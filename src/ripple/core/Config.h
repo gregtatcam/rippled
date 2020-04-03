@@ -174,6 +174,8 @@ public:
     // Thread pool configuration
     std::size_t                 WORKERS = 0;
 
+    std::string                 NODEID = "";
+
     // These override the command line client settings
     boost::optional<beast::IP::Endpoint> rpc_ip;
 

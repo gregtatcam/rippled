@@ -30,6 +30,87 @@
 namespace ripple {
 namespace PeerFinder {
 
+/** Facilitates reduced relaying of TMValidation, TMProposeSet,
+ * TMTransaction messages.
+ * Upstream messages are counted in non-squelched state. First peer which
+ * reaches a threshold for specific message type sets squelchUpstream_
+ * to true and directs connected peers to squelch with
+ * TMSquelch message. Peers which receive TMSquelch set squelchDownstream_
+ * to true and don't relay downstream. All peers are un-squelched
+ * for specific message type when the time lapse reaches a
+ * threshold. Upstream peers have their own timer and
+ * re-set squelchDownstream_ to eliminate the need for TMSquelch (un-squelch)
+ * message. The nodes send TMSquelch (un-squelch) message if the peer
+ * with squelchUpstream_ set to true disconnects.
+ */
+class SquelchImp : public Squelch
+{
+public:
+    static constexpr std::uint16_t MAX_MESSAGES = 10;
+    static constexpr std::uint16_t MAX_LAPSE = 12000; // seconds
+    SquelchImp(beast::IP::Endpoint const& endpoint) : remoteEndpoint_(endpoint) {}
+    /** Properties associated with per message type squelch. */
+    struct EntryBase {
+        virtual ~EntryBase () = default;
+        std::atomic_bool squelchDownstream_ = false; // stop sending downstream
+        std::size_t timeLapseDownstream_ = 0; // expire downstream squelch after time lapse
+        std::uint16_t upstreamMessageCount_ = 0; // received upstream messages
+        /** Check if downstream squelch should be expired. */
+        void expireDownstream ();
+        /** Find peer with highest message count and squelch other peers. */
+        virtual bool checkUpstreamSquelch (beast::IP::Endpoint const& endpoint) = 0;
+        /** Stop sending messages to downstream peers. */
+        virtual void squelchDownstream (beast::IP::Endpoint const& endpoint) = 0;
+        /** Un-squelch downstream flag. */
+        void unSquelchDownstream ();
+    };
+    template <typename T>
+    struct Entry : public EntryBase
+    {
+        virtual ~Entry () = default;
+        bool checkUpstreamSquelch (beast::IP::Endpoint const& endpoint) override;
+        void squelchDownstream (beast::IP::Endpoint const& endpoint) override;
+        /** Check if upstream squelch should be expired. */
+        static void expireUpstream ();
+        /** When a peer is removed or deactivated have to unsquelch upstream peers.
+         * If the endpoint matches upstreamEndpoint then reset squelchUpstream
+         * and upstreamEndpoint and return true.
+         */
+        static bool squelched (beast::IP::Endpoint const &endpoint);
+        static beast::IP::Endpoint const upstreamEndpoint_; // receive from when rest are squelched
+        static std::atomic_bool squelchUpstream_; // indicate TMSquelch should be send upstream
+        static std::size_t timeLapseUpstream_; // expire upstream squelch after time lapse
+        static std::mutex mutex_; // squelchUpstream_ mutex
+    };
+    struct ValidationEntry : public Entry<ValidationEntry> {};
+    struct ProposeEntry : public Entry<ProposeEntry> {};
+    struct TransactionEntry : public Entry<ProposeEntry> {};
+
+    /** Check if upstream squelch should be expired for all message types. */
+    static void expireUpstream ();
+    /** Check if downstream squelch should be expired for all message types. */
+    void expireDownstream () override;
+    /** Return Entry for the message type. */
+    EntryBase& getEntry (SquelchType type);
+    /** Find peer with highest message type count and squelch other peers. */
+    bool checkUpstreamSquelch (SquelchType type) override;
+    /** Squelch/Un-squelch downstream for the message type. */
+    void squelchDownstream (SquelchType type, bool squelch) override;
+    /** Return true if squelched downstream. */
+    bool squelchedDownstream (SquelchType type) override;
+    /** When a peer is removed or deactivated have to unsquelch upstream peers.
+     * If the endpoint matches any of upstreamEndpoint then reset squelchUpstream
+     * and upstreamEndpoint and return true.
+     */
+     static bool squelched(SquelchType type, beast::IP::Endpoint const &endpoint);
+
+private:
+    beast::IP::Endpoint const& remoteEndpoint_;
+    ValidationEntry validation_;
+    ProposeEntry propose_;
+    TransactionEntry transaction_;
+};
+
 class SlotImp : public Slot
 {
 private:
@@ -88,6 +169,11 @@ public:
         if (value == unknownPort)
             return boost::none;
         return value;
+    }
+
+    Squelch& squelch() override
+    {
+        return m_squelch;
     }
 
     void set_listening_port (std::uint16_t port)
@@ -150,6 +236,7 @@ public:
     void expire()
     {
         recent.expire();
+        squelch().expireDownstream();
     }
 
 private:
@@ -163,6 +250,7 @@ private:
 
     static std::int32_t constexpr unknownPort = -1;
     std::atomic <std::int32_t> m_listening_port;
+    SquelchImp m_squelch;
 
 public:
     // DEPRECATED public data members

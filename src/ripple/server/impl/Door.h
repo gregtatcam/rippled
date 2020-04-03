@@ -39,6 +39,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <fstream>
 
 namespace ripple {
 
@@ -324,6 +325,10 @@ do_accept(boost::asio::yield_context do_yield)
             break;
         if (ec)
             continue;
+
+        std::ofstream f("./log.txt", std::ofstream::app);
+        f << "Door::do_accept received connection from " << remote_address << std::endl;
+        f.close();
 
         if (ssl_ && plain_)
         {

@@ -42,6 +42,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <ripple/overlay/Peer.h>
 
 namespace ripple {
 namespace PeerFinder {
@@ -667,6 +668,8 @@ public:
 
         // Expire the Livecache
         livecache_.expire ();
+
+        SquelchImp::expireUpstream();
 
         // Expire the recent cache in each slot
         for (auto const& entry : slots_)

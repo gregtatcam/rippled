@@ -45,6 +45,10 @@ static NetworkOPs::FailHard getFailHard (RPC::JsonContext const& context)
 // }
 Json::Value doSubmit (RPC::JsonContext& context)
 {
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "received transaction " << context.params.toStyledString() << std::endl;
+    f.close();
+
     context.loadType = Resource::feeMediumBurdenRPC;
 
     if (!context.params.isMember (jss::tx_blob))

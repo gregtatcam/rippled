@@ -174,6 +174,15 @@ public:
     relay (protocol::TMValidation& m,
         uint256 const& uid) = 0;
 
+    /** Send squelch to all peers except for excludeId. */
+    virtual
+    void
+    send (protocol::TMSquelch& m, Peer::id_t excludeId) = 0;
+
+    virtual
+    void
+    send(protocol::TMTransaction& m, std::set<Peer::id_t> const& toSkip) = 0;
+
     /** Visit every active peer and return a value
         The functor must:
         - Be callable as:

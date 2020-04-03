@@ -58,6 +58,7 @@
 #include <ripple/beast/rfc2616.h>
 #include <ripple/beast/core/LexicalCast.h>
 #include <ripple/beast/utility/rngfill.h>
+#include <ripple/protocol/digest.h>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/ip/host_name.hpp>
 
@@ -1293,9 +1294,12 @@ void NetworkOPsImp::apply (std::unique_lock<std::mutex>& batchLock)
                     tx.set_receivetimestamp (app_.timeKeeper().now().time_since_epoch().count());
                     tx.set_deferred(e.result == terQUEUED);
                     // FIXME: This should be when we received it
-                    app_.overlay().foreach (send_if_not (
-                        std::make_shared<Message> (tx, protocol::mtTRANSACTION),
-                        peer_in_set(*toSkip)));
+                    std::ofstream f("./log.txt", std::ofstream::app);
+                    f << "relaying transaction hash " << strHex(ripple::sha512Half(tx.rawtransaction())) << std::endl;
+                    app_.overlay().send(tx, *toSkip);
+                    //app_.overlay().foreach (send_if_not (
+                    //    std::make_shared<Message> (tx, protocol::mtTRANSACTION),
+                    //    peer_in_set(*toSkip)));
                     e.transaction->setBroadcast();
                 }
             }

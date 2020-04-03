@@ -87,6 +87,8 @@ PeerImp::PeerImp (Application& app, id_t id,
     , request_(std::move(request))
     , headers_(request_)
 {
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "node " << app_.config(). NODEID << " created inbound PeerImp " << remote_address_.to_string() << std::endl;
 }
 
 PeerImp::~PeerImp ()
@@ -1479,6 +1481,8 @@ void
 PeerImp::onMessage (std::shared_ptr <protocol::TMTransaction> const& m)
 {
 
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "received transaction hash " << strHex(ripple::sha512Half(m->rawtransaction ())) << std::endl;
     if (sanity_.load() == Sanity::insane)
         return;
 
@@ -1534,6 +1538,8 @@ PeerImp::onMessage (std::shared_ptr <protocol::TMTransaction> const& m)
                 checkSignature = false;
             }
         }
+
+        checkUpstreamSquelch(PeerFinder::Squelch::SquelchType::Transaction);
 
         // The maximum number of transactions to have in the job queue.
         constexpr int max_transactions = 250;
@@ -1674,6 +1680,15 @@ PeerImp::onMessage (std::shared_ptr <protocol::TMProposeSet> const& m)
     uint256 const suppression = proposalUniqueId (
         proposeHash, prevLedger, set.proposeseq(),
         closeTime, publicKey.slice(), sig);
+
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "sending proposal uid " << strHex(suppression)
+      << ", tx hash " << strHex(set.currenttxhash())
+      << ", pub key " << strHex(set.nodepubkey())
+      << ", prev ledger " << strHex(set.previousledger())
+      << ", propose seq " << set.proposeseq()
+      << ", close time " << set.closetime() << std::endl;
+    f.close();
 
     if (! app_.getHashRouter ().addSuppressionPeer (suppression, id_))
     {
@@ -2167,6 +2182,22 @@ PeerImp::onMessage (std::shared_ptr <protocol::TMValidation> const& m)
             val->setSeen (closeTime);
         }
 
+        std::ofstream f("./log.txt", std::ofstream::app);
+        try {
+            f << "PeerImp received STValidation:"
+              << "ledger hash " << val->getLedgerHash()
+              << ", ledger seq " << val->getFieldU32(sfLedgerSequence)
+              << ", txn id " << val->getConsensusHash()
+              << ", validation time " << to_string(val->getSignTime())
+              << ", public " << val->getSignerPublic()
+              << ", signature " << strHex(ripple::sha512Half(val->getSignature()))
+              << ", nodeID " << to_string(val->getNodeID())
+              << std::endl;
+        } catch (...) {
+              f << "adaptor exception\n";
+        }
+        f.close();
+
         if (! isCurrent(app_.getValidations().parms(),
             app_.timeKeeper().closeTime(),
             val->getSignTime(),
@@ -2352,6 +2383,30 @@ PeerImp::onMessage (std::shared_ptr <protocol::TMGetObjectByHash> const& m)
     }
 }
 
+void
+PeerImp::onMessage (std::shared_ptr <protocol::TMSquelch> const& m)
+{
+    using namespace ripple::PeerFinder;
+    std::ofstream f("./log.txt", std::ofstream::app);
+    for (int i = 0; i < m->type_size(); ++i)
+    {
+        switch (m->type(i))
+        {
+            case protocol::TMSquelch::stPropose:
+                slot_->squelch().squelchDownstream(Squelch::SquelchType::Propose, m->enable());
+                break;
+            case protocol::TMSquelch::stValidation:
+                slot_->squelch().squelchDownstream(Squelch::SquelchType::Validation, m->enable());
+                break;
+            case protocol::TMSquelch::stTransaction:
+                slot_->squelch().squelchDownstream(Squelch::SquelchType::Transaction, m->enable());
+                break;
+        }
+        f << "onMessage node " << app_.config().NODEID << " received squelch from " << m->nodeid()
+          << " enable " << m->enable() << " type " << (int)m->type (i) << std::endl;
+    }
+}
+
 //--------------------------------------------------------------------------
 
 void
@@ -2505,6 +2560,8 @@ PeerImp::checkPropose (Job& job,
         return;
     }
 
+    checkUpstreamSquelch(ripple::PeerFinder::Squelch::SquelchType::Propose);
+
     if (isTrusted)
     {
         app_.getOPs ().processTrustedProposal (peerPos, packet);
@@ -2545,6 +2602,7 @@ PeerImp::checkValidation (STValidation::pointer val,
         if (app_.getOPs ().recvValidation(val, std::to_string(id())) ||
             cluster())
         {
+            checkUpstreamSquelch(ripple::PeerFinder::Squelch::SquelchType::Validation);
             auto const suppression = sha512Half(
                 makeSlice(val->getSerialized()));
             overlay_.relay(*packet, suppression);
@@ -3002,6 +3060,36 @@ PeerImp::isHighLatency() const
 {
     std::lock_guard sl (recentLock_);
     return latency_ >= Tuning::peerHighLatency;
+}
+
+void
+PeerImp::checkUpstreamSquelch (PeerFinder::Squelch::SquelchType type)
+{
+    using namespace ripple::PeerFinder;
+    // Found peer to receive messages from. Squelch other peers.
+    if (slot_->squelch().checkUpstreamSquelch(type))
+    {
+        protocol::TMSquelch squelch;
+        squelch.set_enable(true);
+        squelch.set_nodeid(std::stoi(app_.config().NODEID));
+        switch (type)
+        {
+            case Squelch::SquelchType::Validation:
+                squelch.add_type(protocol::TMSquelch::stValidation);
+                break;
+            case Squelch::SquelchType::Propose:
+                squelch.add_type(protocol::TMSquelch::stPropose);
+                break;
+            case Squelch::SquelchType::Transaction:
+                squelch.add_type(protocol::TMSquelch::stTransaction);
+                break;
+        }
+        std::ofstream f("./log.txt", std::ofstream::app);
+        f << "checkUpstreamSquelch sending squelch from " << app_.config().NODEID << " remote "
+          << remote_address_.to_string() << " enable " << squelch.enable()
+          << " type " << (int)squelch.type(0) << std::endl;
+        overlay_.send (squelch, id());
+    }
 }
 
 void

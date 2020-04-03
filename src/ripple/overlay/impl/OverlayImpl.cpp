@@ -31,6 +31,7 @@
 #include <ripple/overlay/predicates.h>
 #include <ripple/overlay/impl/ConnectAttempt.h>
 #include <ripple/overlay/impl/PeerImp.h>
+#include <ripple/peerfinder/impl/SlotImp.h>
 #include <ripple/peerfinder/make_Manager.h>
 #include <ripple/rpc/json_body.h>
 #include <ripple/rpc/handlers/GetCounts.h>
@@ -257,6 +258,7 @@ OverlayImpl::onHandoff (std::unique_ptr <stream_type>&& stream_ptr,
     auto const negotiatedVersion = negotiateProtocolVersion(request["Upgrade"]);
     if (!negotiatedVersion)
     {
+        unsquelch(slot);
         m_peerFinder->on_closed(slot);
         handoff.moved = false;
         handoff.response = makeErrorResponse (slot, request,
@@ -268,6 +270,7 @@ OverlayImpl::onHandoff (std::unique_ptr <stream_type>&& stream_ptr,
     auto const sharedValue = makeSharedValue(*stream_ptr, journal);
     if(! sharedValue)
     {
+        unsquelch(slot);
         m_peerFinder->on_closed(slot);
         handoff.moved = false;
         handoff.response = makeErrorResponse (slot, request,
@@ -290,6 +293,7 @@ OverlayImpl::onHandoff (std::unique_ptr <stream_type>&& stream_ptr,
             auto const result = m_peerFinder->activate(slot, publicKey, reserved);
             if (result != PeerFinder::Result::success)
             {
+                unsquelch(slot);
                 m_peerFinder->on_closed(slot);
                 JLOG(journal.debug()) << "Peer " << remote_endpoint << " redirected, slots full";
                 handoff.moved = false;
@@ -325,6 +329,7 @@ OverlayImpl::onHandoff (std::unique_ptr <stream_type>&& stream_ptr,
         JLOG(journal.debug()) << "Peer " << remote_endpoint <<
             " fails handshake (" << e.what() << ")";
 
+        unsquelch(slot);
         m_peerFinder->on_closed(slot);
         handoff.moved = false;
         handoff.response = makeErrorResponse (slot, request,
@@ -413,6 +418,10 @@ OverlayImpl::connect (beast::IP::Endpoint const& remote_endpoint)
         return;
     }
 
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "OverlayImpl::connect " << app_.config().NODEID << " connecting to " << slot->remote_endpoint().to_string() << std::endl;
+    f.close();
+
     auto const p = std::make_shared<ConnectAttempt>(app_,
         io_service_, beast::IPAddressConversion::to_asio_endpoint(remote_endpoint),
             usage, setup_.context, next_id_++, slot,
@@ -469,6 +478,7 @@ OverlayImpl::remove (std::shared_ptr<PeerFinder::Slot> const& slot)
     auto const iter = m_peers.find (slot);
     assert(iter != m_peers.end ());
     m_peers.erase (iter);
+    unsquelch(slot);
 }
 
 //------------------------------------------------------------------------------
@@ -1210,7 +1220,9 @@ OverlayImpl::relay (protocol::TMProposeSet& m, uint256 const& uid)
         for_each([&](std::shared_ptr<PeerImp>&& p)
         {
             if (toSkip->find(p->id()) == toSkip->end())
-                p->send(sm);
+                if (!p->slot()->squelch().squelchedDownstream(
+                        PeerFinder::Squelch::SquelchType::Propose))
+                    p->send(sm);
         });
     }
 }
@@ -1226,11 +1238,36 @@ OverlayImpl::relay (protocol::TMValidation& m, uint256 const& uid)
         for_each([&](std::shared_ptr<PeerImp>&& p)
         {
             if (toSkip->find(p->id()) == toSkip->end())
-                p->send(sm);
+                if (!p->slot()->squelch().squelchedDownstream(
+                        PeerFinder::Squelch::SquelchType::Validation))
+                    p->send(sm);
         });
     }
 }
 
+void
+OverlayImpl::send (protocol::TMSquelch& m, Peer::id_t excludeId)
+{
+    auto const sm = std::make_shared<Message>(m, protocol::mtSQUELCH);
+    for_each([&](std::shared_ptr<PeerImp>&& p)
+    {
+        if (p->id() != excludeId)
+            p->send(sm);
+    });
+}
+
+void
+OverlayImpl::send(protocol::TMTransaction& m, std::set<Peer::id_t> const& toSkip)
+{
+    using type  = PeerFinder::Squelch::SquelchType;
+    auto inSet = peer_in_set(toSkip);
+    foreach (send_if_not(
+        std::make_shared<Message>(m, protocol::mtTRANSACTION),
+        [&inSet](std::shared_ptr<Peer> const& peer) {
+            auto const& imp = std::dynamic_pointer_cast<PeerImp>(peer);
+            return inSet(peer) && imp->slot()->squelch().squelchedDownstream(type::Transaction);
+    }));
+}
 //------------------------------------------------------------------------------
 
 void
@@ -1297,6 +1334,25 @@ OverlayImpl::sendEndpoints()
         }
         if (peer)
             peer->sendEndpoints (e.second.begin(), e.second.end());
+    }
+}
+
+void
+OverlayImpl::unsquelch(std::shared_ptr<PeerFinder::Slot> const& slot)
+{
+    using Type = PeerFinder::Squelch::SquelchType;
+    protocol::TMSquelch m;
+    if (PeerFinder::SquelchImp::squelched(Type::Validation, slot->remote_endpoint()))
+        m.add_type(protocol::TMSquelch::stValidation);
+    if (PeerFinder::SquelchImp::squelched(Type::Propose, slot->remote_endpoint()))
+        m.add_type(protocol::TMSquelch::stPropose);
+    if (PeerFinder::SquelchImp::squelched(Type::Transaction, slot->remote_endpoint()))
+        m.add_type(protocol::TMSquelch::stTransaction);
+    if (m.type_size())
+    {
+        m.set_enable(false);
+        m.set_nodeid(std::stoi(app_.config().NODEID));
+        send(m, 0);
     }
 }
 

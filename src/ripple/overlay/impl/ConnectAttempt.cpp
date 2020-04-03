@@ -47,6 +47,10 @@ ConnectAttempt::ConnectAttempt (Application& app, boost::asio::io_service& io_se
 {
     JLOG(journal_.debug()) <<
         "Connect " << remote_endpoint;
+    std::string addr = "172.1.1.10" + app_.config().NODEID;
+    boost::asio::ip::tcp::endpoint localEndpoint(boost::asio::ip::address::from_string(addr), 0);
+    stream_ptr_->next_layer().socket().open(boost::asio::ip::tcp::v4());
+    stream_ptr_->next_layer().socket().bind(localEndpoint);
 }
 
 ConnectAttempt::~ConnectAttempt()
@@ -74,6 +78,8 @@ ConnectAttempt::stop()
 void
 ConnectAttempt::run()
 {
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "node " << app_.config().NODEID << " connecting to " << remote_endpoint_ << std::endl;
     stream_.next_layer().async_connect (remote_endpoint_,
         strand_.wrap (std::bind (&ConnectAttempt::onConnect,
             shared_from_this(), std::placeholders::_1)));

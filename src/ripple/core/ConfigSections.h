@@ -35,6 +35,7 @@ struct ConfigSection
 };
 
 // VFALCO TODO Rename and replace these macros with variables.
+#define SECTION_NODEID                  "node_id"
 #define SECTION_AMENDMENTS              "amendments"
 #define SECTION_CLUSTER_NODES           "cluster_nodes"
 #define SECTION_DEBUG_LOGFILE           "debug_logfile"

@@ -214,6 +214,13 @@ public:
     relay (protocol::TMValidation& m,
         uint256 const& uid) override;
 
+    void
+    send (protocol::TMSquelch& m,
+        Peer::id_t excludeId) override;
+
+    void
+    send(protocol::TMTransaction& m, std::set<Peer::id_t> const& toSkip) override;
+
     //--------------------------------------------------------------------------
     //
     // OverlayImpl
@@ -255,6 +262,10 @@ public:
             for (auto& x : ids_)
                 wp.push_back(x.second);
         }
+
+        std::ofstream of("./log.txt", std::ofstream::app);
+        of << "relaying to " << wp.size() << std::endl;
+        of.close();
 
         for (auto& w : wp)
         {
@@ -482,6 +493,12 @@ private:
 
     void
     sendEndpoints();
+
+    //
+    // Squelch
+    //
+    void
+    unsquelch(std::shared_ptr<PeerFinder::Slot> const& slot);
 
 private:
 

@@ -210,6 +210,15 @@ RCLConsensus::Adaptor::propose(RCLCxPeerPos::Proposal const& proposal)
 
     app_.getHashRouter ().addSuppression (suppression);
 
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "sending proposal uid " << strHex(suppression)
+      << ", tx hash " << strHex(prop.currenttxhash())
+      << ", pub key " << strHex(prop.nodepubkey())
+      << ", prev ledger " << strHex(prop.previousledger())
+      << ", propose seq " << prop.proposeseq()
+      << ", close time " << prop.closetime() << std::endl;
+    f.close();
+
     app_.overlay().send(prop);
 }
 
@@ -779,6 +788,20 @@ RCLConsensus::Adaptor::validate(RCLCxLedger const& ledger,
         proposing /* full if proposed */,
         fees,
         amendments);
+
+    std::ofstream f("./log.txt", std::ofstream::app);
+    try {
+        f << "adaptor created STValidation: ledger hash " << ledger.id()
+          << ", ledger seq " << ledger.seq()
+          << ", txn id " << txns.id()
+          << ", validation time " << to_string(validationTime)
+          << ", public " << strHex(valPublic_)
+          << ", signature " << strHex(ripple::sha512Half(v->getSignature()))
+          << ", nodeID " << to_string(nodeID_) << std::endl;
+    } catch (...) {
+          f << "adaptor exception\n";
+    }
+    f.close();
 
     // suppress it if we receive it
     app_.getHashRouter().addSuppression(

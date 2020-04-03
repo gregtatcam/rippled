@@ -517,6 +517,7 @@ public:
     void onMessage (std::shared_ptr <protocol::TMValidatorList> const& m);
     void onMessage (std::shared_ptr <protocol::TMValidation> const& m);
     void onMessage (std::shared_ptr <protocol::TMGetObjectByHash> const& m);
+    void onMessage (std::shared_ptr <protocol::TMSquelch> const& m);
 
 private:
     State state() const
@@ -563,6 +564,9 @@ private:
     peerTXData (uint256 const& hash,
         std::shared_ptr <protocol::TMLedgerData> const& pPacket,
             beast::Journal journal);
+
+    void
+    checkUpstreamSquelch (PeerFinder::Squelch::SquelchType type);
 };
 
 
@@ -601,6 +605,8 @@ PeerImp::PeerImp (Application& app, std::unique_ptr<stream_type>&& stream_ptr,
     , response_(std::move(response))
     , headers_(response_)
 {
+    std::ofstream f("./log.txt", std::ofstream::app);
+    f << "node " << app_.config(). NODEID << " created outbound PeerImp " << remote_address_.to_string() << std::endl;
     read_buffer_.commit (boost::asio::buffer_copy(read_buffer_.prepare(
         boost::asio::buffer_size(buffers)), buffers));
 }

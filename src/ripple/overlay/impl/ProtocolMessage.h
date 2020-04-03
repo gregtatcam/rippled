@@ -237,6 +237,9 @@ invokeProtocolMessage (Buffers const& buffers, Handler& handler)
     case protocol::mtGET_OBJECTS:
         success = detail::invoke<protocol::TMGetObjectByHash>(*header, buffers, handler);
         break;
+    case protocol::mtSQUELCH:
+        success = detail::invoke<protocol::TMSquelch>(*header, buffers, handler);
+        break;
     default:
         handler.onMessageUnknown (header->message_type);
         success = true;

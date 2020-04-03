@@ -28,6 +28,24 @@
 namespace ripple {
 namespace PeerFinder {
 
+class Squelch {
+public:
+    enum class SquelchType : uint8_t {
+        Validation,
+        Propose,
+        Transaction
+    };
+    virtual ~Squelch () = default;
+    /** Find peer with highest message count and squelch other peers. */
+    virtual bool checkUpstreamSquelch (SquelchType type) = 0;
+    /** Stop sending messages to downstream peers. */
+    virtual void squelchDownstream (SquelchType type, bool squelch) = 0;
+    /** Check if downstream squelch should be expired. */
+    virtual void expireDownstream () = 0;
+    /** Return true if squelched downstream. */
+    virtual bool squelchedDownstream (SquelchType type) = 0;
+};
+
 /** Properties and state associated with a peer to peer overlay connection. */
 class Slot
 {
@@ -75,6 +93,8 @@ public:
         The public key is established when the handshake is complete.
     */
     virtual boost::optional <PublicKey> const& public_key () const = 0;
+
+    virtual Squelch& squelch () = 0;
 };
 
 }
