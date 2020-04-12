@@ -54,7 +54,7 @@ public:
      */
     template<typename F>
     void
-    updateMessageCount (Peer::id_t const& id, protocol::MessageType type, F&& f);
+    updateMessageCount (std::shared_ptr<Peer> peer, protocol::MessageType type, F&& f);
 
     /** Peer disconnected. Delete the count for the specified peer.
      * @param id Peer id
@@ -69,33 +69,32 @@ public:
     resetCounts ();
 
 private:
-    std::unordered_map<Peer::id_t, std::pair<State, size_t>> messageCount_; // count of message, validation & propose pooled together
+    std::unordered_map<Peer::id_t, std::tuple<std::weak_ptr<Peer>, State, size_t>> messageCount_; // count of message, validation & propose pooled together
     std::unordered_map<Peer::id_t, bool> selected_; // peers selected as the source of the messages from the validator
     clock_type::time_point squelchStart_; // time changed to squelched state
-    //std::mutex mutex_; // handle concurrency for the counters
     std::atomic_bool squelched_; // upstream is squelched
 };
 
 template<typename F>
 void
-Slot::updateMessageCount (Peer::id_t const& id, protocol::MessageType, F&& f)
+Slot::updateMessageCount (std::shared_ptr<Peer> peer, protocol::MessageType, F&& f)
 {
-    //std::lock_guard l(mutex_);
+    auto id = peer->id();
 
     // First time message from this peer
     if (messageCount_.find(id) == messageCount_.end())
     {
-        messageCount_.emplace(std::make_pair(id, std::make_pair(State::Counting, 0)));
+        messageCount_.emplace(std::make_pair(id, std::make_tuple(peer, State::Counting, 0)));
         squelched_ = false;
         selected_.clear();
     }
     // Message from a peer that was previously squelched and became
     // unsquelched because of the squelch time limit
-    else if (messageCount_[id].first == State::Squelched &&
+    else if (std::get<State>(messageCount_[id]) == State::Squelched &&
              clock_type::now() > (squelchStart_ + MIN_UNSQUELCH_EXPIRE))
     {
-        messageCount_[id].first = State::Counting;
-        messageCount_[id].second = 0;
+        std::get<State>(messageCount_[id]) = State::Counting;
+        std::get<size_t>(messageCount_[id]) = 0;
         squelched_ = false;
         selected_.clear();
     }
@@ -103,7 +102,7 @@ Slot::updateMessageCount (Peer::id_t const& id, protocol::MessageType, F&& f)
     if (squelched_)
         return;
 
-    if (++messageCount_[id].second > COUNT_THRESHOLD)
+    if (++std::get<size_t>(messageCount_[id]) > COUNT_THRESHOLD)
         selected_.emplace(std::make_pair(id, true));
 
     if (selected_.size() == MAX_PEERS)
@@ -113,10 +112,10 @@ Slot::updateMessageCount (Peer::id_t const& id, protocol::MessageType, F&& f)
 
         for (auto const &[k,v] : messageCount_)
         {
-            if (v.first == State::Counting && selected_.find(k) == selected_.end())
+            if (std::get<State>(v) == State::Counting && selected_.find(k) == selected_.end())
             {
-                messageCount_[k].first = State::Squelched;
-                f(k);
+                std::get<State>(messageCount_[k]) = State::Squelched;
+                f(std::get<std::weak_ptr<Peer>>(v));
             }
         }
     }
@@ -126,14 +125,12 @@ template<typename F>
 void
 Slot::deletePeer (Peer::id_t const& id, F&& f)
 {
-    //std::lock_guard l(mutex_);
-
     if (selected_.find(id) != selected_.end())
     {
         for (auto const &[k, v] : messageCount_)
         {
-            if (v.first == State::Squelched)
-                f(k);
+            if (std::get<State>(v) == State::Squelched)
+                f(std::get<std::weak_ptr<Peer>>(v));
         }
 
         resetCounts();

@@ -25,8 +25,6 @@ namespace Squelch {
 void
 Squelch::squelch (PublicKey const &validator, bool squelch)
 {
-    std::lock_guard l(mutex_);
-
     // if the validator already exists we reset the expiration time
     if (squelch)
         squelched_[validator] = getExpiration();
@@ -38,8 +36,6 @@ bool
 Squelch::isSquelched (PublicKey const &validator)
 {
     auto now = clock_type::now();
-
-    std::lock_guard l(mutex_);
 
     if (squelched_.find(validator) == squelched_.end())
         return false;

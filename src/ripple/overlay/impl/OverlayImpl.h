@@ -29,6 +29,7 @@
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/TrafficCount.h>
 #include <ripple/overlay/Slot.h>
+#include <ripple/overlay/Squelch.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/resource/ResourceManager.h>
 #include <ripple/rpc/ServerHandler.h>
@@ -125,6 +126,8 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
+    // Should expire the validator - use aged_unordered_map?
+    // Use multi_index for faster delete?
     hash_map<PublicKey, std::shared_ptr<Squelch::Slot>> slots_;
 
     //--------------------------------------------------------------------------
@@ -380,7 +383,7 @@ public:
      * @param type Received protocol message type
      */
     void
-    checkForSquelch(PublicKey const& validator, Peer::id_t const& id, protocol::MessageType type);
+    checkForSquelch(PublicKey const& validator, std::weak_ptr<Peer> peer, protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the source
      * of messages from the validator then squelched peers have to be unsquelched.

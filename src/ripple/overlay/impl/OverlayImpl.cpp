@@ -1165,10 +1165,9 @@ OverlayImpl::relay(PublicKey const &validator, protocol::TMProposeSet& m, uint25
     if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
         auto const sm =
-            std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER);
+            std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER, validator);
         for_each([&](std::shared_ptr<PeerImp>&& p) {
-            if (toSkip->find(p->id()) == toSkip->end() &&
-                    !p->isSquelched(validator))
+            if (toSkip->find(p->id()) == toSkip->end())
                 p->send(sm);
         });
     }
@@ -1183,8 +1182,7 @@ OverlayImpl::relay (PublicKey const &validator,
     {
         auto const sm = std::make_shared<Message>(m, protocol::mtVALIDATION);
         for_each([&](std::shared_ptr<PeerImp>&& p) {
-            if (toSkip->find(p->id()) == toSkip->end() &&
-                    !p->isSquelched(validator))
+            if (toSkip->find(p->id()) == toSkip->end())
                 p->send(sm);
         });
     }
@@ -1270,14 +1268,14 @@ makeSquelchMessage(PublicKey const &validator, bool squelch)
 
 void
 OverlayImpl::checkForSquelch(PublicKey const &validator,
-                             Peer::id_t const& id, protocol::MessageType type)
+                             std::weak_ptr<Peer> wp, protocol::MessageType type)
 {
     if (! strand_.running_in_this_thread())
-        boost::asio::post(strand_, [this, validator, id, type]() {
+        boost::asio::post(strand_, [this, validator, wp, type]() {
             auto it =[&]() {
                 auto it = slots_.find(validator);
                 if (it == slots_.end()) {
-                    auto[it, _] = slots_.emplace(std::make_pair(validator, std::make_shared<Squelch::Slot>()));
+                    auto[it, b] = slots_.emplace(std::make_pair(validator, std::make_shared<Squelch::Slot>()));
                     return it;
                 } else
                     return it;
@@ -1285,8 +1283,12 @@ OverlayImpl::checkForSquelch(PublicKey const &validator,
 
             std::shared_ptr<Message> m{};
 
-            it->second->updateMessageCount(id, type,[&](Peer::id_t id) {
-                auto const &peer = findPeerByShortID(id);
+            auto peer = wp.lock();
+            if (!peer)
+                return;
+
+            it->second->updateMessageCount(peer, type,[&](std::weak_ptr<Peer> wp) {
+                auto peer = wp.lock();
                 if (peer) {
                     if (!m)
                         m = makeSquelchMessage(validator, true);
@@ -1305,8 +1307,8 @@ OverlayImpl::unsquelch(Peer::id_t const &id)
             boost::optional<Peer::id_t> lastId = {};
 
             for (auto const &it : slots_) {
-                it.second->deletePeer(id, [&](Peer::id_t const &id) {
-                    auto const &peer = findPeerByShortID(id);
+                it.second->deletePeer(id, [&](std::weak_ptr<Peer> wp) {
+                    auto const &peer = wp.lock();
                     if (peer) {
                         if (!lastId || *lastId != id) {
                             lastId = id;

@@ -23,8 +23,10 @@
 
 namespace ripple {
 
-Message::Message(::google::protobuf::Message const& message, int type)
+Message::Message(::google::protobuf::Message const& message, int type,
+                 boost::optional<PublicKey> validator)
     : category_(TrafficCount::categorize(message, type, false))
+    , validatorKey_(validator)
 {
     using namespace ripple::compression;
 

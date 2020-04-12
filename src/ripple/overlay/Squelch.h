@@ -64,7 +64,6 @@ private:
      * Expiration time is randomly picked between MIX_UNSQUELCH_EXPIRE and
      * MAX_UNSQUELCH_EXPIRE. */
     hash_map <PublicKey, clock_type::time_point> squelched_;
-    std::mutex mutex_;
 };
 
 } // Squelch

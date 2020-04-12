@@ -22,6 +22,7 @@
 
 #include <ripple/overlay/Compression.h>
 #include <ripple/protocol/messages.h>
+#include <ripple/protocol/PublicKey.h>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/buffers_iterator.hpp>
 #include <algorithm>
@@ -56,7 +57,10 @@ public:
      * @param message Protocol message to serialize
      * @param type Protocol message type
      */
-    Message(::google::protobuf::Message const& message, int type);
+    Message (
+        ::google::protobuf::Message const& message,
+        int type,
+        boost::optional<PublicKey> validator = {});
 
     /** Retrieve the packed message data. If compressed message is requested but
      * the message is not compressible then the uncompressed buffer is returned.
@@ -74,11 +78,18 @@ public:
         return category_;
     }
 
+    /** Get the validator's key */
+    boost::optional<PublicKey> const&
+    getValidatorKey() const {
+        return validatorKey_;
+    }
+
 private:
     std::vector<uint8_t> buffer_;
     std::vector<uint8_t> bufferCompressed_;
     std::size_t category_;
     std::once_flag once_flag_;
+    boost::optional<PublicKey> validatorKey_;
 
     /** Set the payload header
      * @param in Pointer to the payload

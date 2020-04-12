@@ -225,7 +225,11 @@ PeerImp::send(std::shared_ptr<Message> const& m)
         return;
     if (detaching_)
         return;
-
+    
+    auto validator = m->getValidatorKey();
+    if (validator && squelch_.isSquelched(*validator))
+        return;
+    
     overlay_.reportTraffic(
         safe_cast<TrafficCount::category>(m->getCategory()),
         false,
@@ -2314,7 +2318,13 @@ PeerImp::onMessage (std::shared_ptr <protocol::TMSquelch> const& m)
 {
     auto validator = m->validatorpubkey();
     PublicKey key(Slice(validator.data(), validator.size()));
-    squelch_.squelch(key, m->squelch());
+    auto squelch = m->squelch();
+    auto sp = shared_from_this();
+
+    if(! strand_.running_in_this_thread())
+        return post(strand_, [sp, key, squelch]() {
+            sp->squelch_.squelch(key, squelch);
+        });
 }
 
 //--------------------------------------------------------------------------
@@ -2468,7 +2478,7 @@ PeerImp::checkPropose(
         return;
     }
 
-    overlay_.checkForSquelch(peerPos.publicKey(), id(), protocol::mtPROPOSE_LEDGER);
+    overlay_.checkForSquelch(peerPos.publicKey(), shared_from_this(), protocol::mtPROPOSE_LEDGER);
 
     if (isTrusted)
     {
@@ -2510,11 +2520,11 @@ PeerImp::checkValidation(
             cluster())
         {
             overlay_.checkForSquelch(val->getSignerPublic(),
-                                     id(),
+                                     shared_from_this(),
                                      protocol::mtVALIDATION);
             auto const suppression =
                 sha512Half(makeSlice(val->getSerialized()));
-            overlay_.relay(*packet, suppression);
+            overlay_.relay(val->getSignerPublic(), *packet, suppression);
         }
     }
     catch (std::exception const&)
