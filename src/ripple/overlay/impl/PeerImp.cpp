@@ -2309,6 +2309,14 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
     }
 }
 
+void
+PeerImp::onMessage (std::shared_ptr <protocol::TMSquelch> const& m)
+{
+    auto validator = m->validatorpubkey();
+    PublicKey key(Slice(validator.data(), validator.size()));
+    squelch_.squelch(key, m->squelch());
+}
+
 //--------------------------------------------------------------------------
 
 void
@@ -2460,6 +2468,8 @@ PeerImp::checkPropose(
         return;
     }
 
+    overlay_.checkForSquelch(peerPos.publicKey(), id(), protocol::mtPROPOSE_LEDGER);
+
     if (isTrusted)
     {
         app_.getOPs().processTrustedProposal(peerPos, packet);
@@ -2472,7 +2482,7 @@ PeerImp::checkPropose(
         {
             // relay untrusted proposal
             JLOG(p_journal_.trace()) << "relaying UNTRUSTED proposal";
-            overlay_.relay(*packet, peerPos.suppressionID());
+            overlay_.relay(peerPos.publicKey(), set, peerPos.suppressionID());
         }
         else
         {
@@ -2499,6 +2509,9 @@ PeerImp::checkValidation(
         if (app_.getOPs().recvValidation(val, std::to_string(id())) ||
             cluster())
         {
+            overlay_.checkForSquelch(val->getSignerPublic(),
+                                     id(),
+                                     protocol::mtVALIDATION);
             auto const suppression =
                 sha512Half(makeSlice(val->getSerialized()));
             overlay_.relay(*packet, suppression);
@@ -2984,4 +2997,11 @@ PeerImp::Metrics::total_bytes() const
     return totalBytes_;
 }
 
-}  // namespace ripple
+bool
+PeerImp::isSquelched(const PublicKey &validator)
+{
+    return squelch_.isSquelched(validator);
+}
+
+
+} // namespace ripple

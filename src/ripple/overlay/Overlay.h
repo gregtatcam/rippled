@@ -149,11 +149,15 @@ public:
 
     /** Relay a proposal. */
     virtual void
-    relay(protocol::TMProposeSet& m, uint256 const& uid) = 0;
+    relay(PublicKey const& validator,
+          protocol::TMProposeSet& m,
+          uint256 const& uid) = 0;
 
     /** Relay a validation. */
     virtual void
-    relay(protocol::TMValidation& m, uint256 const& uid) = 0;
+    relay(PublicKey const& validator,
+          protocol::TMValidation& m,
+          uint256 const& uid) = 0;
 
     /** Visit every active peer.
      *

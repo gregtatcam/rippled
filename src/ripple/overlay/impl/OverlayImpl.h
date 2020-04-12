@@ -28,6 +28,7 @@
 #include <ripple/overlay/Overlay.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/TrafficCount.h>
+#include <ripple/overlay/Slot.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/resource/ResourceManager.h>
 #include <ripple/rpc/ServerHandler.h>
@@ -124,6 +125,8 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
+    hash_map<PublicKey, std::shared_ptr<Squelch::Slot>> slots_;
+
     //--------------------------------------------------------------------------
 
 public:
@@ -207,10 +210,16 @@ public:
     send(protocol::TMValidation& m) override;
 
     void
-    relay(protocol::TMProposeSet& m, uint256 const& uid) override;
+    relay (
+        PublicKey const& validator,
+        protocol::TMProposeSet& m,
+        uint256 const& uid) override;
 
     void
-    relay(protocol::TMValidation& m, uint256 const& uid) override;
+    relay (
+        PublicKey const& validator,
+        protocol::TMValidation& m,
+        uint256 const& uid) override;
 
     //--------------------------------------------------------------------------
     //
@@ -363,6 +372,22 @@ public:
     */
     void
     lastLink(std::uint32_t id);
+
+    /** Updates message count for validator/peer. Sends TMSquelch if the number
+     * of messages for N peers reaches threshold T.
+     * @param validator Validator's public key
+     * @param id Peer's id
+     * @param type Received protocol message type
+     */
+    void
+    checkForSquelch(PublicKey const& validator, Peer::id_t const& id, protocol::MessageType type);
+
+    /** Called when the peer is deleted. If the peer was selected to be the source
+     * of messages from the validator then squelched peers have to be unsquelched.
+     * @param id Peer's id
+     */
+    void
+    unsquelch(Peer::id_t const& id);
 
 private:
     std::shared_ptr<Writer>

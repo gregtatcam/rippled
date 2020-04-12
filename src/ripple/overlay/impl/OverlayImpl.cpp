@@ -37,6 +37,7 @@
 #include <ripple/server/SimpleWriter.h>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/asio.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
 namespace ripple {
@@ -471,6 +472,9 @@ OverlayImpl::remove(std::shared_ptr<PeerFinder::Slot> const& slot)
     std::lock_guard lock(mutex_);
     auto const iter = m_peers.find(slot);
     assert(iter != m_peers.end());
+    auto peer = iter->second.lock();
+    if (peer)
+        unsquelch(peer->id());
     m_peers.erase(iter);
 }
 
@@ -1156,27 +1160,31 @@ OverlayImpl::send(protocol::TMValidation& m)
 }
 
 void
-OverlayImpl::relay(protocol::TMProposeSet& m, uint256 const& uid)
+OverlayImpl::relay(PublicKey const &validator, protocol::TMProposeSet& m, uint256 const& uid)
 {
     if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER);
         for_each([&](std::shared_ptr<PeerImp>&& p) {
-            if (toSkip->find(p->id()) == toSkip->end())
+            if (toSkip->find(p->id()) == toSkip->end() &&
+                    !p->isSquelched(validator))
                 p->send(sm);
         });
     }
 }
 
 void
-OverlayImpl::relay(protocol::TMValidation& m, uint256 const& uid)
+OverlayImpl::relay (PublicKey const &validator,
+                   protocol::TMValidation& m,
+                   uint256 const& uid)
 {
     if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
         auto const sm = std::make_shared<Message>(m, protocol::mtVALIDATION);
         for_each([&](std::shared_ptr<PeerImp>&& p) {
-            if (toSkip->find(p->id()) == toSkip->end())
+            if (toSkip->find(p->id()) == toSkip->end() &&
+                    !p->isSquelched(validator))
                 p->send(sm);
         });
     }
@@ -1250,6 +1258,69 @@ OverlayImpl::sendEndpoints()
             peer->sendEndpoints(e.second.begin(), e.second.end());
     }
 }
+
+std::shared_ptr<Message>
+makeSquelchMessage(PublicKey const &validator, bool squelch)
+{
+    protocol::TMSquelch m;
+    m.set_squelch(squelch);
+    m.set_validatorpubkey(validator.data(), validator.size());
+    return std::make_shared<Message>(m, protocol::mtSQUELCH);
+}
+
+void
+OverlayImpl::checkForSquelch(PublicKey const &validator,
+                             Peer::id_t const& id, protocol::MessageType type)
+{
+    if (! strand_.running_in_this_thread())
+        boost::asio::post(strand_, [this, validator, id, type]() {
+            auto it =[&]() {
+                auto it = slots_.find(validator);
+                if (it == slots_.end()) {
+                    auto[it, _] = slots_.emplace(std::make_pair(validator, std::make_shared<Squelch::Slot>()));
+                    return it;
+                } else
+                    return it;
+            }();
+
+            std::shared_ptr<Message> m{};
+
+            it->second->updateMessageCount(id, type,[&](Peer::id_t id) {
+                auto const &peer = findPeerByShortID(id);
+                if (peer) {
+                    if (!m)
+                        m = makeSquelchMessage(validator, true);
+                    peer->send(m);
+                }
+            });
+    });
+}
+
+void
+OverlayImpl::unsquelch(Peer::id_t const &id)
+{
+    if (! strand_.running_in_this_thread())
+        boost::asio::post(strand_, [this, id]() {
+            std::shared_ptr<Message> m{};
+            boost::optional<Peer::id_t> lastId = {};
+
+            for (auto const &it : slots_) {
+                it.second->deletePeer(id, [&](Peer::id_t const &id) {
+                    auto const &peer = findPeerByShortID(id);
+                    if (peer) {
+                        if (!lastId || *lastId != id) {
+                            lastId = id;
+                            // optimize - multiple message might be sent to the same peer
+                            m = makeSquelchMessage(it.first, false);
+                        }
+                        peer->send(m);
+                    }
+                });
+            }
+        });
+}
+
+//------------------------------------------------------------------------------
 
 Overlay::Setup
 setup_Overlay(BasicConfig const& config)
