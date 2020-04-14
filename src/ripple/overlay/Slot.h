@@ -46,8 +46,7 @@ class Slot
     using clock_type = system_clock;
 public:
     Slot ()
-    : counting_(true)
-    , timeSelected_(clock_type::now())
+    : timeSelected_(clock_type::now())
     {}
 
     /** Update message count for the peer. If the message is from a new peer or from
@@ -90,7 +89,6 @@ private:
     };
     std::unordered_map<Peer::id_t, Entry> messageCount_; // peer's data
     std::unordered_map<Peer::id_t, bool> selected_; // peers selected as the source of messages from validator
-    bool counting_; // indicates if the slot is in counting state
     clock_type::time_point timeSelected_; // last time peers were selected, used to age the slot
 };
 
@@ -106,7 +104,6 @@ Slot::updateMessageCount (std::shared_ptr<Peer> peer, protocol::MessageType, F&&
         messageCount_.emplace(std::make_pair(id,
                 std::move(Entry{peer, State::Counting, 0, clock_type::now()})));
         resetCounts();
-        counting_ = true;
         selected_.clear();
     }
     // Message from a peer that was previously squelched and became
@@ -116,11 +113,10 @@ Slot::updateMessageCount (std::shared_ptr<Peer> peer, protocol::MessageType, F&&
     {
         messageCount_[id].state_ = State::Counting;
         resetCounts();
-        counting_ = true;
         selected_.clear();
     }
 
-    if (counting_ == false || messageCount_[id].state_ == State::Squelched)
+    if (messageCount_[id].state_ == State::Squelched)
         return;
 
     if (++messageCount_[id].count_ > COUNT_THRESHOLD)
@@ -128,7 +124,6 @@ Slot::updateMessageCount (std::shared_ptr<Peer> peer, protocol::MessageType, F&&
 
     if (selected_.size() == MAX_PEERS)
     {
-        counting_ = false;
         timeSelected_ = clock_type::now();
 
         for (auto &[k,v] : messageCount_)
@@ -165,7 +160,6 @@ Slot::deletePeer (Peer::id_t const& id, F&& f)
             v.expire_ = now;
         }
 
-        counting_ = true;
         selected_.clear();
     }
 
