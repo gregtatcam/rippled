@@ -432,10 +432,6 @@ public:
     boost::optional<hash_map<PublicKey, ShardInfo>>
     getPeerShardInfo() const;
 
-    /** Are peer messages suppressed for the the validator. */
-    bool
-    isSquelched (PublicKey const& validator) override;
-
 private:
     void
     close();

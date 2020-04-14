@@ -20,12 +20,15 @@
 #ifndef RIPPLE_OVERLAY_SLOT_H_INCLUDED
 #define RIPPLE_OVERLAY_SLOT_H_INCLUDED
 
+#include <ripple/basics/random.h>
 #include <ripple/overlay/Peer.h>
 #include <ripple/overlay/Squelch.h>
 
 namespace ripple {
 
 namespace Squelch {
+
+using namespace std::chrono;
 
 /** Maintains Validation and Propose Set message count for specific validator from
  * the upstream peers.
@@ -35,44 +38,60 @@ class Slot
     /** State of the upstream peer */
     enum class State : uint8_t {
         Squelched = 0x01, // squelched
-        Counting = 0x02 // counting messages
+        Counting  = 0x02, // counting messages
+        Selected  = 0x03, // selected to receive, could be counting too
     };
     inline static constexpr uint16_t COUNT_THRESHOLD = 10;
     inline static constexpr uint16_t MAX_PEERS = 3;
-    using clock_type = std::chrono::steady_clock;
+    using clock_type = system_clock;
 public:
-    Slot () : squelchStart_(clock_type::now()), squelched_(false) {}
-    Slot (Slot const&) = delete;
-    Slot& operator = (Slot const&) = delete;
-    Slot (Slot&&) = default;
-    Slot& operator = (Slot &&) = default;
+    Slot ()
+    : counting_(true)
+    , timeSelected_(clock_type::now())
+    {}
 
-    /** Update message type count for the peer.
-     * @param id Peer id
+    /** Update message count for the peer. If the message is from a new peer or from
+     * a previously squelched peer (subject to expire time) then switch the state to
+     * counting. If the number of messages for the peer is COUNT_THRESHOLD then
+     * set the peer's state to Selected. If the number of selected peers is MAX_PEERS then
+     * call f() for each peer, which is not selected and not already in squelched state.
+     * Set the state for those peers to Squelched and reset the count of all peers.
+     * @param peer Peer which received the message
      * @param type  Message type (Validation and Propose Set only, others are ignored)
-     * @param f Function is called for every squelched peer with peer id as the argument
+     * @param f Function is called for every peer that has to be squelched with peer's
+     * weak_ptr as the argument
      */
     template<typename F>
     void
     updateMessageCount (std::shared_ptr<Peer> peer, protocol::MessageType type, F&& f);
 
-    /** Peer disconnected. Delete the count for the specified peer.
-     * @param id Peer id
-     * @param f Function is called for every squelched peer with peer id as the argument
+    /** Handle peer deletion. If the peer is in Selected state then call f() for
+     * every peer in squelched state and reset every peer's state to Counting.
+     * Switch Slot's state to counting.
+     * @param id Deleted peer id
+     * @param f Function is called for every peer in Squelched state with peer weak_ptr
+     * as the argument
      */
     template<typename F>
     void
     deletePeer (Peer::id_t const& id, F&& f);
 
-    /** Reset counts for all peers. */
+private:
+    /** Reset counts of peers in Selected or Counting state */
     void
     resetCounts ();
 
-private:
-    std::unordered_map<Peer::id_t, std::tuple<std::weak_ptr<Peer>, State, size_t>> messageCount_; // count of message, validation & propose pooled together
-    std::unordered_map<Peer::id_t, bool> selected_; // peers selected as the source of the messages from the validator
-    clock_type::time_point squelchStart_; // time changed to squelched state
-    std::atomic_bool squelched_; // upstream is squelched
+    /** Data maintained for each peer */
+    struct Entry {
+        std::weak_ptr<Peer> peer_; // peer's weak_ptr passed to callbacks
+        State state_; // peer's state
+        std::size_t count_; // message's count
+        clock_type::time_point expire_; // Squelched expiration time
+    };
+    std::unordered_map<Peer::id_t, Entry> messageCount_; // peer's data
+    std::unordered_map<Peer::id_t, bool> selected_; // peers selected as the source of messages from validator
+    bool counting_; // indicates if the slot is in counting state
+    clock_type::time_point timeSelected_; // last time peers were selected, used to age the slot
 };
 
 template<typename F>
@@ -81,43 +100,52 @@ Slot::updateMessageCount (std::shared_ptr<Peer> peer, protocol::MessageType, F&&
 {
     auto id = peer->id();
 
-    // First time message from this peer
+    // First time message from this peer.
     if (messageCount_.find(id) == messageCount_.end())
     {
-        messageCount_.emplace(std::make_pair(id, std::make_tuple(peer, State::Counting, 0)));
-        squelched_ = false;
+        messageCount_.emplace(std::make_pair(id,
+                std::move(Entry{peer, State::Counting, 0, clock_type::now()})));
+        resetCounts();
+        counting_ = true;
         selected_.clear();
     }
     // Message from a peer that was previously squelched and became
     // unsquelched because of the squelch time limit
-    else if (std::get<State>(messageCount_[id]) == State::Squelched &&
-             clock_type::now() > (squelchStart_ + MIN_UNSQUELCH_EXPIRE))
+    else if (messageCount_[id].state_ == State::Squelched &&
+             clock_type::now() > messageCount_[id].expire_)
     {
-        std::get<State>(messageCount_[id]) = State::Counting;
-        std::get<size_t>(messageCount_[id]) = 0;
-        squelched_ = false;
+        messageCount_[id].state_ = State::Counting;
+        resetCounts();
+        counting_ = true;
         selected_.clear();
     }
 
-    if (squelched_)
+    if (counting_ == false || messageCount_[id].state_ == State::Squelched)
         return;
 
-    if (++std::get<size_t>(messageCount_[id]) > COUNT_THRESHOLD)
+    if (++messageCount_[id].count_ > COUNT_THRESHOLD)
         selected_.emplace(std::make_pair(id, true));
 
     if (selected_.size() == MAX_PEERS)
     {
-        squelched_ = true;
-        squelchStart_ = clock_type::now();
+        counting_ = false;
+        timeSelected_ = clock_type::now();
 
-        for (auto const &[k,v] : messageCount_)
+        for (auto &[k,v] : messageCount_)
         {
-            if (std::get<State>(v) == State::Counting && selected_.find(k) == selected_.end())
+            v.count_ = 0;
+
+            if (selected_.find(k) != selected_.end())
+                v.state_ = State::Selected;
+            else if (v.state_ != State::Squelched)
             {
-                std::get<State>(messageCount_[k]) = State::Squelched;
-                f(std::get<std::weak_ptr<Peer>>(v));
+                v.state_ = State::Squelched;
+                v.expire_ = timeSelected_ + seconds(rand_int(MIN_UNSQUELCH_EXPIRE.count(),
+                                                             MAX_UNSQUELCH_EXPIRE.count()));
+                f(v.peer_, time_point_cast<seconds>(v.expire_).time_since_epoch().count());
             }
         }
+        selected_.clear ();
     }
 }
 
@@ -125,16 +153,34 @@ template<typename F>
 void
 Slot::deletePeer (Peer::id_t const& id, F&& f)
 {
-    if (selected_.find(id) != selected_.end())
+    if (messageCount_[id].state_ == State::Selected)
     {
-        for (auto const &[k, v] : messageCount_)
+        auto now = clock_type::now();
+        for (auto &[k, v] : messageCount_)
         {
-            if (std::get<State>(v) == State::Squelched)
-                f(std::get<std::weak_ptr<Peer>>(v));
+            if (v.state_ == State::Squelched)
+                f(v.peer_);
+            v.state_ = State::Counting;
+            v.count_ = 0;
+            v.expire_ = now;
         }
 
-        resetCounts();
+        counting_ = true;
+        selected_.clear();
     }
+
+    messageCount_.erase(id);
+}
+
+inline
+void
+Slot::resetCounts()
+{
+   for (auto &[k, v] : messageCount_)
+   {
+       if (v.state_ != State::Squelched)
+           v.count_ = 0;
+   }
 }
 
 } // Squelch

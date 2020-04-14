@@ -22,13 +22,24 @@ ACTION  OF  CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 namespace ripple {
 namespace Squelch {
 
+using namespace std::chrono;
+
 void
-Squelch::squelch (PublicKey const &validator, bool squelch)
+Squelch::squelch (PublicKey const &validator, bool squelch, uint64_t expireSquelch)
 {
     // if the validator already exists we reset the expiration time
     if (squelch)
-        squelched_[validator] = getExpiration();
-    else
+    {
+        auto now = clock_type::now();
+        auto expire = time_point<clock_type>(seconds(expireSquelch));
+        squelched_[validator] = [&]() {
+            // add 10 seconds to account for latency
+            if (expire >= (now + MIN_UNSQUELCH_EXPIRE) && expire <= (now + MAX_UNSQUELCH_EXPIRE + seconds(10)))
+                return expire;
+            else
+                return now + MIN_UNSQUELCH_EXPIRE;
+        }();
+    } else
         squelched_.erase(validator);
 }
 
@@ -45,14 +56,6 @@ Squelch::isSquelched (PublicKey const &validator)
     squelched_.erase(validator);
 
     return false;
-}
-
-Squelch::clock_type::time_point
-Squelch::getExpiration ()
-{
-    return clock_type::now () +
-        std::chrono::seconds{rand_int (MIN_UNSQUELCH_EXPIRE.count(),
-                                       MAX_UNSQUELCH_EXPIRE.count())};
 }
 
 } // Squelch

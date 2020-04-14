@@ -126,8 +126,7 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
-    // Should expire the validator - use aged_unordered_map?
-    // Use multi_index for faster delete?
+    // Should expire validators - use aged_unordered_map?
     hash_map<PublicKey, std::shared_ptr<Squelch::Slot>> slots_;
 
     //--------------------------------------------------------------------------

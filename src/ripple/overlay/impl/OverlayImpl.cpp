@@ -1258,11 +1258,13 @@ OverlayImpl::sendEndpoints()
 }
 
 std::shared_ptr<Message>
-makeSquelchMessage(PublicKey const &validator, bool squelch)
+makeSquelchMessage(PublicKey const &validator, bool squelch, uint64_t expireSquelch)
 {
     protocol::TMSquelch m;
     m.set_squelch(squelch);
     m.set_validatorpubkey(validator.data(), validator.size());
+    if (squelch)
+        m.set_expiresquelch(expireSquelch);
     return std::make_shared<Message>(m, protocol::mtSQUELCH);
 }
 
@@ -1287,15 +1289,15 @@ OverlayImpl::checkForSquelch(PublicKey const &validator,
             if (!peer)
                 return;
 
-            it->second->updateMessageCount(peer, type,[&](std::weak_ptr<Peer> wp) {
+            it->second->updateMessageCount(peer, type,[&](std::weak_ptr<Peer> wp, uint64_t expireSquelch) {
                 auto peer = wp.lock();
                 if (peer) {
                     if (!m)
-                        m = makeSquelchMessage(validator, true);
+                        m = makeSquelchMessage(validator, true, expireSquelch);
                     peer->send(m);
                 }
             });
-    });
+        });
 }
 
 void
@@ -1313,7 +1315,7 @@ OverlayImpl::unsquelch(Peer::id_t const &id)
                         if (!lastId || *lastId != id) {
                             lastId = id;
                             // optimize - multiple message might be sent to the same peer
-                            m = makeSquelchMessage(it.first, false);
+                            m = makeSquelchMessage(it.first, false, 0);
                         }
                         peer->send(m);
                     }

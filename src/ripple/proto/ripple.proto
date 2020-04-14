@@ -361,5 +361,6 @@ message TMSquelch
 {
     required bool squelch           = 1; // squelch if true, otherwise unsquelch
     required bytes validatorPubKey  = 2; // validator's public key
+    optional uint64 expireSquelch   = 3; // squelch expiration time
 }
 

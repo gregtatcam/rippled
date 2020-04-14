@@ -2316,14 +2316,16 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 void
 PeerImp::onMessage (std::shared_ptr <protocol::TMSquelch> const& m)
 {
+    using namespace std::chrono;
     auto validator = m->validatorpubkey();
     PublicKey key(Slice(validator.data(), validator.size()));
     auto squelch = m->squelch();
+    auto expire = m->has_expiresquelch() ? m->expiresquelch() : 0;
     auto sp = shared_from_this();
 
     if(! strand_.running_in_this_thread())
-        return post(strand_, [sp, key, squelch]() {
-            sp->squelch_.squelch(key, squelch);
+        return post(strand_, [sp, key, squelch, expire]() {
+            sp->squelch_.squelch(key, squelch, expire);
         });
 }
 
@@ -3006,12 +3008,5 @@ PeerImp::Metrics::total_bytes() const
     std::shared_lock lock{mutex_};
     return totalBytes_;
 }
-
-bool
-PeerImp::isSquelched(const PublicKey &validator)
-{
-    return squelch_.isSquelched(validator);
-}
-
 
 } // namespace ripple

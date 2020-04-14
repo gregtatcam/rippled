@@ -33,7 +33,7 @@ inline static std::chrono::seconds MAX_UNSQUELCH_EXPIRE{600};
 
 /** Maintains squelching of relaying messages for validators */
 class Squelch {
-    using clock_type    = std::chrono::steady_clock;
+    using clock_type    = std::chrono::system_clock;
 public:
     Squelch () = default;
     virtual ~Squelch () = default;
@@ -41,9 +41,10 @@ public:
     /** Squelch/Unsquelch relaying for the validator
      * @param validator The validator's public key
      * @param squelch Squelch/unsquelch flag
+     * @param expireSquelch Squelch expiration time if squelch is true
      */
     void
-    squelch(PublicKey const &validator, bool squelch);
+    squelch(PublicKey const &validator, bool squelch, uint64_t expireSquelch);
 
     /** Are the messages to this validator squelched
      * @param validator Validator's public key
@@ -53,13 +54,6 @@ public:
     isSquelched(PublicKey const &validator);
 
 private:
-    /** Get expiration random expiration time between
-     * now + MIN_UNSQUELCH_EXPIRE and now + MAX_UNSQUELCH_EXPIRE
-     * @return expire
-     */
-    clock_type::time_point
-    getExpiration ();
-
     /** Maintains the list of squelched relaying to downstream peers.
      * Expiration time is randomly picked between MIX_UNSQUELCH_EXPIRE and
      * MAX_UNSQUELCH_EXPIRE. */

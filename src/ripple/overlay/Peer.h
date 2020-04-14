@@ -118,8 +118,6 @@ public:
     cycleStatus() = 0;
     virtual bool
     hasRange(std::uint32_t uMin, std::uint32_t uMax) = 0;
-    virtual bool
-    isSquelched(PublicKey const& validator) = 0;
 };
 
 }  // namespace ripple
