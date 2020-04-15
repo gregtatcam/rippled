@@ -1160,7 +1160,10 @@ OverlayImpl::send(protocol::TMValidation& m)
 }
 
 void
-OverlayImpl::relay(PublicKey const &validator, protocol::TMProposeSet& m, uint256 const& uid)
+OverlayImpl::relay(
+    protocol::TMProposeSet& m,
+    uint256 const& uid,
+    PublicKey const &validator)
 {
     if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
@@ -1174,9 +1177,10 @@ OverlayImpl::relay(PublicKey const &validator, protocol::TMProposeSet& m, uint25
 }
 
 void
-OverlayImpl::relay (PublicKey const &validator,
-                   protocol::TMValidation& m,
-                   uint256 const& uid)
+OverlayImpl::relay(
+    protocol::TMValidation& m,
+    uint256 const& uid,
+    PublicKey const& validator)
 {
     if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {

@@ -2494,7 +2494,7 @@ PeerImp::checkPropose(
         {
             // relay untrusted proposal
             JLOG(p_journal_.trace()) << "relaying UNTRUSTED proposal";
-            overlay_.relay(peerPos.publicKey(), set, peerPos.suppressionID());
+            overlay_.relay(set, peerPos.suppressionID(), peerPos.publicKey());
         }
         else
         {
@@ -2526,7 +2526,7 @@ PeerImp::checkValidation(
                                      protocol::mtVALIDATION);
             auto const suppression =
                 sha512Half(makeSlice(val->getSerialized()));
-            overlay_.relay(val->getSignerPublic(), *packet, suppression);
+            overlay_.relay(*packet, suppression, val->getSignerPublic());
         }
     }
     catch (std::exception const&)

@@ -212,16 +212,16 @@ public:
     send(protocol::TMValidation& m) override;
 
     void
-    relay (
-        PublicKey const& validator,
+    relay(
         protocol::TMProposeSet& m,
-        uint256 const& uid) override;
+        uint256 const& uid,
+        PublicKey const& validator) override;
 
     void
-    relay (
-        PublicKey const& validator,
+    relay(
         protocol::TMValidation& m,
-        uint256 const& uid) override;
+        uint256 const& uid,
+        PublicKey const& validator) override;
 
     //--------------------------------------------------------------------------
     //
