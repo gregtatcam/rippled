@@ -35,19 +35,23 @@ using namespace std::chrono;
  */
 class Slot
 {
-    /** State of the upstream peer */
+    // Message count threshold to select a peer as the source
+    // of messages from the validator
+    static constexpr uint16_t COUNT_THRESHOLD = 10;
+    // Max selected peers
+    static constexpr uint16_t MAX_PEERS = 3;
+
+    /** Peer's State */
     enum class PeerState : uint8_t {
         Squelched = 0x01, // squelched
         Counting  = 0x02, // counting messages
         Selected  = 0x03, // selected to receive, could be counting too
     };
-    /** State of the Slot */
+    /** Slot's State */
     enum class SlotState : uint8_t {
         Counting  = 0x01, // counting messages
-        Selected  = 0x02, // peers selected
+        Selected  = 0x02, // peers selected, stop counting
     };
-    inline static constexpr uint16_t COUNT_THRESHOLD = 10;
-    inline static constexpr uint16_t MAX_PEERS = 3;
     using clock_type = system_clock;
 public:
     Slot ()
