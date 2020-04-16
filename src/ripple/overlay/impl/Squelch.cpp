@@ -25,19 +25,18 @@ namespace Squelch {
 using namespace std::chrono;
 
 void
-Squelch::squelch (PublicKey const &validator, bool squelch, uint64_t expireSquelch)
+Squelch::squelch (PublicKey const &validator, bool squelch,
+                 uint64_t expireSquelch)
 {
     // if the validator already exists we reset the expiration time
     if (squelch)
     {
-        auto now = clock_type::now();
-        auto expire = time_point<clock_type>(seconds(expireSquelch));
-        squelched_[validator] = [&]() {
-            // add 10 seconds to account for latency
-            if (expire >= (now + MIN_UNSQUELCH_EXPIRE) && expire <= (now + MAX_UNSQUELCH_EXPIRE + seconds(10)))
-                return expire;
-            else
-                return now + MIN_UNSQUELCH_EXPIRE;
+        squelched_[validator] = [expireSquelch]() {
+            auto now = clock_type::now();
+            auto expire = time_point<clock_type>(seconds(expireSquelch));
+            auto min = now + MIN_UNSQUELCH_EXPIRE;
+            auto max = now + MAX_UNSQUELCH_EXPIRE + SQUELCH_LATENCY;
+            return (expire >= min && expire <= max) ? expire : min;
         }();
     } else
         squelched_.erase(validator);

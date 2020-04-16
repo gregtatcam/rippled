@@ -28,10 +28,11 @@ namespace ripple {
 
 namespace Squelch {
 
-inline static std::chrono::seconds MIN_UNSQUELCH_EXPIRE{300};
-inline static std::chrono::seconds MAX_UNSQUELCH_EXPIRE{600};
+static constexpr std::chrono::seconds MIN_UNSQUELCH_EXPIRE{300};
+static constexpr std::chrono::seconds MAX_UNSQUELCH_EXPIRE{600};
+static constexpr std::chrono::seconds SQUELCH_LATENCY{10};
 
-/** Maintains squelching of relaying messages for validators */
+/** Maintains squelching of relaying messages from validators */
 class Squelch {
     using clock_type    = std::chrono::system_clock;
 public:
@@ -55,8 +56,7 @@ public:
 
 private:
     /** Maintains the list of squelched relaying to downstream peers.
-     * Expiration time is randomly picked between MIX_UNSQUELCH_EXPIRE and
-     * MAX_UNSQUELCH_EXPIRE. */
+     * Expiration time is included in the TMSquelch message. */
     hash_map <PublicKey, clock_type::time_point> squelched_;
 };
 
