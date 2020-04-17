@@ -107,7 +107,7 @@ private:
         std::size_t count_; // message's count
         clock_type::time_point expire_; // squelch expiration time
     };
-    std::unordered_map<Peer::id_t, Entry> messageCount_; // peer's data
+    std::unordered_map<Peer::id_t, Entry> peers_; // peer's data
     std::unordered_map<Peer::id_t, bool> selected_; // peers selected as the
                                                     // source of messages from
                                                     // validator
@@ -124,32 +124,33 @@ Slot::updateMessageCount (std::shared_ptr<Peer> peer,
     auto id = peer->id();
 
     // First time message from this peer.
-    if (messageCount_.find(id) == messageCount_.end())
+    if (peers_.find(id) == peers_.end())
     {
-        messageCount_.emplace( std::make_pair(id, std::move(
+        peers_.emplace( std::make_pair(id, std::move(
                  Entry{peer, PeerState::Counting, 0, clock_type::now()})));
         initCounting();
     }
     // Message from a peer with expired squelch
-    else if (messageCount_[id].state_ == PeerState::Squelched &&
-             clock_type::now() > messageCount_[id].expire_)
+    else if (
+        peers_[id].state_ == PeerState::Squelched &&
+             clock_type::now() > peers_[id].expire_)
     {
-        messageCount_[id].state_ = PeerState::Counting;
+        peers_[id].state_ = PeerState::Counting;
         initCounting();
     }
 
     if (state_ != SlotState::Counting ||
-            messageCount_[id].state_ == PeerState::Squelched)
+        peers_[id].state_ == PeerState::Squelched)
         return;
 
-    if (++messageCount_[id].count_ > COUNT_THRESHOLD)
+    if (++peers_[id].count_ > COUNT_THRESHOLD)
         selected_.emplace(std::make_pair(id, true));
 
     if (selected_.size() == MAX_PEERS)
     {
         timeSelected_ = clock_type::now();
 
-        for (auto &[k,v] : messageCount_)
+        for (auto &[k,v] : peers_)
         {
             v.count_ = 0;
 
@@ -174,10 +175,10 @@ template<typename F>
 void
 Slot::deletePeer (Peer::id_t const& id, F&& f)
 {
-    if (messageCount_[id].state_ == PeerState::Selected)
+    if (peers_[id].state_ == PeerState::Selected)
     {
         auto now = clock_type::now();
-        for (auto &[k, v] : messageCount_)
+        for (auto &[k, v] : peers_)
         {
             if (v.state_ == PeerState::Squelched)
                 f(v.peer_);
@@ -190,14 +191,14 @@ Slot::deletePeer (Peer::id_t const& id, F&& f)
         state_ = SlotState::Counting;
     }
 
-    messageCount_.erase(id);
+    peers_.erase(id);
 }
 
 inline
 void
 Slot::resetCounts()
 {
-   for (auto &[k, v] : messageCount_)
+   for (auto &[k, v] : peers_)
    {
        if (v.state_ != PeerState::Squelched)
            v.count_ = 0;
