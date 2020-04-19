@@ -72,6 +72,7 @@ public:
     };
 
 private:
+    static constexpr std::chrono::seconds IDLED{4};
     using clock_type = std::chrono::steady_clock;
     using socket_type = boost::asio::ip::tcp::socket;
     using address_type = boost::asio::ip::address;
@@ -126,8 +127,9 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
-    // Should expire validators - use aged_unordered_map?
     hash_map<PublicKey, std::shared_ptr<Squelch::Slot>> slots_;
+    std::unordered_map<Peer::id_t, std::chrono::time_point<clock_type>>
+        idlePeers_;
 
     //--------------------------------------------------------------------------
 
@@ -382,7 +384,8 @@ public:
      * @param type Received protocol message type
      */
     void
-    checkForSquelch(PublicKey const& validator, std::weak_ptr<Peer> peer, protocol::MessageType type);
+    checkForSquelch(PublicKey const& validator,
+                    std::shared_ptr<Peer> peer, protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the source
      * of messages from the validator then squelched peers have to be unsquelched.
@@ -499,6 +502,15 @@ private:
 
     void
     sendEndpoints();
+
+    /** Check if peers stopped relaying messages
+     * and if slots stopped receiving messages from the validator */
+    void
+    checkIdle();
+
+    /** Update last time peer received message */
+    void
+    touchIdle (const Peer::id_t&);
 
 private:
     struct TrafficGauges

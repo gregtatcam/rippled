@@ -26,17 +26,16 @@ using namespace std::chrono;
 
 void
 Squelch::squelch (PublicKey const &validator, bool squelch,
-                 uint64_t expireSquelch)
+                 uint64_t squelchDuration)
 {
-    // if the validator already exists we reset the expiration time
     if (squelch)
     {
-        squelched_[validator] = [expireSquelch]() {
+        squelched_[validator] = [squelchDuration]() {
             auto now = clock_type::now();
-            auto expire = time_point<clock_type>(seconds(expireSquelch));
+            auto duration = time_point<clock_type>(seconds(squelchDuration));
             auto min = now + MIN_UNSQUELCH_EXPIRE;
             auto max = now + MAX_UNSQUELCH_EXPIRE + SQUELCH_LATENCY;
-            return (expire >= min && expire <= max) ? expire : min;
+            return (duration >= min && duration <= max) ? duration : min;
         }();
     } else
         squelched_.erase(validator);

@@ -2320,12 +2320,12 @@ PeerImp::onMessage (std::shared_ptr <protocol::TMSquelch> const& m)
     auto validator = m->validatorpubkey();
     PublicKey key(Slice(validator.data(), validator.size()));
     auto squelch = m->squelch();
-    auto expire = m->has_expiresquelch() ? m->expiresquelch() : 0;
+    auto duration = m->has_squelchduration() ? m->squelchduration() : 0;
     auto sp = shared_from_this();
 
     if(! strand_.running_in_this_thread())
-        return post(strand_, [sp, key, squelch, expire]() {
-            sp->squelch_.squelch(key, squelch, expire);
+        return post(strand_, [sp, key, squelch, duration]() {
+            sp->squelch_.squelch(key, squelch, duration);
         });
 }
 

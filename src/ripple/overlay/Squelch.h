@@ -34,7 +34,7 @@ static constexpr std::chrono::seconds SQUELCH_LATENCY{10};
 
 /** Maintains squelching of relaying messages from validators */
 class Squelch {
-    using clock_type    = std::chrono::system_clock;
+    using clock_type    = std::chrono::steady_clock;
 public:
     Squelch () = default;
     virtual ~Squelch () = default;
@@ -42,10 +42,10 @@ public:
     /** Squelch/Unsquelch relaying for the validator
      * @param validator The validator's public key
      * @param squelch Squelch/unsquelch flag
-     * @param expireSquelch Squelch expiration time if squelch is true
+     * @param squelchDuration Squelch duration time if squelch is true
      */
     void
-    squelch(PublicKey const &validator, bool squelch, uint64_t expireSquelch);
+    squelch(PublicKey const &validator, bool squelch, uint64_t squelchDuration);
 
     /** Are the messages to this validator squelched
      * @param validator Validator's public key

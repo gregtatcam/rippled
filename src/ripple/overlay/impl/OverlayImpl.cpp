@@ -100,6 +100,7 @@ OverlayImpl::Timer::on_timer(error_code ec)
     overlay_.m_peerFinder->once_per_second();
     overlay_.sendEndpoints();
     overlay_.autoConnect();
+    overlay_.checkIdle();
 
     if ((++overlay_.timer_count_ % Tuning::checkSeconds) == 0)
         overlay_.check();
@@ -1261,23 +1262,62 @@ OverlayImpl::sendEndpoints()
     }
 }
 
+void
+OverlayImpl::checkIdle()
+{
+    using namespace std::chrono;
+    auto now = clock_type::now();
+    for (auto &[id, lastSelected] : idlePeers_)
+    {
+        if (now > lastSelected)
+            unsquelch(id);
+    }
+
+    for (auto it = slots_.begin(); it != slots_.end(); )
+    {
+        if (now - it->second->getLastSelected() > IDLED)
+            it = slots_.erase(it);
+        else
+            ++it;
+    }
+}
+
+void
+OverlayImpl::touchIdle(Peer::id_t const& id)
+{
+    using namespace std::chrono;
+    idlePeers_.emplace(std::make_pair(id, clock_type::now() + IDLED));
+}
+
 std::shared_ptr<Message>
-makeSquelchMessage(PublicKey const &validator, bool squelch, uint64_t expireSquelch)
+makeSquelchMessage(PublicKey const &validator, bool squelch,
+                   uint64_t squelchDuration)
 {
     protocol::TMSquelch m;
     m.set_squelch(squelch);
     m.set_validatorpubkey(validator.data(), validator.size());
     if (squelch)
-        m.set_expiresquelch(expireSquelch);
+        m.set_squelchduration(squelchDuration);
     return std::make_shared<Message>(m, protocol::mtSQUELCH);
 }
 
 void
 OverlayImpl::checkForSquelch(PublicKey const &validator,
-                             std::weak_ptr<Peer> wp, protocol::MessageType type)
+                             std::shared_ptr<Peer> peer, protocol::MessageType type)
 {
+    std::weak_ptr<Peer> wp = peer;
+
     if (! strand_.running_in_this_thread())
         boost::asio::post(strand_, [this, validator, wp, type]() {
+
+            std::shared_ptr<Message> m{};
+
+            auto peer = wp.lock();
+            if (!peer)
+                return;
+
+            touchIdle(peer->id());
+
             auto it =[&]() {
                 auto it = slots_.find(validator);
                 if (it == slots_.end()) {
@@ -1287,20 +1327,19 @@ OverlayImpl::checkForSquelch(PublicKey const &validator,
                     return it;
             }();
 
-            std::shared_ptr<Message> m{};
-
-            auto peer = wp.lock();
-            if (!peer)
-                return;
-
-            it->second->updateMessageCount(peer, type,[&](std::weak_ptr<Peer> wp, uint64_t expireSquelch) {
-                auto peer = wp.lock();
-                if (peer) {
-                    if (!m)
-                        m = makeSquelchMessage(validator, true, expireSquelch);
-                    peer->send(m);
-                }
-            });
+            it->second->update(
+                peer,
+                type,
+                [&](std::weak_ptr<Peer> wp, uint64_t squelchDuration) {
+                    auto peer = wp.lock();
+                    if (peer)
+                    {
+                        if (!m)
+                            m = makeSquelchMessage(
+                                validator, true, squelchDuration);
+                        peer->send(m);
+                    }
+                });
         });
 }
 
