@@ -29,13 +29,16 @@ namespace ripple {
 namespace Squelch {
 
 using namespace std::chrono;
+template <typename Peer> class Slots;
 
 /** Maintains Validation and Propose Set message count for specific validator from
  * the upstream peers.
  */
 template<typename Peer>
-class Slot
+class Slot final
 {
+private:
+    friend class Slots<Peer>;
     // Message count threshold to select a peer as the source
     // of messages from the validator
     static constexpr uint16_t COUNT_THRESHOLD = 10;
@@ -55,7 +58,7 @@ class Slot
     };
     using clock_type = steady_clock;
     using id_t = typename Peer::id_t;
-public:
+
     Slot ()
     : lastSelected_(clock_type::now())
     , state_(SlotState::Counting)
@@ -229,11 +232,11 @@ Slot<Peer>::initCounting()
 }
 
 template<typename Peer>
-class Slots
+class Slots final
 {
-    static constexpr std::chrono::seconds IDLED{4};
+    static constexpr seconds IDLED{4};
     using io_service = boost::asio::io_service;
-    using clock_type = std::chrono::steady_clock;
+    using clock_type = steady_clock;
     using id_t = typename Peer::id_t;
 public:
     Slots() = default;
@@ -272,12 +275,13 @@ public:
     void
     checkIdle(F&& f);
 
-    /** Update last time peer received message */
+    /** Update last time peer received a message */
     void
     touchIdle (const id_t&);
+
 private:
-    hash_map<PublicKey, std::shared_ptr<Slot<Peer>>> slots_;
-    std::unordered_map<id_t, std::chrono::time_point<clock_type>> idlePeers_;
+    hash_map<PublicKey, Slot<Peer>> slots_;
+    std::unordered_map<id_t, time_point<clock_type>> idlePeers_;
 };
 
 template<typename Peer>
@@ -296,15 +300,15 @@ Slots<Peer>::checkForSquelch(
         auto it = slots_.find(validator);
         if (it == slots_.end())
         {
-            auto [it, b] = slots_.emplace(std::make_pair(validator,
-                               std::make_shared<Slot<Peer>>()));
+            auto [it, b] = slots_.emplace(std::make_pair(validator, Slot<Peer>()));
+                               //std::make_shared<Slot<Peer>>()));
             return it;
         }
         else
             return it;
     }();
 
-    it->second->update(id, peer, type, [&validator, f](std::weak_ptr<Peer> peer,
+    it->second.update(id, peer, type, [&validator, f](std::weak_ptr<Peer> peer,
                                            uint32_t squelchDuration) {
         f(validator, peer, squelchDuration);
     });
@@ -315,8 +319,8 @@ template<typename F>
 void
 Slots<Peer>::unsquelch(id_t const& id, F&& f)
 {
-    for (auto const& it : slots_)
-        it.second->deletePeer(id, [&](std::weak_ptr<Peer> peer) {
+    for (auto it : slots_)
+        it.second.deletePeer(id, [&](std::weak_ptr<Peer> peer) {
             f(it.first, peer);
         });
 }
@@ -326,7 +330,6 @@ template<typename F>
 void
 Slots<Peer>::checkIdle(F&& f)
 {
-    using namespace std::chrono;
     auto now = clock_type::now();
     for (auto& [id, lastSelected] : idlePeers_)
     {
@@ -338,7 +341,7 @@ Slots<Peer>::checkIdle(F&& f)
 
     for (auto it = slots_.begin(); it != slots_.end();)
     {
-        if (now - it->second->getLastSelected() > IDLED)
+        if (now - it->second.getLastSelected() > IDLED)
             it = slots_.erase(it);
         else
             ++it;
@@ -349,7 +352,6 @@ template<typename Peer>
 void
 Slots<Peer>::touchIdle(id_t const& id)
 {
-    using namespace std::chrono;
     idlePeers_.emplace(std::make_pair(id, clock_type::now() + IDLED));
 }
 
