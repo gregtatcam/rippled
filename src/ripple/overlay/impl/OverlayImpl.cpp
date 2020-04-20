@@ -1305,18 +1305,18 @@ sendSquelch(PublicKey const& validator, std::weak_ptr<Peer> wp,
 
 void
 OverlayImpl::checkForSquelch(PublicKey const &validator,
-                             std::shared_ptr<Peer> peer,
+                             std::weak_ptr<Peer> wp,
                              protocol::MessageType type)
 {
     if(! strand_.running_in_this_thread())
         return post(strand_, std::bind(&OverlayImpl::checkForSquelch, this,
-                                       validator, peer, type));
+                                       validator, wp, type));
 
-    std::weak_ptr<Peer> wp = peer;
-    auto id = peer->id();
-
-    if (!wp.lock())
+    auto peer = wp.lock();
+    if (!peer)
         return;
+
+    auto id = peer->id();
 
     slots_.checkForSquelch(validator, id, wp, type, sendSquelch);
 }

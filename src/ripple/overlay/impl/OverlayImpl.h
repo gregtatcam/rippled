@@ -382,7 +382,7 @@ public:
      */
     void
     checkForSquelch(PublicKey const& validator,
-                    std::shared_ptr<Peer> peer, protocol::MessageType type);
+                    std::weak_ptr<Peer> peer, protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the source
      * of messages from the validator then squelched peers have to be unsquelched.
