@@ -1262,36 +1262,12 @@ OverlayImpl::sendEndpoints()
     }
 }
 
-void
-OverlayImpl::checkIdle()
-{
-    using namespace std::chrono;
-    auto now = clock_type::now();
-    for (auto &[id, lastSelected] : idlePeers_)
-    {
-        if (now > lastSelected)
-            unsquelch(id);
-    }
-
-    for (auto it = slots_.begin(); it != slots_.end(); )
-    {
-        if (now - it->second->getLastSelected() > IDLED)
-            it = slots_.erase(it);
-        else
-            ++it;
-    }
-}
-
-void
-OverlayImpl::touchIdle(Peer::id_t const& id)
-{
-    using namespace std::chrono;
-    idlePeers_.emplace(std::make_pair(id, clock_type::now() + IDLED));
-}
-
+inline
 std::shared_ptr<Message>
-makeSquelchMessage(PublicKey const &validator, bool squelch,
-                   uint64_t squelchDuration)
+makeSquelchMessage(
+    PublicKey const& validator,
+    bool squelch,
+    uint64_t squelchDuration)
 {
     protocol::TMSquelch m;
     m.set_squelch(squelch);
@@ -1302,69 +1278,65 @@ makeSquelchMessage(PublicKey const &validator, bool squelch,
 }
 
 void
-OverlayImpl::checkForSquelch(PublicKey const &validator,
-                             std::shared_ptr<Peer> peer, protocol::MessageType type)
+sendUnsquelch(PublicKey const& validator, std::weak_ptr<Peer> wp)
 {
+    auto const& peer = wp.lock();
+    if (peer)
+    {
+        // optimize - multiple message with different
+        // validator might be sent to the same peer
+        auto m = makeSquelchMessage(validator, false, 0);
+        peer->send(m);
+    }
+}
+
+void
+sendSquelch(PublicKey const& validator, std::weak_ptr<Peer> wp,
+            uint32_t squelchDuration)
+{
+    auto peer = wp.lock();
+    if (peer)
+    {
+        auto m = makeSquelchMessage(validator,
+                                    true, squelchDuration);
+        peer->send(m);
+    }
+}
+
+void
+OverlayImpl::checkForSquelch(PublicKey const &validator,
+                             std::shared_ptr<Peer> peer,
+                             protocol::MessageType type)
+{
+    if(! strand_.running_in_this_thread())
+        return post(strand_, std::bind(&OverlayImpl::checkForSquelch, this,
+                                       validator, peer, type));
+
     std::weak_ptr<Peer> wp = peer;
+    auto id = peer->id();
 
-    if (! strand_.running_in_this_thread())
-        boost::asio::post(strand_, [this, validator, wp, type]() {
+    if (!wp.lock())
+        return;
 
-            std::shared_ptr<Message> m{};
-
-            auto peer = wp.lock();
-            if (!peer)
-                return;
-
-            touchIdle(peer->id());
-
-            auto it =[&]() {
-                auto it = slots_.find(validator);
-                if (it == slots_.end()) {
-                    auto[it, b] = slots_.emplace(std::make_pair(validator, std::make_shared<Squelch::Slot>()));
-                    return it;
-                } else
-                    return it;
-            }();
-
-            it->second->update(
-                peer,
-                type,
-                [&](std::weak_ptr<Peer> wp, uint64_t squelchDuration) {
-                    auto peer = wp.lock();
-                    if (peer)
-                    {
-                        if (!m)
-                            m = makeSquelchMessage(
-                                validator, true, squelchDuration);
-                        peer->send(m);
-                    }
-                });
-        });
+    slots_.checkForSquelch(validator, id, wp, type, sendSquelch);
 }
 
 void
 OverlayImpl::unsquelch(Peer::id_t const &id)
 {
-    if (! strand_.running_in_this_thread())
-        boost::asio::post(strand_, [this, id]() {
-            std::shared_ptr<Message> m{};
-            boost::optional<Peer::id_t> lastId = {};
+    if(! strand_.running_in_this_thread())
+        return post(strand_, std::bind(&OverlayImpl::unsquelch, this, id));
 
-            for (auto const &it : slots_) {
-                it.second->deletePeer(id, [&](std::weak_ptr<Peer> wp) {
-                    auto const &peer = wp.lock();
-                    if (peer) {
-                        if (!lastId || *lastId != id) {
-                            lastId = id;
-                            // optimize - multiple message might be sent to the same peer
-                            m = makeSquelchMessage(it.first, false, 0);
-                        }
-                        peer->send(m);
-                    }
-                });
-            }
-        });
+    slots_.unsquelch(id, sendUnsquelch);
+}
+
+void
+OverlayImpl::checkIdle()
+{
+    if(! strand_.running_in_this_thread())
+        return post(strand_, std::bind(&OverlayImpl::checkIdle, this));
+
+    slots_.checkIdle(sendUnsquelch);
 }
 
 //------------------------------------------------------------------------------

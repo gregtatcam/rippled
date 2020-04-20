@@ -72,7 +72,6 @@ public:
     };
 
 private:
-    static constexpr std::chrono::seconds IDLED{4};
     using clock_type = std::chrono::steady_clock;
     using socket_type = boost::asio::ip::tcp::socket;
     using address_type = boost::asio::ip::address;
@@ -127,9 +126,7 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
-    hash_map<PublicKey, std::shared_ptr<Squelch::Slot>> slots_;
-    std::unordered_map<Peer::id_t, std::chrono::time_point<clock_type>>
-        idlePeers_;
+    Squelch::Slots<Peer> slots_;
 
     //--------------------------------------------------------------------------
 
@@ -507,10 +504,6 @@ private:
      * and if slots stopped receiving messages from the validator */
     void
     checkIdle();
-
-    /** Update last time peer received message */
-    void
-    touchIdle (const Peer::id_t&);
 
 private:
     struct TrafficGauges
