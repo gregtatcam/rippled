@@ -37,13 +37,14 @@ template <typename Peer> class Slots;
 template<typename Peer>
 class Slot final
 {
-private:
-    friend class Slots<Peer>;
+public:
     // Message count threshold to select a peer as the source
     // of messages from the validator
-    static constexpr uint16_t COUNT_THRESHOLD = 10;
+    static constexpr uint16_t MESSAGE_COUNT_THRESHOLD = 20;
     // Max selected peers
-    static constexpr uint16_t MAX_PEERS = 3;
+    static constexpr uint16_t MAX_SELECTED_PEERS = 3;
+private:
+    friend class Slots<Peer>;
 
     /** Peer's State */
     enum class PeerState : uint8_t {
@@ -135,7 +136,7 @@ void
 Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
              protocol::MessageType type, F&& f)
 {
-    auto peer = [&]() {
+    auto &peer = [&]() {
         auto it = peers_.find(id);
         // First time message from this peer.
         if (it == peers_.end())
@@ -160,10 +161,10 @@ Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
     if (state_ != SlotState::Counting || peer.state_ == PeerState::Squelched)
         return;
 
-    if (++peer.count_ > COUNT_THRESHOLD)
-        selected_.emplace(std::make_pair(id, true));
+    if (++peer.count_ > MESSAGE_COUNT_THRESHOLD)
+        selected_[id] = true;
 
-    if (selected_.size() == MAX_PEERS)
+    if (selected_.size() == MAX_SELECTED_PEERS)
     {
         lastSelected_ = clock_type::now();
 
@@ -176,11 +177,13 @@ Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
             else if (v.state_ != PeerState::Squelched)
             {
                 v.state_ = PeerState::Squelched;
-                auto duration = seconds(rand_int(MIN_UNSQUELCH_EXPIRE.count(),
-                                     MAX_UNSQUELCH_EXPIRE.count()));
+                auto duration =
+                    seconds(rand_int(config::MIN_UNSQUELCH_EXPIRE.count(),
+                                     config::MAX_UNSQUELCH_EXPIRE.count()));
                 v.expire_ = lastSelected_ + duration;
                 f(v.peer_, duration.count());
             }
+            std::cout << std::endl;
         }
         selected_.clear ();
         state_ = SlotState::Selected;
@@ -216,10 +219,7 @@ void
 Slot<Peer>::resetCounts()
 {
     for (auto& [k, v] : peers_)
-    {
-        if (v.state_ != PeerState::Squelched)
-            v.count_ = 0;
-    }
+        v.count_ = 0;
 }
 
 template<typename Peer>
@@ -234,11 +234,10 @@ Slot<Peer>::initCounting()
 template<typename Peer>
 class Slots final
 {
-    static constexpr seconds IDLED{4};
-    using io_service = boost::asio::io_service;
     using clock_type = steady_clock;
     using id_t = typename Peer::id_t;
 public:
+    static constexpr seconds IDLED{4};
     Slots() = default;
     ~Slots() = default;
     /** Updates message count for validator/peer. Sends TMSquelch if the number

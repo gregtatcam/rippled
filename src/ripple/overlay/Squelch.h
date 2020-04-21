@@ -28,14 +28,22 @@ namespace ripple {
 
 namespace Squelch {
 
-static constexpr std::chrono::seconds MIN_UNSQUELCH_EXPIRE{300};
-static constexpr std::chrono::seconds MAX_UNSQUELCH_EXPIRE{600};
-static constexpr std::chrono::seconds SQUELCH_LATENCY{10};
+using namespace std::chrono;
+
+namespace config
+{
+extern seconds MIN_UNSQUELCH_EXPIRE;
+extern seconds MAX_UNSQUELCH_EXPIRE;
+extern seconds SQUELCH_LATENCY;
+}
 
 /** Maintains squelching of relaying messages from validators */
 class Squelch {
     using clock_type    = std::chrono::steady_clock;
 public:
+    static constexpr std::chrono::seconds MIN_UNSQUELCH_EXPIRE{300};
+    static constexpr std::chrono::seconds MAX_UNSQUELCH_EXPIRE{600};
+    static constexpr std::chrono::seconds SQUELCH_LATENCY{10};
     Squelch () = default;
     virtual ~Squelch () = default;
 
@@ -53,6 +61,11 @@ public:
      */
     bool
     isSquelched(PublicKey const &validator);
+
+    /** Used in unit testing to "speed up" unsquelch */
+    static
+    void
+    setConfig(seconds minExpire, seconds maxExpire, seconds latency);
 
 private:
     /** Maintains the list of squelched relaying to downstream peers.
