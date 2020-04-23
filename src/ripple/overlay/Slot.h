@@ -20,7 +20,6 @@
 #ifndef RIPPLE_OVERLAY_SLOT_H_INCLUDED
 #define RIPPLE_OVERLAY_SLOT_H_INCLUDED
 
-#include <ripple/basics/random.h>
 #include <ripple/overlay/Squelch.h>
 #include <ripple/protocol/PublicKey.h>
 
@@ -30,6 +29,22 @@ namespace Squelch {
 
 using namespace std::chrono;
 template <typename Peer> class Slots;
+
+namespace config {
+static constexpr seconds IDLED{4};
+}
+
+/** Peer's State */
+enum class PeerState : uint8_t {
+    Squelched = 0x01, // squelched
+    Counting  = 0x02, // counting messages
+    Selected  = 0x03, // selected to receive, could be counting too
+};
+/** Slot's State */
+enum class SlotState : uint8_t {
+    Counting  = 0x01, // counting messages
+    Selected  = 0x02, // peers selected, stop counting
+};
 
 /** Maintains Validation and Propose Set message count for specific validator from
  * the upstream peers.
@@ -45,18 +60,6 @@ public:
     static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 private:
     friend class Slots<Peer>;
-
-    /** Peer's State */
-    enum class PeerState : uint8_t {
-        Squelched = 0x01, // squelched
-        Counting  = 0x02, // counting messages
-        Selected  = 0x03, // selected to receive, could be counting too
-    };
-    /** Slot's State */
-    enum class SlotState : uint8_t {
-        Counting  = 0x01, // counting messages
-        Selected  = 0x02, // peers selected, stop counting
-    };
     using clock_type = steady_clock;
     using id_t = typename Peer::id_t;
 
@@ -98,12 +101,21 @@ private:
     void
     deletePeer (id_t const& id, F&& f);
 
-    /** Get the time of the last peer selection round */
+    /** Get the time of the last peers selection round */
     const clock_type::time_point&
     getLastSelected() const
     {
         return lastSelected_;
     }
+
+    /** Return if slot is in counting state and if all counts
+     * of unsquelched peers are set to 0 */
+    std::pair<bool, bool>
+    isCountingState() const;
+
+    /** Return number of peers in the state, or not in state if notState = true */
+    std::uint16_t
+    inState(PeerState state, bool notState = false) const;
 
 private:
     /** Reset counts of peers in Selected or Counting state */
@@ -152,8 +164,8 @@ Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
         else if (it->second.state_ == PeerState::Squelched &&
                 clock_type::now() > it->second.expire_)
         {
-                it->second.state_ = PeerState::Counting;
-                initCounting();
+            it->second.state_ = PeerState::Counting;
+            initCounting();
         }
         return it;
     }()->second;
@@ -177,13 +189,10 @@ Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
             else if (v.state_ != PeerState::Squelched)
             {
                 v.state_ = PeerState::Squelched;
-                auto duration =
-                    seconds(rand_int(config::MIN_UNSQUELCH_EXPIRE.count(),
-                                     config::MAX_UNSQUELCH_EXPIRE.count()));
+                auto duration = Squelch::getSquelchDuration();
                 v.expire_ = lastSelected_ + duration;
                 f(v.peer_, duration.count());
             }
-            std::cout << std::endl;
         }
         selected_.clear ();
         state_ = SlotState::Selected;
@@ -195,23 +204,26 @@ template<typename F>
 void
 Slot<Peer>::deletePeer (id_t const& id, F&& f)
 {
-    if (peers_[id].state_ == PeerState::Selected)
+    auto it = peers_.find(id);
+    if (it != peers_.end())
     {
-        auto now = clock_type::now();
-        for (auto &[k, v] : peers_)
+        if (it->second.state_ == PeerState::Selected)
         {
-            if (v.state_ == PeerState::Squelched)
-                f(v.peer_);
-            v.state_ = PeerState::Counting;
-            v.count_ = 0;
-            v.expire_ = now;
+            auto now = clock_type::now();
+            for (auto &[k, v] : peers_)
+            {
+                if (v.state_ == PeerState::Squelched)
+                    f(v.peer_);
+                v.state_ = PeerState::Counting;
+                v.count_ = 0;
+                v.expire_ = now;
+            }
+
+            selected_.clear();
+            state_ = SlotState::Counting;
         }
-
-        selected_.clear();
-        state_ = SlotState::Counting;
+        peers_.erase(id);
     }
-
-    peers_.erase(id);
 }
 
 template<typename Peer>
@@ -232,12 +244,32 @@ Slot<Peer>::initCounting()
 }
 
 template<typename Peer>
+std::pair<bool, bool>
+Slot<Peer>::isCountingState() const
+{
+    auto resetCounts = std::accumulate(peers_.begin(), peers_.end(), 0, [](int init, auto it) {
+            return init += it.second.count_;});
+    return std::make_pair(state_ == SlotState::Counting, resetCounts == 0);
+}
+
+template<typename Peer>
+std::uint16_t
+Slot<Peer>::inState(PeerState state, bool notState) const
+{
+    return std::accumulate(peers_.begin(), peers_.end(), 0, [&](int init, auto it) {
+        if ((!notState && it.second.state_ == state) ||
+                (notState && it.second.state_ != state))
+            return ++init;
+        return init;
+    });
+}
+
+template<typename Peer>
 class Slots final
 {
     using clock_type = steady_clock;
     using id_t = typename Peer::id_t;
 public:
-    static constexpr seconds IDLED{4};
     Slots() = default;
     ~Slots() = default;
     /** Updates message count for validator/peer. Sends TMSquelch if the number
@@ -278,7 +310,34 @@ public:
     void
     touchIdle (const id_t&);
 
+    /** Returns if slot is in counting state and if all counts
+     * of unsquelched peers are set to 0 */
+    std::pair<bool, bool>
+    isCountingState(PublicKey const& validator) const
+    {
+        auto it = slots_.find(validator);
+        if (it != slots_.end())
+            return it->second.isCountingState();
+        return std::make_pair(false, false);
+    }
+
+    /** Return number of peers in the state, or not in state if notState = true */
+    boost::optional<std::uint16_t>
+    inState(PublicKey const& validator, PeerState state, bool notState = false) const
+    {
+        auto it = slots_.find(validator);
+        if (it != slots_.end())
+            return it->second.inState(state, notState);
+        return {};
+    }
+
+    /** Used in unit testing to age slots/peers sooner */
+    static
+    void
+    setConfig(seconds idled);
+
 private:
+    inline static seconds IDLED = config::IDLED;
     hash_map<PublicKey, Slot<Peer>> slots_;
     std::unordered_map<id_t, time_point<clock_type>> idlePeers_;
 };
@@ -352,6 +411,13 @@ void
 Slots<Peer>::touchIdle(id_t const& id)
 {
     idlePeers_.emplace(std::make_pair(id, clock_type::now() + IDLED));
+}
+
+template<typename Peer>
+void
+Slots<Peer>::setConfig(seconds idled)
+{
+    config::IDLED = idled;
 }
 
 } // Squelch

@@ -23,13 +23,6 @@ namespace ripple {
 
 namespace Squelch {
 
-namespace config
-{
-seconds MIN_UNSQUELCH_EXPIRE = Squelch::MIN_UNSQUELCH_EXPIRE;
-seconds MAX_UNSQUELCH_EXPIRE = Squelch::MAX_UNSQUELCH_EXPIRE;
-seconds SQUELCH_LATENCY = Squelch::SQUELCH_LATENCY;
-}
-
 void
 Squelch::squelch (PublicKey const &validator, bool squelch,
                  uint64_t squelchDuration)
@@ -39,9 +32,8 @@ Squelch::squelch (PublicKey const &validator, bool squelch,
         squelched_[validator] = [squelchDuration]() {
             auto now = clock_type::now();
             auto duration = time_point<clock_type>(seconds(squelchDuration));
-            auto min = now + config::MIN_UNSQUELCH_EXPIRE;
-            auto max = now + config::MAX_UNSQUELCH_EXPIRE +
-                config::SQUELCH_LATENCY;
+            auto min = now + MIN_UNSQUELCH_EXPIRE;
+            auto max = now + MAX_UNSQUELCH_EXPIRE + SQUELCH_LATENCY;
             return (duration >= min && duration <= max) ? duration : min;
         }();
     } else
@@ -66,9 +58,18 @@ Squelch::isSquelched (PublicKey const &validator)
 void
 Squelch::setConfig(seconds minExpire, seconds maxExpire, seconds latency)
 {
-    config::MIN_UNSQUELCH_EXPIRE = minExpire;
-    config::MAX_UNSQUELCH_EXPIRE = maxExpire;
-    config::SQUELCH_LATENCY = latency;
+    MIN_UNSQUELCH_EXPIRE = minExpire;
+    MAX_UNSQUELCH_EXPIRE = maxExpire;
+    SQUELCH_LATENCY = latency;
+    std::cout << MIN_UNSQUELCH_EXPIRE.count() << " " << MAX_UNSQUELCH_EXPIRE.count() <<
+     " " << SQUELCH_LATENCY.count() << std::endl;
+}
+
+seconds
+Squelch::getSquelchDuration()
+{
+    return seconds(rand_int(MIN_UNSQUELCH_EXPIRE.count(),
+                            MAX_UNSQUELCH_EXPIRE.count()));
 }
 
 } // Squelch

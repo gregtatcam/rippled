@@ -28,22 +28,19 @@ namespace ripple {
 
 namespace Squelch {
 
-using namespace std::chrono;
-
 namespace config
 {
-extern seconds MIN_UNSQUELCH_EXPIRE;
-extern seconds MAX_UNSQUELCH_EXPIRE;
-extern seconds SQUELCH_LATENCY;
+static constexpr std::chrono::seconds MIN_UNSQUELCH_EXPIRE{300};
+static constexpr std::chrono::seconds MAX_UNSQUELCH_EXPIRE{600};
+static constexpr std::chrono::seconds SQUELCH_LATENCY{10};
 }
+
+using namespace std::chrono;
 
 /** Maintains squelching of relaying messages from validators */
 class Squelch {
-    using clock_type    = std::chrono::steady_clock;
+    using clock_type    = steady_clock;
 public:
-    static constexpr std::chrono::seconds MIN_UNSQUELCH_EXPIRE{300};
-    static constexpr std::chrono::seconds MAX_UNSQUELCH_EXPIRE{600};
-    static constexpr std::chrono::seconds SQUELCH_LATENCY{10};
     Squelch () = default;
     virtual ~Squelch () = default;
 
@@ -67,10 +64,19 @@ public:
     void
     setConfig(seconds minExpire, seconds maxExpire, seconds latency);
 
+    /** Get random squelch duration between MIN_UNSQUELCH_EXPIRE and
+     * MAX_UNSQUELCH_EXPIRE */
+    static
+    seconds
+    getSquelchDuration();
+
 private:
     /** Maintains the list of squelched relaying to downstream peers.
      * Expiration time is included in the TMSquelch message. */
     hash_map <PublicKey, clock_type::time_point> squelched_;
+    inline static seconds MIN_UNSQUELCH_EXPIRE = config::MIN_UNSQUELCH_EXPIRE;
+    inline static seconds MAX_UNSQUELCH_EXPIRE = config::MAX_UNSQUELCH_EXPIRE;
+    inline static seconds SQUELCH_LATENCY = config::SQUELCH_LATENCY;
 };
 
 } // Squelch
