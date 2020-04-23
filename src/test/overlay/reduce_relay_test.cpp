@@ -103,10 +103,11 @@ public:
         return slots_.isCountingState(validator);
     }
 
+    template<typename Comp = std::equal_to<>>
     boost::optional<std::uint16_t>
-    inState(PublicKey const& validator, Squelch::PeerState state, bool notState = false)
+    inState(PublicKey const& validator, Squelch::PeerState state, Comp comp = {})
     {
-        return slots_.inState(validator, state, notState);
+        return slots_.inState(validator, state, comp);
     }
 
     std::set<id_t>

@@ -113,9 +113,10 @@ private:
     std::pair<bool, bool>
     isCountingState() const;
 
-    /** Return number of peers in the state, or not in state if notState = true */
+    /** Return number of peers in the state, or not in state */
+    template<typename Comp = std::equal_to<>>
     std::uint16_t
-    inState(PeerState state, bool notState = false) const;
+    inState(PeerState state, Comp comp = {}) const;
 
     /** Return selected peers */
     std::set<id_t>
@@ -280,12 +281,12 @@ Slot<Peer>::isCountingState() const
 }
 
 template<typename Peer>
+template<typename Comp>
 std::uint16_t
-Slot<Peer>::inState(PeerState state, bool notState) const
+Slot<Peer>::inState(PeerState state, Comp comp) const
 {
     return accumulate( 0, [&](int &init, id_t const& id, PeerInfo const &peer) {
-        if ((!notState && peer.state_ == state) ||
-                (notState && peer.state_ != state))
+        if (comp(peer.state_, state))
             return ++init;
         return init;
     });
@@ -379,13 +380,14 @@ public:
         return std::make_pair(false, false);
     }
 
-    /** Return number of peers in the state, or not in state if notState = true */
+    /** Return number of peers in state, or not in state */
+    template<typename Comp = std::equal_to<>>
     boost::optional<std::uint16_t>
-    inState(PublicKey const& validator, PeerState state, bool notState = false) const
+    inState(PublicKey const& validator, PeerState state, Comp comp = {}) const
     {
         auto const& it = slots_.find(validator);
         if (it != slots_.end())
-            return it->second.inState(state, notState);
+            return it->second.inState(state, comp);
         return {};
     }
 
