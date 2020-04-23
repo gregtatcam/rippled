@@ -62,7 +62,7 @@ public:
     /** Used in unit testing to "speed up" unsquelch */
     static
     void
-    setConfig(seconds minExpire, seconds maxExpire, seconds latency);
+    configSquelchDuration(seconds minExpire, seconds maxExpire, seconds latency);
 
     /** Get random squelch duration between MIN_UNSQUELCH_EXPIRE and
      * MAX_UNSQUELCH_EXPIRE */

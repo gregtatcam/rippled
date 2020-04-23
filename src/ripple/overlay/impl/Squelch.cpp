@@ -56,7 +56,7 @@ Squelch::isSquelched (PublicKey const &validator)
 }
 
 void
-Squelch::setConfig(seconds minExpire, seconds maxExpire, seconds latency)
+Squelch::configSquelchDuration(seconds minExpire, seconds maxExpire, seconds latency)
 {
     MIN_UNSQUELCH_EXPIRE = minExpire;
     MAX_UNSQUELCH_EXPIRE = maxExpire;

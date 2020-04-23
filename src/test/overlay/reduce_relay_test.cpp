@@ -82,10 +82,12 @@ public:
         slots_.checkIdle(f);
     }
 
-    void
+    id_t
     addPeer() {
         auto peer = std::make_shared<PeerSim>();
-        peers_.emplace(std::make_pair(peer->id(), std::move(peer)));
+        auto id = peer->id();
+        peers_.emplace(std::make_pair(id, std::move(peer)));
+        return id;
     }
 
     void
@@ -107,6 +109,27 @@ public:
         return slots_.inState(validator, state, notState);
     }
 
+    std::set<id_t>
+    getSelected(PublicKey const& validator)
+    {
+        return slots_.getSelected(validator);
+    }
+
+    id_t
+    getSelectedPeer(PublicKey const& validator)
+    {
+        auto selected = slots_.getSelected(validator);
+        assert(selected.size());
+        return *selected.begin();
+    }
+    
+    std::unordered_map<id_t, std::tuple<Squelch::PeerState,
+                                        std::uint16_t, std::uint32_t>>
+    getPeers(PublicKey const& validator)
+    {
+        return slots_.getPeers(validator);
+    }
+
 private:
     std::unordered_map<PeerSim::id_t, std::shared_ptr<PeerSim>> peers_;
     Squelch::Slots<PeerSim> slots_;
@@ -114,6 +137,19 @@ private:
 
 class reduce_relay_test : public beast::unit_test::suite {
     using Slot = Squelch::Slot<PeerSim>;
+    
+    void
+    printPeer(PublicKey const& validator)
+    {
+        auto peers = overlay_.getPeers(validator);
+        for (auto &[id,peer] : peers)
+        {
+            auto [state, count, expire] = peer;
+            std::cout << "peer - id: " << id << " state: " << (int)state
+                      << " count: " << count
+                      << " expire: " << expire << std::endl;
+        }
+    }
 
     bool
     checkCounting(PublicKey const& validator, boost::optional<std::pair<bool,bool>> const& test)
@@ -208,6 +244,23 @@ class reduce_relay_test : public beast::unit_test::suite {
         f(log);
     }
 
+    /** Set to counting state - send message from a new peer */
+    id_t setCounting(PublicKey const& validator, bool log)
+    {
+        auto id = overlay_.addPeer();
+        BEAST_EXPECT(sendNoSquelch(validator, {id}, 1, {{true, false}}));
+        return id;
+    }
+
+    /** */
+    void startRound(PublicKey const& validator, bool log)
+    {
+        // message to the last peer resets all counts and sets the peer's count to 1
+        BEAST_EXPECT(sendNoSquelchN(validator, MAX_PEERS, 1, {{true, false}}));
+        BEAST_EXPECT(sendAndSquelch(
+            validator1_, {0, 1, 2}, Slot::MESSAGE_COUNT_THRESHOLD + 1, log, {{false, true}}));
+    }
+
     /** Initial counting round: three peers receive message "faster" then
      * others. Once the message count for the three peers reaches threshold
      * the rest of the peers are squelched and the slot for the give validator
@@ -256,40 +309,99 @@ class reduce_relay_test : public beast::unit_test::suite {
     testNewPeer(bool log)
     {
         doTest("New Peer", log, [this](bool log) {
-            overlay_.addPeer();
-            BEAST_EXPECT(sendNoSquelch(validator1_, {MAX_PEERS}, 1, {{true, false}}));
+            auto id = setCounting(validator1_, log);
             // updates count for the peer
-            BEAST_EXPECT(sendNoSquelch(validator1_, {MAX_PEERS}, 1, {{true, false}}));
+            BEAST_EXPECT(sendNoSquelch(validator1_, {id}, 1, {{true, false}}));
         });
     }
+    
+    bool
+    unsquelch(PublicKey const& validator, std::set<id_t> peers, bool log)
+    {
+        bool res = true;
+        for (auto id : peers)
+        {
+            auto selected = overlay_.getSelected(validator);
+            bool inSelected = selected.find(id) != selected.end();
+            auto squelched =
+                overlay_.inState(validator, Squelch::PeerState::Squelched);
+            std::uint16_t n = 0;
+            overlay_.unsquelch(
+                id, [&](PublicKey const&, std::weak_ptr<PeerSim> wp) {
+                    auto peer = wp.lock();
+                    assert(peer);
+                    BEAST_EXPECT(
+                        peer->id() != 0 && peer->id() != 1 && peer->id() != 2);
+                    n++;
+                });
+            if (log)
+                std::cout << "unsquelched " << squelched << " " << n
+                          << std::endl;
+            BEAST_EXPECT((!inSelected && n == 0) || (inSelected && n == *squelched));
+            res = res && ((!inSelected && n == 0) || (inSelected && n == *squelched));
+        }
+        return res;
+    }
 
+    /** Unsquelch slot */
+    bool
+    unsquelchSelected(PublicKey const& validator, bool log)
+    {
+        auto id = overlay_.getSelectedPeer(validator1_);
+        if (log)
+            std::cout << "selected peer " << id << std::endl;
+        return unsquelch(validator, {id}, log);
+    }
+    
+    void
+    unsquelchNew(PublicKey const& validator, bool log)
+    {
+        auto peers = overlay_.getPeers(validator);
+        for (auto& [id, peer]: peers)
+            if (id >= MAX_PEERS)
+                unsquelch(validator, {id}, log);
+    }
+    
     /** Selected peer disconnects. Should change the state to counting and
      * unsquelch squelched peers. */
     void
-    testSelectedDisconnects(bool log)
+    testSelectedPeerDisconnects(bool log)
     {
         doTest("Selected Peer Disconnects", log, [this](bool log) {
-            auto squelched = overlay_.inState(validator1_, Squelch::PeerState::Squelched);
-            std::uint16_t n = 0;
-            overlay_.unsquelch(0, [&](PublicKey const&, std::weak_ptr<PeerSim> wp) {
-                auto peer = wp.lock();
-                assert(peer);
-                BEAST_EXPECT(peer->id() != 0 && peer->id() != 1 && peer->id() != 2);
-                n++;
-            });
-            if (log)
-                std::cout << "squelched " << squelched << " " << n << std::endl;
-            BEAST_EXPECT(n == *squelched);
+            std::cout << "===\n";
+            BEAST_EXPECT(unsquelchSelected(validator1_, log));
         });
     }
 
     /** Selected peer stops relaying. Should change the state to counting and
      * unsquelch squelched peers. */
     void
-    testStopsRelaying(bool log)
+    testPeerStopsRelaying(bool log)
     {
         doTest("Selected Peer Stops Relaying", log, [this](bool log) {
+            Squelch::Slots<PeerSim>::configIdled(seconds(0));
+            Squelch::Squelch::configSquelchDuration(seconds(0), seconds(1), seconds(0));
+            unsquelchNew(validator1_, log);
+            BEAST_EXPECT(sendAndSquelch(
+              validator1_, {0, 1, 2}, Slot::MESSAGE_COUNT_THRESHOLD + 1, log, {{false, true}}));
+            sleep(2);
+            // might not get any peers squelched since not selected peer is simply
+            // deleted - no need to send unsquelch. this depends on the traversal
+            // order.
+            auto selected = overlay_.getSelected(validator1_);
+            auto squelched = overlay_.inState(validator1_, Squelch::PeerState::Squelched);
+            int n = 0;
+            overlay_.checkIdle([&](PublicKey const&, std::weak_ptr<PeerSim> peerPtr) {
+                auto peer = peerPtr.lock();
+                assert(peer);
+                auto id = peer->id();
+                BEAST_EXPECT(selected.find(id) == selected.end());
+                n++;
+            });
+            BEAST_EXPECT(n == 0 || (n != 0 && n == *squelched));
         });
+        // all peers expired, there no slot either
+        BEAST_EXPECT(checkCounting(validator1_, {{false, false}}));
     }
 
 public:
@@ -309,7 +421,8 @@ public:
         for (int i = 0; i < MAX_PEERS; i++)
             overlay_.addPeer();
 
-        Squelch::Squelch::setConfig(seconds(1), seconds(2), seconds(0));
+        Squelch::Squelch::configSquelchDuration(seconds(1), seconds(2), seconds(0));
+        Squelch::Slots<PeerSim>::configIdled(seconds(0));
     }
 
     void run() override {
@@ -319,7 +432,8 @@ public:
         testPeerUnsquelchedTooSoon(true);
         testPeerUnsquelched(true);
         testNewPeer(true);
-        testSelectedDisconnects(true);
+        testSelectedPeerDisconnects(true);
+        testPeerStopsRelaying(true);
     }
 };
 

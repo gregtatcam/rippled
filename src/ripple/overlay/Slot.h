@@ -117,6 +117,16 @@ private:
     std::uint16_t
     inState(PeerState state, bool notState = false) const;
 
+    /** Return selected peers */
+    std::set<id_t>
+    getSelected() const;
+    
+    /** Get peers info. Return map of peer's state, count, and squelch expiration
+     * seconds.
+     */
+    std::unordered_map<id_t, std::tuple<PeerState, uint16_t, uint32_t>>
+    getPeers();
+    
 private:
     /** Reset counts of peers in Selected or Counting state */
     void
@@ -125,6 +135,11 @@ private:
     /** Initialize slot to Counting state */
     void
     initCounting();
+    
+    /** Accumulate value T over peers. F(T&, id_t const&, PeerInfo const&) */
+    template<typename T, typename F>
+    T
+    accumulate(T t, F&& f) const;
 
     /** Data maintained for each peer */
     struct PeerInfo {
@@ -244,11 +259,23 @@ Slot<Peer>::initCounting()
 }
 
 template<typename Peer>
+template<typename T, typename F>
+T
+Slot<Peer>::accumulate(T t, F&& f) const
+{
+    return std::accumulate(peers_.begin(), peers_.end(), t,
+                           [&](T &t, auto const& it) {
+        return f(t, it.first, it.second);
+    });
+}
+
+template<typename Peer>
 std::pair<bool, bool>
 Slot<Peer>::isCountingState() const
 {
-    auto resetCounts = std::accumulate(peers_.begin(), peers_.end(), 0, [](int init, auto it) {
-            return init += it.second.count_;});
+    auto resetCounts =
+        accumulate(0, [](int& init, id_t const&, PeerInfo const& peer){
+            return init += peer.count_;});
     return std::make_pair(state_ == SlotState::Counting, resetCounts == 0);
 }
 
@@ -256,10 +283,41 @@ template<typename Peer>
 std::uint16_t
 Slot<Peer>::inState(PeerState state, bool notState) const
 {
-    return std::accumulate(peers_.begin(), peers_.end(), 0, [&](int init, auto it) {
-        if ((!notState && it.second.state_ == state) ||
-                (notState && it.second.state_ != state))
+    return accumulate( 0, [&](int &init, id_t const& id, PeerInfo const &peer) {
+        if ((!notState && peer.state_ == state) ||
+                (notState && peer.state_ != state))
             return ++init;
+        return init;
+    });
+}
+
+template<typename Peer>
+std::set<typename Peer::id_t>
+Slot<Peer>::getSelected() const
+{
+    std::set<id_t> init;
+    return accumulate(init,
+                           [](auto &init, id_t const& id, PeerInfo const& peer) {
+      if (peer.state_ == PeerState::Selected)
+      {
+          init.insert(id);
+          return init;
+      }
+      return init;
+    });
+}
+
+template<typename Peer>
+std::unordered_map<typename Peer::id_t,
+                   std::tuple<PeerState, uint16_t, uint32_t>>
+Slot<Peer>::getPeers()
+{
+    auto init = std::unordered_map<id_t, std::tuple<PeerState,
+        std::uint16_t, std::uint32_t>>();
+    return accumulate(init, [](auto& init, id_t const& id, PeerInfo const& peer){
+        init.emplace(std::make_pair(id,
+                     std::make_tuple(peer.state_, peer.count_,
+            duration_cast<seconds>(peer.expire_.time_since_epoch()).count())));
         return init;
     });
 }
@@ -315,7 +373,7 @@ public:
     std::pair<bool, bool>
     isCountingState(PublicKey const& validator) const
     {
-        auto it = slots_.find(validator);
+        auto const& it = slots_.find(validator);
         if (it != slots_.end())
             return it->second.isCountingState();
         return std::make_pair(false, false);
@@ -325,7 +383,7 @@ public:
     boost::optional<std::uint16_t>
     inState(PublicKey const& validator, PeerState state, bool notState = false) const
     {
-        auto it = slots_.find(validator);
+        auto const& it = slots_.find(validator);
         if (it != slots_.end())
             return it->second.inState(state, notState);
         return {};
@@ -334,12 +392,46 @@ public:
     /** Used in unit testing to age slots/peers sooner */
     static
     void
-    setConfig(seconds idled);
+    configIdled(seconds idled);
+
+    /** Get selected peers */
+    std::set<id_t>
+    getSelected(PublicKey const& validator)
+    {
+        auto const& it = slots_.find(validator);
+        if (it != slots_.end())
+            return it->second.getSelected();
+        return {};
+    }
+   
+    /** Get peers info. Return map of peer's state, count, and squelch expiration
+     * seconds.
+     */
+    std::unordered_map<typename Peer::id_t,
+                       std::tuple<PeerState, uint16_t, uint32_t>>
+    getPeers(PublicKey const& validator)
+    {
+        auto const& it = slots_.find(validator);
+        if (it != slots_.end())
+            return it->second.getPeers();
+        return {};
+    }
 
 private:
+    
+    /** Called when the peer is deleted. If the peer was selected to be the source
+     * of messages from the validator then squelched peers have to be unsquelched.
+     * @param id Peer's id
+     * @param f Function is called for every peer in Squelched state
+     *     with peer weak_ptr as the argument
+     */
+    template<typename F>
+    void
+    deletePeer(id_t const& id, F&& f);
+    
     inline static seconds IDLED = config::IDLED;
     hash_map<PublicKey, Slot<Peer>> slots_;
-    std::unordered_map<id_t, time_point<clock_type>> idlePeers_;
+    std::unordered_map<id_t, clock_type::time_point> idlePeers_;
 };
 
 template<typename Peer>
@@ -348,36 +440,35 @@ void
 Slots<Peer>::checkForSquelch(
     const PublicKey& validator,
     id_t const& id,
-    std::weak_ptr<Peer> peer,
+    std::weak_ptr<Peer> peerPtr,
     protocol::MessageType type,
     F&& f)
 {
     touchIdle(id);
 
-    auto it = [&]() {
+    auto& peer = [&]() {
         auto it = slots_.find(validator);
         if (it == slots_.end())
         {
             auto [it, b] = slots_.emplace(std::make_pair(validator, Slot<Peer>()));
-                               //std::make_shared<Slot<Peer>>()));
             return it;
         }
         else
             return it;
-    }();
+    }()->second;
 
-    it->second.update(id, peer, type, [&validator, f](std::weak_ptr<Peer> peer,
+    peer.update(id, peerPtr, type, [&validator, f](std::weak_ptr<Peer> peerPtr,
                                            uint32_t squelchDuration) {
-        f(validator, peer, squelchDuration);
+        f(validator, peerPtr, squelchDuration);
     });
 }
 
 template<typename Peer>
 template<typename F>
 void
-Slots<Peer>::unsquelch(id_t const& id, F&& f)
+Slots<Peer>::deletePeer(id_t const& id, F&& f)
 {
-    for (auto it : slots_)
+    for (auto& it : slots_)
         it.second.deletePeer(id, [&](std::weak_ptr<Peer> peer) {
             f(it.first, peer);
         });
@@ -386,15 +477,30 @@ Slots<Peer>::unsquelch(id_t const& id, F&& f)
 template<typename Peer>
 template<typename F>
 void
+Slots<Peer>::unsquelch(id_t const& id, F&& f)
+{
+    deletePeer(id, f);
+    idlePeers_.erase(id);
+}
+
+template<typename Peer>
+template<typename F>
+void
 Slots<Peer>::checkIdle(F&& f)
 {
     auto now = clock_type::now();
-    for (auto& [id, lastSelected] : idlePeers_)
+    for (auto it = idlePeers_.begin(); it != idlePeers_.end(); )
     {
-        if (now > lastSelected)
-            unsquelch(id, [&](PublicKey const& validator, std::weak_ptr<Peer> peer) {
-                f(validator, peer); // TBD, review std::forward
-            });
+        if (now > it->second)
+        {
+            deletePeer(
+                it->first, [&](PublicKey const& validator, std::weak_ptr<Peer> peer) {
+                    f(validator, peer);
+                });
+            it = idlePeers_.erase(it);
+        }
+        else
+            ++it;
     }
 
     for (auto it = slots_.begin(); it != slots_.end();)
@@ -410,14 +516,14 @@ template<typename Peer>
 void
 Slots<Peer>::touchIdle(id_t const& id)
 {
-    idlePeers_.emplace(std::make_pair(id, clock_type::now() + IDLED));
+    idlePeers_[id] = clock_type::now() + IDLED;
 }
 
 template<typename Peer>
 void
-Slots<Peer>::setConfig(seconds idled)
+Slots<Peer>::configIdled(seconds idled)
 {
-    config::IDLED = idled;
+    IDLED = idled;
 }
 
 } // Squelch
