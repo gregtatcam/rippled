@@ -28,94 +28,89 @@ namespace test {
 using namespace boost::asio;
 using namespace std::chrono;
 
-class PeerSim {
+class Peer : public std::enable_shared_from_this<Peer>
+{
 public:
     using id_t = std::uint32_t;
-    PeerSim ()
-    {
+    Peer() {
         id_ = sid_;
         sid_++;
     }
-
-    ~PeerSim () = default;
-    id_t id() { return id_; }
-
-private:
-    static id_t sid_;
+    virtual ~Peer() = default;
+    id_t id()
+    {
+        return id_;
+    }
+protected:
+    inline static id_t sid_ = 0;
     id_t id_;
-    Squelch::Squelch squelch_;
 };
 
-id_t PeerSim::sid_ = 0;
-
 using SquelchCB = std::function<void(PublicKey const&,
-                                     std::weak_ptr<PeerSim>, std::uint32_t)>;
+                                     std::weak_ptr<Peer>, std::uint32_t)>;
 using UnsquelchCB = std::function<void(PublicKey const&,
-                                       std::weak_ptr<PeerSim>)>;
-using SendCB = std::function<void(PublicKey const&, std::weak_ptr<PeerSim>,
-                                  std::uint32_t, id_t, std::uint32_t)>;
+                                       std::weak_ptr<Peer>)>;
+using SendCB = std::function<void(PublicKey const&, std::weak_ptr<Peer>,
+                                  std::uint32_t, Peer::id_t, std::uint32_t)>;
 
 class OverlaySim {
 public:
+    using id_t = Peer::id_t;
+    using clock_type = steady_clock;
     OverlaySim () {}
-
+    
     ~OverlaySim () = default;
-
+    
     void
     checkForSquelch(PublicKey const& validator,
-                    std::shared_ptr<PeerSim> peer,
+                    std::shared_ptr<Peer> peer,
                     SquelchCB f,
                     protocol::MessageType type = protocol::mtVALIDATION)
     {
         slots_.checkForSquelch(validator, peer->id(), peer, type, f);
     }
-
+    
     void
-    unsquelch(Peer::id_t const& id, UnsquelchCB f)
+    unsquelch(id_t const& id, UnsquelchCB f)
     {
         slots_.unsquelch(id, f);
     }
-
+    
     void
     checkIdle(UnsquelchCB f)
     {
         slots_.checkIdle(f);
     }
-
+    
     id_t
-    addPeer() {
-        auto peer = std::make_shared<PeerSim>();
-        auto id = peer->id();
-        peers_.emplace(std::make_pair(id, std::move(peer)));
-        return id;
-    }
-
+    addPeer();
+    
     void
     send(PublicKey const& validator, id_t id, SquelchCB f,
          protocol::MessageType type = protocol::mtVALIDATION)
     {
         checkForSquelch(validator, peers_[id], f, type);
     }
-
+    
     std::pair<bool, bool>
     isCountingState(PublicKey const& validator)
     {
         return slots_.isCountingState(validator);
     }
-
+    
     template<typename Comp = std::equal_to<>>
     boost::optional<std::uint16_t>
     inState(PublicKey const& validator, Squelch::PeerState state, Comp comp = {})
     {
         return slots_.inState(validator, state, comp);
     }
-
+    
     std::set<id_t>
     getSelected(PublicKey const& validator)
     {
         return slots_.getSelected(validator);
     }
-
+    
     id_t
     getSelectedPeer(PublicKey const& validator)
     {
@@ -125,30 +120,75 @@ public:
     }
     
     std::unordered_map<id_t, std::tuple<Squelch::PeerState,
-                                        std::uint16_t, std::uint32_t>>
+        std::uint16_t, std::uint32_t>>
     getPeers(PublicKey const& validator)
     {
         return slots_.getPeers(validator);
     }
+    
+    std::unordered_map<id_t, clock_type::time_point> const&
+    getIdled() const
+    {
+        return slots_.getIdled();
+    }
 
 private:
-    std::unordered_map<PeerSim::id_t, std::shared_ptr<PeerSim>> peers_;
-    Squelch::Slots<PeerSim> slots_;
+    std::unordered_map<id_t, std::shared_ptr<Peer>> peers_;
+    Squelch::Slots<Peer> slots_;
 };
+
+class PeerSim : public Peer {
+public:
+    using id_t = Peer::id_t;
+    PeerSim (OverlaySim &overlay)
+    : overlay_(overlay)
+    {}
+
+    ~PeerSim () = default;
+    
+    void send(std::shared_ptr<Message> const& m)
+    {
+        auto validator = m->getValidatorKey();
+        assert(validator);
+        if (squelch_.isSquelched(*validator))
+            return;
+    }
+    
+    void onMessage(protocol::TMSquelch squelch)
+    {
+    
+    }
+
+private:
+    OverlaySim& overlay_;
+    Squelch::Squelch squelch_;
+};
+
+id_t
+OverlaySim::addPeer() {
+    auto peer = std::make_shared<PeerSim>(*this);
+    auto id = peer->id();
+    peers_.emplace(std::make_pair(id, std::move(peer)));
+    return id;
+}
+
 
 class reduce_relay_test : public beast::unit_test::suite {
     using Slot = Squelch::Slot<PeerSim>;
+    using id_t = Peer::id_t;
     
     void
-    printPeer(PublicKey const& validator)
+    printPeers(PublicKey const& validator)
     {
+        auto idled = overlay_.getIdled();
         auto peers = overlay_.getPeers(validator);
         for (auto &[id,peer] : peers)
         {
             auto [state, count, expire] = peer;
             std::cout << "peer - id: " << id << " state: " << (int)state
                       << " count: " << count
-                      << " expire: " << expire << std::endl;
+                      << " expire: " << expire
+                      << " idled: " << Squelch::toSecs(idled[id]) << std::endl;
         }
     }
 
@@ -174,7 +214,7 @@ class reduce_relay_test : public beast::unit_test::suite {
             for (int m = 0; m < messages; m++)
                 overlay_.send(validator, p,
                              [&](PublicKey const& validator,
-                                 std::weak_ptr<PeerSim> wp, std::uint32_t duration)
+                                 std::weak_ptr<Peer> wp, std::uint32_t duration)
                     {
                         f(validator, wp, duration, p, m);
                     });
@@ -189,7 +229,7 @@ class reduce_relay_test : public beast::unit_test::suite {
         std::uint32_t squelched = 0;
         send(validator, peers, messages,
                              [&](PublicKey const&,
-                                 std::weak_ptr<PeerSim> wp, std::uint32_t d,
+                                 std::weak_ptr<Peer> wp, std::uint32_t d,
                                     id_t p, uint32_t m)
                     {
                         if (m != (messages - 1))
@@ -220,7 +260,7 @@ class reduce_relay_test : public beast::unit_test::suite {
                   boost::optional<std::pair<bool, bool>> test)
     {
         send(validator, peers, messages,
-             [this](PublicKey const&, std::weak_ptr<PeerSim> wp,
+             [this](PublicKey const&, std::weak_ptr<Peer> wp,
                     std::uint32_t, id_t id, std::uint32_t) {
                BEAST_EXPECT(0);
              });
@@ -328,7 +368,7 @@ class reduce_relay_test : public beast::unit_test::suite {
                 overlay_.inState(validator, Squelch::PeerState::Squelched);
             std::uint16_t n = 0;
             overlay_.unsquelch(
-                id, [&](PublicKey const&, std::weak_ptr<PeerSim> wp) {
+                id, [&](PublicKey const&, std::weak_ptr<Peer> wp) {
                     auto peer = wp.lock();
                     assert(peer);
                     BEAST_EXPECT(
@@ -392,7 +432,7 @@ class reduce_relay_test : public beast::unit_test::suite {
             auto selected = overlay_.getSelected(validator1_);
             auto squelched = overlay_.inState(validator1_, Squelch::PeerState::Squelched);
             int n = 0;
-            overlay_.checkIdle([&](PublicKey const&, std::weak_ptr<PeerSim> peerPtr) {
+            overlay_.checkIdle([&](PublicKey const&, std::weak_ptr<Peer> peerPtr) {
                 auto peer = peerPtr.lock();
                 assert(peer);
                 auto id = peer->id();
@@ -401,7 +441,7 @@ class reduce_relay_test : public beast::unit_test::suite {
             });
             BEAST_EXPECT(n == 0 || (n != 0 && n == *squelched));
         });
-        // all peers expired, there no slot either
+        // all peers expired, there is no slot either
         BEAST_EXPECT(checkCounting(validator1_, {{false, false}}));
     }
 
@@ -423,7 +463,7 @@ public:
             overlay_.addPeer();
 
         Squelch::Squelch::configSquelchDuration(seconds(1), seconds(2), seconds(0));
-        Squelch::Slots<PeerSim>::configIdled(seconds(0));
+        Squelch::Slots<Peer>::configIdled(seconds(0));
     }
 
     void run() override {

@@ -34,6 +34,13 @@ namespace config {
 static constexpr seconds IDLED{4};
 }
 
+inline
+std::uint32_t
+toSecs(steady_clock::time_point const& t)
+{
+    return duration_cast<seconds>(t.time_since_epoch()).count();
+}
+
 /** Peer's State */
 enum class PeerState : uint8_t {
     Squelched = 0x01, // squelched
@@ -318,7 +325,7 @@ Slot<Peer>::getPeers()
     return accumulate(init, [](auto& init, id_t const& id, PeerInfo const& peer){
         init.emplace(std::make_pair(id,
                      std::make_tuple(peer.state_, peer.count_,
-            duration_cast<seconds>(peer.expire_.time_since_epoch()).count())));
+                     toSecs(peer.expire_))));
         return init;
     });
 }
@@ -417,6 +424,13 @@ public:
         if (it != slots_.end())
             return it->second.getPeers();
         return {};
+    }
+    
+    /** Get idled info. */
+    std::unordered_map<id_t, clock_type::time_point> const&
+    getIdled() const
+    {
+        return idlePeers_;
     }
 
 private:

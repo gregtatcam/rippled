@@ -61,8 +61,6 @@ Squelch::configSquelchDuration(seconds minExpire, seconds maxExpire, seconds lat
     MIN_UNSQUELCH_EXPIRE = minExpire;
     MAX_UNSQUELCH_EXPIRE = maxExpire;
     SQUELCH_LATENCY = latency;
-    std::cout << MIN_UNSQUELCH_EXPIRE.count() << " " << MAX_UNSQUELCH_EXPIRE.count() <<
-     " " << SQUELCH_LATENCY.count() << std::endl;
 }
 
 seconds
