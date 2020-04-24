@@ -16,7 +16,9 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 //==============================================================================
+#include <ripple/basics/random.h>
 #include <ripple/overlay/Slot.h>
+#include <ripple.pb.h>
 #include <boost/asio.hpp>
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
@@ -28,32 +30,98 @@ namespace test {
 using namespace boost::asio;
 using namespace std::chrono;
 
+class Peer;
+using SquelchCB = std::function<void(PublicKey const&,
+                                     std::weak_ptr<Peer>, std::uint32_t)>;
+using SendCB = std::function<void(PublicKey const&, std::weak_ptr<Peer>,
+                                  std::uint32_t, std::uint32_t, std::uint32_t)>;
+using UnsquelchCB = std::function<void(PublicKey const&,
+                                       std::weak_ptr<Peer>)>;
+
 class Peer : public std::enable_shared_from_this<Peer>
 {
 public:
     using id_t = std::uint32_t;
-    Peer() {
-        id_ = sid_;
-        sid_++;
-    }
+    Peer() = default;
     virtual ~Peer() = default;
-    id_t id()
+    
+    virtual id_t id() = 0;
+    
+    virtual void send(std::shared_ptr<Message> const& m, SquelchCB f) = 0;
+    virtual void send(std::shared_ptr<protocol::TMSquelch> const& squelch) = 0;
+    
+    std::shared_ptr<Peer>
+    shared()
     {
-        return id_;
+        return shared_from_this();
     }
-protected:
-    inline static id_t sid_ = 0;
-    id_t id_;
 };
 
-using SquelchCB = std::function<void(PublicKey const&,
-                                     std::weak_ptr<Peer>, std::uint32_t)>;
-using UnsquelchCB = std::function<void(PublicKey const&,
-                                       std::weak_ptr<Peer>)>;
-using SendCB = std::function<void(PublicKey const&, std::weak_ptr<Peer>,
-                                  std::uint32_t, Peer::id_t, std::uint32_t)>;
+using Peers = std::unordered_map<Peer::id_t, std::shared_ptr<Peer>>;
 
-class OverlaySim {
+class Overlay {
+public:
+    Overlay() = default;
+    virtual ~Overlay() = default;
+    
+    virtual void
+    checkForSquelch(PublicKey const& validator,
+                    std::shared_ptr<Peer> peer,
+                    SquelchCB f,
+                    protocol::MessageType type = protocol::mtVALIDATION) = 0;
+};
+
+class Validator {
+public:
+    Validator(Peers& peers)
+    : peers_(peers)
+    {
+        pkey_ = std::get<0>(randomKeyPair(KeyType::ed25519));
+    }
+    
+    PublicKey const&
+    key()
+    {
+        return pkey_;
+    }
+    
+    operator PublicKey () const { return pkey_; }
+    
+    void
+    send(std::vector<Peer::id_t> peers, SquelchCB f)
+    {
+        protocol::TMValidation v;
+        v.set_validation("validation");
+        auto m = std::make_shared<Message>(v, protocol::mtVALIDATION, pkey_);
+        
+        auto to = [&]() {
+            if (!peers.empty())
+                return peers;
+            else
+            {
+                std::vector<Peer::id_t> to;
+                std::vector<Peer::id_t> v1;
+                std::transform(peers_.begin(),
+                        peers_.end(), std::back_inserter(v1),
+                        [](auto const& it) {return it.first;});
+                while (to.size() != v1.size())
+                {
+                    auto i = rand_int(v1.size() - to.size() - 1);
+                    to.push_back(v1[i]);
+                }
+                return to;
+            }
+        }();
+        for (auto& id: to)
+            peers_[id]->send(m, f);
+    }
+    
+private:
+    Peers& peers_;
+    PublicKey pkey_;
+};
+
+class OverlaySim : public Overlay {
 public:
     using id_t = Peer::id_t;
     using clock_type = steady_clock;
@@ -65,7 +133,7 @@ public:
     checkForSquelch(PublicKey const& validator,
                     std::shared_ptr<Peer> peer,
                     SquelchCB f,
-                    protocol::MessageType type = protocol::mtVALIDATION)
+                    protocol::MessageType type = protocol::mtVALIDATION) override
     {
         slots_.checkForSquelch(validator, peer->id(), peer, type, f);
     }
@@ -85,12 +153,13 @@ public:
     id_t
     addPeer();
     
+    /*
     void
     send(PublicKey const& validator, id_t id, SquelchCB f,
          protocol::MessageType type = protocol::mtVALIDATION)
     {
         checkForSquelch(validator, peers_[id], f, type);
-    }
+    }*/
     
     std::pair<bool, bool>
     isCountingState(PublicKey const& validator)
@@ -131,9 +200,15 @@ public:
     {
         return slots_.getIdled();
     }
+    
+    Validator
+    makeValidator()
+    {
+        return Validator(peers_);
+    }
 
 private:
-    std::unordered_map<id_t, std::shared_ptr<Peer>> peers_;
+    Peers peers_;
     Squelch::Slots<Peer> slots_;
 };
 
@@ -142,24 +217,39 @@ public:
     using id_t = Peer::id_t;
     PeerSim (OverlaySim &overlay)
     : overlay_(overlay)
-    {}
+    {
+        id_ = sid_++;
+    }
 
     ~PeerSim () = default;
     
-    void send(std::shared_ptr<Message> const& m)
+    id_t
+    id() override
+    {
+        return id_;
+    }
+    
+    void send(std::shared_ptr<Message> const& m, SquelchCB f) override
     {
         auto validator = m->getValidatorKey();
         assert(validator);
         if (squelch_.isSquelched(*validator))
             return;
+        
+        // forward to overlay
+        overlay_.checkForSquelch(*validator, shared(), f);
     }
     
-    void onMessage(protocol::TMSquelch squelch)
+    virtual void send(std::shared_ptr<protocol::TMSquelch> const& squelch) override
     {
-    
+        auto validator = squelch->validatorpubkey();
+        PublicKey key(Slice(validator.data(), validator.size()));
+        squelch_.squelch(key, squelch->squelch(), squelch->squelchduration());
     }
 
 private:
+    inline static id_t sid_ = 0;
+    id_t id_;
     OverlaySim& overlay_;
     Squelch::Squelch squelch_;
 };
@@ -207,12 +297,12 @@ class reduce_relay_test : public beast::unit_test::suite {
     }
 
     void
-    send(PublicKey const& validator,
+    send(Validator& validator,
          std::set<id_t> const& peers, std::uint32_t messages, SendCB f)
     {
         for (auto p : peers)
             for (int m = 0; m < messages; m++)
-                overlay_.send(validator, p,
+                validator.send({p},
                              [&](PublicKey const& validator,
                                  std::weak_ptr<Peer> wp, std::uint32_t duration)
                     {
@@ -221,7 +311,7 @@ class reduce_relay_test : public beast::unit_test::suite {
     }
 
     bool
-    sendAndSquelch(PublicKey const& validator,
+    sendAndSquelch(Validator& validator,
                    std::set<id_t> const& peers, std::uint32_t messages,
                    bool log,
                    boost::optional<std::pair<bool, bool>> test = {})
@@ -255,7 +345,7 @@ class reduce_relay_test : public beast::unit_test::suite {
     }
 
     bool
-    sendNoSquelch(PublicKey const& validator,
+    sendNoSquelch(Validator& validator,
                   std::set<id_t> const& peers, std::uint32_t messages,
                   boost::optional<std::pair<bool, bool>> test)
     {
@@ -268,7 +358,7 @@ class reduce_relay_test : public beast::unit_test::suite {
     }
 
     bool
-    sendNoSquelchN(PublicKey const& validator,
+    sendNoSquelchN(Validator& validator,
                   std::uint16_t n, std::uint32_t messages,
                   boost::optional<std::pair<bool, bool>> test)
     {
@@ -286,20 +376,11 @@ class reduce_relay_test : public beast::unit_test::suite {
     }
 
     /** Set to counting state - send message from a new peer */
-    id_t setCounting(PublicKey const& validator, bool log)
+    id_t setCounting(Validator& validator, bool log)
     {
         auto id = overlay_.addPeer();
         BEAST_EXPECT(sendNoSquelch(validator, {id}, 1, {{true, false}}));
         return id;
-    }
-
-    /** */
-    void startRound(PublicKey const& validator, bool log)
-    {
-        // message to the last peer resets all counts and sets the peer's count to 1
-        BEAST_EXPECT(sendNoSquelchN(validator, MAX_PEERS, 1, {{true, false}}));
-        BEAST_EXPECT(sendAndSquelch(
-            validator1_, {0, 1, 2}, Slot::MESSAGE_COUNT_THRESHOLD + 1, log, {{false, true}}));
     }
 
     /** Initial counting round: three peers receive message "faster" then
@@ -446,19 +527,18 @@ class reduce_relay_test : public beast::unit_test::suite {
     }
 
 public:
-    reduce_relay_test() {}
+    reduce_relay_test()
+    : validator1_(overlay_.makeValidator()){
+    
+    }
 
     static constexpr std::uint32_t MAX_PEERS = 10;
     OverlaySim overlay_;
-    PublicKey validator1_;
-    PublicKey validator2_;
+    Validator validator1_;
 
     void
     init()
     {
-        validator1_ = std::get<0>(randomKeyPair(KeyType::ed25519));
-        validator2_ = std::get<0>(randomKeyPair(KeyType::ed25519));
-
         for (int i = 0; i < MAX_PEERS; i++)
             overlay_.addPeer();
 
