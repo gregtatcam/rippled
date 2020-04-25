@@ -144,7 +144,7 @@ private:
     clock_type::time_point lastPingTime_;
     clock_type::time_point const creationTime_;
 
-    Squelch::Squelch squelch_;
+    Squelch::Squelch<std::chrono::steady_clock> squelch_;
 
     // Notes on thread locking:
     //

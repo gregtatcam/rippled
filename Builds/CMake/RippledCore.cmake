@@ -528,7 +528,6 @@ target_sources (rippled PRIVATE
   src/ripple/overlay/impl/PeerReservationTable.cpp
   src/ripple/overlay/impl/PeerSet.cpp
   src/ripple/overlay/impl/ProtocolVersion.cpp
-  src/ripple/overlay/impl/Squelch.cpp
   src/ripple/overlay/impl/TrafficCount.cpp
   #[===============================[
      main sources:

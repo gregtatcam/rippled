@@ -2316,7 +2316,6 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 void
 PeerImp::onMessage (std::shared_ptr <protocol::TMSquelch> const& m)
 {
-    using namespace std::chrono;
     auto validator = m->validatorpubkey();
     PublicKey key(Slice(validator.data(), validator.size()));
     auto squelch = m->squelch();
@@ -2327,6 +2326,8 @@ PeerImp::onMessage (std::shared_ptr <protocol::TMSquelch> const& m)
         return post(strand_, [sp, key, squelch, duration]() {
             sp->squelch_.squelch(key, squelch, duration);
         });
+    
+    squelch_.squelch(key, squelch, duration);
 }
 
 //--------------------------------------------------------------------------

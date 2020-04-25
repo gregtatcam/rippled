@@ -126,7 +126,7 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
-    Squelch::Slots<Peer> slots_;
+    Squelch::Slots<Peer, std::chrono::steady_clock> slots_;
 
     //--------------------------------------------------------------------------
 

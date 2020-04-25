@@ -22,23 +22,18 @@
 
 #include <ripple/overlay/Squelch.h>
 #include <ripple/protocol/PublicKey.h>
+#include <ripple.pb.h>
 
 namespace ripple {
 
 namespace Squelch {
 
 using namespace std::chrono;
-template <typename Peer> class Slots;
+template <typename Peer, typename clock_type> class Slots;
+using time_unit = milliseconds;
 
 namespace config {
-static constexpr seconds IDLED{4};
-}
-
-inline
-std::uint32_t
-toSecs(steady_clock::time_point const& t)
-{
-    return duration_cast<seconds>(t.time_since_epoch()).count();
+static constexpr time_unit IDLED{4000};
 }
 
 /** Peer's State */
@@ -56,7 +51,7 @@ enum class SlotState : uint8_t {
 /** Maintains Validation and Propose Set message count for specific validator from
  * the upstream peers.
  */
-template<typename Peer>
+template<typename Peer, typename clock_type>
 class Slot final
 {
 public:
@@ -66,9 +61,9 @@ public:
     // Max selected peers
     static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 private:
-    friend class Slots<Peer>;
-    using clock_type = steady_clock;
+    friend class Slots<Peer, clock_type>;
     using id_t = typename Peer::id_t;
+    using time_point = typename clock_type::time_point;
 
     Slot ()
     : lastSelected_(clock_type::now())
@@ -109,7 +104,7 @@ private:
     deletePeer (id_t const& id, F&& f);
 
     /** Get the time of the last peers selection round */
-    const clock_type::time_point&
+    const time_point&
     getLastSelected() const
     {
         return lastSelected_;
@@ -130,7 +125,7 @@ private:
     getSelected() const;
     
     /** Get peers info. Return map of peer's state, count, and squelch expiration
-     * seconds.
+     * milliseconds.
      */
     std::unordered_map<id_t, std::tuple<PeerState, uint16_t, uint32_t>>
     getPeers();
@@ -154,21 +149,21 @@ private:
         std::weak_ptr<Peer> peer_; // peer's weak_ptr passed to callbacks
         PeerState state_; // peer's state
         std::size_t count_; // message's count
-        clock_type::time_point expire_; // squelch expiration time
+        time_point expire_; // squelch expiration time
     };
     std::unordered_map<id_t, PeerInfo> peers_; // peer's data
     std::unordered_map<id_t, bool> selected_; // peers selected as the
                                                     // source of messages from
                                                     // validator
-    clock_type::time_point lastSelected_; // last time peers were selected,
+    typename clock_type::time_point lastSelected_; // last time peers were selected,
                                           // used to age the slot
     SlotState state_; // slot's state
 };
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename F>
 void
-Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
+Slot<Peer, clock_type>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
              protocol::MessageType type, F&& f)
 {
     auto &peer = [&]() {
@@ -212,7 +207,7 @@ Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
             else if (v.state_ != PeerState::Squelched)
             {
                 v.state_ = PeerState::Squelched;
-                auto duration = Squelch::getSquelchDuration();
+                auto duration = Squelch<clock_type>::getSquelchDuration();
                 v.expire_ = lastSelected_ + duration;
                 f(v.peer_, duration.count());
             }
@@ -222,10 +217,10 @@ Slot<Peer>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
     }
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename F>
 void
-Slot<Peer>::deletePeer (id_t const& id, F&& f)
+Slot<Peer, clock_type>::deletePeer (id_t const& id, F&& f)
 {
     auto it = peers_.find(id);
     if (it != peers_.end())
@@ -249,27 +244,27 @@ Slot<Peer>::deletePeer (id_t const& id, F&& f)
     }
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 void
-Slot<Peer>::resetCounts()
+Slot<Peer, clock_type>::resetCounts()
 {
     for (auto& [k, v] : peers_)
         v.count_ = 0;
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 void
-Slot<Peer>::initCounting()
+Slot<Peer, clock_type>::initCounting()
 {
     state_ = SlotState::Counting;
     selected_.clear();
     resetCounts();
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename T, typename F>
 T
-Slot<Peer>::accumulate(T t, F&& f) const
+Slot<Peer, clock_type>::accumulate(T t, F&& f) const
 {
     return std::accumulate(peers_.begin(), peers_.end(), t,
                            [&](T &t, auto const& it) {
@@ -277,9 +272,9 @@ Slot<Peer>::accumulate(T t, F&& f) const
     });
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 std::pair<bool, bool>
-Slot<Peer>::isCountingState() const
+Slot<Peer, clock_type>::isCountingState() const
 {
     auto resetCounts =
         accumulate(0, [](int& init, id_t const&, PeerInfo const& peer){
@@ -287,10 +282,10 @@ Slot<Peer>::isCountingState() const
     return std::make_pair(state_ == SlotState::Counting, resetCounts == 0);
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename Comp>
 std::uint16_t
-Slot<Peer>::inState(PeerState state, Comp comp) const
+Slot<Peer, clock_type>::inState(PeerState state, Comp comp) const
 {
     return accumulate( 0, [&](int &init, id_t const& id, PeerInfo const &peer) {
         if (comp(peer.state_, state))
@@ -299,9 +294,9 @@ Slot<Peer>::inState(PeerState state, Comp comp) const
     });
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 std::set<typename Peer::id_t>
-Slot<Peer>::getSelected() const
+Slot<Peer, clock_type>::getSelected() const
 {
     std::set<id_t> init;
     return accumulate(init,
@@ -315,25 +310,26 @@ Slot<Peer>::getSelected() const
     });
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 std::unordered_map<typename Peer::id_t,
                    std::tuple<PeerState, uint16_t, uint32_t>>
-Slot<Peer>::getPeers()
+Slot<Peer, clock_type>::getPeers()
 {
     auto init = std::unordered_map<id_t, std::tuple<PeerState,
         std::uint16_t, std::uint32_t>>();
     return accumulate(init, [](auto& init, id_t const& id, PeerInfo const& peer){
         init.emplace(std::make_pair(id,
                      std::make_tuple(peer.state_, peer.count_,
-                     toSecs(peer.expire_))));
+                     duration_cast<time_unit>(
+                         peer.expire_.time_since_epoch()).count())));
         return init;
     });
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 class Slots final
 {
-    using clock_type = steady_clock;
+    using time_point = typename clock_type::time_point;
     using id_t = typename Peer::id_t;
 public:
     Slots() = default;
@@ -401,7 +397,7 @@ public:
     /** Used in unit testing to age slots/peers sooner */
     static
     void
-    configIdled(seconds idled);
+    configIdled(time_unit idled);
 
     /** Get selected peers */
     std::set<id_t>
@@ -414,7 +410,7 @@ public:
     }
    
     /** Get peers info. Return map of peer's state, count, and squelch expiration
-     * seconds.
+     * milliseconds.
      */
     std::unordered_map<typename Peer::id_t,
                        std::tuple<PeerState, uint16_t, uint32_t>>
@@ -427,7 +423,7 @@ public:
     }
     
     /** Get idled info. */
-    std::unordered_map<id_t, clock_type::time_point> const&
+    std::unordered_map<id_t, time_point> const&
     getIdled() const
     {
         return idlePeers_;
@@ -445,15 +441,15 @@ private:
     void
     deletePeer(id_t const& id, F&& f);
     
-    inline static seconds IDLED = config::IDLED;
-    hash_map<PublicKey, Slot<Peer>> slots_;
-    std::unordered_map<id_t, clock_type::time_point> idlePeers_;
+    inline static time_unit IDLED = config::IDLED;
+    hash_map<PublicKey, Slot<Peer, clock_type>> slots_;
+    std::unordered_map<id_t, time_point> idlePeers_;
 };
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename F>
 void
-Slots<Peer>::checkForSquelch(
+Slots<Peer, clock_type>::checkForSquelch(
     const PublicKey& validator,
     id_t const& id,
     std::weak_ptr<Peer> peerPtr,
@@ -466,7 +462,8 @@ Slots<Peer>::checkForSquelch(
         auto it = slots_.find(validator);
         if (it == slots_.end())
         {
-            auto [it, b] = slots_.emplace(std::make_pair(validator, Slot<Peer>()));
+            auto [it, b] = slots_.emplace(
+                std::make_pair(validator, Slot<Peer, clock_type>()));
             return it;
         }
         else
@@ -479,10 +476,10 @@ Slots<Peer>::checkForSquelch(
     });
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename F>
 void
-Slots<Peer>::deletePeer(id_t const& id, F&& f)
+Slots<Peer, clock_type>::deletePeer(id_t const& id, F&& f)
 {
     for (auto& it : slots_)
         it.second.deletePeer(id, [&](std::weak_ptr<Peer> peer) {
@@ -490,19 +487,19 @@ Slots<Peer>::deletePeer(id_t const& id, F&& f)
         });
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename F>
 void
-Slots<Peer>::unsquelch(id_t const& id, F&& f)
+Slots<Peer, clock_type>::unsquelch(id_t const& id, F&& f)
 {
     deletePeer(id, f);
     idlePeers_.erase(id);
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 template<typename F>
 void
-Slots<Peer>::checkIdle(F&& f)
+Slots<Peer, clock_type>::checkIdle(F&& f)
 {
     auto now = clock_type::now();
     for (auto it = idlePeers_.begin(); it != idlePeers_.end(); )
@@ -528,16 +525,16 @@ Slots<Peer>::checkIdle(F&& f)
     }
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 void
-Slots<Peer>::touchIdle(id_t const& id)
+Slots<Peer, clock_type>::touchIdle(id_t const& id)
 {
     idlePeers_[id] = clock_type::now() + IDLED;
 }
 
-template<typename Peer>
+template<typename Peer, typename clock_type>
 void
-Slots<Peer>::configIdled(seconds idled)
+Slots<Peer, clock_type>::configIdled(time_unit idled)
 {
     IDLED = idled;
 }
