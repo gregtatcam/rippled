@@ -30,13 +30,13 @@ namespace ripple {
 namespace Squelch {
 
 using namespace std::chrono;
-using time_unit = milliseconds;
+using duration_t = duration<std::uint32_t, std::milli>;
 
 namespace config
 {
-static constexpr time_unit MIN_UNSQUELCH_EXPIRE{300000};
-static constexpr time_unit MAX_UNSQUELCH_EXPIRE{600000};
-static constexpr time_unit SQUELCH_LATENCY{4000};
+static constexpr seconds MIN_UNSQUELCH_EXPIRE{300};
+static constexpr seconds MAX_UNSQUELCH_EXPIRE{600};
+static constexpr seconds SQUELCH_LATENCY{4};
 }
 
 /** Maintains squelching of relaying messages from validators */
@@ -65,21 +65,23 @@ public:
     /** Used in unit testing to "speed up" unsquelch */
     static
     void
-    configSquelchDuration(time_unit minExpire, time_unit maxExpire, time_unit latency);
+    configSquelchDuration(const duration_t& minExpire,
+                          const duration_t& maxExpire,
+                          const duration_t& latency);
 
     /** Get random squelch duration between MIN_UNSQUELCH_EXPIRE and
      * MAX_UNSQUELCH_EXPIRE */
     static
-    time_unit
+    duration_t
     getSquelchDuration();
 
 private:
     /** Maintains the list of squelched relaying to downstream peers.
      * Expiration time is included in the TMSquelch message. */
     hash_map <PublicKey, time_point> squelched_;
-    inline static time_unit MIN_UNSQUELCH_EXPIRE = config::MIN_UNSQUELCH_EXPIRE;
-    inline static time_unit MAX_UNSQUELCH_EXPIRE = config::MAX_UNSQUELCH_EXPIRE;
-    inline static time_unit SQUELCH_LATENCY = config::SQUELCH_LATENCY;
+    inline static duration_t MIN_UNSQUELCH_EXPIRE = config::MIN_UNSQUELCH_EXPIRE;
+    inline static duration_t MAX_UNSQUELCH_EXPIRE = config::MAX_UNSQUELCH_EXPIRE;
+    inline static duration_t SQUELCH_LATENCY = config::SQUELCH_LATENCY;
 };
 
 template<typename clock_type>
@@ -90,11 +92,13 @@ Squelch<clock_type>::squelch (PublicKey const &validator, bool squelch,
     if (squelch)
     {
         squelched_[validator] = [squelchDuration]() {
-          auto now = clock_type::now();
-          auto duration = time_point(time_unit(squelchDuration));
-          auto min = now + MIN_UNSQUELCH_EXPIRE;
-          auto max = now + MAX_UNSQUELCH_EXPIRE + SQUELCH_LATENCY;
-          return (duration >= min && duration <= max) ? duration : min;
+          duration_t duration = milliseconds(squelchDuration);
+          return clock_type::now() +
+              ((duration >= MIN_UNSQUELCH_EXPIRE &&
+                    duration <= MAX_UNSQUELCH_EXPIRE)
+              ? (duration + SQUELCH_LATENCY)
+              : getSquelchDuration()); // TBD should we disconnect if invalid
+                                       // duration?
         }();
     } else
         squelched_.erase(validator);
@@ -118,8 +122,9 @@ Squelch<clock_type>::isSquelched (PublicKey const &validator)
 
 template<typename clock_type>
 void
-Squelch<clock_type>::configSquelchDuration(time_unit minExpire, time_unit maxExpire,
-                                           time_unit latency)
+Squelch<clock_type>::configSquelchDuration(duration_t const& minExpire,
+                                           duration_t const& maxExpire,
+                                           duration_t const& latency)
 {
     MIN_UNSQUELCH_EXPIRE = minExpire;
     MAX_UNSQUELCH_EXPIRE = maxExpire;
@@ -127,11 +132,13 @@ Squelch<clock_type>::configSquelchDuration(time_unit minExpire, time_unit maxExp
 }
 
 template<typename clock_type>
-time_unit
+duration_t
 Squelch<clock_type>::getSquelchDuration()
 {
-    return time_unit(ripple::rand_int(MIN_UNSQUELCH_EXPIRE.count(),
-                              MAX_UNSQUELCH_EXPIRE.count()));
+    auto d = milliseconds(ripple::rand_int(
+        duration_cast<milliseconds>(MIN_UNSQUELCH_EXPIRE).count(),
+        duration_cast<milliseconds>(MAX_UNSQUELCH_EXPIRE).count()));
+    return d;
 }
 
 } // Squelch

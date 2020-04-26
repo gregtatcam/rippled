@@ -29,11 +29,12 @@ namespace ripple {
 namespace Squelch {
 
 using namespace std::chrono;
+using duration_t = duration<std::uint32_t, std::milli>;
+
 template <typename Peer, typename clock_type> class Slots;
-using time_unit = milliseconds;
 
 namespace config {
-static constexpr time_unit IDLED{4000};
+static constexpr milliseconds IDLED{4000};
 }
 
 /** Peer's State */
@@ -209,7 +210,7 @@ Slot<Peer, clock_type>::update(id_t const& id, std::weak_ptr<Peer> peerPtr,
                 v.state_ = PeerState::Squelched;
                 auto duration = Squelch<clock_type>::getSquelchDuration();
                 v.expire_ = lastSelected_ + duration;
-                f(v.peer_, duration.count());
+                f(v.peer_, duration_cast<milliseconds>(duration).count());
             }
         }
         selected_.clear ();
@@ -320,7 +321,7 @@ Slot<Peer, clock_type>::getPeers()
     return accumulate(init, [](auto& init, id_t const& id, PeerInfo const& peer){
         init.emplace(std::make_pair(id,
                      std::make_tuple(peer.state_, peer.count_,
-                     duration_cast<time_unit>(
+                     duration_cast<milliseconds>(
                          peer.expire_.time_since_epoch()).count())));
         return init;
     });
@@ -397,7 +398,7 @@ public:
     /** Used in unit testing to age slots/peers sooner */
     static
     void
-    configIdled(time_unit idled);
+    configIdled(milliseconds idled);
 
     /** Get selected peers */
     std::set<id_t>
@@ -441,7 +442,7 @@ private:
     void
     deletePeer(id_t const& id, F&& f);
     
-    inline static time_unit IDLED = config::IDLED;
+    inline static duration_t IDLED = config::IDLED;
     hash_map<PublicKey, Slot<Peer, clock_type>> slots_;
     std::unordered_map<id_t, time_point> idlePeers_;
 };
@@ -534,7 +535,7 @@ Slots<Peer, clock_type>::touchIdle(id_t const& id)
 
 template<typename Peer, typename clock_type>
 void
-Slots<Peer, clock_type>::configIdled(time_unit idled)
+Slots<Peer, clock_type>::configIdled(milliseconds idled)
 {
     IDLED = idled;
 }
