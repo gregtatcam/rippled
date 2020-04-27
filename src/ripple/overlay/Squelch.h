@@ -22,22 +22,13 @@
 
 #include <ripple/basics/random.h>
 #include <ripple/protocol/PublicKey.h>
+#include <ripple/overlay/SquelchCommon.h>
 #include <chrono>
 #include <functional>
 
 namespace ripple {
 
 namespace Squelch {
-
-using namespace std::chrono;
-using duration_t = duration<std::uint32_t, std::milli>;
-
-namespace config
-{
-static constexpr seconds MIN_UNSQUELCH_EXPIRE{300};
-static constexpr seconds MAX_UNSQUELCH_EXPIRE{600};
-static constexpr seconds SQUELCH_LATENCY{4};
-}
 
 /** Maintains squelching of relaying messages from validators */
 template<typename clock_type>
@@ -62,13 +53,6 @@ public:
     bool
     isSquelched(PublicKey const &validator);
 
-    /** Used in unit testing to "speed up" unsquelch */
-    static
-    void
-    configSquelchDuration(const duration_t& minExpire,
-                          const duration_t& maxExpire,
-                          const duration_t& latency);
-
     /** Get random squelch duration between MIN_UNSQUELCH_EXPIRE and
      * MAX_UNSQUELCH_EXPIRE */
     static
@@ -79,9 +63,6 @@ private:
     /** Maintains the list of squelched relaying to downstream peers.
      * Expiration time is included in the TMSquelch message. */
     hash_map <PublicKey, time_point> squelched_;
-    inline static duration_t MIN_UNSQUELCH_EXPIRE = config::MIN_UNSQUELCH_EXPIRE;
-    inline static duration_t MAX_UNSQUELCH_EXPIRE = config::MAX_UNSQUELCH_EXPIRE;
-    inline static duration_t SQUELCH_LATENCY = config::SQUELCH_LATENCY;
 };
 
 template<typename clock_type>
@@ -118,17 +99,6 @@ Squelch<clock_type>::isSquelched (PublicKey const &validator)
     squelched_.erase(validator);
     
     return false;
-}
-
-template<typename clock_type>
-void
-Squelch<clock_type>::configSquelchDuration(duration_t const& minExpire,
-                                           duration_t const& maxExpire,
-                                           duration_t const& latency)
-{
-    MIN_UNSQUELCH_EXPIRE = minExpire;
-    MAX_UNSQUELCH_EXPIRE = maxExpire;
-    SQUELCH_LATENCY = latency;
 }
 
 template<typename clock_type>

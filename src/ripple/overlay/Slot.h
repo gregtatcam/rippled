@@ -21,6 +21,7 @@
 #define RIPPLE_OVERLAY_SLOT_H_INCLUDED
 
 #include <ripple/overlay/Squelch.h>
+#include <ripple/overlay/SquelchCommon.h>
 #include <ripple/protocol/PublicKey.h>
 #include <ripple.pb.h>
 
@@ -28,14 +29,7 @@ namespace ripple {
 
 namespace Squelch {
 
-using namespace std::chrono;
-using duration_t = duration<std::uint32_t, std::milli>;
-
 template <typename Peer, typename clock_type> class Slots;
-
-namespace config {
-static constexpr milliseconds IDLED{4000};
-}
 
 /** Peer's State */
 enum class PeerState : uint8_t {
@@ -55,12 +49,6 @@ enum class SlotState : uint8_t {
 template<typename Peer, typename clock_type>
 class Slot final
 {
-public:
-    // Message count threshold to select a peer as the source
-    // of messages from the validator
-    static constexpr uint16_t MESSAGE_COUNT_THRESHOLD = 20;
-    // Max selected peers
-    static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 private:
     friend class Slots<Peer, clock_type>;
     using id_t = typename Peer::id_t;
@@ -395,11 +383,6 @@ public:
         return {};
     }
 
-    /** Used in unit testing to age slots/peers sooner */
-    static
-    void
-    configIdled(milliseconds idled);
-
     /** Get selected peers */
     std::set<id_t>
     getSelected(PublicKey const& validator)
@@ -442,7 +425,6 @@ private:
     void
     deletePeer(id_t const& id, F&& f);
     
-    inline static duration_t IDLED = config::IDLED;
     hash_map<PublicKey, Slot<Peer, clock_type>> slots_;
     std::unordered_map<id_t, time_point> idlePeers_;
 };
@@ -531,13 +513,6 @@ void
 Slots<Peer, clock_type>::touchIdle(id_t const& id)
 {
     idlePeers_[id] = clock_type::now() + IDLED;
-}
-
-template<typename Peer, typename clock_type>
-void
-Slots<Peer, clock_type>::configIdled(milliseconds idled)
-{
-    IDLED = idled;
 }
 
 } // Squelch
