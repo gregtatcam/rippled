@@ -21,8 +21,8 @@
 #define RIPPLE_OVERLAY_MESSAGE_H_INCLUDED
 
 #include <ripple/overlay/Compression.h>
-#include <ripple/protocol/messages.h>
 #include <ripple/protocol/PublicKey.h>
+#include <ripple/protocol/messages.h>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/buffers_iterator.hpp>
 #include <algorithm>
