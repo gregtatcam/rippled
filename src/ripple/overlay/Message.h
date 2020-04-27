@@ -57,7 +57,7 @@ public:
      * @param message Protocol message to serialize
      * @param type Protocol message type
      */
-    Message (
+    Message(
         ::google::protobuf::Message const& message,
         int type,
         boost::optional<PublicKey> validator = {});

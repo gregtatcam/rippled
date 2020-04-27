@@ -1786,10 +1786,8 @@ NetworkOPsImp::processTrustedProposal(
     std::shared_ptr<protocol::TMProposeSet> set)
 {
     if (mConsensus.peerProposal(app_.timeKeeper().closeTime(), peerPos))
-    {
         app_.overlay().relay(
             *set, peerPos.suppressionID(), peerPos.publicKey());
-    }
     else
         JLOG(m_journal.info()) << "Not relaying trusted proposal";
 }
