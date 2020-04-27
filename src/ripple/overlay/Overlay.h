@@ -152,7 +152,7 @@ public:
     relay(
         protocol::TMProposeSet& m,
         uint256 const& uid,
-        PublicKey const& validator,) = 0;
+        PublicKey const& validator) = 0;
 
     /** Relay a validation. */
     virtual void
