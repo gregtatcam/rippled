@@ -26,10 +26,10 @@
 #include <ripple/basics/chrono.h>
 #include <ripple/core/Job.h>
 #include <ripple/overlay/Overlay.h>
-#include <ripple/overlay/impl/Handshake.h>
-#include <ripple/overlay/impl/TrafficCount.h>
 #include <ripple/overlay/Slot.h>
 #include <ripple/overlay/Squelch.h>
+#include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/TrafficCount.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/resource/ResourceManager.h>
 #include <ripple/rpc/ServerHandler.h>
@@ -381,11 +381,14 @@ public:
      * @param type Received protocol message type
      */
     void
-    checkForSquelch(PublicKey const& validator,
-                    std::weak_ptr<Peer> peer, protocol::MessageType type);
+    checkForSquelch(
+        PublicKey const& validator,
+        std::weak_ptr<Peer> peer,
+        protocol::MessageType type);
 
-    /** Called when the peer is deleted. If the peer was selected to be the source
-     * of messages from the validator then squelched peers have to be unsquelched.
+    /** Called when the peer is deleted. If the peer was selected to be the
+     * source of messages from the validator then squelched peers have to be
+     * unsquelched.
      * @param id Peer's id
      */
     void

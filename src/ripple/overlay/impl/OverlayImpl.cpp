@@ -1163,7 +1163,7 @@ void
 OverlayImpl::relay(
     protocol::TMProposeSet& m,
     uint256 const& uid,
-    PublicKey const &validator)
+    PublicKey const& validator)
 {
     if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
@@ -1262,8 +1262,7 @@ OverlayImpl::sendEndpoints()
     }
 }
 
-inline
-std::shared_ptr<Message>
+inline std::shared_ptr<Message>
 makeSquelchMessage(
     PublicKey const& validator,
     bool squelch,
@@ -1291,26 +1290,30 @@ sendUnsquelch(PublicKey const& validator, std::weak_ptr<Peer> wp)
 }
 
 void
-sendSquelch(PublicKey const& validator, std::weak_ptr<Peer> wp,
-            uint32_t squelchDuration)
+sendSquelch(
+    PublicKey const& validator,
+    std::weak_ptr<Peer> wp,
+    uint32_t squelchDuration)
 {
     auto peer = wp.lock();
     if (peer)
     {
-        auto m = makeSquelchMessage(validator,
-                                    true, squelchDuration);
+        auto m = makeSquelchMessage(validator, true, squelchDuration);
         peer->send(m);
     }
 }
 
 void
-OverlayImpl::checkForSquelch(PublicKey const &validator,
-                             std::weak_ptr<Peer> wp,
-                             protocol::MessageType type)
+OverlayImpl::checkForSquelch(
+    PublicKey const& validator,
+    std::weak_ptr<Peer> wp,
+    protocol::MessageType type)
 {
-    if(! strand_.running_in_this_thread())
-        return post(strand_, std::bind(&OverlayImpl::checkForSquelch, this,
-                                       validator, wp, type));
+    if (!strand_.running_in_this_thread())
+        return post(
+            strand_,
+            std::bind(
+                &OverlayImpl::checkForSquelch, this, validator, wp, type));
 
     auto peer = wp.lock();
     if (!peer)
@@ -1322,9 +1325,9 @@ OverlayImpl::checkForSquelch(PublicKey const &validator,
 }
 
 void
-OverlayImpl::unsquelch(Peer::id_t const &id)
+OverlayImpl::unsquelch(Peer::id_t const& id)
 {
-    if(! strand_.running_in_this_thread())
+    if (!strand_.running_in_this_thread())
         return post(strand_, std::bind(&OverlayImpl::unsquelch, this, id));
 
     slots_.unsquelch(id, sendUnsquelch);
@@ -1333,7 +1336,7 @@ OverlayImpl::unsquelch(Peer::id_t const &id)
 void
 OverlayImpl::checkIdle()
 {
-    if(! strand_.running_in_this_thread())
+    if (!strand_.running_in_this_thread())
         return post(strand_, std::bind(&OverlayImpl::checkIdle, this));
 
     slots_.checkIdle(sendUnsquelch);

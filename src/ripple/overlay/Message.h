@@ -80,7 +80,8 @@ public:
 
     /** Get the validator's key */
     boost::optional<PublicKey> const&
-    getValidatorKey() const {
+    getValidatorKey() const
+    {
         return validatorKey_;
     }
 
