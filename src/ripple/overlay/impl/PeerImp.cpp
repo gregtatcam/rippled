@@ -3010,4 +3010,4 @@ PeerImp::Metrics::total_bytes() const
     return totalBytes_;
 }
 
-} // namespace ripple
+}  // namespace ripple

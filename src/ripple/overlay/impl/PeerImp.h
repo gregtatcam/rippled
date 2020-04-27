@@ -27,7 +27,6 @@
 #include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
-#include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/Squelch.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/protocol/Protocol.h>
@@ -555,7 +554,7 @@ public:
     void
     onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m);
     void
-    onMessage(std::shared_ptr<protoco::TMSquelch> const& m);
+    onMessage(std::shared_ptr<protocol::TMSquelch> const& m);
 
 private:
     State

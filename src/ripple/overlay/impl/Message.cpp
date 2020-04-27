@@ -23,8 +23,10 @@
 
 namespace ripple {
 
-Message::Message(::google::protobuf::Message const& message, int type,
-                 boost::optional<PublicKey> validator)
+Message::Message(
+        ::google::protobuf::Message const& message,
+        int type,
+        boost::optional<PublicKey> validator)
     : category_(TrafficCount::categorize(message, type, false))
     , validatorKey_(validator)
 {
@@ -118,7 +120,10 @@ Message::compress()
  * Compressed message header
  * 79       Set to 0, indicates the message is compressed
  * 78-76    Compression algorithm, value 1-7. Set to 1 to indicate LZ4
- * compression 75-74    Set to 0 73-48    Payload size 47-32	Message Type
+ *          compression
+ * 75-74    Set to 0 
+ * 73-48    Payload size 
+ * 47-32    Message Type
  * 31-0     Uncompressed message size
  */
 void

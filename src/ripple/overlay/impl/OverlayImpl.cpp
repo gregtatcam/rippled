@@ -37,7 +37,6 @@
 #include <ripple/server/SimpleWriter.h>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/asio.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
 namespace ripple {
@@ -1185,7 +1184,8 @@ OverlayImpl::relay(
 {
     if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
-        auto const sm = std::make_shared<Message>(m, protocol::mtVALIDATION);
+        auto const sm =
+            std::make_shared<Message>(m, protocol::mtVALIDATION, validator);
         for_each([&](std::shared_ptr<PeerImp>&& p) {
             if (toSkip->find(p->id()) == toSkip->end())
                 p->send(sm);
