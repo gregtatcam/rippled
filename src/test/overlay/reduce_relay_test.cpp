@@ -149,6 +149,8 @@ public:
     unsquelch(Peer::id_t const&, UnsquelchCB) = 0;
 };
 
+class Validator;
+
 /** Simulate the link from the validator to the peer which directly connected
  * to the server.
  */
@@ -158,10 +160,14 @@ class Link
 
 public:
     Link(
+        Validator& validator,
         std::shared_ptr<Peer> peer,
         Latency const& latency = {milliseconds(5), milliseconds(15)},
         std::uint16_t priority = 2)
-        : peer_(peer), latency_(latency), priority_(priority)
+        : validator_(validator)
+        , peer_(peer)
+        , latency_(latency)
+        , priority_(priority)
     {
         auto sp = peer_.lock();
         assert(sp);
@@ -185,8 +191,14 @@ public:
     {
         return priority_;
     }
+    Validator&
+    validator()
+    {
+        return validator_;
+    }
 
 private:
+    Validator& validator_;
     std::weak_ptr<Peer> peer_;
     Latency latency_;  // link latency(min,max)
     std::uint16_t
@@ -202,6 +214,10 @@ public:
     Validator()
     {
         pkey_ = std::get<0>(randomKeyPair(KeyType::ed25519));
+        protocol::TMValidation v;
+        v.set_validation("validation");
+        message_ = std::make_shared<Message>(v, protocol::mtVALIDATION, pkey_);
+        id_ = sid_++;
     }
 
     PublicKey const&
@@ -219,7 +235,7 @@ public:
     addPeer(std::shared_ptr<Peer> peer)
     {
         links_.emplace(std::make_pair(
-            peer->id(), std::move(std::make_shared<Link>(peer))));
+            peer->id(), std::move(std::make_shared<Link>(*this, peer))));
     }
 
     void
@@ -252,34 +268,21 @@ public:
         }
     }
 
-    void
-    prepSquelch(std::function<void(std::shared_ptr<Message>)> f)
-    {
-        protocol::TMValidation v;
-        v.set_validation("validation");
-        auto m = std::make_shared<Message>(v, protocol::mtVALIDATION, pkey_);
-
-        ManualClock::randAdvance(milliseconds(30), milliseconds(60));
-
-        f(m);
-    }
-
     /** Iterate over links for the peers */
     void
     for_links(std::vector<Peer::id_t> peers, LinkIterCB f)
     {
-        prepSquelch([&](std::shared_ptr<Message> m) {
-            for (auto id : peers)
-            {
-                assert(links_.find(id) != links_.end());
-                f(*links_[id], m);
-            }
-        });
+        ManualClock::randAdvance(milliseconds(30), milliseconds(60));
+        for (auto id : peers)
+        {
+            assert(links_.find(id) != links_.end());
+            f(*links_[id], message_);
+        }
     }
 
     /** Iterate over links for all peers - high priority first */
     void
-    for_links(LinkIterCB f)
+    for_links(LinkIterCB f, bool sendLowPriority = true)
     {
         std::vector<std::shared_ptr<Link>> links;
         for (auto& [id, link] : links_)
@@ -289,11 +292,14 @@ public:
             else
                 links.push_back(link);
         }
+        ManualClock::randAdvance(milliseconds(30), milliseconds(60));
 
-        prepSquelch([&](std::shared_ptr<Message> m) {
-            for (auto& link : links)
-                f(*link, m);
-        });
+        for (auto& link : links)
+        {
+            auto p = link->getPriority();
+            if (p == 1 || (p > 1 && sendLowPriority))
+                f(*link, message_);
+        }
     }
 
     /** Send to specific peers */
@@ -313,9 +319,24 @@ public:
             [&](Link& link, std::shared_ptr<Message> m) { link.send(m, f); });
     }
 
+    std::shared_ptr<Message>
+    message()
+    {
+        return message_;
+    }
+
+    std::uint16_t
+    id()
+    {
+        return id_;
+    }
+
 private:
     Links links_;
     PublicKey pkey_;
+    std::shared_ptr<Message> message_;
+    inline static std::uint16_t sid_ = 0;
+    std::uint16_t id_ = 0;
 };
 
 class PeerSim : public Peer
@@ -538,6 +559,13 @@ public:
             validator.deletePeer(*id);
     }
 
+    void
+    purgePeers()
+    {
+        while (overlay_.getNumPeers() > MAX_PEERS)
+            deleteLastPeer();
+    }
+
     Validator&
     validator(std::uint16_t v)
     {
@@ -549,6 +577,41 @@ public:
     overlay()
     {
         return overlay_;
+    }
+
+    void
+    for_rand(
+        std::uint32_t min,
+        std::uint32_t max,
+        std::function<void(std::uint32_t)> f)
+    {
+        auto size = max - min;
+        std::vector<std::uint32_t> s(size);
+        std::iota(s.begin(), s.end(), min);
+        while (s.size() != 0)
+        {
+            auto i = s.size() > 1 ? rand_int(s.size() - 1) : 0;
+            f(s[i]);
+            s.erase(s.begin() + i);
+        }
+    }
+
+    void
+    propagate(LinkIterCB link)
+    {
+        ManualClock::reset();
+
+        purgePeers();
+
+        for (int m = 0; m < MAX_MESSAGES; ++m)
+        {
+            ManualClock::advance(milliseconds(rand_int(500, 800)));
+            for_rand(0, MAX_VALIDATORS, [&](std::uint32_t v) {
+                // send less messages over low priority link
+                // to model "slower" link
+                validators_[v].for_links(link, m % 5);
+            });
+        }
     }
 
 private:
@@ -596,69 +659,53 @@ class reduce_relay_test : public beast::unit_test::suite
     void
     random(bool log)
     {
-        using vid_t = std::uint32_t;
-        using pid_t = std::uint32_t;
+        network_.propagate([&](Link& link, std::shared_ptr<Message> m) {
+            protocol::TMSquelch squelch;
+            squelch.set_squelch(true);
+            auto& validator = link.validator();
+            squelch.set_validatorpubkey(
+                validator.key().data(), validator.key().size());
 
-        ManualClock::reset();
+            bool squelched = false;
+            int n = 0;
+            std::stringstream str;
 
-        if (network_.overlay().getNumPeers() > MAX_PEERS)
-            network_.deleteLastPeer();
-
-        for (int m = 0; m < MAX_MESSAGES; m++)
-        {
-            ManualClock::advance(milliseconds(rand_int(500, 800)));
-            for_rand(0, MAX_VALIDATORS, [&](std::uint32_t v) {
-                protocol::TMSquelch squelch;
-                squelch.set_squelch(true);
-                auto& validator = network_.validator(v);
-                squelch.set_validatorpubkey(
-                    validator.key().data(), validator.key().size());
-
-                validator.for_links([&](Link& link,
-                                        std::shared_ptr<Message> m) {
-                    bool squelched = false;
-                    int n = 0;
-                    std::stringstream str;
-                    link.send(
-                        m,
-                        [&](PublicKey const&,
-                            std::weak_ptr<Peer> peerPtr,
-                            std::uint32_t duration) {
-                            auto peer = peerPtr.lock();
-                            assert(peer);
-                            auto p = peer->id();
-                            squelched = true;
-                            n++;
-                            str << p << " ";
-                            squelch.set_squelchduration(duration);
-                            peer->send(squelch);
-                        });
-
-                    if (squelched)
-                    {
-                        auto selected =
-                            network_.overlay().getSelected(validator);
-                        str << " selected: ";
-                        for (auto s : selected)
-                            str << s << " ";
-                        if (log)
-                            std::cout
-                                << "random: squelched peers validator: " << v
-                                << " num: " << n << " peers: " << str.str()
-                                << " time: "
-                                << (double)duration_cast<milliseconds>(
-                                       ManualClock::now().time_since_epoch())
-                                        .count() /
-                                    1000.
-                                << std::endl;
-                        auto [countingState, countsReset] =
-                            network_.overlay().isCountingState(validator);
-                        BEAST_EXPECT(countingState == false);
-                        BEAST_EXPECT(countsReset);
-                    }
+            link.send(
+                m,
+                [&](PublicKey const&,
+                    std::weak_ptr<Peer> peerPtr,
+                    std::uint32_t duration) {
+                    auto peer = peerPtr.lock();
+                    assert(peer);
+                    auto p = peer->id();
+                    squelched = true;
+                    n++;
+                    str << p << " ";
+                    squelch.set_squelchduration(duration);
+                    peer->send(squelch);
                 });
-            });
-        }
+
+            if (squelched)
+            {
+                auto selected = network_.overlay().getSelected(validator);
+                str << " selected: ";
+                for (auto s : selected)
+                    str << s << " ";
+                if (log)
+                    std::cout << "random: squelched peers validator: "
+                              << validator.id() << " num: " << n
+                              << " peers: " << str.str() << " time: "
+                              << (double)duration_cast<milliseconds>(
+                                     ManualClock::now().time_since_epoch())
+                                     .count() /
+                            1000.
+                              << std::endl;
+                auto [countingState, countsReset] =
+                    network_.overlay().isCountingState(validator);
+                BEAST_EXPECT(countingState == false);
+                BEAST_EXPECT(countsReset);
+            }
+        });
     }
 
     void
