@@ -163,30 +163,28 @@ Slot<Peer, clock_type>::update(
     protocol::MessageType type,
     F&& f)
 {
-    auto& peer =
-        [&]() {
-            auto it = peers_.find(id);
-            // First time message from this peer.
-            if (it == peers_.end())
-            {
-                auto [i, b] = peers_.emplace(std::make_pair(
-                    id,
-                    std::move(PeerInfo{
-                        peerPtr, PeerState::Counting, 0, clock_type::now()})));
-                initCounting();
-                it = i;
-            }
-            // Message from a peer with expired squelch
-            else if (
-                it->second.state_ == PeerState::Squelched &&
-                clock_type::now() > it->second.expire_)
-            {
-                it->second.state_ = PeerState::Counting;
-                initCounting();
-            }
-            return it;
-        }()
-            ->second;
+    auto it = peers_.find(id);
+    // First time message from this peer.
+    if (it == peers_.end())
+    {
+        peers_.emplace(std::make_pair(
+            id,
+            std::move(
+                PeerInfo{peerPtr, PeerState::Counting, 0, clock_type::now()})));
+        initCounting();
+        return;
+    }
+    // Message from a peer with expired squelch
+    else if (
+        it->second.state_ == PeerState::Squelched &&
+        clock_type::now() > it->second.expire_)
+    {
+        it->second.state_ = PeerState::Counting;
+        initCounting();
+        return;
+    }
+
+    auto& peer = it->second;
 
     if (state_ != SlotState::Counting || peer.state_ == PeerState::Squelched)
         return;
@@ -248,8 +246,8 @@ template <typename Peer, typename clock_type>
 void
 Slot<Peer, clock_type>::resetCounts()
 {
-    for (auto& [k, v] : peers_)
-        v.count_ = 0;
+    for (auto& [id, peer] : peers_)
+        peer.count_ = 0;
 }
 
 template <typename Peer, typename clock_type>
