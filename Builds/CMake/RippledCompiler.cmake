@@ -177,3 +177,7 @@ if (assert)
     STRING (REGEX REPLACE "[-/]DNDEBUG" "" ${var_} "${${var_}}")
   endforeach ()
 endif ()
+
+export (TARGETS common NAMESPACE Common:: FILE Common.cmake)
+set (CMAKE_EXPORT_PACKAGE_REGISTRY ON)
+export (PACKAGE Commoon)

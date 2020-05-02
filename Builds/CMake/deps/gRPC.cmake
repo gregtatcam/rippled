@@ -83,121 +83,24 @@ else ()
     endif ()
   else ()
     #[===========================[
-       c-ares (grpc requires)
-    #]===========================]
-    ExternalProject_Add (c-ares_src
-      PREFIX ${nih_cache_path}
-      GIT_REPOSITORY https://github.com/c-ares/c-ares.git
-      GIT_TAG cares-1_15_0
-      CMAKE_ARGS
-        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:-DCMAKE_VERBOSE_MAKEFILE=ON>
-        -DCMAKE_DEBUG_POSTFIX=_d
-        $<$<NOT:$<BOOL:${is_multiconfig}>>:-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}>
-        -DCMAKE_INSTALL_PREFIX=<BINARY_DIR>/_installed_
-        -DCARES_SHARED=OFF
-        -DCARES_STATIC=ON
-        -DCARES_STATIC_PIC=ON
-        -DCARES_INSTALL=ON
-        -DCARES_MSVC_STATIC_RUNTIME=ON
-        $<$<BOOL:${MSVC}>:
-          "-DCMAKE_C_FLAGS=-GR -Gd -fp:precise -FS -MP"
-        >
-      LOG_BUILD ON
-      LOG_CONFIGURE ON
-      BUILD_COMMAND
-        ${CMAKE_COMMAND}
-          --build .
-          --config $<CONFIG>
-          $<$<VERSION_GREATER_EQUAL:${CMAKE_VERSION},3.12>:--parallel ${ep_procs}>
-      TEST_COMMAND ""
-      INSTALL_COMMAND
-        ${CMAKE_COMMAND} -E env --unset=DESTDIR ${CMAKE_COMMAND} --build . --config $<CONFIG> --target install
-      BUILD_BYPRODUCTS
-        <BINARY_DIR>/_installed_/lib/${ep_lib_prefix}cares${ep_lib_suffix}
-        <BINARY_DIR>/_installed_/lib/${ep_lib_prefix}cares_d${ep_lib_suffix}
-    )
-    exclude_if_included (c-ares_src)
-    ExternalProject_Get_Property (c-ares_src BINARY_DIR)
-    set (cares_binary_dir "${BINARY_DIR}")
-
-    add_library (c-ares::cares STATIC IMPORTED GLOBAL)
-    file (MAKE_DIRECTORY ${BINARY_DIR}/_installed_/include)
-    set_target_properties (c-ares::cares PROPERTIES
-      IMPORTED_LOCATION_DEBUG
-        ${BINARY_DIR}/_installed_/lib/${ep_lib_prefix}cares_d${ep_lib_suffix}
-      IMPORTED_LOCATION_RELEASE
-        ${BINARY_DIR}/_installed_/lib/${ep_lib_prefix}cares${ep_lib_suffix}
-      INTERFACE_INCLUDE_DIRECTORIES
-        ${BINARY_DIR}/_installed_/include)
-    add_dependencies (c-ares::cares c-ares_src)
-    exclude_if_included (c-ares::cares)
-
-    if (NOT has_zlib)
-      #[===========================[
-         zlib (grpc requires)
-      #]===========================]
-      if (MSVC)
-        set (zlib_debug_postfix "d") # zlib cmake sets this internally for MSVC, so we really don't have a choice
-        set (zlib_base "zlibstatic")
-      else ()
-        set (zlib_debug_postfix "_d")
-        set (zlib_base "z")
-      endif ()
-      ExternalProject_Add (zlib_src
-        PREFIX ${nih_cache_path}
-        GIT_REPOSITORY https://github.com/madler/zlib.git
-        GIT_TAG v1.2.11
-        CMAKE_ARGS
-          -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-          $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:-DCMAKE_VERBOSE_MAKEFILE=ON>
-          -DCMAKE_DEBUG_POSTFIX=${zlib_debug_postfix}
-          $<$<NOT:$<BOOL:${is_multiconfig}>>:-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}>
-          -DCMAKE_INSTALL_PREFIX=<BINARY_DIR>/_installed_
-          -DBUILD_SHARED_LIBS=OFF
-          $<$<BOOL:${MSVC}>:
-            "-DCMAKE_C_FLAGS=-GR -Gd -fp:precise -FS -MP"
-            "-DCMAKE_C_FLAGS_DEBUG=-MTd"
-            "-DCMAKE_C_FLAGS_RELEASE=-MT"
-          >
-        LOG_BUILD ON
-        LOG_CONFIGURE ON
-        BUILD_COMMAND
-          ${CMAKE_COMMAND}
-            --build .
-            --config $<CONFIG>
-            $<$<VERSION_GREATER_EQUAL:${CMAKE_VERSION},3.12>:--parallel ${ep_procs}>
-        TEST_COMMAND ""
-        INSTALL_COMMAND
-          ${CMAKE_COMMAND} -E env --unset=DESTDIR ${CMAKE_COMMAND} --build . --config $<CONFIG> --target install
-        BUILD_BYPRODUCTS
-          <BINARY_DIR>/_installed_/lib/${ep_lib_prefix}${zlib_base}${ep_lib_suffix}
-          <BINARY_DIR>/_installed_/lib/${ep_lib_prefix}${zlib_base}${zlib_debug_postfix}${ep_lib_suffix}
-      )
-      exclude_if_included (zlib_src)
-      ExternalProject_Get_Property (zlib_src BINARY_DIR)
-      set (zlib_binary_dir "${BINARY_DIR}")
-
-      add_library (ZLIB::ZLIB STATIC IMPORTED GLOBAL)
-      file (MAKE_DIRECTORY ${BINARY_DIR}/_installed_/include)
-      set_target_properties (ZLIB::ZLIB PROPERTIES
-        IMPORTED_LOCATION_DEBUG
-          ${BINARY_DIR}/_installed_/lib/${ep_lib_prefix}${zlib_base}${zlib_debug_postfix}${ep_lib_suffix}
-        IMPORTED_LOCATION_RELEASE
-          ${BINARY_DIR}/_installed_/lib/${ep_lib_prefix}${zlib_base}${ep_lib_suffix}
-        INTERFACE_INCLUDE_DIRECTORIES
-          ${BINARY_DIR}/_installed_/include)
-      add_dependencies (ZLIB::ZLIB zlib_src)
-      exclude_if_included (ZLIB::ZLIB)
-    endif ()
-
-    #[===========================[
        grpc
     #]===========================]
+    FetchContent_GetProperties (grpc_src)
+    if (NOT ${grpc_src_POPULATED})
+      FetchContent_Populate(
+        grpc_src
+        GIT_REPOSITORY https://github.com/grpc/grpc.git
+        GIT_TAG v1.25.0
+        SOURCE_DIR ${nih_cache_path}/src/grpc_src
+        BINARY_DIR ${nih_cache_path}/src/grpc_src-build
+        STAMP_DIR  ${nih_cache_path}/src/grpc_src-stamp
+        TMP_DIR    ${nih_cache_path}/tmp
+      )
+      add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
+    endif ()
+
     ExternalProject_Add (grpc_src
-      PREFIX ${nih_cache_path}
-      GIT_REPOSITORY https://github.com/grpc/grpc.git
-      GIT_TAG v1.25.0
+      SOURCE_DIR ${nih_cache_path}/src/grpc_src
       CMAKE_ARGS
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
@@ -265,6 +168,7 @@ else ()
     exclude_if_included (grpc_src)
     ExternalProject_Get_Property (grpc_src BINARY_DIR)
     ExternalProject_Get_Property (grpc_src SOURCE_DIR)
+    message (STATUS "#### ${BINARY_DIR} ${SOURCE_DIR}")
     set (grpc_binary_dir "${BINARY_DIR}")
     set (grpc_source_dir "${SOURCE_DIR}")
     if (CMAKE_VERBOSE_MAKEFILE)
