@@ -85,6 +85,7 @@ else ()
     #[===========================[
        grpc
     #]===========================]
+    #set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
     FetchContent_GetProperties (grpc_src)
     if (NOT ${grpc_src_POPULATED})
       FetchContent_Populate(
@@ -95,13 +96,8 @@ else ()
         BINARY_DIR ${nih_cache_path}/src/grpc_src-build
         STAMP_DIR  ${nih_cache_path}/src/grpc_src-stamp
         TMP_DIR    ${nih_cache_path}/tmp
-      )
-      add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
-    endif ()
-
-    ExternalProject_Add (grpc_src
-      SOURCE_DIR ${nih_cache_path}/src/grpc_src
-      CMAKE_ARGS
+        CMAKE_ARGS
+        CMAKE_ARGS
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
         $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:-DCMAKE_VERBOSE_MAKEFILE=ON>
@@ -115,7 +111,7 @@ else ()
         -DgRPC_MSVC_STATIC_RUNTIME=ON
         -DgRPC_INSTALL=OFF
         -DgRPC_CARES_PROVIDER=package
-        #-Dc-ares_DIR=${cares_binary_dir}/_installed_/lib/cmake/c-ares
+        -Dc-ares_DIR=${cares_binary_dir}/_installed_/lib/cmake/c-ares
         -DgRPC_SSL_PROVIDER=package
         -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}
         -DgRPC_PROTOBUF_PROVIDER=package
@@ -130,28 +126,10 @@ else ()
           "-DCMAKE_CXX_FLAGS=-GR -Gd -fp:precise -FS -EHa -MP"
           "-DCMAKE_C_FLAGS=-GR -Gd -fp:precise -FS -MP"
         >
-      LOG_BUILD ON
-      LOG_CONFIGURE ON
-      BUILD_COMMAND
-        ${CMAKE_COMMAND}
-        --build .
-        --config $<CONFIG>
-        $<$<VERSION_GREATER_EQUAL:${CMAKE_VERSION},3.12>:--parallel ${ep_procs}>
-        $<$<BOOL:${is_multiconfig}>:
-          COMMAND
-            ${CMAKE_COMMAND} -E copy
-            <BINARY_DIR>/$<CONFIG>/${ep_lib_prefix}grpc${grpc_suffix}$<$<CONFIG:Debug>:_d>${ep_lib_suffix}
-            <BINARY_DIR>/$<CONFIG>/${ep_lib_prefix}grpc++${grpc_suffix}$<$<CONFIG:Debug>:_d>${ep_lib_suffix}
-            <BINARY_DIR>/$<CONFIG>/${ep_lib_prefix}address_sorting$<$<CONFIG:Debug>:_d>${ep_lib_suffix}
-            <BINARY_DIR>/$<CONFIG>/${ep_lib_prefix}gpr$<$<CONFIG:Debug>:_d>${ep_lib_suffix}
-            <BINARY_DIR>/$<CONFIG>/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}
-            <BINARY_DIR>
-          >
-      LIST_SEPARATOR :_:
-      TEST_COMMAND ""
-      INSTALL_COMMAND ""
-      #DEPENDS c-ares_src
-      BUILD_BYPRODUCTS
+        LOG_BUILD ON
+        LOG_CONFIGURE ON 
+        LIST_SEPARATOR :_:
+        BUILD_BYPRODUCTS
         <BINARY_DIR>/${ep_lib_prefix}grpc${grpc_suffix}${ep_lib_suffix}
         <BINARY_DIR>/${ep_lib_prefix}grpc${grpc_suffix}_d${ep_lib_suffix}
         <BINARY_DIR>/${ep_lib_prefix}grpc++${grpc_suffix}${ep_lib_suffix}
@@ -161,16 +139,28 @@ else ()
         <BINARY_DIR>/${ep_lib_prefix}gpr${ep_lib_suffix}
         <BINARY_DIR>/${ep_lib_prefix}gpr_d${ep_lib_suffix}
         <BINARY_DIR>/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}
-    )
-    if (TARGET protobuf_src)
-      ExternalProject_Add_StepDependencies(grpc_src build protobuf_src)
+        -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF
+        -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF
+        -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF
+        -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF
+        -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF
+        -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF
+        -DgRPC_ZLIB_PROVIDER=module
+        -DCMAKE_CXX_FLAGS=-Wno-error=ignored-qualifiers
+        -DCMAKE_C_FLAGS=-Wno-error=ignored-qualifiers
+      )
+      add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
     endif ()
+
+#if (TARGET protobuf_src)
+#      ExternalProject_Add_StepDependencies(grpc_src build protobuf_src)
+#    endif ()
     exclude_if_included (grpc_src)
-    ExternalProject_Get_Property (grpc_src BINARY_DIR)
-    ExternalProject_Get_Property (grpc_src SOURCE_DIR)
+    #    ExternalProject_Get_Property (grpc_src BINARY_DIR)
+    #ExternalProject_Get_Property (grpc_src SOURCE_DIR)
     message (STATUS "#### ${BINARY_DIR} ${SOURCE_DIR}")
-    set (grpc_binary_dir "${BINARY_DIR}")
-    set (grpc_source_dir "${SOURCE_DIR}")
+    set (grpc_binary_dir "${grpc_src_BINARY_DIR}")
+    set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
     if (CMAKE_VERBOSE_MAKEFILE)
       print_ep_logs (grpc_src)
     endif ()
