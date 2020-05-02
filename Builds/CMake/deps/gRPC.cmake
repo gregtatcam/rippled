@@ -115,7 +115,7 @@ else ()
         -DgRPC_MSVC_STATIC_RUNTIME=ON
         -DgRPC_INSTALL=OFF
         -DgRPC_CARES_PROVIDER=package
-        -Dc-ares_DIR=${cares_binary_dir}/_installed_/lib/cmake/c-ares
+        #-Dc-ares_DIR=${cares_binary_dir}/_installed_/lib/cmake/c-ares
         -DgRPC_SSL_PROVIDER=package
         -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}
         -DgRPC_PROTOBUF_PROVIDER=package
@@ -150,7 +150,7 @@ else ()
       LIST_SEPARATOR :_:
       TEST_COMMAND ""
       INSTALL_COMMAND ""
-      DEPENDS c-ares_src
+      #DEPENDS c-ares_src
       BUILD_BYPRODUCTS
         <BINARY_DIR>/${ep_lib_prefix}grpc${grpc_suffix}${ep_lib_suffix}
         <BINARY_DIR>/${ep_lib_prefix}grpc${grpc_suffix}_d${ep_lib_suffix}
@@ -200,8 +200,8 @@ else ()
   add_imported_grpc ("grpc++${grpc_suffix}")
   add_imported_grpc (address_sorting)
 
-  target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE c-ares::cares gRPC::gpr gRPC::address_sorting ZLIB::ZLIB)
-  target_link_libraries ("gRPC::grpc++${grpc_suffix}" INTERFACE "gRPC::grpc${grpc_suffix}" gRPC::gpr)
+  #target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE c-ares::cares gRPC::gpr gRPC::address_sorting ZLIB::ZLIB)
+  #target_link_libraries ("gRPC::grpc++${grpc_suffix}" INTERFACE "gRPC::grpc${grpc_suffix}" gRPC::gpr)
 endif ()
 
 #[=================================[
