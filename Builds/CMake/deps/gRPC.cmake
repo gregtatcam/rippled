@@ -90,6 +90,7 @@ else ()
     if (NOT ${grpc_src_POPULATED})
       FetchContent_Populate(
         grpc_src
+        QUIET
         GIT_REPOSITORY https://github.com/grpc/grpc.git
         GIT_TAG v1.25.0
         SOURCE_DIR ${nih_cache_path}/src/grpc_src
@@ -97,7 +98,7 @@ else ()
         STAMP_DIR  ${nih_cache_path}/src/grpc_src-stamp
         TMP_DIR    ${nih_cache_path}/tmp
         CMAKE_ARGS
-        CMAKE_ARGS
+        -DgRPC_BUILD_TESTS=OFF
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
         $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:-DCMAKE_VERBOSE_MAKEFILE=ON>
@@ -146,15 +147,32 @@ else ()
         -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF
         -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF
         -DgRPC_ZLIB_PROVIDER=module
-        -DCMAKE_CXX_FLAGS=-Wno-error=ignored-qualifiers
-        -DCMAKE_C_FLAGS=-Wno-error=ignored-qualifiers
+        "-DCMAKE_CXX_FLAGS=-Wno-error=ignored-qualifiers -w"
+        "-DCMAKE_C_FLAGS=-Wno-error=ignored-qualifiers -w"
       )
       add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
     endif ()
 
-#if (TARGET protobuf_src)
+    #ExternalProject_Add(
+    #  grpc_src-populate
+    #  SOURCE_DIR ${nih_cache_path}/src/grpc_src
+    #  BINARY_DIR ${nih_cache_path}/src/grpc_src-build
+    #  CMAKE_ARGS
+    #    "-DCMAKE_CXX_FLAGS=-Wno-error=ignored-qualifiers -w"
+    #    "-DCMAKE_C_FLAGS=-Wno-error=ignored-qualifiers -w"
+    #    -DgRPC_BUILD_TESTS=OFF
+    #    -DgRPC_BUILD_CSHARP_EXT=OFF
+    #    -DgRPC_MSVC_STATIC_RUNTIME=ON
+    #    -DgRPC_INSTALL=OFF
+    #    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    #    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    #  LIST_SEPARATOR :_:
+    #)
+
+    #if (TARGET protobuf_src)
 #      ExternalProject_Add_StepDependencies(grpc_src build protobuf_src)
-#    endif ()
+#add_dependencies(grpc_src-populate protobuf_src)   
+#endif ()
     exclude_if_included (grpc_src)
     #    ExternalProject_Get_Property (grpc_src BINARY_DIR)
     #ExternalProject_Get_Property (grpc_src SOURCE_DIR)
