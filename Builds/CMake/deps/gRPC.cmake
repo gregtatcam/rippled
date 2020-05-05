@@ -1,4 +1,3 @@
-
 # currently linking to unsecure versions...if we switch, we'll
 # need to add ssl as a link dependency to the grpc targets
 option (use_secure_grpc "use TLS version of grpc libs." OFF)
@@ -8,215 +7,78 @@ else ()
   set (grpc_suffix "_unsecure")
 endif ()
 
-find_package (gRPC 1.23 CONFIG QUIET)
-if (TARGET gRPC::gpr AND NOT local_grpc)
-  get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_DEBUG)
-  if (NOT _grpc_l)
-    get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_RELEASE)
-  endif ()
-  if (NOT _grpc_l)
-    get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION)
-  endif ()
-  message (STATUS "Found cmake config for gRPC. Using ${_grpc_l}.")
-else ()
-  find_package (PkgConfig QUIET)
-  if (PKG_CONFIG_FOUND)
-    pkg_check_modules (grpc QUIET "grpc${grpc_suffix}>=1.25" "grpc++${grpc_suffix}" gpr)
-  endif ()
+#add_executable (gRPC::grpc_cpp_plugin IMPORTED)
+#exclude_if_included (gRPC::grpc_cpp_plugin)
 
-  if (grpc_FOUND)
-    message (STATUS "Found gRPC using pkg-config. Using ${grpc_gpr_PREFIX}.")
-  endif ()
+FetchContent_GetProperties(grpc_src)
+FetchContent_Populate(
+  grpc_src 
+  QUIET
+  GIT_REPOSITORY https://github.com/grpc/grpc.git
+  GIT_TAG v1.25.0
+  SOURCE_DIR ${nih_cache_path}/src/grpc_src
+  BINARY_DIR ${nih_cache_path}/src/grpc_src-build
+  STAMP_DIR ${nih_cache_path}/src/grpc_src-stamp
+  TMP_DIR ${nih_cache_path}/tmp
+  CMAKE_ARGS
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    -DgRPC_BUILD_TESTS=OFF
+    -DgRPC_INSTALL=OFF
+    -DgRPC_BUILD_CSHARP_EXT=OFF
+    -DBENCHMARK_ENABLE_TESTING=OFF
+    -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF
+    -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF
+    -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF
+    -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF
+    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF
+    -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF)
 
-  add_executable (gRPC::grpc_cpp_plugin IMPORTED)
-  exclude_if_included (gRPC::grpc_cpp_plugin)
+set (grpc_binary_dir "${grpc_src_BINARY_DIR}")
+set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
 
-  if (grpc_FOUND AND NOT local_grpc)
-    # use installed grpc (via pkg-config)
-    macro (add_imported_grpc libname_)
-      if (static)
-        set (_search "${CMAKE_STATIC_LIBRARY_PREFIX}${libname_}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-      else ()
-        set (_search "${CMAKE_SHARED_LIBRARY_PREFIX}${libname_}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-      endif()
-      find_library(_found_${libname_}
-        NAMES ${_search}
-        HINTS ${grpc_LIBRARY_DIRS})
-      if (_found_${libname_})
-        message (STATUS "importing ${libname_} as ${_found_${libname_}}")
-      else ()
-        message (FATAL_ERROR "using pkg-config for grpc, can't find ${_search}")
-      endif ()
-      add_library ("gRPC::${libname_}" STATIC IMPORTED GLOBAL)
-      set_target_properties ("gRPC::${libname_}" PROPERTIES IMPORTED_LOCATION ${_found_${libname_}})
-      if (grpc_INCLUDE_DIRS)
-        set_target_properties ("gRPC::${libname_}" PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${grpc_INCLUDE_DIRS})
-      endif ()
-      target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
-      exclude_if_included ("gRPC::${libname_}")
-    endmacro ()
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_GRPC_CSHARP_PLUGIN OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_GRPC_NODE_PLUGIN OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_GRPC_PHP_PLUGIN OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_GRPC_PYTHON_PLUGIN OFF CACHE BOOL "" FORCE)
+set(gRPC_BUILD_GRPC_RUBY_PLUGIN OFF CACHE BOOL "" FORCE)
+#set(werr OFF CACHE BOOL "" FORCE)
+set(CMAKE_CXX_FLAGS "-Wno-error=ignored-qualifiers -w -Wno-ignored-qualifiers")
+add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
 
-    set_target_properties (gRPC::grpc_cpp_plugin PROPERTIES
-        IMPORTED_LOCATION "${grpc_gpr_PREFIX}/bin/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}")
+file (MAKE_DIRECTORY ${grpc_src_SOURCE_DIR}/include)
 
-    pkg_check_modules (cares QUIET libcares)
-    if (cares_FOUND)
-      if (static)
-        set (_search "${CMAKE_STATIC_LIBRARY_PREFIX}cares${CMAKE_STATIC_LIBRARY_SUFFIX}")
-      else ()
-        set (_search "${CMAKE_SHARED_LIBRARY_PREFIX}cares${CMAKE_SHARED_LIBRARY_SUFFIX}")
-      endif()
-      find_library(_cares
-        NAMES ${_search}
-        HINTS ${cares_LIBRARY_DIRS})
-      if (NOT _cares)
-        message (FATAL_ERROR "using pkg-config for grpc, can't find c-ares")
-      endif ()
-      add_library (c-ares::cares STATIC IMPORTED GLOBAL)
-      set_target_properties (c-ares::cares PROPERTIES IMPORTED_LOCATION ${_cares})
-      if (cares_INCLUDE_DIRS)
-        set_target_properties (c-ares::cares PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${cares_INCLUDE_DIRS})
-      endif ()
-      exclude_if_included (c-ares::cares)
-    else ()
-      message (FATAL_ERROR "using pkg-config for grpc, can't find c-ares")
-    endif ()
-  else ()
-    #[===========================[
-       grpc
-    #]===========================]
-    #set(gRPC_BUILD_TESTS OFF CACHE INTERNAL "")
-    FetchContent_GetProperties (grpc_src)
-    if (NOT ${grpc_src_POPULATED})
-      FetchContent_Populate(
-        grpc_src
-        QUIET
-        GIT_REPOSITORY https://github.com/grpc/grpc.git
-        GIT_TAG v1.25.0
-        SOURCE_DIR ${nih_cache_path}/src/grpc_src
-        BINARY_DIR ${nih_cache_path}/src/grpc_src-build
-        STAMP_DIR  ${nih_cache_path}/src/grpc_src-stamp
-        TMP_DIR    ${nih_cache_path}/tmp
-        CMAKE_ARGS
-        -DgRPC_BUILD_TESTS=OFF
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:-DCMAKE_VERBOSE_MAKEFILE=ON>
-        $<$<BOOL:${CMAKE_TOOLCHAIN_FILE}>:-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}>
-        $<$<BOOL:${VCPKG_TARGET_TRIPLET}>:-DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET}>
-        $<$<BOOL:${unity}>:-DCMAKE_UNITY_BUILD=ON}>
-        -DCMAKE_DEBUG_POSTFIX=_d
-        $<$<NOT:$<BOOL:${is_multiconfig}>>:-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}>
-        -DgRPC_BUILD_TESTS=OFF
-        -DgRPC_BUILD_CSHARP_EXT=OFF
-        -DgRPC_MSVC_STATIC_RUNTIME=ON
-        -DgRPC_INSTALL=OFF
-        -DgRPC_CARES_PROVIDER=package
-        -Dc-ares_DIR=${cares_binary_dir}/_installed_/lib/cmake/c-ares
-        -DgRPC_SSL_PROVIDER=package
-        -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}
-        -DgRPC_PROTOBUF_PROVIDER=package
-        -DProtobuf_USE_STATIC_LIBS=$<IF:$<AND:$<BOOL:${Protobuf_FOUND}>,$<NOT:$<BOOL:${static}>>>,OFF,ON>
-        -DProtobuf_INCLUDE_DIR=$<JOIN:$<TARGET_PROPERTY:protobuf::libprotobuf,INTERFACE_INCLUDE_DIRECTORIES>,:_:>
-        -DProtobuf_LIBRARY=$<IF:$<CONFIG:Debug>,$<TARGET_PROPERTY:protobuf::libprotobuf,IMPORTED_LOCATION_DEBUG>,$<TARGET_PROPERTY:protobuf::libprotobuf,IMPORTED_LOCATION_RELEASE>>
-        -DProtobuf_PROTOC_LIBRARY=$<IF:$<CONFIG:Debug>,$<TARGET_PROPERTY:protobuf::libprotoc,IMPORTED_LOCATION_DEBUG>,$<TARGET_PROPERTY:protobuf::libprotoc,IMPORTED_LOCATION_RELEASE>>
-        -DProtobuf_PROTOC_EXECUTABLE=$<TARGET_PROPERTY:protobuf::protoc,IMPORTED_LOCATION>
-        -DgRPC_ZLIB_PROVIDER=package
-        $<$<NOT:$<BOOL:${has_zlib}>>:-DZLIB_ROOT=${zlib_binary_dir}/_installed_>
-        $<$<BOOL:${MSVC}>:
-          "-DCMAKE_CXX_FLAGS=-GR -Gd -fp:precise -FS -EHa -MP"
-          "-DCMAKE_C_FLAGS=-GR -Gd -fp:precise -FS -MP"
-        >
-        LOG_BUILD ON
-        LOG_CONFIGURE ON 
-        LIST_SEPARATOR :_:
-        BUILD_BYPRODUCTS
-        <BINARY_DIR>/${ep_lib_prefix}grpc${grpc_suffix}${ep_lib_suffix}
-        <BINARY_DIR>/${ep_lib_prefix}grpc${grpc_suffix}_d${ep_lib_suffix}
-        <BINARY_DIR>/${ep_lib_prefix}grpc++${grpc_suffix}${ep_lib_suffix}
-        <BINARY_DIR>/${ep_lib_prefix}grpc++${grpc_suffix}_d${ep_lib_suffix}
-        <BINARY_DIR>/${ep_lib_prefix}address_sorting${ep_lib_suffix}
-        <BINARY_DIR>/${ep_lib_prefix}address_sorting_d${ep_lib_suffix}
-        <BINARY_DIR>/${ep_lib_prefix}gpr${ep_lib_suffix}
-        <BINARY_DIR>/${ep_lib_prefix}gpr_d${ep_lib_suffix}
-        <BINARY_DIR>/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}
-        -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF
-        -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF
-        -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF
-        -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF
-        -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF
-        -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF
-        -DgRPC_ZLIB_PROVIDER=module
-        "-DCMAKE_CXX_FLAGS=-Wno-error=ignored-qualifiers -w"
-        "-DCMAKE_C_FLAGS=-Wno-error=ignored-qualifiers -w"
-      )
-      add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
-    endif ()
-
-    #ExternalProject_Add(
-    #  grpc_src-populate
-    #  SOURCE_DIR ${nih_cache_path}/src/grpc_src
-    #  BINARY_DIR ${nih_cache_path}/src/grpc_src-build
-    #  CMAKE_ARGS
-    #    "-DCMAKE_CXX_FLAGS=-Wno-error=ignored-qualifiers -w"
-    #    "-DCMAKE_C_FLAGS=-Wno-error=ignored-qualifiers -w"
-    #    -DgRPC_BUILD_TESTS=OFF
-    #    -DgRPC_BUILD_CSHARP_EXT=OFF
-    #    -DgRPC_MSVC_STATIC_RUNTIME=ON
-    #    -DgRPC_INSTALL=OFF
-    #    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    #    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-    #  LIST_SEPARATOR :_:
-    #)
-
-    #if (TARGET protobuf_src)
-#      ExternalProject_Add_StepDependencies(grpc_src build protobuf_src)
-#add_dependencies(grpc_src-populate protobuf_src)   
-#endif ()
-    exclude_if_included (grpc_src)
-    #    ExternalProject_Get_Property (grpc_src BINARY_DIR)
-    #ExternalProject_Get_Property (grpc_src SOURCE_DIR)
-    message (STATUS "#### ${BINARY_DIR} ${SOURCE_DIR}")
-    set (grpc_binary_dir "${grpc_src_BINARY_DIR}")
-    set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
-    if (CMAKE_VERBOSE_MAKEFILE)
-      print_ep_logs (grpc_src)
-    endif ()
-    file (MAKE_DIRECTORY ${SOURCE_DIR}/include)
-
-    macro (add_imported_grpc libname_)
-      add_library ("gRPC::${libname_}" STATIC IMPORTED GLOBAL)
-      set_target_properties ("gRPC::${libname_}" PROPERTIES
+macro (add_imported_grpc libname_)
+  add_library ("gRPC::${libname_}" STATIC IMPORTED GLOBAL)
+  set_target_properties ("gRPC::${libname_}" PROPERTIES
         IMPORTED_LOCATION_DEBUG
           ${grpc_binary_dir}/${ep_lib_prefix}${libname_}_d${ep_lib_suffix}
         IMPORTED_LOCATION_RELEASE
           ${grpc_binary_dir}/${ep_lib_prefix}${libname_}${ep_lib_suffix}
         INTERFACE_INCLUDE_DIRECTORIES
           ${grpc_source_dir}/include)
-      add_dependencies ("gRPC::${libname_}" grpc_src)
-      target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
-      exclude_if_included ("gRPC::${libname_}")
-    endmacro ()
+  add_dependencies ("gRPC::${libname_}" grpc_src)
+  target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
+  exclude_if_included ("gRPC::${libname_}")
+endmacro ()
 
-    set_target_properties (gRPC::grpc_cpp_plugin PROPERTIES
-        IMPORTED_LOCATION "${grpc_binary_dir}/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}")
-    add_dependencies (gRPC::grpc_cpp_plugin grpc_src)
-  endif ()
+#set_target_properties (gRPC::grpc_cpp_plugin PROPERTIES
+#        IMPORTED_LOCATION "${grpc_binary_dir}/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}")
+#add_dependencies (gRPC::grpc_cpp_plugin grpc_src)
 
-  add_imported_grpc (gpr)
-  add_imported_grpc ("grpc${grpc_suffix}")
-  add_imported_grpc ("grpc++${grpc_suffix}")
-  add_imported_grpc (address_sorting)
+#add_imported_grpc (gpr)
+#add_imported_grpc ("grpc${grpc_suffix}")
+#add_imported_grpc ("grpc++${grpc_suffix}")
+#add_imported_grpc (address_sorting)
 
-  #target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE c-ares::cares gRPC::gpr gRPC::address_sorting ZLIB::ZLIB)
-  #target_link_libraries ("gRPC::grpc++${grpc_suffix}" INTERFACE "gRPC::grpc${grpc_suffix}" gRPC::gpr)
-endif ()
+#target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE c-ares::cares gRPC::gpr gRPC::address_sorting ZLIB::ZLIB)
+#target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE gRPC::gpr gRPC::address_sorting)
+#target_link_libraries ("gRPC::grpc++${grpc_suffix}" INTERFACE "gRPC::grpc${grpc_suffix}" gRPC::gpr)
 
-#[=================================[
-   generate protobuf sources for
-   grpc defs and bundle into a
-   static lib
-#]=================================]
+
 set (GRPC_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen_grpc")
 file (MAKE_DIRECTORY ${GRPC_GEN_DIR})
 set (GRPC_PROTO_SRCS)
@@ -238,13 +100,13 @@ foreach(file ${GRPC_DEFINITION_FILES})
   set (hdr_2 "${GRPC_GEN_DIR}/${_rel_root_dir}/${_basename}.pb.h")
   add_custom_command(
     OUTPUT ${src_1} ${src_2} ${hdr_1} ${hdr_2}
-    COMMAND protobuf::protoc
+    COMMAND $<TARGET_FILE:protoc>
     ARGS --grpc_out=${GRPC_GEN_DIR}
          --cpp_out=${GRPC_GEN_DIR}
-         --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>
+         --plugin=protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>
          -I ${_proto_inc} -I ${_rel_dir}
          ${_abs_file}
-    DEPENDS ${_abs_file} protobuf::protoc gRPC::grpc_cpp_plugin
+    DEPENDS ${_abs_file}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running gRPC C++ protocol buffer compiler on ${file}"
     VERBATIM)
@@ -256,7 +118,7 @@ endforeach()
 add_library (grpc_pbufs STATIC ${GRPC_PROTO_SRCS} ${GRPC_PROTO_HDRS})
 #target_include_directories (grpc_pbufs PRIVATE src)
 target_include_directories (grpc_pbufs SYSTEM PUBLIC ${GRPC_GEN_DIR})
-target_link_libraries (grpc_pbufs protobuf::libprotobuf "gRPC::grpc++${grpc_suffix}")
+target_link_libraries (grpc_pbufs libprotobuf grpc++${grpc_suffix})
 target_compile_options (grpc_pbufs
   PRIVATE
     $<$<BOOL:${MSVC}>:-wd4065>
@@ -269,4 +131,5 @@ target_compile_options (grpc_pbufs
     >)
 add_library (Ripple::grpc_pbufs ALIAS grpc_pbufs)
 target_link_libraries (ripple_libs INTERFACE Ripple::grpc_pbufs)
+target_include_directories(ripple_libs INTERFACE ${nih_cache_path}/src/grpc_src/include)
 exclude_if_included (grpc_pbufs)
