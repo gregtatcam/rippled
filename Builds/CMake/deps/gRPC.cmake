@@ -10,35 +10,29 @@ endif ()
 #add_executable (gRPC::grpc_cpp_plugin IMPORTED)
 #exclude_if_included (gRPC::grpc_cpp_plugin)
 
+# AbseilHelpers.cmake build type check NEED TO FIX
+#set(${_build_type} "static" CACHE STRING "" FORCE)
+
 FetchContent_GetProperties(grpc_src)
 FetchContent_Populate(
   grpc_src 
   QUIET
   GIT_REPOSITORY https://github.com/grpc/grpc.git
-  GIT_TAG v1.25.0
+  GIT_TAG v1.28.0
   SOURCE_DIR ${nih_cache_path}/src/grpc_src
   BINARY_DIR ${nih_cache_path}/src/grpc_src-build
   STAMP_DIR ${nih_cache_path}/src/grpc_src-stamp
-  TMP_DIR ${nih_cache_path}/tmp
-  CMAKE_ARGS
-    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-    -DgRPC_BUILD_TESTS=OFF
-    -DgRPC_INSTALL=OFF
-    -DgRPC_BUILD_CSHARP_EXT=OFF
-    -DBENCHMARK_ENABLE_TESTING=OFF
-    -DgRPC_BUILD_GRPC_CSHARP_PLUGIN=OFF
-    -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF
-    -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF
-    -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF
-    -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF
-    -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF)
+  TMP_DIR ${nih_cache_path}/tmp)
 
 set (grpc_binary_dir "${grpc_src_BINARY_DIR}")
 set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
 
+set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER})
+set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER})
+set(gRPC_BUILD_CSHARP_EXT OFF CACHE BOOL "" FORCE)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_CSHARP_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_NODE_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN OFF CACHE BOOL "" FORCE)
@@ -46,38 +40,11 @@ set(gRPC_BUILD_GRPC_PHP_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_PYTHON_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_RUBY_PLUGIN OFF CACHE BOOL "" FORCE)
 #set(werr OFF CACHE BOOL "" FORCE)
-set(CMAKE_CXX_FLAGS "-Wno-error=ignored-qualifiers -w -Wno-ignored-qualifiers")
+#set(CMAKE_CXX_FLAGS "-Wno-error=ignored-qualifiers -w -Wno-ignored-qualifiers")
+add_definitions("-Wno-error=ignored-qualifiers -w -Wno-ignored-qualifiers")
 add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
 
 file (MAKE_DIRECTORY ${grpc_src_SOURCE_DIR}/include)
-
-macro (add_imported_grpc libname_)
-  add_library ("gRPC::${libname_}" STATIC IMPORTED GLOBAL)
-  set_target_properties ("gRPC::${libname_}" PROPERTIES
-        IMPORTED_LOCATION_DEBUG
-          ${grpc_binary_dir}/${ep_lib_prefix}${libname_}_d${ep_lib_suffix}
-        IMPORTED_LOCATION_RELEASE
-          ${grpc_binary_dir}/${ep_lib_prefix}${libname_}${ep_lib_suffix}
-        INTERFACE_INCLUDE_DIRECTORIES
-          ${grpc_source_dir}/include)
-  add_dependencies ("gRPC::${libname_}" grpc_src)
-  target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
-  exclude_if_included ("gRPC::${libname_}")
-endmacro ()
-
-#set_target_properties (gRPC::grpc_cpp_plugin PROPERTIES
-#        IMPORTED_LOCATION "${grpc_binary_dir}/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}")
-#add_dependencies (gRPC::grpc_cpp_plugin grpc_src)
-
-#add_imported_grpc (gpr)
-#add_imported_grpc ("grpc${grpc_suffix}")
-#add_imported_grpc ("grpc++${grpc_suffix}")
-#add_imported_grpc (address_sorting)
-
-#target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE c-ares::cares gRPC::gpr gRPC::address_sorting ZLIB::ZLIB)
-#target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE gRPC::gpr gRPC::address_sorting)
-#target_link_libraries ("gRPC::grpc++${grpc_suffix}" INTERFACE "gRPC::grpc${grpc_suffix}" gRPC::gpr)
-
 
 set (GRPC_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen_grpc")
 file (MAKE_DIRECTORY ${GRPC_GEN_DIR})
@@ -85,6 +52,41 @@ set (GRPC_PROTO_SRCS)
 set (GRPC_PROTO_HDRS)
 set (GRPC_PROTO_ROOT "${CMAKE_SOURCE_DIR}/src/ripple/proto/org")
 file(GLOB_RECURSE GRPC_DEFINITION_FILES LIST_DIRECTORIES false "${GRPC_PROTO_ROOT}/*.proto")
+
+### protocol messag
+set (PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
+file (MAKE_DIRECTORY ${PROTO_GEN_DIR})
+set(file ${CMAKE_SOURCE_DIR}/src/ripple/proto/ripple.proto)
+get_filename_component(_proto_inc ${file} DIRECTORY) # updir one level
+set(src ${PROTO_GEN_DIR}/ripple.pb.cc)
+set(hdr ${PROTO_GEN_DIR}/ripple.pb.h)
+add_custom_command(
+    OUTPUT ${src} ${hdr}
+    COMMAND $<TARGET_FILE:protoc>
+    ARGS --cpp_out=${PROTO_GEN_DIR}
+         -I ${_proto_inc}
+         ${file}
+    DEPENDS ${file}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Running C++ protocol buffer compiler on ripple.proto"
+    VERBATIM)
+set_source_files_properties(proto.pb.cc proto.pb.h PROPERTIES GENERATED TRUE)
+add_library (pbufs STATIC ${src} ${hdr})
+target_include_directories (pbufs PRIVATE src)
+target_include_directories (pbufs
+  SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen)
+target_link_libraries (pbufs libprotobuf)
+target_compile_options (pbufs
+  PUBLIC
+    $<$<BOOL:${is_xcode}>:
+      --system-header-prefix="google/protobuf"
+      -Wno-deprecated-dynamic-exception-spec
+    >)
+add_library (Ripple::pbufs ALIAS pbufs)
+target_link_libraries (ripple_libs INTERFACE Ripple::pbufs)
+exclude_if_included (pbufs)
+### end protocol message
+
 foreach(file ${GRPC_DEFINITION_FILES})
   get_filename_component(_abs_file ${file} ABSOLUTE)
   get_filename_component(_abs_dir ${_abs_file} DIRECTORY)
