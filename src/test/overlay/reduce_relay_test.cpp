@@ -480,6 +480,15 @@ public:
         peers_.erase(it);
     }
 
+    void
+    resetPeers()
+    {
+        while (!peers_.empty())
+            deletePeer(peers_.begin()->first);
+        while (!peersCache_.empty())
+            addPeer();
+    }
+
     boost::optional<Peer::id_t>
     deleteLastPeer()
     {
@@ -651,7 +660,10 @@ public:
             ManualClock::reset();
 
         if (purge)
+        {
             purgePeers();
+            overlay_.resetPeers();
+        }
 
         for (int m = 0; m < nMessages; ++m)
         {
