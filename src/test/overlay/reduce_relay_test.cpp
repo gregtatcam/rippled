@@ -449,19 +449,35 @@ public:
     }
 
     PeerSPtr
-    addPeer()
+    addPeer(bool useCache = true)
     {
-        auto peer = std::make_shared<PeerSim>(*this);
-        auto id = peer->id();
+        PeerSPtr peer{};
+        Peer::id_t id;
+        if (peersCache_.empty() || !useCache)
+        {
+            peer = std::make_shared<PeerSim>(*this);
+            id = peer->id();
+        }
+        else
+        {
+            auto it = peersCache_.begin();
+            peer = it->second;
+            id = it->first;
+            peersCache_.erase(it);
+        }
         peers_.emplace(std::make_pair(id, peer));
         return peer;
     }
 
     void
-    deletePeer(Peer::id_t id)
+    deletePeer(Peer::id_t id, bool useCache = true)
     {
+        auto it = peers_.find(id);
+        assert(it != peers_.end());
         unsquelch(id, [&](PublicKey const&, PeerWPtr) {});
-        peers_.erase(id);
+        if (useCache)
+            peersCache_.emplace(std::make_pair(id, it->second));
+        peers_.erase(it);
     }
 
     boost::optional<Peer::id_t>
@@ -478,7 +494,7 @@ public:
                 maxId = id;
         }
 
-        deletePeer(maxId);
+        deletePeer(maxId, false);
 
         return maxId;
     }
@@ -535,6 +551,7 @@ public:
 
 private:
     Peers peers_;
+    Peers peersCache_;
     Squelch::Slots<Peer, ManualClock> slots_;
 };
 
@@ -566,9 +583,9 @@ public:
     }
 
     void
-    deletePeer(Peer::id_t id)
+    deletePeer(Peer::id_t id, bool useCache)
     {
-        overlay_.deletePeer(id);
+        overlay_.deletePeer(id, useCache);
         for (auto& v : validators_)
             v.deletePeer(id);
     }
