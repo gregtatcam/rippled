@@ -171,6 +171,7 @@ public:
         , peer_(peer)
         , latency_(latency)
         , priority_(priority)
+        , up_(true)
     {
         auto sp = peer_.lock();
         assert(sp);
@@ -179,6 +180,8 @@ public:
     void
     send(MessageSPtr const& m, SquelchCB f)
     {
+        if (!up_)
+            return;
         auto sp = peer_.lock();
         assert(sp);
         ManualClock::randAdvance(std::get<0>(latency_), std::get<1>(latency_));
@@ -206,6 +209,16 @@ public:
         assert(sp);
         return sp->id();
     }
+    void
+    up(bool linkUp)
+    {
+        up_ = linkUp;
+    }
+    bool
+    isUp()
+    {
+        return up_;
+    }
 
 private:
     Validator& validator_;
@@ -214,6 +227,7 @@ private:
     std::uint16_t
         priority_;  // link priority, 1 is highest
                     // validator sends to links in the order of priority
+    bool up_;
 };
 
 class Validator
@@ -332,6 +346,14 @@ public:
     id()
     {
         return id_;
+    }
+
+    void
+    linkUp(Peer::id_t id, bool up)
+    {
+        auto it = links_.find(id);
+        assert(it != links_.end());
+        it->second->up(up);
     }
 
 private:
@@ -676,17 +698,13 @@ class reduce_relay_test : public beast::unit_test::suite
         return peer->id();
     }
 
-    /** Requirements
-     * - Generate messages at random given interval
-     * - Send messages from random validators
-     * - Send messages to random peers
-     * - Randomly delete squelched and selected peers
-     * - Randomly age a selected peer (stop sending to the peer)
-     * - Randomly age s slot (stop sending from the validator)
-     */
     void
     random(bool log)
     {
+        bool linkDown = false;
+        // Peer::id_t idDown = 0;
+        // PublicKey keyDown{};
+
         network_.propagate([&](Link& link, MessageSPtr m) {
             protocol::TMSquelch squelch;
             squelch.set_squelch(true);
@@ -709,6 +727,9 @@ class reduce_relay_test : public beast::unit_test::suite
                     str << p << " ";
                 });
 
+            if (!linkDown)
+                linkDown = rand_int(0, 10) == 0;
+
             if (squelched)
             {
                 auto selected = network_.overlay().getSelected(validator);
@@ -728,6 +749,15 @@ class reduce_relay_test : public beast::unit_test::suite
                     network_.overlay().isCountingState(validator);
                 BEAST_EXPECT(countingState == false);
                 BEAST_EXPECT(countsReset);
+            }
+
+            if (duration_cast<hours>(ManualClock::now().time_since_epoch())
+                    .count() > 24)
+            {
+                network_.overlay().checkIdle(
+                    [&](PublicKey const& v, PeerWPtr ptr) {
+                        BEAST_EXPECT(false);
+                    });
             }
         });
     }
