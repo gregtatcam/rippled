@@ -29,14 +29,16 @@ namespace ripple {
 
 namespace Squelch {
 
+inline bool gLog = false;
+
 template <typename Peer, typename clock_type>
 class Slots;
 
 /** Peer's State */
 enum class PeerState : uint8_t {
-    Squelched = 0x01,  // squelched
-    Counting = 0x02,   // counting messages
-    Selected = 0x03,   // selected to receive, could be counting too
+    Counting = 0x01,   // counting messages
+    Selected = 0x02,   // selected to receive, could be counting too
+    Squelched = 0x03,  // squelched
 };
 /** Slot's State */
 enum class SlotState : uint8_t {
@@ -90,10 +92,11 @@ private:
      * @param id Deleted peer id
      * @param f Function is called for every peer in Squelched state
      *     with peer weak_ptr as the argument
+     * @param delSelected If true then only delete if peer in Selected state
      */
     template <typename F>
     void
-    deletePeer(id_t const& id, F&& f);
+    deletePeer(id_t const& id, F&& f, bool delSelected);
 
     /** Get the time of the last peers selection round */
     const time_point&
@@ -218,7 +221,7 @@ Slot<Peer, clock_type>::update(
 template <typename Peer, typename clock_type>
 template <typename F>
 void
-Slot<Peer, clock_type>::deletePeer(id_t const& id, F&& f)
+Slot<Peer, clock_type>::deletePeer(id_t const& id, F&& f, bool delSelected)
 {
     auto it = peers_.find(id);
     if (it != peers_.end())
@@ -237,8 +240,10 @@ Slot<Peer, clock_type>::deletePeer(id_t const& id, F&& f)
 
             selected_.clear();
             state_ = SlotState::Counting;
+            delSelected = false;
         }
-        peers_.erase(id);
+        if (!delSelected)
+            peers_.erase(id);
     }
 }
 
@@ -380,7 +385,7 @@ public:
 
     /** Update last time peer received a message */
     void
-    touchIdle(const id_t&);
+    touch(const id_t&);
 
     /** Returns if slot is in counting state and if all counts
      * of unsquelched peers are set to 0 */
@@ -428,11 +433,11 @@ public:
         return {};
     }
 
-    /** Get idled info. */
+    /** Get last message info for each peer. */
     std::unordered_map<id_t, time_point> const&
-    getIdled() const
+    messageTime() const
     {
-        return idlePeers_;
+        return messageTime_;
     }
 
 private:
@@ -442,13 +447,14 @@ private:
      * @param id Peer's id
      * @param f Function is called for every peer in Squelched state
      *     with peer weak_ptr as the argument
+     * @param delSelected If true then only delete if peer in Selected state
      */
     template <typename F>
     void
-    deletePeer(id_t const& id, F&& f);
+    deletePeer(id_t const& id, F&& f, bool delSelected = false);
 
     hash_map<PublicKey, Slot<Peer, clock_type>> slots_;
-    std::unordered_map<id_t, time_point> idlePeers_;
+    std::unordered_map<id_t, time_point> messageTime_;
 };
 
 template <typename Peer, typename clock_type>
@@ -461,7 +467,7 @@ Slots<Peer, clock_type>::checkForSquelch(
     protocol::MessageType type,
     F&& f)
 {
-    touchIdle(id);
+    touch(id);
 
     auto& peer =
         [&]() {
@@ -489,11 +495,13 @@ Slots<Peer, clock_type>::checkForSquelch(
 template <typename Peer, typename clock_type>
 template <typename F>
 void
-Slots<Peer, clock_type>::deletePeer(id_t const& id, F&& f)
+Slots<Peer, clock_type>::deletePeer(id_t const& id, F&& f, bool delSelected)
 {
     for (auto& it : slots_)
         it.second.deletePeer(
-            id, [&](std::weak_ptr<Peer> peer) { f(it.first, peer); });
+            id,
+            [&](std::weak_ptr<Peer> peer) { f(it.first, peer); },
+            delSelected);
 }
 
 template <typename Peer, typename clock_type>
@@ -502,7 +510,7 @@ void
 Slots<Peer, clock_type>::unsquelch(id_t const& id, F&& f)
 {
     deletePeer(id, f);
-    idlePeers_.erase(id);
+    messageTime_.erase(id);
 }
 
 template <typename Peer, typename clock_type>
@@ -511,16 +519,17 @@ void
 Slots<Peer, clock_type>::checkIdle(F&& f)
 {
     auto now = clock_type::now();
-    for (auto it = idlePeers_.begin(); it != idlePeers_.end();)
+    for (auto it = messageTime_.begin(); it != messageTime_.end();)
     {
-        if (now > it->second)
+        if (now - it->second > IDLED)
         {
             deletePeer(
                 it->first,
                 [&](PublicKey const& validator, std::weak_ptr<Peer> peer) {
                     f(validator, peer);
-                });
-            it = idlePeers_.erase(it);
+                },
+                true);
+            it = messageTime_.erase(it);
         }
         else
             ++it;
@@ -528,8 +537,10 @@ Slots<Peer, clock_type>::checkIdle(F&& f)
 
     for (auto it = slots_.begin(); it != slots_.end();)
     {
-        if (now - it->second.getLastSelected() > IDLED)
+        if (now - it->second.getLastSelected() > MAX_UNSQUELCH_EXPIRE)
+        {
             it = slots_.erase(it);
+        }
         else
             ++it;
     }
@@ -537,9 +548,9 @@ Slots<Peer, clock_type>::checkIdle(F&& f)
 
 template <typename Peer, typename clock_type>
 void
-Slots<Peer, clock_type>::touchIdle(id_t const& id)
+Slots<Peer, clock_type>::touch(id_t const& id)
 {
-    idlePeers_[id] = clock_type::now() + IDLED;
+    messageTime_[id] = clock_type::now();
 }
 
 }  // namespace Squelch
