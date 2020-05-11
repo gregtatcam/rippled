@@ -10,8 +10,11 @@ endif ()
 #add_executable (gRPC::grpc_cpp_plugin IMPORTED)
 #exclude_if_included (gRPC::grpc_cpp_plugin)
 
-# AbseilHelpers.cmake build type check NEED TO FIX
-#set(${_build_type} "static" CACHE STRING "" FORCE)
+# AbseilHelpers.cmake build type check checks _build_type for 
+# "static". this appers to conflict with static set in 
+# RippledSettings.cmake
+set(static_bck ${static})
+unset(static CACHE)
 
 FetchContent_GetProperties(grpc_src)
 FetchContent_Populate(
@@ -30,19 +33,38 @@ set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
 set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER})
 set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER})
 set(gRPC_BUILD_CSHARP_EXT OFF CACHE BOOL "" FORCE)
-set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
-set(gRPC_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(gRPC_INSTALL OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_CSHARP_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_NODE_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_PHP_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_PYTHON_PLUGIN OFF CACHE BOOL "" FORCE)
 set(gRPC_BUILD_GRPC_RUBY_PLUGIN OFF CACHE BOOL "" FORCE)
+set(gRPC_CARES_PROVIDER "module" CACHE STRING "" FORCE)
+set(gRPC_SSL_PROVIDER "package" CACHE STRING "" FORCE)
+
+find_package(ZLIB)
+if (ZLIB_FOUND)
+  set(gRPC_ZLIB_PROVIDER "package" CACHE STRING "" FORCE)
+else()
+  set(gRPC_ZLIB_PROVIDER "module" CACHE STRING "" FORCE)
+endif()
+
+find_package(Protobuf 3.8)
+if (Protobuf_FOUND)
+  set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
+else()
+  set(gRPC_PROTOBUF_PROVIDER "module" CACHE STRING "" FORCE)
+endif()
+
 #set(werr OFF CACHE BOOL "" FORCE)
 #set(CMAKE_CXX_FLAGS "-Wno-error=ignored-qualifiers -w -Wno-ignored-qualifiers")
-add_definitions("-Wno-error=ignored-qualifiers -w -Wno-ignored-qualifiers")
+
+#add_definitions("-Wno-error=ignored-qualifiers -w -Wno-ignored-qualifiers")
 add_subdirectory(${grpc_src_SOURCE_DIR} ${grpc_src_BINARY_DIR})
+
+# set the static back to the saved value
+set(static ${static_bck} CACHE BOOL "link protobuf, openssl, libc++, and boost statically" FORCE)
 
 file (MAKE_DIRECTORY ${grpc_src_SOURCE_DIR}/include)
 
@@ -53,7 +75,7 @@ set (GRPC_PROTO_HDRS)
 set (GRPC_PROTO_ROOT "${CMAKE_SOURCE_DIR}/src/ripple/proto/org")
 file(GLOB_RECURSE GRPC_DEFINITION_FILES LIST_DIRECTORIES false "${GRPC_PROTO_ROOT}/*.proto")
 
-### protocol messag
+### protocol message
 set (PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
 file (MAKE_DIRECTORY ${PROTO_GEN_DIR})
 set(file ${CMAKE_SOURCE_DIR}/src/ripple/proto/ripple.proto)
