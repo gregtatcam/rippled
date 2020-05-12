@@ -1,3 +1,35 @@
+# import protobuf if found, otherwise
+# gRPC protobuf is installed
+if (static)
+  set (Protobuf_USE_STATIC_LIBS ON)
+endif ()
+
+message(status "#### find protobuf")
+find_package (Protobuf 3.8)
+message(status "#### protobuf ${local_protobuf} ${Protobuf_FOUND}")
+if (NOT local_protobuf AND Protobuf_FOUND)
+  message(status "#### found protobuf")
+  set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
+  if (NOT TARGET protobuf::protoc)
+    message(status "#### no protobuf target defined yet")
+    if (EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
+      message(status "#### protobuf exec exists ${Protobuf_PROTOC_EXECUTABLE}")
+      add_executable (protobuf::protoc IMPORTED)
+      set_target_properties (protobuf::protoc PROPERTIES
+        IMPORTED_LOCATION "${Protobuf_PROTOC_EXECUTABLE}")
+    else ()
+      message (FATAL_ERROR "Protobuf import failed")
+    endif ()
+  else ()
+    message (status "#### protobuf target exists")
+  endif ()
+else ()
+  set(gRPC_PROTOBUF_PROVIDER "module" CACHE STRING "" FORCE)
+endif()
+
+message(STATUS "#### protobuf provider ${gRPC_PROTOBUF_PROVIDER}")
+
+
 # currently linking to unsecure versions...if we switch, we'll
 # need to add ssl as a link dependency to the grpc targets
 option (use_secure_grpc "use TLS version of grpc libs." OFF)
@@ -9,6 +41,7 @@ endif ()
 
 find_package (gRPC 1.23 CONFIG QUIET)
 if (TARGET gRPC::gpr AND NOT local_grpc)
+  message(status "#### found gRPC package")
   get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_DEBUG)
   if (NOT _grpc_l)
     get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_RELEASE)
@@ -27,7 +60,10 @@ else ()
     message (STATUS "Found gRPC using pkg-config. Using ${grpc_gpr_PREFIX}.")
   endif ()
 
-  add_executable (gRPC::grpc_cpp_plugin IMPORTED)
+  if (NOT TARGET protobuf::protoc)
+    add_executable (gRPC::grpc_cpp_plugin IMPORTED)
+  endif()
+
   exclude_if_included (gRPC::grpc_cpp_plugin)
 
   if (grpc_FOUND AND NOT local_grpc)
@@ -117,13 +153,6 @@ else ()
       set(gRPC_ZLIB_PROVIDER "module" CACHE STRING "" FORCE)
     endif()
     
-    find_package(Protobuf 3.8)
-    if (Protobuf_FOUND)
-      set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
-    else()
-      set(gRPC_PROTOBUF_PROVIDER "module" CACHE STRING "" FORCE)
-    endif()
-    
     # AbseilHelpers.cmake build type check checks _build_type for 
     # "static". this conflicts with option static in 
     # RippledSettings.cmake
@@ -134,6 +163,12 @@ else ()
     
     # set the static back to the saved value
     set(static ${static_bck} CACHE BOOL "link protobuf, openssl, libc++, and boost statically" FORCE)
+
+    if (${gRPC_PROTOBUF_PROVIDER} STREQUAL "module")
+      add_executable (protobuf::protoc IMPORTED)
+      set_target_properties (protobuf::protoc PROPERTIES
+        IMPORTED_LOCATION $<TARGET_FILE:protoc>)
+    endif()
   endif()
 endif()
 
@@ -155,7 +190,7 @@ set(src ${PROTO_GEN_DIR}/ripple.pb.cc)
 set(hdr ${PROTO_GEN_DIR}/ripple.pb.h)
 add_custom_command(
     OUTPUT ${src} ${hdr}
-    COMMAND $<TARGET_FILE:protoc>
+    COMMAND protobuf::protoc
     ARGS --cpp_out=${PROTO_GEN_DIR}
          -I ${_proto_inc}
          ${file}
@@ -168,7 +203,7 @@ add_library (pbufs STATIC ${src} ${hdr})
 target_include_directories (pbufs PRIVATE src)
 target_include_directories (pbufs
   SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen)
-target_link_libraries (pbufs libprotobuf)
+target_link_libraries (pbufs protobuf::libprotobuf)
 target_compile_options (pbufs
   PUBLIC
     $<$<BOOL:${is_xcode}>:
@@ -195,7 +230,7 @@ foreach(file ${GRPC_DEFINITION_FILES})
   set (hdr_2 "${GRPC_GEN_DIR}/${_rel_root_dir}/${_basename}.pb.h")
   add_custom_command(
     OUTPUT ${src_1} ${src_2} ${hdr_1} ${hdr_2}
-    COMMAND $<TARGET_FILE:protoc>
+    COMMAND protobuf::protoc
     ARGS --grpc_out=${GRPC_GEN_DIR}
          --cpp_out=${GRPC_GEN_DIR}
          --plugin=protoc-gen-grpc=$<TARGET_FILE:grpc_cpp_plugin>
@@ -212,7 +247,7 @@ endforeach()
 
 add_library (grpc_pbufs STATIC ${GRPC_PROTO_SRCS} ${GRPC_PROTO_HDRS})
 target_include_directories (grpc_pbufs SYSTEM PUBLIC ${GRPC_GEN_DIR})
-target_link_libraries (grpc_pbufs libprotobuf grpc++${grpc_suffix})
+target_link_libraries (grpc_pbufs protobuf::libprotobuf grpc++${grpc_suffix})
 target_compile_options (grpc_pbufs
   PRIVATE
     $<$<BOOL:${MSVC}>:-wd4065>
