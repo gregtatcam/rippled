@@ -10,6 +10,8 @@ message(status "#### protobuf ${local_protobuf} ${Protobuf_FOUND}")
 if (NOT local_protobuf AND Protobuf_FOUND)
   message(status "#### found protobuf")
   set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
+  set(protoc_ protobuf::protoc)
+  set(protobuf_ protobuf::libprotobuf)
   if (NOT TARGET protobuf::protoc)
     message(status "#### no protobuf target defined yet")
     if (EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
@@ -25,6 +27,8 @@ if (NOT local_protobuf AND Protobuf_FOUND)
   endif ()
 else ()
   set(gRPC_PROTOBUF_PROVIDER "module" CACHE STRING "" FORCE)
+  set(protoc_ protoc)
+  set(protobuf_ libprotobuf)
 endif()
 
 message(STATUS "#### protobuf provider ${gRPC_PROTOBUF_PROVIDER}")
@@ -59,6 +63,9 @@ else ()
   if (grpc_FOUND)
     message (STATUS "Found gRPC using pkg-config. Using ${grpc_gpr_PREFIX}.")
   endif ()
+
+  set(grpc_cpp_plugin_ $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
+  set(grpc++_ "gRPC::grpc++${grpc_suffix}")
 
   if (NOT TARGET protobuf::protoc)
     add_executable (gRPC::grpc_cpp_plugin IMPORTED)
@@ -165,6 +172,11 @@ else ()
       
       # set the static back to the saved value
       set(static ${static_bck} CACHE BOOL "link protobuf, openssl, libc++, and boost statically" FORCE)
+
+      exclude_if_included(grpc_src)
+
+      set(grpc_cpp_plugin_ $<TARGET_FILE:grpc_cpp_plugin>)
+      set(grpc++_ "grpc++${grpc_suffix}")
     endif()
     
     macro (add_imported_grpc libname_)
@@ -180,15 +192,9 @@ else ()
       target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
       exclude_if_included ("gRPC::${libname_}")
     endmacro ()
-
   
-    if (${gRPC_PROTOBUF_PROVIDER} STREQUAL "module")
-      add_executable (protobuf::protoc IMPORTED)
-      set_target_properties (protobuf::protoc PROPERTIES
-        IMPORTED_LOCATION $<TARGET_FILE:protoc>)
-    endif()
   endif()
-  add_imported_grpc("grpc++${grpc_suffix}")
+  #add_imported_grpc("grpc++${grpc_suffix}")
 endif()
 
 
@@ -210,10 +216,10 @@ set(src ${PROTO_GEN_DIR}/ripple.pb.cc)
 set(hdr ${PROTO_GEN_DIR}/ripple.pb.h)
 add_custom_command(
     OUTPUT ${src} ${hdr}
-    COMMAND protobuf::protoc
+    COMMAND ${protoc_}
     ARGS --cpp_out=${PROTO_GEN_DIR}
-         -I ${_proto_inc}
-         ${file}
+      -I ${_proto_inc}
+      ${file}
     DEPENDS ${file}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running C++ protocol buffer compiler on ripple.proto"
@@ -221,9 +227,10 @@ add_custom_command(
 set_source_files_properties(proto.pb.cc proto.pb.h PROPERTIES GENERATED TRUE)
 add_library (pbufs STATIC ${src} ${hdr})
 target_include_directories (pbufs PRIVATE src)
+message(status "#### ${nih_cache_path}/third_party/protobuf/src")
 target_include_directories (pbufs
-  SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen)
-target_link_libraries (pbufs protobuf::libprotobuf)
+    SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen ${nih_cache_path}/src/grpc_src/third_party/protobuf/src) # depend on if part of gRPC or not
+target_link_libraries (pbufs ${libprotobuf_})
 target_compile_options (pbufs
   PUBLIC
     $<$<BOOL:${is_xcode}>:
@@ -250,13 +257,13 @@ foreach(file ${GRPC_DEFINITION_FILES})
   set (hdr_2 "${GRPC_GEN_DIR}/${_rel_root_dir}/${_basename}.pb.h")
   add_custom_command(
     OUTPUT ${src_1} ${src_2} ${hdr_1} ${hdr_2}
-    COMMAND protobuf::protoc
+    COMMAND ${protoc_}
     ARGS --grpc_out=${GRPC_GEN_DIR}
          --cpp_out=${GRPC_GEN_DIR}
-         --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>
+         --plugin=protoc-gen-grpc=${grpc_cpp_plugin_}
          -I ${_proto_inc} -I ${_rel_dir}
          ${_abs_file}
-    DEPENDS ${_abs_file}
+         DEPENDS ${_abs_file}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running gRPC C++ protocol buffer compiler on ${file}"
     VERBATIM)
@@ -265,9 +272,11 @@ foreach(file ${GRPC_DEFINITION_FILES})
     list(APPEND GRPC_PROTO_HDRS ${hdr_1} ${hdr_2})
 endforeach()
 
+message(status "##### ${grpc_cpp_plugin_}")
+
 add_library (grpc_pbufs STATIC ${GRPC_PROTO_SRCS} ${GRPC_PROTO_HDRS})
 target_include_directories (grpc_pbufs SYSTEM PUBLIC ${GRPC_GEN_DIR})
-target_link_libraries (grpc_pbufs protobuf::libprotobuf "gRPC::grpc++${grpc_suffix}")
+target_link_libraries (grpc_pbufs ${libprotobuf_} "${grpc++_}")
 target_compile_options (grpc_pbufs
   PRIVATE
     $<$<BOOL:${MSVC}>:-wd4065>
