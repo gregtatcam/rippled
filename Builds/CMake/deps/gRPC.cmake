@@ -1,38 +1,3 @@
-# import protobuf if found, otherwise
-# gRPC protobuf is installed
-if (static)
-  set (Protobuf_USE_STATIC_LIBS ON)
-endif ()
-
-message(status "#### find protobuf")
-find_package (Protobuf 3.8)
-message(status "#### protobuf ${local_protobuf} ${Protobuf_FOUND}")
-if (NOT local_protobuf AND Protobuf_FOUND)
-  message(status "#### found protobuf")
-  set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
-  set(protoc_ protobuf::protoc)
-  set(protobuf_ protobuf::libprotobuf)
-  if (NOT TARGET protobuf::protoc)
-    message(status "#### no protobuf target defined yet")
-    if (EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
-      message(status "#### protobuf exec exists ${Protobuf_PROTOC_EXECUTABLE}")
-      add_executable (protobuf::protoc IMPORTED)
-      set_target_properties (protobuf::protoc PROPERTIES
-        IMPORTED_LOCATION "${Protobuf_PROTOC_EXECUTABLE}")
-    else ()
-      message (FATAL_ERROR "Protobuf import failed")
-    endif ()
-  else ()
-    message (status "#### protobuf target exists")
-  endif ()
-else ()
-  set(gRPC_PROTOBUF_PROVIDER "module" CACHE STRING "" FORCE)
-  set(protoc_ protoc)
-  set(protobuf_ libprotobuf)
-endif()
-
-message(STATUS "#### protobuf provider ${gRPC_PROTOBUF_PROVIDER}")
-
 
 # currently linking to unsecure versions...if we switch, we'll
 # need to add ssl as a link dependency to the grpc targets
@@ -43,9 +8,11 @@ else ()
   set (grpc_suffix "_unsecure")
 endif ()
 
+set(grpc_cpp_plugin_ $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
+set(grpc++_ "gRPC::grpc++${grpc_suffix}")
+
 find_package (gRPC 1.23 CONFIG QUIET)
 if (TARGET gRPC::gpr AND NOT local_grpc)
-  message(status "#### found gRPC package")
   get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_DEBUG)
   if (NOT _grpc_l)
     get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_RELEASE)
@@ -64,13 +31,7 @@ else ()
     message (STATUS "Found gRPC using pkg-config. Using ${grpc_gpr_PREFIX}.")
   endif ()
 
-  set(grpc_cpp_plugin_ $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
-  set(grpc++_ "gRPC::grpc++${grpc_suffix}")
-
-  if (NOT TARGET protobuf::protoc)
-    add_executable (gRPC::grpc_cpp_plugin IMPORTED)
-  endif()
-
+  add_executable (gRPC::grpc_cpp_plugin IMPORTED)
   exclude_if_included (gRPC::grpc_cpp_plugin)
 
   if (grpc_FOUND AND NOT local_grpc)
@@ -97,6 +58,7 @@ else ()
       target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
       exclude_if_included ("gRPC::${libname_}")
     endmacro ()
+    add_imported_grpc("grpc++${grpc_suffix}")
 
     set_target_properties (gRPC::grpc_cpp_plugin PROPERTIES
         IMPORTED_LOCATION "${grpc_gpr_PREFIX}/bin/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}")
@@ -128,6 +90,7 @@ else ()
     FetchContent_GetProperties(grpc_src)
 
     if (NOT grpc_src_POPULATED)
+      message(STATUS "################# fetching content")
       FetchContent_Populate(
         grpc_src 
         QUIET
@@ -140,27 +103,62 @@ else ()
       
       set (grpc_binary_dir "${grpc_src_BINARY_DIR}")
       set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
+
       
       # build options
-      set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER})
-      set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER})
+      set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "" FORCE)
+      set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER} CACHE STRING "" FORCE)
+      if (${CMAKE_VERBOSE_MAKEFILE})
+        set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "" FORCE)
+      endif()
+      if (${CMAKE_TOOLCHAIN_FILE})
+        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE} CACHE STRING "" FORCE)
+      endif()
+      if (${VCPKG_TARGET_TRIPLET})
+        set(VCPKG_TARGET_TRIPLET ${VCPKG_TARGET_TRIPLET} CACHE STRING "" FORCE)
+      endif()
+      # carse compile fails if unity on ??
+      #$<$<BOOL:${unity}>:-DCMAKE_UNITY_BUILD=ON}>
+      set(CMAKE_DEBUG_POSTFIX _d CACHE STRING "" FORCE)
+      if (NOT ${is_multiconfig})
+        set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+      endif()
+      set(gRPC_BUILD_TESTS OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_CSHARP_EXT OFF CACHE BOOL "" FORCE)
       set(gRPC_INSTALL OFF CACHE BOOL "" FORCE)
+      set(gRPC_MSVC_STATIC_RUNTIME ON CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_CSHARP_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_NODE_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_PHP_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_PYTHON_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_RUBY_PLUGIN OFF CACHE BOOL "" FORCE)
+      # cmake fails if package ??
       set(gRPC_CARES_PROVIDER "module" CACHE STRING "" FORCE)
       set(gRPC_SSL_PROVIDER "package" CACHE STRING "" FORCE)
-      
-      find_package(ZLIB)
-      if (ZLIB_FOUND)
+      set(gRPC_SSL_PROVIDER "package" CACHE STRING "" FORCE)
+      set(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR} CACHE STRING "" FORCE)
+      set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
+      # why do we need protobuf?
+      #-DProtobuf_USE_STATIC_LIBS=$<IF:$<AND:$<BOOL:${Protobuf_FOUND}>,$<NOT:$<BOOL:${static}>>>,       OFF,ON>
+      #220         -DProtobuf_INCLUDE_DIR=$<JOIN:$<TARGET_PROPERTY:protobuf::libprotobuf,                           INTERFACE_INCLUDE_DIRECTORIES>,:_:>
+      #221         -DProtobuf_LIBRARY=$<IF:$<CONFIG:Debug>,$<TARGET_PROPERTY:protobuf::libprotobuf,                 IMPORTED_LOCATION_DEBUG>,$<TARGET_PROPERTY:protobuf::libprotobuf,IMPORTED_LOCATION_RELEASE>>
+      #222         -DProtobuf_PROTOC_LIBRARY=$<IF:$<CONFIG:Debug>,$<TARGET_PROPERTY:protobuf::libprotoc,            IMPORTED_LOCATION_DEBUG>,$<TARGET_PROPERTY:protobuf::libprotoc,IMPORTED_LOCATION_RELEASE>>
+      #223         -DProtobuf_PROTOC_EXECUTABLE=$<TARGET_PROPERTY:protobuf::protoc,IMPORTED_LOCATION>
+      if (${has_zlib})
         set(gRPC_ZLIB_PROVIDER "package" CACHE STRING "" FORCE)
       else()
         set(gRPC_ZLIB_PROVIDER "module" CACHE STRING "" FORCE)
       endif()
+      # why need this?
+      #$<$<NOT:$<BOOL:${has_zlib}>>:-DZLIB_ROOT=${zlib_binary_dir}/_installed_>
+      if (${MSVC})
+        set(CMAKE_CXX_FLAGS "-GR -Gd -fp:precise -FS -EHa -MP" CACHE STRING "" FORCE)
+        set(CMAKE_C_FLAGS "-GR -Gd -fp:precise -FS -MP" CACHE STRING "" FORCE)
+      endif()
+      set(LOG_BUILD ON CACHE BOOL "" FORCE)
+      set(LOG_CONFIGURE ON CACHE BOOL "" FORCE)
+      set(LIST_SEPARATOR ":_:" CACHE STRING "" FORCE)
       
       # AbseilHelpers.cmake build type check checks _build_type for 
       # "static". this conflicts with option static in 
@@ -174,31 +172,11 @@ else ()
       set(static ${static_bck} CACHE BOOL "link protobuf, openssl, libc++, and boost statically" FORCE)
 
       exclude_if_included(grpc_src)
-
-      set(grpc_cpp_plugin_ $<TARGET_FILE:grpc_cpp_plugin>)
-      set(grpc++_ "grpc++${grpc_suffix}")
     endif()
-    
-    macro (add_imported_grpc libname_)
-      add_library ("gRPC::${libname_}" STATIC IMPORTED GLOBAL)
-      set_target_properties ("gRPC::${libname_}" PROPERTIES
-        IMPORTED_LOCATION_DEBUG
-          ${grpc_binary_dir}/${ep_lib_prefix}${libname_}_d${ep_lib_suffix}
-        IMPORTED_LOCATION_RELEASE
-          ${grpc_binary_dir}/${ep_lib_prefix}${libname_}${ep_lib_suffix}
-        INTERFACE_INCLUDE_DIRECTORIES
-          ${grpc_source_dir}/include)
-      add_dependencies ("gRPC::${libname_}" grpc_src)
-      target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
-      exclude_if_included ("gRPC::${libname_}")
-    endmacro ()
-  
+    set(grpc_cpp_plugin_ "${grpc_binary_dir}/grpc_cpp_plugin")
+    set(grpc++_ "grpc++${grpc_suffix}")
   endif()
-  #add_imported_grpc("grpc++${grpc_suffix}")
 endif()
-
-
-#file (MAKE_DIRECTORY ${grpc_src_SOURCE_DIR}/include)
 
 set (GRPC_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen_grpc")
 file (MAKE_DIRECTORY ${GRPC_GEN_DIR})
@@ -206,42 +184,6 @@ set (GRPC_PROTO_SRCS)
 set (GRPC_PROTO_HDRS)
 set (GRPC_PROTO_ROOT "${CMAKE_SOURCE_DIR}/src/ripple/proto/org")
 file(GLOB_RECURSE GRPC_DEFINITION_FILES LIST_DIRECTORIES false "${GRPC_PROTO_ROOT}/*.proto")
-
-### protocol message
-set (PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
-file (MAKE_DIRECTORY ${PROTO_GEN_DIR})
-set(file ${CMAKE_SOURCE_DIR}/src/ripple/proto/ripple.proto)
-get_filename_component(_proto_inc ${file} DIRECTORY) # updir one level
-set(src ${PROTO_GEN_DIR}/ripple.pb.cc)
-set(hdr ${PROTO_GEN_DIR}/ripple.pb.h)
-add_custom_command(
-    OUTPUT ${src} ${hdr}
-    COMMAND ${protoc_}
-    ARGS --cpp_out=${PROTO_GEN_DIR}
-      -I ${_proto_inc}
-      ${file}
-    DEPENDS ${file}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Running C++ protocol buffer compiler on ripple.proto"
-    VERBATIM)
-set_source_files_properties(proto.pb.cc proto.pb.h PROPERTIES GENERATED TRUE)
-add_library (pbufs STATIC ${src} ${hdr})
-target_include_directories (pbufs PRIVATE src)
-message(status "#### ${nih_cache_path}/third_party/protobuf/src")
-target_include_directories (pbufs
-    SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen ${nih_cache_path}/src/grpc_src/third_party/protobuf/src) # depend on if part of gRPC or not
-target_link_libraries (pbufs ${libprotobuf_})
-target_compile_options (pbufs
-  PUBLIC
-    $<$<BOOL:${is_xcode}>:
-      --system-header-prefix="google/protobuf"
-      -Wno-deprecated-dynamic-exception-spec
-    >)
-add_library (Ripple::pbufs ALIAS pbufs)
-target_link_libraries (ripple_libs INTERFACE Ripple::pbufs)
-exclude_if_included (pbufs)
-### end protocol message
-
 foreach(file ${GRPC_DEFINITION_FILES})
   get_filename_component(_abs_file ${file} ABSOLUTE)
   get_filename_component(_abs_dir ${_abs_file} DIRECTORY)
@@ -257,7 +199,7 @@ foreach(file ${GRPC_DEFINITION_FILES})
   set (hdr_2 "${GRPC_GEN_DIR}/${_rel_root_dir}/${_basename}.pb.h")
   add_custom_command(
     OUTPUT ${src_1} ${src_2} ${hdr_1} ${hdr_2}
-    COMMAND ${protoc_}
+    COMMAND protobuf::protoc
     ARGS --grpc_out=${GRPC_GEN_DIR}
          --cpp_out=${GRPC_GEN_DIR}
          --plugin=protoc-gen-grpc=${grpc_cpp_plugin_}
@@ -271,8 +213,6 @@ foreach(file ${GRPC_DEFINITION_FILES})
     list(APPEND GRPC_PROTO_SRCS ${src_1} ${src_2})
     list(APPEND GRPC_PROTO_HDRS ${hdr_1} ${hdr_2})
 endforeach()
-
-message(status "##### ${grpc_cpp_plugin_}")
 
 add_library (grpc_pbufs STATIC ${GRPC_PROTO_SRCS} ${GRPC_PROTO_HDRS})
 target_include_directories (grpc_pbufs SYSTEM PUBLIC ${GRPC_GEN_DIR})
@@ -289,5 +229,5 @@ target_compile_options (grpc_pbufs
     >)
 add_library (Ripple::grpc_pbufs ALIAS grpc_pbufs)
 target_link_libraries (ripple_libs INTERFACE Ripple::grpc_pbufs)
-target_include_directories(ripple_libs INTERFACE ${nih_cache_path}/src/grpc_src/include)
+target_include_directories(ripple_libs INTERFACE ${grpc_source_dir}/include)
 exclude_if_included (grpc_pbufs)
