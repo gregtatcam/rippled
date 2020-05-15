@@ -155,10 +155,10 @@ private:
                                                 // source of messages from
                                                 // validator
     typename clock_type::time_point
-        lastSelected_;  // last time peers were selected,
-                        // used to age the slot
-    SlotState state_;   // slot's state
-    bool reachedThreshold_; // at least one peer reached message threshold
+        lastSelected_;       // last time peers were selected,
+                             // used to age the slot
+    SlotState state_;        // slot's state
+    bool reachedThreshold_;  // at least one peer reached message threshold
 };
 
 template <typename Peer, typename clock_type>
@@ -208,7 +208,7 @@ Slot<Peer, clock_type>::update(
         {
             auto it = selected_.begin();
             auto i = rand_int(selected_.size() - 1);
-            selected_.erase(std::next(it,i));
+            selected_.erase(std::next(it, i));
         }
 
         lastSelected_ = clock_type::now();
