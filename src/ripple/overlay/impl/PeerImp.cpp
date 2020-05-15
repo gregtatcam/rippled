@@ -2496,7 +2496,8 @@ PeerImp::checkPropose(
         {
             // relay untrusted proposal
             JLOG(p_journal_.trace()) << "relaying UNTRUSTED proposal";
-            overlay_.relay(*packet, peerPos.suppressionID(), peerPos.publicKey());
+            overlay_.relay(
+                *packet, peerPos.suppressionID(), peerPos.publicKey());
         }
         else
         {
