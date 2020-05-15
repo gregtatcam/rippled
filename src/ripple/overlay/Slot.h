@@ -57,7 +57,10 @@ private:
     using id_t = typename Peer::id_t;
     using time_point = typename clock_type::time_point;
 
-    Slot() : lastSelected_(clock_type::now()), state_(SlotState::Counting)
+    Slot()
+        : lastSelected_(clock_type::now())
+        , state_(SlotState::Counting)
+        , reachedThreshold_(false)
     {
     }
 
@@ -155,6 +158,7 @@ private:
         lastSelected_;  // last time peers were selected,
                         // used to age the slot
     SlotState state_;   // slot's state
+    bool reachedThreshold_; // at least one peer reached message threshold
 };
 
 template <typename Peer, typename clock_type>
@@ -192,11 +196,21 @@ Slot<Peer, clock_type>::update(
     if (state_ != SlotState::Counting || peer.state_ == PeerState::Squelched)
         return;
 
-    if (++peer.count_ > MESSAGE_COUNT_THRESHOLD)
+    if (++peer.count_ > MESSAGE_LOW_THRESHOLD)
         selected_[id] = true;
 
-    if (selected_.size() == MAX_SELECTED_PEERS)
+    if (peer.count_ > MESSAGE_UPPER_THRESHOLD)
+        reachedThreshold_ = true;
+
+    if (reachedThreshold_ && selected_.size() >= MAX_SELECTED_PEERS)
     {
+        while (selected_.size() != MAX_SELECTED_PEERS)
+        {
+            auto it = selected_.begin();
+            auto i = rand_int(selected_.size() - 1);
+            selected_.erase(std::next(it,i));
+        }
+
         lastSelected_ = clock_type::now();
 
         for (auto& [k, v] : peers_)
@@ -215,6 +229,7 @@ Slot<Peer, clock_type>::update(
         }
         selected_.clear();
         state_ = SlotState::Selected;
+        reachedThreshold_ = false;
     }
 }
 
@@ -260,6 +275,7 @@ void
 Slot<Peer, clock_type>::initCounting()
 {
     state_ = SlotState::Counting;
+    reachedThreshold_ = false;
     selected_.clear();
     resetCounts();
 }
