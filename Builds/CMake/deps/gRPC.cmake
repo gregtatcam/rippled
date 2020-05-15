@@ -90,7 +90,6 @@ else ()
     FetchContent_GetProperties(grpc_src)
 
     if (NOT grpc_src_POPULATED)
-      message(STATUS "################# fetching content")
       FetchContent_Populate(
         grpc_src 
         QUIET
@@ -104,25 +103,7 @@ else ()
       set (grpc_binary_dir "${grpc_src_BINARY_DIR}")
       set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
 
-      
       # build options
-      set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "" FORCE)
-      set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER} CACHE STRING "" FORCE)
-      if (${CMAKE_VERBOSE_MAKEFILE})
-        set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "" FORCE)
-      endif()
-      if (${CMAKE_TOOLCHAIN_FILE})
-        set(CMAKE_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE} CACHE STRING "" FORCE)
-      endif()
-      if (${VCPKG_TARGET_TRIPLET})
-        set(VCPKG_TARGET_TRIPLET ${VCPKG_TARGET_TRIPLET} CACHE STRING "" FORCE)
-      endif()
-      # carse compile fails if unity on ??
-      #$<$<BOOL:${unity}>:-DCMAKE_UNITY_BUILD=ON}>
-      set(CMAKE_DEBUG_POSTFIX _d CACHE STRING "" FORCE)
-      if (NOT ${is_multiconfig})
-        set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-      endif()
       set(gRPC_BUILD_TESTS OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_CSHARP_EXT OFF CACHE BOOL "" FORCE)
       set(gRPC_INSTALL OFF CACHE BOOL "" FORCE)
@@ -133,32 +114,14 @@ else ()
       set(gRPC_BUILD_GRPC_PHP_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_PYTHON_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_RUBY_PLUGIN OFF CACHE BOOL "" FORCE)
-      # cmake fails if package ??
+      # cmake fails if package
       set(gRPC_CARES_PROVIDER "module" CACHE STRING "" FORCE)
       set(gRPC_SSL_PROVIDER "package" CACHE STRING "" FORCE)
-      set(gRPC_SSL_PROVIDER "package" CACHE STRING "" FORCE)
-      set(OPENSSL_ROOT_DIR ${OPENSSL_ROOT_DIR} CACHE STRING "" FORCE)
       set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
-      # why do we need protobuf?
-      #-DProtobuf_USE_STATIC_LIBS=$<IF:$<AND:$<BOOL:${Protobuf_FOUND}>,$<NOT:$<BOOL:${static}>>>,       OFF,ON>
-      #220         -DProtobuf_INCLUDE_DIR=$<JOIN:$<TARGET_PROPERTY:protobuf::libprotobuf,                           INTERFACE_INCLUDE_DIRECTORIES>,:_:>
-      #221         -DProtobuf_LIBRARY=$<IF:$<CONFIG:Debug>,$<TARGET_PROPERTY:protobuf::libprotobuf,                 IMPORTED_LOCATION_DEBUG>,$<TARGET_PROPERTY:protobuf::libprotobuf,IMPORTED_LOCATION_RELEASE>>
-      #222         -DProtobuf_PROTOC_LIBRARY=$<IF:$<CONFIG:Debug>,$<TARGET_PROPERTY:protobuf::libprotoc,            IMPORTED_LOCATION_DEBUG>,$<TARGET_PROPERTY:protobuf::libprotoc,IMPORTED_LOCATION_RELEASE>>
-      #223         -DProtobuf_PROTOC_EXECUTABLE=$<TARGET_PROPERTY:protobuf::protoc,IMPORTED_LOCATION>
-      if (${has_zlib})
-        set(gRPC_ZLIB_PROVIDER "package" CACHE STRING "" FORCE)
-      else()
-        set(gRPC_ZLIB_PROVIDER "module" CACHE STRING "" FORCE)
-      endif()
-      # why need this?
-      #$<$<NOT:$<BOOL:${has_zlib}>>:-DZLIB_ROOT=${zlib_binary_dir}/_installed_>
       if (${MSVC})
         set(CMAKE_CXX_FLAGS "-GR -Gd -fp:precise -FS -EHa -MP" CACHE STRING "" FORCE)
         set(CMAKE_C_FLAGS "-GR -Gd -fp:precise -FS -MP" CACHE STRING "" FORCE)
       endif()
-      set(LOG_BUILD ON CACHE BOOL "" FORCE)
-      set(LOG_CONFIGURE ON CACHE BOOL "" FORCE)
-      set(LIST_SEPARATOR ":_:" CACHE STRING "" FORCE)
       
       # AbseilHelpers.cmake build type check checks _build_type for 
       # "static". this conflicts with option static in 
