@@ -110,8 +110,7 @@ seconds
 Squelch<clock_type>::getSquelchDuration()
 {
     auto d = seconds(ripple::rand_int(
-        MIN_UNSQUELCH_EXPIRE.count(),
-        MAX_UNSQUELCH_EXPIRE.count()));
+        MIN_UNSQUELCH_EXPIRE.count(), MAX_UNSQUELCH_EXPIRE.count()));
     return d;
 }
 
