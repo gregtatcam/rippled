@@ -57,7 +57,7 @@ public:
 
     /** Get random squelch duration between MIN_UNSQUELCH_EXPIRE and
      * MAX_UNSQUELCH_EXPIRE */
-    static duration_t
+    static seconds
     getSquelchDuration();
 
 private:
@@ -76,11 +76,11 @@ Squelch<clock_type>::squelch(
     if (squelch)
     {
         squelched_[validator] = [squelchDuration]() {
-            duration_t duration = milliseconds(squelchDuration);
+            seconds duration = seconds(squelchDuration);
             return clock_type::now() +
                 ((duration >= MIN_UNSQUELCH_EXPIRE &&
                   duration <= MAX_UNSQUELCH_EXPIRE)
-                     ? (duration + SQUELCH_LATENCY)
+                     ? duration
                      : getSquelchDuration());  // TBD should we disconnect if
                                                // invalid duration?
         }();
@@ -106,12 +106,12 @@ Squelch<clock_type>::isSquelched(PublicKey const& validator)
 }
 
 template <typename clock_type>
-duration_t
+seconds
 Squelch<clock_type>::getSquelchDuration()
 {
-    auto d = milliseconds(ripple::rand_int(
-        duration_cast<milliseconds>(MIN_UNSQUELCH_EXPIRE).count(),
-        duration_cast<milliseconds>(MAX_UNSQUELCH_EXPIRE).count()));
+    auto d = seconds(ripple::rand_int(
+        MIN_UNSQUELCH_EXPIRE.count(),
+        MAX_UNSQUELCH_EXPIRE.count()));
     return d;
 }
 
