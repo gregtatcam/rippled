@@ -154,7 +154,7 @@ public:
 
 class Validator;
 
-/** Simulate the link from the validator to the peer which directly connected
+/** Simulate link from a validator to a peer directly connected
  * to the server.
  */
 class Link
@@ -170,7 +170,6 @@ public:
         : validator_(validator)
         , peer_(peer)
         , latency_(latency)
-        , priority_(priority)
         , up_(true)
     {
         auto sp = peer_.lock();
@@ -186,16 +185,6 @@ public:
         assert(sp);
         ManualClock::randAdvance(std::get<0>(latency_), std::get<1>(latency_));
         sp->onMessage(m, f);
-    }
-    void
-    setPriority(std::uint16_t priority)
-    {
-        priority_ = priority;
-    }
-    std::uint16_t
-    getPriority()
-    {
-        return priority_;
     }
     Validator&
     validator()
@@ -223,10 +212,7 @@ public:
 private:
     Validator& validator_;
     PeerWPtr peer_;
-    Latency latency_;  // link latency(min,max)
-    std::uint16_t
-        priority_;  // link priority, 1 is highest
-                    // validator sends to links in the order of priority
+    Latency latency_;
     bool up_;
 };
 
@@ -268,30 +254,6 @@ public:
         links_.erase(id);
     }
 
-    /** Pick high priority links if not set yet */
-    void
-    setPriority()
-    {
-        std::vector<std::shared_ptr<Link>> v;
-        std::uint8_t nHigh = 0;
-
-        for (auto& [id, link] : links_)
-        {
-            if (link->getPriority() != 1)
-                v.push_back(link);
-            else
-                nHigh++;
-        };
-
-        while (nHigh != Squelch::MAX_SELECTED_PEERS)
-        {
-            auto i = rand_int(v.size() - 1);
-            v[i]->setPriority(1);
-            v.erase(v.begin() + i);
-            nHigh++;
-        }
-    }
-
     /** Iterate over links for the peers */
     void
     for_links(std::vector<Peer::id_t> peers, LinkIterCB f)
@@ -304,22 +266,19 @@ public:
         }
     }
 
-    /** Iterate over links for all peers - high priority first */
+    /** Iterate over links for all peers - skip some links to simulate
+     * "slower" link
+     * @param f
+     */
     void
-    for_links(LinkIterCB f, bool sendLowPriority = true)
+    for_links(LinkIterCB f, bool simulateSlow = false)
     {
-        std::vector<std::shared_ptr<Link>> links;
-        for (auto& [id, link] : links_)
-        {
-            if (link->getPriority() == 1)
-                links.insert(links.begin(), link);
-            else if (sendLowPriority)
-                links.push_back(link);
-        }
         ManualClock::randAdvance(milliseconds(30), milliseconds(60));
 
-        for (auto& link : links)
+        for (auto& [id, link] : links_)
+        {
             f(*link, message_);
+        }
     }
 
     /** Send to specific peers */
@@ -329,7 +288,7 @@ public:
         for_links(peers, [&](Link& link, MessageSPtr m) { link.send(m, f); });
     }
 
-    /** Send to all peers - high priority first.*/
+    /** Send to all peers */
     void
     send(SquelchCB f)
     {
@@ -349,11 +308,19 @@ public:
     }
 
     void
-    linkUp(Peer::id_t id, bool up)
+    linkUp(Peer::id_t id)
     {
         auto it = links_.find(id);
         assert(it != links_.end());
-        it->second->up(up);
+        it->second->up(true);
+    }
+
+    void
+    linkDown(Peer::id_t id)
+    {
+        auto it = links_.find(id);
+        assert(it != links_.end());
+        it->second->up(false);
     }
 
 private:
@@ -546,12 +513,6 @@ public:
         return slots_.getPeers(validator);
     }
 
-    std::unordered_map<id_t, clock_type::time_point> const&
-    getIdled() const
-    {
-        return slots_.messageTime();
-    }
-
     std::uint8_t
     getNumPeers() const
     {
@@ -575,9 +536,6 @@ public:
             for (auto& v : validators_)
                 v.addPeer(peer);
         }
-
-        for (auto& v : validators_)
-            v.setPriority();
     }
 
     ~Network() = default;
@@ -632,6 +590,22 @@ public:
     }
 
     void
+    enableLink(std::uint16_t validatorId, Peer::id_t peer, bool enable)
+    {
+        auto it = std::find_if(validators_.begin(), validators_.end(), [&](auto v) {
+            return v.id() == validatorId;
+        });
+        assert(it != validators_.end());
+        std::cout << "enable link " << validatorId << " "
+                  << it->id() << " " << peer << " " << enable
+                  << std::endl;
+        if (enable)
+            it->linkUp(peer);
+        else
+            it->linkDown(peer);
+    }
+
+    void
     for_rand(
         std::uint32_t min,
         std::uint32_t max,
@@ -669,10 +643,7 @@ public:
         {
             ManualClock::advance(milliseconds(rand_int(500, 800)));
             for_rand(0, nValidators, [&](std::uint32_t v) {
-                // send less messages over low priority link
-                // to model "slower" link
-                // first message is sent to all links
-                validators_[v].for_links(link, m == 0 || m % 5);
+                validators_[v].for_links(link);
             });
         }
     }
@@ -732,9 +703,13 @@ class reduce_relay_test : public beast::unit_test::suite
     void
     random(bool log)
     {
-        Squelch::gLog = true;
-        bool linkDown = false;
-        bool disconnected = false;
+        enum State {
+            On,
+            Off,
+            WaitReset
+        };
+        State linkDown = State::Off;
+        State disconnected = State::Off;
         std::uint32_t linkDownCnt = 0;
         std::uint32_t linkDownHandled = 0;
         Peer::id_t peerDown = 0;
@@ -760,12 +735,11 @@ class reduce_relay_test : public beast::unit_test::suite
                     str << p << " ";
                 });
 
-            if (!linkDown && !disconnected)
+            if (linkDown == State::Off && rand_int(0, 20))
             {
-                auto r = rand_int(0, 20);
-                linkDown = r == 0;
-                if (linkDown)
-                    linkDownCnt++;
+                std::cout << "setting link down\n";
+                linkDown = State::On;
+                linkDownCnt++;
             }
 
             if (squelched)
@@ -788,11 +762,12 @@ class reduce_relay_test : public beast::unit_test::suite
                 BEAST_EXPECT(countingState == false);
                 BEAST_EXPECT(countsReset);
 
-                if (linkDown)
+                if (linkDown == State::On)
                 {
                     peerDown = *selected.begin();
-                    validator.linkUp(peerDown, false);
                     validatorDown = validator.id();
+                    network_.enableLink(validatorDown, peerDown, false);
+                    linkDown = State::WaitReset;
                 }
             }
 
@@ -806,14 +781,15 @@ class reduce_relay_test : public beast::unit_test::suite
             });
             if (reset)
             {
+                std::cout << "resetting\n";
                 BEAST_EXPECT(linkDown);
                 BEAST_EXPECT(nSquelched > 0);
-                linkDown = false;
-                network_.validator(validatorDown).linkUp(peerDown, true);
+                linkDown = State::Off;
+                network_.enableLink(validatorDown, peerDown, true);
                 linkDownHandled++;
             }
 
-            if (disconnected)
+            if (disconnected == State::On)
             {
                 disconnectCnt++;
                 Peer::id_t id = rand_int(0, (int)MAX_PEERS);
@@ -847,24 +823,6 @@ class reduce_relay_test : public beast::unit_test::suite
                       << linkDownHandled
                       << " peer disconnect count: " << disconnectCnt << "/"
                       << disconnectSelectedCnt << std::endl;
-    }
-
-    void
-    printPeers(PublicKey const& validator)
-    {
-        auto idled = network_.overlay().getIdled();
-        auto peers = network_.overlay().getPeers(validator);
-        for (auto& [id, peer] : peers)
-        {
-            auto [state, count, expire] = peer;
-            std::cout << "peer - id: " << id << " state: " << (int)state
-                      << " count: " << count << " expire: " << expire
-                      << " idled: "
-                      << duration_cast<milliseconds>(
-                             idled[id].time_since_epoch())
-                             .count()
-                      << std::endl;
-        }
     }
 
     bool
