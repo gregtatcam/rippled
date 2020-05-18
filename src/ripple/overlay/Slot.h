@@ -170,7 +170,7 @@ private:
 };
 
 template <typename Peer, typename clock_type>
-template<typename F>
+template <typename F>
 void
 Slot<Peer, clock_type>::checkIdle(PublicKey const& validator, F&& f)
 {
@@ -181,9 +181,8 @@ Slot<Peer, clock_type>::checkIdle(PublicKey const& validator, F&& f)
         auto id = it->first;
         ++it;
         if (peer.timeMessage_ - now > IDLED)
-            deletePeer(id, [&](std::weak_ptr<Peer> wp) {
-                f(validator, wp);
-            }, true);
+            deletePeer(
+                id, [&](std::weak_ptr<Peer> wp) { f(validator, wp); }, true);
     }
 }
 
@@ -203,8 +202,7 @@ Slot<Peer, clock_type>::update(
     {
         peers_.emplace(std::make_pair(
             id,
-            std::move(
-                PeerInfo{peerPtr, PeerState::Counting, 0, now, now})));
+            std::move(PeerInfo{peerPtr, PeerState::Counting, 0, now, now})));
         initCounting();
         return;
     }
