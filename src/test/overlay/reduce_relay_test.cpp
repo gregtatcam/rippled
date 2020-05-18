@@ -167,10 +167,7 @@ public:
         PeerSPtr peer,
         Latency const& latency = {milliseconds(5), milliseconds(15)},
         std::uint16_t priority = 2)
-        : validator_(validator)
-        , peer_(peer)
-        , latency_(latency)
-        , up_(true)
+        : validator_(validator), peer_(peer), latency_(latency), up_(true)
     {
         auto sp = peer_.lock();
         assert(sp);
@@ -592,13 +589,13 @@ public:
     void
     enableLink(std::uint16_t validatorId, Peer::id_t peer, bool enable)
     {
-        auto it = std::find_if(validators_.begin(), validators_.end(), [&](auto v) {
-            return v.id() == validatorId;
-        });
+        auto it =
+            std::find_if(validators_.begin(), validators_.end(), [&](auto v) {
+                return v.id() == validatorId;
+            });
         assert(it != validators_.end());
-        std::cout << "enable link " << validatorId << " "
-                  << it->id() << " " << peer << " " << enable
-                  << std::endl;
+        std::cout << "enable link " << validatorId << " " << it->id() << " "
+                  << peer << " " << enable << std::endl;
         if (enable)
             it->linkUp(peer);
         else
@@ -703,11 +700,7 @@ class reduce_relay_test : public beast::unit_test::suite
     void
     random(bool log)
     {
-        enum State {
-            On,
-            Off,
-            WaitReset
-        };
+        enum State { On, Off, WaitReset };
         State linkDown = State::Off;
         State disconnected = State::Off;
         std::uint32_t linkDownCnt = 0;
