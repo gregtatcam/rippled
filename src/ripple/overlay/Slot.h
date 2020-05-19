@@ -76,8 +76,7 @@ private:
      * @param type  Message type (Validation and Propose Set only,
      *     others are ignored)
      * @param f Function is called for every peer that has to be
-     *     squelched with peer's
-     * weak_ptr as the argument
+     *     squelched with peer's weak_ptr as the argument
      */
     template <typename F>
     void
@@ -156,7 +155,7 @@ private:
         PeerState state_;           // peer's state
         std::size_t count_;         // message's count
         time_point expire_;         // squelch expiration time
-        time_point timeMessage_;    // time last message received
+        time_point lastMessage_;    // time last message received
     };
     std::unordered_map<id_t, PeerInfo> peers_;  // peer's data
     std::unordered_map<id_t, bool> selected_;   // peers selected as the
@@ -180,7 +179,7 @@ Slot<Peer, clock_type>::checkIdle(PublicKey const& validator, F&& f)
         auto& peer = it->second;
         auto id = it->first;
         ++it;
-        if (peer.timeMessage_ - now > IDLED)
+        if (peer.lastMessage_ - now > IDLED)
             deletePeer(
                 id, [&](std::weak_ptr<Peer> wp) { f(validator, wp); }, true);
     }
@@ -212,13 +211,13 @@ Slot<Peer, clock_type>::update(
         clock_type::now() > it->second.expire_)
     {
         it->second.state_ = PeerState::Counting;
-        it->second.timeMessage_ = now;
+        it->second.lastMessage_ = now;
         initCounting();
         return;
     }
 
     auto& peer = it->second;
-    peer.timeMessage_ = now;
+    peer.lastMessage_ = now;
 
     if (state_ != SlotState::Counting || peer.state_ == PeerState::Squelched)
         return;
@@ -395,7 +394,7 @@ public:
      * @param id Peer's pointer which received the message
      * @param type Received protocol message type
      * @param f Function is called for every peer that has to be
-     *     squelched with peer's
+     *     squelched with peer's weak_ptr as the argument
      */
     template <typename F>
     void
