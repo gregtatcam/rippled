@@ -197,7 +197,7 @@ Slot<Peer, clock_type>::checkIdle(F&& f)
         auto& peer = it->second;
         auto id = it->first;
         ++it;
-        if (peer.lastMessage_ - now > IDLED)
+        if (now - peer.lastMessage_ > IDLED)
             deletePeer(id, false, std::forward<F>(f));
     }
 }
