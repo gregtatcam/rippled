@@ -12,7 +12,7 @@ namespace Squelch {
 using namespace std::chrono;
 
 // Peer's squelch is limited in time to
-// rand(MIN_UNSQUELCH_EXPIRE, MAX_UNSQUELCH_EXPIRE)
+// rand{MIN_UNSQUELCH_EXPIRE, MAX_UNSQUELCH_EXPIRE}
 static constexpr seconds MIN_UNSQUELCH_EXPIRE = seconds{300};
 static constexpr seconds MAX_UNSQUELCH_EXPIRE = seconds{600};
 // No message received threshold before identifying a peer as idled
@@ -24,7 +24,7 @@ static constexpr uint16_t MESSAGE_LOW_THRESHOLD = 20;
 // count in {MESSAGE_LOW_THRESHOLD,
 //           MESSAGE_UPPER_THRESHOLD}
 static constexpr uint16_t MESSAGE_UPPER_THRESHOLD = 30;
-// Max selected peers to relay
+// Max selected peers to choose as the source of messages from validator
 static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 
 }  // namespace Squelch
