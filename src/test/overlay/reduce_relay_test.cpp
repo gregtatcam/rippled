@@ -37,16 +37,11 @@ class Peer;
 class Link;
 
 using MessageSPtr = std::shared_ptr<Message>;
+using LinkSPtr = std::shared_ptr<Link>;
 using PeerSPtr = std::shared_ptr<Peer>;
 using PeerWPtr = std::weak_ptr<Peer>;
 using SquelchCB =
     std::function<void(PublicKey const&, PeerWPtr, std::uint32_t)>;
-using SendCB = std::function<void(
-    PublicKey const&,
-    PeerWPtr,
-    std::uint32_t,
-    std::uint32_t,
-    std::uint32_t)>;
 using UnsquelchCB = std::function<void(PublicKey const&, PeerWPtr)>;
 using LinkIterCB = std::function<void(Link&, MessageSPtr)>;
 
@@ -165,8 +160,7 @@ public:
     Link(
         Validator& validator,
         PeerSPtr peer,
-        Latency const& latency = {milliseconds(5), milliseconds(15)},
-        std::uint16_t priority = 2)
+        Latency const& latency = {milliseconds(5), milliseconds(15)})
         : validator_(validator), peer_(peer), latency_(latency), up_(true)
     {
         auto sp = peer_.lock();
@@ -188,22 +182,10 @@ public:
     {
         return validator_;
     }
-    Peer::id_t
-    getPeerId()
-    {
-        auto sp = peer_.lock();
-        assert(sp);
-        return sp->id();
-    }
     void
     up(bool linkUp)
     {
         up_ = linkUp;
-    }
-    bool
-    isUp()
-    {
-        return up_;
     }
 
 private:
@@ -213,9 +195,10 @@ private:
     bool up_;
 };
 
+/** Simulate Validator */
 class Validator
 {
-    using Links = std::unordered_map<Peer::id_t, std::shared_ptr<Link>>;
+    using Links = std::unordered_map<Peer::id_t, LinkSPtr>;
 
 public:
     Validator()
@@ -251,7 +234,6 @@ public:
         links_.erase(id);
     }
 
-    /** Iterate over links for the peers */
     void
     for_links(std::vector<Peer::id_t> peers, LinkIterCB f)
     {
@@ -263,12 +245,11 @@ public:
         }
     }
 
-    /** Randomly iterate over links for all peers */
     void
     for_links(LinkIterCB f, bool simulateSlow = false)
     {
         ManualClock::randAdvance(milliseconds(30), milliseconds(60));
-        std::vector<std::shared_ptr<Link>> v;
+        std::vector<LinkSPtr> v;
         std::transform(links_.begin(), links_.end(),
                        std::back_inserter(v), [](auto &kv){return kv.second;});
         std::random_device d;
@@ -348,6 +329,7 @@ public:
         return id_;
     }
 
+    /** Receiving Peer (PeerImp) */
     void
     onMessage(MessageSPtr const& m, SquelchCB f) override
     {
@@ -359,18 +341,13 @@ public:
         overlay_.checkForSquelch(*validator, shared(), f);
     }
 
+    /** Sending Peer (Directly connected Peer) */
     virtual void
     onMessage(protocol::TMSquelch const& squelch) override
     {
         auto validator = squelch.validatorpubkey();
         PublicKey key(Slice(validator.data(), validator.size()));
         squelch_.squelch(key, squelch.squelch(), squelch.squelchduration());
-    }
-
-    static void
-    resetId()
-    {
-        sid_ = 0;
     }
 
 private:
@@ -480,16 +457,6 @@ public:
     {
         auto ret = slots_.inState(validator, Squelch::SlotState::Counting);
         return ret && *ret;
-    }
-
-    template <typename Comp = std::equal_to<>>
-    boost::optional<std::uint16_t>
-    inState(
-        PublicKey const& validator,
-        Squelch::PeerState state,
-        Comp comp = {})
-    {
-        return slots_.inState(validator, state, comp);
     }
 
     std::set<id_t>
