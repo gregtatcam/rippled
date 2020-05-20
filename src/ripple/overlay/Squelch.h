@@ -97,7 +97,7 @@ Squelch<clock_type>::isSquelched(PublicKey const& validator)
 
     if (squelched_.find(validator) == squelched_.end())
         return false;
-    else if (squelched_[validator] < now)
+    else if (squelched_[validator] > now)
         return true;
 
     squelched_.erase(validator);
