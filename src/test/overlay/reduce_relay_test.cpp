@@ -263,16 +263,19 @@ public:
         }
     }
 
-    /** Iterate over links for all peers - skip some links to simulate
-     * "slower" link
-     * @param f
-     */
+    /** Randomly iterate over links for all peers */
     void
     for_links(LinkIterCB f, bool simulateSlow = false)
     {
         ManualClock::randAdvance(milliseconds(30), milliseconds(60));
+        std::vector<std::shared_ptr<Link>> v;
+        std::transform(links_.begin(), links_.end(),
+                       std::back_inserter(v), [](auto &kv){return kv.second;});
+        std::random_device d;
+        std::mt19937 g(d());
+        std::shuffle(v.begin(), v.end(), g);
 
-        for (auto& [id, link] : links_)
+        for (auto& link : v)
         {
             f(*link, message_);
         }
@@ -696,6 +699,7 @@ class reduce_relay_test : public beast::unit_test::suite
         std::uint16_t validatorDown = 0;
         std::uint16_t disconnectCnt = 0;
         std::uint16_t disconnectSelectedCnt = 0;
+        std::uint16_t idled = 0;
 
         network_.propagate([&](Link& link, MessageSPtr m) {
             auto& validator = link.validator();
@@ -715,7 +719,7 @@ class reduce_relay_test : public beast::unit_test::suite
                     str << p << " ";
                 });
 
-            if (linkDown == State::Off && rand_int(0, 20))
+            if (linkDown == State::Off && rand_int(0, 100) == 0)
             {
                 linkDown = State::On;
                 linkDownCnt++;
@@ -754,7 +758,8 @@ class reduce_relay_test : public beast::unit_test::suite
             network_.overlay().checkIdle([&](PublicKey const& v, PeerWPtr ptr) {
                 BEAST_EXPECT(linkDown);
                 nSquelched++;
-                reset = true;
+                if (linkDown == State::WaitReset)
+                    reset = true;
                 sendSquelch(validator, ptr, {});
             });
             if (reset)
@@ -764,7 +769,8 @@ class reduce_relay_test : public beast::unit_test::suite
                 linkDown = State::Off;
                 network_.enableLink(validatorDown, peerDown, true);
                 linkDownHandled++;
-            }
+            } else if (nSquelched)
+                idled++;
 
             if (disconnected == State::On)
             {
@@ -798,7 +804,8 @@ class reduce_relay_test : public beast::unit_test::suite
             std::cout << "link down count: " << linkDownCnt << "/"
                       << linkDownHandled
                       << " peer disconnect count: " << disconnectCnt << "/"
-                      << disconnectSelectedCnt << std::endl;
+                      << disconnectSelectedCnt << " "
+                      << " idled " << idled << std::endl;
     }
 
     bool
