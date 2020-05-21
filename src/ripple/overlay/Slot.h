@@ -32,6 +32,9 @@ namespace Squelch {
 template <typename Peer, typename clock_type>
 class Slots;
 
+inline bool glog = false;
+inline hash_map<PublicKey, int> vid;
+
 /** Peer's State */
 enum class PeerState : uint8_t {
     Counting = 0x01,   // counting messages
@@ -136,10 +139,10 @@ private:
     std::set<id_t>
     getSelected() const;
 
-    /** Get peers info. Return map of peer's state, count, and squelch
-     * expiration milliseconds.
+    /** Get peers info. Return map of peer's state, count, squelch
+     * expiration milsec, and last message time milsec.
      */
-    std::unordered_map<id_t, std::tuple<PeerState, uint16_t, uint32_t>>
+    std::unordered_map<id_t, std::tuple<PeerState, uint16_t, uint32_t, uint32_t>>
     getPeers();
 
     /** Check if peers stopped relaying messages
@@ -197,9 +200,17 @@ Slot<Peer, clock_type>::checkIdle(F&& f)
         auto& peer = it->second;
         auto id = it->first;
         ++it;
+        auto d = now - peer.lastMessage_;
+        if (glog)
+            std::cout << id << ":" << (int)peer.state_ << ":"
+                << duration_cast<seconds>(peer.lastMessage_.time_since_epoch()).count() << ":"
+                << (now - peer.lastMessage_ > IDLED) << ":"
+                << duration_cast<seconds>(d).count() << " ";
         if (now - peer.lastMessage_ > IDLED)
             deletePeer(id, false, std::forward<F>(f));
     }
+    if (glog)
+        std::cout << std::endl;
 }
 
 template <typename Peer, typename clock_type>
@@ -288,15 +299,21 @@ Slot<Peer, clock_type>::deletePeer(id_t const& id, bool erase, F&& f)
     {
         if (it->second.state_ == PeerState::Selected)
         {
+            if (glog)
+                std::cout << "deleting ### " << id << " ";
             auto now = clock_type::now();
             for (auto& [k, v] : peers_)
             {
+                if (glog)
+                    std::cout << k << ":" << (int)v.state_ << " ";
                 if (v.state_ == PeerState::Squelched)
                     f(v.peer_);
                 v.state_ = PeerState::Counting;
                 v.count_ = 0;
                 v.expire_ = now;
             }
+            if (glog)
+                std::cout << "### ";
 
             selected_.clear();
             state_ = SlotState::Counting;
@@ -366,21 +383,25 @@ Slot<Peer, clock_type>::getSelected() const
 template <typename Peer, typename clock_type>
 std::unordered_map<
     typename Peer::id_t,
-    std::tuple<PeerState, uint16_t, uint32_t>>
+    std::tuple<PeerState, uint16_t, uint32_t, uint32_t>>
 Slot<Peer, clock_type>::getPeers()
 {
     auto init = std::unordered_map<
         id_t,
-        std::tuple<PeerState, std::uint16_t, std::uint32_t>>();
+        std::tuple<PeerState, std::uint16_t, std::uint32_t, std::uint32_t>>();
+    auto tomsec = [](auto t)
+    {
+        return duration_cast<milliseconds>(t.time_since_epoch()).count();
+    };
     return accumulate(
-        init, [](auto& init, id_t const& id, PeerInfo const& peer) {
+        init, [&](auto& init, id_t const& id, PeerInfo const& peer) {
             init.emplace(std::make_pair(
                 id,
                 std::move(std::make_tuple(
                     peer.state_,
                     peer.count_,
-                    duration_cast<milliseconds>(peer.expire_.time_since_epoch())
-                        .count()))));
+                    tomsec(peer.expire_),
+                    tomsec(peer.lastMessage_)))));
             return init;
         });
 }
@@ -479,7 +500,7 @@ public:
      */
     std::unordered_map<
         typename Peer::id_t,
-        std::tuple<PeerState, uint16_t, uint32_t>>
+        std::tuple<PeerState, uint16_t, uint32_t, std::uint32_t>>
     getPeers(PublicKey const& validator)
     {
         auto const& it = slots_.find(validator);
@@ -573,9 +594,14 @@ void
 Slots<Peer, clock_type>::checkIdle(F&& f)
 {
     auto now = clock_type::now();
+    if (glog)
+        std::cout << "check idle " << duration_cast<seconds>(now.time_since_epoch()).count()
+            << std::endl;
 
     for (auto it = slots_.begin(); it != slots_.end();)
     {
+        if (glog)
+            std::cout << " validator " << vid[it->first] << " ";
         it->second.checkIdle([&](std::weak_ptr<Peer> wp) { f(it->first, wp); });
         if (now - it->second.getLastSelected() > MAX_UNSQUELCH_EXPIRE)
             it = slots_.erase(it);
