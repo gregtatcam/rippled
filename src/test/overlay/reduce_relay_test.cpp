@@ -95,8 +95,8 @@ private:
     inline static const bool is_steady = false;
 };
 
-/** Simulate two entities - peer direcly connected to the server
- * (via squelch in PeerSim) and PeerImp (via overlay)
+/** Simulate two entities - peer directly connected to the server
+ * (via squelch in PeerSim) and PeerImp (via Overlay)
  */
 class Peer : public std::enable_shared_from_this<Peer>
 {
@@ -594,14 +594,6 @@ public:
     }
 
     void
-    deletePeer(Peer::id_t id, bool useCache)
-    {
-        overlay_.deletePeer(id, useCache);
-        for (auto& v : validators_)
-            v.deletePeer(id);
-    }
-
-    void
     deleteLastPeer()
     {
         auto id = overlay_.deleteLastPeer();
@@ -653,7 +645,7 @@ public:
         // Send unsquelch to the Peer on all links. This way when
         // the Peer "reconnects" it starts sending messages on the link.
         // We expect that if a Peer disconnects and then reconnects, it's
-        // squelch state is not set.
+        // unsquelched.
         protocol::TMSquelch squelch;
         squelch.set_squelch(false);
         for (auto& v : validators_)
@@ -709,6 +701,7 @@ public:
         }
     }
 
+    /** Is peer in Selected state in any of the slots */
     bool
     isSelected(Peer::id_t id)
     {
@@ -720,6 +713,10 @@ public:
         return false;
     }
 
+    /** Check if there are peers to unsquelch - peer is in Selected
+     * state in any of the slots and there are peers in Squelched state
+     * in those slots.
+     */
     bool
     allCounting(Peer::id_t peer)
     {
@@ -759,6 +756,7 @@ class reduce_relay_test : public beast::unit_test::suite
         std::cout << std::endl;
     }
 
+    /** Send squelch (if duration is set) or unsquelch (if duration not set) */
     Peer::id_t
     sendSquelch(
         PublicKey const& validator,
@@ -777,11 +775,14 @@ class reduce_relay_test : public beast::unit_test::suite
         return peer->id();
     }
 
+    /** Randomly brings the link between a validator and a peer down.
+     * Randomly disconnects a peer. Those events are generated one at a time.
+     */
     void
     random(bool log)
     {
         enum State { On, Off, WaitReset };
-        enum EventType { LinkDown = 0, PeerDisconnected = 1, None = 2 };
+        enum EventType { LinkDown = 0, PeerDisconnected = 1 };
         // Link down or Peer disconnect event
         // TBD - add new peer event
         // TBD - add overlapping type of events at any
@@ -791,7 +792,6 @@ class reduce_relay_test : public beast::unit_test::suite
             State state_ = State::Off;
             std::uint32_t cnt_ = 0;
             std::uint32_t handledCnt_ = 0;
-            std::uint32_t selectedCnt_ = 0;
             bool isSelected_ = false;
             Peer::id_t peer_;
             std::uint16_t validator_;
@@ -801,7 +801,6 @@ class reduce_relay_test : public beast::unit_test::suite
         };
         std::unordered_map<EventType, Event> events{
             {LinkDown, {}}, {PeerDisconnected, {}}};
-        std::uint16_t idled = 0;
         time_point<ManualClock> lastCheck = ManualClock::now();
 
         network_.reset();
@@ -810,7 +809,6 @@ class reduce_relay_test : public beast::unit_test::suite
             auto now = ManualClock::now();
 
             bool squelched = false;
-            int n = 0;
             std::stringstream str;
 
             link.send(
@@ -821,7 +819,6 @@ class reduce_relay_test : public beast::unit_test::suite
                     assert(key == validator);
                     auto p = sendSquelch(key, peerPtr, duration);
                     squelched = true;
-                    n++;
                     str << p << " ";
                 });
 
@@ -833,24 +830,20 @@ class reduce_relay_test : public beast::unit_test::suite
                     str << s << " ";
                 if (log)
                     std::cout
-                        << "random: squelched peers validator: "
-                        << validator.id() << " num: " << n
+                        << "random, squelched, validator: "
+                        << validator.id()
                         << " peers: " << str.str() << " time: "
                         << (double)Squelch::epoch<milliseconds>(now).count() /
                             1000.
                         << std::endl;
                 auto countingState =
                     network_.overlay().isCountingState(validator);
-                BEAST_EXPECT(countingState == false);
-                if (events[EventType::LinkDown].state_ == State::On)
-                    events[EventType::LinkDown].isSelected_ =
-                        network_.overlay().isSelected(
-                            events[EventType::LinkDown].key_,
-                            events[EventType::LinkDown].peer_);
+                BEAST_EXPECT(countingState == false &&
+                             selected.size() == Squelch::MAX_SELECTED_PEERS);
             }
 
-            if (Squelch::epoch<seconds>(now) > seconds(10) &&
-                events[EventType::LinkDown].state_ == State::Off &&
+            // Trigger Link Down or Peer Disconnect event
+            if (events[EventType::LinkDown].state_ == State::Off &&
                 events[EventType::PeerDisconnected].state_ == State::Off)
             {
                 auto update = [&](EventType event) {
@@ -891,8 +884,10 @@ class reduce_relay_test : public beast::unit_test::suite
                         event.handled_ = true;
                     });
                 // Should only be unsquelched if the peer is in Selected state
-                // If in Selected state it's possible unsqulching didn't
-                // take place because peers in all slots are in Counting state
+                // If in Selected state it's possible unsquelching didn't
+                // take place because there is no peers in Squelched state in
+                // any of the slots where the peer is in Selected state
+                // (allCounting is true)
                 bool handled =
                     (event.isSelected_ == false && !event.handled_) ||
                     (event.isSelected_ == true &&
@@ -906,9 +901,15 @@ class reduce_relay_test : public beast::unit_test::suite
             }
 
             auto& event = events[EventType::LinkDown];
+            // Check every sec for idled peers. Idled peers are
+            // created by Link Down event.
             if (now - lastCheck > milliseconds(1000))
             {
                 lastCheck = now;
+                // Check if Link Down event must be handled by
+                // checkIdle(): 1) the peer is in Selected state;
+                // 2) the has not recevied any messages for IDLED time;
+                // 3) there are peers in Squelched state in the slot.
                 bool linkDownMustHandle = false;
                 if (event.state_ == State::On)
                 {
@@ -932,8 +933,6 @@ class reduce_relay_test : public beast::unit_test::suite
                             sendSquelch(validator, ptr, {});
                         }
                     });
-                if (event.handled_ && !linkDownMustHandle)
-                    idled++;
                 bool handled =
                     (event.handled_ && event.state_ == State::WaitReset) ||
                     (!event.handled_ && !linkDownMustHandle);
@@ -942,8 +941,6 @@ class reduce_relay_test : public beast::unit_test::suite
             if (event.state_ == State::WaitReset ||
                 (event.state_ == State::On && (now - event.time_ > seconds(6))))
             {
-                // Should only be unsquelched if the link is down for Selected
-                // peer
                 bool handled =
                     event.state_ == State::WaitReset || !event.handled_;
                 BEAST_EXPECT(handled);
@@ -957,16 +954,15 @@ class reduce_relay_test : public beast::unit_test::suite
 
         auto& down = events[EventType::LinkDown];
         auto& disconnected = events[EventType::PeerDisconnected];
-        BEAST_EXPECT(
-            down.cnt_ == down.handledCnt_ || down.cnt_ == down.handledCnt_ + 1);
+        // It's possible the last Down Link event is not handled
+        BEAST_EXPECT(down.handledCnt_ >= down.cnt_ - 1);
+        // All Peer Disconnect events must be handled
         BEAST_EXPECT(disconnected.cnt_ == disconnected.handledCnt_);
-        BEAST_EXPECT(idled == 0);
         if (log)
             std::cout << "link down count: " << down.cnt_ << "/"
                       << down.handledCnt_
                       << " peer disconnect count: " << disconnected.cnt_ << "/"
-                      << disconnected.handledCnt_ << " "
-                      << " idled " << idled << std::endl;
+                      << disconnected.handledCnt_;
     }
 
     bool
@@ -1021,6 +1017,7 @@ class reduce_relay_test : public beast::unit_test::suite
         });
     }
 
+    /** Propagate enough messages to generate one squelch event */
     bool
     propagateAndSquelch(bool log, bool purge = true, bool resetClock = true)
     {
@@ -1055,6 +1052,7 @@ class reduce_relay_test : public beast::unit_test::suite
         return n == 1 && res;
     }
 
+    /** Send fewer message so that squelch event is not generated */
     bool
     propagateNoSquelch(
         bool log,
@@ -1083,7 +1081,7 @@ class reduce_relay_test : public beast::unit_test::suite
         return !squelched && res;
     }
 
-    /** Receiving message from new peer should change the
+    /** Receiving a message from new peer should change the
      * slot's state to Counting.
      */
     void
@@ -1134,8 +1132,7 @@ class reduce_relay_test : public beast::unit_test::suite
         });
     }
 
-    /**
-     * Squelched peer disconnects. Should not change the state to counting
+    /** Squelched peer disconnects. Should not change the state to counting.
      */
     void
     testSquelchedPeerDisconnects(bool log)
@@ -1174,7 +1171,7 @@ public:
     void
     run() override
     {
-        bool log = true;
+        bool log = false;
         testInitialRound(log);
         testPeerUnsquelchedTooSoon(log);
         testPeerUnsquelched(log);
