@@ -219,7 +219,6 @@ public:
         v.set_validation("validation");
         message_ = std::make_shared<Message>(v, protocol::mtVALIDATION, pkey_);
         id_ = sid_++;
-        Squelch::vid[pkey_] = id_;
     }
     ~Validator()
     {
@@ -232,8 +231,7 @@ public:
         links_.clear();
     }
 
-    static
-    void
+    static void
     resetId()
     {
         sid_ = 0;
@@ -358,8 +356,7 @@ public:
         return id_;
     }
 
-    static
-    void
+    static void
     resetId()
     {
         sid_ = 0;
@@ -411,7 +408,7 @@ public:
     {
         peers_.clear();
         ManualClock::advance(hours(1));
-        slots_.checkIdle([](PublicKey const&, PeerWPtr){});
+        slots_.checkIdle([](PublicKey const&, PeerWPtr) {});
     }
 
     std::uint16_t
@@ -533,7 +530,11 @@ public:
 
     std::unordered_map<
         id_t,
-        std::tuple<Squelch::PeerState, std::uint16_t, std::uint32_t, std::uint32_t>>
+        std::tuple<
+            Squelch::PeerState,
+            std::uint16_t,
+            std::uint32_t,
+            std::uint32_t>>
     getPeers(PublicKey const& validator)
     {
         return slots_.getPeers(validator);
@@ -655,7 +656,7 @@ public:
         // squelch state is not set.
         protocol::TMSquelch squelch;
         squelch.set_squelch(false);
-        for (auto& v: validators_)
+        for (auto& v : validators_)
         {
             PublicKey key = v;
             squelch.clear_validatorpubkey();
@@ -711,7 +712,7 @@ public:
     bool
     isSelected(Peer::id_t id)
     {
-        for (auto& v: validators_)
+        for (auto& v : validators_)
         {
             if (overlay_.isSelected(v, id))
                 return true;
@@ -722,13 +723,14 @@ public:
     bool
     allCounting(Peer::id_t peer)
     {
-        for (auto& v: validators_)
+        for (auto& v : validators_)
         {
             if (!overlay_.isSelected(v, peer))
                 continue;
             auto peers = overlay_.getPeers(v);
-            for (auto& [k,v]: peers)
-                if (std::get<Squelch::PeerState>(v) == Squelch::PeerState::Squelched)
+            for (auto& [k, v] : peers)
+                if (std::get<Squelch::PeerState>(v) ==
+                    Squelch::PeerState::Squelched)
                     return false;
         }
         return true;
@@ -830,26 +832,21 @@ class reduce_relay_test : public beast::unit_test::suite
                 for (auto s : selected)
                     str << s << " ";
                 if (log)
-                {
-                    std::cout << "random: squelched peers validator: "
-                              << validator.id() << " num: " << n
-                              << " peers: " << str.str() << " time: "
-                              << (double)Squelch::epoch<milliseconds>(now).count() / 1000.
-                              << std::endl;
-                    auto peers = network_.overlay().getPeers(validator);
-                    std::cout << "---- ";
-                    for (auto& [k,v]: peers)
-                        std::cout << k << ":" << (int)std::get<0>(v) << ":"
-                                  << std::get<3>(v)/1000 << " ";
-                    std::cout << std::endl;
-                }
+                    std::cout
+                        << "random: squelched peers validator: "
+                        << validator.id() << " num: " << n
+                        << " peers: " << str.str() << " time: "
+                        << (double)Squelch::epoch<milliseconds>(now).count() /
+                            1000.
+                        << std::endl;
                 auto countingState =
                     network_.overlay().isCountingState(validator);
                 BEAST_EXPECT(countingState == false);
                 if (events[EventType::LinkDown].state_ == State::On)
-                    events[EventType::LinkDown].isSelected_ = network_.overlay().isSelected(
-                        events[EventType::LinkDown].key_,
-                        events[EventType::LinkDown].peer_);
+                    events[EventType::LinkDown].isSelected_ =
+                        network_.overlay().isSelected(
+                            events[EventType::LinkDown].key_,
+                            events[EventType::LinkDown].peer_);
             }
 
             if (Squelch::epoch<seconds>(now) > seconds(10) &&
@@ -867,18 +864,13 @@ class reduce_relay_test : public beast::unit_test::suite
                     {
                         network_.enableLink(
                             validator.id(), link.peerId(), false);
-                        events[event].isSelected_ = network_.overlay().isSelected(
-                            validator, link.peerId());
-                        std::cout << "### starting link down " << Squelch::epoch<seconds>(now).count()
-                            << std::endl;
-                        auto peers = network_.overlay().getPeers(validator);
-                        for (auto& [k, v]: peers)
-                            std::cout << k << ":" << (int)std::get<0>(v)
-                                << ":" << std::get<3>(v)/1000 << " ";
-                        std::cout << std::endl;
+                        events[event].isSelected_ =
+                            network_.overlay().isSelected(
+                                validator, link.peerId());
                     }
                     else
-                        events[event].isSelected_ = network_.isSelected(link.peerId());
+                        events[event].isSelected_ =
+                            network_.isSelected(link.peerId());
                 };
                 auto r = rand_int(0, 500);
                 if (r == (int)EventType::LinkDown ||
@@ -893,8 +885,7 @@ class reduce_relay_test : public beast::unit_test::suite
                 auto& event = events[EventType::PeerDisconnected];
                 bool allCounting = network_.allCounting(event.peer_);
                 network_.overlay().unsquelch(
-                    event.peer_,
-                    [&](PublicKey const& v, PeerWPtr peerPtr) {
+                    event.peer_, [&](PublicKey const& v, PeerWPtr peerPtr) {
                         if (event.isSelected_)
                             sendSquelch(v, peerPtr, {});
                         event.handled_ = true;
@@ -904,14 +895,8 @@ class reduce_relay_test : public beast::unit_test::suite
                 // take place because peers in all slots are in Counting state
                 bool handled =
                     (event.isSelected_ == false && !event.handled_) ||
-                    (event.isSelected_ == true && (event.handled_ || allCounting));
-                if (!handled)
-                    std::cout << "disconnect event peer " << event.peer_ <<  " "
-                          << " validator " << event.validator_ << " "
-                          << " selected " << event.isSelected_ << " "
-                          << " all counting " << allCounting
-                          << " handled " << handled << "/" << event.handled_
-                          << std::endl;
+                    (event.isSelected_ == true &&
+                     (event.handled_ || allCounting));
                 BEAST_EXPECT(handled);
                 event.state_ = State::Off;
                 event.isSelected_ = false;
@@ -935,11 +920,9 @@ class reduce_relay_test : public beast::unit_test::suite
                         std::get<3>(peers[event.peer_]);
                     linkDownMustHandle = event.isSelected_ &&
                         d > milliseconds(Squelch::IDLED).count() &&
-                        network_.overlay().inState(event.key_, Squelch::PeerState::Squelched) > 0;
-                    std::cout << "must handle " << event.isSelected_ << " "
-                        << d << std::endl;
+                        network_.overlay().inState(
+                            event.key_, Squelch::PeerState::Squelched) > 0;
                 }
-                Squelch::glog = true;
                 network_.overlay().checkIdle(
                     [&](PublicKey const& v, PeerWPtr ptr) {
                         event.handled_ = true;
@@ -947,53 +930,28 @@ class reduce_relay_test : public beast::unit_test::suite
                         {
                             event.state_ = State::WaitReset;
                             sendSquelch(validator, ptr, {});
-                        } else
-                        {
-                            std::cout << "condition failure " << linkDownMustHandle << " "
-                                << (v == event.key_) << std::endl;
                         }
                     });
-                Squelch::glog = false;
                 if (event.handled_ && !linkDownMustHandle)
                     idled++;
                 bool handled =
                     (event.handled_ && event.state_ == State::WaitReset) ||
                     (!event.handled_ && !linkDownMustHandle);
                 BEAST_EXPECT(handled);
-                if (!handled)
-                    std::cout << "idle not handled peer " << event.peer_ << " n "
-                              << " state " << (int)event.state_
-                              << " validator " << event.validator_
-                              << " selected " << event.isSelected_ << " handled "
-                              << event.handled_ << std::endl;
             }
             if (event.state_ == State::WaitReset ||
-                (event.state_ == State::On &&
-                    (now - event.time_ > seconds(6))))
+                (event.state_ == State::On && (now - event.time_ > seconds(6))))
             {
                 // Should only be unsquelched if the link is down for Selected
                 // peer
-                bool handled = event.state_ == State::WaitReset || !event.handled_;
+                bool handled =
+                    event.state_ == State::WaitReset || !event.handled_;
                 BEAST_EXPECT(handled);
-                if (!handled)
-                    std::cout << "down event " << event.peer_ <<  " "
-                          << " validator " << event.validator_ << " "
-                          << " selected " << event.isSelected_ << " "
-                          << " state " << (int)event.state_ << " "
-                          << " handled " << event.handled_ << "/" << handled
-                          << " num peers " << network_.overlay().getNumPeers() << std::endl;
                 event.state_ = State::Off;
                 event.isSelected_ = false;
                 event.handledCnt_ += handled;
                 event.handled_ = false;
                 network_.enableLink(event.validator_, event.peer_, true);
-                std::cout << "### finished link down " << Squelch::epoch<seconds>(now).count()
-                          << std::endl;
-                auto peers = network_.overlay().getPeers(validator);
-                for (auto& [k, v]: peers)
-                    std::cout << k << ":" << (int)std::get<0>(v)
-                              << ":" << std::get<3>(v)/1000 << " ";
-                std::cout << std::endl;
             }
         });
 

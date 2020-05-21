@@ -32,9 +32,6 @@ namespace Squelch {
 template <typename Peer, typename clock_type>
 class Slots;
 
-inline bool glog = false;
-inline hash_map<PublicKey, int> vid;
-
 /** Peer's State */
 enum class PeerState : uint8_t {
     Counting = 0x01,   // counting messages
@@ -47,7 +44,7 @@ enum class SlotState : uint8_t {
     Selected = 0x02,  // peers selected, stop counting
 };
 
-template<typename Unit, typename TP>
+template <typename Unit, typename TP>
 Unit
 epoch(TP const& t)
 {
@@ -149,8 +146,9 @@ private:
     /** Get peers info. Return map of peer's state, count, squelch
      * expiration milsec, and last message time milsec.
      */
-    std::unordered_map<id_t, std::tuple<PeerState, uint16_t, uint32_t, uint32_t>>
-    getPeers();
+    std::
+        unordered_map<id_t, std::tuple<PeerState, uint16_t, uint32_t, uint32_t>>
+        getPeers();
 
     /** Check if peers stopped relaying messages
      * @param f Function is called for every peer in Squelched state
@@ -207,17 +205,9 @@ Slot<Peer, clock_type>::checkIdle(F&& f)
         auto& peer = it->second;
         auto id = it->first;
         ++it;
-        auto d = now - peer.lastMessage_;
-        if (glog)
-            std::cout << id << ":" << (int)peer.state_ << ":"
-                << epoch<seconds>(peer.lastMessage_).count() << ":"
-                << (now - peer.lastMessage_ > IDLED) << ":"
-                << duration_cast<seconds>(d).count() << " ";
         if (now - peer.lastMessage_ > IDLED)
             deletePeer(id, false, std::forward<F>(f));
     }
-    if (glog)
-        std::cout << std::endl;
 }
 
 template <typename Peer, typename clock_type>
@@ -270,7 +260,7 @@ Slot<Peer, clock_type>::update(
         // If number of remaining peers is < MAX_SELECTED_PEERS
         // then start the Selection round again and let checkIdle() handle
         // idled peers.
-        for (auto it = selected_.begin(); it != selected_.end(); )
+        for (auto it = selected_.begin(); it != selected_.end();)
         {
             // TBD : should we be stricter and exclude > x% of IDLED? (75%?)
             assert(peers_.find(it->first) != peers_.end());
@@ -328,21 +318,15 @@ Slot<Peer, clock_type>::deletePeer(id_t const& id, bool erase, F&& f)
     {
         if (it->second.state_ == PeerState::Selected)
         {
-            if (glog)
-                std::cout << "deleting ### " << id << " ";
             auto now = clock_type::now();
             for (auto& [k, v] : peers_)
             {
-                if (glog)
-                    std::cout << k << ":" << (int)v.state_ << " ";
                 if (v.state_ == PeerState::Squelched)
                     f(v.peer_);
                 v.state_ = PeerState::Counting;
                 v.count_ = 0;
                 v.expire_ = now;
             }
-            if (glog)
-                std::cout << "### ";
 
             selected_.clear();
             state_ = SlotState::Counting;
@@ -351,6 +335,7 @@ Slot<Peer, clock_type>::deletePeer(id_t const& id, bool erase, F&& f)
         {
             selected_.erase(id);
         }
+
         if (erase)
             peers_.erase(id);
     }
@@ -623,13 +608,9 @@ void
 Slots<Peer, clock_type>::checkIdle(F&& f)
 {
     auto now = clock_type::now();
-    if (glog)
-        std::cout << "check idle " << epoch<seconds>(now).count() << std::endl;
 
     for (auto it = slots_.begin(); it != slots_.end();)
     {
-        if (glog)
-            std::cout << " validator " << vid[it->first] << " ";
         it->second.checkIdle([&](std::weak_ptr<Peer> wp) { f(it->first, wp); });
         if (now - it->second.getLastSelected() > MAX_UNSQUELCH_EXPIRE)
             it = slots_.erase(it);
