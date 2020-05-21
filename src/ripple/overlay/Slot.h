@@ -47,6 +47,13 @@ enum class SlotState : uint8_t {
     Selected = 0x02,  // peers selected, stop counting
 };
 
+template<typename Unit, typename TP>
+Unit
+epoch(TP const& t)
+{
+    return duration_cast<Unit>(t.time_since_epoch());
+}
+
 /**
  * Slot is associated with a specific validator via validator's public key.
  * Slot counts messages from a validator, selects peers to be the source
@@ -203,7 +210,7 @@ Slot<Peer, clock_type>::checkIdle(F&& f)
         auto d = now - peer.lastMessage_;
         if (glog)
             std::cout << id << ":" << (int)peer.state_ << ":"
-                << duration_cast<seconds>(peer.lastMessage_.time_since_epoch()).count() << ":"
+                << epoch<seconds>(peer.lastMessage_).count() << ":"
                 << (now - peer.lastMessage_ > IDLED) << ":"
                 << duration_cast<seconds>(d).count() << " ";
         if (now - peer.lastMessage_ > IDLED)
@@ -257,13 +264,35 @@ Slot<Peer, clock_type>::update(
 
     if (reachedThreshold_ && selected_.size() >= MAX_SELECTED_PEERS)
     {
-        // randomly select MAX_SELECTED_PEERS peers
+        // Randomly select MAX_SELECTED_PEERS peers.
+        // Exclude peers that may have been idling > IDLED -
+        // it's possible that checkIdle() has not been called yet.
+        // If number of remaining peers is < MAX_SELECTED_PEERS
+        // then start the Selection round again and let checkIdle() handle
+        // idled peers.
+        for (auto it = selected_.begin(); it != selected_.end(); )
+        {
+            // TBD : should we be stricter and exclude > x% of IDLED? (75%?)
+            assert(peers_.find(it->first) != peers_.end());
+            if (now - peers_[it->first].lastMessage_ >= IDLED)
+                it = selected_.erase(it);
+            else
+                ++it;
+        }
+
+        if (selected_.size() < MAX_SELECTED_PEERS)
+        {
+            initCounting();
+            return;
+        }
+
         while (selected_.size() != MAX_SELECTED_PEERS)
         {
             auto it = selected_.begin();
             auto i = rand_int(selected_.size() - 1);
             selected_.erase(std::next(it, i));
         }
+        ////// done peer selection
 
         lastSelected_ = now;
 
@@ -318,6 +347,10 @@ Slot<Peer, clock_type>::deletePeer(id_t const& id, bool erase, F&& f)
             selected_.clear();
             state_ = SlotState::Counting;
         }
+        else if (selected_.find(id) != selected_.end())
+        {
+            selected_.erase(id);
+        }
         if (erase)
             peers_.erase(id);
     }
@@ -358,7 +391,7 @@ std::uint16_t
 Slot<Peer, clock_type>::inState(PeerState state, Comp comp) const
 {
     return accumulate(0, [&](int& init, id_t const& id, PeerInfo const& peer) {
-        if (comp(peer.getState(), state))
+        if (comp(peer.state_, state))
             return ++init;
         return init;
     });
@@ -389,19 +422,15 @@ Slot<Peer, clock_type>::getPeers()
     auto init = std::unordered_map<
         id_t,
         std::tuple<PeerState, std::uint16_t, std::uint32_t, std::uint32_t>>();
-    auto tomsec = [](auto t)
-    {
-        return duration_cast<milliseconds>(t.time_since_epoch()).count();
-    };
     return accumulate(
-        init, [&](auto& init, id_t const& id, PeerInfo const& peer) {
+        init, [](auto& init, id_t const& id, PeerInfo const& peer) {
             init.emplace(std::make_pair(
                 id,
                 std::move(std::make_tuple(
                     peer.state_,
                     peer.count_,
-                    tomsec(peer.expire_),
-                    tomsec(peer.lastMessage_)))));
+                    epoch<milliseconds>(peer.expire_).count(),
+                    epoch<milliseconds>(peer.lastMessage_).count()))));
             return init;
         });
 }
@@ -595,8 +624,7 @@ Slots<Peer, clock_type>::checkIdle(F&& f)
 {
     auto now = clock_type::now();
     if (glog)
-        std::cout << "check idle " << duration_cast<seconds>(now.time_since_epoch()).count()
-            << std::endl;
+        std::cout << "check idle " << epoch<seconds>(now).count() << std::endl;
 
     for (auto it = slots_.begin(); it != slots_.end();)
     {
