@@ -914,7 +914,7 @@ class reduce_relay_test : public beast::unit_test::suite
                 lastCheck = now;
                 // Check if Link Down event must be handled by
                 // checkIdle(): 1) the peer is in Selected state;
-                // 2) the has not recevied any messages for IDLED time;
+                // 2) the peer has not received any messages for IDLED time;
                 // 3) there are peers in Squelched state in the slot.
                 bool mustHandle = false;
                 if (event.state_ == State::On)
