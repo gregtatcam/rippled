@@ -220,6 +220,10 @@ public:
         message_ = std::make_shared<Message>(v, protocol::mtVALIDATION, pkey_);
         id_ = sid_++;
     }
+    Validator(Validator const&) = default;
+    Validator(Validator &&) = default;
+    Validator& operator=(Validator const&) = default;
+    Validator& operator=(Validator &&) = default;
     ~Validator()
     {
         clear();
@@ -252,7 +256,7 @@ public:
     addPeer(PeerSPtr peer)
     {
         links_.emplace(std::make_pair(
-            peer->id(), std::move(std::make_shared<Link>(*this, peer))));
+            peer->id(), std::make_shared<Link>(*this, peer)));
     }
 
     void
@@ -333,8 +337,8 @@ public:
 
 private:
     Links links_;
-    PublicKey pkey_;
-    MessageSPtr message_;
+    PublicKey pkey_{};
+    MessageSPtr message_ = nullptr;
     inline static std::uint16_t sid_ = 0;
     std::uint16_t id_ = 0;
 };
@@ -629,7 +633,7 @@ public:
     enableLink(std::uint16_t validatorId, Peer::id_t peer, bool enable)
     {
         auto it =
-            std::find_if(validators_.begin(), validators_.end(), [&](auto v) {
+            std::find_if(validators_.begin(), validators_.end(), [&](auto& v) {
                 return v.id() == validatorId;
             });
         assert(it != validators_.end());
