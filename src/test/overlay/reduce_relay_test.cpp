@@ -830,21 +830,21 @@ class reduce_relay_test : public beast::unit_test::suite
                     str << s << " ";
                 if (log)
                     std::cout
-                        << "random, squelched, validator: "
-                        << validator.id()
+                        << "random, squelched, validator: " << validator.id()
                         << " peers: " << str.str() << " time: "
                         << (double)Squelch::epoch<milliseconds>(now).count() /
                             1000.
                         << std::endl;
                 auto countingState =
                     network_.overlay().isCountingState(validator);
-                BEAST_EXPECT(countingState == false &&
-                             selected.size() == Squelch::MAX_SELECTED_PEERS);
+                BEAST_EXPECT(
+                    countingState == false &&
+                    selected.size() == Squelch::MAX_SELECTED_PEERS);
             }
 
             // Trigger Link Down or Peer Disconnect event
-            if (events[EventType::LinkDown].state_ == State::Off &&
-                events[EventType::PeerDisconnected].state_ == State::Off)
+            // Onle one Link Down at a time
+            if (events[EventType::LinkDown].state_ == State::Off)
             {
                 auto update = [&](EventType event) {
                     events[event].cnt_++;

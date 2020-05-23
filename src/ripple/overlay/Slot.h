@@ -168,11 +168,6 @@ private:
     void
     initCounting();
 
-    /** Accumulate value T over peers. F(T&, id_t const&, PeerInfo const&) */
-    template <typename T, typename F>
-    T
-    accumulate(T t, F&& f) const;
-
     /** Data maintained for each peer */
     struct PeerInfo
     {
@@ -183,7 +178,7 @@ private:
         time_point lastMessage_;    // time last message received
     };
     std::unordered_map<id_t, PeerInfo> peers_;  // peer's data
-    std::unordered_map<id_t, bool> selected_;   // pool of peers selected
+    std::unordered_set<id_t> considered_;       // pool of peers considered
                                                 // as the source of messages
                                                 // from validator
     typename clock_type::time_point
@@ -247,42 +242,42 @@ Slot<Peer, clock_type>::update(
         return;
 
     if (++peer.count_ > MESSAGE_LOW_THRESHOLD)
-        selected_[id] = true;
+        considered_.insert(id);
 
     if (peer.count_ > MESSAGE_UPPER_THRESHOLD)
         reachedThreshold_ = true;
 
-    if (reachedThreshold_ && selected_.size() >= MAX_SELECTED_PEERS)
+    if (reachedThreshold_ && considered_.size() >= MAX_SELECTED_PEERS)
     {
         // Randomly select MAX_SELECTED_PEERS peers.
         // Exclude peers that may have been idling > IDLED -
         // it's possible that checkIdle() has not been called yet.
-        // If number of remaining peers is < MAX_SELECTED_PEERS
+        // If number of remaining peers is != MAX_SELECTED_PEERS
         // then start the Selection round again and let checkIdle() handle
         // idled peers.
-        for (auto it = selected_.begin(); it != selected_.end();)
+        std::unordered_set<id_t> selected;
+        while (selected.size() != MAX_SELECTED_PEERS && considered_.size() != 0)
         {
-            // TBD : should we be stricter and exclude > x% of IDLED? (75%?)
-            assert(peers_.find(it->first) != peers_.end());
-            if (now - peers_[it->first].lastMessage_ >= IDLED)
-                it = selected_.erase(it);
-            else
-                ++it;
+            auto i =
+                considered_.size() == 1 ? 0 : rand_int(considered_.size() - 1);
+            auto it = std::next(considered_.begin(), i);
+            auto id = *it;
+            considered_.erase(it);
+            if (peers_.find(id) == peers_.end())
+            {
+                // TBD have to log this
+                continue;
+            }
+            // TBD : should we be stricter and include < x% of IDLED? (50%?)
+            if (now - peers_[id].lastMessage_ < IDLED)
+                selected.insert(id);
         }
 
-        if (selected_.size() < MAX_SELECTED_PEERS)
+        if (selected.size() != MAX_SELECTED_PEERS)
         {
             initCounting();
             return;
         }
-
-        while (selected_.size() != MAX_SELECTED_PEERS)
-        {
-            auto it = selected_.begin();
-            auto i = rand_int(selected_.size() - 1);
-            selected_.erase(std::next(it, i));
-        }
-        ////// done peer selection
 
         lastSelected_ = now;
 
@@ -292,7 +287,7 @@ Slot<Peer, clock_type>::update(
         {
             v.count_ = 0;
 
-            if (selected_.find(k) != selected_.end())
+            if (selected.find(k) != selected.end())
                 v.state_ = PeerState::Selected;
             else if (v.state_ != PeerState::Squelched)
             {
@@ -302,7 +297,7 @@ Slot<Peer, clock_type>::update(
                 f(v.peer_, duration_cast<milliseconds>(duration).count());
             }
         }
-        selected_.clear();
+        considered_.clear();
         state_ = SlotState::Selected;
         reachedThreshold_ = false;
     }
@@ -328,12 +323,12 @@ Slot<Peer, clock_type>::deletePeer(id_t const& id, bool erase, F&& f)
                 v.expire_ = now;
             }
 
-            selected_.clear();
+            considered_.clear();
             state_ = SlotState::Counting;
         }
-        else if (selected_.find(id) != selected_.end())
+        else if (considered_.find(id) != considered_.end())
         {
-            selected_.erase(id);
+            considered_.erase(id);
         }
 
         if (erase)
@@ -355,19 +350,8 @@ Slot<Peer, clock_type>::initCounting()
 {
     state_ = SlotState::Counting;
     reachedThreshold_ = false;
-    selected_.clear();
+    considered_.clear();
     resetCounts();
-}
-
-template <typename Peer, typename clock_type>
-template <typename T, typename F>
-T
-Slot<Peer, clock_type>::accumulate(T t, F&& f) const
-{
-    return std::accumulate(
-        peers_.begin(), peers_.end(), t, [&](T& t, auto const& it) {
-            return f(t, it.first, it.second);
-        });
 }
 
 template <typename Peer, typename clock_type>
@@ -375,10 +359,8 @@ template <typename Comp>
 std::uint16_t
 Slot<Peer, clock_type>::inState(PeerState state, Comp comp) const
 {
-    return accumulate(0, [&](int& init, id_t const& id, PeerInfo const& peer) {
-        if (comp(peer.state_, state))
-            return ++init;
-        return init;
+    return std::count_if(peers_.begin(), peers_.end(), [&](auto const& it) {
+        return (comp(it.second.state_, state));
     });
 }
 
@@ -387,11 +369,11 @@ std::set<typename Peer::id_t>
 Slot<Peer, clock_type>::getSelected() const
 {
     std::set<id_t> init;
-    return accumulate(
-        init, [](auto& init, id_t const& id, PeerInfo const& peer) {
-            if (peer.state_ == PeerState::Selected)
+    return std::accumulate(
+        peers_.begin(), peers_.end(), init, [](auto& init, auto const& it) {
+            if (it.second.state_ == PeerState::Selected)
             {
-                init.insert(id);
+                init.insert(it.first);
                 return init;
             }
             return init;
@@ -407,15 +389,15 @@ Slot<Peer, clock_type>::getPeers()
     auto init = std::unordered_map<
         id_t,
         std::tuple<PeerState, std::uint16_t, std::uint32_t, std::uint32_t>>();
-    return accumulate(
-        init, [](auto& init, id_t const& id, PeerInfo const& peer) {
+    return std::accumulate(
+        peers_.begin(), peers_.end(), init, [](auto& init, auto const& it) {
             init.emplace(std::make_pair(
-                id,
+                it.first,
                 std::move(std::make_tuple(
-                    peer.state_,
-                    peer.count_,
-                    epoch<milliseconds>(peer.expire_).count(),
-                    epoch<milliseconds>(peer.lastMessage_).count()))));
+                    it.second.state_,
+                    it.second.count_,
+                    epoch<milliseconds>(it.second.expire_).count(),
+                    epoch<milliseconds>(it.second.lastMessage_).count()))));
             return init;
         });
 }
