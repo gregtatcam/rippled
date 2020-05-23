@@ -221,9 +221,11 @@ public:
         id_ = sid_++;
     }
     Validator(Validator const&) = default;
-    Validator(Validator &&) = default;
-    Validator& operator=(Validator const&) = default;
-    Validator& operator=(Validator &&) = default;
+    Validator(Validator&&) = default;
+    Validator&
+    operator=(Validator const&) = default;
+    Validator&
+    operator=(Validator&&) = default;
     ~Validator()
     {
         clear();
@@ -255,8 +257,8 @@ public:
     void
     addPeer(PeerSPtr peer)
     {
-        links_.emplace(std::make_pair(
-            peer->id(), std::make_shared<Link>(*this, peer)));
+        links_.emplace(
+            std::make_pair(peer->id(), std::make_shared<Link>(*this, peer)));
     }
 
     void
@@ -914,7 +916,7 @@ class reduce_relay_test : public beast::unit_test::suite
                 // checkIdle(): 1) the peer is in Selected state;
                 // 2) the has not recevied any messages for IDLED time;
                 // 3) there are peers in Squelched state in the slot.
-                bool linkDownMustHandle = false;
+                bool mustHandle = false;
                 if (event.state_ == State::On)
                 {
                     event.isSelected_ =
@@ -923,7 +925,7 @@ class reduce_relay_test : public beast::unit_test::suite
                     assert(peers.find(event.peer_) != peers.end());
                     auto d = Squelch::epoch<milliseconds>(now).count() -
                         std::get<3>(peers[event.peer_]);
-                    linkDownMustHandle = event.isSelected_ &&
+                    mustHandle = event.isSelected_ &&
                         d > milliseconds(Squelch::IDLED).count() &&
                         network_.overlay().inState(
                             event.key_, Squelch::PeerState::Squelched) > 0;
@@ -931,7 +933,7 @@ class reduce_relay_test : public beast::unit_test::suite
                 network_.overlay().checkIdle(
                     [&](PublicKey const& v, PeerWPtr ptr) {
                         event.handled_ = true;
-                        if (linkDownMustHandle && v == event.key_)
+                        if (mustHandle && v == event.key_)
                         {
                             event.state_ = State::WaitReset;
                             sendSquelch(validator, ptr, {});
@@ -939,7 +941,7 @@ class reduce_relay_test : public beast::unit_test::suite
                     });
                 bool handled =
                     (event.handled_ && event.state_ == State::WaitReset) ||
-                    (!event.handled_ && !linkDownMustHandle);
+                    (!event.handled_ && !mustHandle);
                 BEAST_EXPECT(handled);
             }
             if (event.state_ == State::WaitReset ||

@@ -250,9 +250,9 @@ Slot<Peer, clock_type>::update(
     if (reachedThreshold_ && considered_.size() >= MAX_SELECTED_PEERS)
     {
         // Randomly select MAX_SELECTED_PEERS peers.
-        // Exclude peers that may have been idling > IDLED -
+        // Exclude peers that have been idling > IDLED -
         // it's possible that checkIdle() has not been called yet.
-        // If number of remaining peers is != MAX_SELECTED_PEERS
+        // If number of remaining peers != MAX_SELECTED_PEERS
         // then start the Selection round again and let checkIdle() handle
         // idled peers.
         std::unordered_set<id_t> selected;
