@@ -240,8 +240,6 @@ Slot<Peer, clock_type>::update(
 
     if (considered_.size() >= 3 * peers_.size() / 4)
     {
-        std::cout << "considered size " << considered_.size() << " peers "
-                  << peers_.size() << std::endl;
         // Randomly select MAX_SELECTED_PEERS peers.
         // Exclude peers that have been idling > IDLED -
         // it's possible that checkIdle() has not been called yet.
