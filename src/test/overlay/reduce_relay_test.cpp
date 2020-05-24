@@ -24,6 +24,7 @@
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
 #include <ripple.pb.h>
+#include <numeric>
 
 namespace ripple {
 
@@ -495,7 +496,7 @@ public:
 
         std::uint8_t maxId = 0;
 
-        for (auto& [id, peer] : peers_)
+        for (auto& [id, _] : peers_)
         {
             if (id > maxId)
                 maxId = id;
@@ -731,7 +732,7 @@ public:
             if (!overlay_.isSelected(v, peer))
                 continue;
             auto peers = overlay_.getPeers(v);
-            for (auto& [k, v] : peers)
+            for (auto& [_, v] : peers)
                 if (std::get<Squelch::PeerState>(v) ==
                     Squelch::PeerState::Squelched)
                     return false;
@@ -781,30 +782,31 @@ class reduce_relay_test : public beast::unit_test::suite
         return peer->id();
     }
 
+    enum State { On, Off, WaitReset };
+    enum EventType { LinkDown = 0, PeerDisconnected = 1 };
+    // Link down or Peer disconnect event
+    // TBD - add new peer event
+    // TBD - add overlapping type of events at any
+    //       time in any quantity
+    struct Event
+    {
+        State state_ = State::Off;
+        std::uint32_t cnt_ = 0;
+        std::uint32_t handledCnt_ = 0;
+        bool isSelected_ = false;
+        Peer::id_t peer_;
+        std::uint16_t validator_;
+        PublicKey key_;
+        time_point<ManualClock> time_;
+        bool handled_ = false;
+    };
+
     /** Randomly brings the link between a validator and a peer down.
      * Randomly disconnects a peer. Those events are generated one at a time.
      */
     void
     random(bool log)
     {
-        enum State { On, Off, WaitReset };
-        enum EventType { LinkDown = 0, PeerDisconnected = 1 };
-        // Link down or Peer disconnect event
-        // TBD - add new peer event
-        // TBD - add overlapping type of events at any
-        //       time in any quantity
-        struct Event
-        {
-            State state_ = State::Off;
-            std::uint32_t cnt_ = 0;
-            std::uint32_t handledCnt_ = 0;
-            bool isSelected_ = false;
-            Peer::id_t peer_;
-            std::uint16_t validator_;
-            PublicKey key_;
-            time_point<ManualClock> time_;
-            bool handled_ = false;
-        };
         std::unordered_map<EventType, Event> events{
             {LinkDown, {}}, {PeerDisconnected, {}}};
         time_point<ManualClock> lastCheck = ManualClock::now();

@@ -314,7 +314,7 @@ Slot<Peer, clock_type>::deletePeer(id_t const& id, bool erase, F&& f)
         if (it->second.state_ == PeerState::Selected)
         {
             auto now = clock_type::now();
-            for (auto& [k, v] : peers_)
+            for (auto& [_, v] : peers_)
             {
                 if (v.state_ == PeerState::Squelched)
                     f(v.peer_);
@@ -537,7 +537,7 @@ template <typename Peer, typename clock_type>
 template <typename F>
 void
 Slots<Peer, clock_type>::checkForSquelch(
-    const PublicKey& validator,
+    PublicKey const& validator,
     id_t const& id,
     std::weak_ptr<Peer> peerPtr,
     protocol::MessageType type,
@@ -548,7 +548,7 @@ Slots<Peer, clock_type>::checkForSquelch(
             auto it = slots_.find(validator);
             if (it == slots_.end())
             {
-                auto [it, b] = slots_.emplace(std::make_pair(
+                auto [it, _] = slots_.emplace(std::make_pair(
                     validator, std::move(Slot<Peer, clock_type>())));
                 return it;
             }
@@ -561,7 +561,7 @@ Slots<Peer, clock_type>::checkForSquelch(
         id,
         peerPtr,
         type,
-        [&validator, f](std::weak_ptr<Peer> peerPtr, uint32_t squelchDuration) {
+        [&](std::weak_ptr<Peer> peerPtr, uint32_t squelchDuration) {
             f(validator, peerPtr, squelchDuration);
         });
 }
