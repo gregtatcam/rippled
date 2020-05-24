@@ -74,8 +74,10 @@ private:
 
     /** Update peer info. If the message is from a new
      * peer or from a previously expired squelched peer then switch
-     * the peer's and slot's state to Counting. If the number of messages
-     * for the peer is greater than MESSAGE_THRESHOLD then set the peer's
+     * the peer's and slot's state to Counting. If time of last
+     * selection round is > MAX_UNSQUELCH_EXPIRE then switch the slot's
+     * state to Counting. If the number of messages for the peer
+     * is greater than MESSAGE_THRESHOLD then set the peer's
      * state to Selected. If the number of selected peers is >= 75%
      * of MAX_PEERS then switch slot's state to Selected,
      * randomly select MAX_PEERS from selected peers, and call f() for
@@ -237,6 +239,12 @@ Slot<Peer, clock_type>::update(
 
     if (++peer.count_ > MESSAGE_THRESHOLD)
         considered_.insert(id);
+
+    if (lastSelected_ - now > MAX_UNSQUELCH_EXPIRE)
+    {
+        initCounting();
+        return;
+    }
 
     if (considered_.size() >= 3 * peers_.size() / 4)
     {
