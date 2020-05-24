@@ -340,7 +340,7 @@ template <typename Peer, typename clock_type>
 void
 Slot<Peer, clock_type>::resetCounts()
 {
-    for (auto& [id, peer] : peers_)
+    for (auto& [_, peer] : peers_)
         peer.count_ = 0;
 }
 
