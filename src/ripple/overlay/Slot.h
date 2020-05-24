@@ -68,21 +68,17 @@ private:
     using id_t = typename Peer::id_t;
     using time_point = typename clock_type::time_point;
 
-    Slot()
-        : lastSelected_(clock_type::now())
-        , state_(SlotState::Counting)
-        , reachedThreshold_(false)
+    Slot() : lastSelected_(clock_type::now()), state_(SlotState::Counting)
     {
     }
 
     /** Update peer info. If the message is from a new
      * peer or from a previously expired squelched peer then switch
      * the peer's and slot's state to Counting. If the number of messages
-     * for the peer is greater than MESSAGE_LOW_THRESHOLD then set the peer's
-     * state to Selected. If the number of selected peers is MAX_PEERS
-     * and there is at least one peer with the message count greater
-     * than MESSAGE_UPPER_THRESHOLD then switch slot's state to Selected,
-     * randomly select MAX_PEERS from selected peers and call f() for
+     * for the peer is greater than MESSAGE_THRESHOLD then set the peer's
+     * state to Selected. If the number of selected peers is >= 75%
+     * of MAX_PEERS then switch slot's state to Selected,
+     * randomly select MAX_PEERS from selected peers, and call f() for
      * each peer, which is not selected and not already in Squelched state.
      * Set the state for those peers to Squelched and reset the count of
      * all peers. Set slot's state to Selected. Message count is not updated
@@ -185,8 +181,6 @@ private:
         lastSelected_;  // last time peers were selected,
                         // used to age the slot
     SlotState state_;   // slot's state
-    bool
-        reachedThreshold_;  // at least one peer reached upper message threshold
 };
 
 template <typename Peer, typename clock_type>
@@ -241,19 +235,18 @@ Slot<Peer, clock_type>::update(
     if (state_ != SlotState::Counting || peer.state_ == PeerState::Squelched)
         return;
 
-    if (++peer.count_ > MESSAGE_LOW_THRESHOLD)
+    if (++peer.count_ > MESSAGE_THRESHOLD)
         considered_.insert(id);
 
-    if (peer.count_ > MESSAGE_UPPER_THRESHOLD)
-        reachedThreshold_ = true;
-
-    if (reachedThreshold_ && considered_.size() >= MAX_SELECTED_PEERS)
+    if (considered_.size() >= 3 * peers_.size() / 4)
     {
+        std::cout << "considered size " << considered_.size() << " peers "
+                  << peers_.size() << std::endl;
         // Randomly select MAX_SELECTED_PEERS peers.
         // Exclude peers that have been idling > IDLED -
         // it's possible that checkIdle() has not been called yet.
         // If number of remaining peers != MAX_SELECTED_PEERS
-        // then start the Selection round again and let checkIdle() handle
+        // then start the Selection round and let checkIdle() handle
         // idled peers.
         std::unordered_set<id_t> selected;
         while (selected.size() != MAX_SELECTED_PEERS && considered_.size() != 0)
@@ -299,7 +292,6 @@ Slot<Peer, clock_type>::update(
         }
         considered_.clear();
         state_ = SlotState::Selected;
-        reachedThreshold_ = false;
     }
 }
 
@@ -349,7 +341,6 @@ void
 Slot<Peer, clock_type>::initCounting()
 {
     state_ = SlotState::Counting;
-    reachedThreshold_ = false;
     considered_.clear();
     resetCounts();
 }

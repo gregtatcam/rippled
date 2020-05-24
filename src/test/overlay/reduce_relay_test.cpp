@@ -1049,7 +1049,7 @@ class reduce_relay_test : public beast::unit_test::suite
                 }
             },
             1,
-            Squelch::MESSAGE_UPPER_THRESHOLD + 2,
+            Squelch::MESSAGE_THRESHOLD + 2,
             purge,
             resetClock);
         auto selected = network_.overlay().getSelected(network_.validator(0));
