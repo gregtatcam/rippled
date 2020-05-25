@@ -240,7 +240,7 @@ Slot<Peer, clock_type>::update(
     if (++peer.count_ > MESSAGE_THRESHOLD)
         considered_.insert(id);
 
-    if (lastSelected_ - now > MAX_UNSQUELCH_EXPIRE)
+    if (now - lastSelected_ > MAX_UNSQUELCH_EXPIRE)
     {
         initCounting();
         return;
