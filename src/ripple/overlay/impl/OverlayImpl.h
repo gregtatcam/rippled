@@ -27,7 +27,6 @@
 #include <ripple/core/Job.h>
 #include <ripple/overlay/Overlay.h>
 #include <ripple/overlay/Slot.h>
-#include <ripple/overlay/Squelch.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/TrafficCount.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
