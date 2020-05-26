@@ -246,7 +246,9 @@ Slot<Peer, clock_type>::update(
         return;
     }
 
-    if (considered_.size() >= 3 * peers_.size() / 4)
+    if (
+        considered_.size() > MAX_SELECTED_PEERS &&
+        considered_.size() >= 3 * peers_.size() / 4)
     {
         // Randomly select MAX_SELECTED_PEERS peers.
         // Exclude peers that have been idling > IDLED -
