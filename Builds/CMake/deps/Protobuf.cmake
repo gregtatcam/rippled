@@ -30,7 +30,8 @@ if (local_protobuf OR NOT Protobuf_FOUND)
       BINARY_DIR ${nih_cache_path}/src/protobuf_src-build
       STAMP_DIR ${nih_cache_path}/src/protobuf_src-stamp
       TMP_DIR ${nih_cache_path}/tmp)
-    #set(CMAKE_INSTALL_PREFIX ${protobuf_src_BINARY_DIR}/_installed_ CACHE STRING "" FORCE)
+
+    set(CMAKE_INSTALL_PREFIX ${protobuf_src_BINARY_DIR}/_installed_ CACHE STRING "" FORCE)
     set(protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "" FORCE)
@@ -40,21 +41,27 @@ if (local_protobuf OR NOT Protobuf_FOUND)
     set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
     set(protobuf_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
     if (${has_zlib})
-      set(protobuf_WITH_ZLIB ON CACHE BOOL "" FORCE)
+      set(protobuf_WITH_ZLIB ${has_zlib} CACHE BOOL "" FORCE)
     else()
       set(protobuf_WITH_ZLIB OFF CACHE BOOL "" FORCE)
     endif()
-    set(CMAKE_UNITY_BUILD ${unity} CACHE BOOL "" FORCE)
+    # doesn't work with unity?
+    #if (${unity})
+    #  set(CMAKE_UNITY_BUILD ON CACHE BOOL "" FORCE)
+    #else()
+    #  set(CMAKE_UNITY_BUILD OFF CACHE BOOL "" FORCE)
+    #endif()
     if (NOT ${is_multiconfig})
       set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE BOOL "" FORCE)
     endif()
     if (${MSVC})
       set(CMAKE_CXX_FLAGS "-GR -Gd -fp:precise -FS -EHa -MP" CACHE STRING "" FORCE)
     endif()
-    set(CMAKE_INSTALL_PREFIX "${protobuf_src_BINARY_DIR}/_installed_" CACHE STRING "" FORCE)
-    add_subdirectory(${protobuf_src_SOURCE_DIR}/cmake ${protobuf_src_BINARY_DIR})
 
+    add_subdirectory(${protobuf_src_SOURCE_DIR}/cmake ${protobuf_src_BINARY_DIR})
+    
     set(Protobuf_USE_STATIC_LIBS ${static} CACHE BOOL "" FORCE)
+    # need this so gRPC package could find locally installed protobuf. Should export config?
     set(Protobuf_INCLUDE_DIR "${protobuf_src_SOURCE_DIR}/src" CACHE STRING "" FORCE)
     if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
       set(Protobuf_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protobuf_d${ep_lib_suffix}" CACHE STRING "" FORCE)
@@ -64,27 +71,46 @@ if (local_protobuf OR NOT Protobuf_FOUND)
       set(Protobuf_PROTOC_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}" CACHE STRING "" FORCE)
     endif()
     set(Protobuf_PROTOC_EXECUTABLE "${protobuf_src_BINARY_DIR}/protoc${CMAKE_EXECUTABLE_SUFFIX}" CACHE STRING "" FORCE)
-    if (NOT TARGET protobuf::libprotobuf)
-      add_library(protobuf::libprotobuf STATIC IMPORTED GLOBAL)
-    endif()
-    #add_dependencies(libprotobuf protobuf_src)
-    set_target_properties (libprotobuf PROPERTIES IMPORTED_LOCATION ${protobuf_src_BINARY_DIR})
-    set_target_properties (libprotobuf PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${protobuf_src_BINARY_DIR}/_installed_")
-    exclude_if_included (protobuf::libprotobuf)
-    #if (NOT TARGET protobuf::libprotoc)
-    #  add_library (protobuf::libprotoc STATIC IMPORTED GLOBAL)
-    #endif ()
-    set_target_properties (libprotoc PROPERTIES IMPORTED_LOCATION ${protobuf_src_BINARY_DIR})
-    exclude_if_included (protobuf::libprotoc)
-    #add_dependencies(libprotoc protobuf_src)
-    #if (NOT TARGET protobuf::protoc)
-    #  add_executable (protobuf::protoc IMPORTED)
-      exclude_if_included (protobuf::protoc)
-    #endif ()
-    set_target_properties (protoc PROPERTIES IMPORTED_LOCATION ${protobuf_src_BINARY_DIR})
-    #add_dependencies(protoc protobuf_src)
+    # install for use by others;i.e. gRPC
+    add_custom_target(
+        protobuf_install
+        "${CMAKE_COMMAND}" --install . --prefix ./_installed_
+        COMMENT "installing protobuf"
+        DEPENDS libprotobuf libprotoc protoc
+        WORKING_DIRECTORY
+            "${protobuf_src_BINARY_DIR}"
+    )
 
- endif()
+    if (NOT TARGET protobuf::libprotobuf)
+      add_library (protobuf::libprotobuf STATIC IMPORTED GLOBAL)
+    endif ()
+    set_target_properties (libprotobuf PROPERTIES
+       IMPORTED_LOCATION_DEBUG
+         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
+       IMPORTED_LOCATION_RELEASE
+         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
+       INTERFACE_INCLUDE_DIRECTORIES
+         ${protobuf_src_BINARY_DIR}/_installed_/include)
+
+    if (NOT TARGET protobuf::libprotoc)
+      add_library (protobuf::libprotoc STATIC IMPORTED GLOBAL)
+    endif ()
+    set_target_properties (libprotoc PROPERTIES
+       IMPORTED_LOCATION_DEBUG
+         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
+       IMPORTED_LOCATION_RELEASE
+         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
+       INTERFACE_INCLUDE_DIRECTORIES
+         ${protobuf_src_BINARY_DIR}/_installed_/include)
+
+    if (NOT TARGET protobuf::protoc)
+      add_executable (protobuf::protoc IMPORTED)
+      exclude_if_included (protobuf::protoc)
+    endif ()
+    set_target_properties (protoc PROPERTIES
+       IMPORTED_LOCATION "${protobuf_src_BINARY_DIR}/_installed_/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
+
+  endif()
 
 else ()
   if (NOT TARGET protobuf::protoc)
@@ -96,13 +122,14 @@ else ()
       message (FATAL_ERROR "Protobuf import failed")
     endif ()
   endif ()
+  add_custom_target(protobuf_install DEPENDS protobuf::protoc)
 endif ()
 
 set(PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
 file (MAKE_DIRECTORY ${PROTO_GEN_DIR})
 set(src "${PROTO_GEN_DIR}/ripple.pb.cc")
 set(hdr "${PROTO_GEN_DIR}/ripple.pb.h")
-set(file "${CMAKE_SOURCE_DIR}/src/rippled/proto/ripple.proto")
+set(file "${CMAKE_SOURCE_DIR}/src/ripple/proto/ripple.proto")
 get_filename_component(_proto_inc ${file} DIRECTORY)
 add_custom_command(
     OUTPUT ${src} ${hdr}
@@ -110,22 +137,26 @@ add_custom_command(
     ARGS --cpp_out=${PROTO_GEN_DIR}
          -I ${_proto_inc}
          ${file}
-    DEPENDS ${file} protobuf::protoc
+    DEPENDS ${file} protobuf::protoc protobuf_install # have to create the target if not locally installed
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running C++ protocol buffer compiler on ${file}"
     VERBATIM)
 set_source_files_properties(${src} ${hdr} PROPERTIES GENERATED TRUE)
 add_library (pbufs STATIC ${src} ${hdr})
 target_include_directories (pbufs PRIVATE src)
-target_include_directories (pbufs
-  SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen)
+target_include_directories (pbufs SYSTEM PUBLIC ${PROTO_GEN_DIR})
 target_link_libraries (pbufs protobuf::libprotobuf)
 target_compile_options (pbufs
+  PRIVATE
+    $<$<BOOL:${MSVC}>:-wd4065>
+    $<$<NOT:$<BOOL:${MSVC}>>:-Wno-deprecated-declarations>
   PUBLIC
+    $<$<BOOL:${MSVC}>:-wd4996>
     $<$<BOOL:${is_xcode}>:
-      --system-header-prefix="google/protobuf"
-      -Wno-deprecated-dynamic-exception-spec
-    >)
+        --system-header-prefix="google/protobuf"
+        -Wno-deprecated-dynamic-exception-spec>
+)
 add_library (Ripple::pbufs ALIAS pbufs)
+add_dependencies(pbufs protobuf::protoc)
 target_link_libraries (ripple_libs INTERFACE Ripple::pbufs)
 exclude_if_included (pbufs)
