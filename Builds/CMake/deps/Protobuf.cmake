@@ -23,7 +23,7 @@ if (local_protobuf OR NOT Protobuf_FOUND)
 
   FetchContent_GetProperties(protobuf_src)
   if (NOT protobuf_src_POPULATED)
-    FetchContent_Populate(
+    FetchContent_Populate (
       protobuf_src
       QUIET
       GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
@@ -33,48 +33,37 @@ if (local_protobuf OR NOT Protobuf_FOUND)
       STAMP_DIR ${nih_cache_path}/src/protobuf_src-stamp
       TMP_DIR ${nih_cache_path}/tmp)
 
-    set(CMAKE_INSTALL_PREFIX ${protobuf_src_BINARY_DIR}/_installed_ CACHE STRING "" FORCE)
-    set(protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(protobuf_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "" FORCE)
-    set(protobuf_MSVC_STATIC_RUNTIME ON CACHE BOOL "" FORCE)
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-    set(protobuf_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-    set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
-    set(protobuf_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
-    if (${has_zlib})
-      set(protobuf_WITH_ZLIB ON CACHE BOOL "" FORCE)
-    else()
-      set(protobuf_WITH_ZLIB OFF CACHE BOOL "" FORCE)
-    endif()
+    set (CMAKE_INSTALL_PREFIX ${protobuf_src_BINARY_DIR}/_installed_ CACHE STRING "" FORCE)
+    set (protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set (protobuf_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set (protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "" FORCE)
+    set (protobuf_MSVC_STATIC_RUNTIME ON CACHE BOOL "" FORCE)
+    set (BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set (protobuf_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    set (CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
+    set (protobuf_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
+    set (protobuf_WITH_ZLIB ${has_zlib} CACHE BOOL "" FORCE)
     # doesn't work with unity?
-    #if (${unity})
-    #  set(CMAKE_UNITY_BUILD ON CACHE BOOL "" FORCE)
-    #else()
-    #  set(CMAKE_UNITY_BUILD OFF CACHE BOOL "" FORCE)
-    #endif()
+    #set(CMAKE_UNITY_BUILD ${unity} CACHE BOOL "" FORCE)
     if (NOT ${is_multiconfig})
-      set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE BOOL "" FORCE)
-    endif()
+      set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE BOOL "" FORCE)
+    endif ()
     if (${MSVC})
-      set(CMAKE_CXX_FLAGS "-GR -Gd -fp:precise -FS -EHa -MP" CACHE STRING "" FORCE)
-    endif()
+      set (CMAKE_CXX_FLAGS "-GR -Gd -fp:precise -FS -EHa -MP" CACHE STRING "" FORCE)
+    endif ()
 
-    add_subdirectory(${protobuf_src_SOURCE_DIR}/cmake ${protobuf_src_BINARY_DIR})
+    add_subdirectory (${protobuf_src_SOURCE_DIR}/cmake ${protobuf_src_BINARY_DIR})
 
     # need this so gRPC package could find locally installed protobuf
     file (MAKE_DIRECTORY ${protobuf_src_BINARY_DIR}/_installed_)
     file (CREATE_LINK ${protobuf_src_SOURCE_DIR}/src ${protobuf_src_BINARY_DIR}/_installed_/include SYMBOLIC)
-    set(Protobuf_USE_STATIC_LIBS ${static} CACHE BOOL "" FORCE)
-    set(Protobuf_INCLUDE_DIR "${protobuf_src_BINARY_DIR}/_installed_/include" CACHE STRING "" FORCE)
+    set (Protobuf_USE_STATIC_LIBS ${static} CACHE BOOL "" FORCE)
+    set (Protobuf_INCLUDE_DIR "${protobuf_src_BINARY_DIR}/_installed_/include" CACHE STRING "" FORCE)
     if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-      set(Protobuf_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protobuf_d${ep_lib_suffix}" CACHE STRING "" FORCE)
-      set(Protobuf_PROTOC_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}" CACHE STRING "" FORCE)
-    else()
-      set(Protobuf_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protobuf${ep_lib_suffix}" CACHE STRING "" FORCE)
-      set(Protobuf_PROTOC_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}" CACHE STRING "" FORCE)
-    endif()
-    set(Protobuf_PROTOC_EXECUTABLE "${protobuf_src_BINARY_DIR}/protoc${CMAKE_EXECUTABLE_SUFFIX}" CACHE STRING "" FORCE)
+      set (Protobuf_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protobuf_d${ep_lib_suffix}" CACHE STRING "" FORCE)
+    else ()
+      set (Protobuf_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protobuf${ep_lib_suffix}" CACHE STRING "" FORCE)
+    endif ()
 
     if (NOT TARGET protobuf::libprotobuf)
       add_library (protobuf::libprotobuf STATIC IMPORTED GLOBAL)
@@ -86,7 +75,7 @@ if (local_protobuf OR NOT Protobuf_FOUND)
          ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
        INTERFACE_INCLUDE_DIRECTORIES
          ${protobuf_src_BINARY_DIR}/_installed_/include)
-    exclude_if_included(protobuf::libprotobuf)
+    exclude_if_included (protobuf::libprotobuf)
 
     if (NOT TARGET protobuf::libprotoc)
       add_library (protobuf::libprotoc STATIC IMPORTED GLOBAL)
@@ -98,7 +87,7 @@ if (local_protobuf OR NOT Protobuf_FOUND)
          ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
        INTERFACE_INCLUDE_DIRECTORIES
          ${protobuf_src_BINARY_DIR}/_installed_/include)
-    exclude_if_included(protobuf::libprotoc)
+    exclude_if_included (protobuf::libprotoc)
 
     if (NOT TARGET protobuf::protoc)
       add_executable (protobuf::protoc IMPORTED)
@@ -120,13 +109,13 @@ else ()
   endif ()
 endif ()
 
-set(PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
+set (PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
 file (MAKE_DIRECTORY ${PROTO_GEN_DIR})
-set(src "${PROTO_GEN_DIR}/ripple.pb.cc")
-set(hdr "${PROTO_GEN_DIR}/ripple.pb.h")
-set(file "${CMAKE_SOURCE_DIR}/src/ripple/proto/ripple.proto")
-get_filename_component(_proto_inc ${file} DIRECTORY)
-add_custom_command(
+set (src "${PROTO_GEN_DIR}/ripple.pb.cc")
+set (hdr "${PROTO_GEN_DIR}/ripple.pb.h")
+set (file "${CMAKE_SOURCE_DIR}/src/ripple/proto/ripple.proto")
+get_filename_component (_proto_inc ${file} DIRECTORY)
+add_custom_command (
     OUTPUT ${src} ${hdr}
     COMMAND protobuf::protoc
     ARGS --cpp_out=${PROTO_GEN_DIR}
@@ -136,7 +125,7 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running C++ protocol buffer compiler on ${file}"
     VERBATIM)
-set_source_files_properties(${src} ${hdr} PROPERTIES GENERATED TRUE)
+set_source_files_properties (${src} ${hdr} PROPERTIES GENERATED TRUE)
 add_library (pbufs STATIC ${src} ${hdr})
 target_include_directories (pbufs PRIVATE src)
 target_include_directories (pbufs SYSTEM PUBLIC ${PROTO_GEN_DIR})
