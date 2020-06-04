@@ -153,19 +153,19 @@ else ()
 
     endif()
 
-    file (MAKE_DIRECTORY ${grpc_source_dir}/include)
+    file (CREATE_LINK ${grpc_source_dir}/include ${grpc_binary_dir}/include SYMBOLIC)
 
     macro (add_imported_grpc libname_)
       if (NOT TARGET "gRPC::{libname_}")
         add_library ("gRPC::${libname_}" STATIC IMPORTED GLOBAL)
       endif()
-      #set_target_properties ("gRPC::${libname_}" PROPERTIES
-      #  IMPORTED_LOCATION_DEBUG
-      #    ${grpc_binary_dir}/${ep_lib_prefix}${libname_}_d${ep_lib_suffix}
-      #  IMPORTED_LOCATION_RELEASE
-      #    ${grpc_binary_dir}/${ep_lib_prefix}${libname_}${ep_lib_suffix}
-      #  INTERFACE_INCLUDE_DIRECTORIES
-      #    ${grpc_source_dir}/include)
+      set_target_properties ("gRPC::${libname_}" PROPERTIES
+        IMPORTED_LOCATION_DEBUG
+          ${grpc_binary_dir}/${ep_lib_prefix}${libname_}_d${ep_lib_suffix}
+        IMPORTED_LOCATION_RELEASE
+          ${grpc_binary_dir}/${ep_lib_prefix}${libname_}${ep_lib_suffix}
+        INTERFACE_INCLUDE_DIRECTORIES
+          ${grpc_binary_dir}/include)
       target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
       exclude_if_included ("gRPC::${libname_}")
     endmacro ()
