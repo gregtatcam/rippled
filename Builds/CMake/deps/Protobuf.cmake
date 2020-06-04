@@ -19,6 +19,8 @@ if (local_protobuf OR NOT Protobuf_FOUND)
     set (pbuf_lib_pre ${ep_lib_prefix})
   endif ()
 
+  set(local_protobuf ON CACHE BOOL "" FORCE)
+
   FetchContent_GetProperties(protobuf_src)
   if (NOT protobuf_src_POPULATED)
     FetchContent_Populate(
@@ -41,7 +43,7 @@ if (local_protobuf OR NOT Protobuf_FOUND)
     set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
     set(protobuf_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
     if (${has_zlib})
-      set(protobuf_WITH_ZLIB ${has_zlib} CACHE BOOL "" FORCE)
+      set(protobuf_WITH_ZLIB ON CACHE BOOL "" FORCE)
     else()
       set(protobuf_WITH_ZLIB OFF CACHE BOOL "" FORCE)
     endif()
@@ -59,10 +61,12 @@ if (local_protobuf OR NOT Protobuf_FOUND)
     endif()
 
     add_subdirectory(${protobuf_src_SOURCE_DIR}/cmake ${protobuf_src_BINARY_DIR})
-    
+
+    # need this so gRPC package could find locally installed protobuf. Should export config?  # super hack
+    file (MAKE_DIRECTORY ${protobuf_src_BINARY_DIR}/_installed_)
+    file (CREATE_LINK ${protobuf_src_SOURCE_DIR}/src ${protobuf_src_BINARY_DIR}/_installed_/include SYMBOLIC)
     set(Protobuf_USE_STATIC_LIBS ${static} CACHE BOOL "" FORCE)
-    # need this so gRPC package could find locally installed protobuf. Should export config?
-    set(Protobuf_INCLUDE_DIR "${protobuf_src_SOURCE_DIR}/src" CACHE STRING "" FORCE)
+    set(Protobuf_INCLUDE_DIR "${protobuf_src_BINARY_DIR}/_installed_/include" CACHE STRING "" FORCE)
     if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
       set(Protobuf_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protobuf_d${ep_lib_suffix}" CACHE STRING "" FORCE)
       set(Protobuf_PROTOC_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}" CACHE STRING "" FORCE)
@@ -72,46 +76,52 @@ if (local_protobuf OR NOT Protobuf_FOUND)
     endif()
     set(Protobuf_PROTOC_EXECUTABLE "${protobuf_src_BINARY_DIR}/protoc${CMAKE_EXECUTABLE_SUFFIX}" CACHE STRING "" FORCE)
     # install for use by others;i.e. gRPC
-    add_custom_target(
-        protobuf_install
-        "${CMAKE_COMMAND}" --install . --prefix ./_installed_
-        COMMENT "installing protobuf"
-        DEPENDS libprotobuf libprotoc protoc
-        WORKING_DIRECTORY
-            "${protobuf_src_BINARY_DIR}"
-    )
+    #add_custom_target(
+    #    protobuf_install
+    #    "${CMAKE_COMMAND}" --install . --prefix ./_installed_
+    #    COMMENT "installing protobuf"
+    #    DEPENDS libprotobuf libprotoc protoc
+    #    WORKING_DIRECTORY
+    #        "${protobuf_src_BINARY_DIR}"
+    #)
 
     if (NOT TARGET protobuf::libprotobuf)
       add_library (protobuf::libprotobuf STATIC IMPORTED GLOBAL)
     endif ()
     set_target_properties (libprotobuf PROPERTIES
        IMPORTED_LOCATION_DEBUG
-         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
+         ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
        IMPORTED_LOCATION_RELEASE
-         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
+         ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
        INTERFACE_INCLUDE_DIRECTORIES
          ${protobuf_src_BINARY_DIR}/_installed_/include)
+         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
+         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
+    exclude_if_included(protobuf::libprotobuf)
 
     if (NOT TARGET protobuf::libprotoc)
       add_library (protobuf::libprotoc STATIC IMPORTED GLOBAL)
     endif ()
     set_target_properties (libprotoc PROPERTIES
        IMPORTED_LOCATION_DEBUG
-         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
+         ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
        IMPORTED_LOCATION_RELEASE
-         ${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
+         ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
        INTERFACE_INCLUDE_DIRECTORIES
          ${protobuf_src_BINARY_DIR}/_installed_/include)
+         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
+         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
+    exclude_if_included(protobuf::libprotoc)
 
     if (NOT TARGET protobuf::protoc)
       add_executable (protobuf::protoc IMPORTED)
       exclude_if_included (protobuf::protoc)
     endif ()
     set_target_properties (protoc PROPERTIES
-       IMPORTED_LOCATION "${protobuf_src_BINARY_DIR}/_installed_/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
+       IMPORTED_LOCATION "${protobuf_src_BINARY_DIR}/protoc${CMAKE_EXECUTABLE_SUFFIX}")
+   #IMPORTED_LOCATION "${protobuf_src_BINARY_DIR}/_installed_/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
 
   endif()
-
 else ()
   if (NOT TARGET protobuf::protoc)
     if (EXISTS "${Protobuf_PROTOC_EXECUTABLE}")
@@ -122,7 +132,7 @@ else ()
       message (FATAL_ERROR "Protobuf import failed")
     endif ()
   endif ()
-  add_custom_target(protobuf_install DEPENDS protobuf::protoc)
+  #add_custom_target(protobuf_install DEPENDS protobuf::protoc)
 endif ()
 
 set(PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
@@ -137,7 +147,7 @@ add_custom_command(
     ARGS --cpp_out=${PROTO_GEN_DIR}
          -I ${_proto_inc}
          ${file}
-    DEPENDS ${file} protobuf::protoc protobuf_install # have to create the target if not locally installed
+    DEPENDS ${file} protobuf::protoc #protobuf_install # have to create the target if not locally installed
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running C++ protocol buffer compiler on ${file}"
     VERBATIM)
@@ -147,16 +157,11 @@ target_include_directories (pbufs PRIVATE src)
 target_include_directories (pbufs SYSTEM PUBLIC ${PROTO_GEN_DIR})
 target_link_libraries (pbufs protobuf::libprotobuf)
 target_compile_options (pbufs
-  PRIVATE
-    $<$<BOOL:${MSVC}>:-wd4065>
-    $<$<NOT:$<BOOL:${MSVC}>>:-Wno-deprecated-declarations>
   PUBLIC
-    $<$<BOOL:${MSVC}>:-wd4996>
     $<$<BOOL:${is_xcode}>:
-        --system-header-prefix="google/protobuf"
-        -Wno-deprecated-dynamic-exception-spec>
-)
+      --system-header-prefix="google/protobuf"
+      -Wno-deprecated-dynamic-exception-spec
+    >)
 add_library (Ripple::pbufs ALIAS pbufs)
-add_dependencies(pbufs protobuf::protoc)
 target_link_libraries (ripple_libs INTERFACE Ripple::pbufs)
 exclude_if_included (pbufs)

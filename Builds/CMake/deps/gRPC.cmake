@@ -8,9 +8,6 @@ else ()
   set (grpc_suffix "_unsecure")
 endif ()
 
-set(grpc_cpp_plugin_ $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
-set(grpc++_ "gRPC::grpc++${grpc_suffix}")
-
 find_package (gRPC 1.23 CONFIG QUIET)
 if (TARGET gRPC::gpr AND NOT local_grpc)
   get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_DEBUG)
@@ -58,7 +55,6 @@ else ()
       target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
       exclude_if_included ("gRPC::${libname_}")
     endmacro ()
-    add_imported_grpc("grpc++${grpc_suffix}")
 
     set_target_properties (gRPC::grpc_cpp_plugin PROPERTIES
         IMPORTED_LOCATION "${grpc_gpr_PREFIX}/bin/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}")
@@ -104,20 +100,36 @@ else ()
       set (grpc_source_dir "${grpc_src_SOURCE_DIR}")
 
       # build options
+      if (${CMAKE_VERBOSE_MAKEFILE})
+        set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "" FORCE)
+      endif()
+      if (${CMAKE_TOOLCHAIN_FILE})
+        set(CMAKE_TOOLCHAIN_FILE ON CACHE BOOL "" FORCE)
+      endif()
+      if (${VCPKG_TARGET_TRIPLET})
+        set(VCPKG_TARGET_TRIPLET ON CACHE BOOL "" FORCE)
+      endif()
+      # unity fails
+      #if (${unity})
+      #  set(CMAKE_UNITY_BUILD ON CACHE BOOL "" FORCE)
+      #endif()
+      set(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "" FORCE)
       set(gRPC_BUILD_TESTS OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_CSHARP_EXT OFF CACHE BOOL "" FORCE)
-      set(gRPC_INSTALL OFF CACHE BOOL "" FORCE)
       set(gRPC_MSVC_STATIC_RUNTIME ON CACHE BOOL "" FORCE)
+      set(gRPC_INSTALL OFF CACHE BOOL "" FORCE)
+      # gRPC installs cares
+      set(gRPC_CARES_PROVIDER "module" CACHE STRING "" FORCE)
+      set(gRPC_SSL_PROVIDER "package" CACHE STRING "" FORCE)
+      set(OPENSSL_ROOD_DIR ${OPENSSL_ROOT_DIR} CACHE STRING "" FORCE)
+      set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
+      set(gRPC_BUILD_GRPC_CPP_PLUGIN ON CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_CSHARP_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_NODE_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_PHP_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_PYTHON_PLUGIN OFF CACHE BOOL "" FORCE)
       set(gRPC_BUILD_GRPC_RUBY_PLUGIN OFF CACHE BOOL "" FORCE)
-      # cmake fails if package
-      set(gRPC_CARES_PROVIDER "module" CACHE STRING "" FORCE)
-      set(gRPC_SSL_PROVIDER "package" CACHE STRING "" FORCE)
-      set(gRPC_PROTOBUF_PROVIDER "package" CACHE STRING "" FORCE)
       if (${has_zlib})
         set(gRPC_ZLIB_PROVIDER "package" CACHE STRING "" FORCE)
       else()
@@ -139,16 +151,47 @@ else ()
       # set the static back to the saved value
       set(static ${static_bck} CACHE BOOL "link protobuf, openssl, libc++, and boost statically" FORCE)
 
-      exclude_if_included(grpc_src)
     endif()
-    set(grpc_cpp_plugin_ "${grpc_binary_dir}/grpc_cpp_plugin")
-    set(grpc++_ "{grpc_binary_dir}/grpc++${grpc_suffix}")
-    add_dependencies(grpc_cpp_plugin protobuf::libprotobuf protobuf::libprotoc)
-    add_dependencies(grpc++ protobuf::libprotobuf protobuf::libprotoc)
+
+    file (MAKE_DIRECTORY ${grpc_source_dir}/include)
+
+    macro (add_imported_grpc libname_)
+      if (NOT TARGET "gRPC::{libname_}")
+        add_library ("gRPC::${libname_}" STATIC IMPORTED GLOBAL)
+      endif()
+      #set_target_properties ("gRPC::${libname_}" PROPERTIES
+      #  IMPORTED_LOCATION_DEBUG
+      #    ${grpc_binary_dir}/${ep_lib_prefix}${libname_}_d${ep_lib_suffix}
+      #  IMPORTED_LOCATION_RELEASE
+      #    ${grpc_binary_dir}/${ep_lib_prefix}${libname_}${ep_lib_suffix}
+      #  INTERFACE_INCLUDE_DIRECTORIES
+      #    ${grpc_source_dir}/include)
+      target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
+      exclude_if_included ("gRPC::${libname_}")
+    endmacro ()
+
+    if (NOT TARGET gRPC::grpc_cpp_plugin)
+      add_executable(gRCP::grpc_cpp_plugin IMPORTED)
+    endif()
+    set_target_properties (gRPC::grpc_cpp_plugin PROPERTIES
+      IMPORTED_LOCATION "${grpc_binary_dir}/grpc_cpp_plugin${CMAKE_EXECUTABLE_SUFFIX}")
   endif()
+
+  add_imported_grpc (gpr)
+  add_imported_grpc ("grpc${grpc_suffix}")
+  add_imported_grpc ("grpc++${grpc_suffix}")
+  add_imported_grpc (address_sorting)
+
+  #if (${local_protobuf})
+  #  add_dependencies(grpc_cpp_plugin protobuf::libprotobuf protobuf::libprotoc)
+  #  add_dependencies(grpc++ protobuf::libprotobuf protobuf::libprotoc)
+  #  add_dependencies(grpc protobuf::libprotobuf protobuf::libprotoc)
+  #  add_dependencies(gpr protobuf::libprotobuf protobuf::libprotoc)
+  #endif()
+
 endif()
 
-get_target_property(protobuf_inc protobuf::libprotobuf INTERFACE_INCLUDE_DIRECTORIES)
+#get_target_property(protobuf_inc protobuf::libprotobuf INTERFACE_INCLUDE_DIRECTORIES)
 set (GRPC_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen_grpc")
 file (MAKE_DIRECTORY ${GRPC_GEN_DIR})
 set (GRPC_PROTO_SRCS)
@@ -173,22 +216,23 @@ foreach(file ${GRPC_DEFINITION_FILES})
     COMMAND protobuf::protoc
     ARGS --grpc_out=${GRPC_GEN_DIR}
          --cpp_out=${GRPC_GEN_DIR}
-         --plugin=protoc-gen-grpc=${grpc_cpp_plugin_}
-         -I ${_proto_inc} -I ${_rel_dir} -I ${protobuf_inc}
+         --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>
+         -I ${_proto_inc} -I ${_rel_dir} #-I ${protobuf_inc}
          ${_abs_file}
-         DEPENDS ${_abs_file} protoc grpc_cpp_plugin
+         DEPENDS ${_abs_file} protobuf::protoc grpc_cpp_plugin
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running gRPC C++ protocol buffer compiler on ${file}"
     VERBATIM)
-    set_source_files_properties(${src_1} ${src_2} ${hdr_1} ${hdr_2} PROPERTIES GENERATED TRUE)
+  #DEPENDS ${_abs_file} protobuf::protoc gRPC::grpc_cpp_plugin
+set_source_files_properties(${src_1} ${src_2} ${hdr_1} ${hdr_2} PROPERTIES GENERATED TRUE)
     list(APPEND GRPC_PROTO_SRCS ${src_1} ${src_2})
     list(APPEND GRPC_PROTO_HDRS ${hdr_1} ${hdr_2})
 endforeach()
 
 add_library (grpc_pbufs STATIC ${GRPC_PROTO_SRCS} ${GRPC_PROTO_HDRS})
 target_include_directories (grpc_pbufs SYSTEM PUBLIC ${GRPC_GEN_DIR})
-target_include_directories (grpc_pbufs PRIVATE ${protobuf_inc})
-target_link_libraries (grpc_pbufs ${libprotobuf_} "${grpc++_}")
+#target_include_directories (grpc_pbufs PRIVATE ${protobuf_inc})
+target_link_libraries (grpc_pbufs protobuf::libprotobuf "gRPC::grpc++${grpc_suffix}")
 target_compile_options (grpc_pbufs
   PRIVATE
     $<$<BOOL:${MSVC}>:-wd4065>
