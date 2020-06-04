@@ -8,7 +8,7 @@ else ()
   set (grpc_suffix "_unsecure")
 endif ()
 
-find_package (gRPC 1.23 CONFIG QUIET)
+find_package (gRPC 1.28 CONFIG QUIET)
 if (TARGET gRPC::gpr AND NOT local_grpc)
   get_target_property (_grpc_l gRPC::gpr IMPORTED_LOCATION_DEBUG)
   if (NOT _grpc_l)
@@ -181,24 +181,9 @@ else ()
   add_imported_grpc ("grpc${grpc_suffix}")
   add_imported_grpc ("grpc++${grpc_suffix}")
   add_imported_grpc (address_sorting)
-  #add_imported_grpc ("grpc++_reflection")
-  #add_imported_grpc ("upb")
-  #add_imported_grpc ("grpc_cronet")
-  #add_imported_grpc ("grpcpp_channelz")
-
-  #target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE c-ares::cares gRPC::gpr gRPC::address_sorting ZLIB::ZLIB)
-  #target_link_libraries ("gRPC::grpc++${grpc_suffix}" INTERFACE "gRPC::grpc${grpc_suffix}" gRPC::gpr)
-
-#if (${local_protobuf})
-  #  add_dependencies(grpc_cpp_plugin protobuf::libprotobuf protobuf::libprotoc)
-  #  add_dependencies(grpc++ protobuf::libprotobuf protobuf::libprotoc)
-  #  add_dependencies(grpc protobuf::libprotobuf protobuf::libprotoc)
-  #  add_dependencies(gpr protobuf::libprotobuf protobuf::libprotoc)
-  #endif()
 
 endif()
 
-#get_target_property(protobuf_inc protobuf::libprotobuf INTERFACE_INCLUDE_DIRECTORIES)
 set (GRPC_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen_grpc")
 file (MAKE_DIRECTORY ${GRPC_GEN_DIR})
 set (GRPC_PROTO_SRCS)
@@ -224,7 +209,7 @@ foreach(file ${GRPC_DEFINITION_FILES})
     ARGS --grpc_out=${GRPC_GEN_DIR}
          --cpp_out=${GRPC_GEN_DIR}
          --plugin=protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>
-         -I ${_proto_inc} -I ${_rel_dir} #-I ${protobuf_inc}
+         -I ${_proto_inc} -I ${_rel_dir}
          ${_abs_file}
          DEPENDS ${_abs_file} protobuf::protoc grpc_cpp_plugin
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -237,7 +222,6 @@ endforeach()
 
 add_library (grpc_pbufs STATIC ${GRPC_PROTO_SRCS} ${GRPC_PROTO_HDRS})
 target_include_directories (grpc_pbufs SYSTEM PUBLIC ${GRPC_GEN_DIR})
-#target_include_directories (grpc_pbufs PRIVATE ${protobuf_inc})
 target_link_libraries (grpc_pbufs protobuf::libprotobuf "gRPC::grpc++${grpc_suffix}")
 target_compile_options (grpc_pbufs
   PRIVATE
@@ -251,5 +235,4 @@ target_compile_options (grpc_pbufs
     >)
 add_library (Ripple::grpc_pbufs ALIAS grpc_pbufs)
 target_link_libraries (ripple_libs INTERFACE Ripple::grpc_pbufs)
-#target_include_directories(ripple_libs INTERFACE ${grpc_source_dir}/include)
 exclude_if_included (grpc_pbufs)
