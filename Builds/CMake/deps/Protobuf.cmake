@@ -62,7 +62,7 @@ if (local_protobuf OR NOT Protobuf_FOUND)
 
     add_subdirectory(${protobuf_src_SOURCE_DIR}/cmake ${protobuf_src_BINARY_DIR})
 
-    # need this so gRPC package could find locally installed protobuf. Should export config?  # super hack
+    # need this so gRPC package could find locally installed protobuf
     file (MAKE_DIRECTORY ${protobuf_src_BINARY_DIR}/_installed_)
     file (CREATE_LINK ${protobuf_src_SOURCE_DIR}/src ${protobuf_src_BINARY_DIR}/_installed_/include SYMBOLIC)
     set(Protobuf_USE_STATIC_LIBS ${static} CACHE BOOL "" FORCE)
@@ -75,15 +75,6 @@ if (local_protobuf OR NOT Protobuf_FOUND)
       set(Protobuf_PROTOC_LIBRARY "${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}" CACHE STRING "" FORCE)
     endif()
     set(Protobuf_PROTOC_EXECUTABLE "${protobuf_src_BINARY_DIR}/protoc${CMAKE_EXECUTABLE_SUFFIX}" CACHE STRING "" FORCE)
-    # install for use by others;i.e. gRPC
-    #add_custom_target(
-    #    protobuf_install
-    #    "${CMAKE_COMMAND}" --install . --prefix ./_installed_
-    #    COMMENT "installing protobuf"
-    #    DEPENDS libprotobuf libprotoc protoc
-    #    WORKING_DIRECTORY
-    #        "${protobuf_src_BINARY_DIR}"
-    #)
 
     if (NOT TARGET protobuf::libprotobuf)
       add_library (protobuf::libprotobuf STATIC IMPORTED GLOBAL)
@@ -95,8 +86,6 @@ if (local_protobuf OR NOT Protobuf_FOUND)
          ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
        INTERFACE_INCLUDE_DIRECTORIES
          ${protobuf_src_BINARY_DIR}/_installed_/include)
-         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
-         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
     exclude_if_included(protobuf::libprotobuf)
 
     if (NOT TARGET protobuf::libprotoc)
@@ -109,8 +98,6 @@ if (local_protobuf OR NOT Protobuf_FOUND)
          ${protobuf_src_BINARY_DIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
        INTERFACE_INCLUDE_DIRECTORIES
          ${protobuf_src_BINARY_DIR}/_installed_/include)
-         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc_d${ep_lib_suffix}
-         #${protobuf_src_BINARY_DIR}/_installed_/${CMAKE_INSTALL_LIBDIR}/${pbuf_lib_pre}protoc${ep_lib_suffix}
     exclude_if_included(protobuf::libprotoc)
 
     if (NOT TARGET protobuf::protoc)
@@ -119,7 +106,6 @@ if (local_protobuf OR NOT Protobuf_FOUND)
     endif ()
     set_target_properties (protoc PROPERTIES
        IMPORTED_LOCATION "${protobuf_src_BINARY_DIR}/protoc${CMAKE_EXECUTABLE_SUFFIX}")
-   #IMPORTED_LOCATION "${protobuf_src_BINARY_DIR}/_installed_/bin/protoc${CMAKE_EXECUTABLE_SUFFIX}")
 
   endif()
 else ()
@@ -132,7 +118,6 @@ else ()
       message (FATAL_ERROR "Protobuf import failed")
     endif ()
   endif ()
-  #add_custom_target(protobuf_install DEPENDS protobuf::protoc)
 endif ()
 
 set(PROTO_GEN_DIR "${CMAKE_BINARY_DIR}/proto_gen")
@@ -147,7 +132,7 @@ add_custom_command(
     ARGS --cpp_out=${PROTO_GEN_DIR}
          -I ${_proto_inc}
          ${file}
-    DEPENDS ${file} protobuf::protoc #protobuf_install # have to create the target if not locally installed
+    DEPENDS ${file} protobuf::protoc
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running C++ protocol buffer compiler on ${file}"
     VERBATIM)
