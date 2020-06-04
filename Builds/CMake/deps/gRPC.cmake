@@ -21,7 +21,7 @@ if (TARGET gRPC::gpr AND NOT local_grpc)
 else ()
   find_package (PkgConfig QUIET)
   if (PKG_CONFIG_FOUND)
-      pkg_check_modules (grpc QUIET "grpc${grpc_suffix}>=1.25" "grpc++${grpc_suffix}" gpr)
+      pkg_check_modules (grpc QUIET "grpc${grpc_suffix}>=1.28" "grpc++${grpc_suffix}" gpr)
   endif ()
 
   if (grpc_FOUND)
@@ -166,8 +166,8 @@ else ()
           ${grpc_binary_dir}/${ep_lib_prefix}${libname_}${ep_lib_suffix}
         INTERFACE_INCLUDE_DIRECTORIES
           ${grpc_binary_dir}/include)
-      target_link_libraries (ripple_libs INTERFACE "gRPC::${libname_}")
-      exclude_if_included ("gRPC::${libname_}")
+      target_link_libraries (ripple_libs INTERFACE "${libname_}")
+      exclude_if_included ("${libname_}")
     endmacro ()
 
     if (NOT TARGET gRPC::grpc_cpp_plugin)
@@ -181,8 +181,15 @@ else ()
   add_imported_grpc ("grpc${grpc_suffix}")
   add_imported_grpc ("grpc++${grpc_suffix}")
   add_imported_grpc (address_sorting)
+  #add_imported_grpc ("grpc++_reflection")
+  #add_imported_grpc ("upb")
+  #add_imported_grpc ("grpc_cronet")
+  #add_imported_grpc ("grpcpp_channelz")
 
-  #if (${local_protobuf})
+  #target_link_libraries ("gRPC::grpc${grpc_suffix}" INTERFACE c-ares::cares gRPC::gpr gRPC::address_sorting ZLIB::ZLIB)
+  #target_link_libraries ("gRPC::grpc++${grpc_suffix}" INTERFACE "gRPC::grpc${grpc_suffix}" gRPC::gpr)
+
+#if (${local_protobuf})
   #  add_dependencies(grpc_cpp_plugin protobuf::libprotobuf protobuf::libprotoc)
   #  add_dependencies(grpc++ protobuf::libprotobuf protobuf::libprotoc)
   #  add_dependencies(grpc protobuf::libprotobuf protobuf::libprotoc)
@@ -223,7 +230,6 @@ foreach(file ${GRPC_DEFINITION_FILES})
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running gRPC C++ protocol buffer compiler on ${file}"
     VERBATIM)
-  #DEPENDS ${_abs_file} protobuf::protoc gRPC::grpc_cpp_plugin
 set_source_files_properties(${src_1} ${src_2} ${hdr_1} ${hdr_2} PROPERTIES GENERATED TRUE)
     list(APPEND GRPC_PROTO_SRCS ${src_1} ${src_2})
     list(APPEND GRPC_PROTO_HDRS ${hdr_1} ${hdr_2})
@@ -245,5 +251,5 @@ target_compile_options (grpc_pbufs
     >)
 add_library (Ripple::grpc_pbufs ALIAS grpc_pbufs)
 target_link_libraries (ripple_libs INTERFACE Ripple::grpc_pbufs)
-target_include_directories(ripple_libs INTERFACE ${grpc_source_dir}/include)
+#target_include_directories(ripple_libs INTERFACE ${grpc_source_dir}/include)
 exclude_if_included (grpc_pbufs)
