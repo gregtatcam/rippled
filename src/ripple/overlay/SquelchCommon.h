@@ -1,13 +1,29 @@
-//
-// Created by gregt on 4/26/20.
-//
+//------------------------------------------------------------------------------
+/*
+    This file is part of rippled: https://github.com/ripple/rippled
+    Copyright 2020 Ripple Labs Inc.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose  with  or without fee is hereby granted, provided that the above
+    copyright notice and this permission notice appear in all copies.
+
+    THE  SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+    WITH  REGARD  TO  THIS  SOFTWARE  INCLUDING  ALL  IMPLIED  WARRANTIES  OF
+    MERCHANTABILITY  AND  FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+    ANY  SPECIAL ,  DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER  RESULTING  FROM  LOSS  OF USE, DATA OR PROFITS, WHETHER IN AN
+    ACTION  OF  CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+    OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+//==============================================================================
 
 #ifndef RIPPLE_OVERLAY_SQUELCHCOMMON_H_INCLUDED
 #define RIPPLE_OVERLAY_SQUELCHCOMMON_H_INCLUDED
 #include <chrono>
 
 namespace ripple {
-namespace Squelch {
+
+namespace squelch {
 
 using namespace std::chrono;
 
@@ -18,12 +34,16 @@ static constexpr seconds MAX_UNSQUELCH_EXPIRE = seconds{600};
 // No message received threshold before identifying a peer as idled
 static constexpr seconds IDLED = seconds{4};
 // Message count threshold to start selecting peers as the source
-// of messages from the validator
-static constexpr uint16_t MESSAGE_THRESHOLD = 20;
+// of messages from the validator. We add peers who reach
+// MIN_MESSAGE_THRESHOLD to considered pool once MAX_SELECTED_PEERS
+// reach MAX_MESSAGE_THRESHOLD.
+static constexpr uint16_t MIN_MESSAGE_THRESHOLD = 17;
+static constexpr uint16_t MAX_MESSAGE_THRESHOLD = 20;
 // Max selected peers to choose as the source of messages from validator
 static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 
-}  // namespace Squelch
+}  // namespace squelch
+
 }  // namespace ripple
 
 #endif  // RIPPLED_SQUELCHCOMMON_H

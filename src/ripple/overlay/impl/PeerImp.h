@@ -143,7 +143,7 @@ private:
     clock_type::time_point lastPingTime_;
     clock_type::time_point const creationTime_;
 
-    Squelch::Squelch<UptimeClock> squelch_;
+    squelch::Squelch<UptimeClock> squelch_;
 
     // Notes on thread locking:
     //

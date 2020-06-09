@@ -125,7 +125,7 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
-    Squelch::Slots<Peer, UptimeClock> slots_;
+    squelch::Slots<Peer, UptimeClock> slots_;
 
     //--------------------------------------------------------------------------
 
@@ -382,7 +382,7 @@ public:
     void
     checkForSquelch(
         PublicKey const& validator,
-        std::weak_ptr<Peer> peer,
+        std::weak_ptr<Peer> const& peer,
         protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the

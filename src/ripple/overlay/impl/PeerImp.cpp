@@ -2316,8 +2316,19 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
 {
+    if (!m->has_validatorpubkey())
+    {
+        JLOG(p_journal_.debug()) << "onMessage: TMSquelch, missing public key";
+        return;
+    }
     auto validator = m->validatorpubkey();
-    PublicKey key(Slice(validator.data(), validator.size()));
+    auto const slice{makeSlice(validator)};
+    if (!publicKeyType(slice))
+    {
+        JLOG(p_journal_.debug()) << "onMessage: TMSquelch, invalid public key";
+        return;
+    }
+    PublicKey key(slice);
     auto squelch = m->squelch();
     auto duration = m->has_squelchduration() ? m->squelchduration() : 0;
     auto sp = shared_from_this();
@@ -2481,12 +2492,11 @@ PeerImp::checkPropose(
         return;
     }
 
-    overlay_.checkForSquelch(
-        peerPos.publicKey(), shared_from_this(), protocol::mtPROPOSE_LEDGER);
+    bool relayed = false;
 
     if (isTrusted)
     {
-        app_.getOPs().processTrustedProposal(peerPos, packet);
+        relayed = app_.getOPs().processTrustedProposal(peerPos, packet);
     }
     else
     {
@@ -2498,12 +2508,19 @@ PeerImp::checkPropose(
             JLOG(p_journal_.trace()) << "relaying UNTRUSTED proposal";
             overlay_.relay(
                 *packet, peerPos.suppressionID(), peerPos.publicKey());
+            relayed = true;
         }
         else
         {
             JLOG(p_journal_.debug()) << "Not relaying UNTRUSTED proposal";
         }
     }
+
+    if (relayed)
+        overlay_.checkForSquelch(
+            peerPos.publicKey(),
+            shared_from_this(),
+            protocol::mtPROPOSE_LEDGER);
 }
 
 void
@@ -2524,13 +2541,13 @@ PeerImp::checkValidation(
         if (app_.getOPs().recvValidation(val, std::to_string(id())) ||
             cluster())
         {
+            auto const suppression =
+                sha512Half(makeSlice(val->getSerialized()));
+            overlay_.relay(*packet, suppression, val->getSignerPublic());
             overlay_.checkForSquelch(
                 val->getSignerPublic(),
                 shared_from_this(),
                 protocol::mtVALIDATION);
-            auto const suppression =
-                sha512Half(makeSlice(val->getSerialized()));
-            overlay_.relay(*packet, suppression, val->getSignerPublic());
         }
     }
     catch (std::exception const&)

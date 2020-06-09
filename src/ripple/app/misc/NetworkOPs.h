@@ -169,7 +169,8 @@ public:
     //--------------------------------------------------------------------------
 
     // ledger proposal/close functions
-    virtual void
+    /** Return true if the message is relayed */
+    virtual bool
     processTrustedProposal(
         RCLCxPeerPos peerPos,
         std::shared_ptr<protocol::TMProposeSet> set) = 0;

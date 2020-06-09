@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2012, 2013 Ripple Labs Inc.
+    Copyright (c) 2020 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -28,7 +28,7 @@
 
 namespace ripple {
 
-namespace Squelch {
+namespace squelch {
 
 /** Maintains squelching of relaying messages from validators */
 template <typename clock_type>
@@ -95,12 +95,13 @@ Squelch<clock_type>::isSquelched(PublicKey const& validator)
 {
     auto now = clock_type::now();
 
-    if (squelched_.find(validator) == squelched_.end())
+    auto const& it = squelched_.find(validator);
+    if (it == squelched_.end())
         return false;
-    else if (squelched_[validator] > now)
+    else if (it->second > now)
         return true;
 
-    squelched_.erase(validator);
+    squelched_.erase(it);
 
     return false;
 }
@@ -114,7 +115,7 @@ Squelch<clock_type>::getSquelchDuration()
     return d;
 }
 
-}  // namespace Squelch
+}  // namespace squelch
 
 }  // namespace ripple
 

@@ -1262,7 +1262,7 @@ OverlayImpl::sendEndpoints()
     }
 }
 
-inline std::shared_ptr<Message>
+std::shared_ptr<Message>
 makeSquelchMessage(
     PublicKey const& validator,
     bool squelch,
@@ -1277,10 +1277,9 @@ makeSquelchMessage(
 }
 
 void
-sendUnsquelch(PublicKey const& validator, std::weak_ptr<Peer> wp)
+sendUnsquelch(PublicKey const& validator, std::weak_ptr<Peer> const& wp)
 {
-    auto const& peer = wp.lock();
-    if (peer)
+    if (auto const& peer = wp.lock())
     {
         // optimize - multiple message with different
         // validator might be sent to the same peer
@@ -1292,11 +1291,10 @@ sendUnsquelch(PublicKey const& validator, std::weak_ptr<Peer> wp)
 void
 sendSquelch(
     PublicKey const& validator,
-    std::weak_ptr<Peer> wp,
+    std::weak_ptr<Peer> const& wp,
     uint32_t squelchDuration)
 {
-    auto peer = wp.lock();
-    if (peer)
+    if (auto const& peer = wp.lock())
     {
         auto m = makeSquelchMessage(validator, true, squelchDuration);
         peer->send(m);
@@ -1306,14 +1304,13 @@ sendSquelch(
 void
 OverlayImpl::checkForSquelch(
     PublicKey const& validator,
-    std::weak_ptr<Peer> wp,
+    std::weak_ptr<Peer> const& wp,
     protocol::MessageType type)
 {
     if (!strand_.running_in_this_thread())
-        return post(
-            strand_,
-            std::bind(
-                &OverlayImpl::checkForSquelch, this, validator, wp, type));
+        return post(strand_, [wp, type, validator, this]() {
+            checkForSquelch(validator, wp, type);
+        });
 
     auto peer = wp.lock();
     if (!peer)
