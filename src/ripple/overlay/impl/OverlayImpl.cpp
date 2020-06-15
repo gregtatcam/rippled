@@ -140,6 +140,7 @@ OverlayImpl::OverlayImpl(
     , m_resolver(resolver)
     , next_id_(1)
     , timer_count_(0)
+    , slots_(*this)
     , m_stats(
           std::bind(&OverlayImpl::collect_metrics, this),
           collector,
@@ -474,7 +475,7 @@ OverlayImpl::remove(std::shared_ptr<PeerFinder::Slot> const& slot)
     assert(iter != m_peers.end());
     auto peer = iter->second.lock();
     if (peer)
-        unsquelch(peer->id());
+        deletePeer(peer->id());
     m_peers.erase(iter);
 }
 
@@ -1277,7 +1278,9 @@ makeSquelchMessage(
 }
 
 void
-sendUnsquelch(PublicKey const& validator, std::weak_ptr<Peer> const& wp)
+OverlayImpl::unsquelch(
+    PublicKey const& validator,
+    std::weak_ptr<Peer> const& wp) const
 {
     if (auto const& peer = wp.lock())
     {
@@ -1289,10 +1292,10 @@ sendUnsquelch(PublicKey const& validator, std::weak_ptr<Peer> const& wp)
 }
 
 void
-sendSquelch(
+OverlayImpl::squelch(
     PublicKey const& validator,
     std::weak_ptr<Peer> const& wp,
-    uint32_t squelchDuration)
+    uint32_t squelchDuration) const
 {
     if (auto const& peer = wp.lock())
     {
@@ -1318,16 +1321,16 @@ OverlayImpl::checkForSquelch(
 
     auto id = peer->id();
 
-    slots_.checkForSquelch(validator, id, wp, type, sendSquelch);
+    slots_.checkForSquelch(validator, id, wp, type);
 }
 
 void
-OverlayImpl::unsquelch(Peer::id_t const& id)
+OverlayImpl::deletePeer(Peer::id_t const& id)
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&OverlayImpl::unsquelch, this, id));
+        return post(strand_, std::bind(&OverlayImpl::deletePeer, this, id));
 
-    slots_.unsquelch(id, sendUnsquelch);
+    slots_.unsquelch(id);
 }
 
 void
@@ -1336,7 +1339,7 @@ OverlayImpl::checkIdle()
     if (!strand_.running_in_this_thread())
         return post(strand_, std::bind(&OverlayImpl::checkIdle, this));
 
-    slots_.checkIdle(sendUnsquelch);
+    slots_.checkIdle();
 }
 
 //------------------------------------------------------------------------------

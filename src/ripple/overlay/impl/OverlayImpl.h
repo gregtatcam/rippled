@@ -53,7 +53,7 @@ namespace ripple {
 class PeerImp;
 class BasicConfig;
 
-class OverlayImpl : public Overlay
+class OverlayImpl : public Overlay, public squelch::SquelchHandler
 {
 public:
     class Child
@@ -125,7 +125,7 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
-    squelch::Slots<Peer, UptimeClock> slots_;
+    squelch::Slots<UptimeClock> slots_;
 
     //--------------------------------------------------------------------------
 
@@ -391,9 +391,19 @@ public:
      * @param id Peer's id
      */
     void
-    unsquelch(Peer::id_t const& id);
+    deletePeer(Peer::id_t const& id);
 
 private:
+    void
+    squelch(
+        PublicKey const& validator,
+        std::weak_ptr<Peer> const& peer,
+        std::uint32_t squelchDuration) const override;
+
+    void
+    unsquelch(PublicKey const& validator, std::weak_ptr<Peer> const& peer)
+        const override;
+
     std::shared_ptr<Writer>
     makeRedirectResponse(
         std::shared_ptr<PeerFinder::Slot> const& slot,
