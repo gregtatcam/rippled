@@ -99,7 +99,7 @@ OverlayImpl::Timer::on_timer(error_code ec)
     overlay_.m_peerFinder->once_per_second();
     overlay_.sendEndpoints();
     overlay_.autoConnect();
-    overlay_.checkIdle();
+    overlay_.deleteIdlePeers();
 
     if ((++overlay_.timer_count_ % Tuning::checkSeconds) == 0)
         overlay_.check();
@@ -1305,14 +1305,14 @@ OverlayImpl::squelch(
 }
 
 void
-OverlayImpl::checkForSquelch(
+OverlayImpl::updateSlotAndSquelch(
     PublicKey const& validator,
     std::weak_ptr<Peer> const& wp,
     protocol::MessageType type)
 {
     if (!strand_.running_in_this_thread())
         return post(strand_, [wp, type, validator, this]() {
-            checkForSquelch(validator, wp, type);
+            updateSlotAndSquelch(validator, wp, type);
         });
 
     auto peer = wp.lock();
@@ -1321,7 +1321,7 @@ OverlayImpl::checkForSquelch(
 
     auto id = peer->id();
 
-    slots_.checkForSquelch(validator, id, wp, type);
+    slots_.updateSlotAndSquelch(validator, id, wp, type);
 }
 
 void
@@ -1334,12 +1334,12 @@ OverlayImpl::deletePeer(Peer::id_t const& id)
 }
 
 void
-OverlayImpl::checkIdle()
+OverlayImpl::deleteIdlePeers()
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&OverlayImpl::checkIdle, this));
+        return post(strand_, std::bind(&OverlayImpl::deleteIdlePeers, this));
 
-    slots_.checkIdle();
+    slots_.deleteIdlePeers();
 }
 
 //------------------------------------------------------------------------------

@@ -56,8 +56,8 @@ public:
     /** Constructor
      * @param message Protocol message to serialize
      * @param type Protocol message type
-     * @param validator Public Key of the source validator for Validation or Proposal
-     * message. Used to check if the message should be squelched.
+     * @param validator Public Key of the source validator for Validation or
+     * Proposal message. Used to check if the message should be squelched.
      */
     Message(
         ::google::protobuf::Message const& message,

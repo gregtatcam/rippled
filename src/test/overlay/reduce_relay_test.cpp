@@ -25,6 +25,7 @@
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
 #include <numeric>
+#include <optional>
 #include <ripple.pb.h>
 
 namespace ripple {
@@ -213,13 +214,13 @@ public:
     virtual ~Overlay() = default;
 
     virtual void
-    checkForSquelch(
+    updateSlotAndSquelch(
         PublicKey const& validator,
         PeerSPtr peer,
         SquelchCB f,
         protocol::MessageType type = protocol::mtVALIDATION) = 0;
 
-    virtual void checkIdle(UnsquelchCB) = 0;
+    virtual void deleteIdlePeers(UnsquelchCB) = 0;
 
     virtual void deletePeer(Peer::id_t, UnsquelchCB) = 0;
 };
@@ -457,7 +458,7 @@ public:
         if (squelch_.isSquelched(*validator))
             return;
 
-        overlay_.checkForSquelch(*validator, shared_from_this(), f);
+        overlay_.updateSlotAndSquelch(*validator, shared_from_this(), f);
     }
 
     /** Remote Peer (Directly connected Peer) */
@@ -494,7 +495,7 @@ public:
     {
         peers_.clear();
         ManualClock::advance(hours(1));
-        slots_.checkIdle();
+        slots_.deleteIdlePeers();
     }
 
     std::uint16_t
@@ -505,14 +506,14 @@ public:
     }
 
     void
-    checkForSquelch(
+    updateSlotAndSquelch(
         PublicKey const& validator,
         PeerSPtr peer,
         SquelchCB f,
         protocol::MessageType type = protocol::mtVALIDATION) override
     {
         squelch_ = f;
-        slots_.checkForSquelch(validator, peer->id(), peer, type);
+        slots_.updateSlotAndSquelch(validator, peer->id(), peer, type);
     }
 
     void
@@ -523,10 +524,10 @@ public:
     }
 
     void
-    checkIdle(UnsquelchCB f) override
+    deleteIdlePeers(UnsquelchCB f) override
     {
         unsquelch_ = f;
-        slots_.checkIdle();
+        slots_.deleteIdlePeers();
     }
 
     PeerSPtr
@@ -570,7 +571,7 @@ public:
             addPeer();
     }
 
-    boost::optional<Peer::id_t>
+    std::optional<Peer::id_t>
     deleteLastPeer()
     {
         if (peers_.empty())
@@ -592,8 +593,7 @@ public:
     bool
     isCountingState(PublicKey const& validator)
     {
-        auto ret = slots_.inState(validator, squelch::SlotState::Counting);
-        return ret && *ret;
+        return slots_.inState(validator, squelch::SlotState::Counting);
     }
 
     std::set<id_t>
@@ -866,7 +866,7 @@ class reduce_relay_test : public beast::unit_test::suite
     sendSquelch(
         PublicKey const& validator,
         PeerWPtr const& peerPtr,
-        boost::optional<std::uint32_t> duration)
+        std::optional<std::uint32_t> duration)
     {
         protocol::TMSquelch squelch;
         bool res = duration ? true : false;
@@ -1014,7 +1014,7 @@ class reduce_relay_test : public beast::unit_test::suite
             {
                 lastCheck = now;
                 // Check if Link Down event must be handled by
-                // checkIdle(): 1) the peer is in Selected state;
+                // deleteIdlePeer(): 1) the peer is in Selected state;
                 // 2) the peer has not received any messages for IDLED time;
                 // 3) there are peers in Squelched state in the slot.
                 bool mustHandle = false;
@@ -1031,7 +1031,7 @@ class reduce_relay_test : public beast::unit_test::suite
                         network_.overlay().inState(
                             event.key_, squelch::PeerState::Squelched) > 0;
                 }
-                network_.overlay().checkIdle(
+                network_.overlay().deleteIdlePeers(
                     [&](PublicKey const& v, PeerWPtr const& ptr) {
                         event.handled_ = true;
                         if (mustHandle && v == event.key_)
@@ -1231,7 +1231,7 @@ class reduce_relay_test : public beast::unit_test::suite
             BEAST_EXPECT(propagateAndSquelch(log, true, false));
             ManualClock::advance(seconds(5));
             std::uint16_t unsquelched = 0;
-            network_.overlay().checkIdle(
+            network_.overlay().deleteIdlePeers(
                 [&](PublicKey const& key, PeerWPtr const& peer) {
                     unsquelched++;
                 });

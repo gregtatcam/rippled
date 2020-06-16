@@ -1791,8 +1791,9 @@ NetworkOPsImp::processTrustedProposal(
             *set, peerPos.suppressionID(), peerPos.publicKey());
         return true;
     }
-    else
-        JLOG(m_journal.info()) << "Not relaying trusted proposal";
+
+    JLOG(m_journal.info()) << "Not relaying trusted proposal";
+
     return false;
 }
 

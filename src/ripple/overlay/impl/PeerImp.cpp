@@ -2517,7 +2517,7 @@ PeerImp::checkPropose(
     }
 
     if (relayed)
-        overlay_.checkForSquelch(
+        overlay_.updateSlotAndSquelch(
             peerPos.publicKey(),
             shared_from_this(),
             protocol::mtPROPOSE_LEDGER);
@@ -2544,7 +2544,7 @@ PeerImp::checkValidation(
             auto const suppression =
                 sha512Half(makeSlice(val->getSerialized()));
             overlay_.relay(*packet, suppression, val->getSignerPublic());
-            overlay_.checkForSquelch(
+            overlay_.updateSlotAndSquelch(
                 val->getSignerPublic(),
                 shared_from_this(),
                 protocol::mtVALIDATION);

@@ -380,7 +380,7 @@ public:
      * @param type Received protocol message type
      */
     void
-    checkForSquelch(
+    updateSlotAndSquelch(
         PublicKey const& validator,
         std::weak_ptr<Peer> const& peer,
         protocol::MessageType type);
@@ -515,7 +515,7 @@ private:
     /** Check if peers stopped relaying messages
      * and if slots stopped receiving messages from the validator */
     void
-    checkIdle();
+    deleteIdlePeers();
 
 private:
     struct TrafficGauges
