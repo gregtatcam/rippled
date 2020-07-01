@@ -2158,8 +2158,9 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMValidation> const& m)
                 app_.getHashRouter().addSuppressionPeerWithStatus(key, id_);
             !added)
         {
-            // Count unique messages (Slots has it's own 'HashRouter'), which a peer
-            // receives within IDLED seconds since the message has been relayed.
+            // Count unique messages (Slots has it's own 'HashRouter'), which a
+            // peer receives within IDLED seconds since the message has been
+            // relayed.
             if (app_.config().REDUCE_RELAY_ENABLE && (bool)relayed &&
                 (stopwatch().now() - *relayed) < squelch::IDLED)
                 overlay_.updateSlotAndSquelch(
