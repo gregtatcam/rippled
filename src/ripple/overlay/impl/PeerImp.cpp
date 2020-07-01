@@ -100,6 +100,7 @@ PeerImp::~PeerImp()
 {
     const bool inCluster{cluster()};
 
+    overlay_.deletePeer(id_);
     if (state_ == State::active)
         overlay_.onPeerDeactivate(id_);
     overlay_.peerFinder().on_closed(slot_);
@@ -1642,8 +1643,16 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMProposeSet> const& m)
         publicKey.slice(),
         sig);
 
-    if (!app_.getHashRouter().addSuppressionPeer(suppression, id_))
+    if (auto [added, relayed] =
+            app_.getHashRouter().addSuppressionPeerWithStatus(suppression, id_);
+        !added)
     {
+        // Count unique messages (Slots has it's own 'HashRouter'), which a peer
+        // receives within IDLED seconds since the message has been relayed.
+        if (app_.config().REDUCE_RELAY_ENABLE && relayed &&
+            (stopwatch().now() - *relayed) < squelch::IDLED)
+            overlay_.updateSlotAndSquelch(
+                suppression, publicKey, {id_}, protocol::mtPROPOSE_LEDGER);
         JLOG(p_journal_.trace()) << "Proposal: duplicate";
         return;
     }
@@ -2144,9 +2153,17 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMValidation> const& m)
             return;
         }
 
-        if (!app_.getHashRouter().addSuppressionPeer(
-                sha512Half(makeSlice(m->validation())), id_))
+        auto key = sha512Half(makeSlice(m->validation()));
+        if (auto [added, relayed] =
+                app_.getHashRouter().addSuppressionPeerWithStatus(key, id_);
+            !added)
         {
+            // Count unique messages (Slots has it's own 'HashRouter'), which a peer
+            // receives within IDLED seconds since the message has been relayed.
+            if (app_.config().REDUCE_RELAY_ENABLE && (bool)relayed &&
+                (stopwatch().now() - *relayed) < squelch::IDLED)
+                overlay_.updateSlotAndSquelch(
+                    key, val->getSignerPublic(), {id_}, protocol::mtVALIDATION);
             JLOG(p_journal_.trace()) << "Validation: duplicate";
             return;
         }
@@ -2338,6 +2355,9 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
             sp->squelch_.squelch(key, squelch, duration);
         });
 
+    JLOG(p_journal_.debug())
+        << "onMessage: TMSquelch " << slice << " " << id() << " " << duration;
+
     squelch_.squelch(key, squelch, duration);
 }
 
@@ -2492,34 +2512,39 @@ PeerImp::checkPropose(
         return;
     }
 
-    bool relayed = false;
-
-    if (isTrusted)
-    {
-        relayed = app_.getOPs().processTrustedProposal(peerPos, packet);
-    }
-    else
-    {
-        if (cluster() ||
-            (app_.getOPs().getConsensusLCL() ==
-             peerPos.proposal().prevLedger()))
+    // haveMessage contains peers, which are suppressed; i.e. the peers
+    // are the source of the message, consequently the message should
+    // not be relayed to these peers. But the message must be counted
+    // as part of the squelch logic.
+    auto const haveMessage = [&]() {
+        if (isTrusted)
         {
-            // relay untrusted proposal
-            JLOG(p_journal_.trace()) << "relaying UNTRUSTED proposal";
-            overlay_.relay(
-                *packet, peerPos.suppressionID(), peerPos.publicKey());
-            relayed = true;
+            return app_.getOPs().processTrustedProposal(peerPos, packet);
         }
         else
         {
-            JLOG(p_journal_.debug()) << "Not relaying UNTRUSTED proposal";
+            if (cluster() ||
+                (app_.getOPs().getConsensusLCL() ==
+                 peerPos.proposal().prevLedger()))
+            {
+                // relay untrusted proposal
+                JLOG(p_journal_.trace()) << "relaying UNTRUSTED proposal";
+                return overlay_.relay(
+                    *packet, peerPos.suppressionID(), peerPos.publicKey());
+            }
+            else
+            {
+                JLOG(p_journal_.debug()) << "Not relaying UNTRUSTED proposal";
+            }
         }
-    }
+        return std::set<Peer::id_t>();
+    }();
 
-    if (relayed)
+    if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty())
         overlay_.updateSlotAndSquelch(
+            peerPos.suppressionID(),
             peerPos.publicKey(),
-            shared_from_this(),
+            haveMessage,
             protocol::mtPROPOSE_LEDGER);
 }
 
@@ -2543,11 +2568,20 @@ PeerImp::checkValidation(
         {
             auto const suppression =
                 sha512Half(makeSlice(val->getSerialized()));
-            overlay_.relay(*packet, suppression, val->getSignerPublic());
-            overlay_.updateSlotAndSquelch(
-                val->getSignerPublic(),
-                shared_from_this(),
-                protocol::mtVALIDATION);
+            // haveMessage contains peers, which are suppressed; i.e. the peers
+            // are the source of the message, consequently the message should
+            // not be relayed to these peers. But the message must be counted
+            // as part of the squelch logic.
+            auto haveMessage =
+                overlay_.relay(*packet, suppression, val->getSignerPublic());
+            if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty())
+            {
+                overlay_.updateSlotAndSquelch(
+                    suppression,
+                    val->getSignerPublic(),
+                    haveMessage,
+                    protocol::mtVALIDATION);
+            }
         }
     }
     catch (std::exception const&)

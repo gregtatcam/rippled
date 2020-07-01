@@ -23,6 +23,7 @@
 #include <ripple/basics/random.h>
 #include <ripple/overlay/SquelchCommon.h>
 #include <ripple/protocol/PublicKey.h>
+
 #include <chrono>
 #include <functional>
 
@@ -81,8 +82,7 @@ Squelch<clock_type>::squelch(
                 ((duration >= MIN_UNSQUELCH_EXPIRE &&
                   duration <= MAX_UNSQUELCH_EXPIRE)
                      ? duration
-                     : getSquelchDuration());  // TBD should we disconnect if
-                                               // invalid duration?
+                     : getSquelchDuration());
         }();
     }
     else

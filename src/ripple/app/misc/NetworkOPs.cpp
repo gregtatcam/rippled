@@ -356,7 +356,7 @@ public:
         Json::Value& jvResult) override;
 
     // Ledger proposal/close functions.
-    bool
+    std::set<Peer::id_t> const
     processTrustedProposal(
         RCLCxPeerPos proposal,
         std::shared_ptr<protocol::TMProposeSet> set) override;
@@ -1780,21 +1780,20 @@ NetworkOPsImp::getConsensusLCL()
     return mConsensus.prevLedgerID();
 }
 
-bool
+std::set<Peer::id_t> const
 NetworkOPsImp::processTrustedProposal(
     RCLCxPeerPos peerPos,
     std::shared_ptr<protocol::TMProposeSet> set)
 {
     if (mConsensus.peerProposal(app_.timeKeeper().closeTime(), peerPos))
     {
-        app_.overlay().relay(
+        return app_.overlay().relay(
             *set, peerPos.suppressionID(), peerPos.publicKey());
-        return true;
     }
 
     JLOG(m_journal.info()) << "Not relaying trusted proposal";
 
-    return false;
+    return {};
 }
 
 void

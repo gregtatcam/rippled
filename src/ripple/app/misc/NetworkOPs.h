@@ -26,6 +26,7 @@
 #include <ripple/core/Stoppable.h>
 #include <ripple/ledger/ReadView.h>
 #include <ripple/net/InfoSub.h>
+#include <ripple/overlay/Peer.h>
 #include <ripple/protocol/STValidation.h>
 #include <boost/asio.hpp>
 #include <deque>
@@ -39,7 +40,6 @@ namespace ripple {
 // Operations that clients may wish to perform against the network
 // Master operational handler, server sequencer, network tracker
 
-class Peer;
 class LedgerMaster;
 class Transaction;
 class ValidatorKeys;
@@ -169,8 +169,12 @@ public:
     //--------------------------------------------------------------------------
 
     // ledger proposal/close functions
-    /** Return true if the message is relayed */
-    virtual bool
+    /** Return set of peers, which
+     * have already seen the messge; i.e.
+     * the message has been received from
+     * these peers and added to the hash
+     * router. */
+    virtual std::set<Peer::id_t> const
     processTrustedProposal(
         RCLCxPeerPos peerPos,
         std::shared_ptr<protocol::TMProposeSet> set) = 0;

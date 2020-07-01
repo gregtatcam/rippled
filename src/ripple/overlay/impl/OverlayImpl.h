@@ -198,7 +198,7 @@ public:
     void checkSanity(std::uint32_t) override;
 
     std::shared_ptr<Peer>
-    findPeerByShortID(Peer::id_t const& id) override;
+    findPeerByShortID(Peer::id_t const& id) const override;
 
     std::shared_ptr<Peer>
     findPeerByPublicKey(PublicKey const& pubKey) override;
@@ -209,13 +209,13 @@ public:
     void
     send(protocol::TMValidation& m) override;
 
-    void
+    std::set<Peer::id_t> const
     relay(
         protocol::TMProposeSet& m,
         uint256 const& uid,
         PublicKey const& validator) override;
 
-    void
+    std::set<Peer::id_t> const
     relay(
         protocol::TMValidation& m,
         uint256 const& uid,
@@ -374,15 +374,19 @@ public:
     lastLink(std::uint32_t id);
 
     /** Updates message count for validator/peer. Sends TMSquelch if the number
-     * of messages for N peers reaches threshold T.
+     * of messages for N peers reaches threshold T. A message is counted
+     * if a peer receives the message for the first time and if
+     * the message has been  relayed.
+     * @param key Unique message's key
      * @param validator Validator's public key
-     * @param id Peer's id
+     * @param id Peers id
      * @param type Received protocol message type
      */
     void
     updateSlotAndSquelch(
+        uint256 const& key,
         PublicKey const& validator,
-        std::weak_ptr<Peer> const& peer,
+        std::set<Peer::id_t> const& peers,
         protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the
@@ -391,18 +395,17 @@ public:
      * @param id Peer's id
      */
     void
-    deletePeer(Peer::id_t const& id);
+    deletePeer(Peer::id_t const id);
 
 private:
     void
     squelch(
         PublicKey const& validator,
-        std::weak_ptr<Peer> const& peer,
+        Peer::id_t const id,
         std::uint32_t squelchDuration) const override;
 
     void
-    unsquelch(PublicKey const& validator, std::weak_ptr<Peer> const& peer)
-        const override;
+    unsquelch(PublicKey const& validator, Peer::id_t const id) const override;
 
     std::shared_ptr<Writer>
     makeRedirectResponse(

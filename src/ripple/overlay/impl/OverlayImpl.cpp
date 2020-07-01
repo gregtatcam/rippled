@@ -140,7 +140,7 @@ OverlayImpl::OverlayImpl(
     , m_resolver(resolver)
     , next_id_(1)
     , timer_count_(0)
-    , slots_(*this)
+    , slots_(app, *this)
     , m_stats(
           std::bind(&OverlayImpl::collect_metrics, this),
           collector,
@@ -473,9 +473,6 @@ OverlayImpl::remove(std::shared_ptr<PeerFinder::Slot> const& slot)
     std::lock_guard lock(mutex_);
     auto const iter = m_peers.find(slot);
     assert(iter != m_peers.end());
-    auto peer = iter->second.lock();
-    if (peer)
-        deletePeer(peer->id());
     m_peers.erase(iter);
 }
 
@@ -1112,7 +1109,7 @@ OverlayImpl::check()
 }
 
 std::shared_ptr<Peer>
-OverlayImpl::findPeerByShortID(Peer::id_t const& id)
+OverlayImpl::findPeerByShortID(Peer::id_t const& id) const
 {
     std::lock_guard lock(mutex_);
     auto const iter = ids_.find(id);
@@ -1160,7 +1157,7 @@ OverlayImpl::send(protocol::TMValidation& m)
     app_.getOPs().pubValidation(val);
 }
 
-void
+std::set<Peer::id_t> const
 OverlayImpl::relay(
     protocol::TMProposeSet& m,
     uint256 const& uid,
@@ -1174,10 +1171,12 @@ OverlayImpl::relay(
             if (toSkip->find(p->id()) == toSkip->end())
                 p->send(sm);
         });
+        return *toSkip;
     }
+    return {};
 }
 
-void
+std::set<Peer::id_t> const
 OverlayImpl::relay(
     protocol::TMValidation& m,
     uint256 const& uid,
@@ -1191,7 +1190,9 @@ OverlayImpl::relay(
             if (toSkip->find(p->id()) == toSkip->end())
                 p->send(sm);
         });
+        return *toSkip;
     }
+    return {};
 }
 
 //------------------------------------------------------------------------------
@@ -1278,11 +1279,10 @@ makeSquelchMessage(
 }
 
 void
-OverlayImpl::unsquelch(
-    PublicKey const& validator,
-    std::weak_ptr<Peer> const& wp) const
+OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t const id) const
 {
-    if (auto const& peer = wp.lock())
+    if (auto peer = findPeerByShortID(id);
+        peer && app_.config().REDUCE_RELAY_SQUELCH)
     {
         // optimize - multiple message with different
         // validator might be sent to the same peer
@@ -1294,10 +1294,11 @@ OverlayImpl::unsquelch(
 void
 OverlayImpl::squelch(
     PublicKey const& validator,
-    std::weak_ptr<Peer> const& wp,
+    Peer::id_t const id,
     uint32_t squelchDuration) const
 {
-    if (auto const& peer = wp.lock())
+    if (auto peer = findPeerByShortID(id);
+        peer && app_.config().REDUCE_RELAY_SQUELCH)
     {
         auto m = makeSquelchMessage(validator, true, squelchDuration);
         peer->send(m);
@@ -1306,26 +1307,22 @@ OverlayImpl::squelch(
 
 void
 OverlayImpl::updateSlotAndSquelch(
+    uint256 const& key,
     PublicKey const& validator,
-    std::weak_ptr<Peer> const& wp,
+    std::set<Peer::id_t> const& peers,
     protocol::MessageType type)
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, [wp, type, validator, this]() {
-            updateSlotAndSquelch(validator, wp, type);
+        return post(strand_, [key, peers, type, validator, this]() {
+            updateSlotAndSquelch(key, validator, peers, type);
         });
 
-    auto peer = wp.lock();
-    if (!peer)
-        return;
-
-    auto id = peer->id();
-
-    slots_.updateSlotAndSquelch(validator, id, wp, type);
+    for (auto id : peers)
+        slots_.updateSlotAndSquelch(key, validator, id, type);
 }
 
 void
-OverlayImpl::deletePeer(Peer::id_t const& id)
+OverlayImpl::deletePeer(Peer::id_t const id)
 {
     if (!strand_.running_in_this_thread())
         return post(strand_, std::bind(&OverlayImpl::deletePeer, this, id));

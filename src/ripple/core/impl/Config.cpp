@@ -456,6 +456,24 @@ Config::loadFromString(std::string const& fileContents)
     if (getSingleSection(secConfig, SECTION_COMPRESSION, strTemp, j_))
         COMPRESSION = beast::lexicalCastThrow<bool>(strTemp);
 
+    if (auto section = getIniFileSection(secConfig, SECTION_REDUCE_RELAY))
+    {
+        boost::regex const reEnable("^enable=(true|false)$");
+        boost::regex const reSquelch("^squelch=(true|false)$");
+        for (auto line : *section)
+        {
+            boost::smatch match;
+            if (boost::regex_match(line, match, reEnable))
+                REDUCE_RELAY_ENABLE =
+                    beast::lexicalCastThrow<bool>(match[1].str());
+            else if (boost::regex_match(line, match, reSquelch))
+                REDUCE_RELAY_SQUELCH =
+                    beast::lexicalCastThrow<bool>(match[1].str());
+            else
+                Throw<std::runtime_error>("Invalid " SECTION_REDUCE_RELAY);
+        }
+    }
+
     // Do not load trusted validator configuration for standalone mode
     if (!RUN_STANDALONE)
     {

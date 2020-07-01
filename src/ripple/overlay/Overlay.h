@@ -133,7 +133,7 @@ public:
 
     /** Returns the peer with the matching short id, or null. */
     virtual std::shared_ptr<Peer>
-    findPeerByShortID(Peer::id_t const& id) = 0;
+    findPeerByShortID(Peer::id_t const& id) const = 0;
 
     /** Returns the peer with the matching public key, or null. */
     virtual std::shared_ptr<Peer>
@@ -147,15 +147,23 @@ public:
     virtual void
     send(protocol::TMValidation& m) = 0;
 
-    /** Relay a proposal. */
-    virtual void
+    /** Relay a proposal. Return set
+     * of peers, which have already seen the
+     * message; i.e. the message has been
+     * received from these peers and added
+     * to the hash router */
+    virtual std::set<Peer::id_t> const
     relay(
         protocol::TMProposeSet& m,
         uint256 const& uid,
         PublicKey const& validator) = 0;
 
-    /** Relay a validation. */
-    virtual void
+    /** Relay a validation. Return set
+     * of peers, which have already seen the
+     * message; i.e. the message has been
+     * received from these peers and added
+     * to the hash router */
+    virtual std::set<Peer::id_t> const
     relay(
         protocol::TMValidation& m,
         uint256 const& uid,

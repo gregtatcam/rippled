@@ -32,13 +32,13 @@ using namespace std::chrono;
 static constexpr seconds MIN_UNSQUELCH_EXPIRE = seconds{300};
 static constexpr seconds MAX_UNSQUELCH_EXPIRE = seconds{600};
 // No message received threshold before identifying a peer as idled
-static constexpr seconds IDLED = seconds{4};
+static constexpr seconds IDLED = seconds{8};
 // Message count threshold to start selecting peers as the source
 // of messages from the validator. We add peers who reach
 // MIN_MESSAGE_THRESHOLD to considered pool once MAX_SELECTED_PEERS
 // reach MAX_MESSAGE_THRESHOLD.
-static constexpr uint16_t MIN_MESSAGE_THRESHOLD = 17;
-static constexpr uint16_t MAX_MESSAGE_THRESHOLD = 20;
+static constexpr uint16_t MIN_MESSAGE_THRESHOLD = 9;
+static constexpr uint16_t MAX_MESSAGE_THRESHOLD = 10;
 // Max selected peers to choose as the source of messages from validator
 static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 
