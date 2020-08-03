@@ -23,6 +23,7 @@
 #include <ripple/overlay/Slot.h>
 #include <ripple/protocol/SecretKey.h>
 #include <ripple.pb.h>
+#include <test/jtx/Env.h>
 
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
@@ -217,14 +218,13 @@ public:
     updateSlotAndSquelch(
         uint256 const& key,
         PublicKey const& validator,
-        Peer::id_t const id,
+        Peer::id_t id,
         SquelchCB f,
         protocol::MessageType type = protocol::mtVALIDATION) = 0;
 
     virtual void deleteIdlePeers(UnsquelchCB) = 0;
 
-    virtual void
-    deletePeer(Peer::id_t const, UnsquelchCB) = 0;
+    virtual void deletePeer(Peer::id_t, UnsquelchCB) = 0;
 };
 
 class Validator;
@@ -345,7 +345,7 @@ public:
     }
 
     void
-    deletePeer(Peer::id_t const id)
+    deletePeer(Peer::id_t id)
     {
         links_.erase(id);
     }
@@ -405,7 +405,7 @@ public:
     }
 
     void
-    linkUp(Peer::id_t const id)
+    linkUp(Peer::id_t id)
     {
         auto it = links_.find(id);
         assert(it != links_.end());
@@ -413,7 +413,7 @@ public:
     }
 
     void
-    linkDown(Peer::id_t const id)
+    linkDown(Peer::id_t id)
     {
         auto it = links_.find(id);
         assert(it != links_.end());
@@ -511,7 +511,7 @@ public:
     updateSlotAndSquelch(
         uint256 const& key,
         PublicKey const& validator,
-        Peer::id_t const id,
+        Peer::id_t id,
         SquelchCB f,
         protocol::MessageType type = protocol::mtVALIDATION) override
     {
@@ -520,10 +520,10 @@ public:
     }
 
     void
-    deletePeer(id_t const id, UnsquelchCB f) override
+    deletePeer(id_t id, UnsquelchCB f) override
     {
         unsquelch_ = f;
-        slots_.unsquelch(id);
+        slots_.deletePeer(id, true);
     }
 
     void
@@ -555,7 +555,7 @@ public:
     }
 
     void
-    deletePeer(Peer::id_t const id, bool useCache = true)
+    deletePeer(Peer::id_t id, bool useCache = true)
     {
         auto it = peers_.find(id);
         assert(it != peers_.end());
@@ -606,7 +606,7 @@ public:
     }
 
     bool
-    isSelected(PublicKey const& validator, Peer::id_t const peer)
+    isSelected(PublicKey const& validator, Peer::id_t peer)
     {
         auto selected = slots_.getSelected(validator);
         return selected.find(peer) != selected.end();
@@ -642,14 +642,14 @@ private:
     void
     squelch(
         PublicKey const& validator,
-        Peer::id_t const id,
+        Peer::id_t id,
         std::uint32_t squelchDuration) const override
     {
         if (auto it = peers_.find(id); it != peers_.end())
             squelch_(validator, it->second, squelchDuration);
     }
     void
-    unsquelch(PublicKey const& validator, Peer::id_t const id) const override
+    unsquelch(PublicKey const& validator, Peer::id_t id) const override
     {
         if (auto it = peers_.find(id); it != peers_.end())
             unsquelch_(validator, it->second);
@@ -735,7 +735,7 @@ public:
     }
 
     void
-    enableLink(std::uint16_t validatorId, Peer::id_t const peer, bool enable)
+    enableLink(std::uint16_t validatorId, Peer::id_t peer, bool enable)
     {
         auto it =
             std::find_if(validators_.begin(), validators_.end(), [&](auto& v) {
@@ -749,7 +749,7 @@ public:
     }
 
     void
-    onDisconnectPeer(Peer::id_t const peer)
+    onDisconnectPeer(Peer::id_t peer)
     {
         // Send unsquelch to the Peer on all links. This way when
         // the Peer "reconnects" it starts sending messages on the link.
@@ -812,7 +812,7 @@ public:
 
     /** Is peer in Selected state in any of the slots */
     bool
-    isSelected(Peer::id_t const id)
+    isSelected(Peer::id_t id)
     {
         for (auto& v : validators_)
         {
@@ -827,7 +827,7 @@ public:
      * in those slots.
      */
     bool
-    allCounting(Peer::id_t const peer)
+    allCounting(Peer::id_t peer)
     {
         for (auto& v : validators_)
         {
@@ -1285,8 +1285,8 @@ class reduce_relay_test : public beast::unit_test::suite
 
             std::string toLoad(R"rippleConfig(
 [reduce_relay]
-enable=true
-squelch=true
+enable=1
+squelch=1
 )rippleConfig");
 
             c.loadFromString(toLoad);
@@ -1295,21 +1295,27 @@ squelch=true
 
             Config c1;
 
+            toLoad = (R"rippleConfig(
+[reduce_relay]
+enable=0
+squelch=0
+)rippleConfig");
+
+            c1.loadFromString(toLoad);
+            BEAST_EXPECT(c1.REDUCE_RELAY_ENABLE == false);
+            BEAST_EXPECT(c1.REDUCE_RELAY_SQUELCH == false);
+
+            Config c2;
+
             toLoad = R"rippleConfig(
 [reduce_relay]
-enabled=true
-squelched=true
+enabled=1
+squelched=1
 )rippleConfig";
 
-            try
-            {
-                c.loadFromString(toLoad);
-                fail();
-            }
-            catch (...)
-            {
-                pass();
-            }
+            c2.loadFromString(toLoad);
+            BEAST_EXPECT(c2.REDUCE_RELAY_ENABLE == false);
+            BEAST_EXPECT(c2.REDUCE_RELAY_SQUELCH == false);
         });
     }
 
@@ -1356,7 +1362,7 @@ squelched=true
         });
     }
 
-    Env env_;
+    jtx::Env env_;
     Network network_;
 
 public:

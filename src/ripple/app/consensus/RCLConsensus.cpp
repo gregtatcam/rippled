@@ -217,6 +217,7 @@ RCLConsensus::Adaptor::propose(RCLCxPeerPos::Proposal const& proposal)
 
     app_.getHashRouter().addSuppression(suppression);
 
+    JLOG(j_.debug()) << "sending proposal " << Slice(valPublic_);
     app_.overlay().send(prop);
 }
 
@@ -833,6 +834,7 @@ RCLConsensus::Adaptor::validate(
     protocol::TMValidation val;
     val.set_validation(&validation[0], validation.size());
     // Send signed validation to all of our directly connected peers
+    JLOG(j_.debug()) << "sending validation " << Slice(v->getSignerPublic());
     app_.overlay().send(val);
 }
 

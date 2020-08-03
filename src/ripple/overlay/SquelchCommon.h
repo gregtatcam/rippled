@@ -41,6 +41,9 @@ static constexpr uint16_t MIN_MESSAGE_THRESHOLD = 9;
 static constexpr uint16_t MAX_MESSAGE_THRESHOLD = 10;
 // Max selected peers to choose as the source of messages from validator
 static constexpr uint16_t MAX_SELECTED_PEERS = 3;
+// Wait before reduce-relay is started on boot up to give time to peers
+// to connect
+static constexpr minutes WAIT_ON_BOOTUP = minutes{10};
 
 }  // namespace squelch
 

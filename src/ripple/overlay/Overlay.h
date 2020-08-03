@@ -152,7 +152,7 @@ public:
      * message; i.e. the message has been
      * received from these peers and added
      * to the hash router */
-    virtual std::set<Peer::id_t> const
+    virtual std::set<Peer::id_t>
     relay(
         protocol::TMProposeSet& m,
         uint256 const& uid,
@@ -163,7 +163,7 @@ public:
      * message; i.e. the message has been
      * received from these peers and added
      * to the hash router */
-    virtual std::set<Peer::id_t> const
+    virtual std::set<Peer::id_t>
     relay(
         protocol::TMValidation& m,
         uint256 const& uid,

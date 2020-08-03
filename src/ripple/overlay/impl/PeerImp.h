@@ -431,6 +431,12 @@ public:
     boost::optional<hash_map<PublicKey, ShardInfo>>
     getPeerShardInfo() const;
 
+    void
+    squelch(PublicKey const& key, bool squelch, std::uint64_t duration, std::uint16_t unsquelched);
+
+    bool
+    isSquelched(PublicKey const& key);
+
 private:
     void
     close();
@@ -658,6 +664,8 @@ PeerImp::PeerImp(
 {
     read_buffer_.commit(boost::asio::buffer_copy(
         read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));
+    JLOG(journal_.debug()) << "created peer " << slot_->remote_endpoint().address()
+                           << " " << id_ << " " << slot_->inbound();
 }
 
 template <class FwdIt, class>

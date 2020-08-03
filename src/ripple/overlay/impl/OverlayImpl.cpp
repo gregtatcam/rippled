@@ -39,6 +39,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/utility/in_place_factory.hpp>
 
+#include <functional>
+
 namespace ripple {
 
 namespace CrawlOptions {
@@ -1157,7 +1159,7 @@ OverlayImpl::send(protocol::TMValidation& m)
     app_.getOPs().pubValidation(val);
 }
 
-std::set<Peer::id_t> const
+std::set<Peer::id_t>
 OverlayImpl::relay(
     protocol::TMProposeSet& m,
     uint256 const& uid,
@@ -1176,7 +1178,7 @@ OverlayImpl::relay(
     return {};
 }
 
-std::set<Peer::id_t> const
+std::set<Peer::id_t>
 OverlayImpl::relay(
     protocol::TMValidation& m,
     uint256 const& uid,
@@ -1279,7 +1281,7 @@ makeSquelchMessage(
 }
 
 void
-OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t const id) const
+OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t id) const
 {
     if (auto peer = findPeerByShortID(id);
         peer && app_.config().REDUCE_RELAY_SQUELCH)
@@ -1294,7 +1296,7 @@ OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t const id) const
 void
 OverlayImpl::squelch(
     PublicKey const& validator,
-    Peer::id_t const id,
+    Peer::id_t id,
     uint32_t squelchDuration) const
 {
     if (auto peer = findPeerByShortID(id);
@@ -1309,25 +1311,42 @@ void
 OverlayImpl::updateSlotAndSquelch(
     uint256 const& key,
     PublicKey const& validator,
-    std::set<Peer::id_t> const& peers,
+    std::set<Peer::id_t>&& peers,
     protocol::MessageType type)
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, [key, peers, type, validator, this]() {
-            updateSlotAndSquelch(key, validator, peers, type);
-        });
+        return post(
+            strand_,
+            [this, key, validator, peers = std::move(peers), type]() mutable {
+                updateSlotAndSquelch(key, validator, std::move(peers), type);
+            });
 
     for (auto id : peers)
         slots_.updateSlotAndSquelch(key, validator, id, type);
 }
 
 void
-OverlayImpl::deletePeer(Peer::id_t const id)
+OverlayImpl::updateSlotAndSquelch(
+    uint256 const& key,
+    PublicKey const& validator,
+    Peer::id_t peer,
+    protocol::MessageType type)
+{
+    if (!strand_.running_in_this_thread())
+        return post(strand_, [this, key, validator, peer, type]() {
+            updateSlotAndSquelch(key, validator, peer, type);
+        });
+
+    slots_.updateSlotAndSquelch(key, validator, peer, type);
+}
+
+void
+OverlayImpl::deletePeer(Peer::id_t id)
 {
     if (!strand_.running_in_this_thread())
         return post(strand_, std::bind(&OverlayImpl::deletePeer, this, id));
 
-    slots_.unsquelch(id);
+    slots_.deletePeer(id, true);
 }
 
 void
@@ -1337,6 +1356,36 @@ OverlayImpl::deleteIdlePeers()
         return post(strand_, std::bind(&OverlayImpl::deleteIdlePeers, this));
 
     slots_.deleteIdlePeers();
+}
+
+void
+OverlayImpl::squelchPeer(
+    std::weak_ptr<PeerImp> const& peer,
+    PublicKey const& validator,
+    bool squelch,
+    std::uint64_t duration)
+{
+    if (!strand_.running_in_this_thread())
+        return post(strand_, std::bind(&OverlayImpl::squelchPeer, this, peer, validator, squelch, duration));
+
+    std::uint16_t unsquelched = 0;
+    if (squelch)
+    {
+        std::lock_guard lock(mutex_);
+        for (auto const& [k, wp] : ids_) {
+            if (auto sp = wp.lock())
+                unsquelched += !sp->isSquelched(validator);
+        }
+        /*if (unsquelched <= 2)
+        {
+            JLOG(journal_.debug()) << "not squelching " << Slice(validator) << " "
+                << duration;
+            return;
+        }*/
+    }
+
+    if (auto p = peer.lock())
+        p->squelch(validator, squelch, duration, unsquelched + 1);
 }
 
 //------------------------------------------------------------------------------

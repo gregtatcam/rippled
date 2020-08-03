@@ -169,12 +169,12 @@ public:
     //--------------------------------------------------------------------------
 
     // ledger proposal/close functions
-    /** Return set of peers, which
-     * have already seen the messge; i.e.
-     * the message has been received from
-     * these peers and added to the hash
-     * router. */
-    virtual std::set<Peer::id_t> const
+    /** This function will relay trusted
+     * proposal messages. Returns the set
+     * of peers from which the local node
+     * has received the message.
+     */
+    virtual std::set<Peer::id_t>
     processTrustedProposal(
         RCLCxPeerPos peerPos,
         std::shared_ptr<protocol::TMProposeSet> set) = 0;

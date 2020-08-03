@@ -356,7 +356,7 @@ public:
         Json::Value& jvResult) override;
 
     // Ledger proposal/close functions.
-    std::set<Peer::id_t> const
+    std::set<Peer::id_t>
     processTrustedProposal(
         RCLCxPeerPos proposal,
         std::shared_ptr<protocol::TMProposeSet> set) override;
@@ -1780,7 +1780,7 @@ NetworkOPsImp::getConsensusLCL()
     return mConsensus.prevLedgerID();
 }
 
-std::set<Peer::id_t> const
+std::set<Peer::id_t>
 NetworkOPsImp::processTrustedProposal(
     RCLCxPeerPos peerPos,
     std::shared_ptr<protocol::TMProposeSet> set)

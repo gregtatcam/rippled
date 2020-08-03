@@ -94,10 +94,14 @@ PeerImp::PeerImp(
           headers_["X-Offer-Compression"] == "lz4" ? Compressed::On
                                                    : Compressed::Off)
 {
+    JLOG(journal_.debug()) << "created peer " << " " << slot_->remote_endpoint().address()
+                              << " " << id_ << " " << slot_->inbound();
 }
 
 PeerImp::~PeerImp()
 {
+    JLOG(journal_.debug()) << "deleted peer " << " " << slot_->remote_endpoint().address()
+                              << " " << id_ << " " << slot_->inbound();
     const bool inCluster{cluster()};
 
     overlay_.deletePeer(id_);
@@ -1643,6 +1647,8 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMProposeSet> const& m)
         publicKey.slice(),
         sig);
 
+    JLOG(p_journal_.info()) << "received proposal " << Slice(publicKey) << " " << id();
+
     if (auto [added, relayed] =
             app_.getHashRouter().addSuppressionPeerWithStatus(suppression, id_);
         !added)
@@ -1650,9 +1656,10 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMProposeSet> const& m)
         // Count unique messages (Slots has it's own 'HashRouter'), which a peer
         // receives within IDLED seconds since the message has been relayed.
         if (app_.config().REDUCE_RELAY_ENABLE && relayed &&
-            (stopwatch().now() - *relayed) < squelch::IDLED)
+            (stopwatch().now() - *relayed) < squelch::IDLED &&
+            squelch::epoch<std::chrono::minutes>(UptimeClock::now()) > squelch::WAIT_ON_BOOTUP)
             overlay_.updateSlotAndSquelch(
-                suppression, publicKey, {id_}, protocol::mtPROPOSE_LEDGER);
+                suppression, publicKey, id_, protocol::mtPROPOSE_LEDGER);
         JLOG(p_journal_.trace()) << "Proposal: duplicate";
         return;
     }
@@ -2153,6 +2160,8 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMValidation> const& m)
             return;
         }
 
+        JLOG(p_journal_.info()) << "received validation " << Slice(val->getSignerPublic()) << " " << id();
+
         auto key = sha512Half(makeSlice(m->validation()));
         if (auto [added, relayed] =
                 app_.getHashRouter().addSuppressionPeerWithStatus(key, id_);
@@ -2162,9 +2171,10 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMValidation> const& m)
             // peer receives within IDLED seconds since the message has been
             // relayed.
             if (app_.config().REDUCE_RELAY_ENABLE && (bool)relayed &&
-                (stopwatch().now() - *relayed) < squelch::IDLED)
+                (stopwatch().now() - *relayed) < squelch::IDLED &&
+                squelch::epoch<std::chrono::minutes>(UptimeClock::now()) > squelch::WAIT_ON_BOOTUP)
                 overlay_.updateSlotAndSquelch(
-                    key, val->getSignerPublic(), {id_}, protocol::mtVALIDATION);
+                    key, val->getSignerPublic(), id_, protocol::mtVALIDATION);
             JLOG(p_journal_.trace()) << "Validation: duplicate";
             return;
         }
@@ -2351,15 +2361,33 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
     auto duration = m->has_squelchduration() ? m->squelchduration() : 0;
     auto sp = shared_from_this();
 
+    /*
     if (!strand_.running_in_this_thread())
         return post(strand_, [sp, key, squelch, duration]() {
             sp->squelch_.squelch(key, squelch, duration);
         });
 
     JLOG(p_journal_.debug())
-        << "onMessage: TMSquelch " << slice << " " << id() << " " << duration;
+        << "onMessage: TMSquelch " << slice << " " << id() << " " << slot_->remote_endpoint().address() << " " << duration;
 
     squelch_.squelch(key, squelch, duration);
+     */
+    overlay_.squelchPeer(shared_from_this(), key, squelch, duration);
+}
+
+void
+PeerImp::squelch(PublicKey const& key, bool squelch, std::uint64_t duration, std::uint16_t unsquelched)
+{
+    JLOG(p_journal_.debug())
+        << "onMessage: TMSquelch " << Slice(key) << " " << id() << " " << slot_->remote_endpoint().address() << " " << duration << " " << squelch << " " << unsquelched;
+
+    squelch_.squelch(key, squelch, duration);
+}
+
+bool
+PeerImp::isSquelched(PublicKey const& key)
+{
+    return squelch_.isSquelched(key);
 }
 
 //--------------------------------------------------------------------------
@@ -2517,7 +2545,7 @@ PeerImp::checkPropose(
     // are the source of the message, consequently the message should
     // not be relayed to these peers. But the message must be counted
     // as part of the squelch logic.
-    auto const haveMessage = [&]() {
+    std::set<Peer::id_t> haveMessage = [&]() {
         if (isTrusted)
         {
             return app_.getOPs().processTrustedProposal(peerPos, packet);
@@ -2541,11 +2569,12 @@ PeerImp::checkPropose(
         return std::set<Peer::id_t>();
     }();
 
-    if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty())
+    if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty() &&
+        squelch::epoch<std::chrono::minutes>(UptimeClock::now()) > squelch::WAIT_ON_BOOTUP)
         overlay_.updateSlotAndSquelch(
             peerPos.suppressionID(),
             peerPos.publicKey(),
-            haveMessage,
+            std::move(haveMessage),
             protocol::mtPROPOSE_LEDGER);
 }
 
@@ -2575,12 +2604,13 @@ PeerImp::checkValidation(
             // as part of the squelch logic.
             auto haveMessage =
                 overlay_.relay(*packet, suppression, val->getSignerPublic());
-            if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty())
+            if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty() &&
+                squelch::epoch<std::chrono::minutes>(UptimeClock::now()) > squelch::WAIT_ON_BOOTUP)
             {
                 overlay_.updateSlotAndSquelch(
                     suppression,
                     val->getSignerPublic(),
-                    haveMessage,
+                    std::move(haveMessage),
                     protocol::mtVALIDATION);
             }
         }

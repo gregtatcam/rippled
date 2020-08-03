@@ -209,13 +209,13 @@ public:
     void
     send(protocol::TMValidation& m) override;
 
-    std::set<Peer::id_t> const
+    std::set<Peer::id_t>
     relay(
         protocol::TMProposeSet& m,
         uint256 const& uid,
         PublicKey const& validator) override;
 
-    std::set<Peer::id_t> const
+    std::set<Peer::id_t>
     relay(
         protocol::TMValidation& m,
         uint256 const& uid,
@@ -379,14 +379,30 @@ public:
      * the message has been  relayed.
      * @param key Unique message's key
      * @param validator Validator's public key
-     * @param id Peers id
+     * @param peers Peers' id to update the slots for
      * @param type Received protocol message type
      */
     void
     updateSlotAndSquelch(
         uint256 const& key,
         PublicKey const& validator,
-        std::set<Peer::id_t> const& peers,
+        std::set<Peer::id_t>&& peers,
+        protocol::MessageType type);
+
+    void
+    squelchPeer(
+        std::weak_ptr<PeerImp> const& peer,
+        PublicKey const& validator,
+        bool squelch,
+        std::uint64_t duration);
+
+    /** Overload to reduce allocation in case of single peer
+     */
+    void
+    updateSlotAndSquelch(
+        uint256 const& key,
+        PublicKey const& validator,
+        Peer::id_t peer,
         protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the
@@ -395,7 +411,7 @@ public:
      * @param id Peer's id
      */
     void
-    deletePeer(Peer::id_t const id);
+    deletePeer(Peer::id_t id);
 
 private:
     void
@@ -405,7 +421,7 @@ private:
         std::uint32_t squelchDuration) const override;
 
     void
-    unsquelch(PublicKey const& validator, Peer::id_t const id) const override;
+    unsquelch(PublicKey const& validator, Peer::id_t id) const override;
 
     std::shared_ptr<Writer>
     makeRedirectResponse(
