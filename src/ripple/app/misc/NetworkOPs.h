@@ -318,6 +318,8 @@ public:
         TER terResult) = 0;
     virtual void
     pubValidation(std::shared_ptr<STValidation> const& val) = 0;
+    virtual bool
+    validatorKey(PublicKey const&) const = 0;
 };
 
 //------------------------------------------------------------------------------

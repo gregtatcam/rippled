@@ -43,7 +43,7 @@ static constexpr uint16_t MAX_MESSAGE_THRESHOLD = 10;
 static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 // Wait before reduce-relay is started on boot up to give time to peers
 // to connect
-static constexpr minutes WAIT_ON_BOOTUP = minutes{10};
+static constexpr minutes WAIT_ON_BOOTUP = minutes{5};
 
 }  // namespace squelch
 

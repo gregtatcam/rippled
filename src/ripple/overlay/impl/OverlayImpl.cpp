@@ -1373,8 +1373,8 @@ OverlayImpl::squelchPeer(
     {
         std::lock_guard lock(mutex_);
         for (auto const& [k, wp] : ids_) {
-            if (auto sp = wp.lock())
-                unsquelched += !sp->isSquelched(validator);
+            if (auto sp = wp.lock(); sp && !(app_.getValidationPublicKey() == validator))
+                    unsquelched += !sp->isSquelched(validator);
         }
         /*if (unsquelched <= 2)
         {
@@ -1384,8 +1384,9 @@ OverlayImpl::squelchPeer(
         }*/
     }
 
-    if (auto p = peer.lock())
-        p->squelch(validator, squelch, duration, unsquelched + 1);
+    // don't squelch the source of the message
+    if (auto p = peer.lock(); p && !(app_.getValidationPublicKey() == validator))
+        p->squelch(validator, squelch, duration, unsquelched - 1);
 }
 
 //------------------------------------------------------------------------------

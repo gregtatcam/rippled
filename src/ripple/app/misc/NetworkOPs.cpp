@@ -668,6 +668,12 @@ public:
         stopped();
     }
 
+    bool
+    validatorKey(PublicKey const& key) const override
+    {
+        return mConsensus.validatorKey(key);
+    }
+
 private:
     void
     setHeartbeatTimer();

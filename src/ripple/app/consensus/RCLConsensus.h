@@ -156,6 +156,9 @@ class RCLConsensus
         bool
         validator() const;
 
+        bool
+        validatorKey(PublicKey const&) const;
+
         /** Update operating mode based on current peer positions.
          *
          * If our current ledger has no agreement from the network,
@@ -511,6 +514,12 @@ public:
     parms() const
     {
         return adaptor_.parms();
+    }
+
+    bool
+    validatorKey(PublicKey const& key) const
+    {
+        return adaptor_.validatorKey(key);
     }
 
 private:

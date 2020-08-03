@@ -994,6 +994,12 @@ RCLConsensus::Adaptor::validator() const
     return !valPublic_.empty();
 }
 
+bool
+RCLConsensus::Adaptor::validatorKey(PublicKey const& key) const
+{
+    return !valPublic_.empty() && valPublic_ == key;
+}
+
 void
 RCLConsensus::Adaptor::updateOperatingMode(std::size_t const positions) const
 {
