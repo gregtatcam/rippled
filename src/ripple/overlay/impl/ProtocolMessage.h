@@ -77,6 +77,10 @@ protocolMessageName(int type)
             return "validation";
         case protocol::mtGET_OBJECTS:
             return "get_objects";
+        case protocol::mtHAVE_TRANSACTIONS:
+            return "have_transactions";
+        case protocol::mtTRANSACTIONS:
+            return "transactions";
         case protocol::mtSQUELCH:
             return "squelch";
         default:
@@ -375,6 +379,14 @@ invokeProtocolMessage(Buffers const& buffers, Handler& handler)
             break;
         case protocol::mtGET_OBJECTS:
             success = detail::invoke<protocol::TMGetObjectByHash>(
+                *header, buffers, handler);
+            break;
+        case protocol::mtHAVE_TRANSACTIONS:
+            success = detail::invoke<protocol::TMHaveTransactions>(
+                *header, buffers, handler);
+            break;
+        case protocol::mtTRANSACTIONS:
+            success = detail::invoke<protocol::TMTransactions>(
                 *header, buffers, handler);
             break;
         case protocol::mtSQUELCH:

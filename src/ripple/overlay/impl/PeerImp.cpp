@@ -21,6 +21,7 @@
 #include <ripple/app/ledger/InboundLedgers.h>
 #include <ripple/app/ledger/InboundTransactions.h>
 #include <ripple/app/ledger/LedgerMaster.h>
+#include <ripple/app/ledger/TransactionMaster.h>
 #include <ripple/app/misc/HashRouter.h>
 #include <ripple/app/misc/LoadFeeTrack.h>
 #include <ripple/app/misc/NetworkOPs.h>
@@ -271,6 +272,33 @@ PeerImp::send(std::shared_ptr<Message> const& m)
                 shared_from_this(),
                 std::placeholders::_1,
                 std::placeholders::_2)));
+}
+
+void
+PeerImp::sendTxQueue()
+{
+    std::shared_ptr<Message> m = nullptr;
+    if (txQueue_.hash_size())
+    {
+        std::lock_guard l(txQueueMutex_);
+        m = std::make_shared<Message>(txQueue_, protocol::mtHAVE_TRANSACTIONS);
+        txQueue_.clear_hash();
+    }
+
+    if (m)
+    {
+        JLOG(p_journal_.info()) << "sendTxQueue " << txQueue_.hash_size();
+        send(m);
+    }
+}
+
+void
+PeerImp::addTxQueue(uint256 const& hash)
+{
+    std::lock_guard l(txQueueMutex_);
+
+    txQueue_.add_hash(hash.data(), hash.size());
+    JLOG(p_journal_.info()) << "addTxQueue " << txQueue_.hash_size();
 }
 
 void
@@ -1408,6 +1436,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
 {
+    JLOG(p_journal_.info()) << "received transaction";
     if (sanity_.load() == Sanity::insane)
         return;
 
@@ -2168,6 +2197,9 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 {
     protocol::TMGetObjectByHash& packet = *m;
 
+    JLOG(p_journal_.info()) << "received TMGetObjectByHash " << packet.type()
+                            << " " << packet.objects_size();
+
     if (packet.query())
     {
         // this is a query
@@ -2180,6 +2212,12 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
         if (packet.type() == protocol::TMGetObjectByHash::otFETCH_PACK)
         {
             doFetchPack(m);
+            return;
+        }
+
+        if (packet.type() == protocol::TMGetObjectByHash::otTRANSACTIONS)
+        {
+            doTransactions(m);
             return;
         }
 
@@ -2303,6 +2341,71 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 }
 
 void
+PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
+{
+    // should we do this in a job queue?
+
+    protocol::TMGetObjectByHash tmBH;
+    tmBH.set_type(protocol::TMGetObjectByHash_ObjectType_otTRANSACTIONS);
+    tmBH.set_query(true);
+
+    JLOG(p_journal_.info()) << "received TMHaveTransactions " << m->hash_size();
+
+    for (std::uint32_t i = 0; i < m->hash_size(); i++)
+    {
+        // have to charge?
+        if (!stringIsUint256Sized(m->hash(i)))
+        {
+            JLOG(p_journal_.info()) << "bad hash";
+            continue;
+        }
+
+        uint256 hash(m->hash(i));
+        auto ec{rpcSUCCESS};
+        // is it the way to fetch/check tx, should we use HashRouter?
+        auto txn = app_.getMasterTransaction().fetch(hash, ec);
+        JLOG(p_journal_.info()) << "checking transaction " << (bool)txn;
+
+        // log
+        if (ec == rpcDB_DESERIALIZATION)
+        {
+            JLOG(p_journal_.info()) << "db serialization error";
+            continue;
+        }
+
+        if (!txn)
+        {
+            // Do we need this here? This handled in onMessage(TMTransaction)?
+            // If we do this here then the transaction will be ignored in
+            // onMessage(TMTransaction). Have to make sure we don't send
+            // too many redundant requests.
+            // app_.getHashRouter().addSuppressionPeer(hash, id_);
+            JLOG(p_journal_.info()) << "adding transaction to request";
+            auto obj = tmBH.add_objects();
+            obj->set_hash(hash.data(), hash.size());
+        }
+    }
+
+    JLOG(p_journal_.info())
+        << "transaction request object is " << tmBH.objects_size();
+
+    if (tmBH.objects_size() > 0)
+        send(std::make_shared<Message>(tmBH, protocol::mtGET_OBJECTS));
+}
+
+void
+PeerImp::onMessage(std::shared_ptr<protocol::TMTransactions> const& m)
+{
+    JLOG(p_journal_.info())
+        << "received TMTransactions " << m->transactions_size();
+    // should be queue job?
+    // should not relay this (maybe this already handled by suppression)
+    for (std::uint32_t i = 0; i < m->transactions_size(); ++i)
+        onMessage(std::shared_ptr<protocol::TMTransaction>(
+            m->mutable_transactions(i), [](protocol::TMTransaction*) {}));
+}
+
+void
 PeerImp::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
 {
     if (!m->has_validatorpubkey())
@@ -2391,6 +2494,56 @@ PeerImp::doFetchPack(const std::shared_ptr<protocol::TMGetObjectByHash>& packet)
         jtPACK, "MakeFetchPack", [pap, weak, packet, hash, elapsed](Job&) {
             pap->getLedgerMaster().makeFetchPack(weak, packet, hash, elapsed);
         });
+}
+
+void
+PeerImp::doTransactions(
+    std::shared_ptr<protocol::TMGetObjectByHash> const& packet)
+{
+    protocol::TMTransactions reply;
+
+    JLOG(p_journal_.info()) << "received TMGetObjectByHash requesting tx "
+                            << packet->objects_size();
+
+    // charge?
+    if (!packet->has_query() || !packet->query())
+        return;
+
+    // should add to job queue?
+    for (std::uint32_t i = 0; i < packet->objects_size(); ++i)
+    {
+        auto const& obj = packet->objects(i);
+        // charge
+        if (!stringIsUint256Sized(obj.hash()))
+            continue;
+        auto ec{rpcSUCCESS};
+        uint256 hash(obj.hash());
+        // is it the way to fetch/check tx?
+        auto txn = app_.getMasterTransaction().fetch(hash, ec);
+
+        // log
+        if (ec == rpcDB_DESERIALIZATION)
+            continue;
+
+        // log
+        if (!txn)
+            continue;
+
+        Serializer s;
+        auto tx = reply.add_transactions();
+        auto sttx = txn->getSTransaction();
+        sttx->add(s);
+        tx->set_rawtransaction(s.data(), s.size());
+        tx->set_status(
+            txn->getStatus() == INCLUDED ? protocol::tsCURRENT
+                                         : protocol::tsNEW);
+        tx->set_receivetimestamp(
+            app_.timeKeeper().now().time_since_epoch().count());
+        tx->set_deferred(txn->getSubmitResult().queued);
+    }
+
+    if (reply.transactions_size() > 0)
+        send(std::make_shared<Message>(reply, protocol::mtTRANSACTIONS));
 }
 
 void

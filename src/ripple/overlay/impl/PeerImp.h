@@ -199,6 +199,13 @@ private:
 
     Compressed compressionEnabled_ = Compressed::Off;
 
+    // Transactions' hashes that have not been relayed.
+    // The hashes are sent once a second to a peer
+    // and the peer requests missing transactions from
+    // the node.
+    protocol::TMHaveTransactions txQueue_;
+    std::mutex txQueueMutex_;
+
     friend class OverlayImpl;
 
     class Metrics
@@ -294,6 +301,16 @@ public:
 
     void
     send(std::shared_ptr<Message> const& m) override;
+
+    /** Send aggregated transactions' hashes */
+    void
+    sendTxQueue() override;
+
+    /** Add transaction's hash to the transaction's queue
+     * @param hash transaction's hash
+     */
+    void
+    addTxQueue(uint256 const& hash) override;
 
     /** Send a set of PeerFinder endpoints as a protocol message. */
     template <
@@ -553,6 +570,10 @@ public:
     void
     onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m);
     void
+    onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m);
+    void
+    onMessage(std::shared_ptr<protocol::TMTransactions> const& m);
+    void
     onMessage(std::shared_ptr<protocol::TMSquelch> const& m);
 
 private:
@@ -578,6 +599,13 @@ private:
 
     void
     doFetchPack(const std::shared_ptr<protocol::TMGetObjectByHash>& packet);
+
+    /** Process peer's request to send missing transactions.
+     * @param packet protocol message containing not relayed
+     * transactions' hashes.
+     */
+    void
+    doTransactions(std::shared_ptr<protocol::TMGetObjectByHash> const& packet);
 
     void
     checkTransaction(

@@ -64,6 +64,12 @@ public:
     virtual beast::IP::Endpoint
     getRemoteAddress() const = 0;
 
+    virtual void
+    sendTxQueue() = 0;
+
+    virtual void
+    addTxQueue(uint256 const&) = 0;
+
     /** Adjust this peer's load balance based on the type of load imposed. */
     virtual void
     charge(Resource::Charge const& fee) = 0;

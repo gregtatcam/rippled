@@ -24,6 +24,7 @@
 #include <ripple/app/misc/ValidatorSite.h>
 #include <ripple/basics/base64.h>
 #include <ripple/basics/make_SSLContext.h>
+#include <ripple/basics/random.h>
 #include <ripple/beast/core/LexicalCast.h>
 #include <ripple/core/DatabaseCon.h>
 #include <ripple/nodestore/DatabaseShard.h>
@@ -99,6 +100,8 @@ OverlayImpl::Timer::on_timer(error_code ec)
     overlay_.m_peerFinder->once_per_second();
     overlay_.sendEndpoints();
     overlay_.autoConnect();
+    if (overlay_.app_.config().TX_REDUCE_RELAY_ENABLE)
+        overlay_.sendTxQueue();
 
     if ((++overlay_.timer_count_ % Tuning::checkSeconds) == 0)
         overlay_.check();
@@ -1298,6 +1301,49 @@ OverlayImpl::relay(
     return {};
 }
 
+void
+OverlayImpl::relay(
+    uint256 const& hash,
+    protocol::TMTransaction& m,
+    std::set<Peer::id_t> const& toSkip)
+{
+    auto const sm = std::make_shared<Message>(m, protocol::mtTRANSACTION);
+
+    // hack for now - need to send to random peers and queue the rest
+    // in both cases exclude toSkip
+    if (app_.config().TX_REDUCE_RELAY_ENABLE)
+    {
+        auto peers = getActivePeers();
+        std::uint32_t nactive = peers.size();
+        auto selected = static_cast<uint32_t>(
+                            app_.config().TX_RELAY_TO_PEERS * nactive / 100) -
+            toSkip.size();
+
+        auto end = std::remove_if(
+            peers.begin(), peers.end(), [&](auto const& peer) -> bool {
+                return toSkip.find(peer->id()) != toSkip.end();
+            });
+        std::shuffle(peers.begin(), end, default_prng());
+
+        JLOG(journal_.info())
+            << "relaying tx, active peers " << nactive << " selected "
+            << selected << " skip " << toSkip.size() << " peers pool "
+            << peers.size();
+
+        for (auto it = peers.begin(); it != end; ++it)
+        {
+            if ((it - peers.begin()) < selected)
+                (*it)->send(sm);
+            else
+                (*it)->addTxQueue(hash);
+        }
+    }
+    else
+    {
+        foreach(send_if_not(sm, peer_in_set(toSkip)));
+    }
+}
+
 //------------------------------------------------------------------------------
 
 void
@@ -1365,6 +1411,12 @@ OverlayImpl::sendEndpoints()
         if (peer)
             peer->sendEndpoints(e.second.begin(), e.second.end());
     }
+}
+
+void
+OverlayImpl::sendTxQueue()
+{
+    foreach([](auto const& p) { p->sendTxQueue(); });
 }
 
 std::shared_ptr<Message>

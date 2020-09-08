@@ -221,6 +221,12 @@ public:
         uint256 const& uid,
         PublicKey const& validator) override;
 
+    void
+    relay(
+        uint256 const&,
+        protocol::TMTransaction& m,
+        std::set<Peer::id_t> const& skip) override;
+
     //--------------------------------------------------------------------------
     //
     // OverlayImpl
@@ -531,6 +537,10 @@ private:
 
     void
     sendEndpoints();
+
+    /** Send transactions queue batched by every peer */
+    void
+    sendTxQueue();
 
     /** Check if peers stopped relaying messages
      * and if slots stopped receiving messages from the validator */
