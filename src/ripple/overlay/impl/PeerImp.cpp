@@ -946,10 +946,16 @@ PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
     while (read_buffer_.size() > 0)
     {
         std::size_t bytes_consumed;
-        std::tie(bytes_consumed, ec) =
+        std::size_t bytes_uncompressed;
+        std::uint16_t message_type;
+
+        std::tie(bytes_consumed, bytes_uncompressed, message_type, ec) =
             invokeProtocolMessage(read_buffer_.data(), *this);
         if (ec)
             return fail("onReadMessage", ec);
+        overlay_.addTxMessage(
+            static_cast<protocol::MessageType>(message_type),
+            bytes_uncompressed);
         if (!socket_.is_open())
             return;
         if (gracefulClose_)
@@ -2398,6 +2404,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransactions> const& m)
 {
     JLOG(p_journal_.info())
         << "received TMTransactions " << m->transactions_size();
+    overlay_.addTxMissing(m->transactions_size());
     // should be queue job?
     // should not relay this (maybe this already handled by suppression)
     for (std::uint32_t i = 0; i < m->transactions_size(); ++i)

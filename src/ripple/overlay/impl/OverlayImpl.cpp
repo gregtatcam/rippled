@@ -1330,6 +1330,7 @@ OverlayImpl::relay(
             << selected << " skip " << toSkip.size() << " peers pool "
             << peers.size();
 
+        txMetrics_.addSelected(selected, toSkip.size());
         for (auto it = peers.begin(); it != end; ++it)
         {
             if ((it - peers.begin()) < selected)

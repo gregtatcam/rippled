@@ -29,6 +29,7 @@
 #include <ripple/overlay/Slot.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/TrafficCount.h>
+#include <ripple/overlay/impl/TxMetrics.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/resource/ResourceManager.h>
 #include <ripple/rpc/ServerHandler.h>
@@ -92,6 +93,8 @@ private:
         void
         on_timer(error_code ec);
     };
+
+    TxMetrics txMetrics_;
 
     Application& app_;
     boost::asio::io_service& io_service_;
@@ -411,6 +414,32 @@ public:
      */
     void
     deletePeer(Peer::id_t id);
+
+    Json::Value
+    txMetrics() const override
+    {
+        return txMetrics_.json();
+    }
+
+    void
+    addTxMessage(protocol::MessageType type, std::uint32_t val)
+    {
+        // consider posting via strand?
+        txMetrics_.addMessage(type, val);
+    }
+
+    void
+    addTxMissing(std::uint32_t val)
+    {
+        // consider posting via strand?
+        txMetrics_.addMissing(val);
+    }
+
+    void
+    addTxSelected(std::uint32_t selected, std::uint32_t suppressed)
+    {
+        txMetrics_.addSelected(selected, suppressed);
+    }
 
 private:
     void

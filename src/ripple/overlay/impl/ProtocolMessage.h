@@ -265,17 +265,23 @@ invoke(MessageHeader const& header, Buffers const& buffers, Handler& handler)
     @return The number of bytes consumed, or the error code if any.
 */
 template <class Buffers, class Handler>
-std::pair<std::size_t, boost::system::error_code>
+std::tuple<std::size_t, std::size_t, std::uint16_t, boost::system::error_code>
 invokeProtocolMessage(Buffers const& buffers, Handler& handler)
 {
-    std::pair<std::size_t, boost::system::error_code> result = {0, {}};
+    std::tuple<
+        std::size_t,
+        std::size_t,
+        std::uint16_t,
+        boost::system::error_code>
+        result = {};
 
     auto const size = boost::asio::buffer_size(buffers);
 
     if (size == 0)
         return result;
 
-    auto header = detail::parseMessageHeader(result.second, buffers, size);
+    auto header =
+        detail::parseMessageHeader(std::get<3>(result), buffers, size);
 
     // If we can't parse the header then it may be that we don't have enough
     // bytes yet, or because the message was cut off (if error_code is success).
@@ -292,7 +298,8 @@ invokeProtocolMessage(Buffers const& buffers, Handler& handler)
     if (header->payload_wire_size > megabytes(64) ||
         header->uncompressed_size > megabytes(64))
     {
-        result.second = make_error_code(boost::system::errc::message_size);
+        std::get<3>(result) =
+            make_error_code(boost::system::errc::message_size);
         return result;
     }
 
@@ -300,7 +307,8 @@ invokeProtocolMessage(Buffers const& buffers, Handler& handler)
     if (!handler.compressionEnabled() &&
         header->algorithm != compression::Algorithm::None)
     {
-        result.second = make_error_code(boost::system::errc::protocol_error);
+        std::get<3>(result) =
+            make_error_code(boost::system::errc::protocol_error);
         return result;
     }
 
@@ -399,10 +407,12 @@ invokeProtocolMessage(Buffers const& buffers, Handler& handler)
             break;
     }
 
-    result.first = header->total_wire_size;
+    std::get<0>(result) = header->total_wire_size;
+    std::get<1>(result) = header->uncompressed_size;
+    std::get<2>(result) = header->message_type;
 
     if (!success)
-        result.second = make_error_code(boost::system::errc::bad_message);
+        std::get<3>(result) = make_error_code(boost::system::errc::bad_message);
 
     return result;
 }

@@ -233,6 +233,12 @@ public:
     */
     virtual boost::optional<std::uint32_t>
     networkID() const = 0;
+
+    /** Returns tx reduce-relay metrics
+        @return json value of reduce-relay metrics
+     */
+    virtual Json::Value
+    txMetrics() const = 0;
 };
 
 }  // namespace ripple
