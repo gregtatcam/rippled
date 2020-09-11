@@ -1315,7 +1315,7 @@ OverlayImpl::relay(
         std::uint32_t nactive = peers.size();
         // select a fraction of active peers for relaying
         auto selected = static_cast<uint32_t>(
-                            app_.config().TX_RELAY_TO_PEERS * nactive / 100);
+            app_.config().TX_RELAY_TO_PEERS * nactive / 100);
 
         // less peers that have already seen this transaction
         selected = (selected > toSkip.size()) ? (selected - toSkip.size()) : 0;
@@ -1326,7 +1326,7 @@ OverlayImpl::relay(
         // queue the hash for the rest of the peers
         if (selected == 0)
         {
-            for (auto const& p: peers)
+            for (auto const& p : peers)
                 if (toSkip.count(p->id()) == 0)
                     p->addTxQueue(hash);
             return;
@@ -1635,7 +1635,8 @@ void
 OverlayImpl::addTxMessage(protocol::MessageType type, std::uint32_t val)
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&OverlayImpl::addTxMessage, this, type, val));
+        return post(
+            strand_, std::bind(&OverlayImpl::addTxMessage, this, type, val));
 
     txMetrics_.addMessage(type, val);
 }
@@ -1653,7 +1654,9 @@ void
 OverlayImpl::addTxSelected(std::uint32_t selected, std::uint32_t suppressed)
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&OverlayImpl::addTxSelected, this, selected, suppressed));
+        return post(
+            strand_,
+            std::bind(&OverlayImpl::addTxSelected, this, selected, suppressed));
 
     txMetrics_.addSelected(selected, suppressed);
 }

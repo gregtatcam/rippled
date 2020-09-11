@@ -134,6 +134,6 @@ TxMetrics::json() const
     return ret;
 }
 
-}
+}  // namespace metrics
 
 }  // namespace ripple

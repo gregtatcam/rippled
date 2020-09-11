@@ -36,7 +36,9 @@ using val_t = std::uint64_t;
 
 struct SingleMetrics
 {
-    SingleMetrics(bool ptu = true) : perTimeUnit(ptu) {}
+    SingleMetrics(bool ptu = true) : perTimeUnit(ptu)
+    {
+    }
     using clock_type = std::chrono::steady_clock;
     clock_type::time_point intervalStart{clock_type::now()};
     val_t accum{0};
@@ -77,7 +79,7 @@ struct TxMetrics
     json() const;
 };
 
-}
+}  // namespace metrics
 
 }  // namespace ripple
 

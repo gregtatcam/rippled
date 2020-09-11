@@ -2225,9 +2225,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
         {
             std::weak_ptr<PeerImp> weak = shared_from_this();
             app_.getJobQueue().addJob(
-                jtDOTRANSACTIONS,
-                "doTransactions",
-                [weak, m](Job&){
+                jtDOTRANSACTIONS, "doTransactions", [weak, m](Job&) {
                     if (auto peer = weak.lock())
                         peer->doTransactions(m);
                 });
@@ -2358,16 +2356,15 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
     std::weak_ptr<PeerImp> weak = shared_from_this();
     app_.getJobQueue().addJob(
-        jtTRANSACTIONS,
-        "have_transactions",
-        [weak, m](Job&) {
-          if (auto peer = weak.lock())
-              peer->haveTransactions(m);
+        jtTRANSACTIONS, "have_transactions", [weak, m](Job&) {
+            if (auto peer = weak.lock())
+                peer->haveTransactions(m);
         });
 }
 
 void
-PeerImp::haveTransactions(std::shared_ptr<protocol::TMHaveTransactions> const& m)
+PeerImp::haveTransactions(
+    std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
     // should we do this in a job queue?
 
@@ -2381,7 +2378,8 @@ PeerImp::haveTransactions(std::shared_ptr<protocol::TMHaveTransactions> const& m
     {
         if (!stringIsUint256Sized(m->hash(i)))
         {
-            JLOG(p_journal_.error()) << "TMHaveTransactions with invalid hash size";
+            JLOG(p_journal_.error())
+                << "TMHaveTransactions with invalid hash size";
             fee_ = Resource::feeInvalidRequest;
             return;
         }
@@ -2395,7 +2393,8 @@ PeerImp::haveTransactions(std::shared_ptr<protocol::TMHaveTransactions> const& m
 
         if (ec == rpcDB_DESERIALIZATION)
         {
-            JLOG(p_journal_.error()) << "TMHaveTransactions db serialization error";
+            JLOG(p_journal_.error())
+                << "TMHaveTransactions db serialization error";
             return;
         }
 
@@ -2545,14 +2544,15 @@ PeerImp::doTransactions(
 
         if (ec == rpcDB_DESERIALIZATION)
         {
-            JLOG(p_journal_.error()) << "doTransactions db deserialization error";
+            JLOG(p_journal_.error())
+                << "doTransactions db deserialization error";
             return;
         }
 
         if (!txn)
         {
             JLOG(p_journal_.error()) << "doTransactions, transaction not found "
-                << Slice(hash.data(), hash.size());
+                                     << Slice(hash.data(), hash.size());
             fee_ = Resource::feeInvalidRequest;
             return;
         }
