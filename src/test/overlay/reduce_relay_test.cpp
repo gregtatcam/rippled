@@ -164,6 +164,14 @@ public:
     {
         return false;
     }
+    void
+    sendTxQueue() override
+    {
+    }
+    void
+    addTxQueue(const uint256&) override
+    {
+    }
 };
 
 /** Manually advanced clock. */
