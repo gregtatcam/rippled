@@ -30,26 +30,22 @@
 
 namespace ripple {
 
-enum class MetricsType {
-    Transaction,
-    HaveTransactions,
-    GetLedger,
-    LedgerData,
-    GetObjects,
-    SelectedPeers,
-    SuppressedPeers,
-    MissingTx
-};
+namespace metrics {
+
+using val_t = std::uint64_t;
 
 struct SingleMetrics
 {
+    SingleMetrics(bool ptu = true) : perTimeUnit(ptu) {}
     using clock_type = std::chrono::steady_clock;
     clock_type::time_point intervalStart{clock_type::now()};
-    std::uint64_t accum{0};
-    std::uint64_t rollingAvg{0};
-    boost::circular_buffer<std::uint64_t> rollingAvgAggreg{30, 0ull};
+    val_t accum{0};
+    val_t rollingAvg{0};
+    std::uint64_t N{0};
+    bool perTimeUnit{true};
+    boost::circular_buffer<val_t> rollingAvgAggreg{30, 0ull};
     void
-    addMetrics(std::uint32_t val);
+    addMetrics(val_t val);
 };
 
 struct MetricsPerMessage
@@ -57,7 +53,7 @@ struct MetricsPerMessage
     SingleMetrics cnt;
     SingleMetrics size;
     void
-    addMetrics(std::uint32_t bytes);
+    addMetrics(val_t bytes);
 };
 
 struct TxMetrics
@@ -68,18 +64,20 @@ struct TxMetrics
     MetricsPerMessage getLedger;
     MetricsPerMessage ledgerData;
     MetricsPerMessage getObjects;
-    SingleMetrics selectedPeers;
-    SingleMetrics suppressedPeers;
+    SingleMetrics selectedPeers{false};
+    SingleMetrics suppressedPeers{false};
     SingleMetrics missingTx;
     void
-    addMessage(protocol::MessageType type, std::uint32_t val);
+    addMessage(protocol::MessageType type, val_t val);
     void
-    addSelected(std::uint32_t selected, std::uint32_t suppressed);
+    addSelected(val_t selected, val_t suppressed);
     void
-    addMissing(std::uint32_t missing);
+    addMissing(val_t missing);
     Json::Value
     json() const;
 };
+
+}
 
 }  // namespace ripple
 

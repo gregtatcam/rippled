@@ -2223,7 +2223,14 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 
         if (packet.type() == protocol::TMGetObjectByHash::otTRANSACTIONS)
         {
-            doTransactions(m);
+            std::weak_ptr<PeerImp> weak = shared_from_this();
+            app_.getJobQueue().addJob(
+                jtDOTRANSACTIONS,
+                "doTransactions",
+                [weak, m](Job&){
+                    if (auto peer = weak.lock())
+                        peer->doTransactions(m);
+                });
             return;
         }
 
@@ -2349,6 +2356,19 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
+    std::weak_ptr<PeerImp> weak = shared_from_this();
+    app_.getJobQueue().addJob(
+        jtTRANSACTIONS,
+        "have_transactions",
+        [weak, m](Job&) {
+          if (auto peer = weak.lock())
+              peer->haveTransactions(m);
+        });
+}
+
+void
+PeerImp::haveTransactions(std::shared_ptr<protocol::TMHaveTransactions> const& m)
+{
     // should we do this in a job queue?
 
     protocol::TMGetObjectByHash tmBH;
@@ -2359,34 +2379,30 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 
     for (std::uint32_t i = 0; i < m->hash_size(); i++)
     {
-        // have to charge?
         if (!stringIsUint256Sized(m->hash(i)))
         {
-            JLOG(p_journal_.info()) << "bad hash";
-            continue;
+            JLOG(p_journal_.error()) << "TMHaveTransactions with invalid hash size";
+            fee_ = Resource::feeInvalidRequest;
+            return;
         }
 
         uint256 hash(m->hash(i));
         auto ec{rpcSUCCESS};
-        // is it the way to fetch/check tx, should we use HashRouter?
+
         auto txn = app_.getMasterTransaction().fetch(hash, ec);
+
         JLOG(p_journal_.info()) << "checking transaction " << (bool)txn;
 
-        // log
         if (ec == rpcDB_DESERIALIZATION)
         {
-            JLOG(p_journal_.info()) << "db serialization error";
-            continue;
+            JLOG(p_journal_.error()) << "TMHaveTransactions db serialization error";
+            return;
         }
 
         if (!txn)
         {
-            // Do we need this here? This handled in onMessage(TMTransaction)?
-            // If we do this here then the transaction will be ignored in
-            // onMessage(TMTransaction). Have to make sure we don't send
-            // too many redundant requests.
-            // app_.getHashRouter().addSuppressionPeer(hash, id_);
             JLOG(p_journal_.info()) << "adding transaction to request";
+
             auto obj = tmBH.add_objects();
             obj->set_hash(hash.data(), hash.size());
         }
@@ -2404,9 +2420,9 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransactions> const& m)
 {
     JLOG(p_journal_.info())
         << "received TMTransactions " << m->transactions_size();
+
     overlay_.addTxMissing(m->transactions_size());
-    // should be queue job?
-    // should not relay this (maybe this already handled by suppression)
+
     for (std::uint32_t i = 0; i < m->transactions_size(); ++i)
         onMessage(std::shared_ptr<protocol::TMTransaction>(
             m->mutable_transactions(i), [](protocol::TMTransaction*) {}));
@@ -2512,29 +2528,34 @@ PeerImp::doTransactions(
     JLOG(p_journal_.info()) << "received TMGetObjectByHash requesting tx "
                             << packet->objects_size();
 
-    // charge?
-    if (!packet->has_query() || !packet->query())
-        return;
-
-    // should add to job queue?
     for (std::uint32_t i = 0; i < packet->objects_size(); ++i)
     {
         auto const& obj = packet->objects(i);
-        // charge
+
         if (!stringIsUint256Sized(obj.hash()))
-            continue;
+        {
+            fee_ = Resource::feeInvalidRequest;
+            return;
+        }
+
         auto ec{rpcSUCCESS};
         uint256 hash(obj.hash());
-        // is it the way to fetch/check tx?
+
         auto txn = app_.getMasterTransaction().fetch(hash, ec);
 
-        // log
         if (ec == rpcDB_DESERIALIZATION)
-            continue;
+        {
+            JLOG(p_journal_.error()) << "doTransactions db deserialization error";
+            return;
+        }
 
-        // log
         if (!txn)
-            continue;
+        {
+            JLOG(p_journal_.error()) << "doTransactions, transaction not found "
+                << Slice(hash.data(), hash.size());
+            fee_ = Resource::feeInvalidRequest;
+            return;
+        }
 
         Serializer s;
         auto tx = reply.add_transactions();

@@ -94,7 +94,7 @@ private:
         on_timer(error_code ec);
     };
 
-    TxMetrics txMetrics_;
+    metrics::TxMetrics txMetrics_;
 
     Application& app_;
     boost::asio::io_service& io_service_;
@@ -422,24 +422,13 @@ public:
     }
 
     void
-    addTxMessage(protocol::MessageType type, std::uint32_t val)
-    {
-        // consider posting via strand?
-        txMetrics_.addMessage(type, val);
-    }
+    addTxMessage(protocol::MessageType type, std::uint32_t val);
 
     void
-    addTxMissing(std::uint32_t val)
-    {
-        // consider posting via strand?
-        txMetrics_.addMissing(val);
-    }
+    addTxMissing(std::uint32_t val);
 
     void
-    addTxSelected(std::uint32_t selected, std::uint32_t suppressed)
-    {
-        txMetrics_.addSelected(selected, suppressed);
-    }
+    addTxSelected(std::uint32_t selected, std::uint32_t suppressed);
 
 private:
     void

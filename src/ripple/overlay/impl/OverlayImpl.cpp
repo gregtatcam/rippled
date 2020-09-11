@@ -1309,15 +1309,28 @@ OverlayImpl::relay(
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtTRANSACTION);
 
-    // hack for now - need to send to random peers and queue the rest
-    // in both cases exclude toSkip
     if (app_.config().TX_REDUCE_RELAY_ENABLE)
     {
         auto peers = getActivePeers();
         std::uint32_t nactive = peers.size();
+        // select a fraction of active peers for relaying
         auto selected = static_cast<uint32_t>(
-                            app_.config().TX_RELAY_TO_PEERS * nactive / 100) -
-            toSkip.size();
+                            app_.config().TX_RELAY_TO_PEERS * nactive / 100);
+
+        // less peers that have already seen this transaction
+        selected = (selected > toSkip.size()) ? (selected - toSkip.size()) : 0;
+
+        txMetrics_.addSelected(selected, toSkip.size());
+
+        // enough peers have already seen this transaction -
+        // queue the hash for the rest of the peers
+        if (selected == 0)
+        {
+            for (auto const& p: peers)
+                if (toSkip.count(p->id()) == 0)
+                    p->addTxQueue(hash);
+            return;
+        }
 
         auto end = std::remove_if(
             peers.begin(), peers.end(), [&](auto const& peer) -> bool {
@@ -1330,7 +1343,6 @@ OverlayImpl::relay(
             << selected << " skip " << toSkip.size() << " peers pool "
             << peers.size();
 
-        txMetrics_.addSelected(selected, toSkip.size());
         for (auto it = peers.begin(); it != end; ++it)
         {
             if ((it - peers.begin()) < selected)
@@ -1617,6 +1629,33 @@ setup_Overlay(BasicConfig const& config)
     }
 
     return setup;
+}
+
+void
+OverlayImpl::addTxMessage(protocol::MessageType type, std::uint32_t val)
+{
+    if (!strand_.running_in_this_thread())
+        return post(strand_, std::bind(&OverlayImpl::addTxMessage, this, type, val));
+
+    txMetrics_.addMessage(type, val);
+}
+
+void
+OverlayImpl::addTxMissing(std::uint32_t val)
+{
+    if (!strand_.running_in_this_thread())
+        return post(strand_, std::bind(&OverlayImpl::addTxMissing, this, val));
+
+    txMetrics_.addMissing(val);
+}
+
+void
+OverlayImpl::addTxSelected(std::uint32_t selected, std::uint32_t suppressed)
+{
+    if (!strand_.running_in_this_thread())
+        return post(strand_, std::bind(&OverlayImpl::addTxSelected, this, selected, suppressed));
+
+    txMetrics_.addSelected(selected, suppressed);
 }
 
 std::unique_ptr<Overlay>

@@ -23,10 +23,12 @@
 
 namespace ripple {
 
+namespace metrics {
+
 void
-TxMetrics::addMessage(protocol::MessageType type, std::uint32_t val)
+TxMetrics::addMessage(protocol::MessageType type, val_t val)
 {
-    auto add = [&](auto& m, std::uint32_t val) {
+    auto add = [&](auto& m, val_t val) {
         std::lock_guard lock(mutex);
         m.addMetrics(val);
     };
@@ -54,7 +56,7 @@ TxMetrics::addMessage(protocol::MessageType type, std::uint32_t val)
 }
 
 void
-TxMetrics::addSelected(std::uint32_t selected, std::uint32_t suppressed)
+TxMetrics::addSelected(val_t selected, val_t suppressed)
 {
     std::lock_guard lock(mutex);
     selectedPeers.addMetrics(selected);
@@ -62,31 +64,32 @@ TxMetrics::addSelected(std::uint32_t selected, std::uint32_t suppressed)
 }
 
 void
-TxMetrics::addMissing(std::uint32_t missing)
+TxMetrics::addMissing(val_t missing)
 {
     std::lock_guard lock(mutex);
     missingTx.addMetrics(missing);
 }
 
 void
-MetricsPerMessage::addMetrics(std::uint32_t bytes)
+MetricsPerMessage::addMetrics(val_t bytes)
 {
     cnt.addMetrics(1);
     size.addMetrics(bytes);
 }
 
 void
-SingleMetrics::addMetrics(std::uint32_t val)
+SingleMetrics::addMetrics(val_t val)
 {
     using namespace std::chrono_literals;
     accum += val;
+    N++;
     auto const timeElapsed = clock_type::now() - intervalStart;
     auto const timeElapsedInSecs =
         std::chrono::duration_cast<std::chrono::seconds>(timeElapsed);
 
     if (timeElapsedInSecs >= 1s)
     {
-        auto const avg = accum / timeElapsedInSecs.count();
+        auto const avg = accum / (perTimeUnit ? timeElapsedInSecs.count() : N);
         rollingAvgAggreg.push_back(avg);
 
         auto const total = std::accumulate(
@@ -95,6 +98,7 @@ SingleMetrics::addMetrics(std::uint32_t val)
 
         intervalStart = clock_type::now();
         accum = 0;
+        N = 0;
     }
 }
 
@@ -123,11 +127,13 @@ TxMetrics::json() const
     ret[jss::txr_selected_peers_cnt] = std::to_string(selectedPeers.rollingAvg);
 
     ret[jss::txr_suppressed_peers_cnt] =
-        std::to_string(selectedPeers.rollingAvg);
+        std::to_string(suppressedPeers.rollingAvg);
 
     ret[jss::txr_missing_tx_cnt] = std::to_string(missingTx.rollingAvg);
 
     return ret;
+}
+
 }
 
 }  // namespace ripple
