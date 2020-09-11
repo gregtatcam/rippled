@@ -178,6 +178,12 @@ public:
     static constexpr int MAX_JOB_QUEUE_TX = 1000;
     static constexpr int MIN_JOB_QUEUE_TX = 100;
 
+    // Amendment majority time
+    std::chrono::seconds AMENDMENT_MAJORITY_TIME = defaultAmendmentMajorityTime;
+
+    // Thread pool configuration
+    std::size_t WORKERS = 0;
+
     // Reduce-relay - these parameters are experimental.
     // Enable reduce-relay functionality
     bool REDUCE_RELAY_ENABLE = false;
@@ -191,12 +197,6 @@ public:
     std::uint32_t TX_NUM_PEERS = 20;
     // percentage of peers to select from total peers
     std::uint32_t TX_RELAY_TO_PEERS = 25;
-
-    // Amendment majority time
-    std::chrono::seconds AMENDMENT_MAJORITY_TIME = defaultAmendmentMajorityTime;
-
-    // Thread pool configuration
-    std::size_t WORKERS = 0;
 
     // These override the command line client settings
     boost::optional<beast::IP::Endpoint> rpc_ip;
