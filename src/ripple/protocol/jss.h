@@ -555,8 +555,8 @@ JSS(txr_ledger_data_cnt);     // out: protocol message ledger data count
 JSS(txr_ledger_data_sz);      // out: protocol message ledger data size
 JSS(txr_get_object_cnt);      // out: protocol message get object count
 JSS(txr_get_object_sz);       // out: protocol message get object size
-JSS(txr_selected_peers_cnt);  // out: selected peers count
-JSS(txr_suppressed_peers_cnt);// out: suppressed peers count
+JSS(txr_selected_cnt);        // out: selected peers count
+JSS(txr_suppressed_cnt);      // out: suppressed peers count
 JSS(txr_missing_tx_cnt);      // out: missing tx count
 JSS(txs);                     // out: TxHistory
 JSS(type);                    // in: AccountObjects

@@ -1338,7 +1338,7 @@ OverlayImpl::relay(
             });
         std::shuffle(peers.begin(), end, default_prng());
 
-        JLOG(journal_.info())
+        JLOG(journal_.debug())
             << "relaying tx, active peers " << nactive << " selected "
             << selected << " skip " << toSkip.size() << " peers pool "
             << peers.size();

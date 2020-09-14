@@ -124,10 +124,9 @@ TxMetrics::json() const
     ret[jss::txr_get_object_cnt] = std::to_string(getObjects.cnt.rollingAvg);
     ret[jss::txr_get_object_sz] = std::to_string(getObjects.size.rollingAvg);
 
-    ret[jss::txr_selected_peers_cnt] = std::to_string(selectedPeers.rollingAvg);
+    ret[jss::txr_selected_cnt] = std::to_string(selectedPeers.rollingAvg);
 
-    ret[jss::txr_suppressed_peers_cnt] =
-        std::to_string(suppressedPeers.rollingAvg);
+    ret[jss::txr_suppressed_cnt] = std::to_string(suppressedPeers.rollingAvg);
 
     ret[jss::txr_missing_tx_cnt] = std::to_string(missingTx.rollingAvg);
 

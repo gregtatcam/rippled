@@ -82,13 +82,6 @@ private:
         add(jtNETOP_CLUSTER, "clusterReport", 1, false, 9999ms, 9999ms);
         add(jtNETOP_TIMER, "heartbeat", 1, false, 999ms, 999ms);
         add(jtADMIN, "administration", maxLimit, false, 0ms, 0ms);
-        add(jtTRANSACTIONS,
-            "have_transactions",
-            maxLimit,
-            false,
-            250ms,
-            1000ms);
-        add(jtDOTRANSACTIONS, "doTransactions", maxLimit, false, 250ms, 1000ms);
 
         add(jtPEER, "peerCommand", 0, true, 200ms, 2500ms);
         add(jtDISK, "diskAccess", 0, true, 500ms, 1000ms);

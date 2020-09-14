@@ -287,7 +287,7 @@ PeerImp::sendTxQueue()
 
     if (m)
     {
-        JLOG(p_journal_.info()) << "sendTxQueue " << txQueue_.hash_size();
+        JLOG(p_journal_.debug()) << "sendTxQueue " << txQueue_.hash_size();
         send(m);
     }
 }
@@ -298,7 +298,7 @@ PeerImp::addTxQueue(uint256 const& hash)
     std::lock_guard l(txQueueMutex_);
 
     txQueue_.add_hash(hash.data(), hash.size());
-    JLOG(p_journal_.info()) << "addTxQueue " << txQueue_.hash_size();
+    JLOG(p_journal_.debug()) << "addTxQueue " << txQueue_.hash_size();
 }
 
 void
@@ -946,22 +946,20 @@ PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
     while (read_buffer_.size() > 0)
     {
         std::size_t bytes_consumed;
-        std::size_t bytes_uncompressed;
         std::uint16_t message_type;
 
-        std::tie(bytes_consumed, bytes_uncompressed, message_type, ec) =
+        std::tie(bytes_consumed, message_type, ec) =
             invokeProtocolMessage(read_buffer_.data(), *this);
         if (ec)
             return fail("onReadMessage", ec);
-        overlay_.addTxMessage(
-            static_cast<protocol::MessageType>(message_type),
-            bytes_uncompressed);
         if (!socket_.is_open())
             return;
         if (gracefulClose_)
             return;
         if (bytes_consumed == 0)
             break;
+        overlay_.addTxMessage(
+            static_cast<protocol::MessageType>(message_type), bytes_consumed);
         read_buffer_.consume(bytes_consumed);
     }
     // Timeout on writes only
@@ -1442,7 +1440,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
 {
-    JLOG(p_journal_.info()) << "received transaction";
+    JLOG(p_journal_.debug()) << "received transaction";
     if (sanity_.load() == Sanity::insane)
         return;
 
@@ -2203,8 +2201,8 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 {
     protocol::TMGetObjectByHash& packet = *m;
 
-    JLOG(p_journal_.info()) << "received TMGetObjectByHash " << packet.type()
-                            << " " << packet.objects_size();
+    JLOG(p_journal_.debug()) << "received TMGetObjectByHash " << packet.type()
+                             << " " << packet.objects_size();
 
     if (packet.query())
     {
@@ -2223,12 +2221,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 
         if (packet.type() == protocol::TMGetObjectByHash::otTRANSACTIONS)
         {
-            std::weak_ptr<PeerImp> weak = shared_from_this();
-            app_.getJobQueue().addJob(
-                jtDOTRANSACTIONS, "doTransactions", [weak, m](Job&) {
-                    if (auto peer = weak.lock())
-                        peer->doTransactions(m);
-                });
+            doTransactions(m);
             return;
         }
 
@@ -2354,25 +2347,12 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
-    std::weak_ptr<PeerImp> weak = shared_from_this();
-    app_.getJobQueue().addJob(
-        jtTRANSACTIONS, "have_transactions", [weak, m](Job&) {
-            if (auto peer = weak.lock())
-                peer->haveTransactions(m);
-        });
-}
-
-void
-PeerImp::haveTransactions(
-    std::shared_ptr<protocol::TMHaveTransactions> const& m)
-{
-    // should we do this in a job queue?
-
     protocol::TMGetObjectByHash tmBH;
     tmBH.set_type(protocol::TMGetObjectByHash_ObjectType_otTRANSACTIONS);
     tmBH.set_query(true);
 
-    JLOG(p_journal_.info()) << "received TMHaveTransactions " << m->hash_size();
+    JLOG(p_journal_.debug())
+        << "received TMHaveTransactions " << m->hash_size();
 
     for (std::uint32_t i = 0; i < m->hash_size(); i++)
     {
@@ -2400,14 +2380,14 @@ PeerImp::haveTransactions(
 
         if (!txn)
         {
-            JLOG(p_journal_.info()) << "adding transaction to request";
+            JLOG(p_journal_.debug()) << "adding transaction to request";
 
             auto obj = tmBH.add_objects();
             obj->set_hash(hash.data(), hash.size());
         }
     }
 
-    JLOG(p_journal_.info())
+    JLOG(p_journal_.debug())
         << "transaction request object is " << tmBH.objects_size();
 
     if (tmBH.objects_size() > 0)
@@ -2417,7 +2397,7 @@ PeerImp::haveTransactions(
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMTransactions> const& m)
 {
-    JLOG(p_journal_.info())
+    JLOG(p_journal_.debug())
         << "received TMTransactions " << m->transactions_size();
 
     overlay_.addTxMissing(m->transactions_size());
@@ -2524,8 +2504,8 @@ PeerImp::doTransactions(
 {
     protocol::TMTransactions reply;
 
-    JLOG(p_journal_.info()) << "received TMGetObjectByHash requesting tx "
-                            << packet->objects_size();
+    JLOG(p_journal_.debug()) << "received TMGetObjectByHash requesting tx "
+                             << packet->objects_size();
 
     for (std::uint32_t i = 0; i < packet->objects_size(); ++i)
     {

@@ -514,14 +514,6 @@ private:
     void
     onWriteMessage(error_code ec, std::size_t bytes_transferred);
 
-    /** Handle protocol message with hashes of transactions that have not
-     * been relayed by the upstream node down to its peers - request
-     * transactions, which have not been relayed to this peer.
-     * @param m unsolicited protocol message with transactions' hashes
-     */
-    void
-    haveTransactions(std::shared_ptr<protocol::TMHaveTransactions> const& m);
-
 public:
     //--------------------------------------------------------------------------
     //
