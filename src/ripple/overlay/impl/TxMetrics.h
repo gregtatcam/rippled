@@ -20,8 +20,8 @@
 #ifndef RIPPLE_OVERLAY_TXMETRICS_H_INCLUDED
 #define RIPPLE_OVERLAY_TXMETRICS_H_INCLUDED
 
-#include "ripple/protocol/messages.h"
 #include "ripple/json/json_value.h"
+#include "ripple/protocol/messages.h"
 
 #include <boost/circular_buffer.hpp>
 
@@ -48,27 +48,33 @@ struct SingleMetrics
     addMetrics(std::uint32_t val);
 };
 
-struct MetricsPerMessage
+struct MultipleMetrics
 {
-    SingleMetrics cnt;
-    SingleMetrics size;
+    MultipleMetrics(bool ptu1 = true, bool ptu2 = true) : m1(ptu1), m2(ptu2)
+    {
+    }
+
+    SingleMetrics m1;
+    SingleMetrics m2;
     void
-    addMetrics(std::uint32_t bytes);
+    addMetrics(std::uint32_t val2);
+    void
+    addMetrics(std::uint32_t val1, std::uint32_t val2);
 };
 
 struct TxMetrics
 {
     mutable std::mutex mutex;
-    MetricsPerMessage tx;
-    MetricsPerMessage haveTx;
-    MetricsPerMessage getLedger;
-    MetricsPerMessage ledgerData;
-    MetricsPerMessage transactions;
+    MultipleMetrics tx;
+    MultipleMetrics haveTx;
+    MultipleMetrics getLedger;
+    MultipleMetrics ledgerData;
+    MultipleMetrics transactions;
     SingleMetrics selectedPeers{false};
     SingleMetrics suppressedPeers{false};
-    SingleMetrics missingTx;
+    MultipleMetrics missingTx{false, true};
     void
-    addMetrics(protocol::MessageType type, std::uint64_t val);
+    addMetrics(protocol::MessageType type, std::uint32_t val);
     void
     addMetrics(std::uint32_t selected, std::uint32_t suppressed);
     void

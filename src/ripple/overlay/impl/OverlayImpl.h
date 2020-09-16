@@ -94,8 +94,6 @@ private:
         on_timer(error_code ec);
     };
 
-    metrics::TxMetrics txMetrics_;
-
     Application& app_;
     boost::asio::io_service& io_service_;
     boost::optional<boost::asio::io_service::work> work_;
@@ -129,6 +127,8 @@ private:
     boost::optional<std::uint32_t> networkID_;
 
     squelch::Slots<UptimeClock> slots_;
+
+    metrics::TxMetrics txMetrics_;
 
     //--------------------------------------------------------------------------
 

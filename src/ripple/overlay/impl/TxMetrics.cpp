@@ -27,7 +27,7 @@ namespace ripple {
 namespace metrics {
 
 void
-TxMetrics::addMetrics(protocol::MessageType type, std::uint64_t val)
+TxMetrics::addMetrics(protocol::MessageType type, std::uint32_t val)
 {
     auto add = [&](auto& m, std::uint32_t val) {
         std::lock_guard lock(mutex);
@@ -72,10 +72,16 @@ TxMetrics::addMetrics(std::uint32_t missing)
 }
 
 void
-MetricsPerMessage::addMetrics(std::uint32_t bytes)
+MultipleMetrics::addMetrics(std::uint32_t val2)
 {
-    cnt.addMetrics(1);
-    size.addMetrics(bytes);
+    addMetrics(1, val2);
+}
+
+void
+MultipleMetrics::addMetrics(std::uint32_t val1, std::uint32_t val2)
+{
+    m1.addMetrics(val1);
+    m2.addMetrics(val2);
 }
 
 void
@@ -110,28 +116,27 @@ TxMetrics::json() const
 
     Json::Value ret(Json::objectValue);
 
-    ret[jss::txr_tx_cnt] = std::to_string(tx.cnt.rollingAvg);
-    ret[jss::txr_tx_sz] = std::to_string(tx.size.rollingAvg);
+    ret[jss::txr_tx_cnt] = std::to_string(tx.m1.rollingAvg);
+    ret[jss::txr_tx_sz] = std::to_string(tx.m2.rollingAvg);
 
-    ret[jss::txr_have_txs_cnt] = std::to_string(haveTx.cnt.rollingAvg);
-    ret[jss::txr_have_txs_sz] = std::to_string(haveTx.size.rollingAvg);
+    ret[jss::txr_have_txs_cnt] = std::to_string(haveTx.m1.rollingAvg);
+    ret[jss::txr_have_txs_sz] = std::to_string(haveTx.m2.rollingAvg);
 
-    ret[jss::txr_get_ledger_cnt] = std::to_string(getLedger.cnt.rollingAvg);
-    ret[jss::txr_get_ledger_sz] = std::to_string(getLedger.size.rollingAvg);
+    ret[jss::txr_get_ledger_cnt] = std::to_string(getLedger.m1.rollingAvg);
+    ret[jss::txr_get_ledger_sz] = std::to_string(getLedger.m2.rollingAvg);
 
-    ret[jss::txr_ledger_data_cnt] = std::to_string(ledgerData.cnt.rollingAvg);
-    ret[jss::txr_ledger_data_sz] = std::to_string(ledgerData.size.rollingAvg);
+    ret[jss::txr_ledger_data_cnt] = std::to_string(ledgerData.m1.rollingAvg);
+    ret[jss::txr_ledger_data_sz] = std::to_string(ledgerData.m2.rollingAvg);
 
-    ret[jss::txr_transactions_cnt] =
-        std::to_string(transactions.cnt.rollingAvg);
-    ret[jss::txr_transactions_sz] =
-        std::to_string(transactions.size.rollingAvg);
+    ret[jss::txr_transactions_cnt] = std::to_string(transactions.m1.rollingAvg);
+    ret[jss::txr_transactions_sz] = std::to_string(transactions.m2.rollingAvg);
 
     ret[jss::txr_selected_cnt] = std::to_string(selectedPeers.rollingAvg);
 
     ret[jss::txr_suppressed_cnt] = std::to_string(suppressedPeers.rollingAvg);
 
-    ret[jss::txr_missing_tx_cnt] = std::to_string(missingTx.rollingAvg);
+    ret[jss::txr_missing_tx_sample] = std::to_string(missingTx.m1.rollingAvg);
+    ret[jss::txr_missing_tx_freq] = std::to_string(missingTx.m2.rollingAvg);
 
     return ret;
 }

@@ -557,7 +557,8 @@ JSS(txr_transactions_cnt);    // out: protocol message get object count
 JSS(txr_transactions_sz);     // out: protocol message get object size
 JSS(txr_selected_cnt);        // out: selected peers count
 JSS(txr_suppressed_cnt);      // out: suppressed peers count
-JSS(txr_missing_tx_cnt);      // out: missing tx count
+JSS(txr_missing_tx_sample);   // out: missing tx sample average
+JSS(txr_missing_tx_freq);     // out: missing tx frequency average
 JSS(txs);                     // out: TxHistory
 JSS(type);                    // in: AccountObjects
                               // out: NetworkOPs
