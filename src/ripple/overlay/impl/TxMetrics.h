@@ -20,7 +20,7 @@
 #ifndef RIPPLE_OVERLAY_TXMETRICS_H_INCLUDED
 #define RIPPLE_OVERLAY_TXMETRICS_H_INCLUDED
 
-#include <ripple/protocol/messages.h>
+#include "ripple/protocol/messages.h"
 #include "ripple/json/json_value.h"
 
 #include <boost/circular_buffer.hpp>
