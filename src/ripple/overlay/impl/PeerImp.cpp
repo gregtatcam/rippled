@@ -946,9 +946,7 @@ PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
     while (read_buffer_.size() > 0)
     {
         std::size_t bytes_consumed;
-        std::uint16_t message_type;
-
-        std::tie(bytes_consumed, message_type, ec) =
+        std::tie(bytes_consumed, ec) =
             invokeProtocolMessage(read_buffer_.data(), *this);
         if (ec)
             return fail("onReadMessage", ec);
@@ -958,8 +956,6 @@ PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
             return;
         if (bytes_consumed == 0)
             break;
-        overlay_.addTxMessage(
-            static_cast<protocol::MessageType>(message_type), bytes_consumed);
         read_buffer_.consume(bytes_consumed);
     }
     // Timeout on writes only
@@ -1043,8 +1039,24 @@ PeerImp::onMessageBegin(
     load_event_ =
         app_.getJobQueue().makeLoadEvent(jtPEER, protocolMessageName(type));
     fee_ = Resource::feeLightPeer;
-    overlay_.reportTraffic(
-        TrafficCount::categorize(*m, type, true), true, static_cast<int>(size));
+    auto const category = TrafficCount::categorize(*m, type, true);
+    overlay_.reportTraffic(category, true, static_cast<int>(size));
+    using namespace protocol;
+    if (type == MessageType::mtTRANSACTION ||
+        type == MessageType::mtHAVE_TRANSACTIONS ||
+        type == MessageType::mtTRANSACTIONS ||
+        // GET_OBJECTS
+        category == TrafficCount::category::get_transactions ||
+        // GET_LEDGER
+        category == TrafficCount::category::ld_tsc_get ||
+        category == TrafficCount::category::ld_tsc_share ||
+        // LEDGER_DATA
+        category == TrafficCount::category::gl_tsc_share ||
+        category == TrafficCount::category::gl_tsc_get)
+    {
+        overlay_.addTxMetrics(
+            static_cast<MessageType>(type), static_cast<std::uint64_t>(size));
+    }
 }
 
 void
@@ -2400,7 +2412,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransactions> const& m)
     JLOG(p_journal_.debug())
         << "received TMTransactions " << m->transactions_size();
 
-    overlay_.addTxMissing(m->transactions_size());
+    overlay_.addTxMetrics(m->transactions_size());
 
     for (std::uint32_t i = 0; i < m->transactions_size(); ++i)
         onMessage(std::shared_ptr<protocol::TMTransaction>(

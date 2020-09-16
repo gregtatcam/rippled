@@ -136,9 +136,18 @@ public:
         share_fetch_pack,
         get_fetch_pack,
 
+        // TMGetObjectByHash: transactions
+        get_transactions,
+
         // TMGetObjectByHash: generic
         share_hash,
         get_hash,
+
+        // TMHaveTransactions
+        have_transactions,
+
+        // TMTransactions
+        transactions,
 
         unknown  // must be last
     };
@@ -222,8 +231,11 @@ protected:
         {"getobject_CAS_get"},                   // category::get_cas_object
         {"getobject_Fetch_Pack_share"},          // category::share_fetch_pack
         {"getobject_Fetch Pack_get"},            // category::get_fetch_pack
+        {"getobject_Transactions_get"},          // category::get_transactions
         {"getobject_share"},                     // category::share_hash
         {"getobject_get"},                       // category::get_hash
+        {"have_transactions"},                   // category::have_transactions
+        {"transactions"},                        // category::transactions
         {"unknown"}                              // category::unknown
     }};
 };

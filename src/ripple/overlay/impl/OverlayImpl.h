@@ -421,14 +421,9 @@ public:
         return txMetrics_.json();
     }
 
+    template <typename... Args>
     void
-    addTxMessage(protocol::MessageType type, std::uint32_t val);
-
-    void
-    addTxMissing(std::uint32_t val);
-
-    void
-    addTxSelected(std::uint32_t selected, std::uint32_t suppressed);
+    addTxMetrics(Args... args);
 
 private:
     void

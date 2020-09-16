@@ -27,9 +27,9 @@ namespace ripple {
 namespace metrics {
 
 void
-TxMetrics::addMessage(protocol::MessageType type, val_t val)
+TxMetrics::addMetrics(protocol::MessageType type, std::uint64_t val)
 {
-    auto add = [&](auto& m, val_t val) {
+    auto add = [&](auto& m, std::uint32_t val) {
         std::lock_guard lock(mutex);
         m.addMetrics(val);
     };
@@ -48,8 +48,8 @@ TxMetrics::addMessage(protocol::MessageType type, val_t val)
         case protocol::MessageType::mtLEDGER_DATA:
             add(ledgerData, val);
             break;
-        case protocol::MessageType::mtGET_OBJECTS:
-            add(getObjects, val);
+        case protocol::MessageType::mtTRANSACTIONS:
+            add(transactions, val);
             break;
         default:
             return;
@@ -57,7 +57,7 @@ TxMetrics::addMessage(protocol::MessageType type, val_t val)
 }
 
 void
-TxMetrics::addSelected(val_t selected, val_t suppressed)
+TxMetrics::addMetrics(std::uint32_t selected, std::uint32_t suppressed)
 {
     std::lock_guard lock(mutex);
     selectedPeers.addMetrics(selected);
@@ -65,21 +65,21 @@ TxMetrics::addSelected(val_t selected, val_t suppressed)
 }
 
 void
-TxMetrics::addMissing(val_t missing)
+TxMetrics::addMetrics(std::uint32_t missing)
 {
     std::lock_guard lock(mutex);
     missingTx.addMetrics(missing);
 }
 
 void
-MetricsPerMessage::addMetrics(val_t bytes)
+MetricsPerMessage::addMetrics(std::uint32_t bytes)
 {
     cnt.addMetrics(1);
     size.addMetrics(bytes);
 }
 
 void
-SingleMetrics::addMetrics(val_t val)
+SingleMetrics::addMetrics(std::uint32_t val)
 {
     using namespace std::chrono_literals;
     accum += val;
@@ -122,8 +122,10 @@ TxMetrics::json() const
     ret[jss::txr_ledger_data_cnt] = std::to_string(ledgerData.cnt.rollingAvg);
     ret[jss::txr_ledger_data_sz] = std::to_string(ledgerData.size.rollingAvg);
 
-    ret[jss::txr_get_object_cnt] = std::to_string(getObjects.cnt.rollingAvg);
-    ret[jss::txr_get_object_sz] = std::to_string(getObjects.size.rollingAvg);
+    ret[jss::txr_transactions_cnt] =
+        std::to_string(transactions.cnt.rollingAvg);
+    ret[jss::txr_transactions_sz] =
+        std::to_string(transactions.size.rollingAvg);
 
     ret[jss::txr_selected_cnt] = std::to_string(selectedPeers.rollingAvg);
 

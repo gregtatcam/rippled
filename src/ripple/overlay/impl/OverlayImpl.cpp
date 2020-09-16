@@ -1320,7 +1320,7 @@ OverlayImpl::relay(
         // less peers that have already seen this transaction
         selected = (selected > toSkip.size()) ? (selected - toSkip.size()) : 0;
 
-        txMetrics_.addSelected(selected, toSkip.size());
+        txMetrics_.addMetrics(selected, toSkip.size());
 
         // enough peers have already seen this transaction -
         // queue the hash for the rest of the peers
@@ -1631,34 +1631,16 @@ setup_Overlay(BasicConfig const& config)
     return setup;
 }
 
+template <typename... Args>
 void
-OverlayImpl::addTxMessage(protocol::MessageType type, std::uint32_t val)
-{
-    if (!strand_.running_in_this_thread())
-        return post(
-            strand_, std::bind(&OverlayImpl::addTxMessage, this, type, val));
-
-    txMetrics_.addMessage(type, val);
-}
-
-void
-OverlayImpl::addTxMissing(std::uint32_t val)
-{
-    if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&OverlayImpl::addTxMissing, this, val));
-
-    txMetrics_.addMissing(val);
-}
-
-void
-OverlayImpl::addTxSelected(std::uint32_t selected, std::uint32_t suppressed)
+OverlayImpl::addTxMetrics(Args... args)
 {
     if (!strand_.running_in_this_thread())
         return post(
             strand_,
-            std::bind(&OverlayImpl::addTxSelected, this, selected, suppressed));
+            std::bind(&OverlayImpl::addTxMetrics<Args...>, this, args...));
 
-    txMetrics_.addSelected(selected, suppressed);
+    txMetrics_.addMetrics(args...);
 }
 
 std::unique_ptr<Overlay>
