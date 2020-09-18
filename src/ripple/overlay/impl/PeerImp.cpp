@@ -278,16 +278,24 @@ void
 PeerImp::sendTxQueue()
 {
     std::shared_ptr<Message> m = nullptr;
-    if (txQueue_.hash_size())
     {
         std::lock_guard l(txQueueMutex_);
-        m = std::make_shared<Message>(txQueue_, protocol::mtHAVE_TRANSACTIONS);
-        txQueue_.clear_hash();
+
+        if (!txQueue_.empty())
+        {
+            protocol::TMHaveTransactions ht;
+            std::for_each(
+                txQueue_.begin(), txQueue_.end(), [&](auto const& hash) {
+                    ht.add_hash(hash.data(), hash.size());
+                });
+            m = std::make_shared<Message>(ht, protocol::mtHAVE_TRANSACTIONS);
+            txQueue_.clear();
+        }
     }
 
     if (m)
     {
-        JLOG(p_journal_.debug()) << "sendTxQueue " << txQueue_.hash_size();
+        JLOG(p_journal_.debug()) << "sendTxQueue " << txQueue_.size();
         send(m);
     }
 }
@@ -297,8 +305,17 @@ PeerImp::addTxQueue(uint256 const& hash)
 {
     std::lock_guard l(txQueueMutex_);
 
-    txQueue_.add_hash(hash.data(), hash.size());
-    JLOG(p_journal_.debug()) << "addTxQueue " << txQueue_.hash_size();
+    txQueue_.insert(hash);
+    JLOG(p_journal_.debug()) << "addTxQueue " << txQueue_.size();
+}
+
+void
+PeerImp::removeTxQueue(uint256 const& hash)
+{
+    std::lock_guard l(txQueueMutex_);
+
+    txQueue_.erase(hash);
+    JLOG(p_journal_.debug()) << "removeTxQueue " << txQueue_.size();
 }
 
 void
@@ -1484,6 +1501,8 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
                 JLOG(p_journal_.debug()) << "Ignoring known bad tx " << txID;
             }
 
+            removeTxQueue(txID);
+
             return;
         }
 
@@ -2396,6 +2415,10 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 
             auto obj = tmBH.add_objects();
             obj->set_hash(hash.data(), hash.size());
+        }
+        else
+        {
+            removeTxQueue(hash);
         }
     }
 

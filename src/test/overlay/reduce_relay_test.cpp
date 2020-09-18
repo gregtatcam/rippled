@@ -172,6 +172,10 @@ public:
     addTxQueue(const uint256&) override
     {
     }
+    void
+    removeTxQueue(const uint256&) override
+    {
+    }
 };
 
 /** Manually advanced clock. */

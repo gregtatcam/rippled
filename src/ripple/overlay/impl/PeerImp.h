@@ -23,6 +23,7 @@
 #include <ripple/app/consensus/RCLCxPeerPos.h>
 #include <ripple/basics/Log.h>
 #include <ripple/basics/RangeSet.h>
+#include <ripple/basics/UnorderedContainers.h>
 #include <ripple/beast/utility/WrappedSink.h>
 #include <ripple/overlay/Squelch.h>
 #include <ripple/overlay/impl/OverlayImpl.h>
@@ -203,7 +204,7 @@ private:
     // The hashes are sent once a second to a peer
     // and the peer requests missing transactions from
     // the node.
-    protocol::TMHaveTransactions txQueue_;
+    hash_set<uint256> txQueue_;
     std::mutex txQueueMutex_;
 
     friend class OverlayImpl;
@@ -307,10 +308,16 @@ public:
     sendTxQueue() override;
 
     /** Add transaction's hash to the transaction's queue
-     * @param hash transaction's hash
+       @param hash transaction's hash
      */
     void
     addTxQueue(uint256 const& hash) override;
+
+    /** Remove transaction's hash from the transaction's queue
+       @param hash transaction's hash
+     */
+    void
+    removeTxQueue(uint256 const& hash) override;
 
     /** Send a set of PeerFinder endpoints as a protocol message. */
     template <
