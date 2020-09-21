@@ -278,15 +278,15 @@ void
 PeerImp::sendTxQueue()
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&PeerImp::sendTxQueue, shared_from_this()));
+        return post(
+            strand_, std::bind(&PeerImp::sendTxQueue, shared_from_this()));
 
     if (!txQueue_.empty())
     {
         protocol::TMHaveTransactions ht;
-        std::for_each(
-            txQueue_.begin(), txQueue_.end(), [&](auto const& hash) {
-                ht.add_hash(hash.data(), hash.size());
-            });
+        std::for_each(txQueue_.begin(), txQueue_.end(), [&](auto const& hash) {
+            ht.add_hash(hash.data(), hash.size());
+        });
         txQueue_.clear();
         send(std::make_shared<Message>(ht, protocol::mtHAVE_TRANSACTIONS));
         JLOG(p_journal_.debug()) << "sendTxQueue " << txQueue_.size();
@@ -297,7 +297,8 @@ void
 PeerImp::addTxQueue(uint256 const& hash)
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&PeerImp::addTxQueue, shared_from_this(), hash));
+        return post(
+            strand_, std::bind(&PeerImp::addTxQueue, shared_from_this(), hash));
 
     txQueue_.insert(hash);
     JLOG(p_journal_.debug()) << "addTxQueue " << txQueue_.size();
@@ -307,7 +308,9 @@ void
 PeerImp::removeTxQueue(uint256 const& hash)
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&PeerImp::removeTxQueue, shared_from_this(), hash));
+        return post(
+            strand_,
+            std::bind(&PeerImp::removeTxQueue, shared_from_this(), hash));
 
     auto removed = txQueue_.erase(hash);
     JLOG(p_journal_.debug()) << "removeTxQueue " << removed;
