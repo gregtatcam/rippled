@@ -470,6 +470,9 @@ OverlayImpl::add_active(std::shared_ptr<PeerImp> const& peer)
                                   TokenType::NodePublic, peer->getNodePublic())
                            << ")";
 
+    if (peer->txReduceRelayEnabled())
+        nTxReduceRelayEnabled_++;
+
     // As we are not on the strand, run() must be called
     // while holding the lock, otherwise new I/O can be
     // queued after a call to stop().
@@ -673,6 +676,9 @@ OverlayImpl::activate(std::shared_ptr<PeerImp> const& peer)
                            << toBase58(
                                   TokenType::NodePublic, peer->getNodePublic())
                            << ")";
+
+    if (peer->txReduceRelayEnabled())
+        nTxReduceRelayEnabled_++;
 
     // We just accepted this peer so we have non-zero active peers
     assert(size() != 0);
@@ -1317,8 +1323,10 @@ OverlayImpl::relay(
         auto selected = static_cast<uint32_t>(
             app_.config().TX_RELAY_TO_PEERS * nactive / 100);
 
-        // less peers that have already seen this transaction
-        selected = (selected > toSkip.size()) ? (selected - toSkip.size()) : 0;
+        // less peers that have already seen this transaction or don't
+        // have tx reduce-relay feature enabled
+        auto const lessPeers = toSkip.size() + nactive - nTxReduceRelayEnabled_;
+        selected = (selected > lessPeers) ? (selected - lessPeers) : 0;
 
         txMetrics_.addMetrics(selected, toSkip.size());
 
@@ -1334,7 +1342,8 @@ OverlayImpl::relay(
 
         auto end = std::remove_if(
             peers.begin(), peers.end(), [&](auto const& peer) -> bool {
-                return toSkip.find(peer->id()) != toSkip.end();
+                return toSkip.find(peer->id()) != toSkip.end() ||
+                    !peer->txReduceRelayEnabled();
             });
         std::shuffle(peers.begin(), end, default_prng());
 

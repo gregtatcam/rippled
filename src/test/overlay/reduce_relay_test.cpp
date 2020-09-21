@@ -164,6 +164,11 @@ public:
     {
         return false;
     }
+    bool
+    txReduceRelayEnabled() const override
+    {
+        return false;
+    }
     void
     sendTxQueue() override
     {

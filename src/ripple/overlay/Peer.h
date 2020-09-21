@@ -130,6 +130,9 @@ public:
 
     virtual bool
     compressionEnabled() const = 0;
+
+    virtual bool
+    txReduceRelayEnabled() const = 0;
 };
 
 }  // namespace ripple

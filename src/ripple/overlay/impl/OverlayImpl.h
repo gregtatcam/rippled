@@ -129,6 +129,7 @@ private:
     squelch::Slots<UptimeClock> slots_;
 
     metrics::TxMetrics txMetrics_;
+    std::atomic<std::uint16_t> nTxReduceRelayEnabled_{0};
 
     //--------------------------------------------------------------------------
 
@@ -424,6 +425,13 @@ public:
     template <typename... Args>
     void
     addTxMetrics(Args... args);
+
+    void
+    decrementTxReduceRelay()
+    {
+        if (nTxReduceRelayEnabled_ > 0)
+            nTxReduceRelayEnabled_--;
+    }
 
 private:
     void

@@ -205,6 +205,7 @@ private:
     // and the peer requests missing transactions from
     // the node.
     hash_set<uint256> txQueue_;
+    bool txReduceRelayEnabled_ = false;
 
     friend class OverlayImpl;
 
@@ -460,6 +461,12 @@ public:
         return compressionEnabled_ == Compressed::On;
     }
 
+    bool
+    txReduceRelayEnabled() const override
+    {
+        return txReduceRelayEnabled_;
+    }
+
 private:
     void
     close();
@@ -519,6 +526,20 @@ private:
     // Called when protocol messages bytes are sent
     void
     onWriteMessage(error_code ec, std::size_t bytes_transferred);
+
+    /** Called from onMessage(TMTransaction(s)).
+       @param m Transaction protocol message
+       @param eraseTxQueue is true when called from onMessage(TMTransaction)
+       and is false when called from onMessage(TMTransactions). If true then
+       the transaction hash is erased from txQueue_. Don't need to erase from
+       the queue when called from onMessage(TMTransactions) because this
+       message is the response to missing transactions request and the queue
+       would not have any of these transactions.
+     */
+    void
+    handleTransaction(
+        std::shared_ptr<protocol::TMTransaction> const& m,
+        bool eraseTxQueue);
 
 public:
     //--------------------------------------------------------------------------
@@ -678,6 +699,9 @@ PeerImp::PeerImp(
           headers_["X-Offer-Compression"] == "lz4" && app_.config().COMPRESSION
               ? Compressed::On
               : Compressed::Off)
+    , txReduceRelayEnabled_(
+          headers_["X-Tx-Reduce-Relay"] == "1" &&
+          app_.config().TX_REDUCE_RELAY_ENABLE)
 {
     read_buffer_.commit(boost::asio::buffer_copy(
         read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));

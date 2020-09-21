@@ -202,7 +202,9 @@ ConnectAttempt::onHandshake(error_code ec)
         return close();  // makeSharedValue logs
 
     req_ = makeRequest(
-        !overlay_.peerFinder().config().peerPrivate, app_.config().COMPRESSION);
+        !overlay_.peerFinder().config().peerPrivate,
+        app_.config().COMPRESSION,
+        app_.config().TX_REDUCE_RELAY_ENABLE);
 
     buildHandshake(
         req_,
@@ -282,7 +284,10 @@ ConnectAttempt::onShutdown(error_code ec)
 //--------------------------------------------------------------------------
 
 auto
-ConnectAttempt::makeRequest(bool crawl, bool compressionEnabled) -> request_type
+ConnectAttempt::makeRequest(
+    bool crawl,
+    bool compressionEnabled,
+    bool txReduceRelayEnabled) -> request_type
 {
     request_type m;
     m.method(boost::beast::http::verb::get);
@@ -295,6 +300,8 @@ ConnectAttempt::makeRequest(bool crawl, bool compressionEnabled) -> request_type
     m.insert("Crawl", crawl ? "public" : "private");
     if (compressionEnabled)
         m.insert("X-Offer-Compression", "lz4");
+    if (txReduceRelayEnabled)
+        m.insert("X-Tx-Reduce-Relay", "1");
     return m;
 }
 

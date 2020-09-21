@@ -94,6 +94,7 @@ PeerImp::PeerImp(
     , compressionEnabled_(
           headers_["X-Offer-Compression"] == "lz4" ? Compressed::On
                                                    : Compressed::Off)
+    , txReduceRelayEnabled_(headers_["X-Tx-Reduce-Relay"] == "1")
 {
 }
 
@@ -106,6 +107,8 @@ PeerImp::~PeerImp()
         overlay_.onPeerDeactivate(id_);
     overlay_.peerFinder().on_closed(slot_);
     overlay_.remove(slot_);
+    if (txReduceRelayEnabled_)
+        overlay_.decrementTxReduceRelay();
 
     if (inCluster)
     {
@@ -823,6 +826,8 @@ PeerImp::makeResponse(
     resp.insert("Crawl", crawl ? "public" : "private");
     if (req["X-Offer-Compression"] == "lz4" && app_.config().COMPRESSION)
         resp.insert("X-Offer-Compression", "lz4");
+    if (req["X-Tx-Reduce-Relay"] == "1" && app_.config().TX_REDUCE_RELAY_ENABLE)
+        resp.insert("X-Tx-Reduce-Relay", "1");
 
     buildHandshake(
         resp,
@@ -1467,6 +1472,14 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
 {
+    handleTransaction(m, true);
+}
+
+void
+PeerImp::handleTransaction(
+    std::shared_ptr<protocol::TMTransaction> const& m,
+    bool eraseTxQueue)
+{
     JLOG(p_journal_.debug()) << "received transaction";
     if (sanity_.load() == Sanity::insane)
         return;
@@ -1499,7 +1512,8 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
                 JLOG(p_journal_.debug()) << "Ignoring known bad tx " << txID;
             }
 
-            removeTxQueue(txID);
+            if (eraseTxQueue)
+                removeTxQueue(txID);
 
             return;
         }
@@ -2436,8 +2450,10 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransactions> const& m)
     overlay_.addTxMetrics(m->transactions_size());
 
     for (std::uint32_t i = 0; i < m->transactions_size(); ++i)
-        onMessage(std::shared_ptr<protocol::TMTransaction>(
-            m->mutable_transactions(i), [](protocol::TMTransaction*) {}));
+        handleTransaction(
+            std::shared_ptr<protocol::TMTransaction>(
+                m->mutable_transactions(i), [](protocol::TMTransaction*) {}),
+            false);
 }
 
 void
