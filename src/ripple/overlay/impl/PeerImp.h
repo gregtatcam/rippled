@@ -205,7 +205,6 @@ private:
     // and the peer requests missing transactions from
     // the node.
     hash_set<uint256> txQueue_;
-    std::mutex txQueueMutex_;
 
     friend class OverlayImpl;
 
