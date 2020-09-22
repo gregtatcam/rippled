@@ -144,7 +144,7 @@ private:
     clock_type::time_point lastPingTime_;
     clock_type::time_point const creationTime_;
 
-    squelch::Squelch<UptimeClock> squelch_;
+    reduce_relay::Squelch<UptimeClock> squelch_;
 
     // Notes on thread locking:
     //
@@ -206,6 +206,7 @@ private:
     // the node.
     hash_set<uint256> txQueue_;
     bool txReduceRelayEnabled_ = false;
+    bool vpReduceRelayEnabled_ = false;
 
     friend class OverlayImpl;
 
@@ -700,8 +701,15 @@ PeerImp::PeerImp(
               ? Compressed::On
               : Compressed::Off)
     , txReduceRelayEnabled_(
-          headers_["X-Tx-Reduce-Relay"] == "1" &&
+          reduce_relay::reduceRelayEnabled(
+              headers_["X-Offer-Reduce-Relay"].to_string(),
+              reduce_relay::ReduceRelayEnabled::Transaction) &&
           app_.config().TX_REDUCE_RELAY_ENABLE)
+    , vpReduceRelayEnabled_(
+          reduce_relay::reduceRelayEnabled(
+              headers_["X-Offer-Reduce-Relay"].to_string(),
+              reduce_relay::ReduceRelayEnabled::ValidationProposal) &&
+          app_.config().VP_REDUCE_RELAY_ENABLE)
 {
     read_buffer_.commit(boost::asio::buffer_copy(
         read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));

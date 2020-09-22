@@ -484,7 +484,7 @@ Config::loadFromString(std::string const& fileContents)
     if (exists(SECTION_REDUCE_RELAY))
     {
         auto sec = section(SECTION_REDUCE_RELAY);
-        REDUCE_RELAY_ENABLE = sec.value_or("enable", false);
+        VP_REDUCE_RELAY_ENABLE = sec.value_or("enable", false);
         REDUCE_RELAY_SQUELCH = sec.value_or("squelch", false);
     }
 

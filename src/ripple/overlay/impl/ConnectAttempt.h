@@ -106,7 +106,11 @@ private:
     onShutdown(error_code ec);
 
     static request_type
-    makeRequest(bool crawl, bool compressionEnabled, bool txReduceRelayEnabled);
+    makeRequest(
+        bool crawl,
+        bool compressionEnabled,
+        bool txReduceRelayEnabled,
+        bool vpReduceRelayEnabled);
 
     void
     processResponse();

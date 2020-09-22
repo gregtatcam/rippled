@@ -25,8 +25,8 @@
 #include <ripple/beast/container/aged_unordered_map.h>
 #include <ripple/beast/utility/Journal.h>
 #include <ripple/overlay/Peer.h>
+#include <ripple/overlay/ReduceRelayCommon.h>
 #include <ripple/overlay/Squelch.h>
-#include <ripple/overlay/SquelchCommon.h>
 #include <ripple/protocol/PublicKey.h>
 #include <ripple.pb.h>
 
@@ -40,7 +40,7 @@
 
 namespace ripple {
 
-namespace squelch {
+namespace reduce_relay {
 
 template <typename clock_type>
 class Slots;
@@ -643,7 +643,7 @@ template <typename clock_type>
 bool
 Slots<clock_type>::addPeerMessage(uint256 const& key, id_t id)
 {
-    beast::expire(peersWithMessage_, squelch::IDLED);
+    beast::expire(peersWithMessage_, reduce_relay::IDLED);
 
     if (key.isNonZero())
     {
@@ -727,7 +727,7 @@ Slots<clock_type>::deleteIdlePeers()
     }
 }
 
-}  // namespace squelch
+}  // namespace reduce_relay
 
 }  // namespace ripple
 

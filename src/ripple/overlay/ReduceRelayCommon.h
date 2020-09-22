@@ -17,13 +17,15 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_OVERLAY_SQUELCHCOMMON_H_INCLUDED
-#define RIPPLE_OVERLAY_SQUELCHCOMMON_H_INCLUDED
+#ifndef RIPPLE_OVERLAY_REDUCERELAYCOMMON_H_INCLUDED
+#define RIPPLE_OVERLAY_REDUCERELAYCOMMON_H_INCLUDED
+
 #include <chrono>
+#include <stdlib.h>
 
 namespace ripple {
 
-namespace squelch {
+namespace reduce_relay {
 
 using namespace std::chrono;
 
@@ -45,8 +47,63 @@ static constexpr uint16_t MAX_SELECTED_PEERS = 3;
 // the server establish peer connections
 static constexpr minutes WAIT_ON_BOOTUP = minutes{10};
 
-}  // namespace squelch
+// Reduce-relay feature values used in the HTTP handshake.
+// If both features are supported then they must be bitwise or'ed.
+enum ReduceRelayEnabled : std::uint8_t {
+    ValidationProposal = 0x01,
+    Transaction = 0x02
+};
+
+/** Checks if the header has the specified feature enabled
+   @param header value of X-Offer-Reduce-Relay header
+   @param enabled feature to check
+   @return true if the feature is enabled
+ */
+inline bool
+reduceRelayEnabled(std::string const& header, ReduceRelayEnabled enabled)
+{
+    return (atoi(header.c_str()) & enabled) == enabled;
+}
+
+/** Make HTTP header value depending on the current value and reduce-relay
+   features configuration values
+   @param header value of X-Offer-Reduce-Relay header
+   @param txEnabled configuration value of tx reduce-relay
+   @param vpEnabled configuration value of validation/proposal reduce-relay
+   @return header value
+ */
+inline std::string
+makeHeaderValue(std::string const& header, bool txEnabled, bool vpEnabled)
+{
+    int value = 0;
+    if (reduceRelayEnabled(header, ReduceRelayEnabled::Transaction) &&
+        txEnabled)
+        value = ReduceRelayEnabled::Transaction;
+    if (reduceRelayEnabled(header, ReduceRelayEnabled::ValidationProposal) &&
+        vpEnabled)
+        value |= ReduceRelayEnabled::ValidationProposal;
+    return std::to_string(value);
+}
+
+/** Make HTTP header value depending on reduce-relay features configuration
+   values.
+   @param txEnabled configuration value of tx reduce-relay
+   @param vpEnabled configuration value of validation/proposal reduce-relay
+   @return
+ */
+inline std::string
+makeHeaderValue(bool txEnabled, bool vpEnabled)
+{
+    int value = 0;
+    if (txEnabled)
+        value = ReduceRelayEnabled::Transaction;
+    if (vpEnabled)
+        value |= ReduceRelayEnabled::ValidationProposal;
+    return std::to_string(value);
+}
+
+}  // namespace reduce_relay
 
 }  // namespace ripple
 
-#endif  // RIPPLED_SQUELCHCOMMON_H
+#endif  // RIPPLED_REDUCERELAYCOMMON_H_INCLUDED

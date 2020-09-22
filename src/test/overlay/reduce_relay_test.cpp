@@ -498,10 +498,10 @@ private:
     inline static id_t sid_ = 0;
     id_t id_;
     Overlay& overlay_;
-    squelch::Squelch<ManualClock> squelch_;
+    reduce_relay::Squelch<ManualClock> squelch_;
 };
 
-class OverlaySim : public Overlay, public squelch::SquelchHandler
+class OverlaySim : public Overlay, public reduce_relay::SquelchHandler
 {
     using Peers = std::unordered_map<Peer::id_t, PeerSPtr>;
 
@@ -523,7 +523,7 @@ public:
     }
 
     std::uint16_t
-    inState(PublicKey const& validator, squelch::PeerState state)
+    inState(PublicKey const& validator, reduce_relay::PeerState state)
     {
         auto res = slots_.inState(validator, state);
         return res ? *res : 0;
@@ -619,7 +619,7 @@ public:
     bool
     isCountingState(PublicKey const& validator)
     {
-        return slots_.inState(validator, squelch::SlotState::Counting);
+        return slots_.inState(validator, reduce_relay::SlotState::Counting);
     }
 
     std::set<id_t>
@@ -646,7 +646,7 @@ public:
     std::unordered_map<
         id_t,
         std::tuple<
-            squelch::PeerState,
+            reduce_relay::PeerState,
             std::uint16_t,
             std::uint32_t,
             std::uint32_t>>
@@ -681,7 +681,7 @@ private:
     UnsquelchCB unsquelch_;
     Peers peers_;
     Peers peersCache_;
-    squelch::Slots<ManualClock> slots_;
+    reduce_relay::Slots<ManualClock> slots_;
 };
 
 class Network
@@ -860,8 +860,8 @@ public:
             for (auto& [_, v] : peers)
             {
                 (void)_;
-                if (std::get<squelch::PeerState>(v) ==
-                    squelch::PeerState::Squelched)
+                if (std::get<reduce_relay::PeerState>(v) ==
+                    reduce_relay::PeerState::Squelched)
                     return false;
             }
         }
@@ -875,7 +875,7 @@ private:
 
 class reduce_relay_test : public beast::unit_test::suite
 {
-    using Slot = squelch::Slot<ManualClock>;
+    using Slot = reduce_relay::Slot<ManualClock>;
     using id_t = Peer::id_t;
 
 protected:
@@ -887,7 +887,7 @@ protected:
                   << "num peers " << (int)network_.overlay().getNumPeers()
                   << std::endl;
         for (auto& [k, v] : peers)
-            std::cout << k << ":" << (int)std::get<squelch::PeerState>(v)
+            std::cout << k << ":" << (int)std::get<reduce_relay::PeerState>(v)
                       << " ";
         std::cout << std::endl;
     }
@@ -967,7 +967,8 @@ protected:
                     str << s << " ";
                 if (log)
                     std::cout
-                        << (double)squelch::epoch<milliseconds>(now).count() /
+                        << (double)reduce_relay::epoch<milliseconds>(now)
+                                .count() /
                             1000.
                         << " random, squelched, validator: " << validator.id()
                         << " peers: " << str.str() << std::endl;
@@ -975,7 +976,7 @@ protected:
                     network_.overlay().isCountingState(validator);
                 BEAST_EXPECT(
                     countingState == false &&
-                    selected.size() == squelch::MAX_SELECTED_PEERS);
+                    selected.size() == reduce_relay::MAX_SELECTED_PEERS);
             }
 
             // Trigger Link Down or Peer Disconnect event
@@ -1055,12 +1056,13 @@ protected:
                     event.isSelected_ =
                         network_.overlay().isSelected(event.key_, event.peer_);
                     auto peers = network_.overlay().getPeers(event.key_);
-                    auto d = squelch::epoch<milliseconds>(now).count() -
+                    auto d = reduce_relay::epoch<milliseconds>(now).count() -
                         std::get<3>(peers[event.peer_]);
                     mustHandle = event.isSelected_ &&
-                        d > milliseconds(squelch::IDLED).count() &&
+                        d > milliseconds(reduce_relay::IDLED).count() &&
                         network_.overlay().inState(
-                            event.key_, squelch::PeerState::Squelched) > 0 &&
+                            event.key_, reduce_relay::PeerState::Squelched) >
+                            0 &&
                         peers.find(event.peer_) != peers.end();
                 }
                 network_.overlay().deleteIdlePeers(
@@ -1079,7 +1081,7 @@ protected:
             }
             if (event.state_ == State::WaitReset ||
                 (event.state_ == State::On &&
-                 (now - event.time_ > (squelch::IDLED + seconds(2)))))
+                 (now - event.time_ > (reduce_relay::IDLED + seconds(2)))))
             {
                 bool handled =
                     event.state_ == State::WaitReset || !event.handled_;
@@ -1175,16 +1177,17 @@ protected:
                 if (squelched)
                 {
                     BEAST_EXPECT(
-                        squelched == MAX_PEERS - squelch::MAX_SELECTED_PEERS);
+                        squelched ==
+                        MAX_PEERS - reduce_relay::MAX_SELECTED_PEERS);
                     n++;
                 }
             },
             1,
-            squelch::MAX_MESSAGE_THRESHOLD + 2,
+            reduce_relay::MAX_MESSAGE_THRESHOLD + 2,
             purge,
             resetClock);
         auto selected = network_.overlay().getSelected(network_.validator(0));
-        BEAST_EXPECT(selected.size() == squelch::MAX_SELECTED_PEERS);
+        BEAST_EXPECT(selected.size() == reduce_relay::MAX_SELECTED_PEERS);
         BEAST_EXPECT(n == 1);  // only one selection round
         auto res = checkCounting(network_.validator(0), false);
         BEAST_EXPECT(res);
@@ -1248,7 +1251,7 @@ protected:
                     unsquelched++;
                 });
             BEAST_EXPECT(
-                unsquelched == MAX_PEERS - squelch::MAX_SELECTED_PEERS);
+                unsquelched == MAX_PEERS - reduce_relay::MAX_SELECTED_PEERS);
             BEAST_EXPECT(checkCounting(network_.validator(0), true));
         });
     }
@@ -1261,7 +1264,7 @@ protected:
         doTest("Selected Peer Stops Relaying", log, [this](bool log) {
             ManualClock::advance(seconds(601));
             BEAST_EXPECT(propagateAndSquelch(log, true, false));
-            ManualClock::advance(squelch::IDLED + seconds(1));
+            ManualClock::advance(reduce_relay::IDLED + seconds(1));
             std::uint16_t unsquelched = 0;
             network_.overlay().deleteIdlePeers(
                 [&](PublicKey const& key, PeerWPtr const& peer) {
@@ -1269,7 +1272,7 @@ protected:
                 });
             auto peers = network_.overlay().getPeers(network_.validator(0));
             BEAST_EXPECT(
-                unsquelched == MAX_PEERS - squelch::MAX_SELECTED_PEERS);
+                unsquelched == MAX_PEERS - reduce_relay::MAX_SELECTED_PEERS);
             BEAST_EXPECT(checkCounting(network_.validator(0), true));
         });
     }
@@ -1284,8 +1287,8 @@ protected:
             BEAST_EXPECT(propagateAndSquelch(log, true, false));
             auto peers = network_.overlay().getPeers(network_.validator(0));
             auto it = std::find_if(peers.begin(), peers.end(), [&](auto it) {
-                return std::get<squelch::PeerState>(it.second) ==
-                    squelch::PeerState::Squelched;
+                return std::get<reduce_relay::PeerState>(it.second) ==
+                    reduce_relay::PeerState::Squelched;
             });
             assert(it != peers.end());
             std::uint16_t unsquelched = 0;
@@ -1311,7 +1314,7 @@ squelch=1
 )rippleConfig");
 
             c.loadFromString(toLoad);
-            BEAST_EXPECT(c.REDUCE_RELAY_ENABLE == true);
+            BEAST_EXPECT(c.VP_REDUCE_RELAY_ENABLE == true);
             BEAST_EXPECT(c.REDUCE_RELAY_SQUELCH == true);
 
             Config c1;
@@ -1323,7 +1326,7 @@ squelch=0
 )rippleConfig");
 
             c1.loadFromString(toLoad);
-            BEAST_EXPECT(c1.REDUCE_RELAY_ENABLE == false);
+            BEAST_EXPECT(c1.VP_REDUCE_RELAY_ENABLE == false);
             BEAST_EXPECT(c1.REDUCE_RELAY_SQUELCH == false);
 
             Config c2;
@@ -1335,7 +1338,7 @@ squelched=1
 )rippleConfig";
 
             c2.loadFromString(toLoad);
-            BEAST_EXPECT(c2.REDUCE_RELAY_ENABLE == false);
+            BEAST_EXPECT(c2.VP_REDUCE_RELAY_ENABLE == false);
             BEAST_EXPECT(c2.REDUCE_RELAY_SQUELCH == false);
         });
     }
@@ -1371,7 +1374,7 @@ squelched=1
             peers = network_.overlay().getPeers(network_.validator(0));
             BEAST_EXPECT(std::get<1>(peers[0]) == (nMessages - 1));
             // advance the clock
-            ManualClock::advance(squelch::IDLED + seconds(1));
+            ManualClock::advance(reduce_relay::IDLED + seconds(1));
             network_.overlay().updateSlotAndSquelch(
                 key,
                 network_.validator(0),

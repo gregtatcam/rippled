@@ -21,7 +21,7 @@
 #define RIPPLE_OVERLAY_SQUELCH_H_INCLUDED
 
 #include <ripple/basics/random.h>
-#include <ripple/overlay/SquelchCommon.h>
+#include <ripple/overlay/ReduceRelayCommon.h>
 #include <ripple/protocol/PublicKey.h>
 
 #include <chrono>
@@ -29,7 +29,7 @@
 
 namespace ripple {
 
-namespace squelch {
+namespace reduce_relay {
 
 /** Maintains squelching of relaying messages from validators */
 template <typename clock_type>
@@ -115,7 +115,7 @@ Squelch<clock_type>::getSquelchDuration()
     return d;
 }
 
-}  // namespace squelch
+}  // namespace reduce_relay
 
 }  // namespace ripple
 

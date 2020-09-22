@@ -186,7 +186,7 @@ public:
 
     // Reduce-relay - these parameters are experimental.
     // Enable reduce-relay functionality
-    bool REDUCE_RELAY_ENABLE = false;
+    bool VP_REDUCE_RELAY_ENABLE = false;
     // Send squelch message to peers
     bool REDUCE_RELAY_SQUELCH = false;
 

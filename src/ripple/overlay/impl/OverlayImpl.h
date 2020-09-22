@@ -54,7 +54,7 @@ namespace ripple {
 class PeerImp;
 class BasicConfig;
 
-class OverlayImpl : public Overlay, public squelch::SquelchHandler
+class OverlayImpl : public Overlay, public reduce_relay::SquelchHandler
 {
 public:
     class Child
@@ -126,7 +126,7 @@ private:
 
     boost::optional<std::uint32_t> networkID_;
 
-    squelch::Slots<UptimeClock> slots_;
+    reduce_relay::Slots<UptimeClock> slots_;
 
     metrics::TxMetrics txMetrics_;
     std::atomic<std::uint16_t> nTxReduceRelayEnabled_{0};
