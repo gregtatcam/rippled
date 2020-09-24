@@ -2275,9 +2275,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
         {
             std::weak_ptr<PeerImp> weak = shared_from_this();
             app_.getJobQueue().addJob(
-                jtDOTRANSACTIONS,
-                "doTransactions",
-                [weak, m](Job&){
+                jtDOTRANSACTIONS, "doTransactions", [weak, m](Job&) {
                     if (auto peer = weak.lock())
                         peer->doTransactions(m);
                 });
@@ -2408,16 +2406,15 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
     std::weak_ptr<PeerImp> weak = shared_from_this();
     app_.getJobQueue().addJob(
-        jtTRANSACTIONS,
-        "have_transactions",
-        [weak, m](Job&) {
-          if (auto peer = weak.lock())
-              peer->haveTransactions(m);
+        jtTRANSACTIONS, "have_transactions", [weak, m](Job&) {
+            if (auto peer = weak.lock())
+                peer->haveTransactions(m);
         });
 }
 
 void
-PeerImp::haveTransactions(std::shared_ptr<protocol::TMHaveTransactions> const& m)
+PeerImp::haveTransactions(
+    std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
     protocol::TMGetObjectByHash tmBH;
     tmBH.set_type(protocol::TMGetObjectByHash_ObjectType_otTRANSACTIONS);
