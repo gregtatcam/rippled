@@ -205,7 +205,9 @@ private:
     // and the peer requests missing transactions from
     // the node.
     hash_set<uint256> txQueue_;
+    // true if tx reduce-relay feature is enabled on the peer
     bool txReduceRelayEnabled_ = false;
+    // true if validation/proposal reduce-relay feature is enabled on the peer
     bool vpReduceRelayEnabled_ = false;
 
     friend class OverlayImpl;
@@ -534,7 +536,7 @@ private:
        and is false when called from onMessage(TMTransactions). If true then
        the transaction hash is erased from txQueue_. Don't need to erase from
        the queue when called from onMessage(TMTransactions) because this
-       message is the response to missing transactions request and the queue
+       message is a response to missing transactions request and the queue
        would not have any of these transactions.
      */
     void
@@ -628,9 +630,9 @@ private:
     void
     doFetchPack(const std::shared_ptr<protocol::TMGetObjectByHash>& packet);
 
-    /** Process peer's request to send missing transactions.
-     * @param packet protocol message containing not relayed
-     * transactions' hashes.
+    /** Process peer's request to send missing transactions. The request is
+        sent in response to TMHaveTransactions.
+        @param packet protocol message containing missing transactions' hashes.
      */
     void
     doTransactions(std::shared_ptr<protocol::TMGetObjectByHash> const& packet);

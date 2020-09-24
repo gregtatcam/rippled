@@ -128,7 +128,9 @@ private:
 
     reduce_relay::Slots<UptimeClock> slots_;
 
+    // Transaction reduce-relay metrics
     metrics::TxMetrics txMetrics_;
+    // Number of peers with enabled tx reduce-relay feature
     std::atomic<std::uint16_t> nTxReduceRelayEnabled_{0};
 
     //--------------------------------------------------------------------------
@@ -422,10 +424,12 @@ public:
         return txMetrics_.json();
     }
 
+    /** Add tx reduce-relay metrics. */
     template <typename... Args>
     void
     addTxMetrics(Args... args);
 
+    /** Decrement number of peers supporting tx reduce-relay feature. */
     void
     decrementTxReduceRelay()
     {
@@ -559,7 +563,7 @@ private:
     void
     sendEndpoints();
 
-    /** Send transactions queue batched by every peer */
+    /** Send transactions' queue batched by every peer */
     void
     sendTxQueue();
 

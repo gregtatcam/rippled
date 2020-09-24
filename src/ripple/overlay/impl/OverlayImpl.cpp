@@ -1340,6 +1340,8 @@ OverlayImpl::relay(
             return;
         }
 
+        // remove suppressed peers and peers not supporting tx reduce-relay
+        // feature.
         auto end = std::remove_if(
             peers.begin(), peers.end(), [&](auto const& peer) -> bool {
                 return toSkip.find(peer->id()) != toSkip.end() ||

@@ -171,7 +171,9 @@ public:
         uint256 const& uid,
         PublicKey const& validator) = 0;
 
-    /** Relay a transaction
+    /** Relay a transaction. If tx reduce-relay feature is enabled then
+     * randomly select peers to relay to and queue transaction's hash
+     * for the rest of the peers.
      * @param hash transaction's hash
      * @param m transaction's protocol message
      * @param toSkip peers which have already seen this transaction
