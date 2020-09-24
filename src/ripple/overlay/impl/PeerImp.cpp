@@ -2275,7 +2275,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
         {
             std::weak_ptr<PeerImp> weak = shared_from_this();
             app_.getJobQueue().addJob(
-                jtDOTRANSACTIONS, "doTransactions", [weak, m](Job&) {
+                jtREQUESTED_TXN, "doTransactions", [weak, m](Job&) {
                     if (auto peer = weak.lock())
                         peer->doTransactions(m);
                 });
@@ -2406,7 +2406,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
     std::weak_ptr<PeerImp> weak = shared_from_this();
     app_.getJobQueue().addJob(
-        jtTRANSACTIONS, "have_transactions", [weak, m](Job&) {
+        jtMISSING_TXN, "haveTransactions", [weak, m](Job&) {
             if (auto peer = weak.lock())
                 peer->haveTransactions(m);
         });
