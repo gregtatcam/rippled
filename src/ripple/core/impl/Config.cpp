@@ -491,7 +491,7 @@ Config::loadFromString(std::string const& fileContents)
         TX_RELAY_TO_PEERS = sec.value_or("tx_relay_to_peers", 25);
         if (TX_RELAY_TO_PEERS > 100 || TX_NUM_PEERS < 20 ||
             static_cast<std::uint16_t>(100 * TX_NUM_PEERS / TX_RELAY_TO_PEERS) <
-            5)
+                5)
             Throw<std::runtime_error>(
                 "Invalid " SECTION_TX_REDUCE_RELAY
                 ", num_peers must be greater or equal to 20"
