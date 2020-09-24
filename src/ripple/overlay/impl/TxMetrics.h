@@ -32,8 +32,18 @@ namespace ripple {
 
 namespace metrics {
 
+/** Run single metrics rolling average. Can be either average of a value
+    per second or average of a value's sample per second. For instance,
+    for transaction it makes sense to have transaction bytes and count
+    per second, but for a number of selected peers to relay per transaction
+    it makes sense to have sample's average.
+ */
 struct SingleMetrics
 {
+    /** Class constructor
+       @param ptu if true then calculate metrics per second, otherwise
+           sample's average
+     */
     SingleMetrics(bool ptu = true) : perTimeUnit(ptu)
     {
     }
@@ -44,10 +54,15 @@ struct SingleMetrics
     std::uint32_t N{0};
     bool perTimeUnit{true};
     boost::circular_buffer<std::uint64_t> rollingAvgAggreg{30, 0ull};
+    /** Add metrics value
+     * @param val metrics value, either bytes or count
+     */
     void
     addMetrics(std::uint32_t val);
 };
 
+/** Run two metrics. For instance message size and count for
+    protocol messages. */
 struct MultipleMetrics
 {
     MultipleMetrics(bool ptu1 = true, bool ptu2 = true) : m1(ptu1), m2(ptu2)
@@ -56,29 +71,60 @@ struct MultipleMetrics
 
     SingleMetrics m1;
     SingleMetrics m2;
+    /** Add metrics to m2. m1 in this case aggregates the frequency.
+       @param val2 m2 metrics value
+     */
     void
     addMetrics(std::uint32_t val2);
+    /** Add metrics to m1 and m2.
+     * @param val1 m1 metrics value
+     * @param val2 m2 metrics value
+     */
     void
     addMetrics(std::uint32_t val1, std::uint32_t val2);
 };
 
+/** Run transaction reduce-relay feature related metrics */
 struct TxMetrics
 {
     mutable std::mutex mutex;
+    // TMTransaction bytes and count metrics per second
     MultipleMetrics tx;
+    // TMHaveTransactions bytes and count metrics per second
     MultipleMetrics haveTx;
+    // TMGetLedger bytes and count metrics per second
     MultipleMetrics getLedger;
+    // TMLedgerData bytes and count metrics per second
     MultipleMetrics ledgerData;
+    // TMTransactions bytes and count metrics per second
     MultipleMetrics transactions;
+    // Peers selected to relay in each transaction sample average
     SingleMetrics selectedPeers{false};
+    // Peers suppressed to relay in each transaction sample average
     SingleMetrics suppressedPeers{false};
+    // TMTransactions number of transactions sample average and count per
+    // second metrics
     MultipleMetrics missingTx{false, true};
+    /** Add protocol message metrics
+       @param type protocol message type
+       @param val message size in bytes
+     */
     void
     addMetrics(protocol::MessageType type, std::uint32_t val);
+    /** Add peers selected for relaying and suppressed peers metrics.
+       @param selected number of selected peers to relay
+       @param suppressed number of suppressed peers
+     */
     void
     addMetrics(std::uint32_t selected, std::uint32_t suppressed);
+    /** Add number of missing transactions that a node requested
+       @param missing number of missing transactions
+     */
     void
     addMetrics(std::uint32_t missing);
+    /** Get json representation of the metrics
+       @return json object
+     */
     Json::Value
     json() const;
 };
