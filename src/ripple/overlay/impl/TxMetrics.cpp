@@ -57,7 +57,10 @@ TxMetrics::addMetrics(protocol::MessageType type, std::uint32_t val)
 }
 
 void
-TxMetrics::addMetrics(std::uint32_t selected, std::uint32_t suppressed, std::uint32_t notenabled)
+TxMetrics::addMetrics(
+    std::uint32_t selected,
+    std::uint32_t suppressed,
+    std::uint32_t notenabled)
 {
     std::lock_guard lock(mutex);
     selectedPeers.addMetrics(selected);

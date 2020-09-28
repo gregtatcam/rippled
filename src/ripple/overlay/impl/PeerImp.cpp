@@ -1070,16 +1070,16 @@ PeerImp::onMessageBegin(
     overlay_.reportTraffic(category, true, static_cast<int>(size));
     using namespace protocol;
     if ((type == MessageType::mtTRANSACTION ||
-        type == MessageType::mtHAVE_TRANSACTIONS ||
-        type == MessageType::mtTRANSACTIONS ||
-        // GET_OBJECTS
-        category == TrafficCount::category::get_transactions ||
-        // GET_LEDGER
-        category == TrafficCount::category::ld_tsc_get ||
-        category == TrafficCount::category::ld_tsc_share ||
-        // LEDGER_DATA
-        category == TrafficCount::category::gl_tsc_share ||
-        category == TrafficCount::category::gl_tsc_get) &&
+         type == MessageType::mtHAVE_TRANSACTIONS ||
+         type == MessageType::mtTRANSACTIONS ||
+         // GET_OBJECTS
+         category == TrafficCount::category::get_transactions ||
+         // GET_LEDGER
+         category == TrafficCount::category::ld_tsc_get ||
+         category == TrafficCount::category::ld_tsc_share ||
+         // LEDGER_DATA
+         category == TrafficCount::category::gl_tsc_share ||
+         category == TrafficCount::category::gl_tsc_get) &&
         txReduceRelayEnabled())
     {
         overlay_.addTxMetrics(
