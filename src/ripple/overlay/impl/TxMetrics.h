@@ -88,23 +88,24 @@ struct MultipleMetrics
 struct TxMetrics
 {
     mutable std::mutex mutex;
-    // TMTransaction bytes and count metrics per second
+    // TMTransaction bytes and count per second
     MultipleMetrics tx;
-    // TMHaveTransactions bytes and count metrics per second
+    // TMHaveTransactions bytes and count per second
     MultipleMetrics haveTx;
-    // TMGetLedger bytes and count metrics per second
+    // TMGetLedger bytes and count per second
     MultipleMetrics getLedger;
-    // TMLedgerData bytes and count metrics per second
+    // TMLedgerData bytes and count per second
     MultipleMetrics ledgerData;
-    // TMTransactions bytes and count metrics per second
+    // TMTransactions bytes and count per second
     MultipleMetrics transactions;
     // Peers selected to relay in each transaction sample average
     SingleMetrics selectedPeers{false};
     // Peers suppressed to relay in each transaction sample average
     SingleMetrics suppressedPeers{false};
-    // TMTransactions number of transactions sample average and count per
-    // second metrics
-    MultipleMetrics missingTx{false, true};
+    // Peers with tx reduce-relay feature not enabled
+    SingleMetrics notEnabled{false};
+    // TMTransactions number of transactions count per second
+    SingleMetrics missingTx;
     /** Add protocol message metrics
        @param type protocol message type
        @param val message size in bytes
@@ -114,9 +115,10 @@ struct TxMetrics
     /** Add peers selected for relaying and suppressed peers metrics.
        @param selected number of selected peers to relay
        @param suppressed number of suppressed peers
+       @param notEnabled number of peers with tx reduce-relay featured disabled
      */
     void
-    addMetrics(std::uint32_t selected, std::uint32_t suppressed);
+    addMetrics(std::uint32_t selected, std::uint32_t suppressed, std::uint32_t notEnabled);
     /** Add number of missing transactions that a node requested
        @param missing number of missing transactions
      */

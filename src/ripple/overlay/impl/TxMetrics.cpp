@@ -57,11 +57,12 @@ TxMetrics::addMetrics(protocol::MessageType type, std::uint32_t val)
 }
 
 void
-TxMetrics::addMetrics(std::uint32_t selected, std::uint32_t suppressed)
+TxMetrics::addMetrics(std::uint32_t selected, std::uint32_t suppressed, std::uint32_t notenabled)
 {
     std::lock_guard lock(mutex);
     selectedPeers.addMetrics(selected);
     suppressedPeers.addMetrics(suppressed);
+    notEnabled.addMetrics(notenabled);
 }
 
 void
@@ -135,8 +136,9 @@ TxMetrics::json() const
 
     ret[jss::txr_suppressed_cnt] = std::to_string(suppressedPeers.rollingAvg);
 
-    ret[jss::txr_missing_tx_sample] = std::to_string(missingTx.m1.rollingAvg);
-    ret[jss::txr_missing_tx_freq] = std::to_string(missingTx.m2.rollingAvg);
+    ret[jss::txr_not_enabled_cnt] = std::to_string(notEnabled.rollingAvg);
+
+    ret[jss::txr_missing_tx_freq] = std::to_string(missingTx.rollingAvg);
 
     return ret;
 }
