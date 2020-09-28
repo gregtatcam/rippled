@@ -64,7 +64,7 @@ public:
     virtual beast::IP::Endpoint
     getRemoteAddress() const = 0;
 
-    /** Send once a second aggregated transactions' hashes. */
+    /** Send aggregated transactions' hashes. */
     virtual void
     sendTxQueue() = 0;
 
@@ -72,7 +72,7 @@ public:
     virtual void
     addTxQueue(uint256 const&) = 0;
 
-    /** Remove hash from the transaction queue. */
+    /** Remove hash from the transactions' hashes queue. */
     virtual void
     removeTxQueue(uint256 const&) = 0;
 

@@ -171,11 +171,11 @@ public:
         uint256 const& uid,
         PublicKey const& validator) = 0;
 
-    /** Relay a transaction. If tx reduce-relay feature is enabled then
+    /** Relay a transaction. If the tx reduce-relay feature is enabled then
      * randomly select peers to relay to and queue transaction's hash
      * for the rest of the peers.
      * @param hash transaction's hash
-     * @param m transaction's protocol message
+     * @param m transaction's protocol message to relay
      * @param toSkip peers which have already seen this transaction
      */
     virtual void
@@ -237,7 +237,7 @@ public:
     networkID() const = 0;
 
     /** Returns tx reduce-relay metrics
-        @return json value of reduce-relay metrics
+        @return json value of tx reduce-relay metrics
      */
     virtual Json::Value
     txMetrics() const = 0;

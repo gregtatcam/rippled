@@ -199,7 +199,7 @@ public:
     /** Get active peers excluding peers in toSkip.
        @param toSkip peers to skip
        @return active peers less peers in toSkip, and a number of peers
-           not supporting tx reduce-relay feature less toSkip size.
+           not supporting tx reduce-relay feature less peers in toSkip.
      */
     std::pair<PeerSequence, std::uint16_t>
     getActivePeers(std::set<Peer::id_t> const& toSkip) const;

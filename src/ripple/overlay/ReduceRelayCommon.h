@@ -67,10 +67,11 @@ reduceRelayEnabled(std::string const& header, ReduceRelayEnabled enabled)
 
 /** Make HTTP header value depending on the current value and reduce-relay
    features configuration values. Used in making the handshake response.
-   @param header value of X-Offer-Reduce-Relay header
-   @param txEnabled configuration value of tx reduce-relay
-   @param vpEnabled configuration value of validation/proposal reduce-relay
-   @return header value
+   @param header value of the request's X-Offer-Reduce-Relay header
+   @param txEnabled configuration value of the tx reduce-relay feature
+   @param vpEnabled configuration value of the validation/proposal
+       reduce-relay feature
+   @return X-Offer-Reduce-Relay header value
  */
 inline std::string
 makeHeaderValue(std::string const& header, bool txEnabled, bool vpEnabled)
@@ -87,9 +88,10 @@ makeHeaderValue(std::string const& header, bool txEnabled, bool vpEnabled)
 
 /** Make HTTP header value depending on reduce-relay features configuration
    values. Used in making the handshake request.
-   @param txEnabled configuration value of tx reduce-relay
-   @param vpEnabled configuration value of validation/proposal reduce-relay
-   @return
+   @param txEnabled configuration value of the tx reduce-relay feature
+   @param vpEnabled configuration value of the validation/proposal
+       reduce-relay feature
+   @return X-Offer-Reduce-Relay header value
  */
 inline std::string
 makeHeaderValue(bool txEnabled, bool vpEnabled)

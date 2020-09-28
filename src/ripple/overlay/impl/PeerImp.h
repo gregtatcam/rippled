@@ -545,7 +545,7 @@ private:
         bool eraseTxQueue);
 
     /** Handle protocol message with hashes of transactions that have not
-       been relayed by the upstream node down to its peers - request
+       been relayed by an upstream node down to its peers - request
        transactions, which have not been relayed to this peer.
        @param m protocol message with transactions' hashes
      */

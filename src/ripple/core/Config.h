@@ -185,17 +185,17 @@ public:
     std::size_t WORKERS = 0;
 
     // Reduce-relay - these parameters are experimental.
-    // Enable reduce-relay functionality
+    // Enable reduce-relay features
+    // Validation/proposal reduce-relay feature
     bool VP_REDUCE_RELAY_ENABLE = false;
     // Send squelch message to peers
     bool REDUCE_RELAY_SQUELCH = false;
-
-    // Reduce-relay feature
+    // Transaction reduce-relay feature
     bool TX_REDUCE_RELAY_ENABLE = false;
-    // minimum peers a node should have before
+    // Minimum peers a server should have before
     // selecting random peers
     std::uint32_t TX_NUM_PEERS = 20;
-    // percentage of peers to select from total peers
+    // Percentage of peers to select from total peers
     std::uint32_t TX_RELAY_TO_PEERS = 25;
 
     // These override the command line client settings
