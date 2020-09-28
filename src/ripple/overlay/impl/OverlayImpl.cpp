@@ -470,9 +470,6 @@ OverlayImpl::add_active(std::shared_ptr<PeerImp> const& peer)
                                   TokenType::NodePublic, peer->getNodePublic())
                            << ")";
 
-    if (peer->txReduceRelayEnabled())
-        nTxReduceRelayEnabled_++;
-
     // As we are not on the strand, run() must be called
     // while holding the lock, otherwise new I/O can be
     // queued after a call to stop().
@@ -676,9 +673,6 @@ OverlayImpl::activate(std::shared_ptr<PeerImp> const& peer)
                            << toBase58(
                                   TokenType::NodePublic, peer->getNodePublic())
                            << ")";
-
-    if (peer->txReduceRelayEnabled())
-        nTxReduceRelayEnabled_++;
 
     // We just accepted this peer so we have non-zero active peers
     assert(size() != 0);
@@ -1215,6 +1209,29 @@ OverlayImpl::getActivePeers() const
     return ret;
 }
 
+std::pair<Overlay::PeerSequence, std::uint16_t>
+OverlayImpl::getActivePeers(std::set<Peer::id_t> const& toSkip) const
+{
+    auto ret = std::make_pair<OverlayImpl::PeerSequence, std::uint16_t>({}, 0);
+    std::lock_guard lock(mutex_);
+    ret.first.reserve(ids_.size() - toSkip.size());
+
+    for (auto& [id, w] : ids_)
+    {
+        if (toSkip.find(id) == toSkip.end())
+        {
+            if (auto p = w.lock())
+            {
+                if (!p->txReduceRelayEnabled())
+                    ret.second++;
+                ret.first.emplace_back(std::move(p));
+            }
+        }
+    }
+
+    return ret;
+}
+
 void
 OverlayImpl::checkSanity(std::uint32_t index)
 {
@@ -1317,49 +1334,47 @@ OverlayImpl::relay(
 
     if (app_.config().TX_REDUCE_RELAY_ENABLE)
     {
-        auto peers = getActivePeers();
-        std::uint32_t nactive = peers.size();
+        // returns active peers, which are not in toSkip, and
+        // a number of peers with not enabled tx reduce-relay
+        // feature and which are not in toSkip.
+        auto [peers, notEnabled] = getActivePeers(toSkip);
+
         // select a fraction of active peers for relaying
-        auto selected = static_cast<uint32_t>(
-            app_.config().TX_RELAY_TO_PEERS * nactive / 100);
+        auto toSelect = static_cast<uint32_t>(
+            app_.config().TX_RELAY_TO_PEERS * peers.size() / 100);
 
-        // less peers that have already seen this transaction or don't
-        // have tx reduce-relay feature enabled
-        auto const lessPeers = toSkip.size() + nactive - nTxReduceRelayEnabled_;
-        selected = (selected > lessPeers) ? (selected - lessPeers) : 0;
+        txMetrics_.addMetrics(toSelect, toSkip.size(), notEnabled);
 
-        txMetrics_.addMetrics(selected, toSkip.size());
-
-        // enough peers have already seen this transaction -
-        // queue the hash for the rest of the peers
-        if (selected == 0)
-        {
-            for (auto const& p : peers)
-                if (toSkip.count(p->id()) == 0)
-                    p->addTxQueue(hash);
-            return;
-        }
-
-        // remove suppressed peers and peers not supporting tx reduce-relay
-        // feature.
-        auto end = std::remove_if(
-            peers.begin(), peers.end(), [&](auto const& peer) -> bool {
-                return toSkip.find(peer->id()) != toSkip.end() ||
-                    !peer->txReduceRelayEnabled();
-            });
-        std::shuffle(peers.begin(), end, default_prng());
+        // exclude from peers, which should be randomly selected for relaying,
+        // peers in toSkip and peers with not enabled tx reduce-relay feature
+        auto const exclude = toSkip.size() + notEnabled;
+        toSelect = (toSelect > exclude) ? (toSelect - exclude) : 0;
+        if (toSelect > 0)
+            std::shuffle(peers.begin(), peers.end(), default_prng());
 
         JLOG(journal_.debug())
-            << "relaying tx, active peers " << nactive << " selected "
-            << selected << " skip " << toSkip.size() << " peers pool "
-            << peers.size();
+            << "relaying tx, active peers " << peers.size() << " selected "
+            << toSelect << " skip " << toSkip.size() << " not enabled "
+            << notEnabled;
 
-        for (auto it = peers.begin(); it != end; ++it)
+        std::uint16_t selected = 0;
+        for (auto it = peers.begin(); it != peers.end(); ++it)
         {
-            if ((it - peers.begin()) < selected)
+            // always relay to a peer with the tx reduce-relay feature
+            // not enabled
+            if (!(*it)->txReduceRelayEnabled())
+            {
                 (*it)->send(sm);
+            }
+            else if (selected < toSelect)
+            {
+                selected++;
+                (*it)->send(sm);
+            }
             else
+            {
                 (*it)->addTxQueue(hash);
+            }
         }
     }
     else
@@ -1440,7 +1455,10 @@ OverlayImpl::sendEndpoints()
 void
 OverlayImpl::sendTxQueue()
 {
-    foreach([](auto const& p) { p->sendTxQueue(); });
+    foreach([](auto const& p) {
+        if (p->txReduceRelayEnabled())
+            p->sendTxQueue();
+    });
 }
 
 std::shared_ptr<Message>

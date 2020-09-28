@@ -112,8 +112,6 @@ PeerImp::~PeerImp()
         overlay_.onPeerDeactivate(id_);
     overlay_.peerFinder().on_closed(slot_);
     overlay_.remove(slot_);
-    if (txReduceRelayEnabled_)
-        overlay_.decrementTxReduceRelay();
 
     if (inCluster)
     {
@@ -1071,7 +1069,7 @@ PeerImp::onMessageBegin(
     auto const category = TrafficCount::categorize(*m, type, true);
     overlay_.reportTraffic(category, true, static_cast<int>(size));
     using namespace protocol;
-    if (type == MessageType::mtTRANSACTION ||
+    if ((type == MessageType::mtTRANSACTION ||
         type == MessageType::mtHAVE_TRANSACTIONS ||
         type == MessageType::mtTRANSACTIONS ||
         // GET_OBJECTS
@@ -1081,7 +1079,8 @@ PeerImp::onMessageBegin(
         category == TrafficCount::category::ld_tsc_share ||
         // LEDGER_DATA
         category == TrafficCount::category::gl_tsc_share ||
-        category == TrafficCount::category::gl_tsc_get)
+        category == TrafficCount::category::gl_tsc_get) &&
+        txReduceRelayEnabled())
     {
         overlay_.addTxMetrics(
             static_cast<MessageType>(type), static_cast<std::uint64_t>(size));
@@ -1521,7 +1520,9 @@ PeerImp::handleTransaction(
                 JLOG(p_journal_.debug()) << "Ignoring known bad tx " << txID;
             }
 
-            if (eraseTxQueue)
+            // Erase only if the server has seen this tx. If the server has not
+            // seen this tx then the tx could not has been queued for this peer.
+            if (eraseTxQueue && txReduceRelayEnabled())
                 removeTxQueue(txID);
 
             return;
@@ -2273,6 +2274,14 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 
         if (packet.type() == protocol::TMGetObjectByHash::otTRANSACTIONS)
         {
+            if (!txReduceRelayEnabled())
+            {
+                JLOG(p_journal_.error())
+                    << "TMGetObjectByHash: tx reduce-relay is disabled";
+                fee_ = Resource::feeInvalidRequest;
+                return;
+            }
+
             std::weak_ptr<PeerImp> weak = shared_from_this();
             app_.getJobQueue().addJob(
                 jtREQUESTED_TXN, "doTransactions", [weak, m](Job&) {
@@ -2404,6 +2413,14 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMHaveTransactions> const& m)
 {
+    if (!txReduceRelayEnabled())
+    {
+        JLOG(p_journal_.error())
+            << "TMHaveTransactions: tx reduce-relay is disabled";
+        fee_ = Resource::feeInvalidRequest;
+        return;
+    }
+
     std::weak_ptr<PeerImp> weak = shared_from_this();
     app_.getJobQueue().addJob(
         jtMISSING_TXN, "haveTransactions", [weak, m](Job&) {
@@ -2456,6 +2473,9 @@ PeerImp::haveTransactions(
         }
         else
         {
+            // Erase only if a peer has seen this tx. If the peer has not
+            // seen this tx then the tx could not has been queued for this
+            // peer.
             removeTxQueue(hash);
         }
     }
@@ -2470,6 +2490,14 @@ PeerImp::haveTransactions(
 void
 PeerImp::onMessage(std::shared_ptr<protocol::TMTransactions> const& m)
 {
+    if (!txReduceRelayEnabled())
+    {
+        JLOG(p_journal_.error())
+            << "TMTransactions: tx reduce-relay is disabled";
+        fee_ = Resource::feeInvalidRequest;
+        return;
+    }
+
     JLOG(p_journal_.debug())
         << "received TMTransactions " << m->transactions_size();
 

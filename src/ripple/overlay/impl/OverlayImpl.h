@@ -130,8 +130,6 @@ private:
 
     // Transaction reduce-relay metrics
     metrics::TxMetrics txMetrics_;
-    // Number of peers with enabled tx reduce-relay feature
-    std::atomic<std::uint16_t> nTxReduceRelayEnabled_{0};
 
     //--------------------------------------------------------------------------
 
@@ -197,6 +195,14 @@ public:
 
     PeerSequence
     getActivePeers() const override;
+
+    /** Get active peers excluding peers in toSkip.
+       @param toSkip peers to skip
+       @return active peers less peers in toSkip, and a number of peers
+           not supporting tx reduce-relay feature less toSkip size.
+     */
+    std::pair<PeerSequence, std::uint16_t>
+    getActivePeers(std::set<Peer::id_t> const& toSkip) const;
 
     void
     check() override;
@@ -429,14 +435,6 @@ public:
     void
     addTxMetrics(Args... args);
 
-    /** Decrement number of peers supporting tx reduce-relay feature. */
-    void
-    decrementTxReduceRelay()
-    {
-        if (nTxReduceRelayEnabled_ > 0)
-            nTxReduceRelayEnabled_--;
-    }
-
 private:
     void
     squelch(
@@ -563,7 +561,7 @@ private:
     void
     sendEndpoints();
 
-    /** Send transactions' queue batched by every peer */
+    /** Send once a second transactions' hashes aggregated by peers. */
     void
     sendTxQueue();
 

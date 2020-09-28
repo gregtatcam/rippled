@@ -200,14 +200,14 @@ private:
 
     Compressed compressionEnabled_ = Compressed::Off;
 
-    // Transactions' hashes that have not been relayed.
-    // The hashes are sent once a second to a peer
-    // and the peer requests missing transactions from
-    // the node.
+    // Queue of transactions' hashes that have not been
+    // relayed. The hashes are sent once a second to a peer
+    // and the peer requests missing transactions from the node.
     hash_set<uint256> txQueue_;
-    // true if tx reduce-relay feature is enabled on the peer
+    // true if tx reduce-relay feature is enabled on the peer.
     bool txReduceRelayEnabled_ = false;
-    // true if validation/proposal reduce-relay feature is enabled on the peer
+    // true if validation/proposal reduce-relay feature is enabled
+    // on the peer.
     bool vpReduceRelayEnabled_ = false;
 
     friend class OverlayImpl;
@@ -310,13 +310,13 @@ public:
     void
     sendTxQueue() override;
 
-    /** Add transaction's hash to the transaction's queue
+    /** Add transaction's hash to the transactions' hashes queue
        @param hash transaction's hash
      */
     void
     addTxQueue(uint256 const& hash) override;
 
-    /** Remove transaction's hash from the transaction's queue
+    /** Remove transaction's hash from the transactions' hashes queue
        @param hash transaction's hash
      */
     void
@@ -536,7 +536,7 @@ private:
        and is false when called from onMessage(TMTransactions). If true then
        the transaction hash is erased from txQueue_. Don't need to erase from
        the queue when called from onMessage(TMTransactions) because this
-       message is a response to missing transactions request and the queue
+       message is a response to the missing transactions request and the queue
        would not have any of these transactions.
      */
     void
