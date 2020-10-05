@@ -254,6 +254,10 @@ PeerImp::send(std::shared_ptr<Message> const& m)
                                << " sendq: " << sendq_size;
     }
 
+    JLOG(journal_.info()) << "sending to " << id_ << " type " << m->type_
+        << " size " << m->size_ << " compressed_size " << m->sizeCompressed_
+        << " compressed " << m->compressed_;
+
     send_queue_.push(m);
 
     if (sendq_size != 0)
@@ -1012,13 +1016,20 @@ void
 PeerImp::onMessageBegin(
     std::uint16_t type,
     std::shared_ptr<::google::protobuf::Message> const& m,
-    std::size_t size)
+    std::size_t wire_size,
+    std::size_t uncompr_size,
+    std::size_t total_size,
+    bool compressed)
 {
+    JLOG(journal_.info()) << "received from " << id_ << " type " << type
+        << " wire_size " << wire_size << " uncompressed_size " << uncompr_size
+        << " total_size " << total_size << " compressed " << compressed;
+
     load_event_ =
         app_.getJobQueue().makeLoadEvent(jtPEER, protocolMessageName(type));
     fee_ = Resource::feeLightPeer;
     overlay_.reportTraffic(
-        TrafficCount::categorize(*m, type, true), true, static_cast<int>(size));
+        TrafficCount::categorize(*m, type, true), true, static_cast<int>(wire_size));
 }
 
 void

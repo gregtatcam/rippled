@@ -84,6 +84,8 @@ Message::compress()
         return false;
     }();
 
+    compressed_ = false;
+
     if (compressible)
     {
         auto payload = static_cast<void const*>(buffer_.data() + headerBytes);
@@ -106,10 +108,15 @@ Message::compress()
                 type,
                 Algorithm::LZ4,
                 messageBytes);
+            compressed_ = true;
         }
         else
             bufferCompressed_.resize(0);
     }
+
+    type_ = type;
+    size_ = buffer_.size();
+    sizeCompressed_ = bufferCompressed_.size();
 }
 
 /** Set payload header

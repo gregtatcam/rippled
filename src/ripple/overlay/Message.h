@@ -87,6 +87,11 @@ public:
         return validatorKey_;
     }
 
+    std::uint16_t type_ = 0;
+    std::uint16_t size_ = 0;
+    std::uint32_t sizeCompressed_ = 0;
+    bool compressed_ = false;
+
 private:
     std::vector<uint8_t> buffer_;
     std::vector<uint8_t> bufferCompressed_;

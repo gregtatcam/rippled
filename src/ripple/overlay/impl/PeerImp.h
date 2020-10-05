@@ -516,7 +516,10 @@ public:
     onMessageBegin(
         std::uint16_t type,
         std::shared_ptr<::google::protobuf::Message> const& m,
-        std::size_t size);
+        std::size_t wire_size,
+        std::size_t uncompr_size,
+        std::size_t total_size,
+        bool compressed);
 
     void
     onMessageEnd(
