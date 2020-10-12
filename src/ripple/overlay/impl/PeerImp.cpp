@@ -91,8 +91,9 @@ PeerImp::PeerImp(
     , request_(std::move(request))
     , headers_(request_)
     , compressionEnabled_(
-          headers_["X-Offer-Compression"] == "lz4" ? Compressed::On
-                                                   : Compressed::Off)
+          headers_["X-Offer-Compression"] == "lz4" && app_.config().COMPRESSION
+              ? Compressed::On
+              : Compressed::Off)
 {
 }
 
@@ -1022,14 +1023,17 @@ PeerImp::onMessageBegin(
     bool compressed)
 {
     JLOG(journal_.info()) << "received from " << id_ << " type " << type
-        << " wire_size " << wire_size << " uncompressed_size " << uncompr_size
-        << " total_size " << total_size << " compressed " << compressed;
+                          << " wire_size " << wire_size << " uncompressed_size "
+                          << uncompr_size << " total_size " << total_size
+                          << " compressed " << compressed;
 
     load_event_ =
         app_.getJobQueue().makeLoadEvent(jtPEER, protocolMessageName(type));
     fee_ = Resource::feeLightPeer;
     overlay_.reportTraffic(
-        TrafficCount::categorize(*m, type, true), true, static_cast<int>(wire_size));
+        TrafficCount::categorize(*m, type, true),
+        true,
+        static_cast<int>(wire_size));
 }
 
 void
