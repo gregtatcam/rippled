@@ -90,6 +90,7 @@ public:
     std::uint16_t type_ = 0;
     std::uint16_t size_ = 0;
     std::uint32_t sizeCompressed_ = 0;
+    std::uint32_t sizeCompressedAttempted_ = 0;
     bool compressed_ = false;
 
 private:

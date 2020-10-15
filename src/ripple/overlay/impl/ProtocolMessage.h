@@ -134,7 +134,8 @@ boost::optional<MessageHeader>
 parseMessageHeader(
     boost::system::error_code& ec,
     BufferSequence const& bufs,
-    std::size_t size)
+    std::size_t size,
+    beast::Journal const& journal)
 {
     using namespace ripple::compression;
 
@@ -156,6 +157,7 @@ parseMessageHeader(
         if (*iter & 0x0C)
         {
             ec = make_error_code(boost::system::errc::protocol_error);
+            JLOG(journal.info()) << "compression error: invalid header flag " << (int)*iter;
             return boost::none;
         }
 
@@ -164,6 +166,7 @@ parseMessageHeader(
         if (hdr.algorithm != compression::Algorithm::LZ4)
         {
             ec = make_error_code(boost::system::errc::protocol_error);
+            JLOG(journal.info()) << "compression error: invalid algorithm " << (int)hdr.algorithm;
             return boost::none;
         }
 
@@ -266,7 +269,7 @@ invoke(MessageHeader const& header, Buffers const& buffers, Handler& handler)
 */
 template <class Buffers, class Handler>
 std::pair<std::size_t, boost::system::error_code>
-invokeProtocolMessage(Buffers const& buffers, Handler& handler)
+invokeProtocolMessage(Buffers const& buffers, Handler& handler, beast::Journal const& journal)
 {
     std::pair<std::size_t, boost::system::error_code> result = {0, {}};
 
@@ -275,7 +278,7 @@ invokeProtocolMessage(Buffers const& buffers, Handler& handler)
     if (size == 0)
         return result;
 
-    auto header = detail::parseMessageHeader(result.second, buffers, size);
+    auto header = detail::parseMessageHeader(result.second, buffers, size, journal);
 
     // If we can't parse the header then it may be that we don't have enough
     // bytes yet, or because the message was cut off (if error_code is success).
@@ -300,6 +303,8 @@ invokeProtocolMessage(Buffers const& buffers, Handler& handler)
     if (!handler.compressionEnabled() &&
         header->algorithm != compression::Algorithm::None)
     {
+        JLOG(journal.info()) << "compression error: compression is not enabled and algorithm is "
+             << static_cast<int>(header->algorithm);
         result.second = make_error_code(boost::system::errc::protocol_error);
         return result;
     }

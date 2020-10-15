@@ -98,6 +98,8 @@ Message::compress()
                 return (bufferCompressed_.data() + headerBytesCompressed);
             });
 
+        sizeCompressedAttempted_ = compressedSize;
+
         if (compressedSize <
             (messageBytes - (headerBytesCompressed - headerBytes)))
         {

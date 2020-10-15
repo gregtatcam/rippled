@@ -52,6 +52,13 @@ ConnectAttempt::ConnectAttempt(
     , slot_(slot)
 {
     JLOG(journal_.debug()) << "Connect " << remote_endpoint;
+    auto sec = app.config().section("port_peer");
+    socket_.open(boost::asio::ip::tcp::v4());
+    socket_.bind(boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::address::from_string(sec.get<std::string>("ip")->c_str()),
+        0));
+    boost::asio::socket_base::reuse_address reuseAddress(true);
+    socket_.set_option(reuseAddress);
 }
 
 ConnectAttempt::~ConnectAttempt()

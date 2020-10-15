@@ -107,8 +107,9 @@ public:
         }
 
         boost::system::error_code ec;
+        Env env(*this, envconfig());
         auto header = ripple::detail::parseMessageHeader(
-            ec, buffers.data(), buffer.size());
+            ec, buffers.data(), buffer.size(), env.journal);
 
         BEAST_EXPECT(header);
 
