@@ -593,10 +593,10 @@ private:
         std::array<std::uint64_t, 10> typeTotalSizeCompr{0};
         std::array<std::uint64_t, 10> typeTotalSizeUncompr{0};
         clock_type::time_point intervalStart{clock_type::now()};
-        boost::circular_buffer<double> rollingAvgBwSavingsBuff{3600, 0ull};
+        boost::circular_buffer<double> rollingAvgBwSavingsBuff{6, 0ull};
         std::uint64_t accumBytes{0};
         std::uint64_t accumBytesUncompr{0};
-        std::uint64_t rollingAvgBwSavings{0};
+        double rollingAvgBwSavings{0.0};
 
         std::uint16_t
         typeToStatsType(std::uint16_t type)
@@ -685,18 +685,17 @@ private:
             auto const timeElapsed = clock_type::now() - intervalStart;
             auto const timeElapsedInSecs =
                 std::chrono::duration_cast<std::chrono::seconds>(timeElapsed);
-            if (timeElapsedInSecs >= 1s)
+            if (timeElapsedInSecs >= 600s)
             {
-                auto const avgBwSavings = 100. *
-                    (1. - (double)accumBytes / (double)accumBytesUncompr) /
-                    timeElapsedInSecs.count();
+                double const avgBwSavings = 100. *
+                    (1. - (double)accumBytes / (double)accumBytesUncompr);
                 rollingAvgBwSavingsBuff.push_back(avgBwSavings);
 
-                auto const total = std::accumulate(
+                double const total = std::accumulate(
                     rollingAvgBwSavingsBuff.begin(),
                     rollingAvgBwSavingsBuff.end(),
-                    0ull);
-                rollingAvgBwSavings = total / rollingAvgBwSavingsBuff.size();
+                    0.0);
+                rollingAvgBwSavings = total / (double)rollingAvgBwSavingsBuff.size();
 
                 intervalStart = clock_type::now();
                 accumBytes = 0;
@@ -730,8 +729,8 @@ private:
             ret[jss::comp_total_size_uncompr] =
                 std::to_string(totalSizeUncompr);
             ret[jss::comp_avg_bw_savings] = std::to_string(rollingAvgBwSavings);
-            int const avgBwSavings =
-                100 * (1. - (double)totalSize / (double)totalSizeUncompr);
+            double const avgBwSavings =
+                100. * (1. - (double)totalSize / (double)totalSizeUncompr);
             ret[jss::comp_total_avg_bw_savings] = std::to_string(avgBwSavings);
             ret[jss::comp_err_protocol_error] = std::to_string(protocolError);
             ret[jss::comp_err_bad_message] = std::to_string(badMessage);
