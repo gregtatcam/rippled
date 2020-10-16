@@ -593,10 +593,10 @@ private:
         std::array<std::uint64_t, 10> typeTotalSizeCompr{0};
         std::array<std::uint64_t, 10> typeTotalSizeUncompr{0};
         clock_type::time_point intervalStart{clock_type::now()};
-        boost::circular_buffer<double> rollingAvgBwSavingsBuff{6, 0ull};
-        std::uint64_t accumBytes{0};
-        std::uint64_t accumBytesUncompr{0};
-        double rollingAvgBwSavings{0.0};
+        boost::circular_buffer<std::uint64_t> rollingSize{6, 0ull};
+        boost::circular_buffer<std::uint64_t> rollingSizeUncompr{6, 0ull};
+        std::uint64_t accumSize{0};
+        std::uint64_t accumSizeUncompr{0};
 
         std::uint16_t
         typeToStatsType(std::uint16_t type)
@@ -668,10 +668,10 @@ private:
             totalCnt++;
             typeTotalCnt[type]++;
             totalSize += total_size;
-            accumBytes += total_size;
+            accumSize += total_size;
             typeTotalSize[type] += total_size;
             totalSizeUncompr += uncompr_size + header;
-            accumBytesUncompr += uncompr_size + header;
+            accumSizeUncompr += uncompr_size + header;
             typeTotalSizeUncompr[type] += uncompr_size + header;
             if (is_compressed)
             {
@@ -687,19 +687,11 @@ private:
                 std::chrono::duration_cast<std::chrono::seconds>(timeElapsed);
             if (timeElapsedInSecs >= 600s)
             {
-                double const avgBwSavings = 100. *
-                    (1. - (double)accumBytes / (double)accumBytesUncompr);
-                rollingAvgBwSavingsBuff.push_back(avgBwSavings);
-
-                double const total = std::accumulate(
-                    rollingAvgBwSavingsBuff.begin(),
-                    rollingAvgBwSavingsBuff.end(),
-                    0.0);
-                rollingAvgBwSavings = total / (double)rollingAvgBwSavingsBuff.size();
-
+                rollingSize.push_back(accumSize);
+                rollingSizeUncompr.push_back(accumSizeUncompr);
                 intervalStart = clock_type::now();
-                accumBytes = 0;
-                accumBytesUncompr = 0;
+                accumSize = 0;
+                accumSizeUncompr = 0;
             }
         }
 
@@ -726,12 +718,16 @@ private:
             ret[jss::comp_total_cnt_compr] = std::to_string(totalCntCompr);
             ret[jss::comp_total_size] = std::to_string(totalSize);
             ret[jss::comp_total_size_compr] = std::to_string(totalSizeCompr);
-            ret[jss::comp_total_size_uncompr] =
-                std::to_string(totalSizeUncompr);
-            ret[jss::comp_avg_bw_savings] = std::to_string(rollingAvgBwSavings);
-            double const avgBwSavings =
-                100. * (1. - (double)totalSize / (double)totalSizeUncompr);
-            ret[jss::comp_total_avg_bw_savings] = std::to_string(avgBwSavings);
+            ret[jss::comp_total_size_uncompr] = std::to_string(totalSizeUncompr);
+
+            double const size = std::accumulate(
+                rollingSize.begin(), rollingSize.end(), accumSize);
+            double const sizeUncompr = std::accumulate(
+                rollingSizeUncompr.begin(),
+                rollingSizeUncompr.end(),
+                accumSizeUncompr);
+            ret[jss::comp_avg_bw_savings] = std::to_string(100.*(1.-size/sizeUncompr));
+            ret[jss::comp_total_avg_bw_savings] = std::to_string(100.*(1.-(double)totalSize/totalSizeUncompr));
             ret[jss::comp_err_protocol_error] = std::to_string(protocolError);
             ret[jss::comp_err_bad_message] = std::to_string(badMessage);
             ret[jss::comp_err_message_size] = std::to_string(messageSize);
