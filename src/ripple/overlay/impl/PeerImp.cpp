@@ -95,8 +95,9 @@ PeerImp::PeerImp(
               ? Compressed::On
               : Compressed::Off)
 {
-    JLOG(journal_.info()) << "compression enabled " << (compressionEnabled_ == Compressed::On)
-                << " on " << remote_address_;
+    JLOG(journal_.info()) << "compression enabled "
+                          << (compressionEnabled_ == Compressed::On) << " on "
+                          << remote_address_;
 }
 
 PeerImp::~PeerImp()
@@ -257,10 +258,12 @@ PeerImp::send(std::shared_ptr<Message> const& m)
                                << " sendq: " << sendq_size;
     }
 
-    JLOG(journal_.info()) << "sending to " << id_ << " type " << m->type_
-        << " size " << m->size_ << " compressed_size " << m->sizeCompressed_
-        << " compressed_attempted_size " << m->sizeCompressedAttempted_
-        << " compressed " << m->compressed_;
+    JLOG(journal_.debug()) << "sending to " << id_ << " type " << m->type_
+                           << " size " << m->size_ << " compressed_size "
+                           << m->sizeCompressed_
+                           << " compressed_attempted_size "
+                           << m->sizeCompressedAttempted_ << " compressed "
+                           << m->compressed_;
 
     send_queue_.push(m);
 
@@ -916,7 +919,7 @@ PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
         return gracefulClose();
     }
     if (ec)
-        return fail("onReadMessage1", ec);
+        return fail("onReadMessage", ec);
     if (auto stream = journal_.trace())
     {
         if (bytes_transferred > 0)
@@ -935,7 +938,10 @@ PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
         std::tie(bytes_consumed, ec) =
             invokeProtocolMessage(read_buffer_.data(), *this, journal_);
         if (ec)
-            return fail("onReadMessage2", ec);
+        {
+            overlay_.addErrorMetrics(ec);
+            return fail("onReadMessage", ec);
+        }
         if (!socket_.is_open())
             return;
         if (gracefulClose_)
@@ -1025,10 +1031,12 @@ PeerImp::onMessageBegin(
     std::size_t total_size,
     bool compressed)
 {
-    JLOG(journal_.info()) << "received from " << id_ << " type " << type
-                          << " wire_size " << wire_size << " uncompressed_size "
-                          << uncompr_size << " total_size " << total_size
-                          << " compressed " << compressed;
+    JLOG(journal_.debug()) << "received from " << id_ << " type " << type
+                           << " wire_size " << wire_size
+                           << " uncompressed_size " << uncompr_size
+                           << " total_size " << total_size << " compressed "
+                           << compressed;
+    overlay_.addCompressionMetrics(type, uncompr_size, total_size, compressed);
 
     load_event_ =
         app_.getJobQueue().makeLoadEvent(jtPEER, protocolMessageName(type));

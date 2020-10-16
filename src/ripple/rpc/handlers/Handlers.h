@@ -121,6 +121,8 @@ doRipplePathFind(RPC::JsonContext&);
 Json::Value
 doServerInfo(RPC::JsonContext&);  // for humans
 Json::Value
+doCompression(RPC::JsonContext&);  // for humans
+Json::Value
 doServerState(RPC::JsonContext&);  // for machines
 Json::Value
 doSign(RPC::JsonContext&);

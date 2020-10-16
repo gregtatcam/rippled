@@ -37,6 +37,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/circular_buffer.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/optional.hpp>
 #include <atomic>
@@ -574,8 +575,271 @@ private:
         beast::insight::Hook hook;
     };
 
+    // Continous and rolling averages
+    struct CompressionStats
+    {
+        std::mutex mutex;
+        std::uint64_t totalCnt{0};
+        std::uint64_t totalCntCompr{0};
+        std::uint64_t totalSize{0};
+        std::uint64_t totalSizeCompr{0};
+        std::uint64_t totalSizeUncompr{0};
+        std::uint64_t protocolError{0};
+        std::uint64_t badMessage{0};
+        std::uint64_t messageSize{0};
+        std::array<std::uint64_t, 10> typeTotalCnt{0};
+        std::array<std::uint64_t, 10> typeTotalCntCompr{0};
+        std::array<std::uint64_t, 10> typeTotalSize{0};
+        std::array<std::uint64_t, 10> typeTotalSizeCompr{0};
+        std::array<std::uint64_t, 10> typeTotalSizeUncompr{0};
+        clock_type::time_point intervalStart{clock_type::now()};
+        boost::circular_buffer<double> rollingAvgBwSavingsBuff{3600, 0ull};
+        std::uint64_t accumBytes{0};
+        std::uint64_t accumBytesUncompr{0};
+        std::uint64_t rollingAvgBwSavings{0};
+
+        std::uint16_t
+        typeToStatsType(std::uint16_t type)
+        {
+            switch (type)
+            {
+                case protocol::mtMANIFESTS:
+                    return 0;
+                case protocol::mtENDPOINTS:
+                    return 1;
+                case protocol::mtTRANSACTION:
+                    return 2;
+                case protocol::mtGET_LEDGER:
+                    return 3;
+                case protocol::mtLEDGER_DATA:
+                    return 4;
+                case protocol::mtGET_OBJECTS:
+                    return 5;
+                case protocol::mtVALIDATORLIST:
+                    return 6;
+                case protocol::mtPROPOSE_LEDGER:
+                    return 7;
+                case protocol::mtVALIDATION:
+                    return 8;
+                default:
+                    return 9;
+            }
+        }
+
+        std::uint16_t
+        statsTypeToType(std::uint16_t type)
+        {
+            switch (type)
+            {
+                case 0:
+                    return protocol::mtMANIFESTS;
+                case 1:
+                    return protocol::mtENDPOINTS;
+                case 2:
+                    return protocol::mtTRANSACTION;
+                case 3:
+                    return protocol::mtGET_LEDGER;
+                case 4:
+                    return protocol::mtLEDGER_DATA;
+                case 5:
+                    return protocol::mtGET_OBJECTS;
+                case 6:
+                    return protocol::mtVALIDATORLIST;
+                case 7:
+                    return protocol::mtPROPOSE_LEDGER;
+                case 8:
+                    return protocol::mtVALIDATION;
+                default:
+                    return 9;
+            }
+        }
+
+        void
+        addCompressionMetrics(
+            std::uint16_t type,
+            std::size_t uncompr_size,
+            std::size_t total_size,
+            bool is_compressed)
+        {
+            type = typeToStatsType(type);
+            std::lock_guard l(mutex);
+
+            auto const header = 4;
+            totalCnt++;
+            typeTotalCnt[type]++;
+            totalSize += total_size;
+            accumBytes += total_size;
+            typeTotalSize[type] += total_size;
+            totalSizeUncompr += uncompr_size + header;
+            accumBytesUncompr += uncompr_size + header;
+            typeTotalSizeUncompr[type] += uncompr_size + header;
+            if (is_compressed)
+            {
+                totalCntCompr++;
+                totalSizeCompr += total_size;
+                typeTotalCntCompr[type]++;
+                typeTotalSizeCompr[type] += total_size;
+            }
+
+            using namespace std::chrono;
+            auto const timeElapsed = clock_type::now() - intervalStart;
+            auto const timeElapsedInSecs =
+                std::chrono::duration_cast<std::chrono::seconds>(timeElapsed);
+            if (timeElapsedInSecs >= 1s)
+            {
+                auto const avgBwSavings = 100. *
+                    (1. - (double)accumBytes / (double)accumBytesUncompr) /
+                    timeElapsedInSecs.count();
+                rollingAvgBwSavingsBuff.push_back(avgBwSavings);
+
+                auto const total = std::accumulate(
+                    rollingAvgBwSavingsBuff.begin(),
+                    rollingAvgBwSavingsBuff.end(),
+                    0ull);
+                rollingAvgBwSavings = total / rollingAvgBwSavingsBuff.size();
+
+                intervalStart = clock_type::now();
+                accumBytes = 0;
+                accumBytesUncompr = 0;
+            }
+        }
+
+        void
+        addErrorMetrics(boost::system::error_code const& err)
+        {
+            std::lock_guard l(mutex);
+            if (err == boost::system::errc::protocol_error)
+                protocolError++;
+            else if (err == boost::system::errc::message_size)
+                messageSize++;
+            else if (err == boost::system::errc::bad_message)
+                badMessage++;
+        }
+
+        Json::Value
+        getCompressionMetrics()
+        {
+            std::lock_guard l(mutex);
+
+            Json::Value ret(Json::objectValue);
+
+            ret[jss::comp_total_cnt] = std::to_string(totalCnt);
+            ret[jss::comp_total_cnt_compr] = std::to_string(totalCntCompr);
+            ret[jss::comp_total_size] = std::to_string(totalSize);
+            ret[jss::comp_total_size_compr] = std::to_string(totalSizeCompr);
+            ret[jss::comp_total_size_uncompr] =
+                std::to_string(totalSizeUncompr);
+            ret[jss::comp_avg_bw_savings] = std::to_string(rollingAvgBwSavings);
+            int const avgBwSavings =
+                100 * (1. - (double)totalSize / (double)totalSizeUncompr);
+            ret[jss::comp_total_avg_bw_savings] = std::to_string(avgBwSavings);
+            ret[jss::comp_err_protocol_error] = std::to_string(protocolError);
+            ret[jss::comp_err_bad_message] = std::to_string(badMessage);
+            ret[jss::comp_err_message_size] = std::to_string(messageSize);
+
+            auto set = [&](int i,
+                           auto cnt,
+                           auto cnt_compr,
+                           auto size,
+                           auto size_compr,
+                           auto size_uncompr) {
+                ret[cnt] = std::to_string(typeTotalCnt[i]);
+                ret[cnt_compr] = std::to_string(typeTotalCntCompr[i]);
+                ret[size] = std::to_string(typeTotalSize[i]);
+                ret[size_compr] = std::to_string(typeTotalSizeCompr[i]);
+                ret[size_uncompr] = std::to_string(typeTotalSizeUncompr[i]);
+            };
+            using namespace jss;
+            set(0,
+                comp_total_cnt_man,
+                comp_total_cnt_compr_man,
+                comp_total_size_man,
+                comp_total_size_compr_man,
+                comp_total_size_uncompr_man);
+            set(1,
+                comp_total_cnt_end,
+                comp_total_cnt_compr_end,
+                comp_total_size_end,
+                comp_total_size_compr_end,
+                comp_total_size_uncompr_end);
+            set(2,
+                comp_total_cnt_tx,
+                comp_total_cnt_compr_tx,
+                comp_total_size_tx,
+                comp_total_size_compr_tx,
+                comp_total_size_uncompr_tx);
+            set(3,
+                comp_total_cnt_gl,
+                comp_total_cnt_compr_gl,
+                comp_total_size_gl,
+                comp_total_size_compr_gl,
+                comp_total_size_uncompr_gl);
+            set(4,
+                comp_total_cnt_ld,
+                comp_total_cnt_compr_ld,
+                comp_total_size_ld,
+                comp_total_size_compr_ld,
+                comp_total_size_uncompr_gl);
+            set(5,
+                comp_total_cnt_go,
+                comp_total_cnt_compr_go,
+                comp_total_size_go,
+                comp_total_size_compr_go,
+                comp_total_size_uncompr_go);
+            set(6,
+                comp_total_cnt_vl,
+                comp_total_cnt_compr_vl,
+                comp_total_size_vl,
+                comp_total_size_compr_vl,
+                comp_total_size_uncompr_vl);
+            set(7,
+                comp_total_cnt_prop,
+                comp_total_cnt_compr_prop,
+                comp_total_size_prop,
+                comp_total_size_compr_prop,
+                comp_total_size_uncompr_prop);
+            set(8,
+                comp_total_cnt_val,
+                comp_total_cnt_compr_val,
+                comp_total_size_val,
+                comp_total_size_compr_val,
+                comp_total_size_uncompr_val);
+            set(9,
+                comp_total_cnt_other,
+                comp_total_cnt_compr_other,
+                comp_total_size_other,
+                comp_total_size_compr_other,
+                comp_total_size_uncompr_other);
+            return ret;
+        }
+    };
+
     Stats m_stats;
     std::mutex m_statsMutex;
+
+    CompressionStats m_comprStats;
+
+public:
+    void
+    addCompressionMetrics(
+        std::uint16_t type,
+        std::size_t uncompr_size,
+        std::size_t total_size,
+        bool is_compressed)
+    {
+        m_comprStats.addCompressionMetrics(
+            type, uncompr_size, total_size, is_compressed);
+    }
+    void
+    addErrorMetrics(boost::system::error_code const& err)
+    {
+        m_comprStats.addErrorMetrics(err);
+    }
+    Json::Value
+    getCompressionMetrics() override
+    {
+        return m_comprStats.getCompressionMetrics();
+    }
 
 private:
     void

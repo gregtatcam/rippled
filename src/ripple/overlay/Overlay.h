@@ -222,6 +222,9 @@ public:
     */
     virtual boost::optional<std::uint32_t>
     networkID() const = 0;
+
+    virtual Json::Value
+    getCompressionMetrics() = 0;
 };
 
 }  // namespace ripple

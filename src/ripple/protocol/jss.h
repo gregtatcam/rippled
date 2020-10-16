@@ -115,72 +115,133 @@ JSS(accounts);                    // in: LedgerEntry, Subscribe,
                                   //     handlers/Ledger, Unsubscribe
 JSS(accounts_proposed);           // in: Subscribe, Unsubscribe
 JSS(action);
-JSS(acquiring);              // out: LedgerRequest
-JSS(address);                // out: PeerImp
-JSS(affected);               // out: AcceptedLedgerTx
-JSS(age);                    // out: NetworkOPs, Peers
-JSS(alternatives);           // out: PathRequest, RipplePathFind
-JSS(amendment_blocked);      // out: NetworkOPs
-JSS(amendments);             // in: AccountObjects, out: NetworkOPs
-JSS(amount);                 // out: AccountChannels
-JSS(api_version);            // in: many, out: Version
-JSS(api_version_low);        // out: Version
-JSS(applied);                // out: SubmitTransaction
-JSS(asks);                   // out: Subscribe
-JSS(assets);                 // out: GatewayBalances
-JSS(authorized);             // out: AccountLines
-JSS(auth_change);            // out: AccountInfo
-JSS(auth_change_queued);     // out: AccountInfo
-JSS(available);              // out: ValidatorList
-JSS(avg_bps_recv);           // out: Peers
-JSS(avg_bps_sent);           // out: Peers
-JSS(balance);                // out: AccountLines
-JSS(balances);               // out: GatewayBalances
-JSS(base);                   // out: LogLevel
-JSS(base_fee);               // out: NetworkOPs
-JSS(base_fee_xrp);           // out: NetworkOPs
-JSS(bids);                   // out: Subscribe
-JSS(binary);                 // in: AccountTX, LedgerEntry,
-                             //     AccountTxOld, Tx LedgerData
-JSS(blob);                   // out: ValidatorList
-JSS(books);                  // in: Subscribe, Unsubscribe
-JSS(both);                   // in: Subscribe, Unsubscribe
-JSS(both_sides);             // in: Subscribe, Unsubscribe
-JSS(broadcast);              // out: SubmitTransaction
-JSS(build_path);             // in: TransactionSign
-JSS(build_version);          // out: NetworkOPs
-JSS(cancel_after);           // out: AccountChannels
-JSS(can_delete);             // out: CanDelete
-JSS(channel_id);             // out: AccountChannels
-JSS(channels);               // out: AccountChannels
-JSS(check);                  // in: AccountObjects
-JSS(check_nodes);            // in: LedgerCleaner
-JSS(clear);                  // in/out: FetchInfo
-JSS(close_flags);            // out: LedgerToJson
-JSS(close_time);             // in: Application, out: NetworkOPs,
-                             //      RCLCxPeerPos, LedgerToJson
-JSS(close_time_estimated);   // in: Application, out: LedgerToJson
-JSS(close_time_human);       // out: LedgerToJson
-JSS(close_time_offset);      // out: NetworkOPs
-JSS(close_time_resolution);  // in: Application; out: LedgerToJson
-JSS(closed);                 // out: NetworkOPs, LedgerToJson,
-                             //      handlers/Ledger
-JSS(closed_ledger);          // out: NetworkOPs
-JSS(cluster);                // out: PeerImp
-JSS(code);                   // out: errors
-JSS(command);                // in: RPCHandler
-JSS(complete);               // out: NetworkOPs, InboundLedger
-JSS(complete_ledgers);       // out: NetworkOPs, PeerImp
-JSS(complete_shards);        // out: OverlayImpl, PeerImp
-JSS(consensus);              // out: NetworkOPs, LedgerConsensus
-JSS(converge_time);          // out: NetworkOPs
-JSS(converge_time_s);        // out: NetworkOPs
-JSS(count);                  // in: AccountTx*, ValidatorList
-JSS(counters);               // in/out: retrieve counters
-JSS(currency);               // in: paths/PathRequest, STAmount
-                             // out: STPathSet, STAmount,
-                             //      AccountLines
-JSS(current);                // out: OwnerInfo
+JSS(acquiring);                      // out: LedgerRequest
+JSS(address);                        // out: PeerImp
+JSS(affected);                       // out: AcceptedLedgerTx
+JSS(age);                            // out: NetworkOPs, Peers
+JSS(alternatives);                   // out: PathRequest, RipplePathFind
+JSS(amendment_blocked);              // out: NetworkOPs
+JSS(amendments);                     // in: AccountObjects, out: NetworkOPs
+JSS(amount);                         // out: AccountChannels
+JSS(api_version);                    // in: many, out: Version
+JSS(api_version_low);                // out: Version
+JSS(applied);                        // out: SubmitTransaction
+JSS(asks);                           // out: Subscribe
+JSS(assets);                         // out: GatewayBalances
+JSS(authorized);                     // out: AccountLines
+JSS(auth_change);                    // out: AccountInfo
+JSS(auth_change_queued);             // out: AccountInfo
+JSS(available);                      // out: ValidatorList
+JSS(avg_bps_recv);                   // out: Peers
+JSS(avg_bps_sent);                   // out: Peers
+JSS(balance);                        // out: AccountLines
+JSS(balances);                       // out: GatewayBalances
+JSS(base);                           // out: LogLevel
+JSS(base_fee);                       // out: NetworkOPs
+JSS(base_fee_xrp);                   // out: NetworkOPs
+JSS(bids);                           // out: Subscribe
+JSS(binary);                         // in: AccountTX, LedgerEntry,
+                                     //     AccountTxOld, Tx LedgerData
+JSS(blob);                           // out: ValidatorList
+JSS(books);                          // in: Subscribe, Unsubscribe
+JSS(both);                           // in: Subscribe, Unsubscribe
+JSS(both_sides);                     // in: Subscribe, Unsubscribe
+JSS(broadcast);                      // out: SubmitTransaction
+JSS(build_path);                     // in: TransactionSign
+JSS(build_version);                  // out: NetworkOPs
+JSS(cancel_after);                   // out: AccountChannels
+JSS(can_delete);                     // out: CanDelete
+JSS(channel_id);                     // out: AccountChannels
+JSS(channels);                       // out: AccountChannels
+JSS(check);                          // in: AccountObjects
+JSS(check_nodes);                    // in: LedgerCleaner
+JSS(clear);                          // in/out: FetchInfo
+JSS(close_flags);                    // out: LedgerToJson
+JSS(close_time);                     // in: Application, out: NetworkOPs,
+                                     //      RCLCxPeerPos, LedgerToJson
+JSS(close_time_estimated);           // in: Application, out: LedgerToJson
+JSS(close_time_human);               // out: LedgerToJson
+JSS(close_time_offset);              // out: NetworkOPs
+JSS(close_time_resolution);          // in: Application; out: LedgerToJson
+JSS(closed);                         // out: NetworkOPs, LedgerToJson,
+                                     //      handlers/Ledger
+JSS(closed_ledger);                  // out: NetworkOPs
+JSS(cluster);                        // out: PeerImp
+JSS(code);                           // out: errors
+JSS(command);                        // in: RPCHandler
+JSS(complete);                       // out: NetworkOPs, InboundLedger
+JSS(complete_ledgers);               // out: NetworkOPs, PeerImp
+JSS(complete_shards);                // out: OverlayImpl, PeerImp
+JSS(compression);                    // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt);                 // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr);           // out: OverlayImpl, PeerImp
+JSS(comp_total_size);                // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr);          // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr);        // out: OverlayImpl, PeerImp
+JSS(comp_avg_bw_savings);            // out: OverlayImpl, PeerImp
+JSS(comp_total_avg_bw_savings);      // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_man);             // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_man);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_man);            // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_man);      // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_man);    // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_end);             // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_end);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_end);            // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_end);      // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_end);    // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_tx);              // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_tx);        // out: OverlayImpl, PeerImp
+JSS(comp_total_size_tx);             // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_tx);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_tx);     // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_gl);              // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_gl);        // out: OverlayImpl, PeerImp
+JSS(comp_total_size_gl);             // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_gl);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_gl);     // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_ld);              // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_ld);        // out: OverlayImpl, PeerImp
+JSS(comp_total_size_ld);             // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_ld);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_ld);     // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_go);              // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_go);        // out: OverlayImpl, PeerImp
+JSS(comp_total_size_go);             // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_go);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_go);     // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_vl);              // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_vl);        // out: OverlayImpl, PeerImp
+JSS(comp_total_size_vl);             // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_vl);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_vl);     // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_prop);            // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_prop);      // out: OverlayImpl, PeerImp
+JSS(comp_total_size_prop);           // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_prop);     // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_prop);   // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_val);             // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_val);       // out: OverlayImpl, PeerImp
+JSS(comp_total_size_val);            // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_val);      // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_val);    // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_other);           // out: OverlayImpl, PeerImp
+JSS(comp_total_cnt_compr_other);     // out: OverlayImpl, PeerImp
+JSS(comp_total_size_other);          // out: OverlayImpl, PeerImp
+JSS(comp_total_size_compr_other);    // out: OverlayImpl, PeerImp
+JSS(comp_total_size_uncompr_other);  // out: OverlayImpl, PeerImp
+JSS(comp_err_protocol_error);        // out: OverlayImpl, PeerImp
+JSS(comp_err_message_size);          // out: OverlayImpl, PeerImp
+JSS(comp_err_bad_message);           // out: OverlayImpl, PeerImp
+JSS(consensus);                      // out: NetworkOPs, LedgerConsensus
+JSS(converge_time);                  // out: NetworkOPs
+JSS(converge_time_s);                // out: NetworkOPs
+JSS(count);                          // in: AccountTx*, ValidatorList
+JSS(counters);                       // in/out: retrieve counters
+JSS(currency);                       // in: paths/PathRequest, STAmount
+                                     // out: STPathSet, STAmount,
+                                     //      AccountLines
+JSS(current);                        // out: OwnerInfo
 JSS(current_activities);
 JSS(current_ledger_size);     // out: TxQ
 JSS(current_queue_size);      // out: TxQ
