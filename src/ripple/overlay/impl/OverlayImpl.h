@@ -664,7 +664,7 @@ private:
             type = typeToStatsType(type);
             std::lock_guard l(mutex);
 
-            auto const header = 4;
+            auto const header = 6;
             totalCnt++;
             typeTotalCnt[type]++;
             totalSize += total_size;

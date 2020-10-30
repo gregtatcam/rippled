@@ -162,7 +162,7 @@ parseMessageHeader(
             return boost::none;
         }
 
-        hdr.algorithm = static_cast<compression::Algorithm>(*iter);
+        hdr.algorithm = static_cast<compression::Algorithm>(*iter & 0xF0);
 
         if (hdr.algorithm != compression::Algorithm::LZ4)
         {
