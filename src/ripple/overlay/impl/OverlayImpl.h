@@ -774,7 +774,7 @@ private:
                 comp_total_cnt_compr_ld,
                 comp_total_size_ld,
                 comp_total_size_compr_ld,
-                comp_total_size_uncompr_gl);
+                comp_total_size_uncompr_ld);
             set(5,
                 comp_total_cnt_go,
                 comp_total_cnt_compr_go,
