@@ -714,11 +714,16 @@ private:
 
             Json::Value ret(Json::objectValue);
 
+            ret[jss::comp_up_time] = static_cast<Json::UInt>(
+                std::chrono::duration_cast<std::chrono::seconds>(
+                    UptimeClock::now().time_since_epoch())
+                    .count());
             ret[jss::comp_total_cnt] = std::to_string(totalCnt);
             ret[jss::comp_total_cnt_compr] = std::to_string(totalCntCompr);
             ret[jss::comp_total_size] = std::to_string(totalSize);
             ret[jss::comp_total_size_compr] = std::to_string(totalSizeCompr);
-            ret[jss::comp_total_size_uncompr] = std::to_string(totalSizeUncompr);
+            ret[jss::comp_total_size_uncompr] =
+                std::to_string(totalSizeUncompr);
 
             double const size = std::accumulate(
                 rollingSize.begin(), rollingSize.end(), accumSize);
@@ -726,8 +731,10 @@ private:
                 rollingSizeUncompr.begin(),
                 rollingSizeUncompr.end(),
                 accumSizeUncompr);
-            ret[jss::comp_avg_bw_savings] = std::to_string(100.*(1.-size/sizeUncompr));
-            ret[jss::comp_total_avg_bw_savings] = std::to_string(100.*(1.-(double)totalSize/totalSizeUncompr));
+            ret[jss::comp_avg_bw_savings] =
+                std::to_string(100. * (1. - size / sizeUncompr));
+            ret[jss::comp_total_avg_bw_savings] = std::to_string(
+                100. * (1. - (double)totalSize / totalSizeUncompr));
             ret[jss::comp_err_protocol_error] = std::to_string(protocolError);
             ret[jss::comp_err_bad_message] = std::to_string(badMessage);
             ret[jss::comp_err_message_size] = std::to_string(messageSize);

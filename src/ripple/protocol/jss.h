@@ -173,6 +173,7 @@ JSS(complete);                       // out: NetworkOPs, InboundLedger
 JSS(complete_ledgers);               // out: NetworkOPs, PeerImp
 JSS(complete_shards);                // out: OverlayImpl, PeerImp
 JSS(compression);                    // out: OverlayImpl, PeerImp
+JSS(comp_up_time);                   // out: OverlayImpl, PeerImp
 JSS(comp_total_cnt);                 // out: OverlayImpl, PeerImp
 JSS(comp_total_cnt_compr);           // out: OverlayImpl, PeerImp
 JSS(comp_total_size);                // out: OverlayImpl, PeerImp

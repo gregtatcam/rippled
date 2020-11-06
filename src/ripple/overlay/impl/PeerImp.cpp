@@ -359,8 +359,10 @@ PeerImp::json()
             ret[jss::latency] = static_cast<Json::UInt>(latency_->count());
     }
 
-    ret[jss::uptime] = static_cast<Json::UInt>(
-        std::chrono::duration_cast<std::chrono::seconds>(uptime()).count());
+    ret[jss::uptime] =
+        std::to_string(std::chrono::duration_cast<std::chrono::seconds>(
+                           UptimeClock::now().time_since_epoch())
+                           .count());
 
     std::uint32_t minSeq, maxSeq;
     ledgerRange(minSeq, maxSeq);
