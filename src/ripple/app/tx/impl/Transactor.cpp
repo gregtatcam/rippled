@@ -177,6 +177,7 @@ Transactor::checkFee(PreclaimContext const& ctx, FeeUnit64 baseFee)
     auto const feeDue =
         minimumFee(ctx.app, baseFee, ctx.view.fees(), ctx.flags);
 
+#if 0
     // Only check fee is sufficient when the ledger is open.
     if (ctx.view.open() && feePaid < feeDue)
     {
@@ -184,6 +185,7 @@ Transactor::checkFee(PreclaimContext const& ctx, FeeUnit64 baseFee)
                             << "/" << to_string(feeDue);
         return telINSUF_FEE_P;
     }
+#endif
 
     if (feePaid == beast::zero)
         return tesSUCCESS;

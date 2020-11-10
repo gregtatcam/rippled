@@ -41,12 +41,15 @@ getFeeLevelPaid(ReadView const& view, STTx const& tx)
     auto const [baseFee, effectiveFeePaid] = [&view, &tx]() {
         XRPAmount baseFee = view.fees().toDrops(calculateBaseFee(view, tx));
         XRPAmount feePaid = tx[sfFee].xrp();
+        return std::pair{XRPAmount{1}, XRPAmount{0}};
 
+#if 0
         // If baseFee is 0 then the cost of a basic transaction is free.
         XRPAmount const ref = baseFee.signum() > 0
             ? XRPAmount{0}
             : calculateDefaultBaseFee(view, tx);
         return std::pair{baseFee + ref, feePaid + ref};
+#endif
     }();
 
     assert(baseFee.signum() > 0);
@@ -169,6 +172,8 @@ TxQ::FeeMetrics::update(
 FeeLevel64
 TxQ::FeeMetrics::scaleFeeLevel(Snapshot const& snapshot, OpenView const& view)
 {
+    return baseLevel;
+#if 0
     // Transactions in the open ledger so far
     auto const current = view.txCount();
 
@@ -185,6 +190,7 @@ TxQ::FeeMetrics::scaleFeeLevel(Snapshot const& snapshot, OpenView const& view)
     }
 
     return baseLevel;
+#endif
 }
 
 namespace detail {
@@ -537,6 +543,7 @@ TxQ::tryClearAccountQueueUpThruTx(
     // If the computation for the total manages to overflow (however extremely
     //    unlikely), then there's no way we can confidently verify if the queue
     //    can be cleared.
+#if 0
     if (!requiredTotalFeeLevel.first)
         return {telINSUF_FEE_P, false};
 
@@ -551,6 +558,7 @@ TxQ::tryClearAccountQueueUpThruTx(
     // This transaction did not pay enough, so fall back to the normal process.
     if (totalFeeLevelPaid < requiredTotalFeeLevel.second)
         return {telINSUF_FEE_P, false};
+#endif
 
     // This transaction paid enough to clear out the queue.
     // Attempt to apply the queued transactions.
@@ -1604,8 +1612,10 @@ TxQ::getRequiredFeeLevel(
     FeeLevel64 const feeLevel =
         FeeMetrics::scaleFeeLevel(metricsSnapshot, view);
 
+#if 0
     if ((flags & tapPREFER_QUEUE) && !byFee_.empty())
         return std::max(feeLevel, byFee_.begin()->feeLevel);
+#endif
 
     return feeLevel;
 }
@@ -1643,7 +1653,8 @@ TxQ::tryDirectApply(
     // transaction straight into the ledger.
     FeeLevel64 const feeLevelPaid = getFeeLevelPaid(view, *tx);
 
-    if (feeLevelPaid >= requiredFeeLevel)
+    // if (feeLevelPaid >= requiredFeeLevel)
+    if (true)
     {
         // Attempt to apply the transaction directly.
         auto const transactionID = tx->getTransactionID();
