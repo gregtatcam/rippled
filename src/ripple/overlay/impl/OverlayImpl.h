@@ -829,12 +829,26 @@ public:
         std::size_t total_size,
         bool is_compressed)
     {
+        if (!strand_.running_in_this_thread())
+            return post(
+                strand_,
+                std::bind(
+                    &OverlayImpl::addCompressionMetrics,
+                    this,
+                    type,
+                    uncompr_size,
+                    total_size,
+                    is_compressed));
+
         m_comprStats.addCompressionMetrics(
             type, uncompr_size, total_size, is_compressed);
     }
     void
     addErrorMetrics(boost::system::error_code const& err)
     {
+        if (!strand_.running_in_this_thread())
+            return post(
+                strand_, std::bind(&OverlayImpl::addErrorMetrics, this, err));
         m_comprStats.addErrorMetrics(err);
     }
     Json::Value
