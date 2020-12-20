@@ -73,35 +73,13 @@ PeerImp::PeerImp(
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& stream_ptr,
     OverlayImpl& overlay)
-    : Child(overlay)
-    , app_(app)
-    , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
-    , p_sink_(app_.journal("Protocol"), makePrefix(id))
-    , journal_(sink_)
-    , p_journal_(p_sink_)
-    , stream_ptr_(std::move(stream_ptr))
-    , socket_(stream_ptr_->next_layer().socket())
-    , stream_(*stream_ptr_)
-    , strand_(socket_.get_executor())
+    : P2PeerImp(app, id, slot, std::move(request), publicKey, protocol, std::move(stream_ptr), overlay)
+    , Child(overlay)
     , timer_(waitable_timer{socket_.get_executor()})
-    , remote_address_(slot->remote_endpoint())
-    , overlay_(overlay)
-    , inbound_(true)
-    , protocol_(protocol)
     , tracking_(Tracking::unknown)
-    , trackingTime_(clock_type::now())
-    , publicKey_(publicKey)
-    , lastPingTime_(clock_type::now())
-    , creationTime_(clock_type::now())
     , usage_(consumer)
     , fee_(Resource::feeLightPeer)
     , slot_(slot)
-    , request_(std::move(request))
-    , headers_(request_)
-    , compressionEnabled_(
-          headers_["X-Offer-Compression"] == "lz4" ? Compressed::On
-                                                   : Compressed::Off)
 {
 }
 
@@ -109,10 +87,10 @@ PeerImp::~PeerImp()
 {
     const bool inCluster{cluster()};
 
-    overlay_.deletePeer(id_);
-    overlay_.onPeerDeactivate(id_);
-    overlay_.peerFinder().on_closed(slot_);
-    overlay_.remove(slot_);
+    P2PeerImp::overlay_.deletePeer(id_);
+    P2PeerImp::overlay_.onPeerDeactivate(id_);
+    P2PeerImp::overlay_.peerFinder().on_closed(slot_);
+    P2PeerImp::overlay_.remove(slot_);
 
     if (inCluster)
     {
@@ -215,6 +193,7 @@ PeerImp::stop()
 
 //------------------------------------------------------------------------------
 
+#if 0
 void
 PeerImp::send(std::shared_ptr<Message> const& m)
 {
@@ -269,6 +248,7 @@ PeerImp::send(std::shared_ptr<Message> const& m)
                 std::placeholders::_1,
                 std::placeholders::_2)));
 }
+#endif
 
 void
 PeerImp::charge(Resource::Charge const& fee)
@@ -277,13 +257,14 @@ PeerImp::charge(Resource::Charge const& fee)
         strand_.running_in_this_thread())
     {
         // Sever the connection
-        overlay_.incPeerDisconnectCharges();
+        P2PeerImp::overlay_.incPeerDisconnectCharges();
         fail("charge: Resources");
     }
 }
 
 //------------------------------------------------------------------------------
 
+#if 0
 bool
 PeerImp::crawl() const
 {
@@ -306,48 +287,14 @@ PeerImp::getVersion() const
         return headers_["User-Agent"].to_string();
     return headers_["Server"].to_string();
 }
+#endif
 
 Json::Value
 PeerImp::json()
 {
-    Json::Value ret(Json::objectValue);
-
-    ret[jss::public_key] = toBase58(TokenType::NodePublic, publicKey_);
-    ret[jss::address] = remote_address_.to_string();
-
-    if (inbound_)
-        ret[jss::inbound] = true;
-
-    if (cluster())
-    {
-        ret[jss::cluster] = true;
-
-        if (auto const n = name(); !n.empty())
-            // Could move here if Json::Value supported moving from a string
-            ret[jss::name] = n;
-    }
-
-    if (auto const d = domain(); !d.empty())
-        ret[jss::server_domain] = domain();
-
-    if (auto const nid = headers_["Network-ID"].to_string(); !nid.empty())
-        ret[jss::network_id] = nid;
+    auto ret = P2PeerImp::json();
 
     ret[jss::load] = usage_.balance();
-
-    if (auto const version = getVersion(); !version.empty())
-        ret[jss::version] = version;
-
-    ret[jss::protocol] = to_string(protocol_);
-
-    {
-        std::lock_guard sl(recentLock_);
-        if (latency_)
-            ret[jss::latency] = static_cast<Json::UInt>(latency_->count());
-    }
-
-    ret[jss::uptime] = static_cast<Json::UInt>(
-        std::chrono::duration_cast<std::chrono::seconds>(uptime()).count());
 
     std::uint32_t minSeq, maxSeq;
     ledgerRange(minSeq, maxSeq);
@@ -412,19 +359,10 @@ PeerImp::json()
         }
     }
 
-    ret[jss::metrics] = Json::Value(Json::objectValue);
-    ret[jss::metrics][jss::total_bytes_recv] =
-        std::to_string(metrics_.recv.total_bytes());
-    ret[jss::metrics][jss::total_bytes_sent] =
-        std::to_string(metrics_.sent.total_bytes());
-    ret[jss::metrics][jss::avg_bps_recv] =
-        std::to_string(metrics_.recv.average_bytes());
-    ret[jss::metrics][jss::avg_bps_sent] =
-        std::to_string(metrics_.sent.average_bytes());
-
     return ret;
 }
 
+#if 0
 bool
 PeerImp::supportsFeature(ProtocolFeature f) const
 {
@@ -435,6 +373,7 @@ PeerImp::supportsFeature(ProtocolFeature f) const
     }
     return false;
 }
+#endif
 
 //------------------------------------------------------------------------------
 
@@ -502,6 +441,7 @@ PeerImp::hasRange(std::uint32_t uMin, std::uint32_t uMax)
 
 //------------------------------------------------------------------------------
 
+#if 0
 void
 PeerImp::close()
 {
@@ -523,7 +463,9 @@ PeerImp::close()
         }
     }
 }
+#endif
 
+#if 0
 void
 PeerImp::fail(std::string const& reason)
 {
@@ -531,7 +473,7 @@ PeerImp::fail(std::string const& reason)
         return post(
             strand_,
             std::bind(
-                (void (Peer::*)(std::string const&)) & PeerImp::fail,
+                (void (PeerImp::*)(std::string const&)) & PeerImp::fail,
                 shared_from_this(),
                 reason));
     if (journal_.active(beast::severities::kWarning) && socket_.is_open())
@@ -542,7 +484,9 @@ PeerImp::fail(std::string const& reason)
     }
     close();
 }
+#endif
 
+#if 0
 void
 PeerImp::fail(std::string const& name, error_code ec)
 {
@@ -555,6 +499,7 @@ PeerImp::fail(std::string const& name, error_code ec)
     }
     close();
 }
+#endif
 
 boost::optional<RangeSet<std::uint32_t>>
 PeerImp::getShardIndexes() const
@@ -575,6 +520,7 @@ PeerImp::getPeerShardInfo() const
     return boost::none;
 }
 
+#if 0
 void
 PeerImp::gracefulClose()
 {
@@ -595,6 +541,7 @@ PeerImp::gracefulClose()
         std::bind(
             &PeerImp::onShutdown, shared_from_this(), std::placeholders::_1)));
 }
+#endif
 
 void
 PeerImp::setTimer()
@@ -623,6 +570,7 @@ PeerImp::cancelTimer()
 
 //------------------------------------------------------------------------------
 
+#if 0
 std::string
 PeerImp::makePrefix(id_t id)
 {
@@ -630,6 +578,7 @@ PeerImp::makePrefix(id_t id)
     ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
     return ss.str();
 }
+#endif
 
 void
 PeerImp::onTimer(error_code const& ec)
@@ -667,7 +616,7 @@ PeerImp::onTimer(error_code const& ec)
             (t == Tracking::unknown &&
              (duration > app_.config().MAX_UNKNOWN_TIME)))
         {
-            overlay_.peerFinder().on_failure(slot_);
+            P2PeerImp::overlay_.peerFinder().on_failure(slot_);
             fail("Not useful");
             return;
         }
@@ -692,6 +641,7 @@ PeerImp::onTimer(error_code const& ec)
     setTimer();
 }
 
+#if 0
 void
 PeerImp::onShutdown(error_code ec)
 {
@@ -949,6 +899,7 @@ PeerImp::onWriteMessage(error_code ec, std::size_t bytes_transferred)
                 std::placeholders::_1)));
     }
 }
+#endif
 
 //------------------------------------------------------------------------------
 //
@@ -971,7 +922,7 @@ PeerImp::onMessageBegin(
     load_event_ =
         app_.getJobQueue().makeLoadEvent(jtPEER, protocolMessageName(type));
     fee_ = Resource::feeLightPeer;
-    overlay_.reportTraffic(
+    P2PeerImp::overlay_.reportTraffic(
         TrafficCount::categorize(*m, type, true), true, static_cast<int>(size));
 }
 
@@ -991,7 +942,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMManifests> const& m)
     auto that = shared_from_this();
     app_.getJobQueue().addJob(
         jtVALIDATION_ut, "receiveManifests", [this, that, m](Job&) {
-            overlay_.onManifests(m, that);
+            P2PeerImp::overlay_.onManifests(m, that);
         });
 }
 
@@ -1079,7 +1030,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
             if (item.address != beast::IP::Endpoint())
                 gossip.items.push_back(item);
         }
-        overlay_.resourceManager().importConsumers(name(), gossip);
+        P2PeerImp::overlay_.resourceManager().importConsumers(name(), gossip);
     }
 
     // Calculate the cluster fee:
@@ -1171,7 +1122,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetPeerShardInfo> const& m)
         m->add_peerchain()->set_nodepubkey(
             publicKey_.data(), publicKey_.size());
 
-        overlay_.foreach(send_if_not(
+        P2PeerImp::overlay_.foreach(send_if_not(
             std::make_shared<Message>(*m, protocol::mtGET_PEER_SHARD_INFO),
             match_peer(this)));
     }
@@ -1202,7 +1153,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMPeerShardInfo> const& m)
             return badData("Invalid pubKey");
         PublicKey peerPubKey(s);
 
-        if (auto peer = overlay_.findPeerByPublicKey(peerPubKey))
+        if (auto peer = P2PeerImp::overlay_.findPeerByPublicKey(peerPubKey))
         {
             if (!m->has_nodepubkey())
                 m->set_nodepubkey(publicKey_.data(), publicKey_.size());
@@ -1319,7 +1270,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMPeerShardInfo> const& m)
         << m->shardindexes();
 
     if (m->has_lastlink())
-        overlay_.lastLink(id_);
+        P2PeerImp::overlay_.lastLink(id_);
 }
 
 void
@@ -1356,7 +1307,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
     }
 
     if (!endpoints.empty())
-        overlay_.peerFinder().on_endpoints(slot_, endpoints);
+        P2PeerImp::overlay_.peerFinder().on_endpoints(slot_, endpoints);
 }
 
 void
@@ -1419,7 +1370,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
         if (app_.getJobQueue().getJobCount(jtTRANSACTION) >
             app_.config().MAX_TRANSACTIONS)
         {
-            overlay_.incJqTransOverflow();
+            P2PeerImp::overlay_.incJqTransOverflow();
             JLOG(p_journal_.info()) << "Transaction queue is full";
         }
         else if (app_.getLedgerMaster().getValidatedLedgerAge() > 4min)
@@ -1473,7 +1424,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMLedgerData> const& m)
     if (m->has_requestcookie())
     {
         std::shared_ptr<Peer> target =
-            overlay_.findPeerByShortID(m->requestcookie());
+            P2PeerImp::overlay_.findPeerByShortID(m->requestcookie());
         if (target)
         {
             m->clear_requestcookie();
@@ -1567,7 +1518,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMProposeSet> const& m)
             (stopwatch().now() - *relayed) < squelch::IDLED &&
             squelch::epoch<std::chrono::minutes>(UptimeClock::now()) >
                 squelch::WAIT_ON_BOOTUP)
-            overlay_.updateSlotAndSquelch(
+            P2PeerImp::overlay_.updateSlotAndSquelch(
                 suppression, publicKey, id_, protocol::mtPROPOSE_LEDGER);
         JLOG(p_journal_.trace()) << "Proposal: duplicate";
         return;
@@ -2043,7 +1994,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMValidation> const& m)
                 (stopwatch().now() - *relayed) < squelch::IDLED &&
                 squelch::epoch<std::chrono::minutes>(UptimeClock::now()) >
                     squelch::WAIT_ON_BOOTUP)
-                overlay_.updateSlotAndSquelch(
+                P2PeerImp::overlay_.updateSlotAndSquelch(
                     key, val->getSignerPublic(), id_, protocol::mtVALIDATION);
             JLOG(p_journal_.trace()) << "Validation: duplicate";
             return;
@@ -2424,7 +2375,7 @@ PeerImp::checkPropose(
         if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty() &&
             squelch::epoch<std::chrono::minutes>(UptimeClock::now()) >
                 squelch::WAIT_ON_BOOTUP)
-            overlay_.updateSlotAndSquelch(
+            P2PeerImp::overlay_.updateSlotAndSquelch(
                 peerPos.suppressionID(),
                 peerPos.publicKey(),
                 std::move(haveMessage),
@@ -2457,12 +2408,12 @@ PeerImp::checkValidation(
             // not be relayed to these peers. But the message must be counted
             // as part of the squelch logic.
             auto haveMessage =
-                overlay_.relay(*packet, suppression, val->getSignerPublic());
+                P2PeerImp::overlay_.relay(*packet, suppression, val->getSignerPublic());
             if (app_.config().REDUCE_RELAY_ENABLE && !haveMessage.empty() &&
                 squelch::epoch<std::chrono::minutes>(UptimeClock::now()) >
                     squelch::WAIT_ON_BOOTUP)
             {
-                overlay_.updateSlotAndSquelch(
+                P2PeerImp::overlay_.updateSlotAndSquelch(
                     suppression,
                     val->getSignerPublic(),
                     std::move(haveMessage),
@@ -2569,7 +2520,7 @@ PeerImp::getLedger(std::shared_ptr<protocol::TMGetLedger> const& m)
             {
                 JLOG(p_journal_.debug()) << "GetLedger: Routing Tx set request";
 
-                if (auto const v = getPeerWithTree(overlay_, txHash, this))
+                if (auto const v = getPeerWithTree(P2PeerImp::overlay_, txHash, this))
                 {
                     packet.set_requestcookie(id());
                     v->send(std::make_shared<Message>(
@@ -2644,7 +2595,7 @@ PeerImp::getLedger(std::shared_ptr<protocol::TMGetLedger> const& m)
                 // We don't have the requested ledger
                 // Search for a peer who might
                 auto const v = getPeerWithLedger(
-                    overlay_,
+                    P2PeerImp::overlay_,
                     ledgerhash,
                     packet.has_ledgerseq() ? packet.ledgerseq() : 0,
                     this);
@@ -2859,6 +2810,7 @@ PeerImp::getLedger(std::shared_ptr<protocol::TMGetLedger> const& m)
     send(oPacket);
 }
 
+#if 0
 int
 PeerImp::getScore(bool haveItem) const
 {
@@ -2896,6 +2848,7 @@ PeerImp::getScore(bool haveItem) const
 
     return score;
 }
+#endif
 
 bool
 PeerImp::isHighLatency() const
@@ -2904,6 +2857,7 @@ PeerImp::isHighLatency() const
     return latency_ >= peerHighLatency;
 }
 
+#if 0
 void
 PeerImp::Metrics::add_message(std::uint64_t bytes)
 {
@@ -2943,5 +2897,6 @@ PeerImp::Metrics::total_bytes() const
     std::shared_lock lock{mutex_};
     return totalBytes_;
 }
+#endif
 
 }  // namespace ripple
