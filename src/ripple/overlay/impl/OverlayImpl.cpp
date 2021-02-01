@@ -311,7 +311,9 @@ OverlayImpl::onHandoff(
                 assert(result.second);
                 (void)result.second;
             }
+            JLOG(journal_.info()) << "right before adding to the list";
             list_.emplace(peer.get(), peer);
+            JLOG(journal_.info()) << "added to the list";
 
             peer->run();
         }
@@ -647,7 +649,7 @@ OverlayImpl::activate(std::shared_ptr<PeerImp> const& peer)
 }
 
 void
-OverlayImpl::onPeerDeactivate(Peer::id_t id)
+OverlayImpl::onPeerDeactivate(P2Peer::id_t id)
 {
     std::lock_guard lock(mutex_);
     ids_.erase(id);
@@ -1189,8 +1191,8 @@ OverlayImpl::checkTracking(std::uint32_t index)
         [index](std::shared_ptr<PeerImp>&& sp) { sp->checkTracking(index); });
 }
 
-std::shared_ptr<Peer>
-OverlayImpl::findPeerByShortID(Peer::id_t const& id) const
+std::shared_ptr<P2Peer>
+OverlayImpl::findPeerByShortID(P2Peer::id_t const& id) const
 {
     std::lock_guard lock(mutex_);
     auto const iter = ids_.find(id);
@@ -1201,7 +1203,7 @@ OverlayImpl::findPeerByShortID(Peer::id_t const& id) const
 
 // A public key hash map was not used due to the peer connect/disconnect
 // update overhead outweighing the performance of a small set linear search.
-std::shared_ptr<Peer>
+std::shared_ptr<P2Peer>
 OverlayImpl::findPeerByPublicKey(PublicKey const& pubKey)
 {
     std::lock_guard lock(mutex_);
@@ -1223,7 +1225,7 @@ OverlayImpl::broadcast(protocol::TMProposeSet& m)
     for_each([&](std::shared_ptr<PeerImp>&& p) { p->send(sm); });
 }
 
-std::set<Peer::id_t>
+std::set<P2Peer::id_t>
 OverlayImpl::relay(
     protocol::TMProposeSet& m,
     uint256 const& uid,
@@ -1249,7 +1251,7 @@ OverlayImpl::broadcast(protocol::TMValidation& m)
     for_each([sm](std::shared_ptr<PeerImp>&& p) { p->send(sm); });
 }
 
-std::set<Peer::id_t>
+std::set<P2Peer::id_t>
 OverlayImpl::relay(
     protocol::TMValidation& m,
     uint256 const& uid,
@@ -1382,7 +1384,7 @@ makeSquelchMessage(
 }
 
 void
-OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t id) const
+OverlayImpl::unsquelch(PublicKey const& validator, P2Peer::id_t id) const
 {
     if (auto peer = findPeerByShortID(id);
         peer && app_.config().VP_REDUCE_RELAY_SQUELCH)
@@ -1396,7 +1398,7 @@ OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t id) const
 void
 OverlayImpl::squelch(
     PublicKey const& validator,
-    Peer::id_t id,
+    P2Peer::id_t id,
     uint32_t squelchDuration) const
 {
     if (auto peer = findPeerByShortID(id);
@@ -1410,7 +1412,7 @@ void
 OverlayImpl::updateSlotAndSquelch(
     uint256 const& key,
     PublicKey const& validator,
-    std::set<Peer::id_t>&& peers,
+    std::set<P2Peer::id_t>&& peers,
     protocol::MessageType type)
 {
     if (!strand_.running_in_this_thread())
@@ -1428,7 +1430,7 @@ void
 OverlayImpl::updateSlotAndSquelch(
     uint256 const& key,
     PublicKey const& validator,
-    Peer::id_t peer,
+    P2Peer::id_t peer,
     protocol::MessageType type)
 {
     if (!strand_.running_in_this_thread())
@@ -1440,7 +1442,7 @@ OverlayImpl::updateSlotAndSquelch(
 }
 
 void
-OverlayImpl::deletePeer(Peer::id_t id)
+OverlayImpl::deletePeer(P2Peer::id_t id)
 {
     if (!strand_.running_in_this_thread())
         return post(strand_, std::bind(&OverlayImpl::deletePeer, this, id));

@@ -24,86 +24,30 @@
 #include <ripple/beast/net/IPEndpoint.h>
 #include <ripple/json/json_value.h>
 #include <ripple/overlay/Message.h>
+#include <ripple/overlay/P2Peer.h>
 #include <ripple/protocol/PublicKey.h>
 
-namespace ripple {
+#include <boost/beast/core/multi_buffer.hpp>
 
-namespace Resource {
-class Charge;
-}
+
+namespace ripple {
 
 // Maximum hops to attempt when crawling shards. cs = crawl shards
 static constexpr std::uint32_t csHopLimit = 3;
 
-enum class ProtocolFeature {
-    ValidatorListPropagation,
-    ValidatorList2Propagation
-};
-
 /** Represents a peer connection in the overlay. */
-class Peer
+class Peer : virtual public P2Peer
 {
 public:
     using ptr = std::shared_ptr<Peer>;
 
-    /** Uniquely identifies a peer.
-        This can be stored in tables to find the peer later. Callers
-        can discover if the peer is no longer connected and make
-        adjustments as needed.
-    */
-    using id_t = std::uint32_t;
-
     virtual ~Peer() = default;
-
-    //
-    // Network
-    //
-
-    virtual void
-    send(std::shared_ptr<Message> const& m) = 0;
-
-    virtual beast::IP::Endpoint
-    getRemoteAddress() const = 0;
-
-    /** Adjust this peer's load balance based on the type of load imposed. */
-    virtual void
-    charge(Resource::Charge const& fee) = 0;
-
-    //
-    // Identity
-    //
-
-    virtual id_t
-    id() const = 0;
-
-    /** Returns `true` if this connection is a member of the cluster. */
-    virtual bool
-    cluster() const = 0;
-
-    virtual bool
-    isHighLatency() const = 0;
-
-    virtual int
-    getScore(bool) const = 0;
-
-    virtual PublicKey const&
-    getNodePublic() const = 0;
-
-    virtual Json::Value
-    json() = 0;
-
-    virtual bool
-    supportsFeature(ProtocolFeature f) const = 0;
 
     virtual boost::optional<std::size_t>
     publisherListSequence(PublicKey const&) const = 0;
 
     virtual void
     setPublisherListSequence(PublicKey const&, std::size_t const) = 0;
-
-    //
-    // Ledger
-    //
 
     virtual uint256 const&
     getClosedLedgerHash() const = 0;
@@ -119,9 +63,6 @@ public:
     cycleStatus() = 0;
     virtual bool
     hasRange(std::uint32_t uMin, std::uint32_t uMax) = 0;
-
-    virtual bool
-    compressionEnabled() const = 0;
 };
 
 }  // namespace ripple

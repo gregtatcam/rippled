@@ -52,7 +52,7 @@ namespace ripple {
 class HashRouter
 {
 public:
-    // The type here *MUST* match the type of Peer::id_t
+    // The type here *MUST* match the type of P2Peer::id_t
     using PeerShortID = std::uint32_t;
 
 private:

@@ -159,9 +159,9 @@ struct peer_in_cluster
 /** Select all peers that are in the specified set */
 struct peer_in_set
 {
-    std::set<Peer::id_t> const& peerSet;
+    std::set<P2Peer::id_t> const& peerSet;
 
-    peer_in_set(std::set<Peer::id_t> const& peers) : peerSet(peers)
+    peer_in_set(std::set<P2Peer::id_t> const& peers) : peerSet(peers)
     {
     }
 

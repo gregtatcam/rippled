@@ -48,23 +48,15 @@ class context;
 
 namespace ripple {
 
-/** Manages the set of connected peers. */
-class Overlay : public Stoppable, public beast::PropertyStream::Source
+class P2POverlay
 {
 protected:
     using socket_type = boost::beast::tcp_stream;
     using stream_type = boost::beast::ssl_stream<socket_type>;
-
-    // VFALCO NOTE The requirement of this constructor is an
-    //             unfortunate problem with the API for
-    //             Stoppable and PropertyStream
-    //
-    Overlay(Stoppable& parent)
-        : Stoppable("Overlay", parent), beast::PropertyStream::Source("peers")
-    {
-    }
-
 public:
+    P2POverlay() = default;
+    virtual ~ P2POverlay() = default;
+
     enum class Promote { automatic, never, always };
 
     struct Setup
@@ -80,8 +72,6 @@ public:
     };
 
     using PeerSequence = std::vector<std::shared_ptr<Peer>>;
-
-    virtual ~Overlay() = default;
 
     /** Conditionally accept an incoming HTTP request. */
     virtual Handoff
@@ -120,18 +110,12 @@ public:
     virtual PeerSequence
     getActivePeers() const = 0;
 
-    /** Calls the checkTracking function on each peer
-        @param index the value to pass to the peer's checkTracking function
-    */
-    virtual void
-    checkTracking(std::uint32_t index) = 0;
-
     /** Returns the peer with the matching short id, or null. */
-    virtual std::shared_ptr<Peer>
-    findPeerByShortID(Peer::id_t const& id) const = 0;
+    virtual std::shared_ptr<P2Peer>
+    findPeerByShortID(P2Peer::id_t const& id) const = 0;
 
     /** Returns the peer with the matching public key, or null. */
-    virtual std::shared_ptr<Peer>
+    virtual std::shared_ptr<P2Peer>
     findPeerByPublicKey(PublicKey const& pubKey) = 0;
 
     /** Broadcast a proposal. */
@@ -148,7 +132,7 @@ public:
      * @param validator The pubkey of the validator that issued this proposal
      * @return the set of peers which have already sent us this proposal
      */
-    virtual std::set<Peer::id_t>
+    virtual std::set<P2Peer::id_t>
     relay(
         protocol::TMProposeSet& m,
         uint256 const& uid,
@@ -160,7 +144,7 @@ public:
      * @param validator The pubkey of the validator that issued this validation
      * @return the set of peers which have already sent us this validation
      */
-    virtual std::set<Peer::id_t>
+    virtual std::set<P2Peer::id_t>
     relay(
         protocol::TMValidation& m,
         uint256 const& uid,
@@ -181,12 +165,6 @@ public:
             f(p);
     }
 
-    /** Increment and retrieve counter for transaction job queue overflows. */
-    virtual void
-    incJqTransOverflow() = 0;
-    virtual std::uint64_t
-    getJqTransOverflow() const = 0;
-
     /** Increment and retrieve counters for total peer disconnects, and
      * disconnects we initiate for excessive resource consumption.
      */
@@ -199,14 +177,6 @@ public:
     virtual std::uint64_t
     getPeerDisconnectCharges() const = 0;
 
-    /** Returns information reported to the crawl shard RPC command.
-
-        @param hops the maximum jumps the crawler will attempt.
-        The number of hops achieved is not guaranteed.
-    */
-    virtual Json::Value
-    crawlShards(bool pubKey, std::uint32_t hops) = 0;
-
     /** Returns the ID of the network this server is configured for, if any.
 
         The ID is just a numerical identifier, with the IDs 0, 1 and 2 used to
@@ -217,6 +187,44 @@ public:
     */
     virtual boost::optional<std::uint32_t>
     networkID() const = 0;
+};
+
+/** Manages the set of connected peers. */
+class Overlay : public Stoppable, public beast::PropertyStream::Source, public P2POverlay
+{
+protected:
+    // VFALCO NOTE The requirement of this constructor is an
+    //             unfortunate problem with the API for
+    //             Stoppable and PropertyStream
+    //
+    Overlay(Stoppable& parent)
+        : Stoppable("Overlay", parent), beast::PropertyStream::Source("peers")
+    {
+    }
+
+public:
+
+    virtual ~Overlay() = default;
+
+    /** Calls the checkTracking function on each peer
+        @param index the value to pass to the peer's checkTracking function
+    */
+    virtual void
+    checkTracking(std::uint32_t index) = 0;
+
+    /** Increment and retrieve counter for transaction job queue overflows. */
+    virtual void
+    incJqTransOverflow() = 0;
+    virtual std::uint64_t
+    getJqTransOverflow() const = 0;
+
+    /** Returns information reported to the crawl shard RPC command.
+
+        @param hops the maximum jumps the crawler will attempt.
+        The number of hops achieved is not guaranteed.
+    */
+    virtual Json::Value
+    crawlShards(bool pubKey, std::uint32_t hops) = 0;
 };
 
 }  // namespace ripple

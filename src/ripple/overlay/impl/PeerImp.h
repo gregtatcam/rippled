@@ -26,6 +26,7 @@
 #include <ripple/beast/utility/WrappedSink.h>
 #include <ripple/overlay/Squelch.h>
 #include <ripple/overlay/impl/OverlayImpl.h>
+#include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
@@ -46,9 +47,16 @@ namespace ripple {
 struct ValidatorBlobInfo;
 
 class PeerImp : public Peer,
+                public P2PeerImp,
                 public std::enable_shared_from_this<PeerImp>,
                 public OverlayImpl::Child
 {
+private:
+    std::shared_ptr<P2PeerImp>
+    shared() override
+    {
+        return enable_shared_from_this<PeerImp>::shared_from_this();
+    }
 public:
     /** Whether the peer's view of the ledger converges or diverges from ours */
     enum class Tracking { diverged, unknown, converged };
@@ -60,48 +68,14 @@ public:
     };
 
 private:
-    using clock_type = std::chrono::steady_clock;
-    using error_code = boost::system::error_code;
-    using socket_type = boost::asio::ip::tcp::socket;
-    using middle_type = boost::beast::tcp_stream;
-    using stream_type = boost::beast::ssl_stream<middle_type>;
-    using address_type = boost::asio::ip::address;
-    using endpoint_type = boost::asio::ip::tcp::endpoint;
     using waitable_timer =
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
-    using Compressed = compression::Compressed;
 
     Application& app_;
-    id_t const id_;
-    beast::WrappedSink sink_;
-    beast::WrappedSink p_sink_;
-    beast::Journal const journal_;
-    beast::Journal const p_journal_;
-    std::unique_ptr<stream_type> stream_ptr_;
-    socket_type& socket_;
-    stream_type& stream_;
-    boost::asio::strand<boost::asio::executor> strand_;
     waitable_timer timer_;
-
-    // Updated at each stage of the connection process to reflect
-    // the current conditions as closely as possible.
-    beast::IP::Endpoint const remote_address_;
-
-    // These are up here to prevent warnings about order of initializations
-    //
-    OverlayImpl& overlay_;
-    bool const inbound_;
-
-    // Protocol version to use for this link
-    ProtocolVersion protocol_;
 
     std::atomic<Tracking> tracking_;
     clock_type::time_point trackingTime_;
-    bool detaching_ = false;
-    // Node public key of peer.
-    PublicKey const publicKey_;
-    std::string name_;
-    boost::shared_mutex mutable nameMutex_;
 
     // The indices of the smallest and largest ledgers this peer has available
     //
@@ -152,14 +126,6 @@ private:
     protocol::TMStatusChange last_status_;
     Resource::Consumer usage_;
     Resource::Charge fee_;
-    std::shared_ptr<PeerFinder::Slot> const slot_;
-    boost::beast::multi_buffer read_buffer_;
-    http_request_type request_;
-    http_response_type response_;
-    boost::beast::http::fields const& headers_;
-    std::queue<std::shared_ptr<Message>> send_queue_;
-    bool gracefulClose_ = false;
-    int large_sendq_ = 0;
     std::unique_ptr<LoadEvent> load_event_;
     // The highest sequence of each PublisherList that has
     // been sent to or received from this peer.
@@ -168,46 +134,7 @@ private:
     std::mutex mutable shardInfoMutex_;
     hash_map<PublicKey, ShardInfo> shardInfo_;
 
-    Compressed compressionEnabled_ = Compressed::Off;
-
-    // true if validation/proposal reduce-relay feature is enabled
-    // on the peer.
-    bool vpReduceRelayEnabled_ = false;
-
     friend class OverlayImpl;
-
-    class Metrics
-    {
-    public:
-        Metrics() = default;
-        Metrics(Metrics const&) = delete;
-        Metrics&
-        operator=(Metrics const&) = delete;
-        Metrics(Metrics&&) = delete;
-        Metrics&
-        operator=(Metrics&&) = delete;
-
-        void
-        add_message(std::uint64_t bytes);
-        std::uint64_t
-        average_bytes() const;
-        std::uint64_t
-        total_bytes() const;
-
-    private:
-        boost::shared_mutex mutable mutex_;
-        boost::circular_buffer<std::uint64_t> rollingAvg_{30, 0ull};
-        clock_type::time_point intervalStart_{clock_type::now()};
-        std::uint64_t totalBytes_{0};
-        std::uint64_t accumBytes_{0};
-        std::uint64_t rollingAvgBytes_{0};
-    };
-
-    struct
-    {
-        Metrics sent;
-        Metrics recv;
-    } metrics_;
 
 public:
     PeerImp(PeerImp const&) = delete;
@@ -243,18 +170,6 @@ public:
 
     virtual ~PeerImp();
 
-    beast::Journal const&
-    pjournal() const
-    {
-        return p_journal_;
-    }
-
-    std::shared_ptr<PeerFinder::Slot> const&
-    slot()
-    {
-        return slot_;
-    }
-
     // Work-around for calling shared_from_this in constructors
     void
     run();
@@ -267,9 +182,6 @@ public:
     // Network
     //
 
-    void
-    send(std::shared_ptr<Message> const& m) override;
-
     /** Send a set of PeerFinder endpoints as a protocol message. */
     template <
         class FwdIt,
@@ -279,31 +191,8 @@ public:
     void
     sendEndpoints(FwdIt first, FwdIt last);
 
-    beast::IP::Endpoint
-    getRemoteAddress() const override
-    {
-        return remote_address_;
-    }
-
     void
     charge(Resource::Charge const& fee) override;
-
-    //
-    // Identity
-    //
-
-    Peer::id_t
-    id() const override
-    {
-        return id_;
-    }
-
-    /** Returns `true` if this connection will publicly share its IP address. */
-    bool
-    crawl() const;
-
-    bool
-    cluster() const override;
 
     /** Check if the peer is tracking
         @param validationSeq The ledger sequence of a recently-validated ledger
@@ -314,16 +203,6 @@ public:
     void
     checkTracking(std::uint32_t seq1, std::uint32_t seq2);
 
-    PublicKey const&
-    getNodePublic() const override
-    {
-        return publicKey_;
-    }
-
-    /** Return the version of rippled that the peer is running, if reported. */
-    std::string
-    getVersion() const;
-
     // Return the connection elapsed time.
     clock_type::duration
     uptime() const
@@ -333,9 +212,6 @@ public:
 
     Json::Value
     json() override;
-
-    bool
-    supportsFeature(ProtocolFeature f) const override;
 
     boost::optional<std::size_t>
     publisherListSequence(PublicKey const& pubKey) const override
@@ -392,9 +268,6 @@ public:
     bool
     isHighLatency() const override;
 
-    void
-    fail(std::string const& reason);
-
     /** Return a range set of known shard indexes from this peer. */
     boost::optional<RangeSet<std::uint32_t>>
     getShardIndexes() const;
@@ -403,21 +276,7 @@ public:
     boost::optional<hash_map<PublicKey, ShardInfo>>
     getPeerShardInfo() const;
 
-    bool
-    compressionEnabled() const override
-    {
-        return compressionEnabled_ == Compressed::On;
-    }
-
 private:
-    void
-    close();
-
-    void
-    fail(std::string const& name, error_code ec);
-
-    void
-    gracefulClose();
 
     void
     setTimer();
@@ -425,49 +284,59 @@ private:
     void
     cancelTimer();
 
-    static std::string
-    makePrefix(id_t id);
-
     // Called when the timer wait completes
     void
     onTimer(boost::system::error_code const& ec);
 
-    // Called when SSL shutdown completes
-    void
-    onShutdown(error_code ec);
-
-    void
-    doAccept();
-
-    std::string
-    name() const;
-
-    std::string
-    domain() const;
-
     std::optional<std::uint32_t>
     networkID() const;
-
-    //
-    // protocol message loop
-    //
-
-    // Starts the protocol message loop
-    void
-    doProtocolStart();
-
-    // Called when protocol message bytes are received
-    void
-    onReadMessage(error_code ec, std::size_t bytes_transferred);
-
-    // Called when protocol messages bytes are sent
-    void
-    onWriteMessage(error_code ec, std::size_t bytes_transferred);
 
     // Check if reduce-relay feature is enabled and
     // reduce_relay::WAIT_ON_BOOTUP time passed since the start
     bool
     reduceRelayReady();
+
+protected:
+    void
+    onClose() override
+    {
+        cancelTimer();
+    }
+
+    void
+    onGracefulClose() override
+    {
+        setTimer();
+    }
+
+    void
+    onShuttingDown() override
+    {
+        cancelTimer();
+    }
+
+    bool
+    shouldSend(std::shared_ptr<Message> const& m) override
+    {
+        if (auto validator = m->getValidatorKey(); validator && !squelch_.expireSquelch(*validator))
+            return false;
+        return true;
+    }
+
+    std::optional<std::string>
+    isClusterMember(PublicKey const& key) const override
+    {
+        return app_.cluster().member(key);
+    }
+
+    void
+    onProtocolStart() override;
+
+    std::pair<std::size_t, boost::system::error_code>
+    invokeProtocolMessage(std::size_t& hint) override;
+
+    std::shared_ptr<boost::beast::multi_buffer>
+    onAccept(uint256 const& sharedValue) override;
 
 public:
     //--------------------------------------------------------------------------
@@ -585,45 +454,26 @@ PeerImp::PeerImp(
     ProtocolVersion protocol,
     id_t id,
     OverlayImpl& overlay)
-    : Child(overlay)
+    : P2PeerImp(
+          app.config(),
+          app.logs(),
+          id,
+          std::move(slot),
+          std::move(response),
+          std::move(stream_ptr),
+          publicKey,
+          protocol,
+          overlay)
+    , Child(overlay)
     , app_(app)
-    , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
-    , p_sink_(app_.journal("Protocol"), makePrefix(id))
-    , journal_(sink_)
-    , p_journal_(p_sink_)
-    , stream_ptr_(std::move(stream_ptr))
-    , socket_(stream_ptr_->next_layer().socket())
-    , stream_(*stream_ptr_)
-    , strand_(socket_.get_executor())
     , timer_(waitable_timer{socket_.get_executor()})
-    , remote_address_(slot->remote_endpoint())
-    , overlay_(overlay)
-    , inbound_(false)
-    , protocol_(protocol)
     , tracking_(Tracking::unknown)
     , trackingTime_(clock_type::now())
-    , publicKey_(publicKey)
     , lastPingTime_(clock_type::now())
     , creationTime_(clock_type::now())
     , squelch_(app_.journal("Squelch"))
     , usage_(usage)
     , fee_(Resource::feeLightPeer)
-    , slot_(std::move(slot))
-    , response_(std::move(response))
-    , headers_(response_)
-    , compressionEnabled_(
-          peerFeatureEnabled(
-              headers_,
-              FEATURE_COMPR,
-              "lz4",
-              app_.config().COMPRESSION)
-              ? Compressed::On
-              : Compressed::Off)
-    , vpReduceRelayEnabled_(peerFeatureEnabled(
-          headers_,
-          FEATURE_VPRR,
-          app_.config().VP_REDUCE_RELAY_ENABLE))
 {
     read_buffer_.commit(boost::asio::buffer_copy(
         read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));

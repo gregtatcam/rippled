@@ -117,7 +117,7 @@ protected:
     bool mProgress;
 
     /** The identifiers of the peers we are tracking. */
-    std::set<Peer::id_t> mPeers;
+    std::set<P2Peer::id_t> mPeers;
 
 private:
     /** The minimum time to wait between calls to execute(). */

@@ -165,6 +165,30 @@ public:
     {
         return false;
     }
+protected:
+    void
+    onGracefulClose() override {}
+
+    void
+    onClose() override {}
+
+    void
+    onShuttingDown() override {}
+
+    bool
+    shouldSend(std::shared_ptr<Message> const& m) override {return true;}
+
+    void
+    onProtocolStart() override {}
+
+    std::optional<std::string>
+    isClusterMember(PublicKey const&) const override { return {}; }
+
+    std::pair<std::size_t, boost::system::error_code>
+    invokeProtocolMessage(std::size_t& hint) override { return {}; }
+
+    std::shared_ptr<boost::beast::multi_buffer>
+    onAccept(uint256 const& sharedValue) override { return {}; }
 };
 
 /** Manually advanced clock. */
@@ -224,13 +248,13 @@ public:
     updateSlotAndSquelch(
         uint256 const& key,
         PublicKey const& validator,
-        Peer::id_t id,
+        P2Peer::id_t id,
         SquelchCB f,
         protocol::MessageType type = protocol::mtVALIDATION) = 0;
 
     virtual void deleteIdlePeers(UnsquelchCB) = 0;
 
-    virtual void deletePeer(Peer::id_t, UnsquelchCB) = 0;
+    virtual void deletePeer(P2Peer::id_t, UnsquelchCB) = 0;
 };
 
 class Validator;
@@ -273,7 +297,7 @@ public:
     {
         up_ = linkUp;
     }
-    Peer::id_t
+    P2Peer::id_t
     peerId()
     {
         auto p = peer_.lock();
@@ -298,7 +322,7 @@ private:
 /** Simulate Validator */
 class Validator
 {
-    using Links = std::unordered_map<Peer::id_t, LinkSPtr>;
+    using Links = std::unordered_map<P2Peer::id_t, LinkSPtr>;
 
 public:
     Validator()
@@ -351,13 +375,13 @@ public:
     }
 
     void
-    deletePeer(Peer::id_t id)
+    deletePeer(P2Peer::id_t id)
     {
         links_.erase(id);
     }
 
     void
-    for_links(std::vector<Peer::id_t> peers, LinkIterCB f)
+    for_links(std::vector<P2Peer::id_t> peers, LinkIterCB f)
     {
         for (auto id : peers)
         {
@@ -386,7 +410,7 @@ public:
 
     /** Send to specific peers */
     void
-    send(std::vector<Peer::id_t> peers, SquelchCB f)
+    send(std::vector<P2Peer::id_t> peers, SquelchCB f)
     {
         for_links(peers, [&](Link& link, MessageSPtr m) { link.send(m, f); });
     }
@@ -411,7 +435,7 @@ public:
     }
 
     void
-    linkUp(Peer::id_t id)
+    linkUp(P2Peer::id_t id)
     {
         auto it = links_.find(id);
         assert(it != links_.end());
@@ -419,7 +443,7 @@ public:
     }
 
     void
-    linkDown(Peer::id_t id)
+    linkDown(P2Peer::id_t id)
     {
         auto it = links_.find(id);
         assert(it != links_.end());
@@ -437,7 +461,7 @@ private:
 class PeerSim : public PeerPartial, public std::enable_shared_from_this<PeerSim>
 {
 public:
-    using id_t = Peer::id_t;
+    using id_t = P2Peer::id_t;
     PeerSim(Overlay& overlay, beast::Journal journal)
         : overlay_(overlay), squelch_(journal)
     {
@@ -492,10 +516,10 @@ private:
 
 class OverlaySim : public Overlay, public reduce_relay::SquelchHandler
 {
-    using Peers = std::unordered_map<Peer::id_t, PeerSPtr>;
+    using Peers = std::unordered_map<P2Peer::id_t, PeerSPtr>;
 
 public:
-    using id_t = Peer::id_t;
+    using id_t = P2Peer::id_t;
     using clock_type = ManualClock;
     OverlaySim(Application& app) : slots_(app, *this), app_(app)
     {
@@ -522,7 +546,7 @@ public:
     updateSlotAndSquelch(
         uint256 const& key,
         PublicKey const& validator,
-        Peer::id_t id,
+        P2Peer::id_t id,
         SquelchCB f,
         protocol::MessageType type = protocol::mtVALIDATION) override
     {
@@ -548,7 +572,7 @@ public:
     addPeer(bool useCache = true)
     {
         PeerSPtr peer{};
-        Peer::id_t id;
+        P2Peer::id_t id;
         if (peersCache_.empty() || !useCache)
         {
             peer = std::make_shared<PeerSim>(*this, app_.journal("Squelch"));
@@ -566,7 +590,7 @@ public:
     }
 
     void
-    deletePeer(Peer::id_t id, bool useCache = true)
+    deletePeer(P2Peer::id_t id, bool useCache = true)
     {
         auto it = peers_.find(id);
         assert(it != peers_.end());
@@ -585,7 +609,7 @@ public:
             addPeer();
     }
 
-    std::optional<Peer::id_t>
+    std::optional<P2Peer::id_t>
     deleteLastPeer()
     {
         if (peers_.empty())
@@ -618,7 +642,7 @@ public:
     }
 
     bool
-    isSelected(PublicKey const& validator, Peer::id_t peer)
+    isSelected(PublicKey const& validator, P2Peer::id_t peer)
     {
         auto selected = slots_.getSelected(validator);
         return selected.find(peer) != selected.end();
@@ -654,14 +678,14 @@ private:
     void
     squelch(
         PublicKey const& validator,
-        Peer::id_t id,
+        P2Peer::id_t id,
         std::uint32_t squelchDuration) const override
     {
         if (auto it = peers_.find(id); it != peers_.end())
             squelch_(validator, it->second, squelchDuration);
     }
     void
-    unsquelch(PublicKey const& validator, Peer::id_t id) const override
+    unsquelch(PublicKey const& validator, P2Peer::id_t id) const override
     {
         if (auto it = peers_.find(id); it != peers_.end())
             unsquelch_(validator, it->second);
@@ -706,7 +730,7 @@ public:
         init();
     }
 
-    Peer::id_t
+    P2Peer::id_t
     addPeer()
     {
         auto peer = overlay_.addPeer();
@@ -748,7 +772,7 @@ public:
     }
 
     void
-    enableLink(std::uint16_t validatorId, Peer::id_t peer, bool enable)
+    enableLink(std::uint16_t validatorId, P2Peer::id_t peer, bool enable)
     {
         auto it =
             std::find_if(validators_.begin(), validators_.end(), [&](auto& v) {
@@ -762,7 +786,7 @@ public:
     }
 
     void
-    onDisconnectPeer(Peer::id_t peer)
+    onDisconnectPeer(P2Peer::id_t peer)
     {
         // Send unsquelch to the Peer on all links. This way when
         // the Peer "reconnects" it starts sending messages on the link.
@@ -825,7 +849,7 @@ public:
 
     /** Is peer in Selected state in any of the slots */
     bool
-    isSelected(Peer::id_t id)
+    isSelected(P2Peer::id_t id)
     {
         for (auto& v : validators_)
         {
@@ -840,7 +864,7 @@ public:
      * in those slots.
      */
     bool
-    allCounting(Peer::id_t peer)
+    allCounting(P2Peer::id_t peer)
     {
         for (auto& v : validators_)
         {
@@ -866,7 +890,7 @@ private:
 class reduce_relay_test : public beast::unit_test::suite
 {
     using Slot = reduce_relay::Slot<ManualClock>;
-    using id_t = Peer::id_t;
+    using id_t = P2Peer::id_t;
 
 protected:
     void
@@ -883,7 +907,7 @@ protected:
     }
 
     /** Send squelch (if duration is set) or unsquelch (if duration not set) */
-    Peer::id_t
+    P2Peer::id_t
     sendSquelch(
         PublicKey const& validator,
         PeerWPtr const& peerPtr,
@@ -913,7 +937,7 @@ protected:
         std::uint32_t cnt_ = 0;
         std::uint32_t handledCnt_ = 0;
         bool isSelected_ = false;
-        Peer::id_t peer_;
+        P2Peer::id_t peer_;
         std::uint16_t validator_;
         PublicKey key_;
         time_point<ManualClock> time_;
@@ -1382,14 +1406,14 @@ vp_squelched=1
         {
         }
         void
-        squelch(PublicKey const&, Peer::id_t, std::uint32_t duration)
+        squelch(PublicKey const&, P2Peer::id_t, std::uint32_t duration)
             const override
         {
             if (duration > maxDuration_)
                 maxDuration_ = duration;
         }
         void
-        unsquelch(PublicKey const&, Peer::id_t) const override
+        unsquelch(PublicKey const&, P2Peer::id_t) const override
         {
         }
         mutable int maxDuration_;

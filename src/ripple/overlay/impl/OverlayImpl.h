@@ -109,9 +109,9 @@ private:
     std::unique_ptr<PeerFinder::Manager> m_peerFinder;
     TrafficCount m_traffic;
     hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImp>> m_peers;
-    hash_map<Peer::id_t, std::weak_ptr<PeerImp>> ids_;
+    hash_map<P2Peer::id_t, std::weak_ptr<PeerImp>> ids_;
     Resolver& m_resolver;
-    std::atomic<Peer::id_t> next_id_;
+    std::atomic<P2Peer::id_t> next_id_;
     int timer_count_;
     std::atomic<uint64_t> jqTransOverflow_{0};
     std::atomic<uint64_t> peerDisconnects_{0};
@@ -202,10 +202,10 @@ public:
 
     void checkTracking(std::uint32_t) override;
 
-    std::shared_ptr<Peer>
-    findPeerByShortID(Peer::id_t const& id) const override;
+    std::shared_ptr<P2Peer>
+    findPeerByShortID(P2Peer::id_t const& id) const override;
 
-    std::shared_ptr<Peer>
+    std::shared_ptr<P2Peer>
     findPeerByPublicKey(PublicKey const& pubKey) override;
 
     void
@@ -214,13 +214,13 @@ public:
     void
     broadcast(protocol::TMValidation& m) override;
 
-    std::set<Peer::id_t>
+    std::set<P2Peer::id_t>
     relay(
         protocol::TMProposeSet& m,
         uint256 const& uid,
         PublicKey const& validator) override;
 
-    std::set<Peer::id_t>
+    std::set<P2Peer::id_t>
     relay(
         protocol::TMValidation& m,
         uint256 const& uid,
@@ -250,7 +250,7 @@ public:
 
     // Called when an active peer is destroyed.
     void
-    onPeerDeactivate(Peer::id_t id);
+    onPeerDeactivate(P2Peer::id_t id);
 
     // UnaryFunc will be called as
     //  void(std::shared_ptr<PeerImp>&&)
@@ -394,7 +394,7 @@ public:
     updateSlotAndSquelch(
         uint256 const& key,
         PublicKey const& validator,
-        std::set<Peer::id_t>&& peers,
+        std::set<P2Peer::id_t>&& peers,
         protocol::MessageType type);
 
     /** Overload to reduce allocation in case of single peer
@@ -403,7 +403,7 @@ public:
     updateSlotAndSquelch(
         uint256 const& key,
         PublicKey const& validator,
-        Peer::id_t peer,
+        P2Peer::id_t peer,
         protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the
@@ -412,17 +412,17 @@ public:
      * @param id Peer's id
      */
     void
-    deletePeer(Peer::id_t id);
+    deletePeer(P2Peer::id_t id);
 
 private:
     void
     squelch(
         PublicKey const& validator,
-        Peer::id_t const id,
+        P2Peer::id_t const id,
         std::uint32_t squelchDuration) const override;
 
     void
-    unsquelch(PublicKey const& validator, Peer::id_t id) const override;
+    unsquelch(PublicKey const& validator, P2Peer::id_t id) const override;
 
     std::shared_ptr<Writer>
     makeRedirectResponse(

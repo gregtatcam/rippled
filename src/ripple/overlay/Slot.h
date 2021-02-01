@@ -80,14 +80,14 @@ public:
      * @param duration Squelch duration in seconds
      */
     virtual void
-    squelch(PublicKey const& validator, Peer::id_t id, std::uint32_t duration)
+    squelch(PublicKey const& validator, P2Peer::id_t id, std::uint32_t duration)
         const = 0;
     /** Unsquelch handler
      * @param validator Public key of the source validator
      * @param id Peer's id to unsquelch
      */
     virtual void
-    unsquelch(PublicKey const& validator, Peer::id_t id) const = 0;
+    unsquelch(PublicKey const& validator, P2Peer::id_t id) const = 0;
 };
 
 /**
@@ -105,7 +105,7 @@ class Slot final
 {
 private:
     friend class Slots<clock_type>;
-    using id_t = Peer::id_t;
+    using id_t = P2Peer::id_t;
     using time_point = typename clock_type::time_point;
 
     /** Constructor
@@ -491,7 +491,7 @@ Slot<clock_type>::notInState(PeerState state) const
 }
 
 template <typename clock_type>
-std::set<typename Peer::id_t>
+std::set<typename P2Peer::id_t>
 Slot<clock_type>::getSelected() const
 {
     std::set<id_t> init;
@@ -508,7 +508,7 @@ Slot<clock_type>::getSelected() const
 
 template <typename clock_type>
 std::unordered_map<
-    typename Peer::id_t,
+    typename P2Peer::id_t,
     std::tuple<PeerState, uint16_t, uint32_t, uint32_t>>
 Slot<clock_type>::getPeers() const
 {
@@ -537,10 +537,10 @@ template <typename clock_type>
 class Slots final
 {
     using time_point = typename clock_type::time_point;
-    using id_t = typename Peer::id_t;
+    using id_t = typename P2Peer::id_t;
     using messages = beast::aged_unordered_map<
         uint256,
-        std::unordered_set<Peer::id_t>,
+        std::unordered_set<P2Peer::id_t>,
         clock_type,
         hardened_hash<strong_hash>>;
 
@@ -617,7 +617,7 @@ public:
      * expiration milliseconds.
      */
     std::unordered_map<
-        typename Peer::id_t,
+        typename P2Peer::id_t,
         std::tuple<PeerState, uint16_t, uint32_t, std::uint32_t>>
     getPeers(PublicKey const& validator)
     {
