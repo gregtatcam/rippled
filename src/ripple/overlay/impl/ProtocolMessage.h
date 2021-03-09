@@ -310,19 +310,20 @@ parseMessageContent(MessageHeader const& header, Buffers const& buffers)
 */
 template <class Buffers, class Handler>
 std::pair<std::size_t, boost::system::error_code>
-invokeProtocolMessage(
+doInvokeProtocolMessage(
     Buffers const& buffers,
     Handler& handler,
     std::size_t& hint)
 {
     std::pair<std::size_t, boost::system::error_code> result = {0, {}};
 
-    auto const size = boost::asio::buffer_size(buffers);
+    auto const size = boost::asio::buffer_size(buffers.data());
 
     if (size == 0)
         return result;
 
-    auto header = detail::parseMessageHeader(result.second, buffers, size);
+    auto header =
+        detail::parseMessageHeader(result.second, buffers.data(), size);
 
     // If we can't parse the header then it may be that we don't have enough
     // bytes yet, or because the message was cut off (if error_code is success).

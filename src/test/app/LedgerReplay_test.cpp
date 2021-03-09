@@ -337,6 +337,21 @@ public:
     onEvtShutdown() override
     {
     }
+
+    bool
+    squelched(std::shared_ptr<Message> const&) override
+    {
+        return false;
+    }
+
+    std::pair<std::size_t, boost::system::error_code>
+    invokeProtocolMessage(
+        ripple::detail::MessageHeader const& header,
+        boost::beast::multi_buffer const& buffers,
+        std::size_t& hint) override
+    {
+        return {};
+    }
 };
 
 enum class PeerSetBehavior {

@@ -25,8 +25,13 @@
 #include <ripple/json/json_value.h>
 #include <ripple/overlay/Message.h>
 #include <ripple/protocol/PublicKey.h>
+#include <boost/beast/core/multi_buffer.hpp>
 
 namespace ripple {
+
+namespace detail {
+struct MessageHeader;
+}
 
 namespace Resource {
 class Charge;
@@ -101,12 +106,21 @@ public:
     virtual bool
     compressionEnabled() const = 0;
 
+    virtual std::pair<std::size_t, boost::system::error_code>
+    invokeProtocolMessage(
+        detail::MessageHeader const& header,
+        boost::beast::multi_buffer const& buffers,
+        std::size_t& hint) = 0;
+
 protected:
     virtual bool
     isSocketOpen() const = 0;
 
     virtual std::size_t
     queueSize() const = 0;
+
+    virtual bool
+    squelched(std::shared_ptr<Message> const&) = 0;
 };
 
 }  // namespace ripple

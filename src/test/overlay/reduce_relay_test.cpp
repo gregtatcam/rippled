@@ -22,6 +22,7 @@
 #include <ripple/overlay/Peer.h>
 #include <ripple/overlay/Slot.h>
 #include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/protocol/SecretKey.h>
 #include <ripple.pb.h>
 #include <test/jtx/Env.h>
@@ -198,6 +199,19 @@ public:
     void
     onEvtShutdown() override
     {
+    }
+    bool
+    squelched(std::shared_ptr<Message> const&) override
+    {
+        return false;
+    }
+    std::pair<std::size_t, boost::system::error_code>
+    invokeProtocolMessage(
+        ripple::detail::MessageHeader const& header,
+        boost::beast::multi_buffer const& buffers,
+        std::size_t& hint) override
+    {
+        return {};
     }
 };
 
