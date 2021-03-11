@@ -180,18 +180,7 @@ public:
     //
 
     void
-    add_active(std::shared_ptr<PeerImp_t> const& peer);
-
-    void
     remove(std::shared_ptr<PeerFinder::Slot> const& slot);
-
-    /** Called when a peer has connected successfully
-        This is called after the peer handshake has been completed and during
-        peer activation. At this point, the peer address and the public key
-        are known.
-    */
-    void
-    activate(std::shared_ptr<PeerImp_t> const& peer);
 
     // Called when an active peer is destroyed.
     void
@@ -298,6 +287,40 @@ public:
         return networkID_;
     }
 
+    void
+    addOutboundPeer(
+            std::unique_ptr<stream_type>&& stream_ptr,
+            boost::beast::multi_buffer const& buffers,
+            std::shared_ptr<PeerFinder::Slot>&& slot,
+            http_response_type&& response,
+            Resource::Consumer usage,
+            PublicKey const& publicKey,
+            ProtocolVersion protocol,
+            id_t id);
+
+    void
+    addInboundPeer(
+            id_t id,
+            std::shared_ptr<PeerFinder::Slot> const& slot,
+            http_request_type&& request,
+            PublicKey const& publicKey,
+            ProtocolVersion protocol,
+            Resource::Consumer consumer,
+            std::unique_ptr<stream_type>&& stream_ptr);
+
+    /** Called when a peer has connected successfully
+        This is called after the peer handshake has been completed and during
+        peer activation. At this point, the peer address and the public key
+        are known.
+    */
+    void
+    activate(std::shared_ptr<PeerImp_t> const& peer);
+
+private:
+
+    void
+    add_active(std::shared_ptr<PeerImp_t> const& peer);
+
     virtual std::shared_ptr<PeerImp_t>
     mkOutboundPeer(
         std::unique_ptr<stream_type>&& stream_ptr,
@@ -320,6 +343,7 @@ public:
         std::unique_ptr<stream_type>&& stream_ptr) = 0;
 
 protected:
+
     std::shared_ptr<Writer>
     makeRedirectResponse(
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -627,7 +651,7 @@ P2POverlayImpl<OverlayImplmnt>::onHandoff(
             }
         }
 
-        auto const peer = mkInboundPeer(
+        addInboundPeer(
             id,
             slot,
             std::move(request),
@@ -635,20 +659,7 @@ P2POverlayImpl<OverlayImplmnt>::onHandoff(
             *negotiatedVersion,
             consumer,
             std::move(stream_ptr));
-        {
-            // As we are not on the strand, run() must be called
-            // while holding the lock, otherwise new I/O can be
-            // queued after a call to stop().
-            std::lock_guard<decltype(mutex_)> lock(mutex_);
-            {
-                auto const result = m_peers.emplace(peer->slot(), peer);
-                assert(result.second);
-                (void)result.second;
-            }
-            list_.emplace(peer.get(), peer);
 
-            peer->run();
-        }
         handoff.moved = true;
         return handoff;
     }
@@ -1139,6 +1150,65 @@ P2POverlayImpl<OverlayImplmnt>::autoConnect()
     auto const result = m_peerFinder->autoconnect();
     for (auto addr : result)
         connect(addr);
+}
+
+template <typename OverlayImplmnt>
+void
+P2POverlayImpl<OverlayImplmnt>::addOutboundPeer(
+            std::unique_ptr<stream_type>&& stream_ptr,
+            boost::beast::multi_buffer const& buffers,
+            std::shared_ptr<PeerFinder::Slot>&& slot,
+            http_response_type&& response,
+            Resource::Consumer usage,
+            PublicKey const& publicKey,
+            ProtocolVersion protocol,
+            id_t id)
+{
+    auto peer = mkOutboundPeer(
+            std::move(stream_ptr),
+            buffers,
+            std::move(slot),
+            std::move(response),
+            usage,
+            publicKey,
+            protocol,
+            id);
+    add_active(peer);
+}
+
+template <typename OverlayImplmnt>
+void
+P2POverlayImpl<OverlayImplmnt>::addInboundPeer(
+            id_t id,
+            std::shared_ptr<PeerFinder::Slot> const& slot,
+            http_request_type&& request,
+            PublicKey const& publicKey,
+            ProtocolVersion protocol,
+            Resource::Consumer consumer,
+            std::unique_ptr<stream_type>&& stream_ptr)
+{
+    auto const peer = mkInboundPeer(
+            id,
+            slot,
+            std::move(request),
+            publicKey,
+            protocol,
+            consumer,
+            std::move(stream_ptr));
+    {
+        // As we are not on the strand, run() must be called
+        // while holding the lock, otherwise new I/O can be
+        // queued after a call to stop().
+        std::lock_guard<decltype(mutex_)> lock(mutex_);
+        {
+            auto const result = m_peers.emplace(peer->slot(), peer);
+            assert(result.second);
+            (void)result.second;
+        }
+        list_.emplace(peer.get(), peer);
+
+        peer->run();
+    }
 }
 
 }  // namespace ripple

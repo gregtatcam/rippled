@@ -510,7 +510,7 @@ ConnectAttempt<OverlayImplmnt>::processResponse()
         if (result != PeerFinder::Result::success)
             return fail("Outbound slots full");
 
-        auto peer = this->overlay_.mkOutboundPeer(
+        this->overlay_.addOutboundPeer(
             std::move(stream_ptr_),
             read_buf_,
             std::move(slot_),
@@ -519,7 +519,6 @@ ConnectAttempt<OverlayImplmnt>::processResponse()
             publicKey,
             *negotiatedProtocol,
             id_);
-        this->overlay_.add_active(peer);
     }
     catch (std::exception const& e)
     {
