@@ -289,24 +289,24 @@ public:
 
     void
     addOutboundPeer(
-            std::unique_ptr<stream_type>&& stream_ptr,
-            boost::beast::multi_buffer const& buffers,
-            std::shared_ptr<PeerFinder::Slot>&& slot,
-            http_response_type&& response,
-            Resource::Consumer usage,
-            PublicKey const& publicKey,
-            ProtocolVersion protocol,
-            id_t id);
+        std::unique_ptr<stream_type>&& stream_ptr,
+        boost::beast::multi_buffer const& buffers,
+        std::shared_ptr<PeerFinder::Slot>&& slot,
+        http_response_type&& response,
+        Resource::Consumer usage,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        id_t id);
 
     void
     addInboundPeer(
-            id_t id,
-            std::shared_ptr<PeerFinder::Slot> const& slot,
-            http_request_type&& request,
-            PublicKey const& publicKey,
-            ProtocolVersion protocol,
-            Resource::Consumer consumer,
-            std::unique_ptr<stream_type>&& stream_ptr);
+        id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot,
+        http_request_type&& request,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        Resource::Consumer consumer,
+        std::unique_ptr<stream_type>&& stream_ptr);
 
     /** Called when a peer has connected successfully
         This is called after the peer handshake has been completed and during
@@ -317,7 +317,6 @@ public:
     activate(std::shared_ptr<PeerImp_t> const& peer);
 
 private:
-
     void
     add_active(std::shared_ptr<PeerImp_t> const& peer);
 
@@ -343,7 +342,6 @@ private:
         std::unique_ptr<stream_type>&& stream_ptr) = 0;
 
 protected:
-
     std::shared_ptr<Writer>
     makeRedirectResponse(
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -1155,46 +1153,46 @@ P2POverlayImpl<OverlayImplmnt>::autoConnect()
 template <typename OverlayImplmnt>
 void
 P2POverlayImpl<OverlayImplmnt>::addOutboundPeer(
-            std::unique_ptr<stream_type>&& stream_ptr,
-            boost::beast::multi_buffer const& buffers,
-            std::shared_ptr<PeerFinder::Slot>&& slot,
-            http_response_type&& response,
-            Resource::Consumer usage,
-            PublicKey const& publicKey,
-            ProtocolVersion protocol,
-            id_t id)
+    std::unique_ptr<stream_type>&& stream_ptr,
+    boost::beast::multi_buffer const& buffers,
+    std::shared_ptr<PeerFinder::Slot>&& slot,
+    http_response_type&& response,
+    Resource::Consumer usage,
+    PublicKey const& publicKey,
+    ProtocolVersion protocol,
+    id_t id)
 {
     auto peer = mkOutboundPeer(
-            std::move(stream_ptr),
-            buffers,
-            std::move(slot),
-            std::move(response),
-            usage,
-            publicKey,
-            protocol,
-            id);
+        std::move(stream_ptr),
+        buffers,
+        std::move(slot),
+        std::move(response),
+        usage,
+        publicKey,
+        protocol,
+        id);
     add_active(peer);
 }
 
 template <typename OverlayImplmnt>
 void
 P2POverlayImpl<OverlayImplmnt>::addInboundPeer(
-            id_t id,
-            std::shared_ptr<PeerFinder::Slot> const& slot,
-            http_request_type&& request,
-            PublicKey const& publicKey,
-            ProtocolVersion protocol,
-            Resource::Consumer consumer,
-            std::unique_ptr<stream_type>&& stream_ptr)
+    id_t id,
+    std::shared_ptr<PeerFinder::Slot> const& slot,
+    http_request_type&& request,
+    PublicKey const& publicKey,
+    ProtocolVersion protocol,
+    Resource::Consumer consumer,
+    std::unique_ptr<stream_type>&& stream_ptr)
 {
     auto const peer = mkInboundPeer(
-            id,
-            slot,
-            std::move(request),
-            publicKey,
-            protocol,
-            consumer,
-            std::move(stream_ptr));
+        id,
+        slot,
+        std::move(request),
+        publicKey,
+        protocol,
+        consumer,
+        std::move(stream_ptr));
     {
         // As we are not on the strand, run() must be called
         // while holding the lock, otherwise new I/O can be
