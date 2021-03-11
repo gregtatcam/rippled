@@ -132,6 +132,9 @@ public:
     OverlayImpl&
     operator=(OverlayImpl const&) = delete;
 
+    PeerSequence
+    getActivePeers() const override;
+
     void checkTracking(std::uint32_t) override;
 
     void
@@ -174,6 +177,9 @@ public:
 
     Json::Value
     crawlShards(bool pubKey, std::uint32_t hops) override;
+
+    Json::Value
+    json() override;
 
     /** Called when the last link from a peer chain is received.
 
@@ -235,6 +241,32 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr) override;
+
+    // UnaryFunc will be called as
+    //  void(std::shared_ptr<PeerImplmnt>&&)
+    //
+    template <class UnaryFunc>
+    void
+    for_each(UnaryFunc&& f) const
+    {
+        std::vector<std::weak_ptr<PeerImp_t>> wp;
+        {
+            std::lock_guard lock(mutex_);
+
+            // Iterate over a copy of the peer list because peer
+            // destruction can invalidate iterators.
+            wp.reserve(ids_.size());
+
+            for (auto& x : ids_)
+                wp.push_back(x.second);
+        }
+
+        for (auto& w : wp)
+        {
+            if (auto p = w.lock())
+                f(std::move(p));
+        }
+    }
 
 private:
     void

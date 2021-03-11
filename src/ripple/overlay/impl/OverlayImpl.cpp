@@ -62,7 +62,7 @@ OverlayImpl::OverlayImpl(
     boost::asio::io_service& io_service,
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
-    : P2POverlay<PeerImp::Peer_t>(parent)
+    : P2POverlay(parent)
     , Overlay(parent)
     , P2POverlayImpl<OverlayImpl>(
           app,
@@ -616,11 +616,36 @@ OverlayImpl::processRequest(http_request_type const& req, Handoff& handoff)
         processHealth(req, handoff);
 }
 
+// Returns information on verified peers.
+Json::Value
+OverlayImpl::json()
+{
+    Json::Value json;
+    for (auto const& peer : getActivePeers())
+    {
+        json.append(peer->json());
+    }
+    return json;
+}
+
 void
 OverlayImpl::checkTracking(std::uint32_t index)
 {
     for_each(
         [index](std::shared_ptr<PeerImp>&& sp) { sp->checkTracking(index); });
+}
+
+Overlay::PeerSequence
+OverlayImpl::getActivePeers() const
+{
+    PeerSequence ret;
+    ret.reserve(size());
+
+    for_each([&ret](std::shared_ptr<PeerImp_t>&& sp) {
+        ret.emplace_back(std::move(sp));
+    });
+
+    return ret;
 }
 
 void

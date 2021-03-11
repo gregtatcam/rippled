@@ -62,17 +62,10 @@ namespace ripple {
 class BasicConfig;
 
 template <typename OverlayImplmnt>
-class P2POverlayImpl : virtual public P2POverlay<
-                           typename OverlayImplTraits<OverlayImplmnt>::Peer_t>,
-                       public P2POverlayEvents
+class P2POverlayImpl : virtual public P2POverlay, public P2POverlayEvents
 {
     friend OverlayImplmnt;
-    using Setup_t = typename P2POverlay<
-        typename OverlayImplTraits<OverlayImplmnt>::Peer_t>::Setup;
-    using PeerSequence_t = typename P2POverlay<
-        typename OverlayImplTraits<OverlayImplmnt>::Peer_t>::PeerSequence;
     using PeerImp_t = typename OverlayImplTraits<OverlayImplmnt>::PeerImp_t;
-    using Peer_t = typename OverlayImplTraits<OverlayImplmnt>::Peer_t;
 
 protected:
     using socket_type = boost::asio::ip::tcp::socket;
@@ -86,10 +79,11 @@ protected:
     boost::asio::io_service::strand strand_;
     mutable std::recursive_mutex mutex_;  // VFALCO use std::mutex
     std::condition_variable_any cond_;
-    boost::container::
-        flat_map<Child<OverlayImplmnt>*, std::weak_ptr<Child<OverlayImplmnt>>>
-            list_;
-    Setup_t setup_;
+    boost::container::flat_map<
+        ripple::Child<OverlayImplmnt>*,
+        std::weak_ptr<ripple::Child<OverlayImplmnt>>>
+        list_;
+    Setup setup_;
     beast::Journal const journal_;
     ServerHandler& serverHandler_;
     Resource::Manager& m_resourceManager;
@@ -108,7 +102,7 @@ protected:
 public:
     P2POverlayImpl(
         Application& app,
-        Setup_t const& setup,
+        Setup const& setup,
         Stoppable& parent,
         ServerHandler& serverHandler,
         Resource::Manager& resourceManager,
@@ -141,7 +135,7 @@ public:
         return serverHandler_;
     }
 
-    Setup_t const&
+    Setup const&
     setup() const
     {
         return setup_;
@@ -162,16 +156,10 @@ public:
     std::size_t
     size() const override;
 
-    Json::Value
-    json() override;
-
-    PeerSequence_t
-    getActivePeers() const override;
-
-    std::shared_ptr<Peer_t>
+    std::shared_ptr<P2Peer>
     findPeerByShortID(P2Peer::id_t const& id) const override;
 
-    std::shared_ptr<Peer_t>
+    std::shared_ptr<P2Peer>
     findPeerByPublicKey(PublicKey const& pubKey) override;
 
     //--------------------------------------------------------------------------
@@ -185,32 +173,6 @@ public:
     // Called when an active peer is destroyed.
     void
     onPeerDeactivate(P2Peer::id_t id);
-
-    // UnaryFunc will be called as
-    //  void(std::shared_ptr<PeerImplmnt>&&)
-    //
-    template <class UnaryFunc>
-    void
-    for_each(UnaryFunc&& f) const
-    {
-        std::vector<std::weak_ptr<PeerImp_t>> wp;
-        {
-            std::lock_guard lock(mutex_);
-
-            // Iterate over a copy of the peer list because peer
-            // destruction can invalidate iterators.
-            wp.reserve(ids_.size());
-
-            for (auto& x : ids_)
-                wp.push_back(x.second);
-        }
-
-        for (auto& w : wp)
-        {
-            if (auto p = w.lock())
-                f(std::move(p));
-        }
-    }
 
     static bool
     isPeerUpgrade(http_request_type const& request);
@@ -397,7 +359,7 @@ protected:
 
 public:
     void
-    remove(Child<OverlayImplmnt>& child);
+    remove(ripple::Child<OverlayImplmnt>& child);
 
 protected:
     void
@@ -470,7 +432,7 @@ protected:
 template <typename OverlayImplmnt>
 P2POverlayImpl<OverlayImplmnt>::P2POverlayImpl(
     Application& app,
-    Setup_t const& setup,
+    Setup const& setup,
     Stoppable& parent,
     ServerHandler& serverHandler,
     Resource::Manager& resourceManager,
@@ -478,7 +440,7 @@ P2POverlayImpl<OverlayImplmnt>::P2POverlayImpl(
     boost::asio::io_service& io_service,
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
-    : P2POverlay<Peer_t>(parent)
+    : P2POverlay(parent)
     , app_(app)
     , io_service_(io_service)
     , work_(boost::in_place(std::ref(io_service_)))
@@ -1039,35 +1001,8 @@ P2POverlayImpl<OverlayImplmnt>::limit()
     return m_peerFinder->config().maxPeers;
 }
 
-// Returns information on verified peers.
 template <typename OverlayImplmnt>
-Json::Value
-P2POverlayImpl<OverlayImplmnt>::json()
-{
-    Json::Value json;
-    for (auto const& peer : getActivePeers())
-    {
-        json.append(peer->json());
-    }
-    return json;
-}
-
-template <typename OverlayImplmnt>
-typename P2POverlayImpl<OverlayImplmnt>::PeerSequence_t
-P2POverlayImpl<OverlayImplmnt>::getActivePeers() const
-{
-    PeerSequence_t ret;
-    ret.reserve(size());
-
-    for_each([&ret](std::shared_ptr<PeerImp_t>&& sp) {
-        ret.emplace_back(std::move(sp));
-    });
-
-    return ret;
-}
-
-template <typename OverlayImplmnt>
-std::shared_ptr<typename OverlayImplTraits<OverlayImplmnt>::Peer_t>
+std::shared_ptr<P2Peer>
 P2POverlayImpl<OverlayImplmnt>::findPeerByShortID(P2Peer::id_t const& id) const
 {
     std::lock_guard lock(mutex_);
@@ -1080,7 +1015,7 @@ P2POverlayImpl<OverlayImplmnt>::findPeerByShortID(P2Peer::id_t const& id) const
 // A public key hash map was not used due to the peer connect/disconnect
 // update overhead outweighing the performance of a small set linear search.
 template <typename OverlayImplmnt>
-std::shared_ptr<typename OverlayImplTraits<OverlayImplmnt>::Peer_t>
+std::shared_ptr<P2Peer>
 P2POverlayImpl<OverlayImplmnt>::findPeerByPublicKey(PublicKey const& pubKey)
 {
     std::lock_guard lock(mutex_);
@@ -1099,7 +1034,7 @@ P2POverlayImpl<OverlayImplmnt>::findPeerByPublicKey(PublicKey const& pubKey)
 
 template <typename OverlayImplmnt>
 void
-P2POverlayImpl<OverlayImplmnt>::remove(Child<OverlayImplmnt>& child)
+P2POverlayImpl<OverlayImplmnt>::remove(ripple::Child<OverlayImplmnt>& child)
 {
     std::lock_guard lock(mutex_);
     list_.erase(&child);
@@ -1120,7 +1055,7 @@ P2POverlayImpl<OverlayImplmnt>::stop()
     // start calling stop() on them.  That guarantees
     // P2POverlayImpl<OverlayImplmnt, PeerImplmnt>::remove() won't be called
     // until vector<> children leaves scope.
-    std::vector<std::shared_ptr<Child<OverlayImplmnt>>> children;
+    std::vector<std::shared_ptr<ripple::Child<OverlayImplmnt>>> children;
     {
         std::lock_guard lock(mutex_);
         if (!work_)

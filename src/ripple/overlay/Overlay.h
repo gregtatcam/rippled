@@ -40,19 +40,48 @@ class context;
 namespace ripple {
 
 /** Manages the set of connected peers. */
-class Overlay : virtual public P2POverlay<Peer>
+class Overlay : virtual public P2POverlay
 {
 protected:
     // VFALCO NOTE The requirement of this constructor is an
     //             unfortunate problem with the API for
     //             Stoppable and PropertyStream
     //
-    Overlay(Stoppable& parent) : P2POverlay<Peer>(parent)
+    Overlay(Stoppable& parent) : P2POverlay(parent)
     {
     }
 
 public:
+    using PeerSequence = std::vector<std::shared_ptr<Peer>>;
+
     virtual ~Overlay() = default;
+
+    /** Returns a sequence representing the current list of peers.
+    The snapshot is made at the time of the call.
+*/
+    virtual PeerSequence
+    getActivePeers() const = 0;
+
+    /** Visit every active peer.
+     *
+     * The visitor must be invocable as:
+     *     Function(std::shared_ptr<Peer> const& peer);
+     *
+     * @param f the invocable to call with every peer
+     */
+    template <class Function>
+    void
+    foreach(Function f) const
+    {
+        for (auto const& p : getActivePeers())
+            f(p);
+    }
+
+    /** Return diagnostics on the status of all peers.
+    @deprecated This is superceded by PropertyStream
+*/
+    virtual Json::Value
+    json() = 0;
 
     /** Calls the checkTracking function on each peer
         @param index the value to pass to the peer's checkTracking function

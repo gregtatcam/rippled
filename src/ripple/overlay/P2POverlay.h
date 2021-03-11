@@ -59,7 +59,6 @@ protected:
 };
 
 /** Manages the set of connected peers. */
-template <typename Peer_t>
 class P2POverlay : public Stoppable, public beast::PropertyStream::Source
 {
 protected:
@@ -88,8 +87,6 @@ public:
         bool vlEnabled = true;
     };
 
-    using PeerSequence = std::vector<std::shared_ptr<Peer_t>>;
-
     virtual ~P2POverlay() = default;
 
     /** Conditionally accept an incoming HTTP request. */
@@ -117,40 +114,13 @@ public:
     virtual std::size_t
     size() const = 0;
 
-    /** Return diagnostics on the status of all peers.
-        @deprecated This is superceded by PropertyStream
-    */
-    virtual Json::Value
-    json() = 0;
-
-    /** Returns a sequence representing the current list of peers.
-        The snapshot is made at the time of the call.
-    */
-    virtual PeerSequence
-    getActivePeers() const = 0;
-
     /** Returns the peer with the matching short id, or null. */
-    virtual std::shared_ptr<Peer_t>
+    virtual std::shared_ptr<P2Peer>
     findPeerByShortID(P2Peer::id_t const& id) const = 0;
 
     /** Returns the peer with the matching public key, or null. */
-    virtual std::shared_ptr<Peer_t>
+    virtual std::shared_ptr<P2Peer>
     findPeerByPublicKey(PublicKey const& pubKey) = 0;
-
-    /** Visit every active peer.
-     *
-     * The visitor must be invocable as:
-     *     Function(std::shared_ptr<Peer> const& peer);
-     *
-     * @param f the invocable to call with every peer
-     */
-    template <class Function>
-    void
-    foreach(Function f) const
-    {
-        for (auto const& p : getActivePeers())
-            f(p);
-    }
 
     /** Increment and retrieve counters for total peer disconnects, and
      * disconnects we initiate for excessive resource consumption.
