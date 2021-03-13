@@ -24,9 +24,9 @@
 #include <ripple/basics/RangeSet.h>
 #include <ripple/beast/utility/WrappedSink.h>
 #include <ripple/overlay/P2Peer.h>
-#include <ripple/overlay/impl/Child.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/OverlayImplTraits.h>
+#include <ripple/overlay/impl/P2POverlayBaseImpl.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 #include <ripple/overlay/impl/TrafficCount.h>
@@ -58,14 +58,10 @@ std::chrono::milliseconds constexpr peerHighLatency{300};
 }  // namespace
 
 template <typename PeerImplmnt>
-class P2PeerImp
-    : public virtual P2Peer,
-      public P2PeerEvents,
-      public Child<typename OverlayImplTraits<PeerImplmnt>::OverlayImpl_t>
+class P2PeerImp : public virtual P2Peer,
+                  public P2PeerEvents,
+                  public P2POverlayBaseImpl::Child
 {
-    using OverlayImpl_t =
-        typename OverlayImplTraits<PeerImplmnt>::OverlayImpl_t;
-
 protected:
     using clock_type = std::chrono::steady_clock;
     using error_code = boost::system::error_code;
@@ -171,7 +167,7 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr,
-        OverlayImpl_t& overlay);
+        P2POverlayBaseImpl& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
@@ -188,7 +184,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
-        OverlayImpl_t& overlay);
+        P2POverlayBaseImpl& overlay);
 
     virtual ~P2PeerImp();
 
@@ -344,8 +340,8 @@ P2PeerImp<PeerImplmnt>::P2PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
-    OverlayImpl_t& overlay)
-    : Child<OverlayImpl_t>(overlay)
+    P2POverlayBaseImpl& overlay)
+    : P2POverlayBaseImpl::Child(overlay)
     , p2pApp_(app)
     , id_(id)
     , sink_(logs.journal("Peer"), makePrefix(id))
@@ -389,8 +385,8 @@ P2PeerImp<PeerImplmnt>::P2PeerImp(
     ProtocolVersion protocol,
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& stream_ptr,
-    OverlayImpl_t& overlay)
-    : Child<OverlayImpl_t>(overlay)
+    P2POverlayBaseImpl& overlay)
+    : P2POverlayBaseImpl::Child(overlay)
     , p2pApp_(app)
     , id_(id)
     , sink_(logs.journal("Peer"), makePrefix(id))
@@ -701,7 +697,7 @@ P2PeerImp<PeerImplmnt>::doAccept()
 
     onEvtAccept();
 
-    this->overlay_.activate(std::static_pointer_cast<PeerImplmnt>(shared()));
+    this->overlay_.activate(slot_);
 
     // XXX Set timer: connection is in grace period to be useful.
     // XXX Set timer: connection idle (idle may vary depending on connection

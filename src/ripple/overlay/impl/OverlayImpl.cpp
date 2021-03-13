@@ -93,7 +93,7 @@ OverlayImpl::~OverlayImpl()
 }
 
 OverlayImpl::Timer::Timer(OverlayImpl& overlay)
-    : Child<OverlayImpl>(overlay), timer_(overlay_.io_service_)
+    : P2POverlayBaseImpl::Child(overlay), timer_(overlay.io_service_)
 {
 }
 
@@ -108,31 +108,31 @@ void
 OverlayImpl::Timer::run()
 {
     timer_.expires_from_now(std::chrono::seconds(1));
-    timer_.async_wait(overlay_.strand_.wrap(std::bind(
+    timer_.async_wait(overlay().strand_.wrap(std::bind(
         &Timer::on_timer, shared_from_this(), std::placeholders::_1)));
 }
 
 void
 OverlayImpl::Timer::on_timer(error_code ec)
 {
-    if (ec || overlay_.isStopping())
+    if (ec || overlay().isStopping())
     {
         if (ec && ec != boost::asio::error::operation_aborted)
         {
-            JLOG(overlay_.journal_.error()) << "on_timer: " << ec.message();
+            JLOG(overlay().journal_.error()) << "on_timer: " << ec.message();
         }
         return;
     }
 
-    overlay_.m_peerFinder->once_per_second();
-    overlay_.sendEndpoints();
-    overlay_.autoConnect();
+    overlay().m_peerFinder->once_per_second();
+    overlay().sendEndpoints();
+    overlay().autoConnect();
 
-    if ((++overlay_.timer_count_ % Tuning::checkIdlePeers) == 0)
-        overlay_.deleteIdlePeers();
+    if ((++overlay().timer_count_ % Tuning::checkIdlePeers) == 0)
+        overlay().deleteIdlePeers();
 
     timer_.expires_from_now(std::chrono::seconds(1));
-    timer_.async_wait(overlay_.strand_.wrap(std::bind(
+    timer_.async_wait(overlay().strand_.wrap(std::bind(
         &Timer::on_timer, shared_from_this(), std::placeholders::_1)));
 }
 

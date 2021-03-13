@@ -29,7 +29,6 @@
 #include <ripple/overlay/Message.h>
 #include <ripple/overlay/Overlay.h>
 #include <ripple/overlay/Slot.h>
-#include <ripple/overlay/impl/Child.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/OverlayImplTraits.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
@@ -74,8 +73,8 @@ class OverlayImpl : public Overlay,
 private:
     using clock_type = std::chrono::steady_clock;
 
-    struct Timer : ripple::Child<OverlayImpl>,
-                   std::enable_shared_from_this<Timer>
+    struct Timer : public P2POverlayBaseImpl::Child,
+                   public std::enable_shared_from_this<Timer>
     {
         boost::asio::basic_waitable_timer<clock_type> timer_;
 
@@ -89,6 +88,12 @@ private:
 
         void
         on_timer(error_code ec);
+
+        OverlayImpl&
+        overlay()
+        {
+            return static_cast<OverlayImpl&>(overlay_);
+        }
     };
 
     Application& app_;

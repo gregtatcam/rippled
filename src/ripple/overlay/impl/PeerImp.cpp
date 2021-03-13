@@ -112,15 +112,21 @@ PeerImp::~PeerImp()
 {
     const bool inCluster{cluster()};
 
-    overlay_.deletePeer(id_);
-    overlay_.onPeerDeactivate(id_);
-    overlay_.peerFinder().on_closed(slot_);
-    overlay_.remove(slot_);
+    overlay().deletePeer(id_);
+    overlay().onPeerDeactivate(id_);
+    overlay().peerFinder().on_closed(slot_);
+    overlay().remove(slot_);
 
     if (inCluster)
     {
         JLOG(journal_.warn()) << name() << " left cluster";
     }
+}
+
+OverlayImpl&
+PeerImp::overlay()
+{
+    return static_cast<OverlayImpl&>(overlay_);
 }
 
 // Helper function to check for valid uint256 values in protobuf buffers
@@ -433,7 +439,7 @@ PeerImp::onTimer(error_code const& ec)
             (t == Tracking::unknown &&
              (duration > app_.config().MAX_UNKNOWN_TIME)))
         {
-            overlay_.peerFinder().on_failure(slot_);
+            overlay().peerFinder().on_failure(slot_);
             fail("Not useful");
             return;
         }
@@ -511,7 +517,7 @@ PeerImp::onEvtProtocolStart()
             });
     }
 
-    if (auto m = overlay_.getManifestsMessage())
+    if (auto m = overlay().getManifestsMessage())
         send(m);
 
     // Request shard info from peer
@@ -592,7 +598,7 @@ PeerImp::onMessageBegin(
     load_event_ =
         app_.getJobQueue().makeLoadEvent(jtPEER, protocolMessageName(type));
     fee_ = Resource::feeLightPeer;
-    overlay_.reportTraffic(
+    overlay().reportTraffic(
         TrafficCount::categorize(*m, type, true), true, static_cast<int>(size));
     JLOG(journal_.trace()) << "onMessageBegin: " << type << " " << size << " "
                            << uncompressed_size << " " << isCompressed;
@@ -625,7 +631,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMManifests> const& m)
     auto that = shared_from_this();
     app_.getJobQueue().addJob(
         jtVALIDATION_ut, "receiveManifests", [this, that, m](Job&) {
-            overlay_.onManifests(m, that);
+            overlay().onManifests(m, that);
         });
 }
 
@@ -713,7 +719,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
             if (item.address != beast::IP::Endpoint())
                 gossip.items.push_back(item);
         }
-        overlay_.resourceManager().importConsumers(name(), gossip);
+        overlay().resourceManager().importConsumers(name(), gossip);
     }
 
     // Calculate the cluster fee:
@@ -805,7 +811,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetPeerShardInfo> const& m)
         m->add_peerchain()->set_nodepubkey(
             publicKey_.data(), publicKey_.size());
 
-        overlay_.foreach(send_if_not(
+        overlay().foreach(send_if_not(
             std::make_shared<Message>(*m, protocol::mtGET_PEER_SHARD_INFO),
             match_peer(this)));
     }
@@ -836,7 +842,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMPeerShardInfo> const& m)
             return badData("Invalid pubKey");
         PublicKey peerPubKey(s);
 
-        if (auto peer = overlay_.findPeerByPublicKey(peerPubKey))
+        if (auto peer = overlay().findPeerByPublicKey(peerPubKey))
         {
             if (!m->has_nodepubkey())
                 m->set_nodepubkey(publicKey_.data(), publicKey_.size());
@@ -953,7 +959,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMPeerShardInfo> const& m)
         << m->shardindexes();
 
     if (m->has_lastlink())
-        overlay_.lastLink(id_);
+        overlay().lastLink(id_);
 }
 
 void
@@ -990,7 +996,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
     }
 
     if (!endpoints.empty())
-        overlay_.peerFinder().on_endpoints(slot_, endpoints);
+        overlay().peerFinder().on_endpoints(slot_, endpoints);
 }
 
 void
@@ -1053,7 +1059,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
         if (app_.getJobQueue().getJobCount(jtTRANSACTION) >
             app_.config().MAX_TRANSACTIONS)
         {
-            overlay_.incJqTransOverflow();
+            overlay().incJqTransOverflow();
             JLOG(p_journal_.info()) << "Transaction queue is full";
         }
         else if (app_.getLedgerMaster().getValidatedLedgerAge() > 4min)
@@ -1204,7 +1210,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMLedgerData> const& m)
 
     if (m->has_requestcookie())
     {
-        auto target = overlay_.findPeerByShortID(m->requestcookie());
+        auto target = overlay().findPeerByShortID(m->requestcookie());
         if (target)
         {
             m->clear_requestcookie();
@@ -1294,7 +1300,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMProposeSet> const& m)
         // receives within IDLED seconds since the message has been relayed.
         if (reduceRelayReady() && relayed &&
             (stopwatch().now() - *relayed) < reduce_relay::IDLED)
-            overlay_.updateSlotAndSquelch(
+            overlay().updateSlotAndSquelch(
                 suppression, publicKey, id_, protocol::mtPROPOSE_LEDGER);
         JLOG(p_journal_.trace()) << "Proposal: duplicate";
         return;
@@ -1897,7 +1903,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMValidation> const& m)
             // connections to peers.
             if (reduceRelayReady() && relayed &&
                 (stopwatch().now() - *relayed) < reduce_relay::IDLED)
-                overlay_.updateSlotAndSquelch(
+                overlay().updateSlotAndSquelch(
                     key, val->getSignerPublic(), id_, protocol::mtVALIDATION);
             JLOG(p_journal_.trace()) << "Validation: duplicate";
             return;
@@ -2289,7 +2295,7 @@ PeerImp::checkPropose(
         auto haveMessage = app_.overlay().relay(
             *packet, peerPos.suppressionID(), peerPos.publicKey());
         if (reduceRelayReady() && !haveMessage.empty())
-            overlay_.updateSlotAndSquelch(
+            overlay().updateSlotAndSquelch(
                 peerPos.suppressionID(),
                 peerPos.publicKey(),
                 std::move(haveMessage),
@@ -2322,10 +2328,10 @@ PeerImp::checkValidation(
             // not be relayed to these peers. But the message must be counted
             // as part of the squelch logic.
             auto haveMessage =
-                overlay_.relay(*packet, suppression, val->getSignerPublic());
+                overlay().relay(*packet, suppression, val->getSignerPublic());
             if (reduceRelayReady() && !haveMessage.empty())
             {
-                overlay_.updateSlotAndSquelch(
+                overlay().updateSlotAndSquelch(
                     suppression,
                     val->getSignerPublic(),
                     std::move(haveMessage),
@@ -2432,7 +2438,7 @@ PeerImp::getLedger(std::shared_ptr<protocol::TMGetLedger> const& m)
             {
                 JLOG(p_journal_.debug()) << "GetLedger: Routing Tx set request";
 
-                if (auto const v = getPeerWithTree(overlay_, txHash, this))
+                if (auto const v = getPeerWithTree(overlay(), txHash, this))
                 {
                     packet.set_requestcookie(id());
                     v->send(std::make_shared<Message>(
@@ -2507,7 +2513,7 @@ PeerImp::getLedger(std::shared_ptr<protocol::TMGetLedger> const& m)
                 // We don't have the requested ledger
                 // Search for a peer who might
                 auto const v = getPeerWithLedger(
-                    overlay_,
+                    overlay(),
                     ledgerhash,
                     packet.has_ledgerseq() ? packet.ledgerseq() : 0,
                     this);

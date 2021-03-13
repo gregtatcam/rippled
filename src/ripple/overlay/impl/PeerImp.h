@@ -25,7 +25,6 @@
 #include <ripple/basics/Log.h>
 #include <ripple/basics/RangeSet.h>
 #include <ripple/overlay/Squelch.h>
-#include <ripple/overlay/impl/Child.h>
 #include <ripple/overlay/impl/OverlayImplTraits.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
@@ -313,6 +312,9 @@ private:
 
         return true;
     }
+
+    OverlayImpl&
+    overlay();
 
 public:
     /** Calls the handler for up to one protocol message in the passed buffers.
