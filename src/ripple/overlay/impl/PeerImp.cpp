@@ -2754,11 +2754,6 @@ PeerImp::invokeProtocolMessage(
     std::size_t& hint)
 {
     using namespace std::chrono;
-    auto finish = duration_cast<nanoseconds>(
-                      high_resolution_clock::now().time_since_epoch())
-                      .count();
-    JLOG(journal_.info()) << "invoke time " << header.message_type << " "
-                          << (finish - start);
 
     auto buffers = buffersmb.data();
 
