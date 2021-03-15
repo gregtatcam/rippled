@@ -1,7 +1,9 @@
-#[===================================================================[
+#[== == == == == == == == == == == == == == == == == == == == == == == == == \
+  == == == == == == == == =[
    xrpl_core
    core functionality, useable by some client software perhaps
-#]===================================================================]
+#] == == == == == == == == == == == == == == == == == == == == == == == == == \
+    == == == == == == == == =]
 
 file (GLOB_RECURSE rb_headers
   src/ripple/beast/*.h
@@ -533,6 +535,7 @@ target_sources (rippled PRIVATE
   src/ripple/overlay/impl/Message.cpp
   src/ripple/overlay/impl/OverlayImpl.cpp
   src/ripple/overlay/impl/P2POverlayBaseImpl.cpp
+  src/ripple/overlay/impl/P2PeerImp.cpp
   src/ripple/overlay/impl/PeerImp.cpp
   src/ripple/overlay/impl/PeerReservationTable.cpp
   src/ripple/overlay/impl/PeerSet.cpp
