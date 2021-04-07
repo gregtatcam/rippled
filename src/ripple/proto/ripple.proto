@@ -29,6 +29,7 @@ enum MessageType
     mtPROOF_PATH_RESPONSE   = 58;
     mtREPLAY_DELTA_REQ      = 59;
     mtREPLAY_DELTA_RESPONSE = 60;
+    mtPROTOCOL_STARTED      = 61;
 }
 
 // token, iterations, target, challenge = issue demand for proof of work
@@ -406,3 +407,6 @@ message TMReplayDeltaResponse
     optional TMReplyError error = 4;
 }
 
+message TMProtocolStarted
+{
+}

@@ -481,6 +481,10 @@ invokeProtocolMessage(
             success = detail::invoke<protocol::TMReplayDeltaResponse>(
                 *header, buffers, handler);
             break;
+        case protocol::mtPROTOCOL_STARTED:
+            success = detail::invoke<protocol::TMProtocolStarted>(
+                    *header, buffers, handler);
+            break;
         default:
             handler.onMessageUnknown(header->message_type);
             success = true;

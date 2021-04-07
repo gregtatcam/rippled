@@ -748,34 +748,32 @@ PeerImp::domain() const
 // Protocol logic
 
 void
-PeerImp::doProtocolStart()
+PeerImp::sendOnProtocolStart()
 {
-    onReadMessage(error_code(), 0);
-
     // Send all the validator lists that have been loaded
     if (inbound_ && supportsFeature(ProtocolFeature::ValidatorListPropagation))
     {
         app_.validators().for_each_available(
-            [&](std::string const& manifest,
-                std::uint32_t version,
-                std::map<std::size_t, ValidatorBlobInfo> const& blobInfos,
-                PublicKey const& pubKey,
-                std::size_t maxSequence,
-                uint256 const& hash) {
-                ValidatorList::sendValidatorList(
-                    *this,
-                    0,
-                    pubKey,
-                    maxSequence,
-                    version,
-                    manifest,
-                    blobInfos,
-                    app_.getHashRouter(),
-                    p_journal_);
+                [&](std::string const& manifest,
+                    std::uint32_t version,
+                    std::map<std::size_t, ValidatorBlobInfo> const& blobInfos,
+                    PublicKey const& pubKey,
+                    std::size_t maxSequence,
+                    uint256 const& hash) {
+                    ValidatorList::sendValidatorList(
+                            *this,
+                            0,
+                            pubKey,
+                            maxSequence,
+                            version,
+                            manifest,
+                            blobInfos,
+                            app_.getHashRouter(),
+                            p_journal_);
 
-                // Don't send it next time.
-                app_.getHashRouter().addSuppressionPeer(hash, id_);
-            });
+                    // Don't send it next time.
+                    app_.getHashRouter().addSuppressionPeer(hash, id_);
+                });
     }
 
     if (auto m = overlay_.getManifestsMessage())
@@ -785,6 +783,14 @@ PeerImp::doProtocolStart()
     protocol::TMGetPeerShardInfo tmGPS;
     tmGPS.set_hops(0);
     send(std::make_shared<Message>(tmGPS, protocol::mtGET_PEER_SHARD_INFO));
+}
+
+void
+PeerImp::doProtocolStart()
+{
+    onReadMessage(error_code(), 0);
+
+    sendOnProtocolStart();
 
     setTimer();
 }
@@ -2443,6 +2449,12 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
 
     JLOG(p_journal_.debug())
         << "onMessage: TMSquelch " << slice << " " << id() << " " << duration;
+}
+
+void
+PeerImp::onMessage(std::shared_ptr<protocol::TMProtocolStarted> const& m)
+{
+    sendOnProtocolStart();
 }
 
 //--------------------------------------------------------------------------

@@ -537,6 +537,8 @@ public:
     onMessage(std::shared_ptr<protocol::TMReplayDeltaRequest> const& m);
     void
     onMessage(std::shared_ptr<protocol::TMReplayDeltaResponse> const& m);
+    void
+    onMessage(std::shared_ptr<protocol::TMProtocolStarted> const& m);
 
 private:
     //--------------------------------------------------------------------------
@@ -576,6 +578,9 @@ private:
 
     void
     getLedger(std::shared_ptr<protocol::TMGetLedger> const& packet);
+
+    void
+    sendOnProtocolStart();
 };
 
 //------------------------------------------------------------------------------
