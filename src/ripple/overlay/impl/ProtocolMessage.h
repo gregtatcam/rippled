@@ -483,7 +483,7 @@ invokeProtocolMessage(
             break;
         case protocol::mtPROTOCOL_STARTED:
             success = detail::invoke<protocol::TMProtocolStarted>(
-                    *header, buffers, handler);
+                *header, buffers, handler);
             break;
         default:
             handler.onMessageUnknown(header->message_type);
