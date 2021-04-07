@@ -30,6 +30,7 @@
 #include <ripple/nodestore/DatabaseShard.h>
 #include <ripple/overlay/Cluster.h>
 #include <ripple/overlay/impl/ConnectAttempt.h>
+#include <ripple/overlay/impl/InboundConnection.h>
 #include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/predicates.h>
 #include <ripple/peerfinder/make_Manager.h>
@@ -292,7 +293,7 @@ OverlayImpl::onHandoff(
             }
         }
 
-        auto const peer = std::make_shared<PeerImp>(
+        auto const inboundConnection = std::make_shared<InboundConnection>(
             app_,
             id,
             slot,
@@ -302,20 +303,9 @@ OverlayImpl::onHandoff(
             consumer,
             std::move(stream_ptr),
             *this);
-        {
-            // As we are not on the strand, run() must be called
-            // while holding the lock, otherwise new I/O can be
-            // queued after a call to stop().
-            std::lock_guard<decltype(mutex_)> lock(mutex_);
-            {
-                auto const result = m_peers.emplace(peer->slot(), peer);
-                assert(result.second);
-                (void)result.second;
-            }
-            list_.emplace(peer.get(), peer);
-
-            peer->run();
-        }
+        std::lock_guard lock(mutex_);
+        list_.emplace(inboundConnection.get(), inboundConnection);
+        inboundConnection->run();
         handoff.moved = true;
         return handoff;
     }

@@ -438,9 +438,6 @@ private:
     void
     onShutdown(error_code ec);
 
-    void
-    doAccept();
-
     std::string
     name() const;
 

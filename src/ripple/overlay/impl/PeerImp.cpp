@@ -118,6 +118,11 @@ PeerImp::PeerImp(
           app_.config().LEDGER_REPLAY))
     , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
 {
+    if (auto member = app_.cluster().member(publicKey_))
+    {
+        name_ = *member;
+        JLOG(journal_.info()) << "Cluster name: " << *member;
+    }
     JLOG(journal_.debug()) << " compression enabled "
                            << (compressionEnabled_ == Compressed::On)
                            << " vp reduce-relay enabled "
@@ -196,10 +201,7 @@ PeerImp::run()
             previousLedgerHash_ = *previous;
     }
 
-    if (inbound_)
-        doAccept();
-    else
-        doProtocolStart();
+    doProtocolStart();
 
     // Anything else that needs to be done with the connection should be
     // done in doProtocolStart
@@ -727,71 +729,6 @@ PeerImp::onShutdown(error_code ec)
 }
 
 //------------------------------------------------------------------------------
-void
-PeerImp::doAccept()
-{
-    assert(read_buffer_.size() == 0);
-
-    JLOG(journal_.debug()) << "doAccept: " << remote_address_;
-
-    auto const sharedValue = makeSharedValue(*stream_ptr_, journal_);
-
-    // This shouldn't fail since we already computed
-    // the shared value successfully in OverlayImpl
-    if (!sharedValue)
-        return fail("makeSharedValue: Unexpected failure");
-
-    JLOG(journal_.info()) << "Protocol: " << to_string(protocol_);
-    JLOG(journal_.info()) << "Public Key: "
-                          << toBase58(TokenType::NodePublic, publicKey_);
-
-    if (auto member = app_.cluster().member(publicKey_))
-    {
-        {
-            std::unique_lock lock{nameMutex_};
-            name_ = *member;
-        }
-        JLOG(journal_.info()) << "Cluster name: " << *member;
-    }
-
-    overlay_.activate(shared_from_this());
-
-    // XXX Set timer: connection is in grace period to be useful.
-    // XXX Set timer: connection idle (idle may vary depending on connection
-    // type.)
-
-    auto write_buffer = std::make_shared<boost::beast::multi_buffer>();
-
-    boost::beast::ostream(*write_buffer) << makeResponse(
-        !overlay_.peerFinder().config().peerPrivate,
-        request_,
-        overlay_.setup().public_ip,
-        remote_address_.address(),
-        *sharedValue,
-        overlay_.setup().networkID,
-        protocol_,
-        app_);
-
-    // Write the whole buffer and only start protocol when that's done.
-    boost::asio::async_write(
-        stream_,
-        write_buffer->data(),
-        boost::asio::transfer_all(),
-        bind_executor(
-            strand_,
-            [this, write_buffer, self = shared_from_this()](
-                error_code ec, std::size_t bytes_transferred) {
-                if (!socket_.is_open())
-                    return;
-                if (ec == boost::asio::error::operation_aborted)
-                    return;
-                if (ec)
-                    return fail("onWriteResponse", ec);
-                if (write_buffer->size() == bytes_transferred)
-                    return doProtocolStart();
-                return fail("Failed to write header");
-            }));
-}
 
 std::string
 PeerImp::name() const
