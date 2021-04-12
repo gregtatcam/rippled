@@ -21,9 +21,9 @@
 #define RIPPLE_OVERLAY_OVERLAY_H_INCLUDED
 
 #include <ripple/json/json_value.h>
+#include <ripple/overlay/P2POverlay.h>
 #include <ripple/overlay/Peer.h>
 #include <ripple/overlay/PeerSet.h>
-#include <ripple/overlay/P2POverlay.h>
 #include <ripple/server/Handoff.h>
 #include <functional>
 #include <memory>
@@ -44,7 +44,6 @@ namespace ripple {
 class Overlay : public P2POverlay
 {
 protected:
-
     // VFALCO NOTE The requirement of this constructor is an
     //             unfortunate problem with the API for
     //             Stoppable and PropertyStream
