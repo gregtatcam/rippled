@@ -45,12 +45,12 @@ protected:
     //             Stoppable and PropertyStream
     //
     P2POverlay(Stoppable& parent)
-    : Stoppable("P2POverlay", parent), beast::PropertyStream::Source("peers")
+        : Stoppable("P2POverlay", parent)
+        , beast::PropertyStream::Source("peers")
     {
     }
 
 public:
-
     struct Setup
     {
         explicit Setup() = default;
@@ -70,9 +70,9 @@ public:
     /** Conditionally accept an incoming HTTP request. */
     virtual Handoff
     onHandoff(
-            std::unique_ptr<stream_type>&& bundle,
-            http_request_type&& request,
-            boost::asio::ip::tcp::endpoint remote_address) = 0;
+        std::unique_ptr<stream_type>&& bundle,
+        http_request_type&& request,
+        boost::asio::ip::tcp::endpoint remote_address) = 0;
 
     /** Establish a peer connection to the specified endpoint.
         The call returns immediately, the connection attempt is
@@ -115,4 +115,4 @@ public:
 
 }  // namespace ripple
 
-#endif //RIPPLE_OVERLAY_P2POVERLAY_H_INCLUDED
+#endif  // RIPPLE_OVERLAY_P2POVERLAY_H_INCLUDED
