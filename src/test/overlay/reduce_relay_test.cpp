@@ -19,7 +19,7 @@
 #include <ripple/basics/random.h>
 #include <ripple/beast/unit_test.h>
 #include <ripple/overlay/Message.h>
-#include <ripple/overlay/Peer.h>
+#include <ripple/overlay/P2Peer.h>
 #include <ripple/overlay/Slot.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/protocol/SecretKey.h>
@@ -41,8 +41,8 @@ class Link;
 
 using MessageSPtr = std::shared_ptr<Message>;
 using LinkSPtr = std::shared_ptr<Link>;
-using PeerSPtr = std::shared_ptr<Peer>;
-using PeerWPtr = std::weak_ptr<Peer>;
+using PeerSPtr = std::shared_ptr<P2Peer>;
+using PeerWPtr = std::weak_ptr<P2Peer>;
 using SquelchCB =
     std::function<void(PublicKey const&, PeerWPtr const&, std::uint32_t)>;
 using UnsquelchCB = std::function<void(PublicKey const&, PeerWPtr const&)>;
@@ -55,7 +55,7 @@ static constexpr std::uint32_t MAX_MESSAGES = 200000;
 /** Simulate two entities - peer directly connected to the server
  * (via squelch in PeerSim) and PeerImp (via Overlay)
  */
-class PeerPartial : public Peer
+class PeerPartial : public P2Peer
 {
 public:
     virtual ~PeerPartial()
@@ -81,24 +81,10 @@ public:
     {
         return {};
     }
-    void
-    charge(Resource::Charge const& fee) override
-    {
-    }
     bool
     cluster() const override
     {
         return false;
-    }
-    bool
-    isHighLatency() const override
-    {
-        return false;
-    }
-    int
-    getScore(bool) const override
-    {
-        return 0;
     }
     PublicKey const&
     getNodePublic() const override
@@ -111,53 +97,10 @@ public:
     {
         return {};
     }
-    bool
-    supportsFeature(ProtocolFeature f) const override
+    id_t
+    id() const override
     {
-        return false;
-    }
-    std::optional<std::size_t>
-    publisherListSequence(PublicKey const&) const override
-    {
-        return {};
-    }
-    void
-    setPublisherListSequence(PublicKey const&, std::size_t const) override
-    {
-    }
-    uint256 const&
-    getClosedLedgerHash() const override
-    {
-        static uint256 hash{};
-        return hash;
-    }
-    bool
-    hasLedger(uint256 const& hash, std::uint32_t seq) const override
-    {
-        return false;
-    }
-    void
-    ledgerRange(std::uint32_t& minSeq, std::uint32_t& maxSeq) const override
-    {
-    }
-    bool
-    hasShard(std::uint32_t shardIndex) const override
-    {
-        return false;
-    }
-    bool
-    hasTxSet(uint256 const& hash) const override
-    {
-        return false;
-    }
-    void
-    cycleStatus() override
-    {
-    }
-    bool
-    hasRange(std::uint32_t uMin, std::uint32_t uMax) override
-    {
-        return false;
+        return 0;
     }
     bool
     compressionEnabled() const override

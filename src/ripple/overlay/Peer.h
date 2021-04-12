@@ -24,6 +24,7 @@
 #include <ripple/beast/net/IPEndpoint.h>
 #include <ripple/json/json_value.h>
 #include <ripple/overlay/Message.h>
+#include <ripple/overlay/P2Peer.h>
 #include <ripple/protocol/PublicKey.h>
 
 namespace ripple {
@@ -47,48 +48,18 @@ class Peer
 public:
     using ptr = std::shared_ptr<Peer>;
 
-    /** Uniquely identifies a peer.
-        This can be stored in tables to find the peer later. Callers
-        can discover if the peer is no longer connected and make
-        adjustments as needed.
-    */
-    using id_t = std::uint32_t;
-
+    using id_t = P2Peer::id_t;
     virtual ~Peer() = default;
-
-    //
-    // Network
-    //
-
-    virtual void
-    send(std::shared_ptr<Message> const& m) = 0;
-
-    virtual beast::IP::Endpoint
-    getRemoteAddress() const = 0;
 
     /** Adjust this peer's load balance based on the type of load imposed. */
     virtual void
     charge(Resource::Charge const& fee) = 0;
-
-    //
-    // Identity
-    //
-
-    virtual id_t
-    id() const = 0;
-
-    /** Returns `true` if this connection is a member of the cluster. */
-    virtual bool
-    cluster() const = 0;
 
     virtual bool
     isHighLatency() const = 0;
 
     virtual int
     getScore(bool) const = 0;
-
-    virtual PublicKey const&
-    getNodePublic() const = 0;
 
     virtual Json::Value
     json() = 0;
@@ -121,8 +92,8 @@ public:
     virtual bool
     hasRange(std::uint32_t uMin, std::uint32_t uMax) = 0;
 
-    virtual bool
-    compressionEnabled() const = 0;
+    virtual P2Peer&
+    p2p() = 0;
 };
 
 }  // namespace ripple

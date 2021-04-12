@@ -20,6 +20,7 @@
 #include <ripple/json/json_reader.h>
 #include <ripple/overlay/Cluster.h>
 #include <ripple/overlay/impl/ConnectAttempt.h>
+#include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 
@@ -377,7 +378,7 @@ ConnectAttempt::processResponse()
         if (result != PeerFinder::Result::success)
             return fail("Outbound slots full");
 
-        auto const peer = std::make_shared<PeerImp>(
+        auto const peer = std::make_shared<PeerImp<P2PeerImp>>(
             app_,
             std::move(stream_ptr_),
             read_buf_.data(),

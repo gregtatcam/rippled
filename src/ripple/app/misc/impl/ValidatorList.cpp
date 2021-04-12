@@ -712,8 +712,8 @@ ValidatorList::sendValidatorList(
         {
             if (message.message)
             {
-                peer.send(message.message);
-                hashRouter.addSuppressionPeer(message.hash, peer.id());
+                peer.p2p().send(message.message);
+                hashRouter.addSuppressionPeer(message.hash, peer.p2p().id());
                 sent = true;
             }
         }
@@ -729,16 +729,16 @@ ValidatorList::sendValidatorList(
                     << " validator list(s) for " << strHex(publisherKey)
                     << " with sequence range " << peerSequence << ", "
                     << newPeerSequence << " to "
-                    << peer.getRemoteAddress().to_string() << " [" << peer.id()
-                    << "]";
+                    << peer.p2p().getRemoteAddress().to_string() << " ["
+                    << peer.p2p().id() << "]";
             else
             {
                 assert(numVLs == 1);
                 JLOG(j.debug())
                     << "Sent validator list for " << strHex(publisherKey)
                     << " with sequence " << newPeerSequence << " to "
-                    << peer.getRemoteAddress().to_string() << " [" << peer.id()
-                    << "]";
+                    << peer.p2p().getRemoteAddress().to_string() << " ["
+                    << peer.p2p().id() << "]";
             }
         }
     }
@@ -835,7 +835,7 @@ ValidatorList::broadcastBlobs(
         // the peer, and foreach provides a const&
         for (auto& peer : overlay.getActivePeers())
         {
-            if (toSkip->count(peer->id()) == 0)
+            if (toSkip->count(peer->p2p().id()) == 0)
             {
                 auto const peerSequence =
                     peer->publisherListSequence(publisherKey).value_or(0);
@@ -858,7 +858,7 @@ ValidatorList::broadcastBlobs(
                         j);
                     // Even if the peer doesn't support the messages,
                     // suppress it so it'll be ignored next time.
-                    hashRouter.addSuppressionPeer(hash, peer->id());
+                    hashRouter.addSuppressionPeer(hash, peer->p2p().id());
                 }
             }
         }

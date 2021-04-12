@@ -839,7 +839,7 @@ LedgerMaster::getFetchPack(LedgerIndex missing, InboundLedger::Reason reason)
         tmBH.set_ledgerhash(haveHash->begin(), 32);
         auto packet = std::make_shared<Message>(tmBH, protocol::mtGET_OBJECTS);
 
-        target->send(packet);
+        target->p2p().send(packet);
         JLOG(m_journal.trace()) << "Requested fetch pack for " << missing;
     }
     else
@@ -2320,7 +2320,7 @@ LedgerMaster::makeFetchPack(
             << "Built fetch pack with " << reply.objects().size() << " nodes ("
             << msg->getBufferSize() << " bytes)";
 
-        peer->send(msg);
+        peer->p2p().send(msg);
     }
     catch (std::exception const&)
     {

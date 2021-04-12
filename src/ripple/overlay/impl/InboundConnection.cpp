@@ -18,6 +18,7 @@
 //=============================================================================
 #include <ripple/overlay/Cluster.h>
 #include <ripple/overlay/impl/InboundConnection.h>
+#include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/PeerImp.h>
 
 #include <boost/beast/core/ostream.hpp>
@@ -165,7 +166,7 @@ InboundConnection::close()
 void
 InboundConnection::startProtocol()
 {
-    auto const peer = std::make_shared<PeerImp>(
+    auto const peer = std::make_shared<PeerImp<P2PeerImp>>(
         app_,
         id_,
         slot_,

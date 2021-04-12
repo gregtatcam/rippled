@@ -88,8 +88,8 @@ LedgerDeltaAcquire::trigger(std::size_t limit, ScopedLockType& sl)
             [this](auto peer) {
                 if (peer->supportsFeature(ProtocolFeature::LedgerReplay))
                 {
-                    JLOG(journal_.trace())
-                        << "Add a peer " << peer->id() << " for " << hash_;
+                    JLOG(journal_.trace()) << "Add a peer " << peer->p2p().id()
+                                           << " for " << hash_;
                     protocol::TMReplayDeltaRequest request;
                     request.set_ledgerhash(hash_.data(), hash_.size());
                     peerSet_->sendRequest(request, peer);

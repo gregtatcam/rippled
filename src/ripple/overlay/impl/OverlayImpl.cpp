@@ -428,7 +428,7 @@ OverlayImpl::connect(beast::IP::Endpoint const& remote_endpoint)
 
 // Adds a peer that is already handshaked and active
 void
-OverlayImpl::add_active(std::shared_ptr<PeerImp> const& peer)
+OverlayImpl::add_active(std::shared_ptr<PeerImp<P2PeerImp>> const& peer)
 {
     std::lock_guard lock(mutex_);
 
@@ -441,7 +441,7 @@ OverlayImpl::add_active(std::shared_ptr<PeerImp> const& peer)
     {
         auto const result = ids_.emplace(
             std::piecewise_construct,
-            std::make_tuple(peer->id()),
+            std::make_tuple(peer->p2p().id()),
             std::make_tuple(peer));
         assert(result.second);
         (void)result.second;
@@ -449,10 +449,11 @@ OverlayImpl::add_active(std::shared_ptr<PeerImp> const& peer)
 
     list_.emplace(peer.get(), peer);
 
-    JLOG(journal_.debug()) << "activated " << peer->getRemoteAddress() << " ("
-                           << peer->id() << ":"
+    JLOG(journal_.debug()) << "activated " << peer->p2p().getRemoteAddress()
+                           << " (" << peer->p2p().id() << ":"
                            << toBase58(
-                                  TokenType::NodePublic, peer->getNodePublic())
+                                  TokenType::NodePublic,
+                                  peer->p2p().getNodePublic())
                            << ")";
 
     // As we are not on the strand, run() must be called
@@ -614,23 +615,24 @@ OverlayImpl::onWrite(beast::PropertyStream::Map& stream)
     are known.
 */
 void
-OverlayImpl::activate(std::shared_ptr<PeerImp> const& peer)
+OverlayImpl::activate(std::shared_ptr<PeerImp<P2PeerImp>> const& peer)
 {
     // Now track this peer
     {
         std::lock_guard lock(mutex_);
         auto const result(ids_.emplace(
             std::piecewise_construct,
-            std::make_tuple(peer->id()),
+            std::make_tuple(peer->p2p().id()),
             std::make_tuple(peer)));
         assert(result.second);
         (void)result.second;
     }
 
-    JLOG(journal_.debug()) << "activated " << peer->getRemoteAddress() << " ("
-                           << peer->id() << ":"
+    JLOG(journal_.debug()) << "activated " << peer->p2p().getRemoteAddress()
+                           << " (" << peer->p2p().id() << ":"
                            << toBase58(
-                                  TokenType::NodePublic, peer->getNodePublic())
+                                  TokenType::NodePublic,
+                                  peer->p2p().getNodePublic())
                            << ")";
 
     // We just accepted this peer so we have non-zero active peers
@@ -647,7 +649,7 @@ OverlayImpl::onPeerDeactivate(Peer::id_t id)
 void
 OverlayImpl::onManifests(
     std::shared_ptr<protocol::TMManifests> const& m,
-    std::shared_ptr<PeerImp> const& from)
+    std::shared_ptr<PeerImp<P2PeerImp>> const& from)
 {
     auto const n = m->list_size();
     auto const& journal = from->pjournal();
@@ -694,7 +696,9 @@ OverlayImpl::onManifests(
 
     if (!relay.list().empty())
         for_each([m2 = std::make_shared<Message>(relay, protocol::mtMANIFESTS)](
-                     std::shared_ptr<PeerImp>&& p) { p->send(m2); });
+                     std::shared_ptr<PeerImp<P2PeerImp>>&& p) {
+            p->p2p().send(m2);
+        });
 }
 
 void
@@ -756,8 +760,8 @@ OverlayImpl::crawlShards(bool pubKey, std::uint32_t hops)
     }
 
     // Combine the shard info from peers and their sub peers
-    hash_map<PublicKey, PeerImp::ShardInfo> peerShardInfo;
-    for_each([&](std::shared_ptr<PeerImp> const& peer) {
+    hash_map<PublicKey, PeerImp<P2PeerImp>::ShardInfo> peerShardInfo;
+    for_each([&](std::shared_ptr<PeerImp<P2PeerImp>> const& peer) {
         if (auto psi = peer->getPeerShardInfo())
         {
             // e is non-const so it may be moved from
@@ -826,16 +830,16 @@ OverlayImpl::getOverlayInfo()
     Json::Value jv;
     auto& av = jv["active"] = Json::Value(Json::arrayValue);
 
-    for_each([&](std::shared_ptr<PeerImp>&& sp) {
+    for_each([&](std::shared_ptr<PeerImp<P2PeerImp>>&& sp) {
         auto& pv = av.append(Json::Value(Json::objectValue));
         pv[jss::public_key] = base64_encode(
-            sp->getNodePublic().data(), sp->getNodePublic().size());
+            sp->p2p().getNodePublic().data(), sp->p2p().getNodePublic().size());
         pv[jss::type] = sp->slot()->inbound() ? "in" : "out";
         pv[jss::uptime] = static_cast<std::uint32_t>(
             duration_cast<seconds>(sp->uptime()).count());
         if (sp->crawl())
         {
-            pv[jss::ip] = sp->getRemoteAddress().address().to_string();
+            pv[jss::ip] = sp->p2p().getRemoteAddress().address().to_string();
             if (sp->slot()->inbound())
             {
                 if (auto port = sp->slot()->listening_port())
@@ -843,7 +847,8 @@ OverlayImpl::getOverlayInfo()
             }
             else
             {
-                pv[jss::port] = std::to_string(sp->getRemoteAddress().port());
+                pv[jss::port] =
+                    std::to_string(sp->p2p().getRemoteAddress().port());
             }
         }
 
@@ -1158,7 +1163,7 @@ OverlayImpl::getActivePeers() const
     Overlay::PeerSequence ret;
     ret.reserve(size());
 
-    for_each([&ret](std::shared_ptr<PeerImp>&& sp) {
+    for_each([&ret](std::shared_ptr<PeerImp<P2PeerImp>>&& sp) {
         ret.emplace_back(std::move(sp));
     });
 
@@ -1168,8 +1173,9 @@ OverlayImpl::getActivePeers() const
 void
 OverlayImpl::checkTracking(std::uint32_t index)
 {
-    for_each(
-        [index](std::shared_ptr<PeerImp>&& sp) { sp->checkTracking(index); });
+    for_each([index](std::shared_ptr<PeerImp<P2PeerImp>>&& sp) {
+        sp->checkTracking(index);
+    });
 }
 
 std::shared_ptr<Peer>
@@ -1203,7 +1209,8 @@ void
 OverlayImpl::broadcast(protocol::TMProposeSet& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER);
-    for_each([&](std::shared_ptr<PeerImp>&& p) { p->send(sm); });
+    for_each(
+        [&](std::shared_ptr<PeerImp<P2PeerImp>>&& p) { p->p2p().send(sm); });
 }
 
 std::set<Peer::id_t>
@@ -1216,9 +1223,9 @@ OverlayImpl::relay(
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER, validator);
-        for_each([&](std::shared_ptr<PeerImp>&& p) {
+        for_each([&](std::shared_ptr<PeerImp<P2PeerImp>>&& p) {
             if (toSkip->find(p->id()) == toSkip->end())
-                p->send(sm);
+                p->p2p().send(sm);
         });
         return *toSkip;
     }
@@ -1229,7 +1236,8 @@ void
 OverlayImpl::broadcast(protocol::TMValidation& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtVALIDATION);
-    for_each([sm](std::shared_ptr<PeerImp>&& p) { p->send(sm); });
+    for_each(
+        [sm](std::shared_ptr<PeerImp<P2PeerImp>>&& p) { p->p2p().send(sm); });
 }
 
 std::set<Peer::id_t>
@@ -1242,9 +1250,9 @@ OverlayImpl::relay(
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtVALIDATION, validator);
-        for_each([&](std::shared_ptr<PeerImp>&& p) {
+        for_each([&](std::shared_ptr<PeerImp<P2PeerImp>>&& p) {
             if (toSkip->find(p->id()) == toSkip->end())
-                p->send(sm);
+                p->p2p().send(sm);
         });
         return *toSkip;
     }
@@ -1338,7 +1346,7 @@ OverlayImpl::sendEndpoints()
     auto const result = m_peerFinder->buildEndpointsForPeers();
     for (auto const& e : result)
     {
-        std::shared_ptr<PeerImp> peer;
+        std::shared_ptr<PeerImp<P2PeerImp>> peer;
         {
             std::lock_guard lock(mutex_);
             auto const iter = m_peers.find(e.first);
@@ -1372,7 +1380,7 @@ OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t id) const
     {
         // optimize - multiple message with different
         // validator might be sent to the same peer
-        peer->send(makeSquelchMessage(validator, false, 0));
+        peer->p2p().send(makeSquelchMessage(validator, false, 0));
     }
 }
 
@@ -1385,7 +1393,7 @@ OverlayImpl::squelch(
     if (auto peer = findPeerByShortID(id);
         peer && app_.config().VP_REDUCE_RELAY_SQUELCH)
     {
-        peer->send(makeSquelchMessage(validator, true, squelchDuration));
+        peer->p2p().send(makeSquelchMessage(validator, true, squelchDuration));
     }
 }
 

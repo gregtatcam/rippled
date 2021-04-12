@@ -409,4 +409,5 @@ message TMReplayDeltaResponse
 
 message TMProtocolStarted
 {
+    required uint64 time = 1;
 }

@@ -21,6 +21,7 @@
 #define RIPPLE_OVERLAY_PREDICATES_H_INCLUDED
 
 #include <ripple/overlay/Message.h>
+#include <ripple/overlay/P2Peer.h>
 #include <ripple/overlay/Peer.h>
 
 #include <set>
@@ -41,7 +42,7 @@ struct send_always
     void
     operator()(std::shared_ptr<Peer> const& peer) const
     {
-        peer->send(msg);
+        peer->p2p().send(msg);
     }
 };
 
@@ -65,7 +66,7 @@ struct send_if_pred
     operator()(std::shared_ptr<Peer> const& peer) const
     {
         if (predicate(peer))
-            peer->send(msg);
+            peer->p2p().send(msg);
     }
 };
 
@@ -97,7 +98,7 @@ struct send_if_not_pred
     operator()(std::shared_ptr<Peer> const& peer) const
     {
         if (!predicate(peer))
-            peer->send(msg);
+            peer->p2p().send(msg);
     }
 };
 
@@ -147,7 +148,7 @@ struct peer_in_cluster
         if (skipPeer(peer))
             return false;
 
-        if (!peer->cluster())
+        if (!peer->p2p().cluster())
             return false;
 
         return true;
@@ -168,7 +169,7 @@ struct peer_in_set
     bool
     operator()(std::shared_ptr<Peer> const& peer) const
     {
-        if (peerSet.count(peer->id()) == 0)
+        if (peerSet.count(peer->p2p().id()) == 0)
             return false;
 
         return true;

@@ -26,8 +26,10 @@
 #include <ripple/app/ledger/impl/LedgerReplayMsgHandler.h>
 #include <ripple/app/ledger/impl/SkipListAcquire.h>
 #include <ripple/basics/Slice.h>
+#include <ripple/overlay/P2Peer.h>
+#include <ripple/overlay/Peer.h>
 #include <ripple/overlay/PeerSet.h>
-#include <ripple/overlay/impl/PeerImp.h>
+#include <ripple/overlay/impl/Handshake.h>
 #include <test/jtx.h>
 #include <test/jtx/envconfig.h>
 
@@ -188,25 +190,17 @@ enum class PeerFeature {
  * Depending on the configured PeerFeature,
  * it either supports the ProtocolFeature::LedgerReplay or not
  */
-class TestPeer : public Peer
+class TestP2PeerImp : public P2Peer
 {
 public:
-    TestPeer(bool enableLedgerReplay) : ledgerReplayEnabled_(enableLedgerReplay)
-    {
-    }
-
     void
-    send(std::shared_ptr<Message> const& m) override
+    send(std::shared_ptr<Message> const&) override
     {
     }
     beast::IP::Endpoint
     getRemoteAddress() const override
     {
         return {};
-    }
-    void
-    charge(Resource::Charge const& fee) override
-    {
     }
     id_t
     id() const override
@@ -218,6 +212,34 @@ public:
     {
         return false;
     }
+    PublicKey const&
+    getNodePublic() const override
+    {
+        static PublicKey key{};
+        return key;
+    }
+    Json::Value
+    json() override
+    {
+        return {};
+    }
+    bool
+    compressionEnabled() const override
+    {
+        return false;
+    }
+};
+class TestPeer : public Peer
+{
+public:
+    TestPeer(bool enableLedgerReplay) : ledgerReplayEnabled_(enableLedgerReplay)
+    {
+    }
+
+    void
+    charge(Resource::Charge const& fee) override
+    {
+    }
     bool
     isHighLatency() const override
     {
@@ -227,12 +249,6 @@ public:
     getScore(bool) const override
     {
         return 0;
-    }
-    PublicKey const&
-    getNodePublic() const override
-    {
-        static PublicKey key{};
-        return key;
     }
     Json::Value
     json() override
@@ -289,13 +305,14 @@ public:
     {
         return false;
     }
-    bool
-    compressionEnabled() const override
+    P2Peer&
+    p2p() override
     {
-        return false;
+        return p2p_;
     }
 
     bool ledgerReplayEnabled_;
+    TestP2PeerImp p2p_;
 };
 
 enum class PeerSetBehavior {

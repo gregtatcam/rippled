@@ -82,8 +82,8 @@ SkipListAcquire::trigger(std::size_t limit, ScopedLockType& sl)
             [this](auto peer) {
                 if (peer->supportsFeature(ProtocolFeature::LedgerReplay))
                 {
-                    JLOG(journal_.trace())
-                        << "Add a peer " << peer->id() << " for " << hash_;
+                    JLOG(journal_.trace()) << "Add a peer " << peer->p2p().id()
+                                           << " for " << hash_;
                     protocol::TMProofPathRequest request;
                     request.set_ledgerhash(hash_.data(), hash_.size());
                     request.set_key(
@@ -94,8 +94,9 @@ SkipListAcquire::trigger(std::size_t limit, ScopedLockType& sl)
                 }
                 else
                 {
-                    JLOG(journal_.trace()) << "Add a no feature peer "
-                                           << peer->id() << " for " << hash_;
+                    JLOG(journal_.trace())
+                        << "Add a no feature peer " << peer->p2p().id()
+                        << " for " << hash_;
                     if (++noFeaturePeerCount_ >=
                         LedgerReplayParameters::MAX_NO_FEATURE_PEER_COUNT)
                     {

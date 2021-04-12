@@ -89,7 +89,7 @@ PeerSetImpl::addPeers(
     for (auto const& pair : pairs)
     {
         auto const peer = pair.second;
-        if (!peers_.insert(peer->id()).second)
+        if (!peers_.insert(peer->p2p().id()).second)
             continue;
         onPeerAdded(peer);
         if (++accepted >= limit)
@@ -106,14 +106,14 @@ PeerSetImpl::sendRequest(
     auto packet = std::make_shared<Message>(message, type);
     if (peer)
     {
-        peer->send(packet);
+        peer->p2p().send(packet);
         return;
     }
 
     for (auto id : peers_)
     {
         if (auto p = app_.overlay().findPeerByShortID(id))
-            p->send(packet);
+            p->p2p().send(packet);
     }
 }
 

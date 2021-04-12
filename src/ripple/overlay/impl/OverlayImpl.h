@@ -51,7 +51,9 @@
 
 namespace ripple {
 
+template <typename PeerImplmnt>
 class PeerImp;
+class P2PeerImp;
 class BasicConfig;
 
 class OverlayImpl : public Overlay, public reduce_relay::SquelchHandler
@@ -108,8 +110,11 @@ private:
     Resource::Manager& m_resourceManager;
     std::unique_ptr<PeerFinder::Manager> m_peerFinder;
     TrafficCount m_traffic;
-    hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImp>> m_peers;
-    hash_map<Peer::id_t, std::weak_ptr<PeerImp>> ids_;
+    hash_map<
+        std::shared_ptr<PeerFinder::Slot>,
+        std::weak_ptr<PeerImp<P2PeerImp>>>
+        m_peers;
+    hash_map<Peer::id_t, std::weak_ptr<PeerImp<P2PeerImp>>> ids_;
     Resolver& m_resolver;
     std::atomic<Peer::id_t> next_id_;
     int timer_count_;
@@ -235,7 +240,7 @@ public:
     //
 
     void
-    add_active(std::shared_ptr<PeerImp> const& peer);
+    add_active(std::shared_ptr<PeerImp<P2PeerImp>> const& peer);
 
     void
     remove(std::shared_ptr<PeerFinder::Slot> const& slot);
@@ -246,7 +251,7 @@ public:
         are known.
     */
     void
-    activate(std::shared_ptr<PeerImp> const& peer);
+    activate(std::shared_ptr<PeerImp<P2PeerImp>> const& peer);
 
     // Called when an active peer is destroyed.
     void
@@ -259,7 +264,7 @@ public:
     void
     for_each(UnaryFunc&& f) const
     {
-        std::vector<std::weak_ptr<PeerImp>> wp;
+        std::vector<std::weak_ptr<PeerImp<P2PeerImp>>> wp;
         {
             std::lock_guard lock(mutex_);
 
@@ -282,7 +287,7 @@ public:
     void
     onManifests(
         std::shared_ptr<protocol::TMManifests> const& m,
-        std::shared_ptr<PeerImp> const& from);
+        std::shared_ptr<PeerImp<P2PeerImp>> const& from);
 
     static bool
     isPeerUpgrade(http_request_type const& request);
