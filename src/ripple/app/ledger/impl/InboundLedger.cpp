@@ -626,7 +626,7 @@ InboundLedger::trigger(std::shared_ptr<Peer> const& peer, TriggerReason reason)
                         if (auto p = app_.overlay().findPeerByShortID(id))
                         {
                             mByHash = false;
-                            p->p2p().send(packet);
+                            p->send(packet);
                         }
                     });
             }

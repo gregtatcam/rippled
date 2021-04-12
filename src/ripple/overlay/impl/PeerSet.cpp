@@ -113,7 +113,7 @@ PeerSetImpl::sendRequest(
     for (auto id : peers_)
     {
         if (auto p = app_.overlay().findPeerByShortID(id))
-            p->p2p().send(packet);
+            p->send(packet);
     }
 }
 
