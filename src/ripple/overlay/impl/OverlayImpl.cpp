@@ -1178,7 +1178,7 @@ OverlayImpl::checkTracking(std::uint32_t index)
     });
 }
 
-std::shared_ptr<Peer>
+std::shared_ptr<P2Peer>
 OverlayImpl::findPeerByShortID(Peer::id_t const& id) const
 {
     std::lock_guard lock(mutex_);
@@ -1190,7 +1190,7 @@ OverlayImpl::findPeerByShortID(Peer::id_t const& id) const
 
 // A public key hash map was not used due to the peer connect/disconnect
 // update overhead outweighing the performance of a small set linear search.
-std::shared_ptr<Peer>
+std::shared_ptr<P2Peer>
 OverlayImpl::findPeerByPublicKey(PublicKey const& pubKey)
 {
     std::lock_guard lock(mutex_);
@@ -1380,7 +1380,7 @@ OverlayImpl::unsquelch(PublicKey const& validator, Peer::id_t id) const
     {
         // optimize - multiple message with different
         // validator might be sent to the same peer
-        peer->p2p().send(makeSquelchMessage(validator, false, 0));
+        peer->send(makeSquelchMessage(validator, false, 0));
     }
 }
 
@@ -1393,7 +1393,7 @@ OverlayImpl::squelch(
     if (auto peer = findPeerByShortID(id);
         peer && app_.config().VP_REDUCE_RELAY_SQUELCH)
     {
-        peer->p2p().send(makeSquelchMessage(validator, true, squelchDuration));
+        peer->send(makeSquelchMessage(validator, true, squelchDuration));
     }
 }
 

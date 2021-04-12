@@ -1373,7 +1373,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
             }
 
             m->mutable_peerchain()->RemoveLast();
-            peer->p2p().send(
+            peer->send(
                 std::make_shared<Message>(*m, protocol::mtPEER_SHARD_INFO));
 
             JLOG(p_journal_.trace())
@@ -1745,12 +1745,12 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
     if (m->has_requestcookie())
     {
-        std::shared_ptr<Peer> target =
+        std::shared_ptr<P2Peer> target =
             overlay_.findPeerByShortID(m->requestcookie());
         if (target)
         {
             m->clear_requestcookie();
-            target->p2p().send(
+            target->send(
                 std::make_shared<Message>(packet, protocol::mtLEDGER_DATA));
         }
         else
