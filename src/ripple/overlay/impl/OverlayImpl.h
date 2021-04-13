@@ -112,6 +112,12 @@ public:
 
     void checkTracking(std::uint32_t) override;
 
+    std::shared_ptr<P2Peer>
+    findPeerByShortID(Peer::id_t const& id) const override;
+
+    std::shared_ptr<P2Peer>
+    findPeerByPublicKey(PublicKey const& pubKey) override;
+
     void
     broadcast(protocol::TMProposeSet& m) override;
 

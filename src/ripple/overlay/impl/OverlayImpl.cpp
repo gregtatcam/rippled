@@ -697,6 +697,33 @@ OverlayImpl::checkTracking(std::uint32_t index)
     });
 }
 
+std::shared_ptr<P2Peer>
+OverlayImpl::findPeerByShortID(Peer::id_t const& id) const
+{
+    std::lock_guard lock(mutex_);
+    auto const iter = ids_.find(id);
+    if (iter != ids_.end())
+        return iter->second.lock();
+    return {};
+}
+
+// A public key hash map was not used due to the peer connect/disconnect
+// update overhead outweighing the performance of a small set linear search.
+std::shared_ptr<P2Peer>
+OverlayImpl::findPeerByPublicKey(PublicKey const& pubKey)
+{
+    std::lock_guard lock(mutex_);
+    for (auto const& e : ids_)
+    {
+        if (auto peer = e.second.lock())
+        {
+            if (peer->getNodePublic() == pubKey)
+                return peer;
+        }
+    }
+    return {};
+}
+
 void
 OverlayImpl::broadcast(protocol::TMProposeSet& m)
 {
