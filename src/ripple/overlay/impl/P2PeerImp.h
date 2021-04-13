@@ -41,8 +41,8 @@
 namespace ripple {
 
 class P2PeerImp : public P2Peer,
-                  public P2PeerProperties,
-                  public OverlayImpl::Child,
+                  public P2PeerInternal,
+                  public P2POverlayImpl::Child,
                   public std::enable_shared_from_this<P2PeerImp>
 {
 private:
@@ -51,8 +51,6 @@ private:
     using socket_type = boost::asio::ip::tcp::socket;
     using middle_type = boost::beast::tcp_stream;
     using stream_type = boost::beast::ssl_stream<middle_type>;
-    using address_type = boost::asio::ip::address;
-    using endpoint_type = boost::asio::ip::tcp::endpoint;
     using Compressed = compression::Compressed;
 
     Application& app_;
@@ -256,12 +254,14 @@ protected:
     std::string
     getVersion() const override;
 
+public:  // TODO
     std::shared_ptr<PeerFinder::Slot> const&
     slot() override
     {
         return slot_;
     }
 
+protected:
     std::mutex&
     recentLock() const override
     {

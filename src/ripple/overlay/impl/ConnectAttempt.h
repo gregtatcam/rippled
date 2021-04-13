@@ -26,7 +26,7 @@
 namespace ripple {
 
 /** Manages an outbound connection attempt. */
-class ConnectAttempt : public OverlayImpl::Child,
+class ConnectAttempt : public P2POverlayImpl::Child,
                        public std::enable_shared_from_this<ConnectAttempt>
 {
 private:
@@ -71,7 +71,7 @@ public:
         std::uint32_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         beast::Journal journal,
-        OverlayImpl& overlay);
+        P2POverlayImpl& overlay);
 
     ~ConnectAttempt();
 

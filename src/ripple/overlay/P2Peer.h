@@ -83,10 +83,10 @@ public:
     json() = 0;
 };
 
-class P2PeerProperties
+class P2PeerInternal
 {
 public:
-    virtual ~P2PeerProperties() = default;
+    virtual ~P2PeerInternal() = default;
     ////////////////////////////////////////////////////////////////
     // Getters and other methods shared with the application layer
     ////////////////////////////////////////////////////////////////
@@ -127,9 +127,11 @@ protected:
     virtual std::string
     getVersion() const = 0;
 
+public:  // TODO
     virtual std::shared_ptr<PeerFinder::Slot> const&
     slot() = 0;
 
+protected:
     virtual std::mutex&
     recentLock() const = 0;
 

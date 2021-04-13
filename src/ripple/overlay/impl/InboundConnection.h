@@ -62,7 +62,7 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr,
-        OverlayImpl& overlay);
+        P2POverlayImpl& overlay);
 
     /** Start the handshake */
     void

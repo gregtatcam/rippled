@@ -84,8 +84,8 @@ P2PeerImp::P2PeerImp(
         JLOG(journal_.info()) << "Cluster name: " << *member;
     }
     JLOG(journal_.debug()) << " compression enabled "
-                           << (compressionEnabled_ == Compressed::On) << " "
-                           << id_;
+                           << (compressionEnabled_ == Compressed::On) << " on "
+                           << remote_address_ << " " << id_;
 }
 
 P2PeerImp::~P2PeerImp()

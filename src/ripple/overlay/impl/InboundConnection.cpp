@@ -42,7 +42,7 @@ InboundConnection::InboundConnection(
     ProtocolVersion protocol,
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& streamPtr,
-    OverlayImpl& overlay)
+    P2POverlayImpl& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)
@@ -166,17 +166,14 @@ InboundConnection::close()
 void
 InboundConnection::startProtocol()
 {
-    auto const peer = std::make_shared<PeerImp<P2PeerImp>>(
-        app_,
+    overlay_.addInboundPeer(
         id_,
         slot_,
         std::move(request_),
         publicKey_,
         protocol_,
         usage_,
-        std::move(streamPtr_),
-        overlay_);
-    overlay_.add_active(peer);
+        std::move(streamPtr_));
 }
 
 }  // namespace ripple

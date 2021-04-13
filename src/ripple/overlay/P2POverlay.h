@@ -63,8 +63,6 @@ public:
         bool vlEnabled = true;
     };
 
-    using PeerSequence = std::vector<std::shared_ptr<Peer>>;
-
     virtual ~P2POverlay() = default;
 
     /** Conditionally accept an incoming HTTP request. */

@@ -35,7 +35,7 @@ ConnectAttempt::ConnectAttempt(
     std::uint32_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     beast::Journal journal,
-    OverlayImpl& overlay)
+    P2POverlayImpl& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)
@@ -378,19 +378,15 @@ ConnectAttempt::processResponse()
         if (result != PeerFinder::Result::success)
             return fail("Outbound slots full");
 
-        auto const peer = std::make_shared<PeerImp<P2PeerImp>>(
-            app_,
+        overlay_.addOutboundPeer(
             std::move(stream_ptr_),
-            read_buf_.data(),
+            read_buf_,
             std::move(slot_),
             std::move(response_),
             usage_,
             publicKey,
             *negotiatedProtocol,
-            id_,
-            overlay_);
-
-        overlay_.add_active(peer);
+            id_);
     }
     catch (std::exception const& e)
     {
