@@ -35,7 +35,7 @@ ConnectAttempt::ConnectAttempt(
     std::uint32_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     beast::Journal journal,
-    P2POverlayImpl& overlay)
+    P2POverlay& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)

@@ -920,6 +920,113 @@ OverlayImpl::deleteIdlePeers()
 
 //------------------------------------------------------------------------------
 
+// TODO needs to be split into p2p/app config
+// with p2p config done in the p2p layer
+Overlay::Setup
+setup_Overlay(BasicConfig const& config)
+{
+    Overlay::Setup setup;
+
+    {
+        auto const& section = config.section("overlay");
+        setup.context = make_SSLContext("");
+
+        set(setup.ipLimit, "ip_limit", section);
+        if (setup.ipLimit < 0)
+            Throw<std::runtime_error>("Configured IP limit is invalid");
+
+        std::string ip;
+        set(ip, "public_ip", section);
+        if (!ip.empty())
+        {
+            boost::system::error_code ec;
+            setup.public_ip = beast::IP::Address::from_string(ip, ec);
+            if (ec || beast::IP::is_private(setup.public_ip))
+                Throw<std::runtime_error>("Configured public IP is invalid");
+        }
+    }
+
+    {
+        auto const& section = config.section("crawl");
+        auto const& values = section.values();
+
+        if (values.size() > 1)
+        {
+            Throw<std::runtime_error>(
+                "Configured [crawl] section is invalid, too many values");
+        }
+
+        bool crawlEnabled = true;
+
+        // Only allow "0|1" as a value
+        if (values.size() == 1)
+        {
+            try
+            {
+                crawlEnabled = boost::lexical_cast<bool>(values.front());
+            }
+            catch (boost::bad_lexical_cast const&)
+            {
+                Throw<std::runtime_error>(
+                    "Configured [crawl] section has invalid value: " +
+                    values.front());
+            }
+        }
+
+        if (crawlEnabled)
+        {
+            if (get<bool>(section, "overlay", true))
+            {
+                setup.crawlOptions |= CrawlOptions::Overlay;
+            }
+            if (get<bool>(section, "server", true))
+            {
+                setup.crawlOptions |= CrawlOptions::ServerInfo;
+            }
+            if (get<bool>(section, "counts", false))
+            {
+                setup.crawlOptions |= CrawlOptions::ServerCounts;
+            }
+            if (get<bool>(section, "unl", true))
+            {
+                setup.crawlOptions |= CrawlOptions::Unl;
+            }
+        }
+    }
+    {
+        auto const& section = config.section("vl");
+
+        set(setup.vlEnabled, "enabled", section);
+    }
+
+    try
+    {
+        auto id = config.legacy("network_id");
+
+        if (!id.empty())
+        {
+            if (id == "main")
+                id = "0";
+
+            if (id == "testnet")
+                id = "1";
+
+            if (id == "devnet")
+                id = "2";
+
+            setup.networkID = beast::lexicalCastThrow<std::uint32_t>(id);
+        }
+    }
+    catch (...)
+    {
+        Throw<std::runtime_error>(
+            "Configured [network_id] section is invalid: must be a number "
+            "or one of the strings 'main', 'testnet' or 'devnet'.");
+    }
+
+    return setup;
+}
+
 std::unique_ptr<Overlay>
 make_Overlay(
     Application& app,

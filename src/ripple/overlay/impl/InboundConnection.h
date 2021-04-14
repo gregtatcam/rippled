@@ -20,8 +20,10 @@
 #define RIPPLE_OVERLAY_INBOUNDCONNECTION_H_INCLUDED
 
 #include <ripple/app/main/Application.h>
+#include <ripple/beast/utility/WrappedSink.h>
+#include <ripple/overlay/P2POverlay.h>
+#include <ripple/overlay/impl/Child.h>
 #include <ripple/overlay/impl/Handshake.h>
-#include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/resource/Consumer.h>
 
 namespace ripple {
@@ -29,7 +31,7 @@ namespace ripple {
 /** Handles the inbound peer handshake. Instantiates the overlay peer when
  * done. Maintains all data members required for the peer instantiation.
  */
-class InboundConnection : public OverlayImpl::Child,
+class InboundConnection : public Child,
                           public std::enable_shared_from_this<InboundConnection>
 {
 private:
@@ -62,7 +64,7 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr,
-        P2POverlayImpl& overlay);
+        P2POverlay& overlay);
 
     /** Start the handshake */
     void

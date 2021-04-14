@@ -23,8 +23,10 @@
 #include <ripple/basics/Log.h>
 #include <ripple/basics/RangeSet.h>
 #include <ripple/beast/utility/WrappedSink.h>
+#include <ripple/overlay/P2POverlay.h>
 #include <ripple/overlay/P2Peer.h>
-#include <ripple/overlay/impl/OverlayImpl.h>
+#include <ripple/overlay/impl/Child.h>
+#include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
@@ -42,7 +44,7 @@ namespace ripple {
 
 class P2PeerImp : public P2Peer,
                   public P2PeerInternal,
-                  public P2POverlayImpl::Child,
+                  public Child,
                   public std::enable_shared_from_this<P2PeerImp>
 {
 private:
@@ -135,7 +137,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         std::unique_ptr<stream_type>&& stream_ptr,
-        OverlayImpl& overlay);
+        P2POverlay& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
@@ -149,7 +151,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
-        OverlayImpl& overlay);
+        P2POverlay& overlay);
 
     virtual ~P2PeerImp();
 
@@ -344,7 +346,7 @@ P2PeerImp::P2PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
-    OverlayImpl& overlay)
+    P2POverlay& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)

@@ -22,6 +22,7 @@
 
 #include <ripple/beast/utility/PropertyStream.h>
 #include <ripple/core/Stoppable.h>
+#include <ripple/overlay/impl/TrafficCount.h>
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -32,6 +33,11 @@
 #include <boost/beast/ssl/ssl_stream.hpp>
 
 namespace ripple {
+
+namespace PeerFinder {
+class Manager;
+}
+class Child;
 
 /** Manages the set of connected peers. */
 class P2POverlay : public Stoppable, public beast::PropertyStream::Source
@@ -109,6 +115,48 @@ public:
     */
     virtual std::optional<std::uint32_t>
     networkID() const = 0;
+
+public:
+    // TODO, children should have a reference to internal interface?
+    // have it as a separate abs class implemented in P2POverlayImpl?
+    // public access
+    template <typename>
+    friend class PeerImp;  // double hack
+    virtual void
+    remove(ripple::Child&) = 0;
+
+    virtual void
+    onPeerDistruct(P2Peer::id_t, std::shared_ptr<PeerFinder::Slot> const&) = 0;
+
+    virtual Setup const&
+    setup() const = 0;
+
+    virtual PeerFinder::Manager&
+    peerFinder() = 0;
+
+    virtual void
+    reportTraffic(TrafficCount::category cat, bool isInbound, int bytes) = 0;
+
+    virtual void
+    addOutboundPeer(
+        std::unique_ptr<stream_type>&& stream_ptr,
+        boost::beast::multi_buffer const& buffers,
+        std::shared_ptr<PeerFinder::Slot>&& slot,
+        http_response_type&& response,
+        Resource::Consumer usage,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        id_t id) = 0;
+
+    virtual void
+    addInboundPeer(
+        id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot,
+        http_request_type&& request,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        Resource::Consumer consumer,
+        std::unique_ptr<stream_type>&& stream_ptr) = 0;
 };
 
 }  // namespace ripple

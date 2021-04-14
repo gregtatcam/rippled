@@ -30,13 +30,13 @@
 
 namespace ripple {
 
-template <typename PeerImplmnt>
+template <typename>
 class PeerImp;
 class P2PeerImp;
 class BasicConfig;
 
 class OverlayImpl : public Overlay,
-                    public P2POverlayImpl,
+                    public P2POverlayImpl<PeerImp<P2PeerImp>>,
                     public reduce_relay::SquelchHandler
 {
 private:

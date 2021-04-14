@@ -16,3 +16,19 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 //==============================================================================
+
+#include <ripple/overlay/P2POverlay.h>
+#include <ripple/overlay/impl/Child.h>
+
+namespace ripple {
+
+Child::Child(P2POverlay& overlay) : overlay_(overlay)
+{
+}
+
+Child::~Child()
+{
+    overlay_.remove(*this);
+}
+
+}  // namespace ripple

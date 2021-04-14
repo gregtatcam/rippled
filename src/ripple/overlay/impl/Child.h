@@ -16,3 +16,28 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 //==============================================================================
+
+#ifndef RIPPLE_OVERLAY_CHILD_H_INCLUDED
+#define RIPPLE_OVERLAY_CHILD_H_INCLUDED
+
+namespace ripple {
+
+class P2POverlay;
+
+class Child
+{
+protected:
+    P2POverlay& overlay_;
+
+    explicit Child(P2POverlay& overlay);
+
+    virtual ~Child();
+
+public:
+    virtual void
+    stop() = 0;
+};
+
+}  // namespace ripple
+
+#endif

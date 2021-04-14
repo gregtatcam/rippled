@@ -42,7 +42,7 @@ InboundConnection::InboundConnection(
     ProtocolVersion protocol,
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& streamPtr,
-    P2POverlayImpl& overlay)
+    P2POverlay& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)

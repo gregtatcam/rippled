@@ -52,7 +52,7 @@ P2PeerImp::P2PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     std::unique_ptr<stream_type>&& stream_ptr,
-    OverlayImpl& overlay)
+    P2POverlay& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)
@@ -92,9 +92,7 @@ P2PeerImp::~P2PeerImp()
 {
     const bool inCluster{cluster()};
 
-    overlay_.onPeerDeactivate(id_);
-    overlay_.peerFinder().on_closed(slot_);
-    overlay_.remove(slot_);
+    overlay_.onPeerDistruct(id_, slot_);
 
     if (inCluster)
     {
