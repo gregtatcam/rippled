@@ -69,6 +69,7 @@ namespace ripple {
 
 struct ValidatorBlobInfo;
 
+template <typename>
 class OverlayImpl;
 
 namespace {
@@ -113,7 +114,7 @@ private:
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
     P2Peer& p2p_;
-    OverlayImpl& overlay_;
+    OverlayImpl<P2PeerImplmnt>& overlay_;
     beast::WrappedSink p_sink_;
     beast::Journal const p_journal_;
     waitable_timer timer_;
@@ -198,7 +199,7 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr,
-        OverlayImpl& overlay);
+        OverlayImpl<P2PeerImplmnt>& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
@@ -213,7 +214,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
-        OverlayImpl& overlay);
+        OverlayImpl<P2PeerImplmnt>& overlay);
 
     virtual ~PeerImp();
 
@@ -566,7 +567,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
-    OverlayImpl& overlay)
+    OverlayImpl<P2PeerImplmnt>& overlay)
     : P2PeerImplmnt(
           app,
           std::move(stream_ptr),
@@ -613,7 +614,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     ProtocolVersion protocol,
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& stream_ptr,
-    OverlayImpl& overlay)
+    OverlayImpl<P2PeerImplmnt>& overlay)
     : P2PeerImplmnt(
           app,
           id,
@@ -2958,7 +2959,7 @@ PeerImp<P2PeerImplmnt>::checkValidation(
 template <typename P2PeerImplmnt>
 static std::shared_ptr<PeerImp<P2PeerImplmnt>>
 getPeerWithTree(
-    OverlayImpl& ov,
+    OverlayImpl<P2PeerImplmnt>& ov,
     uint256 const& rootHash,
     PeerImp<P2PeerImplmnt> const* skip)
 {
@@ -2986,7 +2987,7 @@ getPeerWithTree(
 template <typename P2PeerImplmnt>
 static std::shared_ptr<PeerImp<P2PeerImplmnt>>
 getPeerWithLedger(
-    OverlayImpl& ov,
+    OverlayImpl<P2PeerImplmnt>& ov,
     uint256 const& ledgerHash,
     LedgerIndex ledger,
     PeerImp<P2PeerImplmnt> const* skip)
