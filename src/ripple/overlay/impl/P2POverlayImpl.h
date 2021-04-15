@@ -69,8 +69,7 @@ class P2PeerImp;
 class BasicConfig;
 
 template <typename PeerImplmnt>
-class P2POverlayImpl : public P2POverlay,
-                       public P2POverlayInternal<PeerImplmnt>
+class P2POverlayImpl : public P2POverlay, public P2POverlayInternal<PeerImplmnt>
 {
 public:  // private:
     using socket_type = boost::asio::ip::tcp::socket;
