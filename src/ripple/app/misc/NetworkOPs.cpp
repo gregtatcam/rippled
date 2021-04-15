@@ -2223,7 +2223,7 @@ NetworkOPsImp::getServerInfo(bool human, bool admin, bool counters)
         info[jss::server_domain] = app_.config().SERVER_DOMAIN;
 
     if (!app_.config().reporting())
-        if (auto const netid = app_.overlay().networkID())
+        if (auto const netid = app_.overlay().p2p().networkID())
             info[jss::network_id] = static_cast<Json::UInt>(*netid);
 
     info[jss::build_version] = BuildInfo::getVersionString();
@@ -2505,7 +2505,7 @@ NetworkOPsImp::getServerInfo(bool human, bool admin, bool counters)
         info[jss::jq_trans_overflow] =
             std::to_string(app_.overlay().getJqTransOverflow());
         info[jss::peer_disconnects] =
-            std::to_string(app_.overlay().getPeerDisconnect());
+            std::to_string(app_.overlay().p2p().getPeerDisconnect());
         info[jss::peer_disconnects_resources] =
             std::to_string(app_.overlay().getPeerDisconnectCharges());
     }

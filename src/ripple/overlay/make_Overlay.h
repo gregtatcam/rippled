@@ -30,14 +30,14 @@
 
 namespace ripple {
 
-Overlay::Setup
+P2POverlay::Setup
 setup_Overlay(BasicConfig const& config);
 
 /** Creates the implementation of Overlay. */
 std::unique_ptr<Overlay>
 make_Overlay(
     Application& app,
-    Overlay::Setup const& setup,
+    P2POverlay::Setup const& setup,
     Stoppable& parent,
     ServerHandler& serverHandler,
     Resource::Manager& resourceManager,

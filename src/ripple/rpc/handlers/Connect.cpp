@@ -63,7 +63,7 @@ doConnect(RPC::JsonContext& context)
         beast::IP::Endpoint::from_string(context.params[jss::ip].asString());
 
     if (!is_unspecified(ip))
-        context.app.overlay().connect(ip.at_port(iPort));
+        context.app.overlay().p2p().connect(ip.at_port(iPort));
 
     return RPC::makeObjectValue("connecting");
 }

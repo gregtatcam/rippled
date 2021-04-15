@@ -41,14 +41,14 @@ class context;
 namespace ripple {
 
 /** Manages the set of connected peers. */
-class Overlay : virtual public P2POverlay
+class Overlay
 {
 protected:
     // VFALCO NOTE The requirement of this constructor is an
     //             unfortunate problem with the API for
     //             Stoppable and PropertyStream
     //
-    Overlay(Stoppable& parent) : P2POverlay(parent)
+    Overlay(Stoppable& parent)
     {
     }
 
@@ -149,6 +149,9 @@ public:
     */
     virtual Json::Value
     crawlShards(bool pubKey, std::uint32_t hops) = 0;
+
+    virtual P2POverlay&
+    p2p() = 0;
 };
 
 }  // namespace ripple

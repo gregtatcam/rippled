@@ -136,6 +136,12 @@ public:
         uint256 const& uid,
         PublicKey const& validator) override;
 
+    P2POverlay&
+    p2p() override
+    {
+        return *this;
+    }
+
     std::shared_ptr<Message>
     getManifestsMessage();
 

@@ -169,7 +169,7 @@ InboundLedger::getPeerCount() const
 {
     auto const& peerIds = mPeerSet->getPeerIds();
     return std::count_if(peerIds.begin(), peerIds.end(), [this](auto id) {
-        return (app_.overlay().findPeerByShortID(id) != nullptr);
+        return (app_.overlay().p2p().findPeerByShortID(id) != nullptr);
     });
 }
 
@@ -623,7 +623,7 @@ InboundLedger::trigger(std::shared_ptr<Peer> const& peer, TriggerReason reason)
                 auto const& peerIds = mPeerSet->getPeerIds();
                 std::for_each(
                     peerIds.begin(), peerIds.end(), [this, &packet](auto id) {
-                        if (auto p = app_.overlay().findPeerByShortID(id))
+                        if (auto p = app_.overlay().p2p().findPeerByShortID(id))
                         {
                             mByHash = false;
                             p->send(packet);

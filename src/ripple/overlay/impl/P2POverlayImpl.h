@@ -69,7 +69,7 @@ class P2PeerImp;
 class BasicConfig;
 
 template <typename PeerImplmnt>
-class P2POverlayImpl : virtual public P2POverlay,
+class P2POverlayImpl : public P2POverlay,
                        public P2POverlayInternal<PeerImplmnt>
 {
 public:  // private:

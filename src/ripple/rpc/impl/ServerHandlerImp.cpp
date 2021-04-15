@@ -217,7 +217,7 @@ ServerHandlerImp::onHandoff(
     }
 
     if (bundle && p.count("peer") > 0)
-        return app_.overlay().onHandoff(
+        return app_.overlay().p2p().onHandoff(
             std::move(bundle), std::move(request), remote_address);
 
     if (is_ws && isStatusRequest(request))

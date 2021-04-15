@@ -1403,7 +1403,7 @@ ApplicationImp::setup()
             get_io_service(),
             *config_,
             m_collectorManager->collector());
-        add(*overlay_);  // add to PropertyStream
+        add(overlay_->p2p());  // add to PropertyStream
     }
 
     if (!config_->standalone())
@@ -1641,7 +1641,7 @@ ApplicationImp::fdRequired() const
 
     // 2x the configured peer limit for peer connections:
     if (overlay_)
-        needed += 2 * overlay_->limit();
+        needed += 2 * overlay_->p2p().limit();
 
     // the number of fds needed by the backend (internally
     // doubled if online delete is enabled).

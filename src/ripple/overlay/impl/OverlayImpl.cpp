@@ -100,8 +100,7 @@ OverlayImpl::OverlayImpl(
     boost::asio::io_service& io_service,
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
-    : P2POverlay(parent)
-    , Overlay(parent)
+    : Overlay(parent)
     , P2POverlayImpl(
           app,
           setup,
@@ -922,10 +921,10 @@ OverlayImpl::deleteIdlePeers()
 
 // TODO needs to be split into p2p/app config
 // with p2p config done in the p2p layer
-Overlay::Setup
+P2POverlay::Setup
 setup_Overlay(BasicConfig const& config)
 {
-    Overlay::Setup setup;
+    P2POverlay::Setup setup;
 
     {
         auto const& section = config.section("overlay");
@@ -1030,7 +1029,7 @@ setup_Overlay(BasicConfig const& config)
 std::unique_ptr<Overlay>
 make_Overlay(
     Application& app,
-    Overlay::Setup const& setup,
+    P2POverlay::Setup const& setup,
     Stoppable& parent,
     ServerHandler& serverHandler,
     Resource::Manager& resourceManager,
