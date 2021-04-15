@@ -32,7 +32,6 @@ namespace ripple {
 
 template <typename>
 class PeerImp;
-class P2PeerImp;
 class BasicConfig;
 
 class OverlayImpl : public Overlay,

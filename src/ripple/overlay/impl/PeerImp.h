@@ -41,7 +41,6 @@
 #include <ripple/nodestore/DatabaseShard.h>
 #include <ripple/overlay/Cluster.h>
 #include <ripple/overlay/Squelch.h>
-#include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/Tuning.h>
@@ -70,6 +69,8 @@ namespace ripple {
 
 struct ValidatorBlobInfo;
 
+class OverlayImpl;
+
 namespace {
 /** The threshold above which we treat a peer connection as high latency */
 std::chrono::milliseconds constexpr peerHighLatency{300};
@@ -85,12 +86,14 @@ class PeerImp : public Peer, public P2PeerImplmnt
     static_assert(
         std::is_base_of<P2Peer, P2PeerImplmnt>::value,
         "P2PeerImplmnt must inherit from P2Peer");
+
     std::shared_ptr<PeerImp<P2PeerImplmnt>>
     shared()
     {
         return std::static_pointer_cast<PeerImp<P2PeerImplmnt>>(
             this->shared_from_this());
     }
+
     using id_t = P2Peer::id_t;
 
 public:
@@ -181,6 +184,7 @@ private:
 
 public:
     PeerImp(PeerImp const&) = delete;
+
     PeerImp&
     operator=(PeerImp const&) = delete;
 
@@ -370,50 +374,73 @@ private:
 
     void
     onMessage(std::shared_ptr<protocol::TMManifests> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMPing> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMCluster> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMGetShardInfo> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMShardInfo> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMGetPeerShardInfo> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMPeerShardInfo> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMEndpoints> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMTransaction> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMGetLedger> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMLedgerData> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMProposeSet> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMStatusChange> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMHaveTransactionSet> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMValidatorList> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMValidatorListCollection> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMValidation> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMSquelch> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMProofPathRequest> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMProofPathResponse> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMReplayDeltaRequest> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMReplayDeltaResponse> const& m);
+
     void
     onMessage(std::shared_ptr<protocol::TMProtocolStarted> const& m);
 
@@ -519,7 +546,13 @@ protected:
     onEvtProtocolMessage(boost::beast::multi_buffer const&, size_t&) override;
 };
 
+}  // namespace ripple
+
+#include <ripple/overlay/impl/OverlayImpl.h>
+
 //------------------------------------------------------------------------------
+
+namespace ripple {
 
 template <typename P2PeerImplmnt>
 template <class Buffers>
