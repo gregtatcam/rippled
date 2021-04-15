@@ -17,6 +17,7 @@
 */
 //=============================================================================
 #include <ripple/overlay/Cluster.h>
+#include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/InboundConnection.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/PeerImp.h>
@@ -24,14 +25,6 @@
 #include <boost/beast/core/ostream.hpp>
 
 namespace ripple {
-
-std::string
-makePrefix(std::uint32_t id)
-{
-    std::stringstream ss;
-    ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
-    return ss.str();
-}
 
 InboundConnection::InboundConnection(
     Application& app,
@@ -46,7 +39,7 @@ InboundConnection::InboundConnection(
     : Child(overlay)
     , app_(app)
     , id_(id)
-    , sink_(app_.journal("InboundConnection"), makePrefix(id))
+    , sink_(app_.journal("InboundConnection"), P2Peer::makePrefix(id))
     , journal_(sink_)
     , streamPtr_(std::move(streamPtr))
     , socket_(streamPtr_->next_layer().socket())

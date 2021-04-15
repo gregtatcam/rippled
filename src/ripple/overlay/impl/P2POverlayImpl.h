@@ -64,7 +64,7 @@
 namespace ripple {
 
 template <typename>
-class PeerImp;
+class P2POverlayImpl;
 class P2PeerImp;
 class BasicConfig;
 
@@ -171,48 +171,6 @@ public:
     // Called when an active peer is destroyed.
     void
     onPeerDeactivate(Peer::id_t id);
-
-    static bool
-    isPeerUpgrade(http_request_type const& request);
-
-    template <class Body>
-    static bool
-    isPeerUpgrade(boost::beast::http::response<Body> const& response)
-    {
-        if (!is_upgrade(response))
-            return false;
-        return response.result() ==
-            boost::beast::http::status::switching_protocols;
-    }
-
-    template <class Fields>
-    static bool
-    is_upgrade(boost::beast::http::header<true, Fields> const& req)
-    {
-        if (req.version() < 11)
-            return false;
-        if (req.method() != boost::beast::http::verb::get)
-            return false;
-        if (!boost::beast::http::token_list{req["Connection"]}.exists(
-                "upgrade"))
-            return false;
-        return true;
-    }
-
-    template <class Fields>
-    static bool
-    is_upgrade(boost::beast::http::header<false, Fields> const& req)
-    {
-        if (req.version() < 11)
-            return false;
-        if (!boost::beast::http::token_list{req["Connection"]}.exists(
-                "upgrade"))
-            return false;
-        return true;
-    }
-
-    static std::string
-    makePrefix(std::uint32_t id);
 
     void
     incPeerDisconnect() override
@@ -457,7 +415,7 @@ P2POverlayImpl<PeerImplmnt>::onHandoff(
     endpoint_type remote_endpoint)
 {
     auto const id = next_id_++;
-    beast::WrappedSink sink(app_.logs()["Peer"], makePrefix(id));
+    beast::WrappedSink sink(app_.logs()["Peer"], P2Peer::makePrefix(id));
     beast::Journal journal(sink);
 
     Handoff handoff;
@@ -601,25 +559,6 @@ P2POverlayImpl<PeerImplmnt>::onHandoff(
 }
 
 //------------------------------------------------------------------------------
-
-template <typename PeerImplmnt>
-bool
-P2POverlayImpl<PeerImplmnt>::isPeerUpgrade(http_request_type const& request)
-{
-    if (!is_upgrade(request))
-        return false;
-    auto const versions = parseProtocolVersions(request["Upgrade"]);
-    return !versions.empty();
-}
-
-template <typename PeerImplmnt>
-std::string
-P2POverlayImpl<PeerImplmnt>::makePrefix(std::uint32_t id)
-{
-    std::stringstream ss;
-    ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
-    return ss.str();
-}
 
 template <typename PeerImplmnt>
 void

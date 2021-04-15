@@ -414,4 +414,13 @@ makeResponse(
     return resp;
 }
 
+bool
+isPeerUpgrade(http_request_type const& request)
+{
+    if (!is_upgrade(request))
+        return false;
+    auto const versions = parseProtocolVersions(request["Upgrade"]);
+    return !versions.empty();
+}
+
 }  // namespace ripple

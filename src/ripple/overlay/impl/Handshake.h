@@ -237,6 +237,42 @@ makeFeaturesResponseHeader(
     bool vpReduceRelayEnabled,
     bool ledgerReplayEnabled);
 
+template <class Fields>
+bool
+is_upgrade(boost::beast::http::header<true, Fields> const& req)
+{
+    if (req.version() < 11)
+        return false;
+    if (req.method() != boost::beast::http::verb::get)
+        return false;
+    if (!boost::beast::http::token_list{req["Connection"]}.exists("upgrade"))
+        return false;
+    return true;
+}
+
+template <class Fields>
+bool
+is_upgrade(boost::beast::http::header<false, Fields> const& req)
+{
+    if (req.version() < 11)
+        return false;
+    if (!boost::beast::http::token_list{req["Connection"]}.exists("upgrade"))
+        return false;
+    return true;
+}
+
+bool
+isPeerUpgrade(http_request_type const& request);
+
+template <class Body>
+bool
+isPeerUpgrade(boost::beast::http::response<Body> const& response)
+{
+    if (!is_upgrade(response))
+        return false;
+    return response.result() == boost::beast::http::status::switching_protocols;
+}
+
 }  // namespace ripple
 
 #endif

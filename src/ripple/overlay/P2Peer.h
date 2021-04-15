@@ -81,6 +81,16 @@ public:
 
     virtual Json::Value
     json() = 0;
+    ////////////////////////////////////////////////////////////////
+    // Utility
+    ////////////////////////////////////////////////////////////////
+    static std::string
+    makePrefix(std::uint32_t id)
+    {
+        std::stringstream ss;
+        ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
+        return ss.str();
+    }
 };
 
 class P2PeerInternal
@@ -124,10 +134,10 @@ protected:
     virtual void
     close() = 0;
 
+public:  // TODO
     virtual std::string
     getVersion() const = 0;
 
-public:  // TODO
     virtual std::shared_ptr<PeerFinder::Slot> const&
     slot() = 0;
 

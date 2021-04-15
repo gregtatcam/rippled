@@ -43,7 +43,6 @@
 #include <ripple/overlay/Squelch.h>
 #include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
-#include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/Tuning.h>
 #include <ripple/overlay/predicates.h>
@@ -346,15 +345,6 @@ private:
     bool
     reduceRelayReady();
 
-    // TODO make into utility, also in P2PeerImp
-    static std::string
-    makePrefix(id_t id)
-    {
-        std::stringstream ss;
-        ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
-        return ss.str();
-    }
-
 private:
     //--------------------------------------------------------------------------
     //
@@ -556,7 +546,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           overlay)
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
-    , p_sink_(this->app().journal("Protocol"), makePrefix(id))
+    , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{this->get_executor()})
     , tracking_(Tracking::unknown)
@@ -602,7 +592,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           overlay)
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
-    , p_sink_(this->app().journal("Protocol"), makePrefix(id))
+    , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{this->get_executor()})
     , tracking_(Tracking::unknown)

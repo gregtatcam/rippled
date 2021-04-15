@@ -56,7 +56,7 @@ P2PeerImp::P2PeerImp(
     : Child(overlay)
     , app_(app)
     , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
+    , sink_(app_.journal("Peer"), P2Peer::makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
@@ -290,14 +290,6 @@ P2PeerImp::gracefulClose()
 }
 
 //------------------------------------------------------------------------------
-
-std::string
-P2PeerImp::makePrefix(id_t id)
-{
-    std::stringstream ss;
-    ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
-    return ss.str();
-}
 
 void
 P2PeerImp::onShutdown(error_code ec)

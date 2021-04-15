@@ -39,7 +39,7 @@ ConnectAttempt::ConnectAttempt(
     : Child(overlay)
     , app_(app)
     , id_(id)
-    , sink_(journal, OverlayImpl::makePrefix(id))
+    , sink_(journal, P2Peer::makePrefix(id))
     , journal_(sink_)
     , remote_endpoint_(remote_endpoint)
     , usage_(usage)
@@ -324,7 +324,7 @@ ConnectAttempt::processResponse()
         }
     }
 
-    if (!OverlayImpl::isPeerUpgrade(response_))
+    if (!isPeerUpgrade(response_))
     {
         JLOG(journal_.info())
             << "Unable to upgrade to peer protocol: " << response_.result()

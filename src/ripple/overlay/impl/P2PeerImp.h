@@ -81,8 +81,6 @@ private:
     int large_sendq_ = 0;
     Compressed compressionEnabled_ = Compressed::Off;
 
-    friend class OverlayImpl;
-
     class Metrics
     {
     public:
@@ -253,10 +251,10 @@ protected:
     void
     close() override;
 
+public:  // TODO
     std::string
     getVersion() const override;
 
-public:  // TODO
     std::shared_ptr<PeerFinder::Slot> const&
     slot() override
     {
@@ -307,9 +305,6 @@ private:
     void
     gracefulClose();
 
-    static std::string
-    makePrefix(id_t id);
-
     // Called when SSL shutdown completes
     void
     onShutdown(error_code ec);
@@ -350,7 +345,7 @@ P2PeerImp::P2PeerImp(
     : Child(overlay)
     , app_(app)
     , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
+    , sink_(app_.journal("Peer"), P2Peer::makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
