@@ -93,7 +93,7 @@ public:
     }
 };
 
-class P2PeerInternal
+class P2PeerInternal : public P2Peer
 {
 public:
     virtual ~P2PeerInternal() = default;

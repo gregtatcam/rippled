@@ -42,8 +42,7 @@
 
 namespace ripple {
 
-class P2PeerImp : public P2Peer,
-                  public P2PeerInternal,
+class P2PeerImp : public P2PeerInternal,
                   public Child,
                   public std::enable_shared_from_this<P2PeerImp>
 {
