@@ -157,6 +157,9 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr) = 0;
+
+    virtual Resource::Manager&
+    resourceManager() = 0;
 };
 
 }  // namespace ripple

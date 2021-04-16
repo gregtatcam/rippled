@@ -75,6 +75,7 @@ public:  // private:
     using socket_type = boost::asio::ip::tcp::socket;
     using address_type = boost::asio::ip::address;
     using endpoint_type = boost::asio::ip::tcp::endpoint;
+    using P2PeerImp_t = P2PeerImp;
 
     Application& app_;
     boost::asio::io_service& io_service_;
@@ -119,7 +120,7 @@ public:
     operator=(P2POverlayImpl const&) = delete;
 
     Resource::Manager&
-    resourceManager()
+    resourceManager() override
     {
         return m_resourceManager;
     }

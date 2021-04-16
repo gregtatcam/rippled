@@ -140,7 +140,7 @@ make_Overlay(
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
 {
-    return std::make_unique<OverlayImpl<P2PeerImp>>(
+    return std::make_unique<OverlayImpl<P2POverlayImpl<PeerImp<P2PeerImp>>>>(
         app,
         setup,
         parent,

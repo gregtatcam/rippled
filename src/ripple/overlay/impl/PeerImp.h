@@ -70,7 +70,7 @@ namespace ripple {
 struct ValidatorBlobInfo;
 
 template <typename>
-class OverlayImpl;
+class OverlayInternal;
 
 namespace {
 /** The threshold above which we treat a peer connection as high latency */
@@ -114,7 +114,7 @@ private:
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
     P2Peer& p2p_;
-    OverlayImpl<P2PeerImplmnt>& overlay_;
+    OverlayInternal<P2PeerImplmnt>& overlay_;
     beast::WrappedSink p_sink_;
     beast::Journal const p_journal_;
     waitable_timer timer_;
@@ -199,7 +199,7 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr,
-        OverlayImpl<P2PeerImplmnt>& overlay);
+        OverlayInternal<P2PeerImplmnt>& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
@@ -214,7 +214,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
-        OverlayImpl<P2PeerImplmnt>& overlay);
+        OverlayInternal<P2PeerImplmnt>& overlay);
 
     virtual ~PeerImp();
 
@@ -567,7 +567,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
-    OverlayImpl<P2PeerImplmnt>& overlay)
+    OverlayInternal<P2PeerImplmnt>& overlay)
     : P2PeerImplmnt(
           app,
           std::move(stream_ptr),
@@ -577,7 +577,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           publicKey,
           protocol,
           id,
-          overlay)
+          overlay.p2p())
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
     , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
@@ -614,7 +614,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     ProtocolVersion protocol,
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& stream_ptr,
-    OverlayImpl<P2PeerImplmnt>& overlay)
+    OverlayInternal<P2PeerImplmnt>& overlay)
     : P2PeerImplmnt(
           app,
           id,
@@ -623,7 +623,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           publicKey,
           protocol,
           std::move(stream_ptr),
-          overlay)
+          overlay.p2p())
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
     , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
@@ -1071,7 +1071,7 @@ PeerImp<P2PeerImplmnt>::onTimer(error_code const& ec)
             (t == Tracking::unknown &&
              (duration > this->app().config().MAX_UNKNOWN_TIME)))
         {
-            overlay_.peerFinder().on_failure(this->slot());
+            overlay_.p2p().peerFinder().on_failure(this->slot());
             this->fail("Not useful");
             return;
         }
@@ -1121,7 +1121,7 @@ PeerImp<P2PeerImplmnt>::onMessageBegin(
     load_event_ = this->app().getJobQueue().makeLoadEvent(
         jtPEER, protocolMessageName(type));
     fee_ = Resource::feeLightPeer;
-    overlay_.reportTraffic(
+    overlay_.p2p().reportTraffic(
         TrafficCount::categorize(*m, type, true), true, static_cast<int>(size));
     JLOG(this->journal().trace())
         << "onMessageBegin: " << type << " " << size << " " << uncompressed_size
@@ -1248,7 +1248,7 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
             if (item.address != beast::IP::Endpoint())
                 gossip.items.push_back(item);
         }
-        overlay_.resourceManager().importConsumers(this->name(), gossip);
+        overlay_.p2p().resourceManager().importConsumers(this->name(), gossip);
     }
 
     // Calculate the cluster fee:
@@ -1380,7 +1380,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
             return badData("Invalid pubKey");
         PublicKey peerPubKey(s);
 
-        if (auto peer = overlay_.findPeerByPublicKey(peerPubKey))
+        if (auto peer = overlay_.p2p().findPeerByPublicKey(peerPubKey))
         {
             if (!m->has_nodepubkey())
                 m->set_nodepubkey(
@@ -1539,7 +1539,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 
     if (!endpoints.empty())
-        overlay_.peerFinder().on_endpoints(this->slot(), endpoints);
+        overlay_.p2p().peerFinder().on_endpoints(this->slot(), endpoints);
 }
 
 template <typename P2PeerImplmnt>
@@ -1770,7 +1770,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
     if (m->has_requestcookie())
     {
         std::shared_ptr<P2Peer> target =
-            overlay_.findPeerByShortID(m->requestcookie());
+            overlay_.p2p().findPeerByShortID(m->requestcookie());
         if (target)
         {
             m->clear_requestcookie();
@@ -2957,17 +2957,17 @@ PeerImp<P2PeerImplmnt>::checkValidation(
 // the TX tree with the specified root hash.
 //
 template <typename P2PeerImplmnt>
-static std::shared_ptr<PeerImp<P2PeerImplmnt>>
+static std::shared_ptr<Peer>
 getPeerWithTree(
-    OverlayImpl<P2PeerImplmnt>& ov,
+    OverlayInternal<P2PeerImplmnt>& ov,
     uint256 const& rootHash,
     PeerImp<P2PeerImplmnt> const* skip)
 {
-    std::shared_ptr<PeerImp<P2PeerImplmnt>> ret;
+    std::shared_ptr<Peer> ret;
     int retScore = 0;
 
-    ov.for_each([&](std::shared_ptr<PeerImp<P2PeerImplmnt>>&& p) {
-        if (p->hasTxSet(rootHash) && p.get() != skip)
+    ov.foreach([&](std::shared_ptr<Peer> const& p) {
+        if (p->hasTxSet(rootHash) && p->p2p().id() != skip->id())
         {
             auto score = p->getScore(true);
             if (!ret || (score > retScore))
@@ -2985,18 +2985,18 @@ getPeerWithTree(
 // have the ledger and how responsive it is.
 //
 template <typename P2PeerImplmnt>
-static std::shared_ptr<PeerImp<P2PeerImplmnt>>
+static std::shared_ptr<Peer>
 getPeerWithLedger(
-    OverlayImpl<P2PeerImplmnt>& ov,
+    OverlayInternal<P2PeerImplmnt>& ov,
     uint256 const& ledgerHash,
     LedgerIndex ledger,
     PeerImp<P2PeerImplmnt> const* skip)
 {
-    std::shared_ptr<PeerImp<P2PeerImplmnt>> ret;
+    std::shared_ptr<Peer> ret;
     int retScore = 0;
 
-    ov.for_each([&](std::shared_ptr<PeerImp<P2PeerImplmnt>>&& p) {
-        if (p->hasLedger(ledgerHash, ledger) && p.get() != skip)
+    ov.foreach([&](std::shared_ptr<Peer> const& p) {
+        if (p->hasLedger(ledgerHash, ledger) && p->p2p().id() != skip->id())
         {
             auto score = p->getScore(true);
             if (!ret || (score > retScore))
