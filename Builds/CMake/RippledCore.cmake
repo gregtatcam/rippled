@@ -526,7 +526,6 @@ target_sources (rippled PRIVATE
      main sources:
        subdir: overlay
   #]===============================]
-  src/ripple/overlay/impl/Child.cpp
   src/ripple/overlay/impl/Cluster.cpp
   src/ripple/overlay/impl/ConnectAttempt.cpp
   src/ripple/overlay/impl/Handshake.cpp

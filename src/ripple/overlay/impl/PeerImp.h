@@ -70,7 +70,7 @@ namespace ripple {
 struct ValidatorBlobInfo;
 
 template <typename>
-class OverlayInternal;
+class OverlayImpl;
 
 namespace {
 /** The threshold above which we treat a peer connection as high latency */
@@ -81,17 +81,18 @@ std::chrono::seconds constexpr peerTimerInterval{60};
 using namespace std::chrono_literals;
 }  // namespace
 
-template <typename P2PeerImplmnt>
-class PeerImp : public Peer, public P2PeerImplmnt
+template <typename P2POverlayImplmnt>
+class PeerImp : public Peer, public P2POverlayImplmnt::P2PeerImp_t
 {
+    using P2PeerImp_t = typename P2POverlayImplmnt::P2PeerImp_t;
     static_assert(
-        std::is_base_of<P2Peer, P2PeerImplmnt>::value,
-        "P2PeerImplmnt must inherit from P2Peer");
+        std::is_base_of<P2Peer, P2PeerImp_t>::value,
+        "P2PeerImp_t must inherit from P2Peer");
 
-    std::shared_ptr<PeerImp<P2PeerImplmnt>>
+    std::shared_ptr<PeerImp<P2POverlayImplmnt>>
     shared()
     {
-        return std::static_pointer_cast<PeerImp<P2PeerImplmnt>>(
+        return std::static_pointer_cast<PeerImp<P2POverlayImplmnt>>(
             this->shared_from_this());
     }
 
@@ -114,7 +115,7 @@ private:
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
     P2Peer& p2p_;
-    OverlayInternal<P2PeerImplmnt>& overlay_;
+    OverlayImpl<P2POverlayImplmnt>& overlay_;
     beast::WrappedSink p_sink_;
     beast::Journal const p_journal_;
     waitable_timer timer_;
@@ -199,7 +200,7 @@ public:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr,
-        OverlayInternal<P2PeerImplmnt>& overlay);
+        OverlayImpl<P2POverlayImplmnt>& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
@@ -214,7 +215,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
-        OverlayInternal<P2PeerImplmnt>& overlay);
+        OverlayImpl<P2POverlayImplmnt>& overlay);
 
     virtual ~PeerImp();
 
@@ -231,8 +232,8 @@ public:
     }
 
     // Work-around for calling shared_from_this in constructors
-    void
-    run();
+    // void
+    // run();
 
     /** Send a set of PeerFinder endpoints as a protocol message. */
     template <
@@ -555,9 +556,9 @@ protected:
 
 namespace ripple {
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 template <class Buffers>
-PeerImp<P2PeerImplmnt>::PeerImp(
+PeerImp<P2POverlayImplmnt>::PeerImp(
     Application& app,
     std::unique_ptr<stream_type>&& stream_ptr,
     Buffers const& buffers,
@@ -567,8 +568,8 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
-    OverlayInternal<P2PeerImplmnt>& overlay)
-    : P2PeerImplmnt(
+    OverlayImpl<P2POverlayImplmnt>& overlay)
+    : P2PeerImp_t(
           app,
           std::move(stream_ptr),
           buffers,
@@ -577,7 +578,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           publicKey,
           protocol,
           id,
-          overlay.p2p())
+          overlay)
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
     , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
@@ -604,8 +605,8 @@ PeerImp<P2PeerImplmnt>::PeerImp(
         << " vp reduce-relay enabled " << vpReduceRelayEnabled_;
 }
 
-template <typename P2PeerImplmnt>
-PeerImp<P2PeerImplmnt>::PeerImp(
+template <typename P2POverlayImplmnt>
+PeerImp<P2POverlayImplmnt>::PeerImp(
     Application& app,
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -614,8 +615,8 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     ProtocolVersion protocol,
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& stream_ptr,
-    OverlayInternal<P2PeerImplmnt>& overlay)
-    : P2PeerImplmnt(
+    OverlayImpl<P2POverlayImplmnt>& overlay)
+    : P2PeerImp_t(
           app,
           id,
           slot,
@@ -623,7 +624,7 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           publicKey,
           protocol,
           std::move(stream_ptr),
-          overlay.p2p())
+          overlay)
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
     , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
@@ -650,16 +651,16 @@ PeerImp<P2PeerImplmnt>::PeerImp(
         << " vp reduce-relay enabled " << vpReduceRelayEnabled_;
 }
 
-template <typename P2PeerImplmnt>
-PeerImp<P2PeerImplmnt>::~PeerImp()
+template <typename P2POverlayImplmnt>
+PeerImp<P2POverlayImplmnt>::~PeerImp()
 {
     JLOG(this->journal().debug()) << "~PeerImp " << this->id();
     overlay_.deletePeer(this->id());
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::charge(Resource::Charge const& fee)
+PeerImp<P2POverlayImplmnt>::charge(Resource::Charge const& fee)
 {
     if ((usage_.charge(fee) == Resource::drop) && usage_.disconnect() &&
         this->strand().running_in_this_thread())
@@ -670,10 +671,10 @@ PeerImp<P2PeerImplmnt>::charge(Resource::Charge const& fee)
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 template <class FwdIt, class>
 void
-PeerImp<P2PeerImplmnt>::sendEndpoints(FwdIt first, FwdIt last)
+PeerImp<P2POverlayImplmnt>::sendEndpoints(FwdIt first, FwdIt last)
 {
     protocol::TMEndpoints tm;
 
@@ -689,9 +690,9 @@ PeerImp<P2PeerImplmnt>::sendEndpoints(FwdIt first, FwdIt last)
     this->send(std::make_shared<Message>(tm, protocol::mtENDPOINTS));
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::sendOnProtocolStart(bool bSend)
+PeerImp<P2POverlayImplmnt>::sendOnProtocolStart(bool bSend)
 {
     if (!bSend)
         return;
@@ -749,18 +750,18 @@ stringIsUint256Sized(std::string const& pBuffStr)
     return pBuffStr.size() == uint256::size();
 }
 
-template <typename P2PeerImplmnt>
+/*template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::run()
+PeerImp<P2POverlayImplmnt>::run()
 {
     this->doRun();
-}
+}*/
 
 //------------------------------------------------------------------------------
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::crawl() const
+PeerImp<P2POverlayImplmnt>::crawl() const
 {
     auto const iter = this->headers().find("Crawl");
     if (iter == this->headers().end())
@@ -768,9 +769,9 @@ PeerImp<P2PeerImplmnt>::crawl() const
     return boost::iequals(iter->value(), "public");
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 Json::Value
-PeerImp<P2PeerImplmnt>::json()
+PeerImp<P2POverlayImplmnt>::json()
 {
     Json::Value ret(Json::objectValue);
 
@@ -891,9 +892,9 @@ PeerImp<P2PeerImplmnt>::json()
     return ret;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::supportsFeature(ProtocolFeature f) const
+PeerImp<P2POverlayImplmnt>::supportsFeature(ProtocolFeature f) const
 {
     switch (f)
     {
@@ -909,9 +910,10 @@ PeerImp<P2PeerImplmnt>::supportsFeature(ProtocolFeature f) const
 
 //------------------------------------------------------------------------------
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::hasLedger(uint256 const& hash, std::uint32_t seq) const
+PeerImp<P2POverlayImplmnt>::hasLedger(uint256 const& hash, std::uint32_t seq)
+    const
 {
     {
         std::lock_guard sl(this->recentLock());
@@ -927,9 +929,9 @@ PeerImp<P2PeerImplmnt>::hasLedger(uint256 const& hash, std::uint32_t seq) const
         hasShard(NodeStore::seqToShardIndex(seq));
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::ledgerRange(
+PeerImp<P2POverlayImplmnt>::ledgerRange(
     std::uint32_t& minSeq,
     std::uint32_t& maxSeq) const
 {
@@ -939,9 +941,9 @@ PeerImp<P2PeerImplmnt>::ledgerRange(
     maxSeq = maxLedger_;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::hasShard(std::uint32_t shardIndex) const
+PeerImp<P2POverlayImplmnt>::hasShard(std::uint32_t shardIndex) const
 {
     std::lock_guard l{shardInfoMutex_};
     auto const it{shardInfo_.find(this->getNodePublic())};
@@ -950,18 +952,18 @@ PeerImp<P2PeerImplmnt>::hasShard(std::uint32_t shardIndex) const
     return false;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::hasTxSet(uint256 const& hash) const
+PeerImp<P2POverlayImplmnt>::hasTxSet(uint256 const& hash) const
 {
     std::lock_guard sl(this->recentLock());
     return std::find(recentTxSets_.begin(), recentTxSets_.end(), hash) !=
         recentTxSets_.end();
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::cycleStatus()
+PeerImp<P2POverlayImplmnt>::cycleStatus()
 {
     // Operations on closedLedgerHash_ and previousLedgerHash_ must be
     // guarded by recentLock_.
@@ -970,9 +972,9 @@ PeerImp<P2PeerImplmnt>::cycleStatus()
     closedLedgerHash_.zero();
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::hasRange(std::uint32_t uMin, std::uint32_t uMax)
+PeerImp<P2POverlayImplmnt>::hasRange(std::uint32_t uMin, std::uint32_t uMax)
 {
     std::lock_guard sl(this->recentLock());
     return (tracking_ != Tracking::diverged) && (uMin >= minLedger_) &&
@@ -981,9 +983,9 @@ PeerImp<P2PeerImplmnt>::hasRange(std::uint32_t uMin, std::uint32_t uMax)
 
 //------------------------------------------------------------------------------
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 std::optional<RangeSet<std::uint32_t>>
-PeerImp<P2PeerImplmnt>::getShardIndexes() const
+PeerImp<P2POverlayImplmnt>::getShardIndexes() const
 {
     std::lock_guard l{shardInfoMutex_};
     auto it{shardInfo_.find(this->getNodePublic())};
@@ -992,9 +994,10 @@ PeerImp<P2PeerImplmnt>::getShardIndexes() const
     return std::nullopt;
 }
 
-template <typename P2PeerImplmnt>
-std::optional<hash_map<PublicKey, typename PeerImp<P2PeerImplmnt>::ShardInfo>>
-PeerImp<P2PeerImplmnt>::getPeerShardInfo() const
+template <typename P2POverlayImplmnt>
+std::optional<
+    hash_map<PublicKey, typename PeerImp<P2POverlayImplmnt>::ShardInfo>>
+PeerImp<P2POverlayImplmnt>::getPeerShardInfo() const
 {
     std::lock_guard l{shardInfoMutex_};
     if (!shardInfo_.empty())
@@ -1002,9 +1005,9 @@ PeerImp<P2PeerImplmnt>::getPeerShardInfo() const
     return std::nullopt;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::setTimer()
+PeerImp<P2POverlayImplmnt>::setTimer()
 {
     error_code ec;
     timer_.expires_from_now(peerTimerInterval, ec);
@@ -1017,15 +1020,15 @@ PeerImp<P2PeerImplmnt>::setTimer()
     timer_.async_wait(bind_executor(
         this->strand(),
         std::bind(
-            &PeerImp<P2PeerImplmnt>::onTimer,
+            &PeerImp<P2POverlayImplmnt>::onTimer,
             shared(),
             std::placeholders::_1)));
 }
 
 // convenience for ignoring the error code
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::cancelTimer()
+PeerImp<P2POverlayImplmnt>::cancelTimer()
 {
     error_code ec;
     timer_.cancel(ec);
@@ -1033,9 +1036,9 @@ PeerImp<P2PeerImplmnt>::cancelTimer()
 
 //------------------------------------------------------------------------------
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onTimer(error_code const& ec)
+PeerImp<P2POverlayImplmnt>::onTimer(error_code const& ec)
 {
     if (!this->isSocketOpen())
         return;
@@ -1102,16 +1105,16 @@ PeerImp<P2PeerImplmnt>::onTimer(error_code const& ec)
 //
 //------------------------------------------------------------------------------
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessageUnknown(std::uint16_t type)
+PeerImp<P2POverlayImplmnt>::onMessageUnknown(std::uint16_t type)
 {
     // TODO
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessageBegin(
+PeerImp<P2POverlayImplmnt>::onMessageBegin(
     std::uint16_t type,
     std::shared_ptr<::google::protobuf::Message> const& m,
     std::size_t size,
@@ -1128,9 +1131,9 @@ PeerImp<P2PeerImplmnt>::onMessageBegin(
         << " " << isCompressed;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessageEnd(
+PeerImp<P2POverlayImplmnt>::onMessageEnd(
     std::uint16_t,
     std::shared_ptr<::google::protobuf::Message> const&)
 {
@@ -1138,9 +1141,9 @@ PeerImp<P2PeerImplmnt>::onMessageEnd(
     charge(fee_);
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMManifests> const& m)
 {
     auto const s = m->list_size();
@@ -1162,9 +1165,10 @@ PeerImp<P2PeerImplmnt>::onMessage(
         });
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMPing> const& m)
+PeerImp<P2POverlayImplmnt>::onMessage(
+    std::shared_ptr<protocol::TMPing> const& m)
 {
     if (m->type() == protocol::TMPing::ptPING)
     {
@@ -1200,9 +1204,10 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMPing> const& m)
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
+PeerImp<P2POverlayImplmnt>::onMessage(
+    std::shared_ptr<protocol::TMCluster> const& m)
 {
     // VFALCO NOTE I think we should drop the peer immediately
     if (!this->cluster())
@@ -1273,25 +1278,25 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
     this->app().getFeeTrack().setClusterFee(clusterFee);
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMGetShardInfo> const& m)
 {
     // DEPRECATED
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMShardInfo> const& m)
 {
     // DEPRECATED
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMGetPeerShardInfo> const& m)
 {
     auto badData = [&](std::string msg) {
@@ -1353,9 +1358,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMPeerShardInfo> const& m)
 {
     auto badData = [&](std::string msg) {
@@ -1380,7 +1385,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
             return badData("Invalid pubKey");
         PublicKey peerPubKey(s);
 
-        if (auto peer = overlay_.p2p().findPeerByPublicKey(peerPubKey))
+        if (auto peer = overlay_.findPeerByPublicKey(peerPubKey))
         {
             if (!m->has_nodepubkey())
                 m->set_nodepubkey(
@@ -1397,7 +1402,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
             }
 
             m->mutable_peerchain()->RemoveLast();
-            peer->send(
+            peer->p2p().send(
                 std::make_shared<Message>(*m, protocol::mtPEER_SHARD_INFO));
 
             JLOG(p_journal_.trace())
@@ -1502,9 +1507,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
         overlay_.lastLink(this->id());
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMEndpoints> const& m)
 {
     // Don't allow endpoints from peers that are not known tracking or are
@@ -1542,9 +1547,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
         overlay_.p2p().peerFinder().on_endpoints(this->slot(), endpoints);
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMTransaction> const& m)
 {
     if (tracking_.load() == Tracking::diverged)
@@ -1634,9 +1639,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMGetLedger> const& m)
 {
     fee_ = Resource::feeMediumBurdenPeer;
@@ -1648,9 +1653,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
         });
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMProofPathRequest> const& m)
 {
     JLOG(p_journal_.trace()) << "onMessage, TMProofPathRequest";
@@ -1684,9 +1689,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
         });
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMProofPathResponse> const& m)
 {
     if (!ledgerReplayEnabled_)
@@ -1701,9 +1706,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMReplayDeltaRequest> const& m)
 {
     JLOG(p_journal_.trace()) << "onMessage, TMReplayDeltaRequest";
@@ -1737,9 +1742,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
         });
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMReplayDeltaResponse> const& m)
 {
     if (!ledgerReplayEnabled_)
@@ -1754,9 +1759,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMLedgerData> const& m)
 {
     protocol::TMLedgerData& packet = *m;
@@ -1769,12 +1774,12 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
     if (m->has_requestcookie())
     {
-        std::shared_ptr<P2Peer> target =
-            overlay_.p2p().findPeerByShortID(m->requestcookie());
+        std::shared_ptr<Peer> target =
+            overlay_.findPeerByShortID(m->requestcookie());
         if (target)
         {
             m->clear_requestcookie();
-            target->send(
+            target->p2p().send(
                 std::make_shared<Message>(packet, protocol::mtLEDGER_DATA));
         }
         else
@@ -1814,9 +1819,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMProposeSet> const& m)
 {
     protocol::TMProposeSet& set = *m;
@@ -1914,9 +1919,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
         });
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMStatusChange> const& m)
 {
     JLOG(p_journal_.trace()) << "Status: Change";
@@ -2093,9 +2098,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     });
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::checkTracking(std::uint32_t validationSeq)
+PeerImp<P2POverlayImplmnt>::checkTracking(std::uint32_t validationSeq)
 {
     std::uint32_t serverSeq;
     {
@@ -2113,9 +2118,11 @@ PeerImp<P2PeerImplmnt>::checkTracking(std::uint32_t validationSeq)
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::checkTracking(std::uint32_t seq1, std::uint32_t seq2)
+PeerImp<P2POverlayImplmnt>::checkTracking(
+    std::uint32_t seq1,
+    std::uint32_t seq2)
 {
     int diff = std::max(seq1, seq2) - std::min(seq1, seq2);
 
@@ -2136,9 +2143,9 @@ PeerImp<P2PeerImplmnt>::checkTracking(std::uint32_t seq1, std::uint32_t seq2)
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMHaveTransactionSet> const& m)
 {
     if (!stringIsUint256Sized(m->hash()))
@@ -2164,9 +2171,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onValidatorListMessage(
+PeerImp<P2POverlayImplmnt>::onValidatorListMessage(
     std::string const& messageType,
     std::string const& manifest,
     std::uint32_t version,
@@ -2364,9 +2371,9 @@ PeerImp<P2PeerImplmnt>::onValidatorListMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMValidatorList> const& m)
 {
     try
@@ -2394,9 +2401,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMValidatorListCollection> const& m)
 {
     try
@@ -2435,9 +2442,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMValidation> const& m)
 {
     if (m->validation().size() < 50)
@@ -2529,9 +2536,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMGetObjectByHash> const& m)
 {
     protocol::TMGetObjectByHash& packet = *m;
@@ -2672,17 +2679,18 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
+PeerImp<P2POverlayImplmnt>::onMessage(
+    std::shared_ptr<protocol::TMSquelch> const& m)
 {
-    using on_message_fn = void (PeerImp<P2PeerImplmnt>::*)(
+    using on_message_fn = void (PeerImp<P2POverlayImplmnt>::*)(
         std::shared_ptr<protocol::TMSquelch> const&);
     if (!this->strand().running_in_this_thread())
         return post(
             this->strand(),
             std::bind(
-                (on_message_fn)&PeerImp<P2PeerImplmnt>::onMessage,
+                (on_message_fn)&PeerImp<P2POverlayImplmnt>::onMessage,
                 shared(),
                 m));
 
@@ -2719,9 +2727,9 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
                              << this->id() << " " << duration;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
+PeerImp<P2POverlayImplmnt>::onMessage(
     std::shared_ptr<protocol::TMProtocolStarted> const& m)
 {
     sendOnProtocolStart(this->isInbound());
@@ -2729,9 +2737,9 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
 //--------------------------------------------------------------------------
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::addLedger(
+PeerImp<P2POverlayImplmnt>::addLedger(
     uint256 const& hash,
     std::lock_guard<std::mutex> const& lockedRecentLock)
 {
@@ -2746,9 +2754,9 @@ PeerImp<P2PeerImplmnt>::addLedger(
     recentLedgers_.push_back(hash);
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::doFetchPack(
+PeerImp<P2POverlayImplmnt>::doFetchPack(
     const std::shared_ptr<protocol::TMGetObjectByHash>& packet)
 {
     // VFALCO TODO Invert this dependency using an observer and shared state
@@ -2782,9 +2790,9 @@ PeerImp<P2PeerImplmnt>::doFetchPack(
         });
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::checkTransaction(
+PeerImp<P2POverlayImplmnt>::checkTransaction(
     int flags,
     bool checkSignature,
     std::shared_ptr<STTx const> const& stx)
@@ -2862,9 +2870,9 @@ PeerImp<P2PeerImplmnt>::checkTransaction(
 }
 
 // Called from our JobQueue
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::checkPropose(
+PeerImp<P2POverlayImplmnt>::checkPropose(
     Job& job,
     std::shared_ptr<protocol::TMProposeSet> const& packet,
     RCLCxPeerPos peerPos)
@@ -2908,9 +2916,9 @@ PeerImp<P2PeerImplmnt>::checkPropose(
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::checkValidation(
+PeerImp<P2POverlayImplmnt>::checkValidation(
     std::shared_ptr<STValidation> const& val,
     std::shared_ptr<protocol::TMValidation> const& packet)
 {
@@ -2956,12 +2964,12 @@ PeerImp<P2PeerImplmnt>::checkValidation(
 // Returns the set of peers that can help us get
 // the TX tree with the specified root hash.
 //
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 static std::shared_ptr<Peer>
 getPeerWithTree(
-    OverlayInternal<P2PeerImplmnt>& ov,
+    OverlayImpl<P2POverlayImplmnt>& ov,
     uint256 const& rootHash,
-    PeerImp<P2PeerImplmnt> const* skip)
+    PeerImp<P2POverlayImplmnt> const* skip)
 {
     std::shared_ptr<Peer> ret;
     int retScore = 0;
@@ -2984,13 +2992,13 @@ getPeerWithTree(
 // Returns a random peer weighted by how likely to
 // have the ledger and how responsive it is.
 //
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 static std::shared_ptr<Peer>
 getPeerWithLedger(
-    OverlayInternal<P2PeerImplmnt>& ov,
+    OverlayImpl<P2POverlayImplmnt>& ov,
     uint256 const& ledgerHash,
     LedgerIndex ledger,
-    PeerImp<P2PeerImplmnt> const* skip)
+    PeerImp<P2POverlayImplmnt> const* skip)
 {
     std::shared_ptr<Peer> ret;
     int retScore = 0;
@@ -3011,9 +3019,9 @@ getPeerWithLedger(
 }
 
 // VFALCO NOTE This function is way too big and cumbersome.
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::getLedger(
+PeerImp<P2POverlayImplmnt>::getLedger(
     std::shared_ptr<protocol::TMGetLedger> const& m)
 {
     protocol::TMGetLedger& packet = *m;
@@ -3345,9 +3353,9 @@ PeerImp<P2PeerImplmnt>::getLedger(
     this->send(oPacket);
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 int
-PeerImp<P2PeerImplmnt>::getScore(bool haveItem) const
+PeerImp<P2POverlayImplmnt>::getScore(bool haveItem) const
 {
     // Random component of score, used to break ties and avoid
     // overloading the "best" peer
@@ -3384,17 +3392,17 @@ PeerImp<P2PeerImplmnt>::getScore(bool haveItem) const
     return score;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::isHighLatency() const
+PeerImp<P2POverlayImplmnt>::isHighLatency() const
 {
     std::lock_guard sl(this->recentLock());
     return latency_ >= peerHighLatency;
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::reduceRelayReady()
+PeerImp<P2POverlayImplmnt>::reduceRelayReady()
 {
     if (!reduceRelayReady_)
         reduceRelayReady_ =
@@ -3406,38 +3414,38 @@ PeerImp<P2PeerImplmnt>::reduceRelayReady()
 /////////////////////////////////////////////////////////////////
 // Hooks
 ////////////////////////////////////////////////////////////////
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onEvtClose()
+PeerImp<P2POverlayImplmnt>::onEvtClose()
 {
     cancelTimer();
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onEvtShutdown()
+PeerImp<P2POverlayImplmnt>::onEvtShutdown()
 {
     cancelTimer();
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onEvtGracefulClose()
+PeerImp<P2POverlayImplmnt>::onEvtGracefulClose()
 {
     setTimer();
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::squelched(std::shared_ptr<Message> const& m)
+PeerImp<P2POverlayImplmnt>::squelched(std::shared_ptr<Message> const& m)
 {
     auto validator = m->getValidatorKey();
     return validator && !squelch_.expireSquelch(*validator);
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onEvtProtocolStart()
+PeerImp<P2POverlayImplmnt>::onEvtProtocolStart()
 {
     sendOnProtocolStart(!this->isInbound());
 
@@ -3445,9 +3453,9 @@ PeerImp<P2PeerImplmnt>::onEvtProtocolStart()
 }
 
 // should this go into run() where it was originally?
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onEvtRun()
+PeerImp<P2POverlayImplmnt>::onEvtRun()
 {
     auto parseLedgerHash =
         [](std::string const& value) -> std::optional<uint256> {
@@ -3493,9 +3501,9 @@ PeerImp<P2PeerImplmnt>::onEvtRun()
     }
 }
 
-template <typename P2PeerImplmnt>
+template <typename P2POverlayImplmnt>
 std::pair<size_t, boost::system::error_code>
-PeerImp<P2PeerImplmnt>::onEvtProtocolMessage(
+PeerImp<P2POverlayImplmnt>::onEvtProtocolMessage(
     boost::beast::multi_buffer const& mbuffers,
     size_t& hint)
 {

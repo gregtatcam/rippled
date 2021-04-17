@@ -89,14 +89,6 @@ public:
     virtual int
     limit() = 0;
 
-    /** Returns the peer with the matching short id, or null. */
-    virtual std::shared_ptr<P2Peer>
-    findPeerByShortID(Peer::id_t const& id) const = 0;
-
-    /** Returns the peer with the matching public key, or null. */
-    virtual std::shared_ptr<P2Peer>
-    findPeerByPublicKey(PublicKey const& pubKey) = 0;
-
     /** Increment and retrieve counters for total peer disconnects, and
      * disconnects we initiate for excessive resource consumption.
      */
@@ -122,8 +114,8 @@ public:
     // public access
     template <typename>
     friend class PeerImp;  // double hack
-    virtual void
-    remove(ripple::Child&) = 0;
+    /*virtual void
+    remove(ripple::Child&) = 0;*/
 
     virtual void
     onPeerDistruct(P2Peer::id_t, std::shared_ptr<PeerFinder::Slot> const&) = 0;

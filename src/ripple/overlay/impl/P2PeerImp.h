@@ -23,10 +23,9 @@
 #include <ripple/basics/Log.h>
 #include <ripple/basics/RangeSet.h>
 #include <ripple/beast/utility/WrappedSink.h>
-#include <ripple/overlay/P2POverlay.h>
 #include <ripple/overlay/P2Peer.h>
-#include <ripple/overlay/impl/Child.h>
 #include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
@@ -43,9 +42,12 @@
 namespace ripple {
 
 class P2PeerImp : public P2PeerInternal,
-                  public Child,
+                  public P2POverlayImpl::Child,
                   public std::enable_shared_from_this<P2PeerImp>
 {
+public:
+    using P2POverlayImpl_t = P2POverlayImpl;
+
 private:
     using clock_type = std::chrono::steady_clock;
     using error_code = boost::system::error_code;
@@ -134,7 +136,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         std::unique_ptr<stream_type>&& stream_ptr,
-        P2POverlay& overlay);
+        P2POverlayImpl& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
@@ -148,7 +150,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
-        P2POverlay& overlay);
+        P2POverlayImpl& overlay);
 
     virtual ~P2PeerImp();
 
@@ -260,6 +262,10 @@ public:  // TODO
         return slot_;
     }
 
+    // Work-around for calling shared_from_this in constructors
+    void
+    run();
+
 protected:
     std::mutex&
     recentLock() const override
@@ -282,10 +288,6 @@ protected:
     Json::Value
     json() override;
     //////////////
-
-    // Work-around for calling shared_from_this in constructors
-    void
-    doRun() override;
 
     // Called when Overlay gets a stop request.
     void
@@ -340,7 +342,7 @@ P2PeerImp::P2PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
-    P2POverlay& overlay)
+    P2POverlayImpl& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)

@@ -148,8 +148,8 @@ protected:
     virtual boost::beast::http::fields const&
     headers() const = 0;
 
-    virtual void
-    doRun() = 0;
+    /*virtual void
+    run() = 0;*/
 
     virtual std::string
     domain() const = 0;

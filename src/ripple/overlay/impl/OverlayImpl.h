@@ -46,47 +46,10 @@ template <typename>
 class PeerImp;
 class BasicConfig;
 
-template <typename P2PeerImplmnt>
-class OverlayInternal : public Overlay
-{
-public:
-    virtual ~OverlayInternal() = default;
-    OverlayInternal(Stoppable& parent) : Overlay(parent)
-    {
-    }
-
-    virtual void deletePeer(Peer::id_t) = 0;
-
-    virtual std::shared_ptr<Message>
-    getManifestsMessage() = 0;
-
-    virtual void
-    onManifests(
-        std::shared_ptr<protocol::TMManifests> const&,
-        std::shared_ptr<PeerImp<P2PeerImplmnt>> const&) = 0;
-
-    virtual void lastLink(Peer::id_t) = 0;
-
-    virtual void
-    updateSlotAndSquelch(
-        uint256 const& key,
-        PublicKey const& validator,
-        std::set<Peer::id_t>&& peers,
-        protocol::MessageType type) = 0;
-
-    virtual void
-    updateSlotAndSquelch(
-        uint256 const& key,
-        PublicKey const& validator,
-        Peer::id_t peer,
-        protocol::MessageType type) = 0;
-};
-
 template <typename P2POverlayImplmnt>
-class OverlayImpl
-    : public OverlayInternal<typename P2POverlayImplmnt::P2PeerImp_t>,
-      public P2POverlayImplmnt,
-      public reduce_relay::SquelchHandler
+class OverlayImpl : public Overlay,
+                    public P2POverlayImplmnt,
+                    public reduce_relay::SquelchHandler
 {
     static_assert(
         std::is_base_of<P2POverlay, P2POverlayImplmnt>::value,
@@ -134,6 +97,11 @@ private:
     std::optional<std::uint32_t> manifestListSeq_;
     // Protects the message and the sequence list of manifests
     std::mutex manifestLock_;
+    hash_map<
+        std::shared_ptr<PeerFinder::Slot>,
+        std::weak_ptr<PeerImp<P2POverlayImplmnt>>>
+        m_peers;
+    hash_map<Peer::id_t, std::weak_ptr<PeerImp<P2POverlayImplmnt>>> ids_;
 
     //--------------------------------------------------------------------------
 
@@ -166,10 +134,10 @@ public:
 
     void checkTracking(std::uint32_t) override;
 
-    std::shared_ptr<P2Peer>
+    std::shared_ptr<Peer>
     findPeerByShortID(Peer::id_t const& id) const override;
 
-    std::shared_ptr<P2Peer>
+    std::shared_ptr<Peer>
     findPeerByPublicKey(PublicKey const& pubKey) override;
 
     void
@@ -197,7 +165,7 @@ public:
     }
 
     std::shared_ptr<Message>
-    getManifestsMessage() override;
+    getManifestsMessage();
 
     //--------------------------------------------------------------------------
     //
@@ -211,7 +179,7 @@ public:
     void
     for_each(UnaryFunc&& f) const
     {
-        std::vector<std::weak_ptr<PeerImp<P2PeerImp_t>>> wp;
+        std::vector<std::weak_ptr<PeerImp<P2POverlayImplmnt>>> wp;
         {
             std::lock_guard lock(this->mutex_);
 
@@ -234,7 +202,7 @@ public:
     void
     onManifests(
         std::shared_ptr<protocol::TMManifests> const& m,
-        std::shared_ptr<PeerImp<P2PeerImp_t>> const& from) override;
+        std::shared_ptr<PeerImp<P2POverlayImplmnt>> const& from);
 
     void
     incJqTransOverflow() override
@@ -268,7 +236,7 @@ public:
         @param id peer id that received the shard info.
     */
     void
-    lastLink(std::uint32_t id) override;
+    lastLink(std::uint32_t id);
 
     /** Updates message count for validator/peer. Sends TMSquelch if the number
      * of messages for N peers reaches threshold T. A message is counted
@@ -284,7 +252,7 @@ public:
         uint256 const& key,
         PublicKey const& validator,
         std::set<Peer::id_t>&& peers,
-        protocol::MessageType type) override;
+        protocol::MessageType type);
 
     /** Overload to reduce allocation in case of single peer
      */
@@ -293,7 +261,7 @@ public:
         uint256 const& key,
         PublicKey const& validator,
         Peer::id_t peer,
-        protocol::MessageType type) override;
+        protocol::MessageType type);
 
     /** Called when the peer is deleted. If the peer was selected to be the
      * source of messages from the validator then squelched peers have to be
@@ -301,14 +269,14 @@ public:
      * @param id Peer's id
      */
     void
-    deletePeer(Peer::id_t id) override;
+    deletePeer(Peer::id_t id);
 
 protected:
     // HOOKS
     bool
     processRequest(http_request_type const& req, Handoff& handoff) override;
 
-    std::shared_ptr<PeerImp<P2PeerImp_t>>
+    std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
     mkInboundPeer(
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -318,7 +286,7 @@ protected:
         ProtocolVersion protocol,
         std::unique_ptr<stream_type>&& stream_ptr) override;
 
-    std::shared_ptr<PeerImp<P2PeerImp_t>>
+    std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
     mkOutboundPeer(
         std::unique_ptr<stream_type>&& stream_ptr,
         boost::beast::multi_buffer const& buffers,
@@ -328,6 +296,11 @@ protected:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id) override;
+
+    void
+    onPeerDeactivate(
+        Peer::id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot) override;
 
 private:
     void
@@ -483,7 +456,7 @@ OverlayImpl<P2POverlayImplmnt>::OverlayImpl(
     boost::asio::io_service& io_service,
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
-    : OverlayInternal<P2PeerImp_t>(parent)
+    : Overlay(parent)
     , P2POverlayImplmnt(
           app,
           setup,
@@ -517,7 +490,20 @@ OverlayImpl<P2POverlayImplmnt>::~OverlayImpl()
 
 //------------------------------------------------------------------------------
 template <typename P2POverlayImplmnt>
-std::shared_ptr<PeerImp<typename P2POverlayImplmnt::P2PeerImp_t>>
+void
+OverlayImpl<P2POverlayImplmnt>::onPeerDeactivate(
+    Peer::id_t id,
+    std::shared_ptr<PeerFinder::Slot> const& slot)
+{
+    std::lock_guard lock(this->mutex_);
+    ids_.erase(id);
+    auto const iter = m_peers.find(slot);
+    assert(iter != m_peers.end());
+    m_peers.erase(iter);
+}
+
+template <typename P2POverlayImplmnt>
+std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
 OverlayImpl<P2POverlayImplmnt>::mkInboundPeer(
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -527,7 +513,7 @@ OverlayImpl<P2POverlayImplmnt>::mkInboundPeer(
     ProtocolVersion protocol,
     std::unique_ptr<stream_type>&& stream_ptr)
 {
-    return std::make_shared<PeerImp<P2PeerImp_t>>(
+    auto peer = std::make_shared<PeerImp<P2POverlayImplmnt>>(
         this->app_,
         id,
         slot,
@@ -537,10 +523,29 @@ OverlayImpl<P2POverlayImplmnt>::mkInboundPeer(
         consumer,
         std::move(stream_ptr),
         *this);
+
+    std::lock_guard lock(this->mutex_);
+
+    {
+        auto const result = m_peers.emplace(peer->slot(), peer);
+        assert(result.second);
+        (void)result.second;
+    }
+
+    {
+        auto const result = ids_.emplace(
+            std::piecewise_construct,
+            std::make_tuple(peer->p2p().id()),
+            std::make_tuple(peer));
+        assert(result.second);
+        (void)result.second;
+    }
+
+    return peer;
 }
 
 template <typename P2POverlayImplmnt>
-std::shared_ptr<PeerImp<typename P2POverlayImplmnt::P2PeerImp_t>>
+std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
 OverlayImpl<P2POverlayImplmnt>::mkOutboundPeer(
     std::unique_ptr<stream_type>&& stream_ptr,
     boost::beast::multi_buffer const& buffers,
@@ -551,7 +556,7 @@ OverlayImpl<P2POverlayImplmnt>::mkOutboundPeer(
     ProtocolVersion protocol,
     id_t id)
 {
-    return std::make_shared<PeerImp<P2PeerImp_t>>(
+    auto peer = std::make_shared<PeerImp<P2POverlayImplmnt>>(
         this->app_,
         std::move(stream_ptr),
         buffers.data(),
@@ -562,6 +567,25 @@ OverlayImpl<P2POverlayImplmnt>::mkOutboundPeer(
         protocol,
         id,
         *this);
+
+    std::lock_guard lock(this->mutex_);
+
+    {
+        auto const result = m_peers.emplace(peer->slot(), peer);
+        assert(result.second);
+        (void)result.second;
+    }
+
+    {
+        auto const result = ids_.emplace(
+            std::piecewise_construct,
+            std::make_tuple(peer->p2p().id()),
+            std::make_tuple(peer));
+        assert(result.second);
+        (void)result.second;
+    }
+
+    return peer;
 }
 
 template <typename P2POverlayImplmnt>
@@ -580,7 +604,7 @@ template <typename P2POverlayImplmnt>
 void
 OverlayImpl<P2POverlayImplmnt>::onManifests(
     std::shared_ptr<protocol::TMManifests> const& m,
-    std::shared_ptr<PeerImp<P2PeerImp_t>> const& from)
+    std::shared_ptr<PeerImp<P2POverlayImplmnt>> const& from)
 {
     auto const n = m->list_size();
     auto const& journal = from->pjournal();
@@ -627,7 +651,7 @@ OverlayImpl<P2POverlayImplmnt>::onManifests(
 
     if (!relay.list().empty())
         for_each([m2 = std::make_shared<Message>(relay, protocol::mtMANIFESTS)](
-                     std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
+                     std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
             p->p2p().send(m2);
         });
 }
@@ -683,8 +707,9 @@ OverlayImpl<P2POverlayImplmnt>::crawlShards(bool pubKey, std::uint32_t hops)
     }
 
     // Combine the shard info from peers and their sub peers
-    hash_map<PublicKey, typename PeerImp<P2PeerImp_t>::ShardInfo> peerShardInfo;
-    for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>> const& peer) {
+    hash_map<PublicKey, typename PeerImp<P2POverlayImplmnt>::ShardInfo>
+        peerShardInfo;
+    for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>> const& peer) {
         if (auto psi = peer->getPeerShardInfo())
         {
             // e is non-const so it may be moved from
@@ -750,7 +775,7 @@ OverlayImpl<P2POverlayImplmnt>::getOverlayInfo()
     Json::Value jv;
     auto& av = jv["active"] = Json::Value(Json::arrayValue);
 
-    for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& sp) {
+    for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& sp) {
         auto& pv = av.append(Json::Value(Json::objectValue));
         pv[jss::public_key] = base64_encode(
             sp->p2p().getNodePublic().data(), sp->p2p().getNodePublic().size());
@@ -870,6 +895,35 @@ OverlayImpl<P2POverlayImplmnt>::json()
         json.append(peer->json());
     }
     return json;
+}
+
+template <typename P2POverlayImplmnt>
+std::shared_ptr<Peer>
+OverlayImpl<P2POverlayImplmnt>::findPeerByShortID(Peer::id_t const& id) const
+{
+    std::lock_guard lock(this->mutex_);
+    auto const iter = ids_.find(id);
+    if (iter != ids_.end())
+        return iter->second.lock();
+    return {};
+}
+
+// A public key hash map was not used due to the peer connect/disconnect
+// update overhead outweighing the performance of a small set linear search.
+template <typename P2POverlayImplmnt>
+std::shared_ptr<Peer>
+OverlayImpl<P2POverlayImplmnt>::findPeerByPublicKey(PublicKey const& pubKey)
+{
+    std::lock_guard lock(this->mutex_);
+    for (auto const& e : ids_)
+    {
+        if (auto peer = e.second.lock())
+        {
+            if (peer->getNodePublic() == pubKey)
+                return peer;
+        }
+    }
+    return {};
 }
 
 template <typename P2POverlayImplmnt>
@@ -1087,7 +1141,7 @@ OverlayImpl<P2POverlayImplmnt>::getActivePeers() const
     Overlay::PeerSequence ret;
     ret.reserve(size());
 
-    for_each([&ret](std::shared_ptr<PeerImp<P2PeerImp_t>>&& sp) {
+    for_each([&ret](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& sp) {
         ret.emplace_back(std::move(sp));
     });
 
@@ -1098,38 +1152,9 @@ template <typename P2POverlayImplmnt>
 void
 OverlayImpl<P2POverlayImplmnt>::checkTracking(std::uint32_t index)
 {
-    for_each([index](std::shared_ptr<PeerImp<P2PeerImp_t>>&& sp) {
+    for_each([index](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& sp) {
         sp->checkTracking(index);
     });
-}
-
-template <typename P2POverlayImplmnt>
-std::shared_ptr<P2Peer>
-OverlayImpl<P2POverlayImplmnt>::findPeerByShortID(Peer::id_t const& id) const
-{
-    std::lock_guard lock(this->mutex_);
-    auto const iter = this->ids_.find(id);
-    if (iter != this->ids_.end())
-        return iter->second.lock();
-    return {};
-}
-
-// A public key hash map was not used due to the peer connect/disconnect
-// update overhead outweighing the performance of a small set linear search.
-template <typename P2POverlayImplmnt>
-std::shared_ptr<P2Peer>
-OverlayImpl<P2POverlayImplmnt>::findPeerByPublicKey(PublicKey const& pubKey)
-{
-    std::lock_guard lock(this->mutex_);
-    for (auto const& e : this->ids_)
-    {
-        if (auto peer = e.second.lock())
-        {
-            if (peer->getNodePublic() == pubKey)
-                return peer;
-        }
-    }
-    return {};
 }
 
 template <typename P2POverlayImplmnt>
@@ -1137,8 +1162,9 @@ void
 OverlayImpl<P2POverlayImplmnt>::broadcast(protocol::TMProposeSet& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER);
-    for_each(
-        [&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) { p->p2p().send(sm); });
+    for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
+        p->p2p().send(sm);
+    });
 }
 
 template <typename P2POverlayImplmnt>
@@ -1152,7 +1178,7 @@ OverlayImpl<P2POverlayImplmnt>::relay(
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER, validator);
-        for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
+        for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
             if (toSkip->find(p->id()) == toSkip->end())
                 p->p2p().send(sm);
         });
@@ -1166,8 +1192,9 @@ void
 OverlayImpl<P2POverlayImplmnt>::broadcast(protocol::TMValidation& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtVALIDATION);
-    for_each(
-        [sm](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) { p->p2p().send(sm); });
+    for_each([sm](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
+        p->p2p().send(sm);
+    });
 }
 
 template <typename P2POverlayImplmnt>
@@ -1181,7 +1208,7 @@ OverlayImpl<P2POverlayImplmnt>::relay(
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtVALIDATION, validator);
-        for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
+        for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
             if (toSkip->find(p->id()) == toSkip->end())
                 p->p2p().send(sm);
         });
@@ -1230,7 +1257,7 @@ OverlayImpl<P2POverlayImplmnt>::sendEndpoints()
     auto const result = this->m_peerFinder->buildEndpointsForPeers();
     for (auto const& e : result)
     {
-        std::shared_ptr<PeerImp<P2PeerImp_t>> peer;
+        std::shared_ptr<PeerImp<P2POverlayImplmnt>> peer;
         {
             std::lock_guard lock(this->mutex_);
             auto const iter = this->m_peers.find(e.first);
@@ -1267,7 +1294,7 @@ OverlayImpl<P2POverlayImplmnt>::unsquelch(
     {
         // optimize - multiple message with different
         // validator might be sent to the same peer
-        peer->send(makeSquelchMessage(validator, false, 0));
+        peer->p2p().send(makeSquelchMessage(validator, false, 0));
     }
 }
 
@@ -1281,7 +1308,7 @@ OverlayImpl<P2POverlayImplmnt>::squelch(
     if (auto peer = findPeerByShortID(id);
         peer && this->app_.config().VP_REDUCE_RELAY_SQUELCH)
     {
-        peer->send(makeSquelchMessage(validator, true, squelchDuration));
+        peer->p2p().send(makeSquelchMessage(validator, true, squelchDuration));
     }
 }
 

@@ -131,6 +131,14 @@ public:
             f(p);
     }
 
+    /** Returns the peer with the matching short id, or null. */
+    virtual std::shared_ptr<Peer>
+    findPeerByShortID(Peer::id_t const& id) const = 0;
+
+    /** Returns the peer with the matching public key, or null. */
+    virtual std::shared_ptr<Peer>
+    findPeerByPublicKey(PublicKey const& pubKey) = 0;
+
     /** Increment and retrieve counter for transaction job queue overflows. */
     virtual void
     incJqTransOverflow() = 0;

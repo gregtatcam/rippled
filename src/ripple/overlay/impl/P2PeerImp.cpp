@@ -52,7 +52,7 @@ P2PeerImp::P2PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     std::unique_ptr<stream_type>&& stream_ptr,
-    P2POverlay& overlay)
+    P2POverlayImpl& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)
@@ -101,10 +101,10 @@ P2PeerImp::~P2PeerImp()
 }
 
 void
-P2PeerImp::doRun()
+P2PeerImp::run()
 {
     if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&P2PeerImp::doRun, shared_from_this()));
+        return post(strand_, std::bind(&P2PeerImp::run, shared_from_this()));
 
     onEvtRun();
 
