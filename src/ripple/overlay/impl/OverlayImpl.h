@@ -99,9 +99,9 @@ private:
     std::mutex manifestLock_;
     hash_map<
         std::shared_ptr<PeerFinder::Slot>,
-        std::weak_ptr<PeerImp<P2POverlayImplmnt>>>
+        std::weak_ptr<PeerImp<P2PeerImp_t>>>
         m_peers;
-    hash_map<Peer::id_t, std::weak_ptr<PeerImp<P2POverlayImplmnt>>> ids_;
+    hash_map<Peer::id_t, std::weak_ptr<PeerImp<P2PeerImp_t>>> ids_;
 
     //--------------------------------------------------------------------------
 
@@ -179,7 +179,7 @@ public:
     void
     for_each(UnaryFunc&& f) const
     {
-        std::vector<std::weak_ptr<PeerImp<P2POverlayImplmnt>>> wp;
+        std::vector<std::weak_ptr<PeerImp<P2PeerImp_t>>> wp;
         {
             std::lock_guard lock(this->mutex_);
 
@@ -202,7 +202,7 @@ public:
     void
     onManifests(
         std::shared_ptr<protocol::TMManifests> const& m,
-        std::shared_ptr<PeerImp<P2POverlayImplmnt>> const& from);
+        std::shared_ptr<PeerImp<P2PeerImp_t>> const& from);
 
     void
     incJqTransOverflow() override
@@ -513,7 +513,7 @@ OverlayImpl<P2POverlayImplmnt>::mkInboundPeer(
     ProtocolVersion protocol,
     std::unique_ptr<stream_type>&& stream_ptr)
 {
-    auto peer = std::make_shared<PeerImp<P2POverlayImplmnt>>(
+    auto peer = std::make_shared<PeerImp<P2PeerImp_t>>(
         this->app_,
         id,
         slot,
@@ -556,7 +556,7 @@ OverlayImpl<P2POverlayImplmnt>::mkOutboundPeer(
     ProtocolVersion protocol,
     id_t id)
 {
-    auto peer = std::make_shared<PeerImp<P2POverlayImplmnt>>(
+    auto peer = std::make_shared<PeerImp<P2PeerImp_t>>(
         this->app_,
         std::move(stream_ptr),
         buffers.data(),
@@ -604,7 +604,7 @@ template <typename P2POverlayImplmnt>
 void
 OverlayImpl<P2POverlayImplmnt>::onManifests(
     std::shared_ptr<protocol::TMManifests> const& m,
-    std::shared_ptr<PeerImp<P2POverlayImplmnt>> const& from)
+    std::shared_ptr<PeerImp<P2PeerImp_t>> const& from)
 {
     auto const n = m->list_size();
     auto const& journal = from->pjournal();
@@ -651,7 +651,7 @@ OverlayImpl<P2POverlayImplmnt>::onManifests(
 
     if (!relay.list().empty())
         for_each([m2 = std::make_shared<Message>(relay, protocol::mtMANIFESTS)](
-                     std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
+                     std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
             p->p2p().send(m2);
         });
 }
@@ -707,9 +707,9 @@ OverlayImpl<P2POverlayImplmnt>::crawlShards(bool pubKey, std::uint32_t hops)
     }
 
     // Combine the shard info from peers and their sub peers
-    hash_map<PublicKey, typename PeerImp<P2POverlayImplmnt>::ShardInfo>
+    hash_map<PublicKey, typename PeerImp<P2PeerImp_t>::ShardInfo>
         peerShardInfo;
-    for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>> const& peer) {
+    for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>> const& peer) {
         if (auto psi = peer->getPeerShardInfo())
         {
             // e is non-const so it may be moved from
@@ -775,7 +775,7 @@ OverlayImpl<P2POverlayImplmnt>::getOverlayInfo()
     Json::Value jv;
     auto& av = jv["active"] = Json::Value(Json::arrayValue);
 
-    for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& sp) {
+    for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& sp) {
         auto& pv = av.append(Json::Value(Json::objectValue));
         pv[jss::public_key] = base64_encode(
             sp->p2p().getNodePublic().data(), sp->p2p().getNodePublic().size());
@@ -1141,7 +1141,7 @@ OverlayImpl<P2POverlayImplmnt>::getActivePeers() const
     Overlay::PeerSequence ret;
     ret.reserve(size());
 
-    for_each([&ret](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& sp) {
+    for_each([&ret](std::shared_ptr<PeerImp<P2PeerImp_t>>&& sp) {
         ret.emplace_back(std::move(sp));
     });
 
@@ -1152,7 +1152,7 @@ template <typename P2POverlayImplmnt>
 void
 OverlayImpl<P2POverlayImplmnt>::checkTracking(std::uint32_t index)
 {
-    for_each([index](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& sp) {
+    for_each([index](std::shared_ptr<PeerImp<P2PeerImp_t>>&& sp) {
         sp->checkTracking(index);
     });
 }
@@ -1162,7 +1162,7 @@ void
 OverlayImpl<P2POverlayImplmnt>::broadcast(protocol::TMProposeSet& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER);
-    for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
+    for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
         p->p2p().send(sm);
     });
 }
@@ -1178,7 +1178,7 @@ OverlayImpl<P2POverlayImplmnt>::relay(
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER, validator);
-        for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
+        for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
             if (toSkip->find(p->id()) == toSkip->end())
                 p->p2p().send(sm);
         });
@@ -1192,7 +1192,7 @@ void
 OverlayImpl<P2POverlayImplmnt>::broadcast(protocol::TMValidation& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtVALIDATION);
-    for_each([sm](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
+    for_each([sm](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
         p->p2p().send(sm);
     });
 }
@@ -1208,7 +1208,7 @@ OverlayImpl<P2POverlayImplmnt>::relay(
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtVALIDATION, validator);
-        for_each([&](std::shared_ptr<PeerImp<P2POverlayImplmnt>>&& p) {
+        for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
             if (toSkip->find(p->id()) == toSkip->end())
                 p->p2p().send(sm);
         });
@@ -1257,7 +1257,7 @@ OverlayImpl<P2POverlayImplmnt>::sendEndpoints()
     auto const result = this->m_peerFinder->buildEndpointsForPeers();
     for (auto const& e : result)
     {
-        std::shared_ptr<PeerImp<P2POverlayImplmnt>> peer;
+        std::shared_ptr<PeerImp<P2PeerImp_t>> peer;
         {
             std::lock_guard lock(this->mutex_);
             auto const iter = this->m_peers.find(e.first);
