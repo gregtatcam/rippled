@@ -291,16 +291,14 @@ public:  // private:
 
     void
     onPeerDistruct(
-            P2Peer::id_t id,
-            std::shared_ptr<PeerFinder::Slot> const& slot);
+        P2Peer::id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot);
 
 protected:
     void
     remove(P2POverlayImpl::Child& child);
 
 public:  // private:
-
-
     struct TrafficGauges
     {
         TrafficGauges(

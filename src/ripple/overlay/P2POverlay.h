@@ -123,7 +123,9 @@ class P2POverlayInternal : public P2POverlay
 public:
     virtual ~P2POverlayInternal() = default;
 
-    P2POverlayInternal(Stoppable& parent) : P2POverlay(parent) {}
+    P2POverlayInternal(Stoppable& parent) : P2POverlay(parent)
+    {
+    }
 
     ////////////////////////////////////////////////////////////////
     // Getters and other methods shared with the application layer

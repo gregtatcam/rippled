@@ -700,8 +700,7 @@ OverlayImpl<P2POverlayImplmnt>::crawlShards(bool pubKey, std::uint32_t hops)
     }
 
     // Combine the shard info from peers and their sub peers
-    hash_map<PublicKey, typename PeerImp<P2PeerImp_t>::ShardInfo>
-        peerShardInfo;
+    hash_map<PublicKey, typename PeerImp<P2PeerImp_t>::ShardInfo> peerShardInfo;
     for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>> const& peer) {
         if (auto psi = peer->getPeerShardInfo())
         {
@@ -1155,9 +1154,8 @@ void
 OverlayImpl<P2POverlayImplmnt>::broadcast(protocol::TMProposeSet& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER);
-    for_each([&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
-        p->p2p().send(sm);
-    });
+    for_each(
+        [&](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) { p->p2p().send(sm); });
 }
 
 template <typename P2POverlayImplmnt>
@@ -1185,9 +1183,8 @@ void
 OverlayImpl<P2POverlayImplmnt>::broadcast(protocol::TMValidation& m)
 {
     auto const sm = std::make_shared<Message>(m, protocol::mtVALIDATION);
-    for_each([sm](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) {
-        p->p2p().send(sm);
-    });
+    for_each(
+        [sm](std::shared_ptr<PeerImp<P2PeerImp_t>>&& p) { p->p2p().send(sm); });
 }
 
 template <typename P2POverlayImplmnt>
