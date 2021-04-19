@@ -297,7 +297,7 @@ protected:
     void
     remove(P2POverlayImpl::Child& child);
 
-public:  // private:
+protected:  // private:
     struct TrafficGauges
     {
         TrafficGauges(
@@ -337,7 +337,7 @@ public:  // private:
     Stats m_stats;
     std::mutex m_statsMutex;
 
-public:  // private:
+protected:  // private:
     void
     collect_metrics()
     {
