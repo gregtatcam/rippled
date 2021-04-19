@@ -201,10 +201,14 @@ public:
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr);
 
+    void
+    onPeerDistruct(
+            P2Peer::id_t id,
+            std::shared_ptr<PeerFinder::Slot> const& slot);
+
     ////////////////////////////////////////////////////////////////
     // Getters and other methods shared with the application layer
     ////////////////////////////////////////////////////////////////
-
     std::recursive_mutex&
     mutex() const override
     {
@@ -241,7 +245,7 @@ public:
         return journal_;
     }
 
-public:  // private:
+protected: // private
     std::shared_ptr<Writer>
     makeRedirectResponse(
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -288,11 +292,6 @@ public:  // private:
 
     void
     autoConnect();
-
-    void
-    onPeerDistruct(
-        P2Peer::id_t id,
-        std::shared_ptr<PeerFinder::Slot> const& slot);
 
 protected:
     void
