@@ -108,50 +108,44 @@ public:
     virtual std::optional<std::uint32_t>
     networkID() const = 0;
 
-public:
-    // TODO, children should have a reference to internal interface?
-    // have it as a separate abs class implemented in P2POverlayImpl?
-    // public access
-    template <typename>
-    friend class PeerImp;  // double hack
-    /*virtual void
-    remove(ripple::Child&) = 0;*/
+    virtual PeerFinder::Manager&
+    peerFinder() = 0;
+
+    virtual Resource::Manager&
+    resourceManager() = 0;
 
     virtual void
-    onPeerDistruct(P2Peer::id_t, std::shared_ptr<PeerFinder::Slot> const&) = 0;
+    reportTraffic(TrafficCount::category cat, bool isInbound, int bytes) = 0;
+};
+
+class P2POverlayInternal : public P2POverlay
+{
+public:
+    virtual ~P2POverlayInternal() = default;
+
+    P2POverlayInternal(Stoppable& parent) : P2POverlay(parent) {}
+
+    ////////////////////////////////////////////////////////////////
+    // Getters and other methods shared with the application layer
+    ////////////////////////////////////////////////////////////////
+protected:
+    virtual std::recursive_mutex&
+    mutex() const = 0;
+
+    virtual Application&
+    app() const = 0;
 
     virtual Setup const&
     setup() const = 0;
 
-    virtual PeerFinder::Manager&
-    peerFinder() = 0;
+    virtual boost::asio::io_service::strand&
+    strand() = 0;
 
-    virtual void
-    reportTraffic(TrafficCount::category cat, bool isInbound, int bytes) = 0;
+    virtual boost::asio::io_service&
+    io_service() = 0;
 
-    virtual void
-    addOutboundPeer(
-        std::unique_ptr<stream_type>&& stream_ptr,
-        boost::beast::multi_buffer const& buffers,
-        std::shared_ptr<PeerFinder::Slot>&& slot,
-        http_response_type&& response,
-        Resource::Consumer usage,
-        PublicKey const& publicKey,
-        ProtocolVersion protocol,
-        id_t id) = 0;
-
-    virtual void
-    addInboundPeer(
-        id_t id,
-        std::shared_ptr<PeerFinder::Slot> const& slot,
-        http_request_type&& request,
-        PublicKey const& publicKey,
-        ProtocolVersion protocol,
-        Resource::Consumer consumer,
-        std::unique_ptr<stream_type>&& stream_ptr) = 0;
-
-    virtual Resource::Manager&
-    resourceManager() = 0;
+    virtual beast::Journal const&
+    journal() = 0;
 };
 
 }  // namespace ripple

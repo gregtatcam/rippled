@@ -58,9 +58,11 @@ namespace ripple {
 class P2PeerImp;
 class BasicConfig;
 
-class P2POverlayImpl : public P2POverlay
+class P2POverlayImpl : public P2POverlayInternal
 {
 public:
+    using P2PeerImp_t = P2PeerImp;
+
     class Child
     {
     protected:
@@ -75,11 +77,9 @@ public:
         stop() = 0;
     };
 
-public:  // private:
-    using socket_type = boost::asio::ip::tcp::socket;
+private:
     using address_type = boost::asio::ip::address;
     using endpoint_type = boost::asio::ip::tcp::endpoint;
-    using P2PeerImp_t = P2PeerImp;
 
     Application& app_;
     boost::asio::io_service& io_service_;
@@ -180,12 +180,6 @@ public:
         return *m_peerFinder;
     }
 
-    Setup const&
-    setup() const override
-    {
-        return setup_;
-    }
-
     void
     addOutboundPeer(
         std::unique_ptr<stream_type>&& stream_ptr,
@@ -195,7 +189,7 @@ public:
         Resource::Consumer usage,
         PublicKey const& publicKey,
         ProtocolVersion protocol,
-        id_t id) override;
+        id_t id);
 
     void
     addInboundPeer(
@@ -205,7 +199,47 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         Resource::Consumer consumer,
-        std::unique_ptr<stream_type>&& stream_ptr) override;
+        std::unique_ptr<stream_type>&& stream_ptr);
+
+    ////////////////////////////////////////////////////////////////
+    // Getters and other methods shared with the application layer
+    ////////////////////////////////////////////////////////////////
+
+    std::recursive_mutex&
+    mutex() const override
+    {
+        return mutex_;
+    }
+
+    Application&
+    app() const override
+    {
+        return app_;
+    }
+
+    Setup const&
+    setup() const override
+    {
+        return setup_;
+    }
+
+    boost::asio::io_service::strand&
+    strand() override
+    {
+        return strand_;
+    }
+
+    boost::asio::io_service&
+    io_service() override
+    {
+        return io_service_;
+    }
+
+    beast::Journal const&
+    journal() override
+    {
+        return journal_;
+    }
 
 public:  // private:
     std::shared_ptr<Writer>
@@ -255,15 +289,17 @@ public:  // private:
     void
     autoConnect();
 
+    void
+    onPeerDistruct(
+            P2Peer::id_t id,
+            std::shared_ptr<PeerFinder::Slot> const& slot);
+
 protected:
     void
     remove(P2POverlayImpl::Child& child);
 
 public:  // private:
-    void
-    onPeerDistruct(
-        P2Peer::id_t id,
-        std::shared_ptr<PeerFinder::Slot> const& slot) override;
+
 
     struct TrafficGauges
     {

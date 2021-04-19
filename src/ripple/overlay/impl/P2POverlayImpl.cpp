@@ -37,7 +37,7 @@ P2POverlayImpl::P2POverlayImpl(
     boost::asio::io_service& io_service,
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
-    : P2POverlay(parent)
+    : P2POverlayInternal(parent)
     , app_(app)
     , io_service_(io_service)
     , work_(std::in_place, std::ref(io_service_))
