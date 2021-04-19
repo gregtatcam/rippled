@@ -203,8 +203,8 @@ public:
 
     void
     onPeerDistruct(
-            P2Peer::id_t id,
-            std::shared_ptr<PeerFinder::Slot> const& slot);
+        P2Peer::id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot);
 
     ////////////////////////////////////////////////////////////////
     // Getters and other methods shared with the application layer
@@ -245,7 +245,7 @@ public:
         return journal_;
     }
 
-protected: // private
+protected:  // private
     std::shared_ptr<Writer>
     makeRedirectResponse(
         std::shared_ptr<PeerFinder::Slot> const& slot,

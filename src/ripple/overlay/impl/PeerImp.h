@@ -912,8 +912,7 @@ PeerImp<P2PeerImplmnt>::supportsFeature(ProtocolFeature f) const
 
 template <typename P2PeerImplmnt>
 bool
-PeerImp<P2PeerImplmnt>::hasLedger(uint256 const& hash, std::uint32_t seq)
-    const
+PeerImp<P2PeerImplmnt>::hasLedger(uint256 const& hash, std::uint32_t seq) const
 {
     {
         std::lock_guard sl(this->recentLock());
@@ -995,8 +994,7 @@ PeerImp<P2PeerImplmnt>::getShardIndexes() const
 }
 
 template <typename P2PeerImplmnt>
-std::optional<
-    hash_map<PublicKey, typename PeerImp<P2PeerImplmnt>::ShardInfo>>
+std::optional<hash_map<PublicKey, typename PeerImp<P2PeerImplmnt>::ShardInfo>>
 PeerImp<P2PeerImplmnt>::getPeerShardInfo() const
 {
     std::lock_guard l{shardInfoMutex_};
@@ -1167,8 +1165,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
 template <typename P2PeerImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
-    std::shared_ptr<protocol::TMPing> const& m)
+PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMPing> const& m)
 {
     if (m->type() == protocol::TMPing::ptPING)
     {
@@ -1206,8 +1203,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
 template <typename P2PeerImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
-    std::shared_ptr<protocol::TMCluster> const& m)
+PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
 {
     // VFALCO NOTE I think we should drop the peer immediately
     if (!this->cluster())
@@ -2120,9 +2116,7 @@ PeerImp<P2PeerImplmnt>::checkTracking(std::uint32_t validationSeq)
 
 template <typename P2PeerImplmnt>
 void
-PeerImp<P2PeerImplmnt>::checkTracking(
-    std::uint32_t seq1,
-    std::uint32_t seq2)
+PeerImp<P2PeerImplmnt>::checkTracking(std::uint32_t seq1, std::uint32_t seq2)
 {
     int diff = std::max(seq1, seq2) - std::min(seq1, seq2);
 
@@ -2681,8 +2675,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
 template <typename P2PeerImplmnt>
 void
-PeerImp<P2PeerImplmnt>::onMessage(
-    std::shared_ptr<protocol::TMSquelch> const& m)
+PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
 {
     using on_message_fn = void (PeerImp<P2PeerImplmnt>::*)(
         std::shared_ptr<protocol::TMSquelch> const&);
