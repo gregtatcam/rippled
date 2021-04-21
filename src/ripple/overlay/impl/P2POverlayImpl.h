@@ -28,6 +28,7 @@
 #include <ripple/beast/core/LexicalCast.h>
 #include <ripple/overlay/Message.h>
 #include <ripple/overlay/P2POverlay.h>
+#include <ripple/overlay/P2Peer.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/TrafficCount.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
@@ -90,12 +91,12 @@ private:
     boost::container::flat_map<Child*, std::weak_ptr<Child>> list_;
     Setup setup_;
     beast::Journal const journal_;
-    ServerHandler& serverHandler_;
+    std::uint16_t overlayPort_;
     Resource::Manager& m_resourceManager;
     std::unique_ptr<PeerFinder::Manager> m_peerFinder;
     TrafficCount m_traffic;
     Resolver& m_resolver;
-    std::atomic<Peer::id_t> next_id_;
+    std::atomic<P2Peer::id_t> next_id_;
     std::atomic<uint64_t> peerDisconnects_{0};
     std::optional<std::uint32_t> networkID_;
 
@@ -106,7 +107,7 @@ public:
         Application& app,
         Setup const& setup,
         Stoppable& parent,
-        ServerHandler& serverHandler,
+        std::uint16_t overlayPort,
         Resource::Manager& resourceManager,
         Resolver& resolver,
         boost::asio::io_service& io_service,
@@ -123,12 +124,6 @@ public:
     resourceManager() override
     {
         return m_resourceManager;
-    }
-
-    ServerHandler&
-    serverHandler()
-    {
-        return serverHandler_;
     }
 
     Handoff
@@ -394,7 +389,7 @@ protected:
     // Called when an active peer is destroyed.
     virtual void
     onPeerDeactivate(
-        Peer::id_t id,
+        P2Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot) = 0;
 };
 

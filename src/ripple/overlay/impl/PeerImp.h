@@ -138,6 +138,7 @@ private:
     Resource::Consumer usage_;
     Resource::Charge fee_;
     std::optional<std::chrono::milliseconds> latency_;
+    std::mutex mutable recentLock_;
 
     reduce_relay::Squelch<UptimeClock> squelch_;
     inline static std::atomic_bool reduceRelayReady_{false};
@@ -350,6 +351,12 @@ private:
     // reduce_relay::WAIT_ON_BOOTUP time passed since the start
     bool
     reduceRelayReady();
+
+    std::mutex&
+    recentLock() const override
+    {
+        return recentLock_;
+    }
 
 private:
     //--------------------------------------------------------------------------

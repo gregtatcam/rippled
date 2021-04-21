@@ -1397,7 +1397,7 @@ ApplicationImp::setup()
             *this,
             setup_Overlay(*config_),
             *m_jobQueue,
-            *serverHandler_,
+            serverHandler_->setup().overlay.port,
             *m_resourceManager,
             *m_resolver,
             get_io_service(),

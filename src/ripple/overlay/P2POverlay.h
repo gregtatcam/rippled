@@ -23,6 +23,7 @@
 #include <ripple/beast/utility/PropertyStream.h>
 #include <ripple/core/Stoppable.h>
 #include <ripple/overlay/impl/TrafficCount.h>
+#include <ripple/server/Handoff.h>
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/ip/tcp.hpp>

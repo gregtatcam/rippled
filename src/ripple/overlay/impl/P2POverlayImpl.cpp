@@ -31,7 +31,7 @@ P2POverlayImpl::P2POverlayImpl(
     Application& app,
     Setup const& setup,
     Stoppable& parent,
-    ServerHandler& serverHandler,
+    std::uint16_t overlayPort,
     Resource::Manager& resourceManager,
     Resolver& resolver,
     boost::asio::io_service& io_service,
@@ -44,7 +44,7 @@ P2POverlayImpl::P2POverlayImpl(
     , strand_(io_service_)
     , setup_(setup)
     , journal_(app_.journal("Overlay"))
-    , serverHandler_(serverHandler)
+    , overlayPort_(overlayPort)
     , m_resourceManager(resourceManager)
     , m_peerFinder(PeerFinder::make_Manager(
           *this,
@@ -379,7 +379,7 @@ P2POverlayImpl::onPrepare()
 {
     PeerFinder::Config config = PeerFinder::Config::makeConfig(
         app_.config(),
-        serverHandler_.setup().overlay.port,
+        overlayPort_,
         !app_.getValidationPublicKey().empty(),
         setup_.ipLimit);
 

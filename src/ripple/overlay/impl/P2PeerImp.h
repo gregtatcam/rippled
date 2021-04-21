@@ -71,7 +71,6 @@ private:
     PublicKey const publicKey_;
     std::string name_;
     boost::shared_mutex mutable nameMutex_;
-    std::mutex mutable recentLock_;
     std::shared_ptr<PeerFinder::Slot> const slot_;
     boost::beast::multi_buffer read_buffer_;
     http_request_type request_;
@@ -267,12 +266,6 @@ public:  // TODO
     run();
 
 protected:
-    std::mutex&
-    recentLock() const override
-    {
-        return recentLock_;
-    }
-
     virtual boost::beast::http::fields const&
     headers() const override
     {
