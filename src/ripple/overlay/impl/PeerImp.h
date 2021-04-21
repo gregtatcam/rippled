@@ -353,7 +353,7 @@ private:
     reduceRelayReady();
 
     std::mutex&
-    recentLock() const override
+    recentLock() const
     {
         return recentLock_;
     }

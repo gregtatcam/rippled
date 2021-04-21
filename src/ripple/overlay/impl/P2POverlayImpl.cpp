@@ -308,7 +308,7 @@ P2POverlayImpl::connect(beast::IP::Endpoint const& remote_endpoint)
 {
     assert(work_);
 
-    auto usage = resourceManager().newOutboundEndpoint(remote_endpoint);
+    auto usage = m_resourceManager.newOutboundEndpoint(remote_endpoint);
     if (usage.disconnect())
     {
         JLOG(journal_.info()) << "Over resource limit: " << remote_endpoint;

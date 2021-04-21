@@ -142,9 +142,6 @@ public:  // TODO
     slot() = 0;
 
 protected:
-    virtual std::mutex&
-    recentLock() const = 0;
-
     virtual boost::beast::http::fields const&
     headers() const = 0;
 

@@ -23,6 +23,7 @@
 #include <ripple/basics/Log.h>
 #include <ripple/basics/RangeSet.h>
 #include <ripple/beast/utility/WrappedSink.h>
+#include <ripple/overlay/Cluster.h>
 #include <ripple/overlay/P2Peer.h>
 #include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
@@ -48,7 +49,7 @@ class P2PeerImp : public P2PeerInternal,
 public:
     using P2POverlayImpl_t = P2POverlayImpl;
 
-private:
+protected:
     using clock_type = std::chrono::steady_clock;
     using error_code = boost::system::error_code;
     using socket_type = boost::asio::ip::tcp::socket;
@@ -56,6 +57,7 @@ private:
     using stream_type = boost::beast::ssl_stream<middle_type>;
     using Compressed = compression::Compressed;
 
+private:
     Application& app_;
     id_t const id_;
     beast::WrappedSink sink_;
