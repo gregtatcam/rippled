@@ -106,7 +106,6 @@ public:
     P2POverlayImpl(
         Application& app,
         Setup const& setup,
-        Stoppable& parent,
         std::uint16_t overlayPort,
         Resource::Manager& resourceManager,
         Resolver& resolver,
@@ -255,25 +254,6 @@ protected:  // private
         std::string msg);
 
     //
-    // Stoppable
-    //
-
-    void
-    checkStopped();
-
-    void
-    onPrepare() override;
-
-    void
-    onStart() override;
-
-    void
-    onStop() override;
-
-    void
-    onChildrenStopped() override;
-
-    //
     // PropertyStream
     //
 
@@ -281,9 +261,6 @@ protected:  // private
     onWrite(beast::PropertyStream::Map& stream) override;
 
     //--------------------------------------------------------------------------
-
-    void
-    stop();
 
     void
     autoConnect();
@@ -349,6 +326,19 @@ protected:  // private:
         }
         m_stats.peerDisconnects = getPeerDisconnect();
     }
+
+protected:
+    ////////////////////////////////////////////////////////////////
+    // Start/Stop, temp replacement for Stoppable
+    ////////////////////////////////////////////////////////////////
+    void
+    doStart() override;
+
+    void
+    doStop() override;
+
+    bool
+    childrenEmpty() override;
 
 protected:
     // HOOKS implemented in the app layer

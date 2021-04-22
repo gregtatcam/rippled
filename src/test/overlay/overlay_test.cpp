@@ -18,6 +18,7 @@
 //==============================================================================
 #include <ripple/basics/ResolverAsio.h>
 #include <ripple/beast/unit_test.h>
+#include <ripple/core/ConfigSections.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/make_Overlay.h>
@@ -122,7 +123,6 @@ public:
     OverlayImplTest(
         Application& app,
         Setup const& setup,
-        Stoppable& parent,
         std::uint16_t overlayPort,
         Resource::Manager& resourceManager,
         Resolver& resolver,
@@ -132,7 +132,6 @@ public:
         : P2POverlayImpl(
               app,
               setup,
-              parent,
               overlayPort,
               resourceManager,
               resolver,
@@ -140,6 +139,12 @@ public:
               config,
               collector)
     {
+    }
+
+    void
+    run()
+    {
+        autoConnect();
     }
 
 protected:
@@ -203,34 +208,80 @@ protected:
     }
 };
 
-class overlay_test : public beast::unit_test::suite
+class overlay_net_test : public beast::unit_test::suite
 {
-    std::unique_ptr<P2POverlayImpl> overlay1_;
-    std::unique_ptr<P2POverlayImpl> overlay2_;
-    jtx::Env env_;
+    std::unique_ptr<OverlayImplTest> overlay1_;
+    std::unique_ptr<OverlayImplTest> overlay2_;
 
 public:
-    overlay_test() : env_(*this)
+    overlay_net_test()
     {
+    }
+
+    std::unique_ptr<jtx::Env>
+    mkEnv(std::string const& ip, std::vector<std::string> const& fixed)
+    {
+        auto c = std::make_unique<Config>();
+        std::stringstream str;
+        str << " [server]\n"
+            << " port_peer\n"
+            << " port_rpc_admin_local\n"
+            << "[port_peer]\n"
+            << "port = 5005\n"
+            << "ip = " << ip << "\n"
+            << "protocol = peer\n"
+            << "[port_rpc_admin_local]\n"
+            << "port = 6006\n"
+            << " ip = " << ip << "\n"
+            << " admin=[0.0.0.0]\n"
+            << " protocol = http\n"
+            << "[ips_fixed]\n";
+        for (auto i : fixed)
+            str << i << " 51235\n";
+        c->loadFromString(str.str());
+        c->overwrite(ConfigSection::nodeDatabase(), "type", "memory");
+        c->overwrite(ConfigSection::nodeDatabase(), "path", "main");
+        c->deprecatedClearSection(ConfigSection::importNodeDatabase());
+        c->legacy("database_path", "");
+        c->setupControl(true, true, true);
+        return std::make_unique<jtx::Env>(*this, std::move(c));
     }
 
     void
     testOverlay()
     {
         testcase("Overlay");
-        auto resolver = ResolverAsio::New(
-                env_.app().getIOService(), env_.app().journal("OverlayTest"));
+        std::cout << "running test\n";
+        auto env1 = mkEnv("172.0.0.0", {"172.0.0.1"});
+        auto env2 = mkEnv("172.0.0.1", {"172.0.0.0"});
+        auto& app1 = env1->app();
+        auto& app2 = env2->app();
+        auto resolver =
+            ResolverAsio::New(app1.getIOService(), app1.journal("OverlayTest"));
         overlay1_ = std::make_unique<OverlayImplTest>(
-            env_.app(),
-            setup_Overlay(env_.app().config()),
-            env_.app().getJobQueue(),
+            app1,
+            setup_Overlay(app1.config()),
             5005,
-            env_.app().getResourceManager(),
+            app1.getResourceManager(),
             *resolver,
-            env_.app().getIOService(),
-            env_.app().config(),
-            env_.app().getCollectorManager().collector());
-        BEAST_EXPECT(1);
+            app1.getIOService(),
+            app1.config(),
+            app1.getCollectorManager().collector());
+        BEAST_EXPECT(overlay1_);
+        overlay1_->run();
+        overlay2_ = std::make_unique<OverlayImplTest>(
+            app2,
+            setup_Overlay(app2.config()),
+            5005,
+            app2.getResourceManager(),
+            *resolver,
+            app2.getIOService(),
+            app2.config(),
+            app1.getCollectorManager().collector());
+        BEAST_EXPECT(overlay2_);
+        overlay2_->run();
+        app1.getIOService().run();
+        app2.getIOService().run();
     }
 
     void
@@ -240,7 +291,7 @@ public:
     }
 };
 
-BEAST_DEFINE_TESTSUITE(overlay, ripple_data, ripple);
+BEAST_DEFINE_TESTSUITE_MANUAL(overlay_net, ripple_data, ripple);
 
 }  // namespace test
 

@@ -41,7 +41,7 @@ class Manager;
 class Child;
 
 /** Manages the set of connected peers. */
-class P2POverlay : public Stoppable, public beast::PropertyStream::Source
+class P2POverlay : public beast::PropertyStream::Source
 {
 protected:
     using socket_type = boost::beast::tcp_stream;
@@ -51,9 +51,7 @@ protected:
     //             unfortunate problem with the API for
     //             Stoppable and PropertyStream
     //
-    P2POverlay(Stoppable& parent)
-        : Stoppable("P2POverlay", parent)
-        , beast::PropertyStream::Source("peers")
+    P2POverlay() : beast::PropertyStream::Source("peers")
     {
     }
 
@@ -122,11 +120,9 @@ public:
 class P2POverlayInternal : public P2POverlay
 {
 public:
-    virtual ~P2POverlayInternal() = default;
+    P2POverlayInternal() = default;
 
-    P2POverlayInternal(Stoppable& parent) : P2POverlay(parent)
-    {
-    }
+    virtual ~P2POverlayInternal() = default;
 
     ////////////////////////////////////////////////////////////////
     // Getters and other methods shared with the application layer
@@ -149,6 +145,25 @@ protected:
 
     virtual beast::Journal const&
     journal() = 0;
+
+    ////////////////////////////////////////////////////////////////
+    // Start/Cleanup, temp replacement for Stoppable
+    ////////////////////////////////////////////////////////////////
+    virtual void
+    doStart()
+    {
+    }
+
+    virtual void
+    doStop()
+    {
+    }
+
+    virtual bool
+    childrenEmpty()
+    {
+        return true;
+    }
 };
 
 }  // namespace ripple

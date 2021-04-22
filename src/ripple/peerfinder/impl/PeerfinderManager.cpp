@@ -46,13 +46,12 @@ public:
     //--------------------------------------------------------------------------
 
     ManagerImp(
-        Stoppable& stoppable,
         boost::asio::io_service& io_service,
         clock_type& clock,
         beast::Journal journal,
         BasicConfig const& config,
         beast::insight::Collector::ptr const& collector)
-        : Manager(stoppable)
+        : Manager()
         , io_service_(io_service)
         , work_(std::in_place, std::ref(io_service_))
         , m_clock(clock)
@@ -67,7 +66,7 @@ public:
 
     ~ManagerImp() override
     {
-        close();
+        stop();
     }
 
     void
@@ -220,17 +219,16 @@ public:
     //--------------------------------------------------------------------------
 
     void
-    onPrepare() override
+    start() override
     {
         m_store.open(m_config);
         m_logic.load();
     }
 
     void
-    onStop() override
+    stop() override
     {
         close();
-        stopped();
     }
 
     //--------------------------------------------------------------------------
@@ -279,15 +277,12 @@ private:
 
 //------------------------------------------------------------------------------
 
-Manager::Manager(Stoppable& parent)
-    : Stoppable("PeerFinder", parent)
-    , beast::PropertyStream::Source("peerfinder")
+Manager::Manager() : beast::PropertyStream::Source("peerfinder")
 {
 }
 
 std::unique_ptr<Manager>
 make_Manager(
-    Stoppable& parent,
     boost::asio::io_service& io_service,
     clock_type& clock,
     beast::Journal journal,
@@ -295,7 +290,7 @@ make_Manager(
     beast::insight::Collector::ptr const& collector)
 {
     return std::make_unique<ManagerImp>(
-        parent, io_service, clock, journal, config, collector);
+        io_service, clock, journal, config, collector);
 }
 
 }  // namespace PeerFinder

@@ -375,6 +375,28 @@ private:
      * and if slots stopped receiving messages from the validator */
     void
     deleteIdlePeers();
+
+    //
+    // Stoppable
+    //
+
+    void
+    checkStopped();
+
+    void
+    onPrepare() override;
+
+    void
+    onStart() override;
+
+    void
+    onStop() override;
+
+    void
+    onChildrenStopped() override;
+
+    void
+    stop();
 };
 
 }  // namespace ripple
@@ -460,7 +482,6 @@ OverlayImpl<P2POverlayImplmnt>::OverlayImpl(
     , P2POverlayImplmnt(
           app,
           setup,
-          parent,
           overlayPort,
           resourceManager,
           resolver,
@@ -478,7 +499,55 @@ OverlayImpl<P2POverlayImplmnt>::OverlayImpl(
 template <typename P2POverlayImplmnt>
 OverlayImpl<P2POverlayImplmnt>::~OverlayImpl()
 {
+    stop();
     timer_->stop();  // TODO
+}
+
+//------------------------------------------------------------------------------
+
+template <typename P2POverlayImplmnt>
+void
+OverlayImpl<P2POverlayImplmnt>::stop()
+{
+    this->doStop();
+}
+
+// Caller must hold the mutex
+template <typename P2POverlayImplmnt>
+void
+OverlayImpl<P2POverlayImplmnt>::checkStopped()
+{
+    if (isStopping() && areChildrenStopped() &&
+        this->P2POverlayInternal::childrenEmpty())
+        stopped();
+}
+
+template <typename P2POverlayImplmnt>
+void
+OverlayImpl<P2POverlayImplmnt>::onPrepare()
+{
+    this->doStart();
+}
+
+template <typename P2POverlayImplmnt>
+void
+OverlayImpl<P2POverlayImplmnt>::onStart()
+{
+}
+
+template <typename P2POverlayImplmnt>
+void
+OverlayImpl<P2POverlayImplmnt>::onStop()
+{
+    this->strand().dispatch(std::bind(&OverlayImpl::stop, this));
+}
+
+template <typename P2POverlayImplmnt>
+void
+OverlayImpl<P2POverlayImplmnt>::onChildrenStopped()
+{
+    std::lock_guard lock(this->mutex());
+    checkStopped();
 }
 
 //------------------------------------------------------------------------------

@@ -1391,13 +1391,34 @@ ApplicationImp::setup()
     //             move the instantiation inside a conditional:
     //
     //             if (!config_.standalone())
+    // TODO the overlay needs the listening port,
+    // parsed as part of the server handler setup below
+    auto setup = [&]() -> std::optional<ServerHandler::Setup> {
+        try
+        {
+            return setup_ServerHandler(
+                *config_, beast::logstream{m_journal.error()});
+        }
+        catch (std::exception const& e)
+        {
+            if (auto stream = m_journal.fatal())
+            {
+                stream << "Unable to setup server handler";
+                if (std::strlen(e.what()) > 0)
+                    stream << ": " << e.what();
+            }
+            return std::nullopt;
+        }
+    }();
+    if (!setup)
+        return false;
     if (!config_->reporting())
     {
         overlay_ = make_Overlay(
             *this,
             setup_Overlay(*config_),
             *m_jobQueue,
-            serverHandler_->setup().overlay.port,
+            setup->overlay.port,
             *m_resourceManager,
             *m_resolver,
             get_io_service(),
@@ -1425,10 +1446,8 @@ ApplicationImp::setup()
     {
         try
         {
-            auto setup = setup_ServerHandler(
-                *config_, beast::logstream{m_journal.error()});
-            setup.makeContexts();
-            serverHandler_->setup(setup, m_journal);
+            setup->makeContexts();
+            serverHandler_->setup(*setup, m_journal);
         }
         catch (std::exception const& e)
         {

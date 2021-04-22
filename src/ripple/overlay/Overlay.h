@@ -41,14 +41,14 @@ class context;
 namespace ripple {
 
 /** Manages the set of connected peers. */
-class Overlay
+class Overlay : public Stoppable
 {
 protected:
     // VFALCO NOTE The requirement of this constructor is an
     //             unfortunate problem with the API for
     //             Stoppable and PropertyStream
     //
-    Overlay(Stoppable& parent)
+    Overlay(Stoppable& parent) : Stoppable("Overlay", parent)
     {
     }
 

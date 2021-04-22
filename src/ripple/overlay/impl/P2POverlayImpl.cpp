@@ -30,15 +30,13 @@ namespace ripple {
 P2POverlayImpl::P2POverlayImpl(
     Application& app,
     Setup const& setup,
-    Stoppable& parent,
     std::uint16_t overlayPort,
     Resource::Manager& resourceManager,
     Resolver& resolver,
     boost::asio::io_service& io_service,
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
-    : P2POverlayInternal(parent)
-    , app_(app)
+    : app_(app)
     , io_service_(io_service)
     , work_(std::in_place, std::ref(io_service_))
     , strand_(io_service_)
@@ -47,7 +45,6 @@ P2POverlayImpl::P2POverlayImpl(
     , overlayPort_(overlayPort)
     , m_resourceManager(resourceManager)
     , m_peerFinder(PeerFinder::make_Manager(
-          *this,
           io_service,
           stopwatch(),
           app_.journal("PeerFinder"),
@@ -75,7 +72,7 @@ P2POverlayImpl::P2POverlayImpl(
 
 P2POverlayImpl::~P2POverlayImpl()
 {
-    stop();
+    doStop();
 
     // Block until dependent objects have been destroyed.
     // This is just to catch improper use of the Stoppable API.
@@ -367,15 +364,14 @@ P2POverlayImpl::add_active(std::shared_ptr<P2PeerImp> const& peer)
 //------------------------------------------------------------------------------
 
 // Caller must hold the mutex
-void
-P2POverlayImpl::checkStopped()
+bool
+P2POverlayImpl::childrenEmpty()
 {
-    if (isStopping() && areChildrenStopped() && list_.empty())
-        stopped();
+    return list_.empty();
 }
 
 void
-P2POverlayImpl::onPrepare()
+P2POverlayImpl::doStart()
 {
     PeerFinder::Config config = PeerFinder::Config::makeConfig(
         app_.config(),
@@ -384,6 +380,8 @@ P2POverlayImpl::onPrepare()
         setup_.ipLimit);
 
     m_peerFinder->setConfig(config);
+
+    m_peerFinder->start();
 
     // Populate our boot cache: if there are no entries in [ips] then we use
     // the entries in [ips_fixed].
@@ -449,24 +447,6 @@ P2POverlayImpl::onPrepare()
     }
 }
 
-void
-P2POverlayImpl::onStart()
-{
-}
-
-void
-P2POverlayImpl::onStop()
-{
-    strand_.dispatch(std::bind(&P2POverlayImpl::stop, this));
-}
-
-void
-P2POverlayImpl::onChildrenStopped()
-{
-    std::lock_guard lock(mutex_);
-    checkStopped();
-}
-
 //------------------------------------------------------------------------------
 //
 // PropertyStream
@@ -507,8 +487,6 @@ P2POverlayImpl::remove(P2POverlayImpl::Child& child)
 {
     std::lock_guard lock(mutex_);
     list_.erase(&child);
-    if (list_.empty())
-        checkStopped();
 }
 
 void
@@ -521,8 +499,10 @@ P2POverlayImpl::onPeerDistruct(
 }
 
 void
-P2POverlayImpl::stop()
+P2POverlayImpl::doStop()
 {
+    m_peerFinder->stop();
+
     // Calling list_[].second->stop() may cause list_ to be modified
     // (OverlayImpl::remove() may be called on this same thread).  So
     // iterating directly over list_ to call child->stop() could lead to
