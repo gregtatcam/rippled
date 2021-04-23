@@ -356,6 +356,16 @@ public:
             make_Server(handler1, app1.getIOService(), app1.journal("server1"));
         auto server2 =
             make_Server(handler2, app1.getIOService(), app1.journal("server2"));
+        std::vector<Port> serverPort1(1);
+        serverPort1.back().ip = beast::IP::Address::from_string("172.0.0.0");
+        serverPort1.back().port = 5005;
+        serverPort1.back().protocol.insert("peer");
+        std::vector<Port> serverPort2(1);
+        serverPort2.back().ip = beast::IP::Address::from_string("172.0.0.1");
+        serverPort2.back().port = 5005;
+        serverPort2.back().protocol.insert("peer");
+        server1->ports(serverPort1);
+        server2->ports(serverPort2);
         overlay1_->run();
         overlay2_->run();
         app1.getIOService().run();
