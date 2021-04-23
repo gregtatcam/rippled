@@ -41,7 +41,8 @@ public:
         std::unique_ptr<stream_type>&& stream_ptr,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              app,
+              app.logs(),
+              app.config(),
               id,
               slot,
               std::move(request),
@@ -66,7 +67,8 @@ public:
         id_t id,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              app,
+              app.logs(),
+              app.config(),
               std::move(stream_ptr),
               buffers,
               std::move(slot),
@@ -79,6 +81,11 @@ public:
     }
 
 protected:
+    std::string
+    name() const override
+    {
+        return "";
+    }
     bool
     squelched(std::shared_ptr<Message> const&) override
     {

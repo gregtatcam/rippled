@@ -114,6 +114,7 @@ private:
     using waitable_timer =
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
+    Application& app_;
     P2Peer& p2p_;
     OverlayImpl<P2POverlayImpl_t>& overlay_;
     beast::WrappedSink p_sink_;
@@ -121,6 +122,8 @@ private:
     waitable_timer timer_;
     std::atomic<Tracking> tracking_;
     clock_type::time_point trackingTime_;
+    std::string name_;
+    boost::shared_mutex mutable nameMutex_;
 
     // The indices of the smallest and largest ledgers this peer has available
     //
@@ -335,6 +338,13 @@ public:
 
     void
     charge(Resource::Charge const& fee) override;
+
+    /** Returns `true` if this connection is a member of the cluster. */
+    bool
+    cluster() const override;
+
+    std::string
+    name() const override;
 
 private:
     void
@@ -577,7 +587,8 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     id_t id,
     OverlayImpl<P2POverlayImpl_t>& overlay)
     : P2PeerImplmnt(
-          app,
+          app.logs(),
+          app.config(),
           std::move(stream_ptr),
           buffers,
           std::move(slot),
@@ -586,9 +597,10 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           protocol,
           id,
           overlay)
+    , app_(app)
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
-    , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
+    , p_sink_(app_.journal("Protocol"), P2Peer::makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{this->get_executor()})
     , tracking_(Tracking::unknown)
@@ -597,17 +609,22 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     , creationTime_(clock_type::now())
     , usage_(consumer)
     , fee_(Resource::feeLightPeer)
-    , squelch_(this->app().journal("Squelch"))
+    , squelch_(app_.journal("Squelch"))
     , vpReduceRelayEnabled_(peerFeatureEnabled(
           this->headers(),
           FEATURE_VPRR,
-          this->app().config().VP_REDUCE_RELAY_ENABLE))
+          app_.config().VP_REDUCE_RELAY_ENABLE))
     , ledgerReplayEnabled_(peerFeatureEnabled(
           this->headers(),
           FEATURE_LEDGER_REPLAY,
-          this->app().config().LEDGER_REPLAY))
-    , ledgerReplayMsgHandler_(this->app(), this->app().getLedgerReplayer())
+          app_.config().LEDGER_REPLAY))
+    , ledgerReplayMsgHandler_(app_, app_.getLedgerReplayer())
 {
+    if (auto member = app_.cluster().member(this->getNodePublic()))
+    {
+        name_ = *member;
+        JLOG(this->journal().info()) << "Cluster name: " << *member;
+    }
     JLOG(this->journal().debug())
         << " vp reduce-relay enabled " << vpReduceRelayEnabled_;
 }
@@ -624,7 +641,8 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     std::unique_ptr<stream_type>&& stream_ptr,
     OverlayImpl<P2POverlayImpl_t>& overlay)
     : P2PeerImplmnt(
-          app,
+          app.logs(),
+          app.config(),
           id,
           slot,
           std::move(request),
@@ -632,9 +650,10 @@ PeerImp<P2PeerImplmnt>::PeerImp(
           protocol,
           std::move(stream_ptr),
           overlay)
+    , app_(app)
     , p2p_(static_cast<P2Peer&>(*this))
     , overlay_(overlay)
-    , p_sink_(this->app().journal("Protocol"), P2Peer::makePrefix(id))
+    , p_sink_(app_.journal("Protocol"), P2Peer::makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{this->get_executor()})
     , tracking_(Tracking::unknown)
@@ -643,17 +662,22 @@ PeerImp<P2PeerImplmnt>::PeerImp(
     , creationTime_(clock_type::now())
     , usage_(consumer)
     , fee_(Resource::feeLightPeer)
-    , squelch_(this->app().journal("Squelch"))
+    , squelch_(app_.journal("Squelch"))
     , vpReduceRelayEnabled_(peerFeatureEnabled(
           this->headers(),
           FEATURE_VPRR,
-          this->app().config().VP_REDUCE_RELAY_ENABLE))
+          app_.config().VP_REDUCE_RELAY_ENABLE))
     , ledgerReplayEnabled_(peerFeatureEnabled(
           this->headers(),
           FEATURE_LEDGER_REPLAY,
-          this->app().config().LEDGER_REPLAY))
+          app_.config().LEDGER_REPLAY))
     , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
 {
+    if (auto member = app_.cluster().member(this->getNodePublic()))
+    {
+        name_ = *member;
+        JLOG(this->journal().info()) << "Cluster name: " << *member;
+    }
     JLOG(this->journal().debug())
         << " vp reduce-relay enabled " << vpReduceRelayEnabled_;
 }
@@ -661,6 +685,11 @@ PeerImp<P2PeerImplmnt>::PeerImp(
 template <typename P2PeerImplmnt>
 PeerImp<P2PeerImplmnt>::~PeerImp()
 {
+    if (app_.cluster().member(this->getNodePublic()))
+    {
+        JLOG(this->journal().warn()) << name_ << " left cluster";
+    }
+
     JLOG(this->journal().debug()) << "~PeerImp " << this->id();
     overlay_.deletePeer(this->id());
 }
@@ -676,6 +705,21 @@ PeerImp<P2PeerImplmnt>::charge(Resource::Charge const& fee)
         overlay_.incPeerDisconnectCharges();
         this->fail("charge: Resources");
     }
+}
+
+template <typename P2PeerImplmnt>
+bool
+PeerImp<P2PeerImplmnt>::cluster() const
+{
+    return static_cast<bool>(app_.cluster().member(this->getNodePublic()));
+}
+
+template <typename P2PeerImplmnt>
+std::string
+PeerImp<P2PeerImplmnt>::name() const
+{
+    std::shared_lock read_lock{nameMutex_};
+    return name_;
 }
 
 template <typename P2PeerImplmnt>
@@ -708,7 +752,7 @@ PeerImp<P2PeerImplmnt>::sendOnProtocolStart(bool bSend)
     if (this->isInbound() &&
         supportsFeature(ProtocolFeature::ValidatorListPropagation))
     {
-        this->app().validators().for_each_available(
+        app_.validators().for_each_available(
             [&](std::string const& manifest,
                 std::uint32_t version,
                 std::map<std::size_t, ValidatorBlobInfo> const& blobInfos,
@@ -723,12 +767,11 @@ PeerImp<P2PeerImplmnt>::sendOnProtocolStart(bool bSend)
                     version,
                     manifest,
                     blobInfos,
-                    this->app().getHashRouter(),
+                    app_.getHashRouter(),
                     p_journal_);
 
                 // Don't send it next time.
-                this->app().getHashRouter().addSuppressionPeer(
-                    hash, this->id());
+                app_.getHashRouter().addSuppressionPeer(hash, this->id());
             });
     }
     else
@@ -931,7 +974,7 @@ PeerImp<P2PeerImplmnt>::hasLedger(uint256 const& hash, std::uint32_t seq) const
             return true;
     }
 
-    return seq >= this->app().getNodeStore().earliestLedgerSeq() &&
+    return seq >= app_.getNodeStore().earliestLedgerSeq() &&
         hasShard(NodeStore::seqToShardIndex(seq));
 }
 
@@ -1075,9 +1118,9 @@ PeerImp<P2PeerImplmnt>::onTimer(error_code const& ec)
         }
 
         if ((t == Tracking::diverged &&
-             (duration > this->app().config().MAX_DIVERGED_TIME)) ||
+             (duration > app_.config().MAX_DIVERGED_TIME)) ||
             (t == Tracking::unknown &&
-             (duration > this->app().config().MAX_UNKNOWN_TIME)))
+             (duration > app_.config().MAX_UNKNOWN_TIME)))
         {
             overlay_.p2p().peerFinder().on_failure(this->slot());
             this->fail("Not useful");
@@ -1126,8 +1169,8 @@ PeerImp<P2PeerImplmnt>::onMessageBegin(
     std::size_t uncompressed_size,
     bool isCompressed)
 {
-    load_event_ = this->app().getJobQueue().makeLoadEvent(
-        jtPEER, protocolMessageName(type));
+    load_event_ =
+        app_.getJobQueue().makeLoadEvent(jtPEER, protocolMessageName(type));
     fee_ = Resource::feeLightPeer;
     overlay_.p2p().reportTraffic(
         TrafficCount::categorize(*m, type, true), true, static_cast<int>(size));
@@ -1164,7 +1207,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
     // VFALCO What's the right job type?
     auto that = shared();
-    this->app().getJobQueue().addJob(
+    app_.getJobQueue().addJob(
         jtVALIDATION_ut, "receiveManifests", [this, that, m](Job&) {
             overlay_.onManifests(m, that);
         });
@@ -1237,7 +1280,7 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
             auto const reportTime =
                 NetClock::time_point{NetClock::duration{node.reporttime()}};
 
-            this->app().cluster().update(
+            app_.cluster().update(
                 *publicKey, name, node.nodeload(), reportTime);
         }
     }
@@ -1260,13 +1303,13 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
     }
 
     // Calculate the cluster fee:
-    auto const thresh = this->app().timeKeeper().now() - 90s;
+    auto const thresh = app_.timeKeeper().now() - 90s;
     std::uint32_t clusterFee = 0;
 
     std::vector<std::uint32_t> fees;
-    fees.reserve(this->app().cluster().size());
+    fees.reserve(app_.cluster().size());
 
-    this->app().cluster().for_each([&fees, thresh](ClusterNode const& status) {
+    app_.cluster().for_each([&fees, thresh](ClusterNode const& status) {
         if (status.getReportTime() >= thresh)
             fees.push_back(status.getLoadFee());
     });
@@ -1278,7 +1321,7 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMCluster> const& m)
         clusterFee = fees[index];
     }
 
-    this->app().getFeeTrack().setClusterFee(clusterFee);
+    app_.getFeeTrack().setClusterFee(clusterFee);
 }
 
 template <typename P2PeerImplmnt>
@@ -1313,7 +1356,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
         return badData("Invalid peer chain");
 
     // Reply with shard info we may have
-    if (auto shardStore = this->app().getShardStore())
+    if (auto shardStore = app_.getShardStore())
     {
         fee_ = Resource::feeLightPeer;
         auto shards{shardStore->getCompleteShards()};
@@ -1431,8 +1474,8 @@ PeerImp<P2PeerImplmnt>::onMessage(
         std::optional<std::uint32_t> latestShard;
         {
             auto const curLedgerSeq{
-                this->app().getLedgerMaster().getCurrentLedgerIndex()};
-            if (auto shardStore = this->app().getShardStore())
+                app_.getLedgerMaster().getCurrentLedgerIndex()};
+            if (auto shardStore = app_.getShardStore())
             {
                 earliestShard = shardStore->earliestShardIndex();
                 if (curLedgerSeq >= shardStore->earliestLedgerSeq())
@@ -1441,7 +1484,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
             else
             {
                 auto const earliestLedgerSeq{
-                    this->app().getNodeStore().earliestLedgerSeq()};
+                    app_.getNodeStore().earliestLedgerSeq()};
                 earliestShard = NodeStore::seqToShardIndex(earliestLedgerSeq);
                 if (curLedgerSeq >= earliestLedgerSeq)
                     latestShard = NodeStore::seqToShardIndex(curLedgerSeq);
@@ -1558,7 +1601,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
     if (tracking_.load() == Tracking::diverged)
         return;
 
-    if (this->app().getOPs().isNeedNetworkLedger())
+    if (app_.getOPs().isNeedNetworkLedger())
     {
         // If we've never been in synch, there's nothing we can do
         // with a transaction
@@ -1577,7 +1620,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
         int flags;
         constexpr std::chrono::seconds tx_interval = 10s;
 
-        if (!this->app().getHashRouter().shouldProcess(
+        if (!app_.getHashRouter().shouldProcess(
                 txID, this->id(), flags, tx_interval))
         {
             // we have seen this transaction recently
@@ -1602,7 +1645,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
                 flags |= SF_TRUSTED;
             }
 
-            if (this->app().getValidationPublicKey().empty())
+            if (app_.getValidationPublicKey().empty())
             {
                 // For now, be paranoid and have each validator
                 // check each transaction, regardless of source
@@ -1610,20 +1653,20 @@ PeerImp<P2PeerImplmnt>::onMessage(
             }
         }
 
-        if (this->app().getJobQueue().getJobCount(jtTRANSACTION) >
-            this->app().config().MAX_TRANSACTIONS)
+        if (app_.getJobQueue().getJobCount(jtTRANSACTION) >
+            app_.config().MAX_TRANSACTIONS)
         {
             overlay_.incJqTransOverflow();
             JLOG(p_journal_.info()) << "Transaction queue is full";
         }
-        else if (this->app().getLedgerMaster().getValidatedLedgerAge() > 4min)
+        else if (app_.getLedgerMaster().getValidatedLedgerAge() > 4min)
         {
             JLOG(p_journal_.trace())
                 << "No new transactions until synchronized";
         }
         else
         {
-            this->app().getJobQueue().addJob(
+            app_.getJobQueue().addJob(
                 jtTRANSACTION,
                 "recvTransaction->checkTransaction",
                 [weak = std::weak_ptr<PeerImp>(shared()),
@@ -1649,11 +1692,10 @@ PeerImp<P2PeerImplmnt>::onMessage(
 {
     fee_ = Resource::feeMediumBurdenPeer;
     std::weak_ptr<PeerImp> weak = shared();
-    this->app().getJobQueue().addJob(
-        jtLEDGER_REQ, "recvGetLedger", [weak, m](Job&) {
-            if (auto peer = weak.lock())
-                peer->getLedger(m);
-        });
+    app_.getJobQueue().addJob(jtLEDGER_REQ, "recvGetLedger", [weak, m](Job&) {
+        if (auto peer = weak.lock())
+            peer->getLedger(m);
+    });
 }
 
 template <typename P2PeerImplmnt>
@@ -1670,7 +1712,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
     fee_ = Resource::feeMediumBurdenPeer;
     std::weak_ptr<PeerImp> weak = shared();
-    this->app().getJobQueue().addJob(
+    app_.getJobQueue().addJob(
         jtREPLAY_REQ, "recvProofPathRequest", [weak, m](Job&) {
             if (auto peer = weak.lock())
             {
@@ -1723,7 +1765,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
     fee_ = Resource::feeMediumBurdenPeer;
     std::weak_ptr<PeerImp> weak = shared();
-    this->app().getJobQueue().addJob(
+    app_.getJobQueue().addJob(
         jtREPLAY_REQ, "recvReplayDeltaRequest", [weak, m](Job&) {
             if (auto peer = weak.lock())
             {
@@ -1806,8 +1848,8 @@ PeerImp<P2PeerImplmnt>::onMessage(
     {
         // got data for a candidate transaction set
         std::weak_ptr<PeerImp> weak = shared();
-        auto& app = this->app();
-        this->app().getJobQueue().addJob(
+        auto& app = app_;
+        app_.getJobQueue().addJob(
             jtTXN_DATA, "recvPeerData", [weak, hash, m, &app](Job&) {
                 if (auto peer = weak.lock())
                     app.getInboundTransactions().gotData(hash, peer, m);
@@ -1815,7 +1857,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
         return;
     }
 
-    if (!this->app().getInboundLedgers().gotLedgerData(hash, shared(), m))
+    if (!app_.getInboundLedgers().gotLedgerData(hash, shared(), m))
     {
         JLOG(p_journal_.trace()) << "Got data for unwanted ledger";
         fee_ = Resource::feeUnwantedData;
@@ -1864,7 +1906,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
         sig);
 
     if (auto [added, relayed] =
-            this->app().getHashRouter().addSuppressionPeerWithStatus(
+            app_.getHashRouter().addSuppressionPeerWithStatus(
                 suppression, this->id());
         !added)
     {
@@ -1878,7 +1920,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
         return;
     }
 
-    auto const isTrusted = this->app().validators().trusted(publicKey);
+    auto const isTrusted = app_.validators().trusted(publicKey);
 
     if (!isTrusted)
     {
@@ -1889,7 +1931,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
             return;
         }
 
-        if (!this->cluster() && this->app().getFeeTrack().isLoadedLocal())
+        if (!this->cluster() && app_.getFeeTrack().isLoadedLocal())
         {
             JLOG(p_journal_.debug()) << "Proposal: Dropping untrusted (load)";
             return;
@@ -1908,12 +1950,11 @@ PeerImp<P2PeerImplmnt>::onMessage(
             set.proposeseq(),
             proposeHash,
             closeTime,
-            this->app().timeKeeper().closeTime(),
-            calcNodeID(
-                this->app().validatorManifests().getMasterKey(publicKey))});
+            app_.timeKeeper().closeTime(),
+            calcNodeID(app_.validatorManifests().getMasterKey(publicKey))});
 
     std::weak_ptr<PeerImp> weak = shared();
-    this->app().getJobQueue().addJob(
+    app_.getJobQueue().addJob(
         isTrusted ? jtPROPOSAL_t : jtPROPOSAL_ut,
         "recvPropose->checkPropose",
         [weak, m, proposal](Job& job) {
@@ -1930,8 +1971,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
     JLOG(p_journal_.trace()) << "Status: Change";
 
     if (!m->has_networktime())
-        m->set_networktime(
-            this->app().timeKeeper().now().time_since_epoch().count());
+        m->set_networktime(app_.timeKeeper().now().time_since_epoch().count());
 
     {
         std::lock_guard sl(this->recentLock());
@@ -2020,14 +2060,13 @@ PeerImp<P2PeerImplmnt>::onMessage(
     }
 
     if (m->has_ledgerseq() &&
-        this->app().getLedgerMaster().getValidatedLedgerAge() < 2min)
+        app_.getLedgerMaster().getValidatedLedgerAge() < 2min)
     {
         checkTracking(
-            m->ledgerseq(),
-            this->app().getLedgerMaster().getValidLedgerIndex());
+            m->ledgerseq(), app_.getLedgerMaster().getValidLedgerIndex());
     }
 
-    this->app().getOPs().pubPeerStatus([=]() -> Json::Value {
+    app_.getOPs().pubPeerStatus([=]() -> Json::Value {
         Json::Value j = Json::objectValue;
 
         if (m->has_newstatus())
@@ -2197,7 +2236,7 @@ PeerImp<P2PeerImplmnt>::onValidatorListMessage(
         << "Received " << messageType << " from "
         << this->getRemoteAddress().to_string() << " (" << this->id() << ")";
 
-    if (!this->app().getHashRouter().addSuppressionPeer(hash, this->id()))
+    if (!app_.getHashRouter().addSuppressionPeer(hash, this->id()))
     {
         JLOG(p_journal_.debug())
             << messageType << ": received duplicate " << messageType;
@@ -2208,15 +2247,15 @@ PeerImp<P2PeerImplmnt>::onValidatorListMessage(
         return;
     }
 
-    auto const applyResult = this->app().validators().applyListsAndBroadcast(
+    auto const applyResult = app_.validators().applyListsAndBroadcast(
         manifest,
         version,
         blobs,
         this->getRemoteAddress().to_string(),
         hash,
-        this->app().overlay(),
-        this->app().getHashRouter(),
-        this->app().getOPs());
+        app_.overlay(),
+        app_.getHashRouter(),
+        app_.getOPs());
 
     JLOG(p_journal_.debug())
         << "Processed " << messageType << " version " << version << " from "
@@ -2457,7 +2496,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
     try
     {
-        auto const closeTime = this->app().timeKeeper().closeTime();
+        auto const closeTime = app_.timeKeeper().closeTime();
 
         std::shared_ptr<STValidation> val;
         {
@@ -2466,15 +2505,15 @@ PeerImp<P2PeerImplmnt>::onMessage(
                 std::ref(sit),
                 [this](PublicKey const& pk) {
                     return calcNodeID(
-                        this->app().validatorManifests().getMasterKey(pk));
+                        app_.validatorManifests().getMasterKey(pk));
                 },
                 false);
             val->setSeen(closeTime);
         }
 
         if (!isCurrent(
-                this->app().getValidations().parms(),
-                this->app().timeKeeper().closeTime(),
+                app_.getValidations().parms(),
+                app_.timeKeeper().closeTime(),
                 val->getSignTime(),
                 val->getSeenTime()))
         {
@@ -2485,7 +2524,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
 
         auto key = sha512Half(makeSlice(m->validation()));
         if (auto [added, relayed] =
-                this->app().getHashRouter().addSuppressionPeerWithStatus(
+                app_.getHashRouter().addSuppressionPeerWithStatus(
                     key, this->id());
             !added)
         {
@@ -2505,18 +2544,17 @@ PeerImp<P2PeerImplmnt>::onMessage(
         }
 
         auto const isTrusted =
-            this->app().validators().trusted(val->getSignerPublic());
+            app_.validators().trusted(val->getSignerPublic());
 
         if (!isTrusted && (tracking_.load() == Tracking::diverged))
         {
             JLOG(p_journal_.debug())
                 << "Validation: dropping untrusted from diverged peer";
         }
-        if (isTrusted || this->cluster() ||
-            !this->app().getFeeTrack().isLoadedLocal())
+        if (isTrusted || this->cluster() || !app_.getFeeTrack().isLoadedLocal())
         {
             std::weak_ptr<PeerImp> weak = shared();
-            this->app().getJobQueue().addJob(
+            app_.getJobQueue().addJob(
                 isTrusted ? jtVALIDATION_t : jtVALIDATION_ut,
                 "recvValidation->checkValidation",
                 [weak, val, m](Job&) {
@@ -2591,11 +2629,10 @@ PeerImp<P2PeerImplmnt>::onMessage(
                 // VFALCO TODO Move this someplace more sensible so we dont
                 //             need to inject the NodeStore interfaces.
                 std::uint32_t seq{obj.has_ledgerseq() ? obj.ledgerseq() : 0};
-                auto nodeObject{
-                    this->app().getNodeStore().fetchNodeObject(hash, seq)};
+                auto nodeObject{app_.getNodeStore().fetchNodeObject(hash, seq)};
                 if (!nodeObject)
                 {
-                    if (auto shardStore = this->app().getShardStore())
+                    if (auto shardStore = app_.getShardStore())
                     {
                         if (seq >= shardStore->earliestLedgerSeq())
                             nodeObject = shardStore->fetchNodeObject(hash, seq);
@@ -2646,7 +2683,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
                                 << "GetObj: Full fetch pack for " << pLSeq;
                         }
                         pLSeq = obj.ledgerseq();
-                        pLDo = !this->app().getLedgerMaster().haveLedger(pLSeq);
+                        pLDo = !app_.getLedgerMaster().haveLedger(pLSeq);
 
                         if (!pLDo)
                         {
@@ -2662,7 +2699,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
                 {
                     uint256 const hash{obj.hash()};
 
-                    this->app().getLedgerMaster().addFetchPack(
+                    app_.getLedgerMaster().addFetchPack(
                         hash,
                         std::make_shared<Blob>(
                             obj.data().begin(), obj.data().end()));
@@ -2676,7 +2713,7 @@ PeerImp<P2PeerImplmnt>::onMessage(
                 << "GetObj: Partial fetch pack for " << pLSeq;
         }
         if (packet.type() == protocol::TMGetObjectByHash::otFETCH_PACK)
-            this->app().getLedgerMaster().gotFetchPack(progress, pLSeq);
+            app_.getLedgerMaster().gotFetchPack(progress, pLSeq);
     }
 }
 
@@ -2709,7 +2746,7 @@ PeerImp<P2PeerImplmnt>::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
     PublicKey key(slice);
 
     // Ignore the squelch for validator's own messages.
-    if (key == this->app().getValidationPublicKey())
+    if (key == app_.getValidationPublicKey())
     {
         JLOG(p_journal_.debug())
             << "onMessage: TMSquelch discarding validator's squelch " << slice;
@@ -2762,9 +2799,9 @@ PeerImp<P2PeerImplmnt>::doFetchPack(
     // VFALCO TODO Invert this dependency using an observer and shared state
     // object. Don't queue fetch pack jobs if we're under load or we already
     // have some queued.
-    if (this->app().getFeeTrack().isLoadedLocal() ||
-        (this->app().getLedgerMaster().getValidatedLedgerAge() > 40s) ||
-        (this->app().getJobQueue().getJobCount(jtPACK) > 10))
+    if (app_.getFeeTrack().isLoadedLocal() ||
+        (app_.getLedgerMaster().getValidatedLedgerAge() > 40s) ||
+        (app_.getJobQueue().getJobCount(jtPACK) > 10))
     {
         JLOG(p_journal_.info()) << "Too busy to make fetch pack";
         return;
@@ -2783,8 +2820,8 @@ PeerImp<P2PeerImplmnt>::doFetchPack(
 
     std::weak_ptr<PeerImp> weak = shared();
     auto elapsed = UptimeClock::now();
-    auto const pap = &this->app();
-    this->app().getJobQueue().addJob(
+    auto const pap = &app_;
+    app_.getJobQueue().addJob(
         jtPACK, "MakeFetchPack", [pap, weak, packet, hash, elapsed](Job&) {
             pap->getLedgerMaster().makeFetchPack(weak, packet, hash, elapsed);
         });
@@ -2803,10 +2840,9 @@ PeerImp<P2PeerImplmnt>::checkTransaction(
         // Expired?
         if (stx->isFieldPresent(sfLastLedgerSequence) &&
             (stx->getFieldU32(sfLastLedgerSequence) <
-             this->app().getLedgerMaster().getValidLedgerIndex()))
+             app_.getLedgerMaster().getValidLedgerIndex()))
         {
-            this->app().getHashRouter().setFlags(
-                stx->getTransactionID(), SF_BAD);
+            app_.getHashRouter().setFlags(stx->getTransactionID(), SF_BAD);
             charge(Resource::feeUnwantedData);
             return;
         }
@@ -2815,10 +2851,10 @@ PeerImp<P2PeerImplmnt>::checkTransaction(
         {
             // Check the signature before handing off to the job queue.
             if (auto [valid, validReason] = checkValidity(
-                    this->app().getHashRouter(),
+                    app_.getHashRouter(),
                     *stx,
-                    this->app().getLedgerMaster().getValidatedRules(),
-                    this->app().config());
+                    app_.getLedgerMaster().getValidatedRules(),
+                    app_.config());
                 valid != Validity::Valid)
             {
                 if (!validReason.empty())
@@ -2828,8 +2864,7 @@ PeerImp<P2PeerImplmnt>::checkTransaction(
                 }
 
                 // Probably not necessary to set SF_BAD, but doesn't hurt.
-                this->app().getHashRouter().setFlags(
-                    stx->getTransactionID(), SF_BAD);
+                app_.getHashRouter().setFlags(stx->getTransactionID(), SF_BAD);
                 charge(Resource::feeInvalidSignature);
                 return;
             }
@@ -2837,13 +2872,11 @@ PeerImp<P2PeerImplmnt>::checkTransaction(
         else
         {
             forceValidity(
-                this->app().getHashRouter(),
-                stx->getTransactionID(),
-                Validity::Valid);
+                app_.getHashRouter(), stx->getTransactionID(), Validity::Valid);
         }
 
         std::string reason;
-        auto tx = std::make_shared<Transaction>(stx, reason, this->app());
+        auto tx = std::make_shared<Transaction>(stx, reason, app_);
 
         if (tx->getStatus() == INVALID)
         {
@@ -2852,19 +2885,18 @@ PeerImp<P2PeerImplmnt>::checkTransaction(
                 JLOG(p_journal_.trace())
                     << "Exception checking transaction: " << reason;
             }
-            this->app().getHashRouter().setFlags(
-                stx->getTransactionID(), SF_BAD);
+            app_.getHashRouter().setFlags(stx->getTransactionID(), SF_BAD);
             charge(Resource::feeInvalidSignature);
             return;
         }
 
         bool const trusted(flags & SF_TRUSTED);
-        this->app().getOPs().processTransaction(
+        app_.getOPs().processTransaction(
             tx, trusted, false, NetworkOPs::FailHard::no);
     }
     catch (std::exception const&)
     {
-        this->app().getHashRouter().setFlags(stx->getTransactionID(), SF_BAD);
+        app_.getHashRouter().setFlags(stx->getTransactionID(), SF_BAD);
         charge(Resource::feeBadData);
     }
 }
@@ -2894,10 +2926,9 @@ PeerImp<P2PeerImplmnt>::checkPropose(
     bool relay;
 
     if (isTrusted)
-        relay = this->app().getOPs().processTrustedProposal(peerPos);
+        relay = app_.getOPs().processTrustedProposal(peerPos);
     else
-        relay =
-            this->app().config().RELAY_UNTRUSTED_PROPOSALS || this->cluster();
+        relay = app_.config().RELAY_UNTRUSTED_PROPOSALS || this->cluster();
 
     if (relay)
     {
@@ -2905,7 +2936,7 @@ PeerImp<P2PeerImplmnt>::checkPropose(
         // are the source of the message, consequently the message should
         // not be relayed to these peers. But the message must be counted
         // as part of the squelch logic.
-        auto haveMessage = this->app().overlay().relay(
+        auto haveMessage = app_.overlay().relay(
             *packet, peerPos.suppressionID(), peerPos.publicKey());
         if (reduceRelayReady() && !haveMessage.empty())
             overlay_.updateSlotAndSquelch(
@@ -2932,8 +2963,7 @@ PeerImp<P2PeerImplmnt>::checkValidation(
     // FIXME it should be safe to remove this try/catch. Investigate codepaths.
     try
     {
-        if (this->app().getOPs().recvValidation(
-                val, std::to_string(this->id())) ||
+        if (app_.getOPs().recvValidation(val, std::to_string(this->id())) ||
             this->cluster())
         {
             auto const suppression =
@@ -3051,7 +3081,7 @@ PeerImp<P2PeerImplmnt>::getLedger(
 
         uint256 const txHash{packet.ledgerhash()};
 
-        shared = this->app().getInboundTransactions().getSet(txHash, false);
+        shared = app_.getInboundTransactions().getSet(txHash, false);
         map = shared.get();
 
         if (!map)
@@ -3090,7 +3120,7 @@ PeerImp<P2PeerImplmnt>::getLedger(
             return;
         }
 
-        if (this->app().getFeeTrack().isLoadedLocal() && !this->cluster())
+        if (app_.getFeeTrack().isLoadedLocal() && !this->cluster())
         {
             JLOG(p_journal_.debug()) << "GetLedger: Too busy";
             return;
@@ -3111,11 +3141,11 @@ PeerImp<P2PeerImplmnt>::getLedger(
             uint256 const ledgerhash{packet.ledgerhash()};
             logMe += "LedgerHash:";
             logMe += to_string(ledgerhash);
-            ledger = this->app().getLedgerMaster().getLedgerByHash(ledgerhash);
+            ledger = app_.getLedgerMaster().getLedgerByHash(ledgerhash);
 
             if (!ledger && packet.has_ledgerseq())
             {
-                if (auto shardStore = this->app().getShardStore())
+                if (auto shardStore = app_.getShardStore())
                 {
                     auto seq = packet.ledgerseq();
                     if (seq >= shardStore->earliestLedgerSeq())
@@ -3154,14 +3184,12 @@ PeerImp<P2PeerImplmnt>::getLedger(
         }
         else if (packet.has_ledgerseq())
         {
-            if (packet.ledgerseq() <
-                this->app().getLedgerMaster().getEarliestFetch())
+            if (packet.ledgerseq() < app_.getLedgerMaster().getEarliestFetch())
             {
                 JLOG(p_journal_.debug()) << "GetLedger: Early ledger request";
                 return;
             }
-            ledger = this->app().getLedgerMaster().getLedgerBySeq(
-                packet.ledgerseq());
+            ledger = app_.getLedgerMaster().getLedgerBySeq(packet.ledgerseq());
             if (!ledger)
             {
                 JLOG(p_journal_.debug())
@@ -3170,7 +3198,7 @@ PeerImp<P2PeerImplmnt>::getLedger(
         }
         else if (packet.has_ltype() && (packet.ltype() == protocol::ltCLOSED))
         {
-            ledger = this->app().getLedgerMaster().getClosedLedger();
+            ledger = app_.getLedgerMaster().getClosedLedger();
             assert(!ledger->open());
             // VFALCO ledger should never be null!
             // VFALCO How can the closed ledger be open?
@@ -3201,8 +3229,7 @@ PeerImp<P2PeerImplmnt>::getLedger(
         }
 
         if (!packet.has_ledgerseq() &&
-            (ledger->info().seq <
-             this->app().getLedgerMaster().getEarliestFetch()))
+            (ledger->info().seq < app_.getLedgerMaster().getEarliestFetch()))
         {
             JLOG(p_journal_.debug()) << "GetLedger: Early ledger request";
             return;

@@ -51,6 +51,10 @@ public:
     using id_t = P2Peer::id_t;
     virtual ~Peer() = default;
 
+    /** Returns `true` if this connection is a member of the cluster. */
+    virtual bool
+    cluster() const = 0;
+
     /** Adjust this peer's load balance based on the type of load imposed. */
     virtual void
     charge(Resource::Charge const& fee) = 0;

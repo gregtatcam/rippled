@@ -36,7 +36,6 @@ namespace Resource {
 class Charge;
 }
 class Message;
-class Application;
 class Journal;
 namespace PeerFinder {
 class Slot;
@@ -69,10 +68,6 @@ public:
     virtual id_t
     id() const = 0;
 
-    /** Returns `true` if this connection is a member of the cluster. */
-    virtual bool
-    cluster() const = 0;
-
     virtual PublicKey const&
     getNodePublic() const = 0;
 
@@ -101,9 +96,6 @@ public:
     // Getters and other methods shared with the application layer
     ////////////////////////////////////////////////////////////////
 protected:
-    virtual Application&
-    app() const = 0;
-
     virtual boost::asio::strand<boost::asio::executor>&
     strand() = 0;
 
@@ -151,6 +143,7 @@ protected:
     virtual std::string
     domain() const = 0;
 
+    // TODO
     virtual std::string
     name() const = 0;
 

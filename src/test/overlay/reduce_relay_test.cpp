@@ -81,11 +81,6 @@ public:
     {
         return {};
     }
-    bool
-    cluster() const override
-    {
-        return false;
-    }
     PublicKey const&
     getNodePublic() const override
     {

@@ -148,7 +148,7 @@ struct peer_in_cluster
         if (skipPeer(peer))
             return false;
 
-        if (!peer->p2p().cluster())
+        if (!peer->cluster())
             return false;
 
         return true;

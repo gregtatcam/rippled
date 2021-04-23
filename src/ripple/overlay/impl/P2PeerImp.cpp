@@ -45,7 +45,8 @@ using namespace std::chrono_literals;
 namespace ripple {
 
 P2PeerImp::P2PeerImp(
-    Application& app,
+    Logs& logs,
+    Config const& config,
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     http_request_type&& request,
@@ -54,9 +55,8 @@ P2PeerImp::P2PeerImp(
     std::unique_ptr<stream_type>&& stream_ptr,
     P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
     , id_(id)
-    , sink_(app_.journal("Peer"), P2Peer::makePrefix(id))
+    , sink_(logs.journal("Peer"), P2Peer::makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
@@ -70,19 +70,10 @@ P2PeerImp::P2PeerImp(
     , request_(std::move(request))
     , headers_(request_)
     , compressionEnabled_(
-          peerFeatureEnabled(
-              headers_,
-              FEATURE_COMPR,
-              "lz4",
-              app_.config().COMPRESSION)
+          peerFeatureEnabled(headers_, FEATURE_COMPR, "lz4", config.COMPRESSION)
               ? Compressed::On
               : Compressed::Off)
 {
-    if (auto member = app_.cluster().member(publicKey_))
-    {
-        name_ = *member;
-        JLOG(journal_.info()) << "Cluster name: " << *member;
-    }
     JLOG(journal_.debug()) << " compression enabled "
                            << (compressionEnabled_ == Compressed::On) << " on "
                            << remote_address_ << " " << id_;
@@ -90,14 +81,7 @@ P2PeerImp::P2PeerImp(
 
 P2PeerImp::~P2PeerImp()
 {
-    const bool inCluster{cluster()};
-
     overlay_.onPeerDistruct(id_, slot_);
-
-    if (inCluster)
-    {
-        JLOG(journal_.warn()) << name() << " left cluster";
-    }
 }
 
 void
@@ -195,12 +179,6 @@ P2PeerImp::send(std::shared_ptr<Message> const& m)
 }
 
 //------------------------------------------------------------------------------
-
-bool
-P2PeerImp::cluster() const
-{
-    return static_cast<bool>(app_.cluster().member(publicKey_));
-}
 
 std::string
 P2PeerImp::getVersion() const
@@ -307,13 +285,6 @@ P2PeerImp::onShutdown(error_code ec)
 }
 
 //------------------------------------------------------------------------------
-
-std::string
-P2PeerImp::name() const
-{
-    std::shared_lock read_lock{nameMutex_};
-    return name_;
-}
 
 std::string
 P2PeerImp::domain() const

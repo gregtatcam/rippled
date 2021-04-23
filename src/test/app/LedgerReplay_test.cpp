@@ -207,11 +207,6 @@ public:
     {
         return 1234;
     }
-    bool
-    cluster() const override
-    {
-        return false;
-    }
     PublicKey const&
     getNodePublic() const override
     {
@@ -239,6 +234,11 @@ public:
     void
     charge(Resource::Charge const& fee) override
     {
+    }
+    bool
+    cluster() const override
+    {
+        return false;
     }
     bool
     isHighLatency() const override

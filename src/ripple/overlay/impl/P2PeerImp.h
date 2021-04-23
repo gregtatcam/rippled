@@ -58,7 +58,6 @@ protected:
     using Compressed = compression::Compressed;
 
 private:
-    Application& app_;
     id_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
@@ -71,8 +70,6 @@ private:
     ProtocolVersion protocol_;
     bool detaching_ = false;
     PublicKey const publicKey_;
-    std::string name_;
-    boost::shared_mutex mutable nameMutex_;
     std::shared_ptr<PeerFinder::Slot> const slot_;
     boost::beast::multi_buffer read_buffer_;
     http_request_type request_;
@@ -130,7 +127,8 @@ public:
 
     /** Create an active incoming peer from an established ssl connection. */
     P2PeerImp(
-        Application& app,
+        Logs& logs,
+        Config const& config,
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
@@ -143,7 +141,8 @@ public:
     // VFALCO legacyPublicKey should be implied by the Slot
     template <typename Buffers>
     P2PeerImp(
-        Application& app,
+        Logs& logs,
+        Config const& config,
         std::unique_ptr<stream_type>&& stream_ptr,
         Buffers const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,
@@ -174,9 +173,6 @@ public:
         return id_;
     }
 
-    bool
-    cluster() const override;
-
     PublicKey const&
     getNodePublic() const override
     {
@@ -193,12 +189,6 @@ public:
     // Getters and other methods shared with the application layer
     ////////////////////////////////////////////////////////////////
 protected:
-    Application&
-    app() const override
-    {
-        return app_;
-    }
-
     beast::Journal const&
     journal() override
     {
@@ -275,9 +265,6 @@ protected:
     }
 
     std::string
-    name() const override;
-
-    std::string
     domain() const override;
 
     Json::Value
@@ -329,7 +316,8 @@ private:
 
 template <class Buffers>
 P2PeerImp::P2PeerImp(
-    Application& app,
+    Logs& logs,
+    Config const& config,
     std::unique_ptr<stream_type>&& stream_ptr,
     Buffers const& buffers,
     std::shared_ptr<PeerFinder::Slot>&& slot,
@@ -339,9 +327,8 @@ P2PeerImp::P2PeerImp(
     id_t id,
     P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
     , id_(id)
-    , sink_(app_.journal("Peer"), P2Peer::makePrefix(id))
+    , sink_(logs.journal("Peer"), P2Peer::makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
@@ -355,19 +342,10 @@ P2PeerImp::P2PeerImp(
     , response_(std::move(response))
     , headers_(response_)
     , compressionEnabled_(
-          peerFeatureEnabled(
-              headers_,
-              FEATURE_COMPR,
-              "lz4",
-              app_.config().COMPRESSION)
+          peerFeatureEnabled(headers_, FEATURE_COMPR, "lz4", config.COMPRESSION)
               ? Compressed::On
               : Compressed::Off)
 {
-    if (auto member = app_.cluster().member(publicKey_))
-    {
-        name_ = *member;
-        JLOG(journal_.info()) << "Cluster name: " << *member;
-    }
     read_buffer_.commit(boost::asio::buffer_copy(
         read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));
     JLOG(journal_.debug()) << "compression enabled "
