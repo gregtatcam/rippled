@@ -88,31 +88,37 @@ protected:
     void
     onEvtProtocolStart() override
     {
+        std::cout << "protocol started event\n";
     }
 
     void
     onEvtRun() override
     {
+        std::cout << "run event\n";
     }
 
     void
     onEvtClose() override
     {
+        std::cout << "close event\n";
     }
 
     void
     onEvtGracefulClose() override
     {
+        std::cout << "graceful close event\n";
     }
 
     void
     onEvtShutdown() override
     {
+        std::cout << "shutdown event\n";
     }
 
     std::pair<size_t, boost::system::error_code>
     onEvtProtocolMessage(boost::beast::multi_buffer const&, size_t&) override
     {
+        std::cout << "protocol message event\n";
         return {};
     }
 };
@@ -205,6 +211,72 @@ protected:
         P2Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot) override
     {
+        std::cout << "deactivating peer\n";
+    }
+};
+
+struct TestHandler
+{
+    OverlayImplTest& overlay_;
+
+    TestHandler(OverlayImplTest& overlay) : overlay_(overlay)
+    {
+    }
+
+    bool
+    onAccept(Session& session, boost::asio::ip::tcp::endpoint endpoint)
+    {
+        return true;
+    }
+
+    Handoff
+    onHandoff(
+        Session& session,
+        std::unique_ptr<stream_type>&& bundle,
+        http_request_type&& request,
+        boost::asio::ip::tcp::endpoint remote_address)
+    {
+        return overlay_.onHandoff(
+            std::move(bundle), std::move(request), remote_address);
+    }
+
+    Handoff
+    onHandoff(
+        Session& session,
+        http_request_type&& request,
+        boost::asio::ip::tcp::endpoint remote_address)
+    {
+        return onHandoff(
+            session,
+            {},
+            std::forward<http_request_type>(request),
+            remote_address);
+    }
+
+    void
+    onRequest(Session& session)
+    {
+        if (beast::rfc2616::is_keep_alive(session.request()))
+            session.complete();
+        else
+            session.close(true);
+    }
+
+    void
+    onWSMessage(
+        std::shared_ptr<WSSession> session,
+        std::vector<boost::asio::const_buffer> const&)
+    {
+    }
+
+    void
+    onClose(Session& session, boost::system::error_code const&)
+    {
+    }
+
+    void
+    onStopped(Server& server)
+    {
     }
 };
 
@@ -223,18 +295,18 @@ public:
     {
         auto c = std::make_unique<Config>();
         std::stringstream str;
-        str << " [server]\n"
-            << " port_peer\n"
-            << " port_rpc_admin_local\n"
+        str << "[server]\n"
+            << "port_peer\n"
+            << "port_rpc_admin_local\n"
             << "[port_peer]\n"
             << "port = 5005\n"
             << "ip = " << ip << "\n"
             << "protocol = peer\n"
             << "[port_rpc_admin_local]\n"
             << "port = 6006\n"
-            << " ip = " << ip << "\n"
-            << " admin=[0.0.0.0]\n"
-            << " protocol = http\n"
+            << "ip = " << ip << "\n"
+            << "admin=[0.0.0.0]\n"
+            << "protocol = http\n"
             << "[ips_fixed]\n";
         for (auto i : fixed)
             str << i << " 51235\n";
@@ -256,32 +328,37 @@ public:
         auto env2 = mkEnv("172.0.0.1", {"172.0.0.0"});
         auto& app1 = env1->app();
         auto& app2 = env2->app();
-        auto resolver =
-            ResolverAsio::New(app1.getIOService(), app1.journal("OverlayTest"));
+        auto resolver1 = ResolverAsio::New(
+            app1.getIOService(), app1.journal("OverlayTest1"));
         overlay1_ = std::make_unique<OverlayImplTest>(
             app1,
             setup_Overlay(app1.config()),
             5005,
             app1.getResourceManager(),
-            *resolver,
+            *resolver1,
             app1.getIOService(),
             app1.config(),
             app1.getCollectorManager().collector());
         BEAST_EXPECT(overlay1_);
-        overlay1_->run();
         overlay2_ = std::make_unique<OverlayImplTest>(
             app2,
             setup_Overlay(app2.config()),
             5005,
             app2.getResourceManager(),
-            *resolver,
-            app2.getIOService(),
+            *resolver1,
+            app1.getIOService(),
             app2.config(),
-            app1.getCollectorManager().collector());
+            app2.getCollectorManager().collector());
         BEAST_EXPECT(overlay2_);
+        TestHandler handler1(*overlay1_);
+        TestHandler handler2(*overlay2_);
+        auto server1 =
+            make_Server(handler1, app1.getIOService(), app1.journal("server1"));
+        auto server2 =
+            make_Server(handler2, app1.getIOService(), app1.journal("server2"));
+        overlay1_->run();
         overlay2_->run();
         app1.getIOService().run();
-        app2.getIOService().run();
     }
 
     void
