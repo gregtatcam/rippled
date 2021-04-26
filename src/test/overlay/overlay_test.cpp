@@ -157,6 +157,7 @@ public:
     void
     run()
     {
+        doStart();
         autoConnect();
     }
 
@@ -289,93 +290,86 @@ struct TestHandler
 
 class overlay_net_test : public beast::unit_test::suite
 {
-    std::unique_ptr<OverlayImplTest> overlay1_;
-    std::unique_ptr<OverlayImplTest> overlay2_;
-
 public:
     overlay_net_test()
     {
     }
-
-    std::unique_ptr<jtx::Env>
-    mkEnv(std::string const& ip, std::vector<std::string> const& fixed)
+    struct PseudoNet
     {
+        std::unique_ptr<OverlayImplTest> overlay_;
+        std::unique_ptr<jtx::Env> env_;
+        std::unique_ptr<ResolverAsio> resolver_;
+        std::unique_ptr<Server> server_;
+        std::unique_ptr<TestHandler> handler_;
+        static inline Application* app_ = nullptr;
+    };
+    std::vector<std::unique_ptr<PseudoNet>> nets_;
+
+    void
+    mkNet(std::string const& i, std::vector<std::string> const& fixed)
+    {
+        auto net = std::make_unique<PseudoNet>();
         auto c = std::make_unique<Config>();
-        std::stringstream str;
-        str << "[server]\n"
-            << "port_peer\n"
-            << "port_rpc_admin_local\n"
-            << "[port_peer]\n"
-            << "port = 5005\n"
-            << "ip = " << ip << "\n"
-            << "protocol = peer\n"
-            << "[port_rpc_admin_local]\n"
-            << "port = 6006\n"
-            << "ip = " << ip << "\n"
-            << "admin=[0.0.0.0]\n"
-            << "protocol = http\n"
-            << "[ips_fixed]\n";
+        std::string ip = "172.0.0." + i;
+        (*c)["server"].append("port_peer");
+        (*c)["port_peer"].set("ip", ip);
+        (*c)["port_peer"].set("port", "5005");
+        (*c)["port_peer"].set("protocol", "peer");
+        (*c)["server"].append("port_rpc_admin_local");
+        (*c)["port_rpc_admin_local"].set("ip", ip);
+        (*c)["port_rpc_admin_local"].set("port", "6006");
+        (*c)["port_rpc_admin_local"].set("protocol", "http");
+        (*c)["port_rpc_admin_local"].set("admin", "0.0.0.0");
+        std::string dbpath =
+            "/home/gregt/Documents/Projects/private-test-net/Nodes/Node" + i +
+            "/db";
+        c->legacy("database_path", dbpath);
         for (auto i : fixed)
-            str << i << " 51235\n";
-        c->loadFromString(str.str());
+            (*c)["ips_fixed"].append(i + " 51235");
         c->overwrite(ConfigSection::nodeDatabase(), "type", "memory");
         c->overwrite(ConfigSection::nodeDatabase(), "path", "main");
         c->deprecatedClearSection(ConfigSection::importNodeDatabase());
-        c->legacy("database_path", "");
+        // application runs server handler, which opens ports, set standalone to
+        // true to disable the peer protocol
         c->setupControl(true, true, true);
-        return std::make_unique<jtx::Env>(*this, std::move(c));
+        net->env_ = std::make_unique<jtx::Env>(*this, std::move(c));
+        // set standalone to false to enable peer protocol
+        net->env_->app().config().setupControl(true, true, false);
+        std::string name = "OverlayTest" + i;
+        if (PseudoNet::app_ == nullptr)
+            PseudoNet::app_ = &(net->env_->app());
+        auto& app1 = *PseudoNet::app_;
+        net->resolver_ =
+            ResolverAsio::New(app1.getIOService(), app1.journal(name));
+        net->overlay_ = std::make_unique<OverlayImplTest>(
+            app1,
+            setup_Overlay(app1.config()),
+            5005,
+            app1.getResourceManager(),
+            *net->resolver_,
+            app1.getIOService(),
+            app1.config(),
+            app1.getCollectorManager().collector());
+        net->handler_ = std::make_unique<TestHandler>(*net->overlay_);
+        std::vector<Port> serverPort(1);
+        serverPort.back().ip = beast::IP::Address::from_string(ip);
+        serverPort.back().port = 5005;
+        serverPort.back().protocol.insert("peer");
+        name = "server" + i;
+        net->server_ = make_Server(
+            *net->handler_, app1.getIOService(), app1.journal(name));
+        net->server_->ports(serverPort);
+        net->overlay_->run();
+        nets_.push_back(std::move(net));
     }
 
     void
     testOverlay()
     {
         testcase("Overlay");
-        std::cout << "running test\n";
-        auto env1 = mkEnv("172.0.0.0", {"172.0.0.1"});
-        auto env2 = mkEnv("172.0.0.1", {"172.0.0.0"});
-        auto& app1 = env1->app();
-        auto& app2 = env2->app();
-        auto resolver1 = ResolverAsio::New(
-            app1.getIOService(), app1.journal("OverlayTest1"));
-        overlay1_ = std::make_unique<OverlayImplTest>(
-            app1,
-            setup_Overlay(app1.config()),
-            5005,
-            app1.getResourceManager(),
-            *resolver1,
-            app1.getIOService(),
-            app1.config(),
-            app1.getCollectorManager().collector());
-        BEAST_EXPECT(overlay1_);
-        overlay2_ = std::make_unique<OverlayImplTest>(
-            app2,
-            setup_Overlay(app2.config()),
-            5005,
-            app2.getResourceManager(),
-            *resolver1,
-            app1.getIOService(),
-            app2.config(),
-            app2.getCollectorManager().collector());
-        BEAST_EXPECT(overlay2_);
-        TestHandler handler1(*overlay1_);
-        TestHandler handler2(*overlay2_);
-        auto server1 =
-            make_Server(handler1, app1.getIOService(), app1.journal("server1"));
-        auto server2 =
-            make_Server(handler2, app1.getIOService(), app1.journal("server2"));
-        std::vector<Port> serverPort1(1);
-        serverPort1.back().ip = beast::IP::Address::from_string("172.0.0.0");
-        serverPort1.back().port = 5005;
-        serverPort1.back().protocol.insert("peer");
-        std::vector<Port> serverPort2(1);
-        serverPort2.back().ip = beast::IP::Address::from_string("172.0.0.1");
-        serverPort2.back().port = 5005;
-        serverPort2.back().protocol.insert("peer");
-        server1->ports(serverPort1);
-        server2->ports(serverPort2);
-        overlay1_->run();
-        overlay2_->run();
-        app1.getIOService().run();
+        mkNet("0", {"172.0.0.1"});
+        mkNet("1", {"172.0.0.0"});
+        PseudoNet::app_->getIOService().run();
     }
 
     void
