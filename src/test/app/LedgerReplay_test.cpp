@@ -1098,6 +1098,7 @@ struct LedgerReplayer_test : public beast::unit_test::suite
                 boost::asio::ip::address::from_string("172.1.1.100");
             jtx::Env serverEnv(*this);
             serverEnv.app().config().LEDGER_REPLAY = server;
+            auto& app = serverEnv.app();
             auto http_resp = ripple::makeResponse(
                 true,
                 http_request,
@@ -1106,7 +1107,12 @@ struct LedgerReplayer_test : public beast::unit_test::suite
                 uint256{1},
                 1,
                 {1, 0},
-                serverEnv.app());
+                HandshakeConfig{
+                    app.logs(),
+                    app.nodeIdentity(),
+                    app.config(),
+                    app.getLedgerMaster().getClosedLedger(),
+                    app.timeKeeper().now()});
             auto const clientResult =
                 peerFeatureEnabled(http_resp, FEATURE_LEDGER_REPLAY, client);
             if (clientResult != expecting)

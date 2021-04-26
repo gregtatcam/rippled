@@ -18,7 +18,7 @@
 //==============================================================================
 
 #include <ripple/app/ledger/LedgerMaster.h>
-#include <ripple/app/main/Application.h>
+//#include <ripple/app/main/Application.h>
 #include <ripple/basics/base64.h>
 #include <ripple/basics/safe_cast.h>
 #include <ripple/beast/core/LexicalCast.h>
@@ -174,7 +174,7 @@ buildHandshake(
     std::optional<std::uint32_t> networkID,
     beast::IP::Address public_ip,
     beast::IP::Address remote_ip,
-    Application& app)
+    HandshakeConfig const& hconfig)
 {
     if (networkID)
     {
@@ -185,21 +185,19 @@ buildHandshake(
     }
 
     h.insert(
-        "Network-Time",
-        std::to_string(app.timeKeeper().now().time_since_epoch().count()));
+        "Network-Time", std::to_string(hconfig.now.time_since_epoch().count()));
 
     h.insert(
-        "Public-Key",
-        toBase58(TokenType::NodePublic, app.nodeIdentity().first));
+        "Public-Key", toBase58(TokenType::NodePublic, hconfig.identity.first));
 
     {
         auto const sig = signDigest(
-            app.nodeIdentity().first, app.nodeIdentity().second, sharedValue);
+            hconfig.identity.first, hconfig.identity.second, sharedValue);
         h.insert("Session-Signature", base64_encode(sig.data(), sig.size()));
     }
 
-    if (!app.config().SERVER_DOMAIN.empty())
-        h.insert("Server-Domain", app.config().SERVER_DOMAIN);
+    if (!hconfig.config.SERVER_DOMAIN.empty())
+        h.insert("Server-Domain", hconfig.config.SERVER_DOMAIN);
 
     if (beast::IP::is_public(remote_ip))
         h.insert("Remote-IP", remote_ip.to_string());
@@ -207,7 +205,7 @@ buildHandshake(
     if (!public_ip.is_unspecified())
         h.insert("Local-IP", public_ip.to_string());
 
-    if (auto const cl = app.getLedgerMaster().getClosedLedger())
+    if (auto const cl = hconfig.closedLedger)
     {
         // TODO: Use hex for these
         h.insert(
@@ -227,7 +225,7 @@ verifyHandshake(
     std::optional<std::uint32_t> networkID,
     beast::IP::Address public_ip,
     beast::IP::Address remote,
-    Application& app)
+    HandshakeConfig const& hconfig)
 {
     if (auto const iter = headers.find("Server-Domain"); iter != headers.end())
     {
@@ -262,7 +260,7 @@ verifyHandshake(
 
         using namespace std::chrono;
 
-        auto const ourTime = app.timeKeeper().now();
+        auto const ourTime = hconfig.now;
         auto const tolerance = 20s;
 
         // We can't blindly "return a-b;" because TimeKeeper::time_point
@@ -299,7 +297,7 @@ verifyHandshake(
         throw std::runtime_error("Bad node public key");
     }();
 
-    if (publicKey == app.nodeIdentity().first)
+    if (publicKey == hconfig.identity.first)
         throw std::runtime_error("Self connection");
 
     // This check gets two birds with one stone:
@@ -391,7 +389,7 @@ makeResponse(
     uint256 const& sharedValue,
     std::optional<std::uint32_t> networkID,
     ProtocolVersion protocol,
-    Application& app)
+    HandshakeConfig const& hconfig)
 {
     http_response_type resp;
     resp.result(boost::beast::http::status::switching_protocols);
@@ -405,11 +403,11 @@ makeResponse(
         "X-Protocol-Ctl",
         makeFeaturesResponseHeader(
             req,
-            app.config().COMPRESSION,
-            app.config().VP_REDUCE_RELAY_ENABLE,
-            app.config().LEDGER_REPLAY));
+            hconfig.config.COMPRESSION,
+            hconfig.config.VP_REDUCE_RELAY_ENABLE,
+            hconfig.config.LEDGER_REPLAY));
 
-    buildHandshake(resp, sharedValue, networkID, public_ip, remote_ip, app);
+    buildHandshake(resp, sharedValue, networkID, public_ip, remote_ip, hconfig);
 
     return resp;
 }

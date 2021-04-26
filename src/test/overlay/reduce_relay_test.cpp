@@ -1452,6 +1452,7 @@ vp_squelched=1
                 BEAST_EXPECT(!(peerEnabled ^ inboundEnabled));
 
                 setEnv(inboundEnable);
+                auto& app = env_.app();
                 auto http_resp = ripple::makeResponse(
                     true,
                     http_request,
@@ -1460,7 +1461,12 @@ vp_squelched=1
                     uint256{1},
                     1,
                     {1, 0},
-                    env_.app());
+                    HandshakeConfig{
+                        app.logs(),
+                        app.nodeIdentity(),
+                        app.config(),
+                        app.getLedgerMaster().getClosedLedger(),
+                        app.timeKeeper().now()});
                 // outbound is enabled if the response's header has the feature
                 // enabled and the peer's configuration is enabled
                 auto const outboundEnabled =

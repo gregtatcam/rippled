@@ -99,7 +99,12 @@ InboundConnection::sendResponse()
         *sharedValue,
         overlay_.setup().networkID,
         protocol_,
-        app_);
+        HandshakeConfig{
+            app_.logs(),
+            app_.nodeIdentity(),
+            app_.config(),
+            app_.getLedgerMaster().getClosedLedger(),
+            app_.timeKeeper().now()});
 
     // Write the whole buffer and only start protocol when that's done.
     boost::asio::async_write(

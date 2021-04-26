@@ -504,6 +504,7 @@ public:
 
             env.reset();
             env = getEnv(inboundEnable);
+            auto& app = env->app();
             auto http_resp = ripple::makeResponse(
                 true,
                 http_request,
@@ -512,7 +513,12 @@ public:
                 uint256{1},
                 1,
                 {1, 0},
-                env->app());
+                HandshakeConfig{
+                    app.logs(),
+                    app.nodeIdentity(),
+                    app.config(),
+                    app.getLedgerMaster().getClosedLedger(),
+                    app.timeKeeper().now()});
             // outbound is enabled if the response's header has the feature
             // enabled and the peer's configuration is enabled
             auto const outboundEnabled = peerFeatureEnabled(

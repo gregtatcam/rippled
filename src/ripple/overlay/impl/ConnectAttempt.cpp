@@ -214,7 +214,12 @@ ConnectAttempt::onHandshake(error_code ec)
         overlay_.setup().networkID,
         overlay_.setup().public_ip,
         remote_endpoint_.address(),
-        app_);
+        HandshakeConfig{
+            app_.logs(),
+            app_.nodeIdentity(),
+            app_.config(),
+            app_.getLedgerMaster().getClosedLedger(),
+            app_.timeKeeper().now()});
 
     setTimer();
     boost::beast::http::async_write(
@@ -359,7 +364,12 @@ ConnectAttempt::processResponse()
             overlay_.setup().networkID,
             overlay_.setup().public_ip,
             remote_endpoint_.address(),
-            app_);
+            HandshakeConfig{
+                app_.logs(),
+                app_.nodeIdentity(),
+                app_.config(),
+                app_.getLedgerMaster().getClosedLedger(),
+                app_.timeKeeper().now()});
 
         JLOG(journal_.info())
             << "Public Key: " << toBase58(TokenType::NodePublic, publicKey);

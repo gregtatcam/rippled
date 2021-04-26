@@ -20,10 +20,11 @@
 #ifndef RIPPLE_OVERLAY_HANDSHAKE_H_INCLUDED
 #define RIPPLE_OVERLAY_HANDSHAKE_H_INCLUDED
 
-#include <ripple/app/main/Application.h>
+//#include <ripple/app/main/Application.h>
 #include <ripple/beast/utility/Journal.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 #include <ripple/protocol/BuildInfo.h>
+#include <ripple/protocol/SecretKey.h>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/ssl/stream.hpp>
@@ -48,6 +49,15 @@ using http_request_type =
 using http_response_type =
     boost::beast::http::response<boost::beast::http::dynamic_body>;
 
+struct HandshakeConfig
+{
+    Logs const& logs;
+    std::pair<PublicKey, SecretKey> identity;
+    Config const& config;
+    std::shared_ptr<const Ledger> closedLedger;
+    NetClock::time_point now;
+};
+
 /** Computes a shared value based on the SSL connection state.
 
     When there is no man in the middle, both sides will compute the same
@@ -69,7 +79,7 @@ buildHandshake(
     std::optional<std::uint32_t> networkID,
     beast::IP::Address public_ip,
     beast::IP::Address remote_ip,
-    Application& app);
+    HandshakeConfig const& config);
 
 /** Validate header fields necessary for upgrading the link to the peer
    protocol.
@@ -89,7 +99,7 @@ verifyHandshake(
     std::optional<std::uint32_t> networkID,
     beast::IP::Address public_ip,
     beast::IP::Address remote,
-    Application& app);
+    HandshakeConfig const& config);
 
 /** Make outbound http request
 
@@ -127,7 +137,7 @@ makeResponse(
     uint256 const& sharedValue,
     std::optional<std::uint32_t> networkID,
     ProtocolVersion version,
-    Application& app);
+    HandshakeConfig const& app);
 
 // Protocol features negotiated via HTTP handshake.
 // The format is:

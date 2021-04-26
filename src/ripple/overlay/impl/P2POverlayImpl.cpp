@@ -189,7 +189,12 @@ P2POverlayImpl::onHandoff(
             setup_.networkID,
             setup_.public_ip,
             remote_endpoint.address(),
-            app_);
+            HandshakeConfig{
+                app_.logs(),
+                app_.nodeIdentity(),
+                app_.config(),
+                app_.getLedgerMaster().getClosedLedger(),
+                app_.timeKeeper().now()});
 
         {
             // The node gets a reserved slot if it is in our cluster
