@@ -28,7 +28,10 @@
 namespace ripple {
 
 P2POverlayImpl::P2POverlayImpl(
-    Application& app,
+    HandshakeConfig hconfig,
+    Cluster& cluster,
+    PeerReservationTable& peerReservations,
+    bool validationPublicKeyEmpty,
     Setup const& setup,
     std::uint16_t overlayPort,
     Resource::Manager& resourceManager,
@@ -36,18 +39,21 @@ P2POverlayImpl::P2POverlayImpl(
     boost::asio::io_service& io_service,
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
-    : app_(app)
+    : hconfig_(hconfig)
+    , cluster_(cluster)
+    , peerReservations_(peerReservations)
+    , validationPublicKeyEmpty_(validationPublicKeyEmpty)
     , io_service_(io_service)
     , work_(std::in_place, std::ref(io_service_))
     , strand_(io_service_)
     , setup_(setup)
-    , journal_(app_.journal("Overlay"))
+    , journal_(hconfig.logs.journal("Overlay"))
     , overlayPort_(overlayPort)
     , m_resourceManager(resourceManager)
     , m_peerFinder(PeerFinder::make_Manager(
           io_service,
           stopwatch(),
-          app_.journal("PeerFinder"),
+          hconfig_.logs.journal("PeerFinder"),
           config,
           collector))
     , m_resolver(resolver)
@@ -99,7 +105,7 @@ P2POverlayImpl::onHandoff(
     endpoint_type remote_endpoint)
 {
     auto const id = next_id_++;
-    beast::WrappedSink sink(app_.logs()["Peer"], P2Peer::makePrefix(id));
+    beast::WrappedSink sink(hconfig_.logs["Peer"], P2Peer::makePrefix(id));
     beast::Journal journal(sink);
 
     Handoff handoff;
@@ -189,19 +195,14 @@ P2POverlayImpl::onHandoff(
             setup_.networkID,
             setup_.public_ip,
             remote_endpoint.address(),
-            HandshakeConfig{
-                app_.logs(),
-                app_.nodeIdentity(),
-                app_.config(),
-                app_.getLedgerMaster().getClosedLedger(),
-                app_.timeKeeper().now()});
+            hconfig_);
 
         {
             // The node gets a reserved slot if it is in our cluster
             // or if it has a reservation.
             bool const reserved =
-                static_cast<bool>(app_.cluster().member(publicKey)) ||
-                app_.peerReservations().contains(publicKey);
+                static_cast<bool>(cluster_.member(publicKey)) ||
+                peerReservations_.contains(publicKey);
             auto const result =
                 m_peerFinder->activate(slot, publicKey, reserved);
             if (result != PeerFinder::Result::success)
@@ -218,7 +219,8 @@ P2POverlayImpl::onHandoff(
         }
 
         auto const inboundConnection = std::make_shared<InboundConnection>(
-            app_,
+            hconfig_,
+            cluster_,
             id,
             slot,
             std::move(request),
@@ -325,14 +327,15 @@ P2POverlayImpl::connect(beast::IP::Endpoint const& remote_endpoint)
     }
 
     auto const p = std::make_shared<ConnectAttempt>(
-        app_,
+        hconfig_,
+        cluster_,
         io_service_,
         beast::IPAddressConversion::to_asio_endpoint(remote_endpoint),
         usage,
         setup_.context,
         next_id_++,
         slot,
-        app_.journal("Peer"),
+        hconfig_.logs.journal("Peer"),
         *this);
 
     std::lock_guard lock(mutex_);
@@ -379,9 +382,9 @@ void
 P2POverlayImpl::doStart()
 {
     PeerFinder::Config config = PeerFinder::Config::makeConfig(
-        app_.config(),
+        hconfig_.config,
         overlayPort_,
-        !app_.getValidationPublicKey().empty(),
+        !validationPublicKeyEmpty_,
         setup_.ipLimit);
 
     m_peerFinder->setConfig(config);
@@ -390,8 +393,8 @@ P2POverlayImpl::doStart()
 
     // Populate our boot cache: if there are no entries in [ips] then we use
     // the entries in [ips_fixed].
-    auto bootstrapIps =
-        app_.config().IPS.empty() ? app_.config().IPS_FIXED : app_.config().IPS;
+    auto bootstrapIps = hconfig_.config.IPS.empty() ? hconfig_.config.IPS_FIXED
+                                                    : hconfig_.config.IPS;
 
     // If nothing is specified, default to several well-known high-capacity
     // servers to serve as bootstrap:
@@ -428,10 +431,10 @@ P2POverlayImpl::doStart()
         });
 
     // Add the ips_fixed from the rippled.cfg file
-    if (!app_.config().standalone() && !app_.config().IPS_FIXED.empty())
+    if (!hconfig_.config.standalone() && !hconfig_.config.IPS_FIXED.empty())
     {
         m_resolver.resolve(
-            app_.config().IPS_FIXED,
+            hconfig_.config.IPS_FIXED,
             [this](
                 std::string const& name,
                 std::vector<beast::IP::Endpoint> const& addresses) {

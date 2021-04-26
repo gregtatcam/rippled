@@ -51,7 +51,7 @@ using http_response_type =
 
 struct HandshakeConfig
 {
-    Logs const& logs;
+    Logs& logs;
     std::pair<PublicKey, SecretKey> identity;
     Config const& config;
     std::shared_ptr<const Ledger> closedLedger;

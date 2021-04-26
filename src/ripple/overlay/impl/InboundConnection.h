@@ -38,7 +38,8 @@ private:
     using socket_type = boost::asio::ip::tcp::socket;
     using middle_type = boost::beast::tcp_stream;
     using stream_type = boost::beast::ssl_stream<middle_type>;
-    Application& app_;
+    HandshakeConfig& hconfig_;
+    Cluster& cluster_;
     std::uint32_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
@@ -55,7 +56,8 @@ private:
 
 public:
     InboundConnection(
-        Application& app,
+        HandshakeConfig& hconfig,
+        Cluster& cluster,
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,

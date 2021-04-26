@@ -82,7 +82,10 @@ private:
     using address_type = boost::asio::ip::address;
     using endpoint_type = boost::asio::ip::tcp::endpoint;
 
-    Application& app_;
+    HandshakeConfig hconfig_;
+    Cluster& cluster_;
+    PeerReservationTable& peerReservations_;
+    bool validationPublicKeyEmpty_;
     boost::asio::io_service& io_service_;
     std::optional<boost::asio::io_service::work> work_;
     boost::asio::io_service::strand strand_;
@@ -104,7 +107,10 @@ private:
 
 public:
     P2POverlayImpl(
-        Application& app,
+        HandshakeConfig hconfig,
+        Cluster& cluster,
+        PeerReservationTable& peerReservation,
+        bool validationPublicKeyEmpty,
         Setup const& setup,
         std::uint16_t overlayPort,
         Resource::Manager& resourceManager,
@@ -207,12 +213,6 @@ public:
     mutex() const override
     {
         return mutex_;
-    }
-
-    Application&
-    app() const override
-    {
-        return app_;
     }
 
     Setup const&

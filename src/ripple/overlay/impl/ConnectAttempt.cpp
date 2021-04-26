@@ -27,7 +27,8 @@
 namespace ripple {
 
 ConnectAttempt::ConnectAttempt(
-    Application& app,
+    HandshakeConfig& hconfig,
+    Cluster& cluster,
     boost::asio::io_service& io_service,
     endpoint_type const& remote_endpoint,
     Resource::Consumer usage,
@@ -37,7 +38,8 @@ ConnectAttempt::ConnectAttempt(
     beast::Journal journal,
     P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
+    , hconfig_(hconfig)
+    , cluster_(cluster)
     , id_(id)
     , sink_(journal, P2Peer::makePrefix(id))
     , journal_(sink_)
@@ -204,9 +206,9 @@ ConnectAttempt::onHandshake(error_code ec)
 
     req_ = makeRequest(
         !overlay_.peerFinder().config().peerPrivate,
-        app_.config().COMPRESSION,
-        app_.config().VP_REDUCE_RELAY_ENABLE,
-        app_.config().LEDGER_REPLAY);
+        hconfig_.config.COMPRESSION,
+        hconfig_.config.VP_REDUCE_RELAY_ENABLE,
+        hconfig_.config.LEDGER_REPLAY);
 
     buildHandshake(
         req_,
@@ -214,12 +216,7 @@ ConnectAttempt::onHandshake(error_code ec)
         overlay_.setup().networkID,
         overlay_.setup().public_ip,
         remote_endpoint_.address(),
-        HandshakeConfig{
-            app_.logs(),
-            app_.nodeIdentity(),
-            app_.config(),
-            app_.getLedgerMaster().getClosedLedger(),
-            app_.timeKeeper().now()});
+        hconfig_);
 
     setTimer();
     boost::beast::http::async_write(
@@ -364,12 +361,7 @@ ConnectAttempt::processResponse()
             overlay_.setup().networkID,
             overlay_.setup().public_ip,
             remote_endpoint_.address(),
-            HandshakeConfig{
-                app_.logs(),
-                app_.nodeIdentity(),
-                app_.config(),
-                app_.getLedgerMaster().getClosedLedger(),
-                app_.timeKeeper().now()});
+            hconfig_);
 
         JLOG(journal_.info())
             << "Public Key: " << toBase58(TokenType::NodePublic, publicKey);
@@ -377,7 +369,7 @@ ConnectAttempt::processResponse()
         JLOG(journal_.debug())
             << "Protocol: " << to_string(*negotiatedProtocol);
 
-        auto const member = app_.cluster().member(publicKey);
+        auto const member = cluster_.member(publicKey);
         if (member)
         {
             JLOG(journal_.info()) << "Cluster name: " << *member;

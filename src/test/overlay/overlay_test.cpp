@@ -16,6 +16,7 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 //==============================================================================
+#include <ripple/app/ledger/LedgerMaster.h>
 #include <ripple/basics/ResolverAsio.h>
 #include <ripple/beast/unit_test.h>
 #include <ripple/core/ConfigSections.h>
@@ -28,11 +29,35 @@ namespace ripple {
 
 namespace test {
 
+class OverlayImplTest;
+class TestHandler;
+
+struct PseudoNet
+{
+    PseudoNet(boost::asio::io_service& service) : io_service_(service)
+    {
+        identity_ = randomKeyPair(KeyType::ed25519);
+    }
+    boost::asio::io_service& io_service_;
+    PeerReservationTable reservations_;
+    std::unique_ptr<OverlayImplTest> overlay_;
+    std::unique_ptr<ResolverAsio> resolver_;
+    std::unique_ptr<Server> server_;
+    std::unique_ptr<TestHandler> handler_;
+    std::unique_ptr<CollectorManager> collector_;
+    std::unique_ptr<jtx::SuiteLogs> logs_;
+    std::unique_ptr<ManualTimeKeeper> timeKeeper_;
+    std::unique_ptr<Resource::Manager> resourceManager_;
+    std::unique_ptr<Config> config_;
+    std::unique_ptr<Cluster> cluster_;
+    std::pair<PublicKey, SecretKey> identity_;
+};
+
 class PeerImpTest : public P2PeerImp
 {
 public:
     PeerImpTest(
-        Application& app,
+        PseudoNet& net,
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
@@ -41,8 +66,8 @@ public:
         std::unique_ptr<stream_type>&& stream_ptr,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              app.logs(),
-              app.config(),
+              *net.logs_,
+              *net.config_,
               id,
               slot,
               std::move(request),
@@ -57,7 +82,7 @@ public:
     // VFALCO legacyPublicKey should be implied by the Slot
     template <class Buffers>
     PeerImpTest(
-        Application& app,
+        PseudoNet& net,
         std::unique_ptr<stream_type>&& stream_ptr,
         Buffers const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,
@@ -67,8 +92,8 @@ public:
         id_t id,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              app.logs(),
-              app.config(),
+              *net.logs_,
+              *net.config_,
               std::move(stream_ptr),
               buffers,
               std::move(slot),
@@ -132,25 +157,32 @@ protected:
 
 class OverlayImplTest : public P2POverlayImpl
 {
+private:
+    PseudoNet& net_;
+
 public:
-    OverlayImplTest(
-        Application& app,
-        Setup const& setup,
-        std::uint16_t overlayPort,
-        Resource::Manager& resourceManager,
-        Resolver& resolver,
-        boost::asio::io_service& io_service,
-        BasicConfig const& config,
-        beast::insight::Collector::ptr const& collector)
+    OverlayImplTest(PseudoNet& net, std::uint16_t overlayPort)
         : P2POverlayImpl(
-              app,
-              setup,
+              [&]() -> HandshakeConfig {
+                  HandshakeConfig hconfig{
+                      *net.logs_,
+                      net.identity_,
+                      *net.config_,
+                      nullptr,
+                      net.timeKeeper_->now()};
+                  return hconfig;
+              }(),
+              *net.cluster_,
+              net.reservations_,
+              true,
+              setup_Overlay(*net.config_),
               overlayPort,
-              resourceManager,
-              resolver,
-              io_service,
-              config,
-              collector)
+              *net.resourceManager_,
+              *net.resolver_,
+              net.io_service_,
+              *net.config_,
+              net.collector_->collector())
+        , net_(net)
     {
     }
 
@@ -179,7 +211,7 @@ protected:
         std::unique_ptr<stream_type>&& stream_ptr) override
     {
         auto peer = std::make_shared<PeerImpTest>(
-            this->app(),
+            net_,
             id,
             slot,
             std::move(request),
@@ -202,7 +234,7 @@ protected:
         id_t id) override
     {
         auto peer = std::make_shared<PeerImpTest>(
-            this->app(),
+            net_,
             std::move(stream_ptr),
             buffers.data(),
             std::move(slot),
@@ -290,66 +322,57 @@ struct TestHandler
 
 class overlay_net_test : public beast::unit_test::suite
 {
+    boost::asio::io_service io_service_;
+
 public:
     overlay_net_test()
     {
     }
-    struct PseudoNet
-    {
-        std::unique_ptr<OverlayImplTest> overlay_;
-        std::unique_ptr<jtx::Env> env_;
-        std::unique_ptr<ResolverAsio> resolver_;
-        std::unique_ptr<Server> server_;
-        std::unique_ptr<TestHandler> handler_;
-        static inline Application* app_ = nullptr;
-    };
+
     std::vector<std::unique_ptr<PseudoNet>> nets_;
 
     void
     mkNet(std::string const& i, std::vector<std::string> const& fixed)
     {
-        auto net = std::make_unique<PseudoNet>();
-        auto c = std::make_unique<Config>();
+        auto net = std::make_unique<PseudoNet>(io_service_);
+        net->logs_ = std::make_unique<jtx::SuiteLogs>(*this);
+        net->cluster_ =
+            std::make_unique<Cluster>(net->logs_->journal("Cluster"));
+        net->timeKeeper_ = std::make_unique<ManualTimeKeeper>();
+        net->config_ = std::make_unique<Config>();
         std::string ip = "172.0.0." + i;
-        (*c)["server"].append("port_peer");
-        (*c)["port_peer"].set("ip", ip);
-        (*c)["port_peer"].set("port", "5005");
-        (*c)["port_peer"].set("protocol", "peer");
-        (*c)["server"].append("port_rpc_admin_local");
-        (*c)["port_rpc_admin_local"].set("ip", ip);
-        (*c)["port_rpc_admin_local"].set("port", "6006");
-        (*c)["port_rpc_admin_local"].set("protocol", "http");
-        (*c)["port_rpc_admin_local"].set("admin", "0.0.0.0");
+        (*net->config_)["server"].append("port_peer");
+        (*net->config_)["port_peer"].set("ip", ip);
+        (*net->config_)["port_peer"].set("port", "5005");
+        (*net->config_)["port_peer"].set("protocol", "peer");
+        (*net->config_)["server"].append("port_rpc_admin_local");
+        (*net->config_)["port_rpc_admin_local"].set("ip", ip);
+        (*net->config_)["port_rpc_admin_local"].set("port", "6006");
+        (*net->config_)["port_rpc_admin_local"].set("protocol", "http");
+        (*net->config_)["port_rpc_admin_local"].set("admin", "0.0.0.0");
         std::string dbpath =
             "/home/gregt/Documents/Projects/private-test-net/Nodes/Node" + i +
             "/db";
-        c->legacy("database_path", dbpath);
+        net->config_->legacy("database_path", dbpath);
         for (auto i : fixed)
-            (*c)["ips_fixed"].append(i + " 51235");
-        c->overwrite(ConfigSection::nodeDatabase(), "type", "memory");
-        c->overwrite(ConfigSection::nodeDatabase(), "path", "main");
-        c->deprecatedClearSection(ConfigSection::importNodeDatabase());
+            (*net->config_)["ips_fixed"].append(i + " 51235");
+        net->config_->overwrite(
+            ConfigSection::nodeDatabase(), "type", "memory");
+        net->config_->overwrite(ConfigSection::nodeDatabase(), "path", "main");
+        net->config_->deprecatedClearSection(
+            ConfigSection::importNodeDatabase());
         // application runs server handler, which opens ports, set standalone to
         // true to disable the peer protocol
-        c->setupControl(true, true, true);
-        net->env_ = std::make_unique<jtx::Env>(*this, std::move(c));
-        // set standalone to false to enable peer protocol
-        net->env_->app().config().setupControl(true, true, false);
+        net->config_->setupControl(true, true, false);
+        net->collector_ = CollectorManager::New(
+            net->config_->section(SECTION_INSIGHT),
+            net->logs_->journal("Collector"));
+        net->resourceManager_ = Resource::make_Manager(
+            net->collector_->collector(), net->logs_->journal("Resource"));
         std::string name = "OverlayTest" + i;
-        if (PseudoNet::app_ == nullptr)
-            PseudoNet::app_ = &(net->env_->app());
-        auto& app1 = *PseudoNet::app_;
         net->resolver_ =
-            ResolverAsio::New(app1.getIOService(), app1.journal(name));
-        net->overlay_ = std::make_unique<OverlayImplTest>(
-            app1,
-            setup_Overlay(app1.config()),
-            5005,
-            app1.getResourceManager(),
-            *net->resolver_,
-            app1.getIOService(),
-            app1.config(),
-            app1.getCollectorManager().collector());
+            ResolverAsio::New(net->io_service_, net->logs_->journal(name));
+        net->overlay_ = std::make_unique<OverlayImplTest>(*net, 5005);
         net->handler_ = std::make_unique<TestHandler>(*net->overlay_);
         std::vector<Port> serverPort(1);
         serverPort.back().ip = beast::IP::Address::from_string(ip);
@@ -357,7 +380,7 @@ public:
         serverPort.back().protocol.insert("peer");
         name = "server" + i;
         net->server_ = make_Server(
-            *net->handler_, app1.getIOService(), app1.journal(name));
+            *net->handler_, net->io_service_, net->logs_->journal(name));
         net->server_->ports(serverPort);
         net->overlay_->run();
         nets_.push_back(std::move(net));
@@ -369,7 +392,7 @@ public:
         testcase("Overlay");
         mkNet("0", {"172.0.0.1"});
         mkNet("1", {"172.0.0.0"});
-        PseudoNet::app_->getIOService().run();
+        io_service_.run();
     }
 
     void

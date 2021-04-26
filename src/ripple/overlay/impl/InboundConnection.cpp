@@ -27,7 +27,8 @@
 namespace ripple {
 
 InboundConnection::InboundConnection(
-    Application& app,
+    HandshakeConfig& hconfig,
+    Cluster& cluster,
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     http_request_type&& request,
@@ -37,9 +38,10 @@ InboundConnection::InboundConnection(
     std::unique_ptr<stream_type>&& streamPtr,
     P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
+    , hconfig_(hconfig)
+    , cluster_(cluster)
     , id_(id)
-    , sink_(app_.journal("InboundConnection"), P2Peer::makePrefix(id))
+    , sink_(hconfig_.logs.journal("InboundConnection"), P2Peer::makePrefix(id))
     , journal_(sink_)
     , streamPtr_(std::move(streamPtr))
     , socket_(streamPtr_->next_layer().socket())
@@ -99,12 +101,7 @@ InboundConnection::sendResponse()
         *sharedValue,
         overlay_.setup().networkID,
         protocol_,
-        HandshakeConfig{
-            app_.logs(),
-            app_.nodeIdentity(),
-            app_.config(),
-            app_.getLedgerMaster().getClosedLedger(),
-            app_.timeKeeper().now()});
+        hconfig_);
 
     // Write the whole buffer and only start protocol when that's done.
     boost::asio::async_write(
@@ -144,7 +141,7 @@ InboundConnection::fail(std::string const& reason)
 {
     if (journal_.active(beast::severities::kWarning) && socket_.is_open())
     {
-        auto const n = app_.cluster().member(publicKey_);
+        auto const n = cluster_.member(publicKey_);
         JLOG(journal_.warn())
             << (n ? remoteAddress_.to_string() : *n) << " failed: " << reason;
     }

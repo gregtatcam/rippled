@@ -77,6 +77,7 @@ private:
         on_timer(error_code ec);
     };
 
+    Application& app_;
     std::shared_ptr<Timer> timer_;
     int timer_count_;
     std::atomic<uint64_t> jqTransOverflow_{0};
@@ -480,7 +481,18 @@ OverlayImpl<P2POverlayImplmnt>::OverlayImpl(
     beast::insight::Collector::ptr const& collector)
     : Overlay(parent)
     , P2POverlayImplmnt(
-          app,
+          [&]() -> HandshakeConfig {
+              HandshakeConfig hconfig{
+                  app.logs(),
+                  app.nodeIdentity(),
+                  app.config(),
+                  app.getLedgerMaster().getClosedLedger(),
+                  app.timeKeeper().now()};
+              return hconfig;
+          }(),
+          app.cluster(),
+          app.peerReservations(),
+          app.getValidationPublicKey().empty(),
           setup,
           overlayPort,
           resourceManager,
@@ -488,6 +500,7 @@ OverlayImpl<P2POverlayImplmnt>::OverlayImpl(
           io_service,
           config,
           collector)
+    , app_(app)
     , timer_count_(0)
     , slots_(app, *this)
 {
@@ -576,7 +589,7 @@ OverlayImpl<P2POverlayImplmnt>::mkInboundPeer(
     std::unique_ptr<stream_type>&& stream_ptr)
 {
     auto peer = std::make_shared<PeerImp<P2PeerImp_t>>(
-        this->app(),
+        app_,
         id,
         slot,
         std::move(request),
@@ -619,7 +632,7 @@ OverlayImpl<P2POverlayImplmnt>::mkOutboundPeer(
     id_t id)
 {
     auto peer = std::make_shared<PeerImp<P2PeerImp_t>>(
-        this->app(),
+        app_,
         std::move(stream_ptr),
         buffers.data(),
         std::move(slot),
@@ -682,7 +695,7 @@ OverlayImpl<P2POverlayImplmnt>::onManifests(
             auto const serialized = mo->serialized;
 
             auto const result =
-                this->app().validatorManifests().applyManifest(std::move(*mo));
+                app_.validatorManifests().applyManifest(std::move(*mo));
 
             if (result == ManifestDisposition::accepted)
             {
@@ -694,11 +707,11 @@ OverlayImpl<P2POverlayImplmnt>::onManifests(
                 mo = deserializeManifest(serialized);
                 assert(mo);
 
-                this->app().getOPs().pubManifest(*mo);
+                app_.getOPs().pubManifest(*mo);
 
-                if (this->app().validators().listed(mo->masterKey))
+                if (app_.validators().listed(mo->masterKey))
                 {
-                    auto db = this->app().getWalletDB().checkoutDb();
+                    auto db = app_.getWalletDB().checkoutDb();
                     addValidatorManifest(*db, serialized);
                 }
             }
@@ -887,7 +900,7 @@ OverlayImpl<P2POverlayImplmnt>::getServerInfo()
     bool const counters = false;
 
     Json::Value server_info =
-        this->app().getOPs().getServerInfo(humanReadable, admin, counters);
+        app_.getOPs().getServerInfo(humanReadable, admin, counters);
 
     // Filter out some information
     server_info.removeMember(jss::hostid);
@@ -911,14 +924,14 @@ template <typename P2POverlayImplmnt>
 Json::Value
 OverlayImpl<P2POverlayImplmnt>::getServerCounts()
 {
-    return getCountsJson(this->app(), 10);
+    return getCountsJson(app_, 10);
 }
 
 template <typename P2POverlayImplmnt>
 Json::Value
 OverlayImpl<P2POverlayImplmnt>::getUnlInfo()
 {
-    Json::Value validators = this->app().validators().getJson();
+    Json::Value validators = app_.validators().getJson();
 
     if (validators.isMember(jss::publisher_lists))
     {
@@ -934,7 +947,7 @@ OverlayImpl<P2POverlayImplmnt>::getUnlInfo()
     validators.removeMember(jss::trusted_validator_keys);
     validators.removeMember(jss::validation_quorum);
 
-    Json::Value validatorSites = this->app().validatorSites().getJson();
+    Json::Value validatorSites = app_.validatorSites().getJson();
 
     if (validatorSites.isMember(jss::validator_sites))
     {
@@ -1073,7 +1086,7 @@ OverlayImpl<P2POverlayImplmnt>::processValidatorList(
         return fail(boost::beast::http::status::bad_request);
 
     // find the list
-    auto vl = this->app().validators().getAvailable(key, version);
+    auto vl = app_.validators().getAvailable(key, version);
 
     if (!vl)
     {
@@ -1234,7 +1247,7 @@ OverlayImpl<P2POverlayImplmnt>::relay(
     uint256 const& uid,
     PublicKey const& validator)
 {
-    if (auto const toSkip = this->app().getHashRouter().shouldRelay(uid))
+    if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtPROPOSE_LEDGER, validator);
@@ -1263,7 +1276,7 @@ OverlayImpl<P2POverlayImplmnt>::relay(
     uint256 const& uid,
     PublicKey const& validator)
 {
-    if (auto const toSkip = this->app().getHashRouter().shouldRelay(uid))
+    if (auto const toSkip = app_.getHashRouter().shouldRelay(uid))
     {
         auto const sm =
             std::make_shared<Message>(m, protocol::mtVALIDATION, validator);
@@ -1282,14 +1295,14 @@ OverlayImpl<P2POverlayImplmnt>::getManifestsMessage()
 {
     std::lock_guard g(manifestLock_);
 
-    if (auto seq = this->app().validatorManifests().sequence();
+    if (auto seq = app_.validatorManifests().sequence();
         seq != manifestListSeq_)
     {
         protocol::TMManifests tm;
 
-        this->app().validatorManifests().for_each_manifest(
+        app_.validatorManifests().for_each_manifest(
             [&tm](std::size_t s) { tm.mutable_list()->Reserve(s); },
-            [&tm, &hr = this->app().getHashRouter()](Manifest const& manifest) {
+            [&tm, &hr = app_.getHashRouter()](Manifest const& manifest) {
                 tm.add_list()->set_stobject(
                     manifest.serialized.data(), manifest.serialized.size());
                 hr.addSuppression(manifest.hash());
@@ -1349,7 +1362,7 @@ OverlayImpl<P2POverlayImplmnt>::unsquelch(
     Peer::id_t id) const
 {
     if (auto peer = findPeerByShortID(id);
-        peer && this->app().config().VP_REDUCE_RELAY_SQUELCH)
+        peer && app_.config().VP_REDUCE_RELAY_SQUELCH)
     {
         // optimize - multiple message with different
         // validator might be sent to the same peer
@@ -1365,7 +1378,7 @@ OverlayImpl<P2POverlayImplmnt>::squelch(
     uint32_t squelchDuration) const
 {
     if (auto peer = findPeerByShortID(id);
-        peer && this->app().config().VP_REDUCE_RELAY_SQUELCH)
+        peer && app_.config().VP_REDUCE_RELAY_SQUELCH)
     {
         peer->p2p().send(makeSquelchMessage(validator, true, squelchDuration));
     }

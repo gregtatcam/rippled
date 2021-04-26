@@ -131,9 +131,6 @@ protected:
     virtual std::recursive_mutex&
     mutex() const = 0;
 
-    virtual Application&
-    app() const = 0;
-
     virtual Setup const&
     setup() const = 0;
 
