@@ -23,18 +23,22 @@
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/make_Overlay.h>
+#include <ripple_test.pb.h>
 #include <test/jtx/Env.h>
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
 #include <memory>
+#include <mutex>
 
 namespace ripple {
 
 namespace test {
 
 class OverlayImplTest;
+class Nets;
+std::mutex logMutex;
 
 static std::string
 name(std::string const& n, int i)
@@ -42,15 +46,18 @@ name(std::string const& n, int i)
     return n + std::to_string(i);
 }
 
+// All objects needed to run the overlay
 struct PseudoNet
 {
     PseudoNet(
+        Nets& nets,
         beast::unit_test::suite& suite,
         boost::asio::io_service& service,
         std::string const& ip,
         std::vector<std::string> const& ipsFixed,
         int peerPort)
-        : io_service_(service)
+        : id_(sid_)
+        , io_service_(service)
         , config_(mkConfig(ip, std::to_string(peerPort), ipsFixed))
         , logs_(std::make_unique<jtx::SuiteLogs>(suite))
         , cluster_(std::make_unique<Cluster>(logs_->journal("Cluster")))
@@ -64,8 +71,9 @@ struct PseudoNet
         , resolver_(ResolverAsio::New(
               io_service_,
               logs_->journal(name("Overlay", id_))))
-        , identity_(randomKeyPair(KeyType::ed25519))
+        , identity_(randomKeyPair(KeyType::secp256k1))
         , overlay_(std::make_shared<OverlayImplTest>(
+              nets,
               *this,
               peerPort,
               name("Overlay", id_)))
@@ -78,7 +86,8 @@ struct PseudoNet
         serverPort_.back().ip = beast::IP::Address::from_string(ip);
         serverPort_.back().port = peerPort;
         serverPort_.back().protocol.insert("peer");
-        id_++;
+        serverPort_.back().context = make_SSLContext("");
+        sid_++;
     }
     void
     run();
@@ -102,7 +111,8 @@ struct PseudoNet
         config->setupControl(true, true, false);
         return config;
     }
-    static inline int id_ = 0;
+    static inline int sid_ = 0;
+    int id_;
     boost::asio::io_service& io_service_;
     std::unique_ptr<Config> config_;
     std::unique_ptr<jtx::SuiteLogs> logs_;
@@ -116,6 +126,67 @@ struct PseudoNet
     std::shared_ptr<OverlayImplTest> overlay_;
     std::vector<Port> serverPort_;
     std::unique_ptr<Server> server_;
+};
+
+// Collection of overlays
+class Nets
+{
+    friend class overlay_net_test;
+
+protected:
+    boost::asio::io_service io_service_;
+    boost::thread_group tg_;
+    std::mutex netMutex_;
+    std::unordered_map<int, std::shared_ptr<PseudoNet>> pseudoNets_;
+    std::uint32_t nNets_ = 0;
+
+public:
+    virtual ~Nets() = default;
+
+    void
+    erase(int id)
+    {
+        std::lock_guard l(netMutex_);
+        //pseudoNets_.erase(id);
+        nNets_--;
+        {
+            std::lock_guard l1(logMutex);
+            std::cout << "---------------> number of overlays "
+                      << nNets_ << std::endl
+                      << std::flush;
+        }
+
+        if (nNets_ == 0)
+        {
+            io_service_.stop();
+        }
+    }
+
+protected:
+    void
+    add(std::shared_ptr<PseudoNet> const& net)
+    {
+        std::lock_guard l(netMutex_);
+        pseudoNets_.emplace(net->id_, net);
+        nNets_++;
+    }
+    virtual void
+    mkNet(
+        std::string const& ip,
+        std::vector<std::string> fixed,
+        int peerPort = 51235) = 0;
+    void
+    startNets(std::vector<std::string> const& nets)
+    {
+        for (auto n : nets)
+            mkNet(n, nets);
+        for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
+            tg_.create_thread(
+                boost::bind(&boost::asio::io_service::run, &io_service_));
+        tg_.join_all();
+        std::lock_guard l(logMutex);
+        std::cout << "-----------------> finished\n" << std::flush;
+    }
 };
 
 class PeerImpTest : public P2PeerImp
@@ -185,38 +256,99 @@ protected:
     void
     onEvtProtocolStart() override
     {
-        std::cout << "protocol started event\n";
+        {
+            std::lock_guard l(logMutex);
+            std::cout << "protocol started event, peer id " << this->id()
+                      << " for remote " << this->getRemoteAddress() << std::endl
+                      << std::flush;
+        }
+        protocol::TMSendTest tms;
+        tms.set_version(101);
+        this->send(std::make_shared<Message>(tms, protocol::mtSEND_TEST));
     }
 
     void
     onEvtRun() override
     {
-        std::cout << "run event\n";
+        std::lock_guard l(logMutex);
+        std::cout << "run event\n" << std::flush;
     }
 
     void
     onEvtClose() override
     {
-        std::cout << "close event\n";
+        std::lock_guard l(logMutex);
+        std::cout << "close event\n" << std::flush;
     }
 
     void
     onEvtGracefulClose() override
     {
-        std::cout << "graceful close event\n";
+        std::lock_guard l(logMutex);
+        std::cout << "graceful close event\n" << std::flush;
     }
 
     void
     onEvtShutdown() override
     {
-        std::cout << "shutdown event\n";
+        std::lock_guard l(logMutex);
+        std::cout << "shutdown event\n" << std::flush;
     }
 
     std::pair<size_t, boost::system::error_code>
-    onEvtProtocolMessage(boost::beast::multi_buffer const&, size_t&) override
+    onEvtProtocolMessage(
+        boost::beast::multi_buffer const& mbuffers,
+        size_t& hint) override
     {
-        std::cout << "protocol message event\n";
-        return {};
+        {
+            std::lock_guard l(logMutex);
+            std::cout << "protocol message event\n" << std::flush;
+        }
+        std::pair<std::size_t, boost::system::error_code> result = {0, {}};
+
+        auto buffers = mbuffers.data();
+
+        auto header = getHeader(buffers, *this, hint);
+
+        if (!header.first)
+        {
+            result.second = header.second;
+            return result;
+        }
+
+        if (header.second == boost::system::errc::no_message)
+        {
+            result.second = {};
+            return result;
+        }
+
+        switch (header.first->message_type)
+        {
+            case protocol::mtSEND_TEST: {
+                if (auto const m =
+                        detail::parseMessageContent<protocol::TMSendTest>(
+                            *header.first, buffers))
+                {
+                    std::lock_guard l(logMutex);
+                    std::cout << "got message from " << this->getRemoteAddress()
+                              << ": " << m->version() << std::endl
+                              << std::flush;
+                }
+            }
+            break;
+            default: {
+                std::lock_guard l(logMutex);
+                std::cout << "invalid message " << header.first->message_type
+                          << std::endl
+                          << std::flush;
+            }
+        }
+
+        result.first = header.first->total_wire_size;
+        // intentional to close the connection and terminate
+        result.second = make_error_code(boost::system::errc::bad_message);
+
+        return result;
     }
 };
 
@@ -224,12 +356,22 @@ class OverlayImplTest : public P2POverlayImpl,
                         public std::enable_shared_from_this<OverlayImplTest>
 {
 private:
+    Nets& nets_;
     PseudoNet& net_;
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
     std::string const name_;
+    std::mutex peersMutex_;
+    std::unordered_map<P2Peer::id_t, std::weak_ptr<PeerImpTest>> peers_;
+    std::uint16_t nPeers_ = 0;
 
 public:
+    ~OverlayImplTest()
+    {
+        timer_.cancel();
+    }
+
     OverlayImplTest(
+        Nets& nets,
         PseudoNet& net,
         std::uint16_t overlayPort,
         std::string const& name)
@@ -253,6 +395,7 @@ public:
               net.io_service_,
               *net.config_,
               net.collector_->collector())
+        , nets_(nets)
         , net_(net)
         , timer_(net.io_service_)
         , name_(name)
@@ -279,7 +422,8 @@ public:
     void
     onTimer(boost::system::error_code ec)
     {
-        std::cout << "onTimer " << name_ << std::endl << std::flush;
+        if (ec)
+            return;
         // peerFinder().once_per_second();
         autoConnect();
         setTimer();
@@ -367,6 +511,9 @@ protected:
             protocol,
             std::move(stream_ptr),
             *this);
+        std::lock_guard l(peersMutex_);
+        peers_.emplace(peer->id(), peer);
+        nPeers_++;
         return peer;
     }
 
@@ -391,6 +538,9 @@ protected:
             protocol,
             id,
             *this);
+        std::lock_guard l(peersMutex_);
+        peers_.emplace(peer->id(), peer);
+        nPeers_++;
         return peer;
     }
 
@@ -399,7 +549,18 @@ protected:
         P2Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot) override
     {
-        std::cout << "deactivating peer\n";
+        std::lock_guard l1(peersMutex_);
+        auto peer = peers_[id].lock();
+        if (peer)
+        {
+            std::lock_guard l(logMutex);
+            std::cout << "deactivating peer " << peer->getRemoteAddress()
+                      << std::flush;
+        }
+        //peers_.erase(id);
+        nPeers_--;
+        if (nPeers_ == 0) // TODO
+            net_.io_service_.post([&]() { nets_.erase(net_.id_); });
     }
 };
 
@@ -410,30 +571,29 @@ PseudoNet::run()
     overlay_->run();
 }
 
-class overlay_net_test : public beast::unit_test::suite
+class overlay_net_test : public beast::unit_test::suite, public Nets
 {
-    boost::asio::io_service io_service_;
-
 public:
     overlay_net_test()
     {
     }
 
-    std::vector<std::shared_ptr<PseudoNet>> nets_;
-
+protected:
     void
     mkNet(
-        std::string const& i,
-        std::vector<std::string> const& fixed,
-        std::string const& baseIp = "172.0.0.",
-        int peerPort = 51235)
+        std::string const& ip,
+        std::vector<std::string> fixed,
+        int peerPort = 51235) override
     {
-        std::string ip = baseIp + i;
-        std::cout << "configuring " << i << std::endl << std::flush;
-        std::cout << "-------------------\n" << std::endl << std::flush;
+        {
+            std::lock_guard l(logMutex);
+            std::cout << "configuring " << ip << std::endl << std::flush;
+            std::cout << "-------------------\n" << std::endl << std::flush;
+        }
+        fixed.erase(std::find(fixed.begin(), fixed.end(), ip));
         auto net = std::make_shared<PseudoNet>(
-            *this, io_service_, ip, fixed, peerPort);
-        nets_.emplace_back(net);
+            *this, *this, io_service_, ip, fixed, peerPort);
+        add(net);
         net->run();
     }
 
@@ -441,19 +601,18 @@ public:
     testOverlay()
     {
         testcase("Overlay");
-        mkNet("0", {"172.0.0.1"});
-        mkNet("1", {"172.0.0.0"});
-        boost::thread_group tg;
-        for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
-            tg.create_thread(
-                boost::bind(&boost::asio::io_service::run, &io_service_));
-        tg.join_all();
+        // interfaces must be pre-configured
+        std::vector<std::string> nets = {
+            "172.0.0.0", "172.0.0.1", "172.0.0.2", "172.0.0.3", "172.0.0.4"};
+        startNets(nets);
     }
 
+public:
     void
     run() override
     {
         testOverlay();
+        exit(0); // TODO, doesn't exit after returning from testOverlay()
     }
 };
 

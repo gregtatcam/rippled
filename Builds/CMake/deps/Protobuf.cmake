@@ -124,20 +124,37 @@ protobuf_generate_cpp (
   PROTO_SRCS
   PROTO_HDRS
   src/ripple/proto/ripple.proto)
+protobuf_generate_cpp (
+        PROTO_SRCS_TEST
+        PROTO_HDRS_TEST
+        src/ripple/proto/ripple_test.proto)
 set (CMAKE_CURRENT_BINARY_DIR ${save_CBD})
 
 add_library (pbufs STATIC ${PROTO_SRCS} ${PROTO_HDRS})
+add_library (pbufs_test STATIC ${PROTO_SRCS_TEST} ${PROTO_HDRS_TEST})
 
 target_include_directories (pbufs PRIVATE src)
+target_include_directories (pbufs_test PRIVATE src)
 target_include_directories (pbufs
   SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen)
+target_include_directories (pbufs_test
+        SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/proto_gen)
 target_link_libraries (pbufs protobuf::libprotobuf)
+target_link_libraries (pbufs_test protobuf::libprotobuf)
 target_compile_options (pbufs
   PUBLIC
     $<$<BOOL:${is_xcode}>:
       --system-header-prefix="google/protobuf"
       -Wno-deprecated-dynamic-exception-spec
     >)
+target_compile_options (pbufs_test
+        PUBLIC
+        $<$<BOOL:${is_xcode}>:
+        --system-header-prefix="google/protobuf"
+        -Wno-deprecated-dynamic-exception-spec
+        >)
 add_library (Ripple::pbufs ALIAS pbufs)
+add_library (Ripple::pbufs_test ALIAS pbufs_test)
 target_link_libraries (ripple_libs INTERFACE Ripple::pbufs)
-exclude_if_included (pbufs)
+target_link_libraries (ripple_libs INTERFACE Ripple::pbufs_test)
+exclude_if_included (pbufs_test)

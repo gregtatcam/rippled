@@ -1,0 +1,12 @@
+syntax = "proto2";
+package protocol;
+
+enum MessageTestType
+{
+  mtSEND_TEST = 1;
+}
+
+message TMSendTest
+{
+  required uint32 version = 1;
+}
