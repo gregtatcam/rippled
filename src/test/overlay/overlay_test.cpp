@@ -58,40 +58,41 @@ struct Counts
 struct VirtualNode
 {
     VirtualNode(
-            VirtualNetwork& net,
-            beast::unit_test::suite& suite,
-            boost::asio::io_service& service,
-            std::string const& ip,
-            std::vector<std::string> const& ipsFixed,
-            int peerPort)
+        VirtualNetwork& net,
+        beast::unit_test::suite& suite,
+        boost::asio::io_service& service,
+        jtx::SuiteLogs& logs,
+        std::string const& ip,
+        std::vector<std::string> const& ipsFixed,
+        int peerPort)
         : net_(net)
         , ip_(ip)
         , id_(sid_)
         , io_service_(service)
         , config_(mkConfig(ip, std::to_string(peerPort), ipsFixed))
-        , logs_(std::make_unique<jtx::SuiteLogs>(suite))
-        , cluster_(std::make_unique<Cluster>(logs_->journal("Cluster")))
+        , logs_(logs)
+        , cluster_(std::make_unique<Cluster>(logs_.journal("Cluster")))
         , timeKeeper_(std::make_unique<ManualTimeKeeper>())
         , collector_(CollectorManager::New(
               config_->section(SECTION_INSIGHT),
-              logs_->journal("Collector")))
+              logs_.journal("Collector")))
         , resourceManager_(Resource::make_Manager(
               collector_->collector(),
-              logs_->journal("Resource")))
+              logs_.journal("Resource")))
         , resolver_(ResolverAsio::New(
               io_service_,
-              logs_->journal(name("Overlay", id_))))
+              logs_.journal(name("Overlay", id_))))
         , identity_(randomKeyPair(KeyType::secp256k1))
         , overlay_(std::make_shared<OverlayImplTest>(
-                    net,
-                    *this,
-                    peerPort,
-                    name("Overlay", id_)))
+              net,
+              *this,
+              peerPort,
+              name("Overlay", id_)))
         , serverPort_(1)
         , server_(make_Server(
               *overlay_,
               io_service_,
-              logs_->journal(name("Server", id_))))
+              logs_.journal(name("Server", id_))))
     {
         serverPort_.back().ip = beast::IP::Address::from_string(ip);
         serverPort_.back().port = peerPort;
@@ -127,7 +128,7 @@ struct VirtualNode
     int id_;
     boost::asio::io_service& io_service_;
     std::unique_ptr<Config> config_;
-    std::unique_ptr<jtx::SuiteLogs> logs_;
+    jtx::SuiteLogs& logs_;
     std::unique_ptr<Cluster> cluster_;
     std::unique_ptr<ManualTimeKeeper> timeKeeper_;
     std::unique_ptr<CollectorManager> collector_;
@@ -184,6 +185,7 @@ protected:
 class PeerImpTest : public P2PeerImp
 {
     VirtualNode& node_;
+
 public:
     PeerImpTest(
         VirtualNode& node,
@@ -195,7 +197,7 @@ public:
         std::unique_ptr<stream_type>&& stream_ptr,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              *node.logs_,
+              node.logs_,
               *node.config_,
               id,
               slot,
@@ -222,7 +224,7 @@ public:
         id_t id,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              *node.logs_,
+              node.logs_,
               *node.config_,
               std::move(stream_ptr),
               buffers,
@@ -342,14 +344,14 @@ public:
     }
 
     OverlayImplTest(
-            VirtualNetwork& net,
-            VirtualNode& node,
-            std::uint16_t overlayPort,
-            std::string const& name)
+        VirtualNetwork& net,
+        VirtualNode& node,
+        std::uint16_t overlayPort,
+        std::string const& name)
         : P2POverlayImpl(
               [&]() -> HandshakeConfig {
                   HandshakeConfig hconfig{
-                      *node.logs_,
+                      node.logs_,
                       node.identity_,
                       *node.config_,
                       nullptr,
@@ -474,14 +476,14 @@ protected:
         std::unique_ptr<stream_type>&& stream_ptr) override
     {
         auto peer = std::make_shared<PeerImpTest>(
-                node_,
-                id,
-                slot,
-                std::move(request),
-                publicKey,
-                protocol,
-                std::move(stream_ptr),
-                *this);
+            node_,
+            id,
+            slot,
+            std::move(request),
+            publicKey,
+            protocol,
+            std::move(stream_ptr),
+            *this);
         Counts::inPeersCnt++;
         return peer;
     }
@@ -498,15 +500,15 @@ protected:
         id_t id) override
     {
         auto peer = std::make_shared<PeerImpTest>(
-                node_,
-                std::move(stream_ptr),
-                buffers.data(),
-                std::move(slot),
-                std::move(response),
-                publicKey,
-                protocol,
-                id,
-                *this);
+            node_,
+            std::move(stream_ptr),
+            buffers.data(),
+            std::move(slot),
+            std::move(response),
+            publicKey,
+            protocol,
+            id,
+            *this);
         Counts::outPeersCnt++;
         return peer;
     }
@@ -529,8 +531,10 @@ VirtualNode::run()
 class overlay_net_test : public beast::unit_test::suite, public VirtualNetwork
 {
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> overlayTimer_;
+    jtx::SuiteLogs logs_;
+
 public:
-    overlay_net_test() : overlayTimer_(io_service_)
+    overlay_net_test() : overlayTimer_(io_service_), logs_(*this)
     {
     }
 
@@ -543,7 +547,7 @@ protected:
     {
         fixed.erase(std::find(fixed.begin(), fixed.end(), ip));
         auto net = std::make_shared<VirtualNode>(
-            *this, *this, io_service_, ip, fixed, peerPort);
+            *this, *this, io_service_, logs_, ip, fixed, peerPort);
         add(net);
         net->run();
     }
@@ -554,6 +558,10 @@ protected:
         std::lock_guard l1(nodesMutex_);
         overlayTimer_.cancel();
         // TODO nodes cleanup
+        for (auto& node : nodes_)
+        {
+            node.second->server_->close();
+        }
         io_service_.stop();
     }
 
@@ -566,9 +574,7 @@ protected:
             "172.0.0.0", "172.0.0.1", "172.0.0.2", "172.0.0.3", "172.0.0.4"};
         overlayTimer_.expires_from_now(std::chrono::seconds(10));
         overlayTimer_.async_wait(std::bind(
-                &overlay_net_test::onOverlayTimer,
-                this,
-                std::placeholders::_1));
+            &overlay_net_test::onOverlayTimer, this, std::placeholders::_1));
         startNets(nets);
     }
 
@@ -578,8 +584,11 @@ protected:
         if (ec)
             return;
         std::lock_guard l(logMutex);
-        std::cout << "peers " << Counts::inPeersCnt << " " << Counts::outPeersCnt << std::endl;
-        std::cout << "messages " << Counts::msgRecvCnt << " " << Counts::msgSendCnt << std::endl;
+        std::cout << "peers " << Counts::inPeersCnt << " "
+                  << Counts::outPeersCnt << std::endl;
+        std::cout << "messages " << Counts::msgRecvCnt << " "
+                  << Counts::msgSendCnt << std::endl;
+        // TODO expected counts
         BEAST_EXPECT(Counts::inPeersCnt == 20);
         BEAST_EXPECT(Counts::outPeersCnt == 20);
         BEAST_EXPECT(Counts::msgSendCnt == 40);
