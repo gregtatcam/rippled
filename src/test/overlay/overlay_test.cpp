@@ -237,6 +237,19 @@ public:
     {
     }
 
+    // close peer connection
+    void
+    closeConnection()
+    {
+        if (!strand().running_in_this_thread())
+            return post(
+                strand(),
+                std::bind(
+                    &PeerImpTest::closeConnection,
+                    std::static_pointer_cast<PeerImpTest>(shared_from_this())));
+        close();
+    }
+
 protected:
     std::string
     name() const override
@@ -311,7 +324,7 @@ protected:
                 {
                     std::lock_guard l(logMutex);
                     Counts::msgRecvCnt++;
-                    if (Counts::msgRecvCnt == 40 && Counts::msgSendCnt == 40)
+                    if (Counts::msgRecvCnt == 20 && Counts::msgSendCnt == 20)
                         net_.stop();
                     status = true;
                 }
@@ -334,6 +347,8 @@ private:
     VirtualNetwork& net_;
     VirtualNode& node_;
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
+    std::mutex peersMutex_;
+    std::unordered_map<P2Peer::id_t, std::weak_ptr<PeerImpTest>> peers_;
     std::string const name_;
 
 public:
@@ -457,6 +472,19 @@ public:
     {
     }
 
+    // close all peers connection
+    void
+    closeConnections()
+    {
+        std::lock_guard l(peersMutex_);
+        for (auto& peer : peers_)
+        {
+            auto sp = peer.second.lock();
+            if (sp)
+                sp->closeConnection();
+        }
+    }
+
 protected:
     bool
     processRequest(http_request_type const& req, Handoff& handoff) override
@@ -484,6 +512,8 @@ protected:
             std::move(stream_ptr),
             *this);
         Counts::inPeersCnt++;
+        std::lock_guard l(peersMutex_);
+        peers_.emplace(id, peer);
         return peer;
     }
 
@@ -509,6 +539,8 @@ protected:
             id,
             *this);
         Counts::outPeersCnt++;
+        std::lock_guard l(peersMutex_);
+        peers_.emplace(id, peer);
         return peer;
     }
 
@@ -517,6 +549,8 @@ protected:
         P2Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot) override
     {
+        std::lock_guard l(peersMutex_);
+        peers_.erase(id);
     }
 };
 
@@ -555,8 +589,12 @@ protected:
     {
         std::lock_guard l1(nodesMutex_);
         overlayTimer_.cancel();
-        // TODO nodes cleanup
-        nodes_.clear();
+
+        for (auto& node : nodes_)
+        {
+            node.second->overlay_->closeConnections();
+            node.second->server_.reset();
+        }
         io_service_.stop();
     }
 
@@ -571,6 +609,16 @@ protected:
         overlayTimer_.async_wait(std::bind(
             &overlay_net_test::onOverlayTimer, this, std::placeholders::_1));
         startNets(nets);
+        std::lock_guard l(logMutex);
+        std::cout << "peers " << Counts::inPeersCnt << " "
+                  << Counts::outPeersCnt << std::endl;
+        std::cout << "messages " << Counts::msgRecvCnt << " "
+                  << Counts::msgSendCnt << std::endl;
+        // TODO expected counts
+        BEAST_EXPECT(Counts::inPeersCnt == 10);
+        BEAST_EXPECT(Counts::outPeersCnt == 10);
+        BEAST_EXPECT(Counts::msgSendCnt == 20);
+        BEAST_EXPECT(Counts::msgRecvCnt == 20);
     }
 
     void
@@ -578,16 +626,6 @@ protected:
     {
         if (ec)
             return;
-        std::lock_guard l(logMutex);
-        std::cout << "peers " << Counts::inPeersCnt << " "
-                  << Counts::outPeersCnt << std::endl;
-        std::cout << "messages " << Counts::msgRecvCnt << " "
-                  << Counts::msgSendCnt << std::endl;
-        // TODO expected counts
-        BEAST_EXPECT(Counts::inPeersCnt == 20);
-        BEAST_EXPECT(Counts::outPeersCnt == 20);
-        BEAST_EXPECT(Counts::msgSendCnt == 40);
-        BEAST_EXPECT(Counts::msgRecvCnt == 40);
         stop();
     }
 
