@@ -37,7 +37,7 @@ namespace ripple {
 namespace test {
 
 class OverlayImplTest;
-class Nets;
+class VirtualNetwork;
 std::mutex logMutex;
 
 static std::string
@@ -46,17 +46,27 @@ name(std::string const& n, int i)
     return n + std::to_string(i);
 }
 
-// All objects needed to run the overlay
-struct PseudoNet
+struct Counts
 {
-    PseudoNet(
-        Nets& nets,
-        beast::unit_test::suite& suite,
-        boost::asio::io_service& service,
-        std::string const& ip,
-        std::vector<std::string> const& ipsFixed,
-        int peerPort)
-        : id_(sid_)
+    static inline std::uint16_t msgSendCnt = 0;
+    static inline std::uint16_t msgRecvCnt = 0;
+    static inline std::uint16_t inPeersCnt = 0;
+    static inline std::uint16_t outPeersCnt = 0;
+};
+
+// All objects needed to run the overlay
+struct VirtualNode
+{
+    VirtualNode(
+            VirtualNetwork& net,
+            beast::unit_test::suite& suite,
+            boost::asio::io_service& service,
+            std::string const& ip,
+            std::vector<std::string> const& ipsFixed,
+            int peerPort)
+        : net_(net)
+        , ip_(ip)
+        , id_(sid_)
         , io_service_(service)
         , config_(mkConfig(ip, std::to_string(peerPort), ipsFixed))
         , logs_(std::make_unique<jtx::SuiteLogs>(suite))
@@ -73,10 +83,10 @@ struct PseudoNet
               logs_->journal(name("Overlay", id_))))
         , identity_(randomKeyPair(KeyType::secp256k1))
         , overlay_(std::make_shared<OverlayImplTest>(
-              nets,
-              *this,
-              peerPort,
-              name("Overlay", id_)))
+                    net,
+                    *this,
+                    peerPort,
+                    name("Overlay", id_)))
         , serverPort_(1)
         , server_(make_Server(
               *overlay_,
@@ -112,6 +122,8 @@ struct PseudoNet
         return config;
     }
     static inline int sid_ = 0;
+    VirtualNetwork& net_;
+    std::string ip_;
     int id_;
     boost::asio::io_service& io_service_;
     std::unique_ptr<Config> config_;
@@ -129,71 +141,52 @@ struct PseudoNet
 };
 
 // Collection of overlays
-class Nets
+class VirtualNetwork
 {
     friend class overlay_net_test;
 
 protected:
     boost::asio::io_service io_service_;
     boost::thread_group tg_;
-    std::mutex netMutex_;
-    std::unordered_map<int, std::shared_ptr<PseudoNet>> pseudoNets_;
-    std::uint32_t nNets_ = 0;
+    std::mutex nodesMutex_;
+    std::unordered_map<int, std::shared_ptr<VirtualNode>> nodes_;
 
 public:
-    virtual ~Nets() = default;
+    virtual ~VirtualNetwork() = default;
 
-    void
-    erase(int id)
-    {
-        std::lock_guard l(netMutex_);
-        //pseudoNets_.erase(id);
-        nNets_--;
-        {
-            std::lock_guard l1(logMutex);
-            std::cout << "---------------> number of overlays "
-                      << nNets_ << std::endl
-                      << std::flush;
-        }
-
-        if (nNets_ == 0)
-        {
-            io_service_.stop();
-        }
-    }
+    virtual void
+    stop() = 0;
 
 protected:
     void
-    add(std::shared_ptr<PseudoNet> const& net)
+    add(std::shared_ptr<VirtualNode> const& node)
     {
-        std::lock_guard l(netMutex_);
-        pseudoNets_.emplace(net->id_, net);
-        nNets_++;
+        std::lock_guard l(nodesMutex_);
+        nodes_.emplace(node->id_, node);
     }
     virtual void
-    mkNet(
+    mkNode(
         std::string const& ip,
         std::vector<std::string> fixed,
         int peerPort = 51235) = 0;
     void
-    startNets(std::vector<std::string> const& nets)
+    startNets(std::vector<std::string> const& nodes)
     {
-        for (auto n : nets)
-            mkNet(n, nets);
+        for (auto n : nodes)
+            mkNode(n, nodes);
         for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
             tg_.create_thread(
                 boost::bind(&boost::asio::io_service::run, &io_service_));
         tg_.join_all();
-        std::lock_guard l(logMutex);
-        std::cout << "-----------------> finished\n" << std::flush;
     }
 };
 
 class PeerImpTest : public P2PeerImp
 {
+    VirtualNode& node_;
 public:
     PeerImpTest(
-        PseudoNet& net,
+        VirtualNode& node,
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
@@ -202,8 +195,8 @@ public:
         std::unique_ptr<stream_type>&& stream_ptr,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              *net.logs_,
-              *net.config_,
+              *node.logs_,
+              *node.config_,
               id,
               slot,
               std::move(request),
@@ -211,6 +204,7 @@ public:
               protocol,
               std::move(stream_ptr),
               overlay)
+        , node_(node)
     {
     }
 
@@ -218,7 +212,7 @@ public:
     // VFALCO legacyPublicKey should be implied by the Slot
     template <class Buffers>
     PeerImpTest(
-        PseudoNet& net,
+        VirtualNode& node,
         std::unique_ptr<stream_type>&& stream_ptr,
         Buffers const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,
@@ -228,8 +222,8 @@ public:
         id_t id,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              *net.logs_,
-              *net.config_,
+              *node.logs_,
+              *node.config_,
               std::move(stream_ptr),
               buffers,
               std::move(slot),
@@ -238,6 +232,7 @@ public:
               protocol,
               id,
               overlay)
+        , node_(node)
     {
     }
 
@@ -256,43 +251,30 @@ protected:
     void
     onEvtProtocolStart() override
     {
-        {
-            std::lock_guard l(logMutex);
-            std::cout << "protocol started event, peer id " << this->id()
-                      << " for remote " << this->getRemoteAddress() << std::endl
-                      << std::flush;
-        }
         protocol::TMSendTest tms;
         tms.set_version(101);
+        Counts::msgSendCnt++;
         this->send(std::make_shared<Message>(tms, protocol::mtSEND_TEST));
     }
 
     void
     onEvtRun() override
     {
-        std::lock_guard l(logMutex);
-        std::cout << "run event\n" << std::flush;
     }
 
     void
     onEvtClose() override
     {
-        std::lock_guard l(logMutex);
-        std::cout << "close event\n" << std::flush;
     }
 
     void
     onEvtGracefulClose() override
     {
-        std::lock_guard l(logMutex);
-        std::cout << "graceful close event\n" << std::flush;
     }
 
     void
     onEvtShutdown() override
     {
-        std::lock_guard l(logMutex);
-        std::cout << "shutdown event\n" << std::flush;
     }
 
     std::pair<size_t, boost::system::error_code>
@@ -300,11 +282,8 @@ protected:
         boost::beast::multi_buffer const& mbuffers,
         size_t& hint) override
     {
-        {
-            std::lock_guard l(logMutex);
-            std::cout << "protocol message event\n" << std::flush;
-        }
         std::pair<std::size_t, boost::system::error_code> result = {0, {}};
+        bool status = false;
 
         auto buffers = mbuffers.data();
 
@@ -330,23 +309,18 @@ protected:
                             *header.first, buffers))
                 {
                     std::lock_guard l(logMutex);
-                    std::cout << "got message from " << this->getRemoteAddress()
-                              << ": " << m->version() << std::endl
-                              << std::flush;
+                    Counts::msgRecvCnt++;
+                    if (Counts::msgRecvCnt == 40 && Counts::msgSendCnt == 40)
+                        node_.net_.stop();
+                    status = true;
                 }
             }
             break;
-            default: {
-                std::lock_guard l(logMutex);
-                std::cout << "invalid message " << header.first->message_type
-                          << std::endl
-                          << std::flush;
-            }
         }
 
         result.first = header.first->total_wire_size;
-        // intentional to close the connection and terminate
-        result.second = make_error_code(boost::system::errc::bad_message);
+        if (!status)
+            result.second = make_error_code(boost::system::errc::bad_message);
 
         return result;
     }
@@ -356,13 +330,10 @@ class OverlayImplTest : public P2POverlayImpl,
                         public std::enable_shared_from_this<OverlayImplTest>
 {
 private:
-    Nets& nets_;
-    PseudoNet& net_;
+    VirtualNetwork& net_;
+    VirtualNode& node_;
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
     std::string const name_;
-    std::mutex peersMutex_;
-    std::unordered_map<P2Peer::id_t, std::weak_ptr<PeerImpTest>> peers_;
-    std::uint16_t nPeers_ = 0;
 
 public:
     ~OverlayImplTest()
@@ -371,33 +342,33 @@ public:
     }
 
     OverlayImplTest(
-        Nets& nets,
-        PseudoNet& net,
-        std::uint16_t overlayPort,
-        std::string const& name)
+            VirtualNetwork& net,
+            VirtualNode& node,
+            std::uint16_t overlayPort,
+            std::string const& name)
         : P2POverlayImpl(
               [&]() -> HandshakeConfig {
                   HandshakeConfig hconfig{
-                      *net.logs_,
-                      net.identity_,
-                      *net.config_,
+                      *node.logs_,
+                      node.identity_,
+                      *node.config_,
                       nullptr,
-                      net.timeKeeper_->now()};
+                      node.timeKeeper_->now()};
                   return hconfig;
               }(),
-              *net.cluster_,
-              net.reservations_,
+              *node.cluster_,
+              node.reservations_,
               true,
-              setup_Overlay(*net.config_),
+              setup_Overlay(*node.config_),
               overlayPort,
-              *net.resourceManager_,
-              *net.resolver_,
-              net.io_service_,
-              *net.config_,
-              net.collector_->collector())
-        , nets_(nets)
+              *node.resourceManager_,
+              *node.resolver_,
+              node.io_service_,
+              *node.config_,
+              node.collector_->collector())
         , net_(net)
-        , timer_(net.io_service_)
+        , node_(node)
+        , timer_(node.io_service_)
         , name_(name)
     {
     }
@@ -420,7 +391,7 @@ public:
     }
 
     void
-    onTimer(boost::system::error_code ec)
+    onTimer(boost::system::error_code const& ec)
     {
         if (ec)
             return;
@@ -503,17 +474,15 @@ protected:
         std::unique_ptr<stream_type>&& stream_ptr) override
     {
         auto peer = std::make_shared<PeerImpTest>(
-            net_,
-            id,
-            slot,
-            std::move(request),
-            publicKey,
-            protocol,
-            std::move(stream_ptr),
-            *this);
-        std::lock_guard l(peersMutex_);
-        peers_.emplace(peer->id(), peer);
-        nPeers_++;
+                node_,
+                id,
+                slot,
+                std::move(request),
+                publicKey,
+                protocol,
+                std::move(stream_ptr),
+                *this);
+        Counts::inPeersCnt++;
         return peer;
     }
 
@@ -529,18 +498,16 @@ protected:
         id_t id) override
     {
         auto peer = std::make_shared<PeerImpTest>(
-            net_,
-            std::move(stream_ptr),
-            buffers.data(),
-            std::move(slot),
-            std::move(response),
-            publicKey,
-            protocol,
-            id,
-            *this);
-        std::lock_guard l(peersMutex_);
-        peers_.emplace(peer->id(), peer);
-        nPeers_++;
+                node_,
+                std::move(stream_ptr),
+                buffers.data(),
+                std::move(slot),
+                std::move(response),
+                publicKey,
+                protocol,
+                id,
+                *this);
+        Counts::outPeersCnt++;
         return peer;
     }
 
@@ -549,52 +516,45 @@ protected:
         P2Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot) override
     {
-        std::lock_guard l1(peersMutex_);
-        auto peer = peers_[id].lock();
-        if (peer)
-        {
-            std::lock_guard l(logMutex);
-            std::cout << "deactivating peer " << peer->getRemoteAddress()
-                      << std::flush;
-        }
-        //peers_.erase(id);
-        nPeers_--;
-        if (nPeers_ == 0) // TODO
-            net_.io_service_.post([&]() { nets_.erase(net_.id_); });
     }
 };
 
 void
-PseudoNet::run()
+VirtualNode::run()
 {
     server_->ports(serverPort_);
     overlay_->run();
 }
 
-class overlay_net_test : public beast::unit_test::suite, public Nets
+class overlay_net_test : public beast::unit_test::suite, public VirtualNetwork
 {
+    boost::asio::basic_waitable_timer<std::chrono::steady_clock> overlayTimer_;
 public:
-    overlay_net_test()
+    overlay_net_test() : overlayTimer_(io_service_)
     {
     }
 
 protected:
     void
-    mkNet(
+    mkNode(
         std::string const& ip,
         std::vector<std::string> fixed,
         int peerPort = 51235) override
     {
-        {
-            std::lock_guard l(logMutex);
-            std::cout << "configuring " << ip << std::endl << std::flush;
-            std::cout << "-------------------\n" << std::endl << std::flush;
-        }
         fixed.erase(std::find(fixed.begin(), fixed.end(), ip));
-        auto net = std::make_shared<PseudoNet>(
+        auto net = std::make_shared<VirtualNode>(
             *this, *this, io_service_, ip, fixed, peerPort);
         add(net);
         net->run();
+    }
+
+    void
+    stop() override
+    {
+        std::lock_guard l1(nodesMutex_);
+        overlayTimer_.cancel();
+        // TODO nodes cleanup
+        io_service_.stop();
     }
 
     void
@@ -604,7 +564,27 @@ protected:
         // interfaces must be pre-configured
         std::vector<std::string> nets = {
             "172.0.0.0", "172.0.0.1", "172.0.0.2", "172.0.0.3", "172.0.0.4"};
+        overlayTimer_.expires_from_now(std::chrono::seconds(10));
+        overlayTimer_.async_wait(std::bind(
+                &overlay_net_test::onOverlayTimer,
+                this,
+                std::placeholders::_1));
         startNets(nets);
+    }
+
+    void
+    onOverlayTimer(boost::system::error_code const& ec)
+    {
+        if (ec)
+            return;
+        std::lock_guard l(logMutex);
+        std::cout << "peers " << Counts::inPeersCnt << " " << Counts::outPeersCnt << std::endl;
+        std::cout << "messages " << Counts::msgRecvCnt << " " << Counts::msgSendCnt << std::endl;
+        BEAST_EXPECT(Counts::inPeersCnt == 20);
+        BEAST_EXPECT(Counts::outPeersCnt == 20);
+        BEAST_EXPECT(Counts::msgSendCnt == 40);
+        BEAST_EXPECT(Counts::msgRecvCnt == 40);
+        stop();
     }
 
 public:
@@ -612,7 +592,6 @@ public:
     run() override
     {
         testOverlay();
-        exit(0); // TODO, doesn't exit after returning from testOverlay()
     }
 };
 
