@@ -61,7 +61,6 @@ struct VirtualNode
         VirtualNetwork& net,
         beast::unit_test::suite& suite,
         boost::asio::io_service& service,
-        jtx::SuiteLogs& logs,
         std::string const& ip,
         std::vector<std::string> const& ipsFixed,
         int peerPort)
@@ -70,18 +69,18 @@ struct VirtualNode
         , id_(sid_)
         , io_service_(service)
         , config_(mkConfig(ip, std::to_string(peerPort), ipsFixed))
-        , logs_(logs)
-        , cluster_(std::make_unique<Cluster>(logs_.journal("Cluster")))
+        , logs_(std::make_unique<jtx::SuiteLogs>(suite))
+        , cluster_(std::make_unique<Cluster>(logs_->journal("Cluster")))
         , timeKeeper_(std::make_unique<ManualTimeKeeper>())
         , collector_(CollectorManager::New(
               config_->section(SECTION_INSIGHT),
-              logs_.journal("Collector")))
+              logs_->journal("Collector")))
         , resourceManager_(Resource::make_Manager(
               collector_->collector(),
-              logs_.journal("Resource")))
+              logs_->journal("Resource")))
         , resolver_(ResolverAsio::New(
               io_service_,
-              logs_.journal(name("Overlay", id_))))
+              logs_->journal(name("Overlay", id_))))
         , identity_(randomKeyPair(KeyType::secp256k1))
         , overlay_(std::make_shared<OverlayImplTest>(
               net,
@@ -92,7 +91,7 @@ struct VirtualNode
         , server_(make_Server(
               *overlay_,
               io_service_,
-              logs_.journal(name("Server", id_))))
+              logs_->journal(name("Server", id_))))
     {
         serverPort_.back().ip = beast::IP::Address::from_string(ip);
         serverPort_.back().port = peerPort;
@@ -128,7 +127,7 @@ struct VirtualNode
     int id_;
     boost::asio::io_service& io_service_;
     std::unique_ptr<Config> config_;
-    jtx::SuiteLogs& logs_;
+    std::unique_ptr<jtx::SuiteLogs> logs_;
     std::unique_ptr<Cluster> cluster_;
     std::unique_ptr<ManualTimeKeeper> timeKeeper_;
     std::unique_ptr<CollectorManager> collector_;
@@ -184,7 +183,7 @@ protected:
 
 class PeerImpTest : public P2PeerImp
 {
-    VirtualNode& node_;
+    VirtualNetwork& net_;
 
 public:
     PeerImpTest(
@@ -197,7 +196,7 @@ public:
         std::unique_ptr<stream_type>&& stream_ptr,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              node.logs_,
+              *node.logs_,
               *node.config_,
               id,
               slot,
@@ -206,7 +205,7 @@ public:
               protocol,
               std::move(stream_ptr),
               overlay)
-        , node_(node)
+        , net_(node.net_)
     {
     }
 
@@ -224,7 +223,7 @@ public:
         id_t id,
         P2POverlayImpl& overlay)
         : P2PeerImp(
-              node.logs_,
+              *node.logs_,
               *node.config_,
               std::move(stream_ptr),
               buffers,
@@ -234,7 +233,7 @@ public:
               protocol,
               id,
               overlay)
-        , node_(node)
+        , net_(node.net_)
     {
     }
 
@@ -313,7 +312,7 @@ protected:
                     std::lock_guard l(logMutex);
                     Counts::msgRecvCnt++;
                     if (Counts::msgRecvCnt == 40 && Counts::msgSendCnt == 40)
-                        node_.net_.stop();
+                        net_.stop();
                     status = true;
                 }
             }
@@ -351,7 +350,7 @@ public:
         : P2POverlayImpl(
               [&]() -> HandshakeConfig {
                   HandshakeConfig hconfig{
-                      node.logs_,
+                      *node.logs_,
                       node.identity_,
                       *node.config_,
                       nullptr,
@@ -531,10 +530,9 @@ VirtualNode::run()
 class overlay_net_test : public beast::unit_test::suite, public VirtualNetwork
 {
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> overlayTimer_;
-    jtx::SuiteLogs logs_;
 
 public:
-    overlay_net_test() : overlayTimer_(io_service_), logs_(*this)
+    overlay_net_test() : overlayTimer_(io_service_)
     {
     }
 
@@ -547,7 +545,7 @@ protected:
     {
         fixed.erase(std::find(fixed.begin(), fixed.end(), ip));
         auto net = std::make_shared<VirtualNode>(
-            *this, *this, io_service_, logs_, ip, fixed, peerPort);
+            *this, *this, io_service_, ip, fixed, peerPort);
         add(net);
         net->run();
     }
@@ -558,10 +556,7 @@ protected:
         std::lock_guard l1(nodesMutex_);
         overlayTimer_.cancel();
         // TODO nodes cleanup
-        for (auto& node : nodes_)
-        {
-            node.second->server_->close();
-        }
+        nodes_.clear();
         io_service_.stop();
     }
 
