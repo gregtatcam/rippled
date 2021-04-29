@@ -48,10 +48,39 @@ name(std::string const& n, int i)
 
 struct Counts
 {
+    static inline std::recursive_mutex cntMutex;
+    static inline std::condition_variable_any cond;
     static inline std::uint16_t msgSendCnt = 0;
     static inline std::uint16_t msgRecvCnt = 0;
     static inline std::uint16_t inPeersCnt = 0;
     static inline std::uint16_t outPeersCnt = 0;
+    static inline std::uint16_t deactivateCnt = 0;
+    static inline std::uint16_t expectedMsgCnt = 0;
+    static void
+    incCnt(std::uint16_t& cnt)
+    {
+        std::lock_guard l(cntMutex);
+        cnt++;
+        cond.notify_all();
+    }
+    static bool
+    deactivated()
+    {
+        return deactivateCnt == inPeersCnt + outPeersCnt;
+    }
+    static void
+    waitDeactivated()
+    {
+        using namespace std::chrono;
+        std::unique_lock l(cntMutex);
+        cond.wait_for(l, 5s, [] { return deactivated(); });
+    }
+    static bool
+    expected()
+    {
+        std::unique_lock l(cntMutex);
+        return expectedMsgCnt == msgSendCnt + msgRecvCnt;
+    }
 };
 
 // All objects needed to run the overlay
@@ -156,6 +185,12 @@ public:
 
     virtual void
     stop() = 0;
+
+    boost::asio::io_service&
+    io_service()
+    {
+        return io_service_;
+    }
 
 protected:
     void
@@ -267,7 +302,7 @@ protected:
     {
         protocol::TMSendTest tms;
         tms.set_version(101);
-        Counts::msgSendCnt++;
+        Counts::incCnt(Counts::msgSendCnt);
         this->send(std::make_shared<Message>(tms, protocol::mtSEND_TEST));
     }
 
@@ -322,11 +357,15 @@ protected:
                         detail::parseMessageContent<protocol::TMSendTest>(
                             *header.first, buffers))
                 {
-                    std::lock_guard l(logMutex);
-                    Counts::msgRecvCnt++;
-                    if (Counts::msgRecvCnt == 20 && Counts::msgSendCnt == 20)
-                        net_.stop();
+                    Counts::incCnt(Counts::msgRecvCnt);
                     status = true;
+                    std::lock_guard l(logMutex);
+                    std::cout << "msgs " << Counts::expectedMsgCnt << " "
+                              << Counts::msgSendCnt << " " << Counts::msgRecvCnt
+                              << std::endl
+                              << std::flush;
+                    if (Counts::expected())
+                        net_.io_service().post([this]() { net_.stop(); });
                 }
             }
             break;
@@ -397,6 +436,12 @@ public:
             &OverlayImplTest::onTimer,
             shared_from_this(),
             std::placeholders::_1)));
+    }
+
+    void
+    cancelTimer()
+    {
+        timer_.cancel();
     }
 
     void
@@ -511,7 +556,7 @@ protected:
             protocol,
             std::move(stream_ptr),
             *this);
-        Counts::inPeersCnt++;
+        Counts::incCnt(Counts::inPeersCnt);
         std::lock_guard l(peersMutex_);
         peers_.emplace(id, peer);
         return peer;
@@ -538,7 +583,7 @@ protected:
             protocol,
             id,
             *this);
-        Counts::outPeersCnt++;
+        Counts::incCnt(Counts::outPeersCnt);
         std::lock_guard l(peersMutex_);
         peers_.emplace(id, peer);
         return peer;
@@ -549,6 +594,10 @@ protected:
         P2Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot) override
     {
+        Counts::incCnt(Counts::deactivateCnt);
+        std::lock_guard l1(logMutex);
+        std::cout << "deactivating " << Counts::deactivateCnt << std::endl
+                  << std::flush;
         std::lock_guard l(peersMutex_);
         peers_.erase(id);
     }
@@ -590,9 +639,16 @@ protected:
         std::lock_guard l1(nodesMutex_);
         overlayTimer_.cancel();
 
+        // cancel the timer so that
+        // the terminated connection is not
+        // re-connected by auto-connect
+        for (auto& node : nodes_)
+            node.second->overlay_->cancelTimer();
+
         for (auto& node : nodes_)
         {
             node.second->overlay_->closeConnections();
+            Counts::waitDeactivated();
             node.second->server_.reset();
         }
         io_service_.stop();
@@ -605,20 +661,29 @@ protected:
         // interfaces must be pre-configured
         std::vector<std::string> nets = {
             "172.0.0.0", "172.0.0.1", "172.0.0.2", "172.0.0.3", "172.0.0.4"};
-        overlayTimer_.expires_from_now(std::chrono::seconds(10));
+        // complete graph - n*(n-1)/2 edges
+        std::uint16_t edges = nets.size() * (nets.size() - 1) / 2;
+        // number of peers is twice the edges and a message is sent and received
+        // by each peer
+        Counts::expectedMsgCnt = edges * 2 * 2;
+        overlayTimer_.expires_from_now(std::chrono::seconds(15));
         overlayTimer_.async_wait(std::bind(
             &overlay_net_test::onOverlayTimer, this, std::placeholders::_1));
         startNets(nets);
         std::lock_guard l(logMutex);
         std::cout << "peers " << Counts::inPeersCnt << " "
-                  << Counts::outPeersCnt << std::endl;
+                  << Counts::outPeersCnt << " " << Counts::deactivateCnt
+                  << std::endl;
         std::cout << "messages " << Counts::msgRecvCnt << " "
                   << Counts::msgSendCnt << std::endl;
-        // TODO expected counts
-        BEAST_EXPECT(Counts::inPeersCnt == 10);
-        BEAST_EXPECT(Counts::outPeersCnt == 10);
-        BEAST_EXPECT(Counts::msgSendCnt == 20);
-        BEAST_EXPECT(Counts::msgRecvCnt == 20);
+        BEAST_EXPECT(Counts::deactivated());
+        // a message is sent and received on each connection
+        // in both directions
+        BEAST_EXPECT(
+            2 * (Counts::inPeersCnt + Counts::outPeersCnt) ==
+            Counts::msgSendCnt + Counts::msgRecvCnt);
+        BEAST_EXPECT(
+            Counts::expectedMsgCnt == Counts::msgSendCnt + Counts::msgRecvCnt);
     }
 
     void
