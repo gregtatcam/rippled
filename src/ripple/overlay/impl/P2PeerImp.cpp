@@ -103,7 +103,7 @@ P2PeerImp::stop()
 {
     if (!strand_.running_in_this_thread())
         return post(strand_, std::bind(&P2PeerImp::stop, shared_from_this()));
-    if (socket_.is_open())
+    if (isSocketOpen())
     {
         // The rationale for using different severity levels is that
         // outbound connections are under our control and may be logged
@@ -166,7 +166,7 @@ P2PeerImp::send(std::shared_ptr<Message> const& m)
         return;
 
     boost::asio::async_write(
-        stream_,
+        *stream_ptr_,
         boost::asio::buffer(
             send_queue_.front()->getBuffer(compressionEnabled_)),
         bind_executor(
@@ -194,12 +194,12 @@ void
 P2PeerImp::close()
 {
     assert(strand_.running_in_this_thread());
-    if (socket_.is_open())
+    if (isSocketOpen())
     {
         detaching_ = true;  // DEPRECATED
         error_code ec;
         onEvtClose();
-        socket_.close(ec);
+        stream_ptr_->next_layer().socket().close(ec);
         overlay_.incPeerDisconnect();
         if (inbound_)
         {
@@ -222,7 +222,7 @@ P2PeerImp::fail(std::string const& reason)
                 (void (P2PeerImp::*)(std::string const&)) & P2PeerImp::fail,
                 shared_from_this(),
                 reason));
-    if (journal_.active(beast::severities::kWarning) && socket_.is_open())
+    if (journal_.active(beast::severities::kWarning) && isSocketOpen())
     {
         std::string const n = name();
         JLOG(journal_.warn()) << (n.empty() ? remote_address_.to_string() : n)
@@ -235,7 +235,7 @@ void
 P2PeerImp::fail(std::string const& name, error_code ec)
 {
     assert(strand_.running_in_this_thread());
-    if (socket_.is_open())
+    if (isSocketOpen())
     {
         JLOG(journal_.warn())
             << name << " from " << toBase58(TokenType::NodePublic, publicKey_)
@@ -259,7 +259,7 @@ P2PeerImp::gracefulClose()
     if (send_queue_.size() > 0)
         return;
     onEvtGracefulClose();
-    stream_.async_shutdown(bind_executor(
+    stream_ptr_->async_shutdown(bind_executor(
         strand_,
         std::bind(
             &P2PeerImp::onShutdown,
@@ -324,7 +324,7 @@ P2PeerImp::doProtocolStart()
 void
 P2PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
 {
-    if (!socket_.is_open())
+    if (!isSocketOpen())
         return;
     if (ec == boost::asio::error::operation_aborted)
         return;
@@ -355,7 +355,7 @@ P2PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
         std::tie(bytes_consumed, ec) = onEvtProtocolMessage(read_buffer_, hint);
         if (ec)
             return fail("onReadMessage", ec);
-        if (!socket_.is_open())
+        if (!isSocketOpen())
             return;
         if (gracefulClose_)
             return;
@@ -365,7 +365,7 @@ P2PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
     }
 
     // Timeout on writes only
-    stream_.async_read_some(
+    stream_ptr_->async_read_some(
         read_buffer_.prepare(std::max(Tuning::readBufferBytes, hint)),
         bind_executor(
             strand_,
@@ -379,7 +379,7 @@ P2PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
 void
 P2PeerImp::onWriteMessage(error_code ec, std::size_t bytes_transferred)
 {
-    if (!socket_.is_open())
+    if (!isSocketOpen())
         return;
     if (ec == boost::asio::error::operation_aborted)
         return;
@@ -401,7 +401,7 @@ P2PeerImp::onWriteMessage(error_code ec, std::size_t bytes_transferred)
     {
         // Timeout on writes only
         return boost::asio::async_write(
-            stream_,
+            *stream_ptr_,
             boost::asio::buffer(
                 send_queue_.front()->getBuffer(compressionEnabled_)),
             bind_executor(
@@ -415,7 +415,7 @@ P2PeerImp::onWriteMessage(error_code ec, std::size_t bytes_transferred)
 
     if (gracefulClose_)
     {
-        return stream_.async_shutdown(bind_executor(
+        return stream_ptr_->async_shutdown(bind_executor(
             strand_,
             std::bind(
                 &P2PeerImp::onShutdown,

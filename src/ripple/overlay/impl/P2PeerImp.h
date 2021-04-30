@@ -204,7 +204,7 @@ protected:
     bool
     isSocketOpen() const override
     {
-        return socket_.is_open();
+        return stream_ptr_->next_layer().socket().is_open();
     }
 
     int
