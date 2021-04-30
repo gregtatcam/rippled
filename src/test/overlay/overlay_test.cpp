@@ -22,6 +22,7 @@
 #include <ripple/core/ConfigSections.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
+#include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/make_Overlay.h>
 #include <ripple_test.pb.h>
 #include <test/jtx/Env.h>
@@ -379,52 +380,108 @@ protected:
     }
 };
 
-class OverlayImplTest : public P2POverlayImpl,
-                        public std::enable_shared_from_this<OverlayImplTest>
+class P2PeerImpTest : public P2PeerImp
 {
-private:
-    VirtualNetwork& net_;
-    VirtualNode& node_;
+public:
+    /** Create an active incoming peer from an established ssl connection. */
+    P2PeerImpTest(
+        Logs& logs,
+        Config const& config,
+        id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot,
+        http_request_type&& request,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        std::unique_ptr<stream_type>&& stream_ptr,
+        P2POverlayImpl& overlay)
+        : P2PeerImp(
+              logs,
+              config,
+              id,
+              slot,
+              std::move(request),
+              publicKey,
+              protocol,
+              std::move(stream_ptr),
+              overlay)
+    {
+    }
+
+    /** Create outgoing, handshaked peer. */
+    // VFALCO legacyPublicKey should be implied by the Slot
+    template <typename Buffers>
+    P2PeerImpTest(
+        Logs& logs,
+        Config const& config,
+        std::unique_ptr<stream_type>&& stream_ptr,
+        Buffers const& buffers,
+        std::shared_ptr<PeerFinder::Slot>&& slot,
+        http_response_type&& response,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        id_t id,
+        P2POverlayImpl& overlay)
+        : P2PeerImp(
+              logs,
+              config,
+              std::move(stream_ptr),
+              buffers,
+              std::move(slot),
+              std::move(response),
+              publicKey,
+              protocol,
+              id,
+              overlay)
+    {
+    }
+
+    void
+    send(std::shared_ptr<Message> const& m) override
+    {
+    }
+};
+
+template <typename PeerTest>
+class OverlayImplTestBase
+    : public P2POverlayImpl,
+      public std::enable_shared_from_this<OverlayImplTestBase<PeerTest>>
+{
+protected:
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
     std::mutex peersMutex_;
-    std::unordered_map<P2Peer::id_t, std::weak_ptr<PeerImpTest>> peers_;
-    std::string const name_;
+    std::unordered_map<P2Peer::id_t, std::weak_ptr<PeerTest>> peers_;
 
 public:
-    ~OverlayImplTest()
+    virtual ~OverlayImplTestBase()
     {
         timer_.cancel();
     }
 
-    OverlayImplTest(
-        VirtualNetwork& net,
-        VirtualNode& node,
+    OverlayImplTestBase(
+        HandshakeConfig hconfig,
+        Cluster& cluster,
+        PeerReservationTable& peerReservation,
+        bool validationPublicKeyEmpty,
+        Setup const& setup,
         std::uint16_t overlayPort,
-        std::string const& name)
+        Resource::Manager& resourceManager,
+        Resolver& resolver,
+        boost::asio::io_service& io_service,
+        BasicConfig const& config,
+        beast::insight::Collector::ptr const& collector)
         : P2POverlayImpl(
-              [&]() -> HandshakeConfig {
-                  HandshakeConfig hconfig{
-                      *node.logs_,
-                      node.identity_,
-                      *node.config_,
-                      nullptr,
-                      node.timeKeeper_->now()};
-                  return hconfig;
-              }(),
-              *node.cluster_,
-              node.reservations_,
-              true,
-              setup_Overlay(*node.config_),
+              hconfig,
+              cluster,
+              peerReservation,
+              validationPublicKeyEmpty,
+              setup,
               overlayPort,
-              *node.resourceManager_,
-              *node.resolver_,
-              node.io_service_,
-              *node.config_,
-              node.collector_->collector())
-        , net_(net)
-        , node_(node)
-        , timer_(node.io_service_)
-        , name_(name)
+              resourceManager,
+              resolver,
+              io_service,
+              config,
+              collector)
+        , timer_(io_service)
     {
     }
 
@@ -433,8 +490,8 @@ public:
     {
         timer_.expires_from_now(std::chrono::seconds(1));
         timer_.async_wait(strand().wrap(std::bind(
-            &OverlayImplTest::onTimer,
-            shared_from_this(),
+            &OverlayImplTestBase<PeerTest>::onTimer,
+            this->shared_from_this(),
             std::placeholders::_1)));
     }
 
@@ -537,6 +594,62 @@ protected:
         return false;
     }
 
+    void
+    onPeerDeactivate(
+        P2Peer::id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot) override
+    {
+        Counts::incCnt(Counts::deactivateCnt);
+        std::lock_guard l1(logMutex);
+        std::cout << "deactivating " << Counts::deactivateCnt << std::endl
+                  << std::flush;
+        std::lock_guard l(peersMutex_);
+        peers_.erase(id);
+    }
+};
+
+class OverlayImplTest : public OverlayImplTestBase<PeerImpTest>
+{
+private:
+    VirtualNetwork& net_;
+    VirtualNode& node_;
+    std::string const name_;
+
+public:
+    ~OverlayImplTest() = default;
+
+    OverlayImplTest(
+        VirtualNetwork& net,
+        VirtualNode& node,
+        std::uint16_t overlayPort,
+        std::string const& name)
+        : OverlayImplTestBase<PeerImpTest>(
+              [&]() -> HandshakeConfig {
+                  HandshakeConfig hconfig{
+                      *node.logs_,
+                      node.identity_,
+                      *node.config_,
+                      nullptr,
+                      node.timeKeeper_->now()};
+                  return hconfig;
+              }(),
+              *node.cluster_,
+              node.reservations_,
+              true,
+              setup_Overlay(*node.config_),
+              overlayPort,
+              *node.resourceManager_,
+              *node.resolver_,
+              node.io_service_,
+              *node.config_,
+              node.collector_->collector())
+        , net_(net)
+        , node_(node)
+        , name_(name)
+    {
+    }
+
+protected:
     std::shared_ptr<P2PeerImp>
     mkInboundPeer(
         id_t id,
@@ -587,19 +700,6 @@ protected:
         std::lock_guard l(peersMutex_);
         peers_.emplace(id, peer);
         return peer;
-    }
-
-    void
-    onPeerDeactivate(
-        P2Peer::id_t id,
-        std::shared_ptr<PeerFinder::Slot> const& slot) override
-    {
-        Counts::incCnt(Counts::deactivateCnt);
-        std::lock_guard l1(logMutex);
-        std::cout << "deactivating " << Counts::deactivateCnt << std::endl
-                  << std::flush;
-        std::lock_guard l(peersMutex_);
-        peers_.erase(id);
     }
 };
 

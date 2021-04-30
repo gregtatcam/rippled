@@ -1341,7 +1341,7 @@ OverlayImpl<P2POverlayImplmnt>::sendEndpoints()
     }
 }
 
-std::shared_ptr<Message>
+inline std::shared_ptr<Message>
 makeSquelchMessage(
     PublicKey const& validator,
     bool squelch,
