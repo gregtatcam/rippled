@@ -569,7 +569,7 @@ P2POverlayImpl::addOutboundPeer(
         protocol,
         id);
 
-    add_active(peer);
+    add_active(std::static_pointer_cast<P2PeerImp>(peer));
 }
 
 void
@@ -591,7 +591,7 @@ P2POverlayImpl::addInboundPeer(
         protocol,
         std::move(stream_ptr));
 
-    add_active(peer);
+    add_active(std::static_pointer_cast<P2PeerImp>(peer));
 }
 
 }  // namespace ripple

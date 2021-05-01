@@ -277,7 +277,7 @@ protected:
     bool
     processRequest(http_request_type const& req, Handoff& handoff) override;
 
-    std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
+    std::shared_ptr<P2Peer>
     mkInboundPeer(
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -287,7 +287,7 @@ protected:
         ProtocolVersion protocol,
         std::unique_ptr<stream_type>&& stream_ptr) override;
 
-    std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
+    std::shared_ptr<P2Peer>
     mkOutboundPeer(
         std::unique_ptr<stream_type>&& stream_ptr,
         boost::beast::multi_buffer const& buffers,
@@ -578,7 +578,7 @@ OverlayImpl<P2POverlayImplmnt>::onPeerDeactivate(
 }
 
 template <typename P2POverlayImplmnt>
-std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
+std::shared_ptr<P2Peer>
 OverlayImpl<P2POverlayImplmnt>::mkInboundPeer(
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -620,7 +620,7 @@ OverlayImpl<P2POverlayImplmnt>::mkInboundPeer(
 }
 
 template <typename P2POverlayImplmnt>
-std::shared_ptr<typename P2POverlayImplmnt::P2PeerImp_t>
+std::shared_ptr<P2Peer>
 OverlayImpl<P2POverlayImplmnt>::mkOutboundPeer(
     std::unique_ptr<stream_type>&& stream_ptr,
     boost::beast::multi_buffer const& buffers,

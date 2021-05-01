@@ -352,7 +352,7 @@ protected:
     /** Creates an inbound peer instance.
      @return inbound peer instance
      */
-    virtual std::shared_ptr<P2PeerImp>
+    virtual std::shared_ptr<P2Peer>
     mkInboundPeer(
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -365,7 +365,7 @@ protected:
     /** Creates an outbound peer instance.
      @return outbound peer instance
      */
-    virtual std::shared_ptr<P2PeerImp>
+    virtual std::shared_ptr<P2Peer>
     mkOutboundPeer(
         std::unique_ptr<stream_type>&& stream_ptr,
         boost::beast::multi_buffer const& buffers,

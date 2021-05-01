@@ -131,20 +131,36 @@ struct VirtualNode
     }
     void
     run();
-    std::unique_ptr<Config>
+    static std::unique_ptr<Config>
     mkConfig(
         std::string const& ip,
         std::string const& peerPort,
-        std::vector<std::string> const& ipsFixed)
+        std::vector<std::string> const& ipsFixed,
+        std::string const& dbPath = "",
+        bool http = false)
     {
         auto config = std::make_unique<Config>();
         config->overwrite(ConfigSection::nodeDatabase(), "type", "memory");
         config->overwrite(ConfigSection::nodeDatabase(), "path", "main");
         config->deprecatedClearSection(ConfigSection::importNodeDatabase());
+        if (dbPath != "")
+        {
+            std::string cmd = "mkdir -p " + dbPath;
+            system(cmd.c_str());
+        }
+        config->legacy("database_path", dbPath);
         (*config)["server"].append("port_peer");
         (*config)["port_peer"].set("ip", ip);
         (*config)["port_peer"].set("port", peerPort);
         (*config)["port_peer"].set("protocol", "peer");
+
+        if (http)
+        {
+            (*config)["server"].append("port_rpc");
+            (*config)["port_rpc"].set("ip", ip);
+            (*config)["port_rpc"].set("port", "6006");
+            (*config)["port_rpc"].set("protocol", "http");
+        }
         (*config)["ssl_verify"].append("0");
         for (auto f : ipsFixed)
             config->IPS_FIXED.push_back(f + " " + peerPort);
@@ -380,9 +396,12 @@ protected:
     }
 };
 
+class P2POverlayImplTest;
+
 class P2PeerImpTest : public P2PeerImp
 {
 public:
+    using P2POverlayImpl_t = P2POverlayImplTest;
     /** Create an active incoming peer from an established ssl connection. */
     P2PeerImpTest(
         Logs& logs,
@@ -437,6 +456,52 @@ public:
 
     void
     send(std::shared_ptr<Message> const& m) override
+    {
+    }
+
+    // close peer connection
+    void
+    closeConnection()
+    {
+        if (!strand().running_in_this_thread())
+            return post(
+                strand(),
+                std::bind(
+                    &PeerImpTest::closeConnection,
+                    std::static_pointer_cast<PeerImpTest>(shared_from_this())));
+        close();
+    }
+};
+
+class P2POverlayImplTest : public P2POverlayImpl
+{
+public:
+    using P2PeerImp_t = P2PeerImpTest;
+    virtual ~P2POverlayImplTest() = default;
+    P2POverlayImplTest(
+        HandshakeConfig hconfig,
+        Cluster& cluster,
+        PeerReservationTable& peerReservation,
+        bool validationPublicKeyEmpty,
+        Setup const& setup,
+        std::uint16_t overlayPort,
+        Resource::Manager& resourceManager,
+        Resolver& resolver,
+        boost::asio::io_service& io_service,
+        BasicConfig const& config,
+        beast::insight::Collector::ptr const& collector)
+        : P2POverlayImpl(
+              hconfig,
+              cluster,
+              peerReservation,
+              validationPublicKeyEmpty,
+              setup,
+              overlayPort,
+              resourceManager,
+              resolver,
+              io_service,
+              config,
+              collector)
     {
     }
 };
@@ -650,7 +715,7 @@ public:
     }
 
 protected:
-    std::shared_ptr<P2PeerImp>
+    std::shared_ptr<P2Peer>
     mkInboundPeer(
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -675,7 +740,7 @@ protected:
         return peer;
     }
 
-    std::shared_ptr<P2PeerImp>
+    std::shared_ptr<P2Peer>
     mkOutboundPeer(
         std::unique_ptr<stream_type>&& stream_ptr,
         boost::beast::multi_buffer const& buffers,
@@ -709,6 +774,76 @@ VirtualNode::run()
     server_->ports(serverPort_);
     overlay_->run();
 }
+
+std::unique_ptr<OverlayImpl<P2POverlayImplTest>>
+make_OverlayTest(
+    Application& app,
+    Stoppable& parent,
+    std::uint16_t overlayPort,
+    Resolver& resolver,
+    boost::asio::io_service& io_service)
+{
+    return std::make_unique<OverlayImpl<P2POverlayImplTest>>(
+        app,
+        setup_Overlay(app.config()),
+        parent,
+        overlayPort,
+        app.getResourceManager(),
+        resolver,
+        io_service,
+        app.config(),
+        app.getCollectorManager().collector());
+}
+
+struct AppVirtualNode
+{
+    AppVirtualNode(
+        beast::unit_test::suite& suite,
+        boost::asio::io_service& io_service,
+        std::string const& ip,
+        std::uint16_t port,
+        std::string const& dbPath,
+        std::vector<std::string> const& fixed)
+        : env_(
+              suite,
+              std::move(VirtualNode::mkConfig(
+                  ip,
+                  std::to_string(port),
+                  fixed,
+                  dbPath,
+                  true)))
+        , resolver_(ResolverAsio::New(
+              io_service,
+              env_.app().logs().journal(name("Overlay", 0))))
+        , overlay_(make_OverlayTest(
+              env_.app(),
+              dynamic_cast<Stoppable&>(env_.app()),
+              port,
+              *resolver_,
+              io_service)
+
+          )
+    {
+    }
+    ~AppVirtualNode() = default;
+    jtx::Env env_;
+    std::unique_ptr<ResolverAsio> resolver_;
+    std::unique_ptr<OverlayImpl<P2POverlayImplTest>> overlay_;
+};
+
+struct Test
+{
+    Test(
+        std::vector<std::string> const& v_,
+        std::string const& s_,
+        std::string const s1_)
+        : v(v_), s(s_), s1(s1_)
+    {
+    }
+    std::vector<std::string> v;
+    std::string s;
+    std::string s1;
+};
 
 class overlay_net_test : public beast::unit_test::suite, public VirtualNetwork
 {
@@ -794,11 +929,34 @@ protected:
         stop();
     }
 
+    void
+    testOverlayApp()
+    {
+        std::vector<std::shared_ptr<AppVirtualNode>> nodes;
+        std::vector<std::string> fixed{"172.0.0.1"};
+        auto path = [](auto d) { return std::string("./db") + d; };
+        nodes.emplace_back(std::make_shared<AppVirtualNode>(
+            *this,
+            io_service_,
+            "172.0.0.0",
+            51235,
+            path("0"),
+            std::vector<std::string>{"172.0.0.1"}));
+        nodes.emplace_back(std::make_shared<AppVirtualNode>(
+            *this,
+            io_service_,
+            "172.0.0.1",
+            51235,
+            path("1"),
+            std::vector<std::string>{"172.0.0.0"}));
+    }
+
 public:
     void
     run() override
     {
-        testOverlay();
+        // testOverlay();
+        testOverlayApp();
     }
 };
 
