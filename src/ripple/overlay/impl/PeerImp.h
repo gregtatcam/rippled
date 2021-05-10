@@ -108,7 +108,6 @@ private:
     protocol::TMStatusChange last_status_;
     Resource::Consumer usage_;
     Resource::Charge fee_;
-    std::shared_ptr<PeerFinder::Slot> const slot_;
     boost::beast::multi_buffer read_buffer_;
     http_request_type request_;
     http_response_type response_;
