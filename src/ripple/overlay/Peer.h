@@ -60,9 +60,11 @@ public:
     // Network
     //
 
+    // P2P
     virtual void
     send(std::shared_ptr<Message> const& m) = 0;
 
+    // P2P
     virtual beast::IP::Endpoint
     getRemoteAddress() const = 0;
 
@@ -74,6 +76,7 @@ public:
     // Identity
     //
 
+    // P2P
     virtual id_t
     id() const = 0;
 
@@ -87,6 +90,7 @@ public:
     virtual int
     getScore(bool) const = 0;
 
+    // P2P
     virtual PublicKey const&
     getNodePublic() const = 0;
 
@@ -121,6 +125,7 @@ public:
     virtual bool
     hasRange(std::uint32_t uMin, std::uint32_t uMax) = 0;
 
+    // P2P
     virtual bool
     compressionEnabled() const = 0;
 };
