@@ -56,7 +56,7 @@ protected:
     using endpoint_type = boost::asio::ip::tcp::endpoint;
     using Compressed = compression::Compressed;
 
-    Application& app_;
+    Application& app_;  // TODO remove Application dependency
     id_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
@@ -166,7 +166,7 @@ public:
 
     // Work-around for calling shared_from_this in constructors
     void
-    run();
+    run() override;
 
     // Called when Overlay gets a stop request.
     void
@@ -230,9 +230,6 @@ protected:
     // Called when SSL shutdown completes
     void
     onShutdown(error_code ec);
-
-    void
-    doAccept();
 
     std::string
     name() const;
@@ -353,9 +350,7 @@ P2PeerImp<PeerImp_t>::P2PeerImp(
 template <typename PeerImp_t>
 P2PeerImp<PeerImp_t>::~P2PeerImp()
 {
-    overlay_.onPeerDeactivate(id_);
     overlay_.peerFinder().on_closed(slot_);
-    overlay_.remove(slot_);
 }
 
 template <typename PeerImp_t>
@@ -368,10 +363,7 @@ P2PeerImp<PeerImp_t>::run()
 
     peerImp_.onEvtRun();
 
-    if (inbound_)
-        doAccept();
-    else
-        doProtocolStart();
+    doProtocolStart();
 
     // Anything else that needs to be done with the connection should be
     // done in doProtocolStart
@@ -582,66 +574,6 @@ P2PeerImp<PeerImp_t>::onShutdown(error_code ec)
 }
 
 //------------------------------------------------------------------------------
-template <typename PeerImp_t>
-void
-P2PeerImp<PeerImp_t>::doAccept()
-{
-    assert(read_buffer_.size() == 0);
-
-    JLOG(journal_.debug()) << "doAccept: " << remote_address_;
-
-    auto const sharedValue = makeSharedValue(*stream_ptr_, journal_);
-
-    // This shouldn't fail since we already computed
-    // the shared value successfully in OverlayImpl
-    if (!sharedValue)
-        return fail("makeSharedValue: Unexpected failure");
-
-    JLOG(journal_.info()) << "Protocol: " << to_string(protocol_);
-    JLOG(journal_.info()) << "Public Key: "
-                          << toBase58(TokenType::NodePublic, publicKey_);
-
-    peerImp_.onEvtAccept();
-
-    overlay_.activate(
-        std::static_pointer_cast<PeerImp_t>(this->shared_from_this()));
-
-    // XXX Set timer: connection is in grace period to be useful.
-    // XXX Set timer: connection idle (idle may vary depending on connection
-    // type.)
-
-    auto write_buffer = std::make_shared<boost::beast::multi_buffer>();
-
-    boost::beast::ostream(*write_buffer) << makeResponse(
-        !overlay_.peerFinder().config().peerPrivate,
-        request_,
-        overlay_.setup().public_ip,
-        remote_address_.address(),
-        *sharedValue,
-        overlay_.setup().networkID,
-        protocol_,
-        app_);
-
-    // Write the whole buffer and only start protocol when that's done.
-    boost::asio::async_write(
-        stream_,
-        write_buffer->data(),
-        boost::asio::transfer_all(),
-        bind_executor(
-            strand_,
-            [this, write_buffer, self = this->shared_from_this()](
-                error_code ec, std::size_t bytes_transferred) {
-                if (!socket_.is_open())
-                    return;
-                if (ec == boost::asio::error::operation_aborted)
-                    return;
-                if (ec)
-                    return fail("onWriteResponse", ec);
-                if (write_buffer->size() == bytes_transferred)
-                    return doProtocolStart();
-                return fail("Failed to write header");
-            }));
-}
 
 template <typename PeerImp_t>
 std::string

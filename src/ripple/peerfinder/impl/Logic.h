@@ -750,6 +750,8 @@ public:
                 continue;
             }
 
+            JLOG(m_journal.info())
+                << "endpoint " << ep.address << " " << ep.hops;
             // Increment hop count on the incoming message, so
             // we store it at the hop count we will send it at.
             //
@@ -762,7 +764,7 @@ public:
     void
     on_endpoints(SlotImp::ptr const& slot, Endpoints list)
     {
-        JLOG(m_journal.trace())
+        JLOG(m_journal.info())
             << beast::leftw(18) << "Endpoints from " << slot->remote_endpoint()
             << " contained " << list.size()
             << ((list.size() > 1) ? " entries" : " entry");

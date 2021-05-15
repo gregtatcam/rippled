@@ -20,13 +20,13 @@
 #ifndef RIPPLE_OVERLAY_CONNECTATTEMPT_H_INCLUDED
 #define RIPPLE_OVERLAY_CONNECTATTEMPT_H_INCLUDED
 
-#include <ripple/overlay/impl/OverlayImpl.h>
+#include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/Tuning.h>
 
 namespace ripple {
 
 /** Manages an outbound connection attempt. */
-class ConnectAttempt : public OverlayImpl::Child,
+class ConnectAttempt : public P2POverlayImpl::Child,
                        public std::enable_shared_from_this<ConnectAttempt>
 {
 private:
@@ -71,7 +71,7 @@ public:
         std::uint32_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         beast::Journal journal,
-        OverlayImpl& overlay);
+        P2POverlayImpl& overlay);
 
     ~ConnectAttempt();
 
@@ -79,7 +79,7 @@ public:
     stop() override;
 
     void
-    run();
+    run() override;
 
 private:
     void

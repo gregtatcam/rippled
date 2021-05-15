@@ -82,6 +82,7 @@ PeerImp::PeerImp(
           protocol,
           std::move(stream_ptr),
           overlay)
+    , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{socket_.get_executor()})
@@ -104,6 +105,14 @@ PeerImp::PeerImp(
           app_.config().LEDGER_REPLAY))
     , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
 {
+    if (auto member = app_.cluster().member(publicKey_))
+    {
+        {
+            std::unique_lock lock{nameMutex_};
+            name_ = *member;
+        }
+        JLOG(journal_.info()) << "Cluster name: " << *member;
+    }
     JLOG(journal_.debug()) << " compression enabled "
                            << (compressionEnabled_ == Compressed::On)
                            << " vp reduce-relay enabled "
@@ -115,7 +124,9 @@ PeerImp::~PeerImp()
 {
     const bool inCluster{cluster()};
 
+    overlay_.onPeerDeactivate(id_);
     overlay_.deletePeer(id_);
+    overlay_.remove(slot_);
 
     if (inCluster)
     {
@@ -540,18 +551,6 @@ PeerImp::onEvtShutdown()
 }
 
 //------------------------------------------------------------------------------
-void
-PeerImp::onEvtAccept()
-{
-    if (auto member = app_.cluster().member(publicKey_))
-    {
-        {
-            std::unique_lock lock{nameMutex_};
-            name_ = *member;
-        }
-        JLOG(journal_.info()) << "Cluster name: " << *member;
-    }
-}
 
 std::string
 PeerImp::name() const

@@ -50,6 +50,7 @@ private:
     using waitable_timer =
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
+    OverlayImpl& overlay_;
     beast::WrappedSink p_sink_;
     beast::Journal const p_journal_;
     waitable_timer timer_;
@@ -440,8 +441,6 @@ private:
     void
     onEvtShutdown();
     void
-    onEvtAccept();
-    void
     onEvtProtocolStart();
     std::pair<std::size_t, boost::system::error_code>
     /** Calls the handler for up to one protocol message in the passed buffers.
@@ -484,6 +483,7 @@ PeerImp::PeerImp(
           protocol,
           id,
           overlay)
+    , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{socket_.get_executor()})

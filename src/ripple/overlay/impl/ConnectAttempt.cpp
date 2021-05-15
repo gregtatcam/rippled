@@ -34,7 +34,7 @@ ConnectAttempt::ConnectAttempt(
     std::uint32_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     beast::Journal journal,
-    OverlayImpl& overlay)
+    P2POverlayImpl& overlay)
     : Child(overlay)
     , app_(app)
     , id_(id)
@@ -51,6 +51,14 @@ ConnectAttempt::ConnectAttempt(
     , stream_(*stream_ptr_)
     , slot_(slot)
 {
+    auto sec = app_.config().section("port_peer");
+    socket_.open(boost::asio::ip::tcp::v4());
+    socket_.bind(boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::address::from_string(
+            sec.get<std::string>("ip")->c_str()),
+        0));
+    boost::asio::socket_base::reuse_address reuseAddress(true);
+    socket_.set_option(reuseAddress);
     JLOG(journal_.debug()) << "Connect " << remote_endpoint;
 }
 
@@ -377,19 +385,15 @@ ConnectAttempt::processResponse()
         if (result != PeerFinder::Result::success)
             return fail("Outbound slots full");
 
-        auto const peer = std::make_shared<PeerImp>(
-            app_,
+        overlay_.addOutboundPeer(
             std::move(stream_ptr_),
-            read_buf_.data(),
+            read_buf_,
             std::move(slot_),
             std::move(response_),
             usage_,
             publicKey,
             *negotiatedProtocol,
-            id_,
-            overlay_);
-
-        overlay_.add_active(peer);
+            id_);
     }
     catch (std::exception const& e)
     {
