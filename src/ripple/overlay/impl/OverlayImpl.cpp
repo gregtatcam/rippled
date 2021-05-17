@@ -57,21 +57,21 @@ enum {
 //------------------------------------------------------------------------------
 
 OverlayImpl::Timer::Timer(OverlayImpl& overlay)
-    : Child(overlay), overlay_(overlay), timer_(overlay_.io_service_)
+    : overlay_(overlay), timer_(overlay_.io_service_)
 {
 }
 
 void
 OverlayImpl::Timer::stop()
 {
-    error_code ec;
-    timer_.cancel(ec);
+    stopping_ = true;
+    timer_.cancel();
 }
 
 void
-OverlayImpl::Timer::run()
+OverlayImpl::Timer::async_wait()
 {
-    timer_.expires_from_now(std::chrono::seconds(1));
+    timer_.expires_after(std::chrono::seconds(1));
     timer_.async_wait(overlay_.strand_.wrap(std::bind(
         &Timer::on_timer, shared_from_this(), std::placeholders::_1)));
 }
@@ -79,7 +79,7 @@ OverlayImpl::Timer::run()
 void
 OverlayImpl::Timer::on_timer(error_code ec)
 {
-    if (ec || overlay_.isStopping())
+    if (ec || stopping_)
     {
         if (ec && ec != boost::asio::error::operation_aborted)
         {
@@ -95,9 +95,7 @@ OverlayImpl::Timer::on_timer(error_code ec)
     if ((++overlay_.timer_count_ % Tuning::checkIdlePeers) == 0)
         overlay_.deleteIdlePeers();
 
-    timer_.expires_from_now(std::chrono::seconds(1));
-    timer_.async_wait(overlay_.strand_.wrap(std::bind(
-        &Timer::on_timer, shared_from_this(), std::placeholders::_1)));
+    async_wait();
 }
 
 //------------------------------------------------------------------------------
@@ -125,18 +123,11 @@ OverlayImpl::OverlayImpl(
     , timer_count_(0)
     , slots_(app, *this)
 {
-    beast::PropertyStream::Source::add(m_peerFinder.get());
 }
 
 OverlayImpl::~OverlayImpl()
 {
     stop();
-
-    // Block until dependent objects have been destroyed.
-    // This is just to catch improper use of the Stoppable API.
-    //
-    std::unique_lock<decltype(mutex_)> lock(mutex_);
-    cond_.wait(lock, [this] { return list_.empty(); });
 }
 
 //------------------------------------------------------------------------------
@@ -179,13 +170,21 @@ OverlayImpl::remove(std::shared_ptr<PeerFinder::Slot> const& slot)
 }
 
 void
-OverlayImpl::onStart()
+OverlayImpl::start()
 {
+    P2POverlayImpl::start();
+
+    /* TODO uncomment when Stoppable is removed
     auto const timer = std::make_shared<Timer>(*this);
-    std::lock_guard lock(mutex_);
-    list_.emplace(timer.get(), timer);
     timer_ = timer;
-    timer->run();
+    timer->async_wait();*/
+}
+
+void
+OverlayImpl::stop()
+{
+    timer_->stop();
+    P2POverlayImpl::stop();
 }
 
 void

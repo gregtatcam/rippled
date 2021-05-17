@@ -36,27 +36,26 @@ class OverlayImpl : public P2POverlayImpl, public reduce_relay::SquelchHandler
 private:
     using clock_type = std::chrono::steady_clock;
 
-    // TODO, should use it's own child management, not inherit
-    // from Child
-    struct Timer : Child, std::enable_shared_from_this<Timer>
+    struct Timer : std::enable_shared_from_this<Timer>
     {
         // hack
         OverlayImpl& overlay_;
         boost::asio::basic_waitable_timer<clock_type> timer_;
+        bool stopping_{false};
 
         explicit Timer(OverlayImpl& overlay);
 
         void
-        stop() override;
+        stop();
 
         void
-        run() override;
+        async_wait();
 
         void
         on_timer(error_code ec);
     };
 
-    std::weak_ptr<Timer> timer_;
+    std::shared_ptr<Timer> timer_;
     hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImp>> m_peers;
     hash_map<Peer::id_t, std::weak_ptr<PeerImp>> ids_;
     int timer_count_;
@@ -251,6 +250,12 @@ public:
     void
     deletePeer(Peer::id_t id);
 
+    void
+    start() override;
+
+    void
+    stop() override;
+
 private:
     void
     squelch(
@@ -324,9 +329,46 @@ private:
 
     //--------------------------------------------------------------------------
 
-    // TODO stoppable split between p2p and app
+    //
+    // Stoppable, temp
+    //
+
     void
-    onStart() override;
+    checkStopped() override
+    {
+        if (isStopping() && areChildrenStopped() && list_.empty())
+            stopped();
+    }
+
+    void
+    onPrepare() override
+    {
+        start();
+    }
+
+    void
+    onStart() override
+    {
+        // TODO remove once Stoppable is removed
+        auto const timer = std::make_shared<Timer>(*this);
+        timer_ = timer;
+        timer->async_wait();
+    }
+
+    void
+    onStop() override
+    {
+        strand_.dispatch(std::bind(&OverlayImpl::stop, this));
+    }
+
+    void
+    onChildrenStopped() override
+    {
+        std::lock_guard lock(mutex_);
+        checkStopped();
+    }
+
+    //--------------------------------------------------------------------------
 
     void
     sendEndpoints();

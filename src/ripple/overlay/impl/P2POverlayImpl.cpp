@@ -69,7 +69,6 @@ P2POverlayImpl::P2POverlayImpl(
     , serverHandler_(serverHandler)
     , m_resourceManager(resourceManager)
     , m_peerFinder(PeerFinder::make_Manager(
-          *this,
           io_service,
           stopwatch(),
           app_.journal("PeerFinder"),
@@ -93,17 +92,6 @@ P2POverlayImpl::P2POverlayImpl(
           }())
 {
     beast::PropertyStream::Source::add(m_peerFinder.get());
-}
-
-P2POverlayImpl::~P2POverlayImpl()
-{
-    stop();
-
-    // Block until dependent objects have been destroyed.
-    // This is just to catch improper use of the Stoppable API.
-    //
-    std::unique_lock<decltype(mutex_)> lock(mutex_);
-    cond_.wait(lock, [this] { return list_.empty(); });
 }
 
 //------------------------------------------------------------------------------
@@ -371,16 +359,8 @@ P2POverlayImpl::connect(beast::IP::Endpoint const& remote_endpoint)
 //
 //------------------------------------------------------------------------------
 
-// Caller must hold the mutex
 void
-P2POverlayImpl::checkStopped()
-{
-    if (isStopping() && areChildrenStopped() && list_.empty())
-        stopped();
-}
-
-void
-P2POverlayImpl::onPrepare()
+P2POverlayImpl::start()
 {
     PeerFinder::Config config = PeerFinder::Config::makeConfig(
         app_.config(),
@@ -389,6 +369,7 @@ P2POverlayImpl::onPrepare()
         setup_.ipLimit);
 
     m_peerFinder->setConfig(config);
+    m_peerFinder->start();
 
     // Populate our boot cache: if there are no entries in [ips] then we use
     // the entries in [ips_fixed].
@@ -454,19 +435,6 @@ P2POverlayImpl::onPrepare()
     }
 }
 
-void
-P2POverlayImpl::onStop()
-{
-    strand_.dispatch(std::bind(&P2POverlayImpl::stop, this));
-}
-
-void
-P2POverlayImpl::onChildrenStopped()
-{
-    std::lock_guard lock(mutex_);
-    checkStopped();
-}
-
 //------------------------------------------------------------------------------
 //
 // PropertyStream
@@ -517,11 +485,25 @@ P2POverlayImpl::remove(Child& child)
     std::lock_guard lock(mutex_);
     list_.erase(&child);
     if (list_.empty())
+    {
+        cond_.notify_all();
         checkStopped();
+    }
 }
 
 void
 P2POverlayImpl::stop()
+{
+    strand_.dispatch(std::bind(&P2POverlayImpl::stopChildren, this));
+    {
+        std::unique_lock<decltype(mutex_)> lock(mutex_);
+        cond_.wait(lock, [this] { return list_.empty(); });
+    }
+    m_peerFinder->stop();
+}
+
+void
+P2POverlayImpl::stopChildren()
 {
     // Calling list_[].second->stop() may cause list_ to be modified
     // (P2POverlayImpl::remove() may be called on this same thread).  So

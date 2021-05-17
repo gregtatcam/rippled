@@ -133,10 +133,10 @@ using Endpoints = std::vector<Endpoint>;
 enum class Result { duplicate, full, success };
 
 /** Maintains a set of IP addresses used for getting into the network. */
-class Manager : public Stoppable, public beast::PropertyStream::Source
+class Manager : public beast::PropertyStream::Source
 {
 protected:
-    explicit Manager(Stoppable& parent);
+    explicit Manager();
 
 public:
     /** Destroy the object.
@@ -262,6 +262,12 @@ public:
     */
     virtual void
     once_per_second() = 0;
+
+    virtual void
+    start() = 0;
+
+    virtual void
+    stop() = 0;
 };
 
 }  // namespace PeerFinder

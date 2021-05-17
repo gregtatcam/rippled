@@ -109,7 +109,7 @@ public:
         BasicConfig const& config,
         beast::insight::Collector::ptr const& collector);
 
-    ~P2POverlayImpl();
+    virtual ~P2POverlayImpl() = default;
 
     P2POverlayImpl(P2POverlayImpl const&) = delete;
     P2POverlayImpl&
@@ -240,6 +240,15 @@ public:
         return networkID_;
     }
 
+    void
+    stop() override;
+
+    virtual void
+    checkStopped() = 0;
+
+    void
+    start() override;
+
 protected:
     virtual std::shared_ptr<Child>
     mkOutboundPeer(
@@ -299,30 +308,11 @@ protected:
     remove(Child& child);
 
     void
-    stop();
-
-    void
     autoConnect();
 
 private:
-    //
-    // Stoppable
-    //
-
     void
-    checkStopped();
-
-    void
-    onPrepare() override;
-
-    // void
-    // onStart() override; // implemented in the app
-
-    void
-    onStop() override;
-
-    void
-    onChildrenStopped() override;
+    stopChildren();
 
 protected:
     struct TrafficGauges
