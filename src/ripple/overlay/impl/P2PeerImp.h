@@ -144,11 +144,9 @@ public:
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
-    template <class Buffers>
     P2PeerImp(
         Application& app,
         std::unique_ptr<stream_type>&& stream_ptr,
-        Buffers const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,
         http_response_type&& response,
         PublicKey const& publicKey,
@@ -270,11 +268,9 @@ protected:
 //------------------------------------------------------------------------------
 
 template <typename PeerImp_t>
-template <class Buffers>
 P2PeerImp<PeerImp_t>::P2PeerImp(
     Application& app,
     std::unique_ptr<stream_type>&& stream_ptr,
-    Buffers const& buffers,
     std::shared_ptr<PeerFinder::Slot>&& slot,
     http_response_type&& response,
     PublicKey const& publicKey,

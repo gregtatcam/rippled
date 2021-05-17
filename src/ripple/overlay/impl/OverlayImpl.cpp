@@ -944,7 +944,6 @@ OverlayImpl::mkOutboundPeer(
     auto peer = std::make_shared<PeerImp>(
         app_,
         std::move(stream_ptr),
-        buffers.data(),
         std::move(slot),
         std::move(response),
         usage,

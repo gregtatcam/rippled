@@ -120,6 +120,55 @@ PeerImp::PeerImp(
                            << " " << id_;
 }
 
+PeerImp::PeerImp(
+    Application& app,
+    std::unique_ptr<stream_type>&& stream_ptr,
+    std::shared_ptr<PeerFinder::Slot>&& slot,
+    http_response_type&& response,
+    Resource::Consumer usage,
+    PublicKey const& publicKey,
+    ProtocolVersion protocol,
+    id_t id,
+    OverlayImpl& overlay)
+    : P2PeerImp<PeerImp>(
+          app,
+          std::move(stream_ptr),
+          std::move(slot),
+          std::move(response),
+          publicKey,
+          protocol,
+          id,
+          overlay)
+    , overlay_(overlay)
+    , p_sink_(app_.journal("Protocol"), makePrefix(id))
+    , p_journal_(p_sink_)
+    , timer_(waitable_timer{socket_.get_executor()})
+    , tracking_(Tracking::unknown)
+    , trackingTime_(clock_type::now())
+    , lastPingTime_(clock_type::now())
+    , creationTime_(clock_type::now())
+    , squelch_(app_.journal("Squelch"))
+    , usage_(usage)
+    , fee_(Resource::feeLightPeer)
+    , response_(std::move(response))
+    , headers_(response_)
+    , vpReduceRelayEnabled_(peerFeatureEnabled(
+          headers_,
+          FEATURE_VPRR,
+          app_.config().VP_REDUCE_RELAY_ENABLE))
+    , ledgerReplayEnabled_(peerFeatureEnabled(
+          headers_,
+          FEATURE_LEDGER_REPLAY,
+          app_.config().LEDGER_REPLAY))
+    , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
+{
+    JLOG(journal_.debug()) << "compression enabled "
+                           << (compressionEnabled_ == Compressed::On)
+                           << " vp reduce-relay enabled "
+                           << vpReduceRelayEnabled_ << " on " << remote_address_
+                           << " " << id_;
+}
+
 PeerImp::~PeerImp()
 {
     const bool inCluster{cluster()};
@@ -355,6 +404,8 @@ PeerImp::supportsFeature(ProtocolFeature f) const
             return protocol_ >= make_protocol(2, 2);
         case ProtocolFeature::LedgerReplay:
             return ledgerReplayEnabled_;
+        case ProtocolFeature::StartProtocol:
+            return protocol_ >= make_protocol(2, 3);
     }
     return false;
 }
@@ -566,8 +617,58 @@ PeerImp::name() const
 void
 PeerImp::onEvtProtocolStart()
 {
+    bool supportedProtocol = supportsFeature(ProtocolFeature::StartProtocol);
+
+    if (!inbound_)
+    {
+        // Instruct connected inbound peer to start sending
+        // protocol messages
+        if (supportedProtocol)
+        {
+            JLOG(journal_.debug())
+                << "doProtocolStart(): outbound sending mtSTART_PROTOCOL to "
+                << remote_address_;
+            protocol::TMStartProtocol tmPS;
+            tmPS.set_starttime(std::chrono::duration_cast<std::chrono::seconds>(
+                                   clock_type::now().time_since_epoch())
+                                   .count());
+            send(std::make_shared<Message>(tmPS, protocol::mtSTART_PROTOCOL));
+        }
+        else
+        {
+            JLOG(journal_.debug()) << "doProtocolStart(): outbound connected "
+                                      "to an older protocol on "
+                                   << remote_address_ << " " << protocol_.first
+                                   << " " << protocol_.second;
+        }
+
+        if (auto m = overlay_.getManifestsMessage())
+            send(m);
+
+        // Request shard info from peer
+        protocol::TMGetPeerShardInfo tmGPS;
+        tmGPS.set_hops(0);
+        send(std::make_shared<Message>(tmGPS, protocol::mtGET_PEER_SHARD_INFO));
+    }
+    // Backward compatibility with the older protocols
+    else if (!supportedProtocol)
+    {
+        JLOG(journal_.debug())
+            << "doProtocolStart(): inbound handling of an older protocol on "
+            << remote_address_ << " " << protocol_.first << " "
+            << protocol_.second;
+        onStartProtocol();
+    }
+
+    setTimer();
+}
+
+void
+PeerImp::onStartProtocol()
+{
+    JLOG(journal_.debug()) << "onStartProtocol(): " << remote_address_;
     // Send all the validator lists that have been loaded
-    if (inbound_ && supportsFeature(ProtocolFeature::ValidatorListPropagation))
+    if (supportsFeature(ProtocolFeature::ValidatorListPropagation))
     {
         app_.validators().for_each_available(
             [&](std::string const& manifest,
@@ -599,8 +700,6 @@ PeerImp::onEvtProtocolStart()
     protocol::TMGetPeerShardInfo tmGPS;
     tmGPS.set_hops(0);
     send(std::make_shared<Message>(tmGPS, protocol::mtGET_PEER_SHARD_INFO));
-
-    setTimer();
 }
 
 //------------------------------------------------------------------------------
@@ -2289,6 +2388,13 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
 
     JLOG(p_journal_.debug())
         << "onMessage: TMSquelch " << slice << " " << id() << " " << duration;
+}
+
+void
+PeerImp::onMessage(std::shared_ptr<protocol::TMStartProtocol> const& m)
+{
+    JLOG(journal_.debug()) << "onMessage(TMStartProtocol): " << remote_address_;
+    onStartProtocol();
 }
 
 //--------------------------------------------------------------------------

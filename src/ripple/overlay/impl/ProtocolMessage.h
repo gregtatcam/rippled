@@ -109,6 +109,8 @@ protocolMessageName(int type)
             return "replay_delta_request";
         case protocol::mtREPLAY_DELTA_RESPONSE:
             return "replay_delta_response";
+        case protocol::mtSTART_PROTOCOL:
+            return "start_protocol";
         default:
             break;
     }

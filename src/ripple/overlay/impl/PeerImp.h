@@ -149,11 +149,9 @@ public:
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
-    template <class Buffers>
     PeerImp(
         Application& app,
         std::unique_ptr<stream_type>&& stream_ptr,
-        Buffers const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,
         http_response_type&& response,
         Resource::Consumer usage,
@@ -299,6 +297,8 @@ private:
     // ProtocolStream
     //
     //--------------------------------------------------------------------------
+    void
+    onStartProtocol();
 
     void
     onMessageUnknown(std::uint16_t type);
@@ -362,6 +362,8 @@ private:
     onMessage(std::shared_ptr<protocol::TMReplayDeltaRequest> const& m);
     void
     onMessage(std::shared_ptr<protocol::TMReplayDeltaResponse> const& m);
+    void
+    onMessage(std::shared_ptr<protocol::TMStartProtocol> const& m);
 
     //--------------------------------------------------------------------------
     // lockedRecentLock is passed as a reminder to callers that recentLock_
@@ -460,60 +462,6 @@ private:
 };
 
 //------------------------------------------------------------------------------
-
-template <class Buffers>
-PeerImp::PeerImp(
-    Application& app,
-    std::unique_ptr<stream_type>&& stream_ptr,
-    Buffers const& buffers,
-    std::shared_ptr<PeerFinder::Slot>&& slot,
-    http_response_type&& response,
-    Resource::Consumer usage,
-    PublicKey const& publicKey,
-    ProtocolVersion protocol,
-    id_t id,
-    OverlayImpl& overlay)
-    : P2PeerImp<PeerImp>(
-          app,
-          std::move(stream_ptr),
-          buffers,
-          std::move(slot),
-          std::move(response),
-          publicKey,
-          protocol,
-          id,
-          overlay)
-    , overlay_(overlay)
-    , p_sink_(app_.journal("Protocol"), makePrefix(id))
-    , p_journal_(p_sink_)
-    , timer_(waitable_timer{socket_.get_executor()})
-    , tracking_(Tracking::unknown)
-    , trackingTime_(clock_type::now())
-    , lastPingTime_(clock_type::now())
-    , creationTime_(clock_type::now())
-    , squelch_(app_.journal("Squelch"))
-    , usage_(usage)
-    , fee_(Resource::feeLightPeer)
-    , response_(std::move(response))
-    , headers_(response_)
-    , vpReduceRelayEnabled_(peerFeatureEnabled(
-          headers_,
-          FEATURE_VPRR,
-          app_.config().VP_REDUCE_RELAY_ENABLE))
-    , ledgerReplayEnabled_(peerFeatureEnabled(
-          headers_,
-          FEATURE_LEDGER_REPLAY,
-          app_.config().LEDGER_REPLAY))
-    , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
-{
-    read_buffer_.commit(boost::asio::buffer_copy(
-        read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));
-    JLOG(journal_.debug()) << "compression enabled "
-                           << (compressionEnabled_ == Compressed::On)
-                           << " vp reduce-relay enabled "
-                           << vpReduceRelayEnabled_ << " on " << remote_address_
-                           << " " << id_;
-}
 
 template <class FwdIt, class>
 void
