@@ -70,23 +70,6 @@ handout(
     SeqFwdIter seq_first,
     SeqFwdIter seq_last)
 {
-    // handout random endpoints
-    std::vector<Endpoint> endpoints;
-    for (auto si = seq_first; si != seq_last; ++si)
-    {
-        for (auto it = si->begin(); it != si->end(); ++it)
-        {
-            endpoints.push_back(*it);
-        }
-    }
-    for (auto ti = first; ti != last; ++ti)
-    {
-        std::shuffle(endpoints.begin(), endpoints.end(), default_prng());
-        for (auto it : endpoints)
-            if (!ti->full())
-                ti->try_insert(it);
-    }
-#if 0
     for (;;)
     {
         std::size_t n(0);
@@ -109,7 +92,6 @@ handout(
         if (!n)
             break;
     }
-#endif
 }
 
 //------------------------------------------------------------------------------
