@@ -444,7 +444,6 @@ private:
     onEvtShutdown();
     void
     onEvtProtocolStart();
-    std::pair<std::size_t, boost::system::error_code>
     /** Calls the handler for up to one protocol message in the passed buffers.
 
     If there is insufficient data to produce a complete protocol
@@ -455,7 +454,8 @@ private:
                 returned value MAY be zero, which means "no hint"
 
     @return The number of bytes consumed, or the error code if any.
-*/
+    */
+    std::pair<std::size_t, boost::system::error_code>
     onEvtProtocolMessage(
         boost::beast::multi_buffer const& buffers,
         std::size_t& hint);
