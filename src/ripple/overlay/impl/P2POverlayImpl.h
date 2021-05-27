@@ -291,10 +291,6 @@ protected:
     virtual bool
     processRequest(http_request_type const& req, Handoff& handoff) = 0;
 
-    /** Setup peer finder and bootstrap peers */
-    void
-    init();
-
     //
     // PropertyStream
     //
