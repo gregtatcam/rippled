@@ -93,8 +93,6 @@ PeerImp::PeerImp(
     , squelch_(app_.journal("Squelch"))
     , usage_(consumer)
     , fee_(Resource::feeLightPeer)
-    , request_(std::move(request))
-    , headers_(request_)
     , vpReduceRelayEnabled_(peerFeatureEnabled(
           headers_,
           FEATURE_VPRR,
@@ -150,8 +148,6 @@ PeerImp::PeerImp(
     , squelch_(app_.journal("Squelch"))
     , usage_(usage)
     , fee_(Resource::feeLightPeer)
-    , response_(std::move(response))
-    , headers_(response_)
     , vpReduceRelayEnabled_(peerFeatureEnabled(
           headers_,
           FEATURE_VPRR,

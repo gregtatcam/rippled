@@ -60,9 +60,13 @@ protected:
     id_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
+private:
     std::unique_ptr<stream_type> stream_ptr_;
+protected:
     socket_type& socket_;
+private:
     stream_type& stream_;
+protected:
     boost::asio::strand<boost::asio::executor> strand_;
 
     // Updated at each stage of the connection process to reflect
@@ -83,12 +87,16 @@ protected:
     boost::shared_mutex mutable nameMutex_;
 
     std::shared_ptr<PeerFinder::Slot> const slot_;
+private:
     boost::beast::multi_buffer read_buffer_;
     http_request_type request_;
     http_response_type response_;
+protected:
     boost::beast::http::fields const& headers_;
     std::queue<std::shared_ptr<Message>> send_queue_;
+private:
     bool gracefulClose_ = false;
+protected:
     int large_sendq_ = 0;
 
     Compressed compressionEnabled_ = Compressed::Off;
@@ -242,6 +250,7 @@ protected:
     // protocol message loop
     //
 
+private:
     // Starts the protocol message loop
     void
     doProtocolStart();
@@ -254,15 +263,7 @@ protected:
     void
     onWriteMessage(error_code ec, std::size_t bytes_transferred);
 
-private:
     PeerImp_t& peerImp_;
-
-protected:
-    std::shared_ptr<PeerImp_t>
-    shared()
-    {
-        return std::static_pointer_cast<PeerImp_t>(this->shared_from_this());
-    }
 };
 
 //------------------------------------------------------------------------------

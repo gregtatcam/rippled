@@ -109,13 +109,6 @@ private:
     protocol::TMStatusChange last_status_;
     Resource::Consumer usage_;
     Resource::Charge fee_;
-    boost::beast::multi_buffer read_buffer_;
-    http_request_type request_;
-    http_response_type response_;
-    boost::beast::http::fields const& headers_;
-    std::queue<std::shared_ptr<Message>> send_queue_;
-    bool gracefulClose_ = false;
-    int large_sendq_ = 0;
     std::unique_ptr<LoadEvent> load_event_;
     // The highest sequence of each PublisherList that has
     // been sent to or received from this peer.
@@ -403,6 +396,7 @@ private:
     void
     getLedger(std::shared_ptr<protocol::TMGetLedger> const& packet);
 
+private:
     template <
         class T,
         class = std::enable_if_t<
@@ -429,7 +423,6 @@ private:
         return true;
     }
 
-private:
     friend class P2PeerImp<PeerImp>;
     // P2P events/methods
     void
@@ -459,6 +452,11 @@ private:
     onEvtProtocolMessage(
         boost::beast::multi_buffer const& buffers,
         std::size_t& hint);
+    std::shared_ptr<PeerImp>
+    shared()
+    {
+        return std::static_pointer_cast<PeerImp>(this->shared_from_this());
+    }
 };
 
 //------------------------------------------------------------------------------
