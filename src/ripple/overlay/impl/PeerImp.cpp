@@ -74,14 +74,16 @@ PeerImp::PeerImp(
     std::unique_ptr<stream_type>&& stream_ptr,
     OverlayImpl& overlay)
     : P2PeerImp<PeerImp>(
-          app,
+          app.logs(),
           id,
           slot,
           std::move(request),
           publicKey,
           protocol,
           std::move(stream_ptr),
+          app.config().COMPRESSION,
           overlay)
+    , app_(app)
     , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)
@@ -129,14 +131,16 @@ PeerImp::PeerImp(
     id_t id,
     OverlayImpl& overlay)
     : P2PeerImp<PeerImp>(
-          app,
+          app.logs(),
           std::move(stream_ptr),
           std::move(slot),
           std::move(response),
           publicKey,
           protocol,
           id,
+          app.config().COMPRESSION,
           overlay)
+    , app_(app)
     , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)

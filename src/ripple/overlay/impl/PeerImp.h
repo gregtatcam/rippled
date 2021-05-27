@@ -50,6 +50,7 @@ private:
     using waitable_timer =
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
+    Application& app_;
     OverlayImpl& overlay_;
     beast::WrappedSink p_sink_;
     beast::Journal const p_journal_;

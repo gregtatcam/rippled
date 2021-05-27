@@ -56,7 +56,6 @@ protected:
     using endpoint_type = boost::asio::ip::tcp::endpoint;
     using Compressed = compression::Compressed;
 
-    Application& app_;  // TODO remove Application dependency
     id_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
@@ -149,25 +148,27 @@ public:
 
     /** Create an active incoming peer from an established ssl connection. */
     P2PeerImp(
-        Application& app,
+        Logs& logs,
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         std::unique_ptr<stream_type>&& stream_ptr,
+        bool compressionEnabled,
         P2POverlayImpl& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
     P2PeerImp(
-        Application& app,
+        Logs& app,
         std::unique_ptr<stream_type>&& stream_ptr,
         std::shared_ptr<PeerFinder::Slot>&& slot,
         http_response_type&& response,
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
+        bool compressionEnabled,
         P2POverlayImpl& overlay);
 
     virtual ~P2PeerImp();
@@ -278,18 +279,18 @@ private:
 
 template <typename PeerImp_t>
 P2PeerImp<PeerImp_t>::P2PeerImp(
-    Application& app,
+    Logs& logs,
     std::unique_ptr<stream_type>&& stream_ptr,
     std::shared_ptr<PeerFinder::Slot>&& slot,
     http_response_type&& response,
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
+    bool compressionEnabled,
     P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
     , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
+    , sink_(logs.journal("Peer"), makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
@@ -303,11 +304,7 @@ P2PeerImp<PeerImp_t>::P2PeerImp(
     , response_(std::move(response))
     , headers_(response_)
     , compressionEnabled_(
-          peerFeatureEnabled(
-              headers_,
-              FEATURE_COMPR,
-              "lz4",
-              app_.config().COMPRESSION)
+          peerFeatureEnabled(headers_, FEATURE_COMPR, "lz4", compressionEnabled)
               ? Compressed::On
               : Compressed::Off)
     , peerImp_(static_cast<PeerImp_t&>(*this))
@@ -316,18 +313,18 @@ P2PeerImp<PeerImp_t>::P2PeerImp(
 
 template <typename PeerImp_t>
 P2PeerImp<PeerImp_t>::P2PeerImp(
-    Application& app,
+    Logs& logs,
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     http_request_type&& request,
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     std::unique_ptr<stream_type>&& stream_ptr,
+    bool compressionEnabled,
     P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
     , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
+    , sink_(logs.journal("Peer"), makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
@@ -341,11 +338,7 @@ P2PeerImp<PeerImp_t>::P2PeerImp(
     , request_(std::move(request))
     , headers_(request_)
     , compressionEnabled_(
-          peerFeatureEnabled(
-              headers_,
-              FEATURE_COMPR,
-              "lz4",
-              app_.config().COMPRESSION)
+          peerFeatureEnabled(headers_, FEATURE_COMPR, "lz4", compressionEnabled)
               ? Compressed::On
               : Compressed::Off)
     , peerImp_(static_cast<PeerImp_t&>(*this))
