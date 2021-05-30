@@ -23,6 +23,7 @@
 #include <ripple/basics/chrono.h>
 #include <ripple/core/Job.h>
 #include <ripple/overlay/Slot.h>
+#include <ripple/overlay/impl/AppConfigRequestorImpl.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <boost/asio/basic_waitable_timer.hpp>
 
@@ -55,6 +56,8 @@ private:
         on_timer(error_code ec);
     };
 
+    Application& app_;
+    AppConfigRequestorImpl requestor_;
     std::shared_ptr<Timer> timer_;
     hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImp>> m_peers;
     hash_map<Peer::id_t, std::weak_ptr<PeerImp>> ids_;

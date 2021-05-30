@@ -20,6 +20,7 @@
 #ifndef RIPPLE_OVERLAY_INBOUNDHANDOFF_H_INCLUDED
 #define RIPPLE_OVERLAY_INBOUNDHANDOFF_H_INCLUDED
 
+#include <ripple/overlay/impl/Handshake.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 
 namespace ripple {
@@ -36,7 +37,7 @@ private:
     using socket_type = boost::asio::ip::tcp::socket;
     using middle_type = boost::beast::tcp_stream;
     using stream_type = boost::beast::ssl_stream<middle_type>;
-    Application& app_;
+    P2PConfig const& p2pConfig_;
     std::uint32_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
@@ -53,7 +54,7 @@ public:
     virtual ~InboundHandoff() override = default;
 
     InboundHandoff(
-        Application& app,
+        P2PConfig const& p2pConfig,
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,

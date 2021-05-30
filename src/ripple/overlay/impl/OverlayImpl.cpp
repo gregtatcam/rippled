@@ -111,7 +111,13 @@ OverlayImpl::OverlayImpl(
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
     : P2POverlayImpl(
-          app,
+          P2PConfig{
+              app.config(),
+              app.logs(),
+              !app.getValidationPublicKey().empty(),
+              app.nodeIdentity(),
+              app.timeKeeper().now(),
+              requestor_},
           setup,
           parent,
           serverHandler,
@@ -120,6 +126,8 @@ OverlayImpl::OverlayImpl(
           io_service,
           config,
           collector)
+    , app_(app)
+    , requestor_(app)
     , timer_count_(0)
     , slots_(app, *this)
 {

@@ -26,7 +26,7 @@
 namespace ripple {
 
 InboundHandoff::InboundHandoff(
-    Application& app,
+    P2PConfig const& p2pConfig,
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     http_request_type&& request,
@@ -36,10 +36,10 @@ InboundHandoff::InboundHandoff(
     std::unique_ptr<stream_type>&& stream_ptr,
     P2POverlayImpl& overlay)
     : P2POverlayImpl::Child(overlay)
-    , app_(app)
+    , p2pConfig_(p2pConfig)
     , id_(id)
     , sink_(
-          app_.journal("Peer"),
+          p2pConfig_.logs.journal("Peer"),
           [id]() {
               std::stringstream ss;
               ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
@@ -102,7 +102,7 @@ InboundHandoff::sendResponse()
         *sharedValue,
         overlay_.setup().networkID,
         protocol_,
-        app_);
+        p2pConfig_);
 
     // Write the whole buffer and only start protocol when that's done.
     boost::asio::async_write(
@@ -142,7 +142,7 @@ InboundHandoff::fail(std::string const& reason)
 {
     if (journal_.active(beast::severities::kWarning) && socket().is_open())
     {
-        auto const n = app_.cluster().member(publicKey_);
+        auto const n = p2pConfig_.requestor.clusterMember(publicKey_);
         JLOG(journal_.warn())
             << (n ? remote_address_.to_string() : *n) << " failed: " << reason;
     }

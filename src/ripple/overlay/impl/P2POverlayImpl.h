@@ -20,12 +20,12 @@
 #ifndef RIPPLE_OVERLAY_P2POVERLAYIMPL_H_INCLUDED
 #define RIPPLE_OVERLAY_P2POVERLAYIMPL_H_INCLUDED
 
-#include <ripple/app/main/Application.h>
 #include <ripple/basics/Resolver.h>
 #include <ripple/basics/UnorderedContainers.h>
 #include <ripple/overlay/Message.h>
 #include <ripple/overlay/Overlay.h>
 #include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/P2PConfig.h>
 #include <ripple/overlay/impl/TrafficCount.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/resource/ResourceManager.h>
@@ -75,7 +75,7 @@ protected:
     using endpoint_type = boost::asio::ip::tcp::endpoint;
     using error_code = boost::system::error_code;
 
-    Application& app_;  // TODO remove Application dependency
+    P2PConfig const p2pConfig_;
     boost::asio::io_service& io_service_;
     std::optional<boost::asio::io_service::work> work_;
     boost::asio::io_service::strand strand_;
@@ -99,7 +99,7 @@ protected:
 
 public:
     P2POverlayImpl(
-        Application& app,
+        P2PConfig const& p2pConfig,
         Setup const& setup,
         Stoppable& parent,
         ServerHandler& serverHandler,

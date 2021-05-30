@@ -21,7 +21,9 @@
 #include <ripple/overlay/Message.h>
 #include <ripple/overlay/Peer.h>
 #include <ripple/overlay/Slot.h>
+#include <ripple/overlay/impl/AppConfigRequestorImpl.h>
 #include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/P2PConfig.h>
 #include <ripple/protocol/SecretKey.h>
 #include <ripple.pb.h>
 #include <test/jtx/Env.h>
@@ -1513,6 +1515,7 @@ vp_squelched=1
                     http_request, FEATURE_VPRR, inboundEnable);
                 BEAST_EXPECT(!(peerEnabled ^ inboundEnabled));
 
+                AppConfigRequestorImpl requestor(env_.app());
                 setEnv(inboundEnable);
                 auto http_resp = ripple::makeResponse(
                     true,
@@ -1522,7 +1525,13 @@ vp_squelched=1
                     uint256{1},
                     1,
                     {1, 0},
-                    env_.app());
+                    P2PConfig{
+                        env_.app().config(),
+                        env_.app().logs(),
+                        !env_.app().getValidationPublicKey().empty(),
+                        env_.app().nodeIdentity(),
+                        env_.app().timeKeeper().now(),
+                        requestor});
                 // outbound is enabled if the response's header has the feature
                 // enabled and the peer's configuration is enabled
                 auto const outboundEnabled =

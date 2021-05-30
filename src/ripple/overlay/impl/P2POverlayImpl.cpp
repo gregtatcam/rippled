@@ -50,7 +50,7 @@ P2POverlayImpl::Child::~Child()
 //------------------------------------------------------------------------------
 
 P2POverlayImpl::P2POverlayImpl(
-    Application& app,
+    P2PConfig const& p2pConfig,
     Setup const& setup,
     Stoppable& parent,
     ServerHandler& serverHandler,
@@ -60,18 +60,18 @@ P2POverlayImpl::P2POverlayImpl(
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
     : Overlay(parent)
-    , app_(app)
+    , p2pConfig_(p2pConfig)
     , io_service_(io_service)
     , work_(std::in_place, std::ref(io_service_))
     , strand_(io_service_)
     , setup_(setup)
-    , journal_(app_.journal("Overlay"))
+    , journal_(p2pConfig_.logs.journal("Overlay"))
     , serverHandler_(serverHandler)
     , m_resourceManager(resourceManager)
     , m_peerFinder(PeerFinder::make_Manager(
           io_service,
           stopwatch(),
-          app_.journal("PeerFinder"),
+          p2pConfig_.logs.journal("PeerFinder"),
           config,
           collector))
     , m_resolver(resolver)
@@ -103,7 +103,7 @@ P2POverlayImpl::onHandoff(
     endpoint_type remote_endpoint)
 {
     auto const id = next_id_++;
-    beast::WrappedSink sink(app_.logs()["Peer"], makePrefix(id));
+    beast::WrappedSink sink(p2pConfig_.logs["Peer"], makePrefix(id));
     beast::Journal journal(sink);
 
     Handoff handoff;
@@ -193,14 +193,15 @@ P2POverlayImpl::onHandoff(
             setup_.networkID,
             setup_.public_ip,
             remote_endpoint.address(),
-            app_);
+            p2pConfig_);
 
         {
             // The node gets a reserved slot if it is in our cluster
             // or if it has a reservation.
             bool const reserved =
-                static_cast<bool>(app_.cluster().member(publicKey)) ||
-                app_.peerReservations().contains(publicKey);
+                static_cast<bool>(
+                    p2pConfig_.requestor.clusterMember(publicKey)) ||
+                p2pConfig_.requestor.reservedPeer(publicKey);
             auto const result =
                 m_peerFinder->activate(slot, publicKey, reserved);
             if (result != PeerFinder::Result::success)
@@ -217,7 +218,7 @@ P2POverlayImpl::onHandoff(
         }
 
         auto const peer = std::make_shared<InboundHandoff>(
-            app_,
+            p2pConfig_,
             id,
             slot,
             std::move(request),
@@ -338,14 +339,14 @@ P2POverlayImpl::connect(beast::IP::Endpoint const& remote_endpoint)
     }
 
     auto const p = std::make_shared<ConnectAttempt>(
-        app_,
+        p2pConfig_,
         io_service_,
         beast::IPAddressConversion::to_asio_endpoint(remote_endpoint),
         usage,
         setup_.context,
         next_id_++,
         slot,
-        app_.journal("Peer"),
+        p2pConfig_.logs.journal("Peer"),
         *this);
 
     std::lock_guard lock(mutex_);
@@ -363,9 +364,9 @@ void
 P2POverlayImpl::start()
 {
     PeerFinder::Config config = PeerFinder::Config::makeConfig(
-        app_.config(),
+        p2pConfig_.config,
         serverHandler_.setup().overlay.port,
-        !app_.getValidationPublicKey().empty(),
+        p2pConfig_.isValidator,
         setup_.ipLimit);
 
     m_peerFinder->setConfig(config);
@@ -373,8 +374,9 @@ P2POverlayImpl::start()
 
     // Populate our boot cache: if there are no entries in [ips] then we use
     // the entries in [ips_fixed].
-    auto bootstrapIps =
-        app_.config().IPS.empty() ? app_.config().IPS_FIXED : app_.config().IPS;
+    auto bootstrapIps = p2pConfig_.config.IPS.empty()
+        ? p2pConfig_.config.IPS_FIXED
+        : p2pConfig_.config.IPS;
 
     // If nothing is specified, default to several well-known high-capacity
     // servers to serve as bootstrap:
@@ -411,10 +413,10 @@ P2POverlayImpl::start()
         });
 
     // Add the ips_fixed from the rippled.cfg file
-    if (!app_.config().standalone() && !app_.config().IPS_FIXED.empty())
+    if (!p2pConfig_.config.standalone() && !p2pConfig_.config.IPS_FIXED.empty())
     {
         m_resolver.resolve(
-            app_.config().IPS_FIXED,
+            p2pConfig_.config.IPS_FIXED,
             [this](
                 std::string const& name,
                 std::vector<beast::IP::Endpoint> const& addresses) {

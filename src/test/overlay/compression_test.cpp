@@ -25,7 +25,9 @@
 #include <ripple/core/TimeKeeper.h>
 #include <ripple/overlay/Compression.h>
 #include <ripple/overlay/Message.h>
+#include <ripple/overlay/impl/AppConfigRequestorImpl.h>
 #include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/P2PConfig.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ZeroCopyStream.h>
 #include <ripple/protocol/HashPrefix.h>
@@ -502,6 +504,7 @@ public:
                 http_request, FEATURE_COMPR, "lz4", inboundEnable);
             BEAST_EXPECT(!(peerEnabled ^ inboundEnabled));
 
+            AppConfigRequestorImpl requestor(env->app());
             env.reset();
             env = getEnv(inboundEnable);
             auto http_resp = ripple::makeResponse(
@@ -512,7 +515,13 @@ public:
                 uint256{1},
                 1,
                 {1, 0},
-                env->app());
+                P2PConfig{
+                    env->app().config(),
+                    env->app().logs(),
+                    !env->app().getValidationPublicKey().empty(),
+                    env->app().nodeIdentity(),
+                    env->app().timeKeeper().now(),
+                    requestor});
             // outbound is enabled if the response's header has the feature
             // enabled and the peer's configuration is enabled
             auto const outboundEnabled = peerFeatureEnabled(
