@@ -20,6 +20,8 @@
 #ifndef RIPPLE_OVERLAY_CONNECTATTEMPT_H_INCLUDED
 #define RIPPLE_OVERLAY_CONNECTATTEMPT_H_INCLUDED
 
+#include <ripple/beast/net/IPAddressConversion.h>
+#include <ripple/beast/utility/WrappedSink.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/Tuning.h>
 

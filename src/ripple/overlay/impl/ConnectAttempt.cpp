@@ -23,6 +23,8 @@
 #include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 
+#include <boost/beast/http.hpp>
+
 namespace ripple {
 
 ConnectAttempt::ConnectAttempt(

@@ -25,6 +25,7 @@
 #include <ripple/overlay/Slot.h>
 #include <ripple/overlay/impl/AppConfigRequestorImpl.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
+#include <ripple/rpc/ServerHandler.h>
 #include <boost/asio/basic_waitable_timer.hpp>
 
 namespace ripple {

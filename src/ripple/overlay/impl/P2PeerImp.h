@@ -161,7 +161,7 @@ public:
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
     P2PeerImp(
-        Logs& app,
+        Logs& logs,
         std::unique_ptr<stream_type>&& stream_ptr,
         std::shared_ptr<PeerFinder::Slot>&& slot,
         http_response_type&& response,

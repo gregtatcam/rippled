@@ -29,7 +29,6 @@
 #include <ripple/overlay/impl/TrafficCount.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/resource/ResourceManager.h>
-#include <ripple/rpc/ServerHandler.h>
 #include <ripple/server/Handoff.h>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -84,7 +83,7 @@ protected:
     boost::container::flat_map<Child*, std::weak_ptr<Child>> list_;
     Setup setup_;
     beast::Journal const journal_;
-    ServerHandler& serverHandler_;
+    std::uint16_t overlayPort_;
     Resource::Manager& m_resourceManager;
     std::unique_ptr<PeerFinder::Manager> m_peerFinder;
     TrafficCount m_traffic;
@@ -102,7 +101,7 @@ public:
         P2PConfig const& p2pConfig,
         Setup const& setup,
         Stoppable& parent,
-        ServerHandler& serverHandler,
+        std::uint16_t overlayPort,
         Resource::Manager& resourceManager,
         Resolver& resolver,
         boost::asio::io_service& io_service,
@@ -125,12 +124,6 @@ public:
     resourceManager()
     {
         return m_resourceManager;
-    }
-
-    ServerHandler&
-    serverHandler()
-    {
-        return serverHandler_;
     }
 
     Setup const&

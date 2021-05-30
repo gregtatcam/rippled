@@ -120,7 +120,7 @@ OverlayImpl::OverlayImpl(
               requestor_},
           setup,
           parent,
-          serverHandler,
+          serverHandler.setup().overlay.port,
           resourceManager,
           resolver,
           io_service,
