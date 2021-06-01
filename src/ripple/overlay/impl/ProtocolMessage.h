@@ -262,6 +262,46 @@ parseMessageHeader(
     return std::nullopt;
 }
 
+template <class BufferSequence>
+std::optional<MessageHeader>
+getMessageHeader(
+    bool compressionEnabled,
+    boost::system::error_code& ec,
+    BufferSequence const& buffs,
+    std::size_t& hint)
+{
+    auto const size = boost::asio::buffer_size(buffs);
+    if (size == 0)
+        return std::nullopt;
+
+    auto header = ripple::detail::parseMessageHeader(ec, buffs, size);
+
+    if (!header)
+        return std::nullopt;
+
+    if (header->payload_wire_size > maximiumMessageSize ||
+        header->uncompressed_size > maximiumMessageSize)
+    {
+        ec = make_error_code(boost::system::errc::message_size);
+        return std::nullopt;
+    }
+
+    if (!compressionEnabled &&
+        header->algorithm != compression::Algorithm::None)
+    {
+        ec = make_error_code(boost::system::errc::protocol_error);
+        return std::nullopt;
+    }
+
+    if (header->total_wire_size > size)
+    {
+        hint = header->total_wire_size - size;
+        return std::nullopt;
+    }
+
+    return header;
+}
+
 template <
     class T,
     class Buffers,
