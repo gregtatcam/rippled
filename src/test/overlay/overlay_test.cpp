@@ -33,10 +33,17 @@
 #include <test/overlay/DefaultOverlayImpl.h>
 
 #include <boost/asio.hpp>
+#include <boost/regex.hpp>
 #include <boost/thread.hpp>
 
+#include <chrono>
+#include <fstream>
+#include <iostream>
+#include <map>
 #include <memory>
 #include <mutex>
+#include <signal.h>
+#include <unistd.h>
 
 namespace ripple {
 
@@ -45,6 +52,7 @@ namespace test {
 class OverlayImplTest;
 class VirtualNetwork;
 std::mutex logMutex;
+std::map<std::string, std::map<std::string, std::uint16_t>> netConfig;
 
 static std::string
 name(std::string const& n, int i)
@@ -67,6 +75,13 @@ struct Counts
     {
         std::lock_guard l(cntMutex);
         cnt++;
+        cond.notify_all();
+    }
+    static void
+    decCnt(std::uint16_t& cnt)
+    {
+        std::lock_guard l(cntMutex);
+        cnt--;
         cond.notify_all();
     }
     static bool
@@ -98,15 +113,23 @@ struct VirtualNode
         Stoppable& parent,
         boost::asio::io_service& service,
         std::string const& ip,
-        std::vector<std::string> const& ipsFixed,
-        std::uint16_t peerPort)
+        bool isFixed,
+        std::vector<std::string> const& bootstrap,
+        std::uint16_t peerPort,
+        std::uint16_t out_max,
+        std::uint16_t in_max)
         : net_(net)
         , ip_(ip)
         , id_(sid_)
         , io_service_(service)
-        , config_(mkConfig(ip, std::to_string(peerPort), ipsFixed))
+        , config_(mkConfig(
+              ip,
+              std::to_string(peerPort),
+              isFixed,
+              bootstrap,
+              out_max,
+              in_max))
         , logs_(std::make_unique<jtx::SuiteLogs>(suite))
-        , cluster_(std::make_unique<Cluster>(logs_->journal("Cluster")))
         , timeKeeper_(std::make_unique<ManualTimeKeeper>())
         , collector_(CollectorManager::New(
               config_->section(SECTION_INSIGHT),
@@ -130,6 +153,8 @@ struct VirtualNode
               io_service_,
               logs_->journal(name("Server", id_))))
         , name_(ip)
+        , out_max_(out_max)
+        , in_max_(in_max)
     {
         serverPort_.back().ip = beast::IP::Address::from_string(ip);
         serverPort_.back().port = peerPort;
@@ -143,7 +168,10 @@ struct VirtualNode
     mkConfig(
         std::string const& ip,
         std::string const& peerPort,
-        std::vector<std::string> const& ipsFixed,
+        bool isFixed,  // if true then ips_fixed, otherwise ips
+        std::vector<std::string> const& bootstrap,
+        std::uint16_t out_max,
+        std::uint16_t in_max,
         std::string const& dbPath = "",
         bool http = false)
     {
@@ -162,6 +190,10 @@ struct VirtualNode
         (*config)["port_peer"].set("port", peerPort);
         (*config)["port_peer"].set("protocol", "peer");
 
+        config->PEER_PRIVATE = false;
+        config->PEERS_OUT_MAX = out_max;
+        config->PEERS_IN_MAX = in_max;
+
         if (http)
         {
             (*config)["server"].append("port_rpc");
@@ -170,8 +202,11 @@ struct VirtualNode
             (*config)["port_rpc"].set("protocol", "http");
         }
         (*config)["ssl_verify"].append("0");
-        for (auto f : ipsFixed)
-            config->IPS_FIXED.push_back(f + " " + peerPort);
+        for (auto f : bootstrap)
+            if (isFixed)
+                config->IPS_FIXED.push_back(f + " " + peerPort);
+            else
+                config->IPS.push_back(f + " " + peerPort);
         config->setupControl(true, true, false);
         return config;
     }
@@ -182,17 +217,17 @@ struct VirtualNode
     boost::asio::io_service& io_service_;
     std::unique_ptr<Config> config_;
     std::unique_ptr<jtx::SuiteLogs> logs_;
-    std::unique_ptr<Cluster> cluster_;
     std::unique_ptr<ManualTimeKeeper> timeKeeper_;
     std::unique_ptr<CollectorManager> collector_;
     std::unique_ptr<Resource::Manager> resourceManager_;
     std::unique_ptr<ResolverAsio> resolver_;
     std::pair<PublicKey, SecretKey> identity_;
-    PeerReservationTable reservations_;
     std::shared_ptr<OverlayImplTest> overlay_;
     std::vector<Port> serverPort_;
     std::unique_ptr<Server> server_;
     std::string name_;
+    std::uint16_t out_max_;
+    std::uint16_t in_max_;
 };
 
 // Collection of overlays
@@ -205,9 +240,14 @@ protected:
     boost::thread_group tg_;
     std::mutex nodesMutex_;
     std::unordered_map<int, std::shared_ptr<VirtualNode>> nodes_;
+    std::chrono::time_point<std::chrono::steady_clock> start_;
 
 public:
     virtual ~VirtualNetwork() = default;
+    VirtualNetwork()
+    {
+        start_ = std::chrono::steady_clock::now();
+    }
 
     virtual void
     stop() = 0;
@@ -216,6 +256,13 @@ public:
     io_service()
     {
         return io_service_;
+    }
+
+    std::size_t
+    now()
+    {
+        using namespace std::chrono;
+        return duration_cast<seconds>(steady_clock::now() - start_).count();
     }
 
 protected:
@@ -228,13 +275,16 @@ protected:
     virtual void
     mkNode(
         std::string const& ip,
-        std::vector<std::string> fixed,
-        int peerPort = 51235) = 0;
+        bool isFixed,
+        std::vector<std::string> bootstrap,
+        std::uint16_t out_max,
+        std::uint16_t in_max,
+        std::uint16_t peerPort = 51235) = 0;
     void
-    startNets(std::vector<std::string> const& nodes)
+    startNodes(std::vector<std::string> const& nodes)
     {
         for (auto n : nodes)
-            mkNode(n, nodes);
+            mkNode(n, true, nodes, 20, 20);
         for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
             tg_.create_thread(
                 boost::bind(&boost::asio::io_service::run, &io_service_));
@@ -312,7 +362,7 @@ public:
         close();
     }
 
-protected:
+private:
     // P2P events/methods
     std::pair<size_t, boost::system::error_code>
     onEvtProtocolMessage(
@@ -354,11 +404,6 @@ protected:
     void
     onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
     {
-        {
-            std::lock_guard l(logMutex);
-            std::cout << node_.name_ << " received from " << remote_address_
-                      << std::endl;
-        }
         std::vector<PeerFinder::Endpoint> endpoints;
         endpoints.reserve(m->endpoints_v2().size());
 
@@ -563,13 +608,58 @@ public:
     {
         Counts::incCnt(Counts::deactivateCnt);
         std::lock_guard l(peersMutex_);
-        peers_.erase(slot);
+        if (auto it = peers_.find(slot); it != peers_.end())
+        {
+            peers_.erase(it);
+            auto p = it->second.lock();
+            if (p)
+            {
+                if (p->inbound())
+                    Counts::decCnt(Counts::inPeersCnt);
+                else
+                    Counts::decCnt(Counts::outPeersCnt);
+            }
+        }
     }
 
     std::string
     name()
     {
         return name_;
+    }
+
+    std::pair<std::uint16_t, std::uint16_t>
+    getCounts()
+    {
+        std::lock_guard l(peersMutex_);
+        std::uint16_t nin = 0;
+        std::uint16_t nout = 0;
+        for (auto [slot, peer] : peers_)
+        {
+            (void)slot;
+            if (auto p = peer.lock())
+            {
+                if (p->inbound())
+                    nin++;
+                else
+                    nout++;
+            }
+        }
+        return {nout, nin};
+    }
+
+    void
+    outputNetwork(std::ofstream& of)
+    {
+        std::lock_guard l(peersMutex_);
+        for (auto [slot, peer] : peers_)
+        {
+            (void)slot;
+            auto p = peer.lock();
+            if (p)
+                of << node_.ip_ << "," << p->getRemoteAddress()
+                   << (p->inbound() ? "in" : "out") << std::endl;
+        }
     }
 
 protected:
@@ -637,32 +727,24 @@ private:
         auto const result = m_peerFinder->buildEndpointsForPeers();
         for (auto const& e : result)
         {
-            std::shared_ptr<PeerImpTest> peer;
+            std::lock_guard lock(mutex_);
+            if (auto const iter = peers_.find(e.first); iter != peers_.end())
             {
-                std::lock_guard lock(mutex_);
-                auto const iter = peers_.find(e.first);
-                if (iter != peers_.end())
-                    peer = iter->second.lock();
-            }
-            if (peer)
-            {
-                protocol::TMEndpoints tm;
-                for (auto first = e.second.begin(); first != e.second.end();
-                     first++)
+                if (auto peer = iter->second.lock())
                 {
-                    auto& tme2(*tm.add_endpoints_v2());
-                    tme2.set_endpoint(first->address.to_string());
-                    tme2.set_hops(first->hops);
+                    protocol::TMEndpoints tm;
+                    for (auto first = e.second.begin(); first != e.second.end();
+                         first++)
+                    {
+                        auto& tme2(*tm.add_endpoints_v2());
+                        tme2.set_endpoint(first->address.to_string());
+                        tme2.set_hops(first->hops);
+                    }
+                    tm.set_version(2);
+                    Counts::incCnt(Counts::msgSendCnt);
+                    peer->send(
+                        std::make_shared<Message>(tm, protocol::mtENDPOINTS));
                 }
-                tm.set_version(2);
-                {
-                    std::lock_guard l(logMutex);
-                    std::cout << name_ << ": sending to "
-                              << peer->getRemoteAddress() << std::endl;
-                }
-                Counts::incCnt(Counts::msgSendCnt);
-                peer->send(
-                    std::make_shared<Message>(tm, protocol::mtENDPOINTS));
             }
         }
     }
@@ -684,6 +766,7 @@ class overlay_net_test : public beast::unit_test::suite,
                          public VirtualNetwork,
                          public RootStoppable
 {
+protected:
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> overlayTimer_;
 
 public:
@@ -696,14 +779,33 @@ protected:
     void
     mkNode(
         std::string const& ip,
-        std::vector<std::string> fixed,
-        int peerPort = 51235) override
+        bool isFixed,
+        std::vector<std::string> bootstrap,
+        std::uint16_t out_max,
+        std::uint16_t in_max,
+        std::uint16_t peerPort = 51235) override
     {
-        fixed.erase(std::find(fixed.begin(), fixed.end(), ip));
-        auto net = std::make_shared<VirtualNode>(
-            *this, *this, *this, io_service_, ip, fixed, peerPort);
-        add(net);
-        net->run();
+        static std::uint16_t tot_out = 0;
+        static std::uint16_t tot_in = 0;
+        tot_out += out_max;
+        tot_in += in_max;
+        std::cout << ip << " " << out_max << " " << in_max << " " << tot_out
+                  << " " << tot_in << std::endl
+                  << std::flush;
+        bootstrap.erase(std::find(bootstrap.begin(), bootstrap.end(), ip));
+        auto node = std::make_shared<VirtualNode>(
+            *this,
+            *this,
+            *this,
+            io_service_,
+            ip,
+            isFixed,
+            bootstrap,
+            peerPort,
+            out_max,
+            in_max);
+        add(node);
+        node->run();
     }
 
     void
@@ -711,6 +813,7 @@ protected:
     {
         std::lock_guard l1(nodesMutex_);
         overlayTimer_.cancel();
+        std::cout << "stopping\n";
 
         // cancel the timer so that
         // the terminated connection is not
@@ -732,12 +835,12 @@ protected:
     {
         testcase("Overlay");
         // interfaces must be pre-configured
-        std::vector<std::string> nets = {
+        std::vector<std::string> nodes = {
             "172.0.0.0", "172.0.0.1", "172.0.0.2", "172.0.0.3", "172.0.0.4"};
         overlayTimer_.expires_from_now(std::chrono::seconds(15));
         overlayTimer_.async_wait(std::bind(
             &overlay_net_test::onOverlayTimer, this, std::placeholders::_1));
-        startNets(nets);
+        startNodes(nodes);
         std::lock_guard l(logMutex);
         std::cout << "peers " << Counts::inPeersCnt << " "
                   << Counts::outPeersCnt << " " << Counts::deactivateCnt
@@ -765,7 +868,264 @@ public:
     }
 };
 
+class xrpl_overlay_test : public overlay_net_test
+{
+    static inline bool stopping_ = false;
+    std::vector<std::uint16_t> tot_peers_out_;
+    std::vector<std::uint16_t> tot_peers_in_;
+
+public:
+    /**
+     * @param adjMatrix - adjacency matrix. Format:
+     * ip1,ip2,[in|out]
+     * [in|out] - in: inbound connection, ip2 is an inbound peer;
+     *            out: outbound connection, ip2 is an outbound peer
+     * @return vector of bootstrap ip
+     */
+    std::vector<std::string>
+    getNetConfig(std::string const& adjMatrixPath)
+    {
+        std::
+            map<std::string, std::map<std::string, std::map<std::string, bool>>>
+                all;
+        std::map<std::string, std::string> ip2Local;
+        std::string base = "172.0";
+        std::uint16_t cnt = 0;
+        std::fstream file(adjMatrixPath, std::ios::in);
+        assert(file.is_open());
+        std::string line;
+        // convert to local "172.x.x.x" ip
+        auto convert = [&](auto ip) {
+            if (ip2Local.find(ip) == ip2Local.end())
+            {
+                std::stringstream str;
+                str << base << "." << (cnt / 256) << "." << (cnt % 256);
+                ip2Local[ip] = str.str();
+                cnt++;
+            }
+            return ip2Local[ip];
+        };
+        // for each ip figure out out_max and in_max
+        // for an entry ip,ip1,'in|out' can
+        // increment for ip max_in|max_out
+        // for each ip,ip1,'in' and ip,ip1,'out'
+        // if corresponding ip1,ip,'out' and/or ip1,ip,'in'
+        // are not present then should assume they exist
+        while (getline(file, line))
+        {
+            boost::smatch match;
+            boost::regex rx("^([^,]+),([^,]+),(in|out)");
+            assert(boost::regex_search(line, match, rx));
+            auto const ip = convert(match[1]);
+            auto const ip1 = convert(match[2]);
+            auto const ctype = match[3];
+            if (all.find(ip) == all.end() || all[ip].find(ip1) == all[ip].end())
+                netConfig[ip][ctype]++;
+            all[ip][ip1][ctype] = true;
+            if (all.find(ip1) == all.end() ||
+                all[ip1].find(ip) == all[ip1].end())
+            {
+                std::string const t = (ctype == "in") ? "out" : "in";
+                all[ip1][ip][t] = true;
+                netConfig[ip1][t] += 1;
+            }
+        }
+        std::vector<std::string> bootstrap;
+        auto resolve = [&](auto host) {
+            boost::asio::ip::tcp::resolver resolver(io_service_);
+            boost::asio::ip::tcp::resolver::query query(host, "80");
+            boost::asio::ip::tcp::resolver::iterator iter =
+                resolver.resolve(query);
+            std::for_each(iter, {}, [&](auto& it) {
+                auto ip = it.endpoint().address().to_string();
+                if (auto it1 = ip2Local.find(ip); it1 != ip2Local.end())
+                    bootstrap.push_back(it1->second);
+            });
+        };
+        resolve("r.ripple.com");
+        resolve("zaphod.alloy.ee");
+        resolve("sahyadri.isrdc.in");
+        return bootstrap;
+    }
+
+    void
+    testXRPLOverlay()
+    {
+        testcase("XRPLOverlay");
+        // dummy interfaces must be pre-configured
+        if (arg() == "")
+        {
+            fail("adjacency matrix must be provided");
+            return;
+        }
+
+        auto bootstrap = getNetConfig(arg());
+        startNodes(bootstrap);
+        std::lock_guard l(logMutex);
+        std::cout << "peers " << Counts::inPeersCnt << " "
+                  << Counts::outPeersCnt << " " << Counts::deactivateCnt
+                  << std::endl;
+        std::cout << "messages " << Counts::msgRecvCnt << " "
+                  << Counts::msgSendCnt << std::endl;
+        BEAST_EXPECT(Counts::deactivated());
+        BEAST_EXPECT(
+            Counts::msgSendCnt > 0 && Counts::msgSendCnt == Counts::msgRecvCnt);
+    }
+
+    static void
+    sigHandler(int signum)
+    {
+        stopping_ = true;
+    }
+
+    void
+    startNodes(std::vector<std::string> const& bootstrap)
+    {
+        signal(SIGUSR1, &xrpl_overlay_test::sigHandler);
+        for (auto [node, types] : netConfig)
+            mkNode(node, false, bootstrap, types["out"], types["in"]);
+        setTimer();
+        for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
+            tg_.create_thread(
+                boost::bind(&boost::asio::io_service::run, &io_service_));
+        tg_.join_all();
+    }
+
+    void
+    outputNetwork()
+    {
+        std::ofstream of("network.out");
+        for (auto [id, node] : nodes_)
+            node->overlay_->outputNetwork(of);
+    }
+
+    void
+    onOverlayTimer(boost::system::error_code const& ec)
+    {
+        if (ec)
+            return;
+        if (now() > 3600 || stopping_)
+        {
+            outputNetwork();
+            stop();
+        }
+        else
+        {
+            doLog();
+            setTimer();
+        }
+    }
+
+    void
+    setTimer()
+    {
+        overlayTimer_.expires_from_now(std::chrono::seconds(40));
+        overlayTimer_.async_wait(std::bind(
+            &xrpl_overlay_test::onOverlayTimer, this, std::placeholders::_1));
+    }
+
+    void
+    doLog()
+    {
+        using namespace std::chrono;
+        std::string sep = "";
+        std::vector<double> pct_out;
+        std::vector<double> pct_in;
+        std::vector<std::uint16_t> peers_out;
+        std::vector<std::uint16_t> peers_in;
+        std::uint16_t Nin = 0;
+        std::uint16_t Nout = 0;
+        double avg_pct_out = 0.;
+        double avg_pct_in = 0.;
+        double avg_peers_out = 0.;
+        double avg_peers_in = 0.;
+        std::uint16_t out_max = 0;
+        std::uint16_t in_max = 0;
+        std::uint16_t tot_out = 0;
+        std::uint16_t tot_in = 0;
+        for (auto [id, node] : nodes_)
+        {
+            (void)id;
+            auto [nout, nin] = node->overlay_->getCounts();
+            if (node->out_max_ > 0)
+            {
+                tot_out += nout;
+                Nout++;
+                avg_peers_out += nout;
+                if (nout > out_max)
+                    out_max = nout;
+                peers_out.push_back(nout);
+                avg_pct_out += 100. * nout / node->out_max_;
+                pct_out.push_back(100. * nout / node->out_max_);
+            }
+            if (node->in_max_ > 0)
+            {
+                tot_in += nin;
+                Nin++;
+                avg_peers_in += nin;
+                if (nin > in_max)
+                    in_max = nin;
+                peers_in.push_back(nin);
+                avg_pct_in += 100. * nin / node->in_max_;
+                pct_in.push_back(100. * nin / node->in_max_);
+            }
+        }
+        auto stats = [](auto& avg, auto N, auto sample) {
+            avg = avg / N;
+            double sd = 0.;
+            for (auto d : sample)
+                sd += (d - avg) * (d - avg);
+            if (N > 1)
+                sd = sqrt(sd) / (N - 1);
+            return sd;
+        };
+        auto sd_peers_out = stats(avg_peers_out, Nout, peers_out);
+        auto sd_peers_in = stats(avg_peers_in, Nin, peers_in);
+        auto sd_pct_out = stats(avg_pct_out, Nout, pct_out);
+        auto sd_pct_in = stats(avg_pct_in, Nin, pct_in);
+        {
+            std::lock_guard l(logMutex);
+            std::cout.precision(2);
+            std::cout << now() << ", out: " << tot_out << ", in: " << tot_in
+                      << ", snd: " << Counts::msgSendCnt
+                      << ", rcv: " << Counts::msgRecvCnt
+                      << ", deact: " << Counts::deactivateCnt
+                      << ", max out/in: " << out_max << "/" << in_max
+                      << ", avg out/in: " << avg_peers_out << "/"
+                      << sd_peers_out << ", " << avg_peers_in << "/"
+                      << sd_peers_in << ", "
+                      << "avg pct out/in: " << avg_pct_out << "/" << sd_pct_out
+                      << ", " << avg_pct_in << "/" << sd_pct_in << ", "
+                      << tot_peers_in_.size() << " " << tot_peers_out_.size()
+                      << std::endl
+                      << std::flush;
+        }
+        if (tot_peers_in_.size() > 0 &&
+            tot_peers_in_[tot_peers_in_.size() - 1] != tot_in)
+            tot_peers_in_.clear();
+        if (tot_peers_out_.size() > 0 &&
+            tot_peers_out_[tot_peers_out_.size() - 1] != tot_out)
+            tot_peers_out_.clear();
+        tot_peers_in_.push_back(tot_in);
+        tot_peers_out_.push_back(tot_out);
+        // stop if the network doesn't change
+        if (tot_peers_in_.size() >= 4 and tot_peers_out_.size() >= 4)
+        {
+            overlayTimer_.cancel();
+            outputNetwork();
+            stop();
+        }
+    }
+
+    void
+    run() override
+    {
+        testXRPLOverlay();
+    }
+};
+
 BEAST_DEFINE_TESTSUITE_MANUAL(overlay_net, ripple_data, ripple);
+BEAST_DEFINE_TESTSUITE_MANUAL(xrpl_overlay, ripple_data, ripple);
 
 }  // namespace test
 
