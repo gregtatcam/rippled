@@ -229,6 +229,12 @@ public:
         return compressionEnabled_ == Compressed::On;
     }
 
+    bool
+    inbound() const
+    {
+        return inbound_;
+    }
+
 protected:
     void
     close();
