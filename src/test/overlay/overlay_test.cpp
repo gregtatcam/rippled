@@ -89,13 +89,7 @@ struct Counts
     {
         return deactivateCnt == inPeersCnt + outPeersCnt;
     }
-    static void
-    waitDeactivated()
-    {
-        using namespace std::chrono;
-        std::unique_lock l(cntMutex);
-        cond.wait_for(l, 5s, [] { return deactivated(); });
-    }
+
     static bool
     expected()
     {
@@ -349,19 +343,6 @@ public:
 
     ~PeerImpTest();
 
-    // close peer connection
-    void
-    closeConnection()
-    {
-        if (!strand_.running_in_this_thread())
-            return post(
-                strand_,
-                std::bind(
-                    &PeerImpTest::closeConnection,
-                    std::static_pointer_cast<PeerImpTest>(shared_from_this())));
-        close();
-    }
-
 private:
     // P2P events/methods
     std::pair<size_t, boost::system::error_code>
@@ -590,19 +571,6 @@ public:
             stopped();
     }
 
-    // close all peers connection
-    void
-    closeConnections()
-    {
-        std::lock_guard l(peersMutex_);
-        for (auto& peer : peers_)
-        {
-            auto sp = peer.second.lock();
-            if (sp)
-                sp->closeConnection();
-        }
-    }
-
     void
     onPeerDeactivate(std::shared_ptr<PeerFinder::Slot> const& slot)
     {
@@ -657,7 +625,8 @@ public:
             (void)slot;
             auto p = peer.lock();
             if (p)
-                of << node_.ip_ << "," << p->getRemoteAddress()
+                of << node_.ip_ << ","
+                   << p->getRemoteAddress().address().to_string() << ","
                    << (p->inbound() ? "in" : "out") << std::endl;
         }
     }
@@ -812,8 +781,6 @@ protected:
     stop() override
     {
         std::lock_guard l1(nodesMutex_);
-        overlayTimer_.cancel();
-        std::cout << "stopping\n";
 
         // cancel the timer so that
         // the terminated connection is not
@@ -823,8 +790,7 @@ protected:
 
         for (auto& node : nodes_)
         {
-            node.second->overlay_->closeConnections();
-            Counts::waitDeactivated();
+            node.second->overlay_->stop();
             node.second->server_.reset();
         }
         io_service_.stop();
@@ -870,7 +836,6 @@ public:
 
 class xrpl_overlay_test : public overlay_net_test
 {
-    static inline bool stopping_ = false;
     std::vector<std::uint16_t> tot_peers_out_;
     std::vector<std::uint16_t> tot_peers_in_;
 
@@ -972,16 +937,9 @@ public:
             Counts::msgSendCnt > 0 && Counts::msgSendCnt == Counts::msgRecvCnt);
     }
 
-    static void
-    sigHandler(int signum)
-    {
-        stopping_ = true;
-    }
-
     void
     startNodes(std::vector<std::string> const& bootstrap)
     {
-        signal(SIGUSR1, &xrpl_overlay_test::sigHandler);
         for (auto [node, types] : netConfig)
             mkNode(node, false, bootstrap, types["out"], types["in"]);
         setTimer();
@@ -1004,7 +962,8 @@ public:
     {
         if (ec)
             return;
-        if (now() > 3600 || stopping_)
+        std::ifstream inf("stop");
+        if (now() > 3600 || inf.good())
         {
             outputNetwork();
             stop();
