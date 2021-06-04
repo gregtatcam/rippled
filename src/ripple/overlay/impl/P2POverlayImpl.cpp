@@ -319,6 +319,24 @@ P2POverlayImpl::makeErrorResponse(
 
 //------------------------------------------------------------------------------
 
+std::shared_ptr<ConnectAttempt>
+P2POverlayImpl::mkConnectAttempt(
+    beast::IP::Endpoint const& remote_endpoint,
+    Resource::Consumer const& usage,
+    std::shared_ptr<PeerFinder::Slot> const& slot)
+{
+    return std::make_shared<ConnectAttempt>(
+        p2pConfig_,
+        io_service_,
+        beast::IPAddressConversion::to_asio_endpoint(remote_endpoint),
+        usage,
+        setup_.context,
+        next_id_++,
+        slot,
+        p2pConfig_.logs.journal("Peer"),
+        *this);
+}
+
 void
 P2POverlayImpl::connect(beast::IP::Endpoint const& remote_endpoint)
 {
@@ -338,16 +356,7 @@ P2POverlayImpl::connect(beast::IP::Endpoint const& remote_endpoint)
         return;
     }
 
-    auto const p = std::make_shared<ConnectAttempt>(
-        p2pConfig_,
-        io_service_,
-        beast::IPAddressConversion::to_asio_endpoint(remote_endpoint),
-        usage,
-        setup_.context,
-        next_id_++,
-        slot,
-        p2pConfig_.logs.journal("Peer"),
-        *this);
+    auto const p = mkConnectAttempt(remote_endpoint, usage, slot);
 
     std::lock_guard lock(mutex_);
     list_.emplace(p.get(), p);

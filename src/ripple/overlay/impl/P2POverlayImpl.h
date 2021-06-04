@@ -47,6 +47,7 @@
 namespace ripple {
 
 class BasicConfig;
+class ConnectAttempt;
 
 class P2POverlayImpl : public Overlay
 {
@@ -137,6 +138,12 @@ public:
         std::unique_ptr<stream_type>&& bundle,
         http_request_type&& request,
         endpoint_type remote_endpoint) override;
+
+    virtual std::shared_ptr<ConnectAttempt>
+    mkConnectAttempt(
+        beast::IP::Endpoint const& remote_endpoint,
+        Resource::Consumer const& usage,
+        std::shared_ptr<PeerFinder::Slot> const& slot);
 
     void
     connect(beast::IP::Endpoint const& remote_endpoint) override;

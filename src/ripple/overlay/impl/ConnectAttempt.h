@@ -31,7 +31,7 @@ namespace ripple {
 class ConnectAttempt : public P2POverlayImpl::Child,
                        public std::enable_shared_from_this<ConnectAttempt>
 {
-private:
+protected:
     using error_code = boost::system::error_code;
 
     using endpoint_type = boost::asio::ip::tcp::endpoint;
@@ -75,7 +75,7 @@ public:
         beast::Journal journal,
         P2POverlayImpl& overlay);
 
-    ~ConnectAttempt();
+    virtual ~ConnectAttempt();
 
     void
     stop() override;
