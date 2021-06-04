@@ -19,6 +19,7 @@
 #include <ripple/app/ledger/LedgerMaster.h>
 #include <ripple/app/main/CollectorManager.h>
 #include <ripple/basics/ResolverAsio.h>
+#include <ripple/basics/UnorderedContainers.h>
 #include <ripple/beast/unit_test.h>
 #include <ripple/core/ConfigSections.h>
 #include <ripple/core/Stoppable.h>
@@ -33,16 +34,15 @@
 #include <test/overlay/DefaultOverlayImpl.h>
 
 #include <boost/asio.hpp>
+#include <boost/bimap.hpp>
 #include <boost/regex.hpp>
 #include <boost/thread.hpp>
 
 #include <chrono>
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
-#include <signal.h>
 #include <unistd.h>
 
 namespace ripple {
@@ -50,9 +50,6 @@ namespace ripple {
 namespace test {
 
 class OverlayImplTest;
-class VirtualNetwork;
-std::mutex logMutex;
-std::map<std::string, std::map<std::string, std::uint16_t>> netConfig;
 
 static std::string
 name(std::string const& n, int i)
@@ -62,47 +59,22 @@ name(std::string const& n, int i)
 
 struct Counts
 {
-    static inline std::recursive_mutex cntMutex;
-    static inline std::condition_variable_any cond;
-    static inline std::uint16_t msgSendCnt = 0;
-    static inline std::uint16_t msgRecvCnt = 0;
-    static inline std::uint16_t inPeersCnt = 0;
-    static inline std::uint16_t outPeersCnt = 0;
-    static inline std::uint16_t deactivateCnt = 0;
-    static inline std::uint16_t expectedMsgCnt = 0;
-    static void
-    incCnt(std::uint16_t& cnt)
-    {
-        std::lock_guard l(cntMutex);
-        cnt++;
-        cond.notify_all();
-    }
-    static void
-    decCnt(std::uint16_t& cnt)
-    {
-        std::lock_guard l(cntMutex);
-        cnt--;
-        cond.notify_all();
-    }
+    static inline std::atomic_uint64_t msgSendCnt = 0;
+    static inline std::atomic_uint64_t msgRecvCnt = 0;
+    static inline std::atomic_uint32_t inPeersCnt = 0;
+    static inline std::atomic_uint32_t outPeersCnt = 0;
+    static inline std::atomic_uint32_t deactivateCnt = 0;
     static bool
     deactivated()
     {
         return deactivateCnt == inPeersCnt + outPeersCnt;
     }
-
-    static bool
-    expected()
-    {
-        std::unique_lock l(cntMutex);
-        return expectedMsgCnt == (msgSendCnt + msgRecvCnt);
-    }
 };
 
-// All objects needed to run the overlay
+// All objects needed to run the Overlay and Peer implementation
 struct VirtualNode
 {
     VirtualNode(
-        VirtualNetwork& net,
         beast::unit_test::suite& suite,
         Stoppable& parent,
         boost::asio::io_service& service,
@@ -112,8 +84,7 @@ struct VirtualNode
         std::uint16_t peerPort,
         std::uint16_t out_max,
         std::uint16_t in_max)
-        : net_(net)
-        , ip_(ip)
+        : ip_(ip)
         , id_(sid_)
         , io_service_(service)
         , config_(mkConfig(
@@ -136,7 +107,6 @@ struct VirtualNode
               logs_->journal(name("Overlay", id_))))
         , identity_(randomKeyPair(KeyType::secp256k1))
         , overlay_(std::make_shared<OverlayImplTest>(
-              net,
               *this,
               parent,
               peerPort,
@@ -205,7 +175,6 @@ struct VirtualNode
         return config;
     }
     static inline int sid_ = 0;
-    VirtualNetwork& net_;
     std::string ip_;
     int id_;
     boost::asio::io_service& io_service_;
@@ -224,7 +193,7 @@ struct VirtualNode
     std::uint16_t in_max_;
 };
 
-// Collection of overlays
+// Collection of VirtualNode
 class VirtualNetwork
 {
     friend class overlay_net_test;
@@ -286,10 +255,10 @@ protected:
     }
 };
 
+// Application layer peer implementation
 class PeerImpTest : public DefaultPeerImp<PeerImpTest>
 {
     friend class P2PeerImp<PeerImpTest>;
-    VirtualNetwork& net_;
     VirtualNode& node_;
 
 public:
@@ -312,7 +281,6 @@ public:
               std::move(stream_ptr),
               false,
               overlay)
-        , net_(node.net_)
         , node_(node)
     {
     }
@@ -336,7 +304,6 @@ public:
               id,
               false,
               overlay)
-        , net_(node.net_)
         , node_(node)
     {
     }
@@ -344,7 +311,7 @@ public:
     ~PeerImpTest();
 
 private:
-    // P2P events/methods
+    // P2P hook
     std::pair<size_t, boost::system::error_code>
     onEvtProtocolMessage(
         boost::beast::multi_buffer const& mbuffers,
@@ -362,7 +329,7 @@ private:
         switch (header->message_type)
         {
             case protocol::mtENDPOINTS:
-                Counts::incCnt(Counts::msgRecvCnt);
+                Counts::msgRecvCnt++;
                 if (auto m = ripple::detail::parseMessageContent<
                         protocol::TMEndpoints>(*header, mbuffers.data()))
                 {
@@ -423,17 +390,15 @@ public:
     }
 };
 
+// Application layer overlay implementation
 class OverlayImplTest : public DefaultOverlayImpl,
                         public std::enable_shared_from_this<OverlayImplTest>
 {
 private:
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
     std::mutex peersMutex_;
-    std::unordered_map<
-        std::shared_ptr<PeerFinder::Slot>,
-        std::weak_ptr<PeerImpTest>>
+    hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImpTest>>
         peers_;
-    VirtualNetwork& net_;
     VirtualNode& node_;
     std::string const name_;
     AppConfigRequestorTest requestor_;
@@ -445,7 +410,6 @@ public:
     }
 
     OverlayImplTest(
-        VirtualNetwork& net,
         VirtualNode& node,
         Stoppable& parent,
         std::uint16_t overlayPort,
@@ -467,7 +431,6 @@ public:
               *node.config_,
               node.collector_->collector())
         , timer_(node.io_service_)
-        , net_(net)
         , node_(node)
         , name_(name)
     {
@@ -574,20 +537,9 @@ public:
     void
     onPeerDeactivate(std::shared_ptr<PeerFinder::Slot> const& slot)
     {
-        Counts::incCnt(Counts::deactivateCnt);
+        Counts::deactivateCnt++;
         std::lock_guard l(peersMutex_);
-        if (auto it = peers_.find(slot); it != peers_.end())
-        {
-            peers_.erase(it);
-            auto p = it->second.lock();
-            if (p)
-            {
-                if (p->inbound())
-                    Counts::decCnt(Counts::inPeersCnt);
-                else
-                    Counts::decCnt(Counts::outPeersCnt);
-            }
-        }
+        peers_.erase(slot);
     }
 
     std::string
@@ -597,7 +549,7 @@ public:
     }
 
     std::pair<std::uint16_t, std::uint16_t>
-    getCounts()
+    getPeersCounts()
     {
         std::lock_guard l(peersMutex_);
         std::uint16_t nin = 0;
@@ -617,7 +569,9 @@ public:
     }
 
     void
-    outputNetwork(std::ofstream& of)
+    outputPeers(
+        std::ofstream& of,
+        boost::bimap<std::string, std::string> const& ip2Local)
     {
         std::lock_guard l(peersMutex_);
         for (auto [slot, peer] : peers_)
@@ -625,9 +579,10 @@ public:
             (void)slot;
             auto p = peer.lock();
             if (p)
-                of << node_.ip_ << ","
-                   << p->getRemoteAddress().address().to_string() << ","
-                   << (p->inbound() ? "in" : "out") << std::endl;
+                of << ip2Local.right.at(node_.ip_) << ","
+                   << ip2Local.right.at(
+                          p->getRemoteAddress().address().to_string())
+                   << "," << (p->inbound() ? "in" : "out") << std::endl;
         }
     }
 
@@ -657,7 +612,7 @@ protected:
             protocol,
             std::move(stream_ptr),
             *this);
-        Counts::incCnt(Counts::inPeersCnt);
+        Counts::inPeersCnt++;
         std::lock_guard l(peersMutex_);
         peers_.emplace(peer->slot(), peer);
         return peer;
@@ -683,7 +638,7 @@ protected:
             protocol,
             id,
             *this);
-        Counts::incCnt(Counts::outPeersCnt);
+        Counts::outPeersCnt++;
         std::lock_guard l(peersMutex_);
         peers_.emplace(peer->slot(), peer);
         return peer;
@@ -696,24 +651,27 @@ private:
         auto const result = m_peerFinder->buildEndpointsForPeers();
         for (auto const& e : result)
         {
-            std::lock_guard lock(mutex_);
-            if (auto const iter = peers_.find(e.first); iter != peers_.end())
+            std::shared_ptr<PeerImpTest> peer;
             {
-                if (auto peer = iter->second.lock())
+                std::lock_guard lock(mutex_);
+                if (auto const iter = peers_.find(e.first);
+                    iter != peers_.end())
+                    peer = iter->second.lock();
+            }
+            if (peer)
+            {
+                protocol::TMEndpoints tm;
+                for (auto first = e.second.begin(); first != e.second.end();
+                     first++)
                 {
-                    protocol::TMEndpoints tm;
-                    for (auto first = e.second.begin(); first != e.second.end();
-                         first++)
-                    {
-                        auto& tme2(*tm.add_endpoints_v2());
-                        tme2.set_endpoint(first->address.to_string());
-                        tme2.set_hops(first->hops);
-                    }
-                    tm.set_version(2);
-                    Counts::incCnt(Counts::msgSendCnt);
-                    peer->send(
-                        std::make_shared<Message>(tm, protocol::mtENDPOINTS));
+                    auto& tme2(*tm.add_endpoints_v2());
+                    tme2.set_endpoint(first->address.to_string());
+                    tme2.set_hops(first->hops);
                 }
+                tm.set_version(2);
+                Counts::msgSendCnt++;
+                peer->send(
+                    std::make_shared<Message>(tm, protocol::mtENDPOINTS));
             }
         }
     }
@@ -737,6 +695,7 @@ class overlay_net_test : public beast::unit_test::suite,
 {
 protected:
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> overlayTimer_;
+    boost::bimap<std::string, std::string> ip2Local_;
 
 public:
     overlay_net_test()
@@ -756,14 +715,19 @@ protected:
     {
         static std::uint16_t tot_out = 0;
         static std::uint16_t tot_in = 0;
+        if (out_max == 0)
+        {
+            out_max++;
+            in_max++;
+        }
         tot_out += out_max;
         tot_in += in_max;
-        std::cout << ip << " " << out_max << " " << in_max << " " << tot_out
-                  << " " << tot_in << std::endl
+        std::cout << ip << " " << ip2Local_.right.at(ip) << " " << out_max
+                  << " " << in_max << " " << tot_out << " " << tot_in
+                  << std::endl
                   << std::flush;
         bootstrap.erase(std::find(bootstrap.begin(), bootstrap.end(), ip));
         auto node = std::make_shared<VirtualNode>(
-            *this,
             *this,
             *this,
             io_service_,
@@ -807,7 +771,6 @@ protected:
         overlayTimer_.async_wait(std::bind(
             &overlay_net_test::onOverlayTimer, this, std::placeholders::_1));
         startNodes(nodes);
-        std::lock_guard l(logMutex);
         std::cout << "peers " << Counts::inPeersCnt << " "
                   << Counts::outPeersCnt << " " << Counts::deactivateCnt
                   << std::endl;
@@ -836,6 +799,10 @@ public:
 
 class xrpl_overlay_test : public overlay_net_test
 {
+    // ip:[in|out]_max
+    std::map<std::string, std::map<std::string, std::uint16_t>> netConfig_;
+    // global ip:local ip
+    using global_local = boost::bimap<std::string, std::string>::value_type;
     std::vector<std::uint16_t> tot_peers_out_;
     std::vector<std::uint16_t> tot_peers_in_;
 
@@ -845,7 +812,7 @@ public:
      * ip1,ip2,[in|out]
      * [in|out] - in: inbound connection, ip2 is an inbound peer;
      *            out: outbound connection, ip2 is an outbound peer
-     * @return vector of bootstrap ip
+     * @return vector of bootstrap ip and set netConfig and ip2Local
      */
     std::vector<std::string>
     getNetConfig(std::string const& adjMatrixPath)
@@ -853,29 +820,28 @@ public:
         std::
             map<std::string, std::map<std::string, std::map<std::string, bool>>>
                 all;
-        std::map<std::string, std::string> ip2Local;
         std::string base = "172.0";
         std::uint16_t cnt = 0;
         std::fstream file(adjMatrixPath, std::ios::in);
         assert(file.is_open());
         std::string line;
         // convert to local "172.x.x.x" ip
-        auto convert = [&](auto ip) {
-            if (ip2Local.find(ip) == ip2Local.end())
+        auto convert = [&](std::string const& ip) {
+            if (ip2Local_.left.find(ip) == ip2Local_.left.end())
             {
                 std::stringstream str;
                 str << base << "." << (cnt / 256) << "." << (cnt % 256);
-                ip2Local[ip] = str.str();
+                ip2Local_.insert(global_local(ip, str.str()));
                 cnt++;
             }
-            return ip2Local[ip];
+            return ip2Local_.left.at(ip);
         };
-        // for each ip figure out out_max and in_max
+        // for each ip figure out out_max and in_max.
         // for an entry ip,ip1,'in|out' can
-        // increment for ip max_in|max_out
+        // increment for ip:max_in|max_out.
         // for each ip,ip1,'in' and ip,ip1,'out'
         // if corresponding ip1,ip,'out' and/or ip1,ip,'in'
-        // are not present then should assume they exist
+        // are not present then should increment ip1:max_out|max_in
         while (getline(file, line))
         {
             boost::smatch match;
@@ -885,14 +851,14 @@ public:
             auto const ip1 = convert(match[2]);
             auto const ctype = match[3];
             if (all.find(ip) == all.end() || all[ip].find(ip1) == all[ip].end())
-                netConfig[ip][ctype]++;
+                netConfig_[ip][ctype]++;
             all[ip][ip1][ctype] = true;
             if (all.find(ip1) == all.end() ||
                 all[ip1].find(ip) == all[ip1].end())
             {
                 std::string const t = (ctype == "in") ? "out" : "in";
                 all[ip1][ip][t] = true;
-                netConfig[ip1][t] += 1;
+                netConfig_[ip1][t] += 1;
             }
         }
         std::vector<std::string> bootstrap;
@@ -903,7 +869,8 @@ public:
                 resolver.resolve(query);
             std::for_each(iter, {}, [&](auto& it) {
                 auto ip = it.endpoint().address().to_string();
-                if (auto it1 = ip2Local.find(ip); it1 != ip2Local.end())
+                if (auto it1 = ip2Local_.left.find(ip);
+                    it1 != ip2Local_.left.end())
                     bootstrap.push_back(it1->second);
             });
         };
@@ -926,12 +893,6 @@ public:
 
         auto bootstrap = getNetConfig(arg());
         startNodes(bootstrap);
-        std::lock_guard l(logMutex);
-        std::cout << "peers " << Counts::inPeersCnt << " "
-                  << Counts::outPeersCnt << " " << Counts::deactivateCnt
-                  << std::endl;
-        std::cout << "messages " << Counts::msgRecvCnt << " "
-                  << Counts::msgSendCnt << std::endl;
         BEAST_EXPECT(Counts::deactivated());
         BEAST_EXPECT(
             Counts::msgSendCnt > 0 && Counts::msgSendCnt == Counts::msgRecvCnt);
@@ -940,8 +901,19 @@ public:
     void
     startNodes(std::vector<std::string> const& bootstrap)
     {
-        for (auto [node, types] : netConfig)
-            mkNode(node, false, bootstrap, types["out"], types["in"]);
+        std::vector<std::string> ips;
+        ips.reserve(netConfig_.size());
+        std::for_each(netConfig_.begin(), netConfig_.end(), [&](auto it) {
+            ips.push_back(it.first);
+        });
+        std::random_shuffle(ips.begin(), ips.end());
+        for (auto ip : ips)
+            mkNode(
+                ip,
+                false,
+                bootstrap,
+                netConfig_[ip]["out"],
+                netConfig_[ip]["in"]);
         setTimer();
         for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
             tg_.create_thread(
@@ -954,7 +926,7 @@ public:
     {
         std::ofstream of("network.out");
         for (auto [id, node] : nodes_)
-            node->overlay_->outputNetwork(of);
+            node->overlay_->outputPeers(of, ip2Local_);
     }
 
     void
@@ -987,7 +959,6 @@ public:
     doLog()
     {
         using namespace std::chrono;
-        std::string sep = "";
         std::vector<double> pct_out;
         std::vector<double> pct_in;
         std::vector<std::uint16_t> peers_out;
@@ -1002,10 +973,13 @@ public:
         std::uint16_t in_max = 0;
         std::uint16_t tot_out = 0;
         std::uint16_t tot_in = 0;
+        std::uint16_t no_peers = 0;
         for (auto [id, node] : nodes_)
         {
             (void)id;
-            auto [nout, nin] = node->overlay_->getCounts();
+            auto [nout, nin] = node->overlay_->getPeersCounts();
+            if ((nout + nin) == 0)
+                no_peers++;
             if (node->out_max_ > 0)
             {
                 tot_out += nout;
@@ -1043,7 +1017,6 @@ public:
         auto sd_pct_out = stats(avg_pct_out, Nout, pct_out);
         auto sd_pct_in = stats(avg_pct_in, Nin, pct_in);
         {
-            std::lock_guard l(logMutex);
             std::cout.precision(2);
             std::cout << now() << ", out: " << tot_out << ", in: " << tot_in
                       << ", snd: " << Counts::msgSendCnt
@@ -1054,9 +1027,8 @@ public:
                       << sd_peers_out << ", " << avg_peers_in << "/"
                       << sd_peers_in << ", "
                       << "avg pct out/in: " << avg_pct_out << "/" << sd_pct_out
-                      << ", " << avg_pct_in << "/" << sd_pct_in << ", "
-                      << tot_peers_in_.size() << " " << tot_peers_out_.size()
-                      << std::endl
+                      << ", " << avg_pct_in << "/" << sd_pct_in
+                      << ", no peers: " << no_peers << std::endl
                       << std::flush;
         }
         if (tot_peers_in_.size() > 0 &&
@@ -1068,7 +1040,7 @@ public:
         tot_peers_in_.push_back(tot_in);
         tot_peers_out_.push_back(tot_out);
         // stop if the network doesn't change
-        if (tot_peers_in_.size() >= 4 and tot_peers_out_.size() >= 4)
+        if (tot_peers_in_.size() >= 6 and tot_peers_out_.size() >= 6)
         {
             overlayTimer_.cancel();
             outputNetwork();
