@@ -83,7 +83,7 @@ struct VirtualNode
         boost::asio::io_service& service,
         std::string const& ip,
         bool isFixed,
-        std::vector<std::string> const& bootstrap,
+        std::unordered_map<std::string, std::string> const& bootstrap,
         std::uint16_t peerPort,
         std::uint16_t out_max,
         std::uint16_t in_max)
@@ -122,6 +122,7 @@ struct VirtualNode
         , name_(ip)
         , out_max_(out_max)
         , in_max_(in_max)
+        , bootstrap_(bootstrap)
     {
         serverPort_.back().ip = beast::IP::Address::from_string(ip);
         serverPort_.back().port = peerPort;
@@ -136,7 +137,7 @@ struct VirtualNode
         std::string const& ip,
         std::string const& peerPort,
         bool isFixed,  // if true then ips_fixed, otherwise ips
-        std::vector<std::string> const& bootstrap,
+        std::unordered_map<std::string, std::string> const& bootstrap,
         std::uint16_t out_max,
         std::uint16_t in_max,
         std::string const& dbPath = "",
@@ -169,11 +170,14 @@ struct VirtualNode
             (*config)["port_rpc"].set("protocol", "http");
         }
         (*config)["ssl_verify"].append("0");
-        for (auto f : bootstrap)
+        for (auto it : bootstrap) {
+            if (it.first == ip)
+                continue;
             if (isFixed)
-                config->IPS_FIXED.push_back(f + " " + peerPort);
+                config->IPS_FIXED.push_back(it.first + " " + peerPort);
             else
-                config->IPS.push_back(f + " " + peerPort);
+                config->IPS.push_back(it.first + " " + peerPort);
+        }
         config->setupControl(true, true, false);
         return config;
     }
@@ -194,6 +198,7 @@ struct VirtualNode
     std::string name_;
     std::uint16_t out_max_;
     std::uint16_t in_max_;
+    std::unordered_map<std::string, std::string> const& bootstrap_;
 };
 
 // Collection of VirtualNode
@@ -207,6 +212,7 @@ protected:
     std::mutex nodesMutex_;
     std::unordered_map<int, std::shared_ptr<VirtualNode>> nodes_;
     std::chrono::time_point<std::chrono::steady_clock> start_;
+    std::unordered_map<std::string, std::string> bootstrap_;
 
 public:
     virtual ~VirtualNetwork() = default;
@@ -242,7 +248,6 @@ protected:
     mkNode(
         std::string const& ip,
         bool isFixed,
-        std::vector<std::string> bootstrap,
         std::uint16_t out_max,
         std::uint16_t in_max,
         std::uint16_t peerPort = 51235) = 0;
@@ -250,7 +255,7 @@ protected:
     startNodes(std::vector<std::string> const& nodes)
     {
         for (auto n : nodes)
-            mkNode(n, true, nodes, 20, 20);
+            mkNode(n, true, 20, 20);
         for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
             tg_.create_thread(
                 boost::bind(&boost::asio::io_service::run, &io_service_));
@@ -773,7 +778,6 @@ protected:
     mkNode(
         std::string const& ip,
         bool isFixed,
-        std::vector<std::string> bootstrap,
         std::uint16_t out_max,
         std::uint16_t in_max,
         std::uint16_t peerPort = 51235) override
@@ -791,14 +795,13 @@ protected:
                   << " " << in_max << " " << tot_out << " " << tot_in
                   << std::endl
                   << std::flush;
-        bootstrap.erase(std::find(bootstrap.begin(), bootstrap.end(), ip));
         auto node = std::make_shared<VirtualNode>(
             *this,
             *this,
             io_service_,
             ip,
             isFixed,
-            bootstrap,
+            bootstrap_,
             peerPort,
             out_max,
             in_max);
@@ -832,6 +835,7 @@ protected:
         auto mkIp = [&](auto str) {
             std::string ip = baseIp + str;
             ip2Local_.insert(global_local(ip, ip));
+            bootstrap_[ip] = ip;
             return ip;
         };
         std::vector<std::string> nodes = {
@@ -908,9 +912,9 @@ public:
      * ip1,ip2,[in|out]
      * [in|out] - in: inbound connection, ip2 is an inbound peer;
      *            out: outbound connection, ip2 is an outbound peer
-     * @return vector of bootstrap ip and set netConfig and ip2Local
+     * set bootstrap ip, netConfig, and ip2Local
      */
-    std::vector<std::string>
+    void
     getNetConfig(std::string const& adjMatrixPath)
     {
         std::
@@ -956,7 +960,6 @@ public:
                 netConfig_[ip1][t] += 1;
             }
         }
-        std::vector<std::string> bootstrap;
         auto resolve = [&](auto host) {
             boost::asio::ip::tcp::resolver resolver(io_service_);
             boost::asio::ip::tcp::resolver::query query(host, "80");
@@ -966,13 +969,12 @@ public:
                 auto ip = it.endpoint().address().to_string();
                 if (auto it1 = ip2Local_.left.find(ip);
                     it1 != ip2Local_.left.end())
-                    bootstrap.push_back(it1->second);
+                    bootstrap_[it1->second] = host;
             });
         };
         resolve("r.ripple.com");
         resolve("zaphod.alloy.ee");
         resolve("sahyadri.isrdc.in");
-        return bootstrap;
     }
 
     void
@@ -986,15 +988,15 @@ public:
             return;
         }
 
-        auto bootstrap = getNetConfig(arg());
-        startNodes(bootstrap);
+        getNetConfig(arg());
+        startNodes();
         BEAST_EXPECT(Counts::deactivated());
         BEAST_EXPECT(
             Counts::msgSendCnt > 0 && Counts::msgSendCnt == Counts::msgRecvCnt);
     }
 
     void
-    startNodes(std::vector<std::string> const& bootstrap)
+    startNodes()
     {
         std::vector<std::string> ips;
         ips.reserve(netConfig_.size());
@@ -1006,7 +1008,6 @@ public:
             mkNode(
                 ip,
                 false,
-                bootstrap,
                 netConfig_[ip]["out"],
                 netConfig_[ip]["in"]);
         setTimer();
