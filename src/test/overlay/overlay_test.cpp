@@ -50,6 +50,14 @@ namespace ripple {
 
 namespace test {
 
+/** Unit-tests for testing Overlay (peer-2-peer only) network. There is
+ * a think application layer implementation to send/receive the endpoints.
+ * There are two test overlay_net_test, which creates a small network of
+ * five interconnected nodes. And overlay_xrpl_test, which attempts to
+ * replicate complete XRPL network overlay. Each test has more detailed
+ * description.
+ */
+
 class OverlayImplTest;
 
 std::string baseIp = "172.0";
@@ -60,6 +68,9 @@ name(std::string const& n, int i)
     return n + std::to_string(i);
 }
 
+/** Overlay total counts of endpoint messages, inbound/outbound peers,
+ * and deactivated peers.
+ */
 struct Counts
 {
     static inline std::atomic_uint64_t msgSendCnt = 0;
@@ -74,7 +85,9 @@ struct Counts
     }
 };
 
-// All objects needed to run the Overlay and Peer implementation
+/** Represents a virtual node in the overlay. It contains all objects
+ * required for Overlay and Peer instantiation.
+ */
 struct VirtualNode
 {
     VirtualNode(
@@ -170,7 +183,8 @@ struct VirtualNode
             (*config)["port_rpc"].set("protocol", "http");
         }
         (*config)["ssl_verify"].append("0");
-        for (auto it : bootstrap) {
+        for (auto it : bootstrap)
+        {
             if (it.first == ip)
                 continue;
             if (isFixed)
@@ -201,7 +215,10 @@ struct VirtualNode
     std::unordered_map<std::string, std::string> const& bootstrap_;
 };
 
-// Collection of VirtualNode
+/** Represents the Overlay - collection of VirtualNode. Unit tests inherit
+ * from this class. It contains one and only io_service for all async
+ * operations in the network.
+ */
 class VirtualNetwork
 {
     friend class overlay_net_test;
@@ -230,6 +247,8 @@ public:
         return io_service_;
     }
 
+    /** Represents epoch time in seconds since the start of the test.
+     */
     std::size_t
     now()
     {
@@ -251,19 +270,11 @@ protected:
         std::uint16_t out_max,
         std::uint16_t in_max,
         std::uint16_t peerPort = 51235) = 0;
-    void
-    startNodes(std::vector<std::string> const& nodes)
-    {
-        for (auto n : nodes)
-            mkNode(n, true, 20, 20);
-        for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
-            tg_.create_thread(
-                boost::bind(&boost::asio::io_service::run, &io_service_));
-        tg_.join_all();
-    }
 };
 
-// Application layer peer implementation
+/** Thin Application layer peer implementation. Handles
+ * send/receive endpoints protocol message.
+ */
 class PeerImpTest : public DefaultPeerImp<PeerImpTest>
 {
     friend class P2PeerImp<PeerImpTest>;
@@ -319,7 +330,9 @@ public:
     ~PeerImpTest();
 
 private:
-    // P2P hook
+    /** P2P hook. Enables p2p layer to hand over protocol message
+     * implementation to the application layer peer.
+     */
     std::pair<size_t, boost::system::error_code>
     onEvtProtocolMessage(
         boost::beast::multi_buffer const& mbuffers,
@@ -378,6 +391,9 @@ private:
     }
 };
 
+/** Enables access to dynamic properties managed by the Application
+ * layer.
+ */
 class AppConfigRequestorTest : public AppConfigRequestor
 {
 public:
@@ -398,10 +414,13 @@ public:
     }
 };
 
-// ConnectAttempt must bind to ip/port so that when it connects
-// it's not treated as a duplicate ip. If a client doesn't bind
-// to specific ip then it binds to a default ip, which is going
-// to be the same for all clients.
+/** ConnectAttempt must bind to ip/port so that when it connects
+ * to the server endpoint it's not treated as a duplicate ip.
+ * If a client doesn't bind to specific ip then it binds to
+ * a default ip, which is going to be the same for all clients.
+ * Consequently, clients connecting to the same endpoint are
+ * treated as the duplicated endpoints and are disconnected.
+ */
 class ConnectAttemptTest : public ConnectAttempt
 {
 public:
@@ -426,6 +445,7 @@ public:
               journal,
               overlay)
     {
+        // Bind to this node configured ip
         auto sec = p2pConfig_.config.section("port_peer");
         socket_.open(boost::asio::ip::tcp::v4());
         socket_.bind(boost::asio::ip::tcp::endpoint(
@@ -437,7 +457,9 @@ public:
     }
 };
 
-// Application layer overlay implementation
+/** Thin application layer overlay implementation. Keeps a list
+ * of the application layer peer implementation.
+ */
 class OverlayImplTest : public DefaultOverlayImpl,
                         public std::enable_shared_from_this<OverlayImplTest>
 {
@@ -518,6 +540,8 @@ public:
         setTimer();
     }
 
+    // Server handler
+    //-----------------------------------------------------------------
     bool
     onAccept(Session& session, boost::asio::ip::tcp::endpoint endpoint)
     {
@@ -573,6 +597,7 @@ public:
     onStopped(Server& server)
     {
     }
+    //-----------------------------------------------------------------
 
     void
     checkStopped() override
@@ -754,9 +779,10 @@ VirtualNode::run()
     overlay_->run();
 }
 
-// Test Overlay network with five nodes with ip in range 172.0.0.0-172.0.0.4.
-// Ip's must be pre-configured (see overlay_xrpl_test below). The test stops
-// after total 20 peers or 15 seconds.
+/** Test Overlay network with five nodes with ip in range 172.0.0.0-172.0.0.4.
+ * Ip's must be pre-configured (see overlay_xrpl_test below). The test stops
+ * after total 20 peers or 15 seconds.
+ */
 class overlay_net_test : public beast::unit_test::suite,
                          public VirtualNetwork,
                          public RootStoppable
@@ -792,7 +818,9 @@ protected:
         tot_out += out_max;
         tot_in += in_max;
         std::cout << ip << " " << ip2Local_.right.at(ip) << " " << out_max
-                  << " " << in_max << " " << tot_out << " " << tot_in
+                  << " " << in_max << " " << tot_out << " " << tot_in << " "
+                  << (bootstrap_.find(ip) != bootstrap_.end() ? bootstrap_[ip]
+                                                              : "")
                   << std::endl
                   << std::flush;
         auto node = std::make_shared<VirtualNode>(
@@ -826,6 +854,17 @@ protected:
             node.second->server_.reset();
         }
         io_service_.stop();
+    }
+
+    void
+    startNodes(std::vector<std::string> const& nodes)
+    {
+        for (auto n : nodes)
+            mkNode(n, true, 20, 20);
+        for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
+            tg_.create_thread(
+                boost::bind(&boost::asio::io_service::run, &io_service_));
+        tg_.join_all();
     }
 
     void
@@ -886,23 +925,26 @@ public:
     }
 };
 
-// Test of the Overlay network. Network configuration - adjacency matrix
-// with the type of connection (outbound/inbound) is passed in as
-// the unit test argument. The matrix can be generated by crawling XRPL
-// network. The global ip's are mapped to local 172.x.x.x ip's, which
-// must pre-configured in the system. On Ubuntu 20.20 (tested system)
-// ip's can be configured as:
-//    ip link add dummy1 type dummy
-//    ip address add 172.0.0.1/255.255.255.0 dev dummy1
-// In additions, the number of open files must be increased to 65536
-// (On Ubuntu 20.20: ulimit -n 65536, also may need to update
-// /etc/security/limits.conf, /etc/sysctl.conf, /etc/pam.d/common-session,
-// /etc/systemd/system.conf). The test runs until no changes are detected in the
-// network - the number of in/out peers remains the same after four minutes.
+/** Test of the Overlay network. Network configuration - adjacency matrix
+ * with the type of connection (outbound/inbound) is passed in as
+ * the unit test argument. The matrix can be generated by crawling XRPL
+ * network. The global ip's are mapped to local 172.x.x.x ip's, which
+ * must pre-configured in the system. On Ubuntu 20.20 (tested system)
+ * ip's can be configured as:
+ *    ip link add dummy1 type dummy
+ *    ip address add 172.0.0.1/255.255.255.0 dev dummy1
+ * In additions, the number of open files must be increased to 65536
+ * (On Ubuntu 20.20: ulimit -n 65536, also may need to update
+ * /etc/security/limits.conf, /etc/sysctl.conf, /etc/pam.d/common-session,
+ * /etc/systemd/system.conf). The test runs until no changes are detected in the
+ * network - the number of in/out peers remains the same after four minutes.
+ */
 class overlay_xrpl_test : public overlay_net_test
 {
-    // ip:[in|out]_max
+    // Network configuration of outbound/inbound max peer for each node.
     std::map<std::string, std::map<std::string, std::uint16_t>> netConfig_;
+    // Total outbound/inbound peers in the network at each logged time point.
+    // We stop when the number of peers doesn't change after a few iterations.
     std::vector<std::uint16_t> tot_peers_out_;
     std::vector<std::uint16_t> tot_peers_in_;
 
@@ -912,7 +954,7 @@ public:
      * ip1,ip2,[in|out]
      * [in|out] - in: inbound connection, ip2 is an inbound peer;
      *            out: outbound connection, ip2 is an outbound peer
-     * set bootstrap ip, netConfig, and ip2Local
+     * set bootstrap ips, netConfig, and ip2Local
      */
     void
     getNetConfig(std::string const& adjMatrixPath)
@@ -960,6 +1002,10 @@ public:
                 netConfig_[ip1][t] += 1;
             }
         }
+        // Figure out which ips in the adjacency matrix represent
+        // the bootstrap servers of ripple, alloy, and isrdc. Those
+        // servers are added to each node's ips configuration as "local"
+        // ip's.
         auto resolve = [&](auto host) {
             boost::asio::ip::tcp::resolver resolver(io_service_);
             boost::asio::ip::tcp::resolver::query query(host, "80");
@@ -981,7 +1027,6 @@ public:
     testXRPLOverlay()
     {
         testcase("XRPLOverlay");
-        // dummy interfaces must be pre-configured
         if (arg() == "")
         {
             fail("adjacency matrix must be provided");
@@ -1005,11 +1050,7 @@ public:
         });
         std::random_shuffle(ips.begin(), ips.end());
         for (auto ip : ips)
-            mkNode(
-                ip,
-                false,
-                netConfig_[ip]["out"],
-                netConfig_[ip]["in"]);
+            mkNode(ip, false, netConfig_[ip]["out"], netConfig_[ip]["in"]);
         setTimer();
         for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
             tg_.create_thread(
