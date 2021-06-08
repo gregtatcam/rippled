@@ -38,6 +38,7 @@
 #include <boost/bimap.hpp>
 #include <boost/regex.hpp>
 #include <boost/thread.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -59,6 +60,7 @@ namespace test {
  */
 
 class OverlayImplTest;
+class VirtualNetwork;
 
 std::string baseIp = "172.0";
 
@@ -92,6 +94,7 @@ struct VirtualNode
 {
     VirtualNode(
         beast::unit_test::suite& suite,
+        VirtualNetwork& net,
         Stoppable& parent,
         boost::asio::io_service& service,
         std::string const& ip,
@@ -136,6 +139,7 @@ struct VirtualNode
         , out_max_(out_max)
         , in_max_(in_max)
         , bootstrap_(bootstrap)
+        , net_(net)
     {
         serverPort_.back().ip = beast::IP::Address::from_string(ip);
         serverPort_.back().port = peerPort;
@@ -213,6 +217,7 @@ struct VirtualNode
     std::uint16_t out_max_;
     std::uint16_t in_max_;
     std::unordered_map<std::string, std::string> const& bootstrap_;
+    VirtualNetwork& net_;
 };
 
 /** Represents the Overlay - collection of VirtualNode. Unit tests inherit
@@ -230,6 +235,11 @@ protected:
     std::unordered_map<int, std::shared_ptr<VirtualNode>> nodes_;
     std::chrono::time_point<std::chrono::steady_clock> start_;
     std::unordered_map<std::string, std::string> bootstrap_;
+    // features
+    // limit connections to bootstrap nodes from the same node
+    bool limitBootstrapConnections_ = false;
+    // handle overflow of inbound connections
+    bool handleOverflow_ = false;
 
 public:
     virtual ~VirtualNetwork() = default;
@@ -254,6 +264,12 @@ public:
     {
         using namespace std::chrono;
         return duration_cast<seconds>(steady_clock::now() - start_).count();
+    }
+
+    bool
+    limitConnections()
+    {
+        return limitBootstrapConnections_;
     }
 
 protected:
@@ -471,6 +487,10 @@ private:
     VirtualNode& node_;
     std::string const name_;
     AppConfigRequestorTest requestor_;
+    // Model a feature limiting a number of connections to
+    // the bootstrap servers. Allow only one connection to
+    // each of the ripple, alloy, or isrdc nodes.
+    std::unordered_map<std::string, bool> bootstrapConnected_;
 
 public:
     virtual ~OverlayImplTest()
@@ -676,11 +696,42 @@ public:
             *this);
     }
 
+    /** Model a feature allowing only one connection to one of
+     * the bootstrap nodes.
+     */
+    void
+    connect(beast::IP::Endpoint const& address) override
+    {
+        if (node_.net_.limitConnections())
+        {
+            if (auto it = node_.bootstrap_.find(address.address().to_string());
+                it != node_.bootstrap_.end() &&
+                bootstrapConnected_.find(it->second) !=
+                    bootstrapConnected_.end())
+                return;
+        }
+        P2POverlayImpl::connect(address);
+    }
+
 protected:
     bool
     processRequest(http_request_type const& req, Handoff& handoff) override
     {
         return false;
+    }
+
+    void
+    addPeer(std::shared_ptr<PeerImpTest> const& peer)
+    {
+        std::lock_guard l(peersMutex_);
+        peers_.emplace(peer->slot(), peer);
+        if (node_.net_.limitConnections())
+        {
+            if (auto it = node_.bootstrap_.find(
+                    peer->getRemoteAddress().address().to_string());
+                it != node_.bootstrap_.end())
+                bootstrapConnected_[it->second] = true;
+        }
     }
 
     std::shared_ptr<P2POverlayImpl::Child>
@@ -703,8 +754,7 @@ protected:
             std::move(stream_ptr),
             *this);
         Counts::inPeersCnt++;
-        std::lock_guard l(peersMutex_);
-        peers_.emplace(peer->slot(), peer);
+        addPeer(peer);
         return peer;
     }
 
@@ -729,8 +779,7 @@ protected:
             id,
             *this);
         Counts::outPeersCnt++;
-        std::lock_guard l(peersMutex_);
-        peers_.emplace(peer->slot(), peer);
+        addPeer(peer);
         return peer;
     }
 
@@ -824,6 +873,7 @@ protected:
                   << std::endl
                   << std::flush;
         auto node = std::make_shared<VirtualNode>(
+            *this,
             *this,
             *this,
             io_service_,
@@ -947,6 +997,8 @@ class overlay_xrpl_test : public overlay_net_test
     // We stop when the number of peers doesn't change after a few iterations.
     std::vector<std::uint16_t> tot_peers_out_;
     std::vector<std::uint16_t> tot_peers_in_;
+    // options
+    std::string adjMatrixPath_ = "";
 
 public:
     /**
@@ -957,13 +1009,13 @@ public:
      * set bootstrap ips, netConfig, and ip2Local
      */
     void
-    getNetConfig(std::string const& adjMatrixPath)
+    getNetConfig()
     {
         std::
             map<std::string, std::map<std::string, std::map<std::string, bool>>>
                 all;
         std::uint16_t cnt = 1;
-        std::fstream file(adjMatrixPath, std::ios::in);
+        std::fstream file(adjMatrixPath_, std::ios::in);
         assert(file.is_open());
         std::string line;
         // map to local ip
@@ -1023,17 +1075,39 @@ public:
         resolve("sahyadri.isrdc.in");
     }
 
+    bool
+    parseArg()
+    {
+        if (arg() == "")
+            return false;
+        boost::char_separator<char> sep(",");
+        typedef boost::tokenizer<boost::char_separator<char>> t_tokenizer;
+        t_tokenizer tok(arg(), sep);
+        for (t_tokenizer::iterator it = tok.begin(); it != tok.end(); ++it)
+        {
+            if (adjMatrixPath_ == "")
+                adjMatrixPath_ = *it;
+            else if (*it == "limit")
+                limitBootstrapConnections_ = true;
+            else if (*it == "overflow")
+                handleOverflow_ = true;
+            else
+                std::cout << "invalid argument " << *it << std::endl;
+        }
+        return (adjMatrixPath_ != "");
+    }
+
     void
     testXRPLOverlay()
     {
         testcase("XRPLOverlay");
-        if (arg() == "")
+        if (!parseArg())
         {
             fail("adjacency matrix must be provided");
             return;
         }
 
-        getNetConfig(arg());
+        getNetConfig();
         startNodes();
         BEAST_EXPECT(Counts::deactivated());
         BEAST_EXPECT(
@@ -1076,14 +1150,13 @@ public:
         }
 
         std::ifstream inf("stop");
-        if (now() > 3600 || inf.good())
+        if (now() > 3600 || inf.good() || !doLog())
         {
             outputNetwork();
             stop();
         }
         else
         {
-            doLog();
             setTimer();
         }
     }
@@ -1096,7 +1169,7 @@ public:
             &overlay_xrpl_test::onOverlayTimer, this, std::placeholders::_1));
     }
 
-    void
+    bool
     doLog()
     {
         using namespace std::chrono;
@@ -1182,11 +1255,8 @@ public:
         tot_peers_out_.push_back(tot_out);
         // stop if the network doesn't change
         if (tot_peers_in_.size() >= 6 and tot_peers_out_.size() >= 6)
-        {
-            overlayTimer_.cancel();
-            outputNetwork();
-            stop();
-        }
+            return false;
+        return true;
     }
 
     void
