@@ -36,11 +36,13 @@
 
 #include <boost/asio.hpp>
 #include <boost/bimap.hpp>
+#include <boost/circular_buffer.hpp>
 #include <boost/regex.hpp>
 #include <boost/thread.hpp>
 #include <boost/tokenizer.hpp>
 
 #include <chrono>
+#include <cstdio>
 #include <iostream>
 #include <map>
 #include <memory>
@@ -102,7 +104,8 @@ struct VirtualNode
         std::unordered_map<std::string, std::string> const& bootstrap,
         std::uint16_t peerPort,
         std::uint16_t out_max,
-        std::uint16_t in_max)
+        std::uint16_t in_max,
+        bool testNode = false)
         : ip_(ip)
         , id_(sid_)
         , io_service_(service)
@@ -140,6 +143,7 @@ struct VirtualNode
         , in_max_(in_max)
         , bootstrap_(bootstrap)
         , net_(net)
+        , testNode_(testNode)
     {
         serverPort_.back().ip = beast::IP::Address::from_string(ip);
         serverPort_.back().port = peerPort;
@@ -218,6 +222,8 @@ struct VirtualNode
     std::uint16_t in_max_;
     std::unordered_map<std::string, std::string> const& bootstrap_;
     VirtualNetwork& net_;
+    bool testNode_;
+    std::uint16_t nRedirects_{0};
 };
 
 /** Represents the Overlay - collection of VirtualNode. Unit tests inherit
@@ -238,8 +244,8 @@ protected:
     // features
     // limit connections to bootstrap nodes from the same node
     bool limitBootstrapConnections_ = false;
-    // handle overflow of inbound connections
-    bool handleOverflow_ = false;
+    // handle max out of inbound connections
+    bool handleInboundMaxOut_ = false;
 
 public:
     virtual ~VirtualNetwork() = default;
@@ -273,9 +279,29 @@ public:
     }
 
     bool
-    overflow()
+    inboundMaxOut()
     {
-        return handleOverflow_;
+        return handleInboundMaxOut_;
+    }
+
+    std::tuple<std::uint16_t, std::uint32_t, std::vector<std::uint16_t>>
+    getRedirects()
+    {
+        std::lock_guard l(nodesMutex_);
+        std::tuple<std::uint16_t, std::uint32_t, std::vector<std::uint16_t>>
+            res;
+        std::get<2>(res).reserve(nodes_.size());
+        for (auto it : nodes_)
+        {
+            if (!it.second->testNode_)
+            {
+                std::get<1>(res) += it.second->nRedirects_;
+                std::get<2>(res).push_back(it.second->nRedirects_);
+            }
+            else
+                std::get<0>(res) = it.second->nRedirects_;
+        }
+        return res;
     }
 
 protected:
@@ -291,6 +317,7 @@ protected:
         bool isFixed,
         std::uint16_t out_max,
         std::uint16_t in_max,
+        bool testNode = false,
         std::uint16_t peerPort = 51235) = 0;
 };
 
@@ -445,8 +472,11 @@ public:
  */
 class ConnectAttemptTest : public ConnectAttempt
 {
+    VirtualNode& node_;
+
 public:
     ConnectAttemptTest(
+        VirtualNode& node,
         P2PConfig const& p2pConfig,
         boost::asio::io_service& io_service,
         endpoint_type const& remote_endpoint,
@@ -466,6 +496,7 @@ public:
               slot,
               journal,
               overlay)
+        , node_(node)
     {
         // Bind to this node configured ip
         auto sec = p2pConfig_.config.section("port_peer");
@@ -476,6 +507,16 @@ public:
             0));
         boost::asio::socket_base::reuse_address reuseAddress(true);
         socket_.set_option(reuseAddress);
+    }
+
+protected:
+    void
+    processResponse() override
+    {
+        if (response_.result() ==
+            boost::beast::http::status::service_unavailable)
+            node_.nRedirects_++;
+        ConnectAttempt::processResponse();
     }
 };
 
@@ -497,6 +538,13 @@ private:
     // the bootstrap servers. Allow only one connection to
     // each of the ripple, alloy, or isrdc nodes.
     std::unordered_map<std::string, bool> bootstrapConnected_;
+    // handle inbound slots max out
+    std::size_t inboundMaxOutTimer_{0};
+    // removed peers statistics
+    boost::circular_buffer<float> rollingAvg_{30, 0u};
+    std::size_t intervalStart_{0};
+    float totalRemoved_{0};
+    std::atomic<float> rollingAvgRemoved_{0};
 
 public:
     virtual ~OverlayImplTest()
@@ -564,6 +612,77 @@ public:
         sendEndpoints();
         autoConnect();
         setTimer();
+        if (node_.net_.inboundMaxOut() && checkInboundMaxOut())
+            handleInboundMaxOut();
+    }
+
+    bool
+    checkInboundMaxOut()
+    {
+        // applicable only to high inbound max configuration
+        if (node_.in_max_ < 100)
+            return false;
+        if (inboundMaxOutTimer_ > 0 &&
+            node_.net_.timeSinceStart() > inboundMaxOutTimer_)
+            return true;
+        else if (inboundMaxOutTimer_ == 0)
+        {
+            auto [nout, nin] = getPeersCounts();
+            // this is a prototype of the feature. the way this test
+            // runs, the inbound slots are going to fill up on start up
+            // therefore don't disconnect right away, but wait 90 seconds
+            // so that the peer has enough time to connect to other endpoints
+            // besides this one.
+            if (nin >= node_.in_max_)
+                inboundMaxOutTimer_ = node_.net_.timeSinceStart() + 90;
+        }
+        return false;
+    }
+
+    /** Handle inbound peer max out
+     */
+    void
+    handleInboundMaxOut()
+    {
+        auto [nout, nin] = getPeersCounts();
+        std::vector<std::shared_ptr<PeerImpTest>> active;
+        {
+            std::lock_guard l(peersMutex_);
+            active.reserve(nin);
+            for (auto [slot, peer] : peers_)
+            {
+                auto p = peer.lock();
+                if (p && p->inbound())
+                    active.push_back(p);
+            }
+        }
+        // use a simple strategy of removing a sample of peers
+        auto ns = 3 * nin / 100;
+        std::random_shuffle(active.begin(), active.end());
+        for (auto i = 0; i < ns; ++i)
+            active[i]->stop();
+        inboundMaxOutTimer_ = 0;
+        totalRemoved_ += ns;
+        float const timeElapsed = node_.net_.timeSinceStart() - intervalStart_;
+        if (timeElapsed > 60)
+        {
+            auto const avgRemoved = totalRemoved_ / (timeElapsed / 60.);
+            rollingAvg_.push_back(avgRemoved);
+            auto const totalRemoved =
+                std::accumulate(rollingAvg_.begin(), rollingAvg_.end(), 0.);
+            rollingAvgRemoved_ = totalRemoved / rollingAvg_.size();
+            intervalStart_ = node_.net_.timeSinceStart();
+            totalRemoved_ = 0;
+        }
+    }
+
+    std::optional<float>
+    getRemoved()
+    {
+        if (node_.in_max_ > 100)
+            return {rollingAvgRemoved_};
+        else
+            return std::nullopt;
     }
 
     // Server handler
@@ -637,6 +756,12 @@ public:
     {
         Counts::deactivateCnt++;
         std::lock_guard l(peersMutex_);
+        // erase if it's one of the bootstrap nodes so can connect again
+        if (auto it = node_.bootstrap_.find(
+                slot->remote_endpoint().address().to_string());
+            it != node_.bootstrap_.end() &&
+            bootstrapConnected_.find(it->second) != bootstrapConnected_.end())
+            bootstrapConnected_.erase(it->second);
         peers_.erase(slot);
     }
 
@@ -691,6 +816,7 @@ public:
         std::shared_ptr<PeerFinder::Slot> const& slot) override
     {
         return std::make_shared<ConnectAttemptTest>(
+            node_,
             p2pConfig_,
             io_service_,
             beast::IPAddressConversion::to_asio_endpoint(remote_endpoint),
@@ -710,6 +836,7 @@ public:
     {
         if (node_.net_.limitConnections())
         {
+            std::lock_guard l(peersMutex_);
             if (auto it = node_.bootstrap_.find(address.address().to_string());
                 it != node_.bootstrap_.end() &&
                 bootstrapConnected_.find(it->second) !=
@@ -861,6 +988,7 @@ protected:
         bool isFixed,
         std::uint16_t out_max,
         std::uint16_t in_max,
+        bool testNode = false,
         std::uint16_t peerPort = 51235) override
     {
         static std::uint16_t tot_out = 0;
@@ -872,12 +1000,12 @@ protected:
         }
         tot_out += out_max;
         tot_in += in_max;
-        std::cout << ip << " " << ip2Local_.right.at(ip) << " " << out_max
-                  << " " << in_max << " " << tot_out << " " << tot_in << " "
+        std::cout << nodes_.size() << " " << ip << " " << ip2Local_.right.at(ip)
+                  << " " << out_max << " " << in_max << " " << tot_out << " "
+                  << tot_in << " "
                   << (bootstrap_.find(ip) != bootstrap_.end() ? bootstrap_[ip]
                                                               : "")
-                  << std::endl
-                  << std::flush;
+                  << "                                \r" << std::flush;
         auto node = std::make_shared<VirtualNode>(
             *this,
             *this,
@@ -888,7 +1016,8 @@ protected:
             bootstrap_,
             peerPort,
             out_max,
-            in_max);
+            in_max,
+            testNode);
         add(node);
         node->run();
     }
@@ -1005,6 +1134,8 @@ class overlay_xrpl_test : public overlay_net_test
     std::vector<std::uint16_t> tot_peers_in_;
     // options
     std::string adjMatrixPath_ = "";
+    // add a node to test how well it can get connected
+    bool nodeAdded_ = false;
 
 public:
     /**
@@ -1095,8 +1226,8 @@ public:
                 adjMatrixPath_ = *it;
             else if (*it == "limit")
                 limitBootstrapConnections_ = true;
-            else if (*it == "overflow")
-                handleOverflow_ = true;
+            else if (*it == "maxout")
+                handleInboundMaxOut_ = true;
             else
                 std::cout << "invalid argument " << *it << std::endl;
         }
@@ -1112,6 +1243,9 @@ public:
             fail("adjacency matrix must be provided");
             return;
         }
+
+        std::remove("stop");
+        std::remove("add");
 
         getNetConfig();
         startNodes();
@@ -1163,7 +1297,24 @@ public:
         }
         else
         {
+            addNode();
             setTimer();
+        }
+    }
+
+    /** Add a node to test network connectability
+     */
+    void
+    addNode()
+    {
+        std::ifstream inf("add");
+        if (!nodeAdded_ && inf.good())
+        {
+            std::string const node("172.0.2.237");
+            nodeAdded_ = true;
+            std::cout << "added a node\n";
+            ip2Local_.insert(global_local(node, node));
+            mkNode(node, false, 10, 10, true);
         }
     }
 
@@ -1179,21 +1330,23 @@ public:
     doLog()
     {
         using namespace std::chrono;
-        std::vector<double> pct_out;
-        std::vector<double> pct_in;
+        std::vector<float> pct_out;
+        std::vector<float> pct_in;
         std::vector<std::uint16_t> peers_out;
         std::vector<std::uint16_t> peers_in;
         std::uint16_t Nin = 0;
         std::uint16_t Nout = 0;
-        double avg_pct_out = 0.;
-        double avg_pct_in = 0.;
-        double avg_peers_out = 0.;
-        double avg_peers_in = 0.;
+        float avg_pct_out = 0.;
+        float avg_pct_in = 0.;
+        float avg_peers_out = 0.;
+        float avg_peers_in = 0.;
         std::uint16_t out_max = 0;
         std::uint16_t in_max = 0;
         std::uint16_t tot_out = 0;
         std::uint16_t tot_in = 0;
         std::uint16_t no_peers = 0;
+        std::vector<float> removed;
+        float avg_removed = 0;
         for (auto [id, node] : nodes_)
         {
             (void)id;
@@ -1222,10 +1375,15 @@ public:
                 avg_pct_in += 100. * nin / node->in_max_;
                 pct_in.push_back(100. * nin / node->in_max_);
             }
+            if (auto r = node->overlay_->getRemoved(); r)
+            {
+                avg_removed += *r;
+                removed.push_back(*r);
+            }
         }
         auto stats = [](auto& avg, auto N, auto sample) {
             avg = avg / N;
-            double sd = 0.;
+            float sd = 0.;
             for (auto d : sample)
                 sd += (d - avg) * (d - avg);
             if (N > 1)
@@ -1236,6 +1394,22 @@ public:
         auto sd_peers_in = stats(avg_peers_in, Nin, peers_in);
         auto sd_pct_out = stats(avg_pct_out, Nout, pct_out);
         auto sd_pct_in = stats(avg_pct_in, Nin, pct_in);
+        auto [an_redirect, sum, redirects] = getRedirects();
+        auto sd_redirects = stats(sum, redirects.size(), redirects);
+        std::uint16_t anout = 0;
+        std::uint16_t anin = 0;
+        std::uint16_t max_anout = 0;
+        std::uint16_t max_anin = 0;
+        if (nodes_[VirtualNode::sid_ - 1]->testNode_)
+        {
+            auto res =
+                nodes_[VirtualNode::sid_ - 1]->overlay_->getPeersCounts();
+            anout = res.first;
+            anin = res.second;
+            max_anout = nodes_[VirtualNode::sid_ - 1]->out_max_;
+            max_anin = nodes_[VirtualNode::sid_ - 1]->in_max_;
+        }
+        auto sd_removed = stats(avg_removed, removed.size(), removed);
         {
             std::cout.precision(2);
             std::cout << timeSinceStart() << ", out: " << tot_out
@@ -1248,7 +1422,12 @@ public:
                       << sd_peers_in << ", "
                       << "avg pct out/in: " << avg_pct_out << "/" << sd_pct_out
                       << ", " << avg_pct_in << "/" << sd_pct_in
-                      << ", no peers: " << no_peers << std::endl
+                      << ", no peers: " << no_peers
+                      << ", removed: " << avg_removed << "/" << sd_removed
+                      << ", redirects: " << sum << "/" << sd_redirects
+                      << ", add node out/in/redirect " << max_anout << "/"
+                      << anout << ", " << max_anin << "/" << anin << ", "
+                      << an_redirect << std::endl
                       << std::flush;
         }
         if (tot_peers_in_.size() > 0 &&
