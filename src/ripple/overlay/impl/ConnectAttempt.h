@@ -83,7 +83,7 @@ public:
     void
     run() override;
 
-private:
+protected:
     void
     close();
     void
@@ -106,7 +106,7 @@ private:
     onRead(error_code ec);
     void
     onShutdown(error_code ec);
-    void
+    virtual void
     processResponse();
 
     template <class = void>
