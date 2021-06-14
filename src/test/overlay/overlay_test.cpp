@@ -1138,12 +1138,8 @@ class overlay_xrpl_test : public overlay_net_test
     bool nodeAdded_ = false;
 
 public:
-    /**
-     * @param adjMatrix - adjacency matrix. Format:
-     * ip1,ip2,[in|out]
-     * [in|out] - in: inbound connection, ip2 is an inbound peer;
-     *            out: outbound connection, ip2 is an outbound peer
-     * set bootstrap ips, netConfig, and ip2Local
+    /** Set bootstrap_, netConfig_, and ip2Local_. Use the adjacency matrix.
+     * Map global ip to local ip.
      */
     void
     getNetConfig()
