@@ -64,8 +64,6 @@ namespace test {
 class OverlayImplTest;
 class VirtualNetwork;
 
-std::string baseIp = "172.0";
-
 static std::string
 name(std::string const& n, int i)
 {
@@ -245,7 +243,7 @@ protected:
     // limit connections to bootstrap nodes from the same node
     bool limitBootstrapConnections_ = false;
     // handle max out of inbound connections
-    bool handleInboundMaxOut_ = false;
+    bool handleInboundPrunning_ = false;
 
 public:
     virtual ~VirtualNetwork() = default;
@@ -279,9 +277,9 @@ public:
     }
 
     bool
-    inboundMaxOut()
+    inboundPrunning()
     {
-        return handleInboundMaxOut_;
+        return handleInboundPrunning_;
     }
 
     std::tuple<std::uint16_t, std::uint32_t, std::vector<std::uint16_t>>
@@ -539,7 +537,7 @@ private:
     // each of the ripple, alloy, or isrdc nodes.
     std::unordered_map<std::string, bool> bootstrapConnected_;
     // handle inbound slots max out
-    std::size_t inboundMaxOutTimer_{0};
+    std::size_t inboundPrunningTimer_{0};
     // removed peers statistics
     boost::circular_buffer<float> rollingAvg_{30, 0u};
     std::size_t intervalStart_{0};
@@ -612,20 +610,20 @@ public:
         sendEndpoints();
         autoConnect();
         setTimer();
-        if (node_.net_.inboundMaxOut() && checkInboundMaxOut())
-            handleInboundMaxOut();
+        if (node_.net_.inboundPrunning() && checkInboundPrunning())
+            handleInboundPrunning();
     }
 
     bool
-    checkInboundMaxOut()
+    checkInboundPrunning()
     {
         // applicable only to high inbound max configuration
         if (node_.in_max_ < 100)
             return false;
-        if (inboundMaxOutTimer_ > 0 &&
-            node_.net_.timeSinceStart() > inboundMaxOutTimer_)
+        if (inboundPrunningTimer_ > 0 &&
+            node_.net_.timeSinceStart() > inboundPrunningTimer_)
             return true;
-        else if (inboundMaxOutTimer_ == 0)
+        else if (inboundPrunningTimer_ == 0)
         {
             auto [nout, nin] = getPeersCounts();
             // this is a prototype of the feature. the way this test
@@ -634,7 +632,7 @@ public:
             // so that the peer has enough time to connect to other endpoints
             // besides this one.
             if (nin >= node_.in_max_)
-                inboundMaxOutTimer_ = node_.net_.timeSinceStart() + 90;
+                inboundPrunningTimer_ = node_.net_.timeSinceStart() + 90;
         }
         return false;
     }
@@ -642,7 +640,7 @@ public:
     /** Handle inbound peer max out
      */
     void
-    handleInboundMaxOut()
+    handleInboundPrunning()
     {
         auto [nout, nin] = getPeersCounts();
         std::vector<std::shared_ptr<PeerImpTest>> active;
@@ -661,7 +659,7 @@ public:
         std::random_shuffle(active.begin(), active.end());
         for (auto i = 0; i < ns; ++i)
             active[i]->stop();
-        inboundMaxOutTimer_ = 0;
+        inboundPrunningTimer_ = 0;
         totalRemoved_ += ns;
         float const timeElapsed = node_.net_.timeSinceStart() - intervalStart_;
         if (timeElapsed > 60)
@@ -974,6 +972,11 @@ protected:
     // global ip:local ip
     boost::bimap<std::string, std::string> ip2Local_;
     using global_local = boost::bimap<std::string, std::string>::value_type;
+    std::string baseIp_ = "172.0";
+    std::uint16_t static constexpr maxSubaddr_ = 255;
+    std::uint16_t tot_out_ = 0;
+    std::uint16_t tot_in_ = 0;
+    std::optional<std::pair<std::uint16_t, std::uint16_t>> max_default_ = {};
 
 public:
     overlay_net_test()
@@ -991,18 +994,24 @@ protected:
         bool testNode = false,
         std::uint16_t peerPort = 51235) override
     {
-        static std::uint16_t tot_out = 0;
-        static std::uint16_t tot_in = 0;
         if (out_max == 0)
         {
             out_max++;
             in_max++;
         }
-        tot_out += out_max;
-        tot_in += in_max;
+        // test - reduce out_max+in_max to 7
+        auto const t = out_max + in_max;
+        if (max_default_ && in_max > 0 && t <= 21 &&
+            t > (max_default_->first + max_default_->second))
+        {
+            out_max = max_default_->first;
+            in_max = max_default_->second;
+        }
+        tot_out_ += out_max;
+        tot_in_ += in_max;
         std::cout << nodes_.size() << " " << ip << " " << ip2Local_.right.at(ip)
-                  << " " << out_max << " " << in_max << " " << tot_out << " "
-                  << tot_in << " "
+                  << " " << out_max << " " << in_max << " " << tot_out_ << " "
+                  << tot_in_ << " "
                   << (bootstrap_.find(ip) != bootstrap_.end() ? bootstrap_[ip]
                                                               : "")
                   << "                                \r" << std::flush;
@@ -1057,7 +1066,7 @@ protected:
     {
         testcase("Overlay");
         auto mkIp = [&](auto str) {
-            std::string ip = baseIp + str;
+            std::string ip = baseIp_ + str;
             ip2Local_.insert(global_local(ip, ip));
             bootstrap_[ip] = ip;
             return ip;
@@ -1156,7 +1165,8 @@ public:
             if (ip2Local_.left.find(ip) == ip2Local_.left.end())
             {
                 std::stringstream str;
-                str << baseIp << "." << (cnt / 256) << "." << (cnt % 256);
+                str << baseIp_ << "." << (cnt / (maxSubaddr_ + 1)) << "."
+                    << (cnt % (maxSubaddr_ + 1));
                 ip2Local_.insert(global_local(ip, str.str()));
                 cnt++;
             }
@@ -1214,18 +1224,33 @@ public:
         if (arg() == "")
             return false;
         boost::char_separator<char> sep(",");
+        boost::char_separator<char> sep1(":");
         typedef boost::tokenizer<boost::char_separator<char>> t_tokenizer;
         t_tokenizer tok(arg(), sep);
-        for (t_tokenizer::iterator it = tok.begin(); it != tok.end(); ++it)
+        for (auto it = tok.begin(); it != tok.end(); ++it)
         {
             if (adjMatrixPath_ == "")
                 adjMatrixPath_ = *it;
             else if (*it == "limit")
                 limitBootstrapConnections_ = true;
-            else if (*it == "maxout")
-                handleInboundMaxOut_ = true;
+            else if (*it == "prune")
+                handleInboundPrunning_ = true;
+            else if ((*it).substr(0, 3) == "ip:")
+                baseIp_ = (*it).substr(3);
+            else if ((*it).substr(0, 8) == "default:")
+            {
+                std::string const val = (*it).substr(8);
+                t_tokenizer tok1(val, sep1);
+                auto it1 = tok1.begin();
+                std::uint16_t max_out = std::stoi(*it1);
+                std::uint16_t max_in = std::stoi(*(++it1));
+                max_default_ = {std::make_pair(max_out, max_in)};
+            }
             else
+            {
                 std::cout << "invalid argument " << *it << std::endl;
+                return false;
+            }
         }
         return (adjMatrixPath_ != "");
     }
@@ -1261,6 +1286,8 @@ public:
         std::random_shuffle(ips.begin(), ips.end());
         for (auto ip : ips)
             mkNode(ip, false, netConfig_[ip]["out"], netConfig_[ip]["in"]);
+        std::cout << "total out: " << tot_out_ << ", total in: " << tot_in_
+                  << "                             \n";
         setTimer();
         for (unsigned i = 0; i < boost::thread::hardware_concurrency(); ++i)
             tg_.create_thread(
@@ -1328,12 +1355,16 @@ public:
         using namespace std::chrono;
         std::vector<float> pct_out;
         std::vector<float> pct_in;
+        std::vector<float> pct_def_out;
+        std::vector<float> pct_def_in;
         std::vector<std::uint16_t> peers_out;
         std::vector<std::uint16_t> peers_in;
         std::uint16_t Nin = 0;
         std::uint16_t Nout = 0;
         float avg_pct_out = 0.;
         float avg_pct_in = 0.;
+        float avg_pct_def_out = 0.;
+        float avg_pct_def_in = 0.;
         float avg_peers_out = 0.;
         float avg_peers_in = 0.;
         std::uint16_t out_max = 0;
@@ -1371,6 +1402,16 @@ public:
                 avg_pct_in += 100. * nin / node->in_max_;
                 pct_in.push_back(100. * nin / node->in_max_);
             }
+            std::uint16_t deflt = max_default_
+                ? (max_default_->first + max_default_->second)
+                : 21;
+            if (node->in_max_ > 0 && (node->out_max_ + node->in_max_ <= deflt))
+            {
+                avg_pct_def_in += 100. * nin / node->in_max_;
+                avg_pct_def_out += 100. * nout / node->out_max_;
+                pct_def_out.push_back(100. * nout / node->out_max_);
+                pct_def_in.push_back(100. * nin / node->in_max_);
+            }
             if (auto r = node->overlay_->getRemoved(); r)
             {
                 avg_removed += *r;
@@ -1390,6 +1431,10 @@ public:
         auto sd_peers_in = stats(avg_peers_in, Nin, peers_in);
         auto sd_pct_out = stats(avg_pct_out, Nout, pct_out);
         auto sd_pct_in = stats(avg_pct_in, Nin, pct_in);
+        auto sd_pct_def_out =
+            stats(avg_pct_def_out, pct_def_out.size(), pct_def_out);
+        auto sd_pct_def_in =
+            stats(avg_pct_def_in, pct_def_in.size(), pct_def_in);
         auto [an_redirect, sum, redirects] = getRedirects();
         auto sd_redirects = stats(sum, redirects.size(), redirects);
         std::uint16_t anout = 0;
@@ -1415,10 +1460,12 @@ public:
                       << ", max out/in: " << out_max << "/" << in_max
                       << ", avg out/in: " << avg_peers_out << "/"
                       << sd_peers_out << ", " << avg_peers_in << "/"
-                      << sd_peers_in << ", "
-                      << "avg pct out/in: " << avg_pct_out << "/" << sd_pct_out
-                      << ", " << avg_pct_in << "/" << sd_pct_in
-                      << ", no peers: " << no_peers
+                      << sd_peers_in << ", avg pct out/in: " << avg_pct_out
+                      << "/" << sd_pct_out << ", " << avg_pct_in << "/"
+                      << sd_pct_in
+                      << ", avg pct default out/in: " << avg_pct_def_out << "/"
+                      << sd_pct_def_out << ", " << avg_pct_def_in << "/"
+                      << sd_pct_def_in << ", no peers: " << no_peers
                       << ", removed: " << avg_removed << "/" << sd_removed
                       << ", redirects: " << sum << "/" << sd_redirects
                       << ", add node out/in/redirect " << max_anout << "/"
@@ -1436,7 +1483,9 @@ public:
         tot_peers_out_.push_back(tot_out);
         // stop if the network doesn't change
         if (tot_peers_in_.size() >= 6 and tot_peers_out_.size() >= 6)
+        {
             return false;
+        }
         return true;
     }
 
