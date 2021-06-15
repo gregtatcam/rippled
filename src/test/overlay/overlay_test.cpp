@@ -977,6 +977,7 @@ protected:
     std::uint16_t tot_out_ = 0;
     std::uint16_t tot_in_ = 0;
     std::optional<std::pair<std::uint16_t, std::uint16_t>> max_default_ = {};
+    bool batch_ = false;
 
 public:
     overlay_net_test()
@@ -1009,12 +1010,14 @@ protected:
         }
         tot_out_ += out_max;
         tot_in_ += in_max;
-        std::cout << nodes_.size() << " " << ip << " " << ip2Local_.right.at(ip)
-                  << " " << out_max << " " << in_max << " " << tot_out_ << " "
-                  << tot_in_ << " "
-                  << (bootstrap_.find(ip) != bootstrap_.end() ? bootstrap_[ip]
-                                                              : "")
-                  << "                                \r" << std::flush;
+        if (!batch_)
+            std::cout << nodes_.size() << " " << ip << " "
+                      << ip2Local_.right.at(ip) << " " << out_max << " "
+                      << in_max << " " << tot_out_ << " " << tot_in_ << " "
+                      << (bootstrap_.find(ip) != bootstrap_.end()
+                              ? bootstrap_[ip]
+                              : "")
+                      << "                                \r" << std::flush;
         auto node = std::make_shared<VirtualNode>(
             *this,
             *this,
@@ -1237,6 +1240,8 @@ public:
                 handleInboundPrunning_ = true;
             else if ((*it).substr(0, 3) == "ip:")
                 baseIp_ = (*it).substr(3);
+            else if (*it == "batch")
+                batch_ = true;
             else if ((*it).substr(0, 8) == "default:")
             {
                 std::string const val = (*it).substr(8);
@@ -1335,7 +1340,6 @@ public:
         {
             std::string const node("172.0.2.237");
             nodeAdded_ = true;
-            std::cout << "added a node\n";
             ip2Local_.insert(global_local(node, node));
             mkNode(node, false, 10, 10, true);
         }
