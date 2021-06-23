@@ -976,8 +976,10 @@ protected:
     std::uint16_t static constexpr maxSubaddr_ = 255;
     std::uint16_t tot_out_ = 0;
     std::uint16_t tot_in_ = 0;
-    std::optional<std::pair<std::uint16_t, std::uint16_t>> max_default_ = {};
+    std::optional<std::pair<std::uint16_t, std::uint16_t>> max_default_{};
     bool batch_ = false;
+    std::uint16_t duration_ = 3600;
+    bool resolve_ = false;
 
 public:
     overlay_net_test()
@@ -1000,7 +1002,7 @@ protected:
             out_max++;
             in_max++;
         }
-        // test - reduce out_max+in_max to 7
+        // test - reduce out_max+in_max
         auto const t = out_max + in_max;
         if (max_default_ && in_max > 0 && t <= 21 &&
             t > (max_default_->first + max_default_->second))
@@ -1148,6 +1150,8 @@ class overlay_xrpl_test : public overlay_net_test
     std::string adjMatrixPath_ = "";
     // add a node to test how well it can get connected
     bool nodeAdded_ = false;
+    // set to true when avg % of filled out/in slot is >= 96%
+    bool networkStable_ = false;
 
 public:
     /** Set bootstrap_, netConfig_, and ip2Local_. Use the adjacency matrix.
@@ -1204,21 +1208,60 @@ public:
         // the bootstrap servers of ripple, alloy, and isrdc. Those
         // servers are added to each node's ips configuration as "local"
         // ip's.
-        auto resolve = [&](auto host) {
-            boost::asio::ip::tcp::resolver resolver(io_service_);
-            boost::asio::ip::tcp::resolver::query query(host, "80");
-            boost::asio::ip::tcp::resolver::iterator iter =
-                resolver.resolve(query);
-            std::for_each(iter, {}, [&](auto& it) {
-                auto ip = it.endpoint().address().to_string();
-                if (auto it1 = ip2Local_.left.find(ip);
-                    it1 != ip2Local_.left.end())
-                    bootstrap_[it1->second] = host;
-            });
+        auto mapLocal = [&](auto ip, auto host) {
+            if (auto it1 = ip2Local_.left.find(ip); it1 != ip2Local_.left.end())
+                bootstrap_[it1->second] = host;
         };
-        resolve("r.ripple.com");
-        resolve("zaphod.alloy.ee");
-        resolve("sahyadri.isrdc.in");
+        // manual resolve for offline testing
+        if (resolve_)
+        {
+            auto resolveManual = [&](auto hosts, auto host) {
+                std::for_each(hosts.begin(), hosts.end(), [&](auto& it) {
+                    mapLocal(it, host);
+                });
+            };
+            std::vector<std::string> ripple = {
+                "34.205.233.231",
+                "169.55.164.29",
+                "198.11.206.6",
+                "169.55.164.21",
+                "198.11.206.26",
+                "52.25.71.90",
+                "3.216.68.48",
+                "54.190.253.12"};
+            resolveManual(ripple, "r.ripple.ee");
+            std::vector<std::string> alloy = {
+                "46.4.218.119",
+                "88.99.137.170",
+                "116.202.148.26",
+                "136.243.24.38",
+                "95.216.102.188",
+                "46.4.138.103",
+                "46.4.218.120",
+                "116.202.163.130",
+                "95.216.102.182",
+                "94.130.221.2",
+                "95.216.5.218"};
+            resolveManual(alloy, "zaphod.alloy.ee");
+            std::vector<std::string> isrdc = {"59.185.224.109"};
+            resolveManual(isrdc, "sahyadri.isrdc.in");
+        }
+        else
+        {
+            auto resolve = [&](auto host) {
+                boost::asio::ip::tcp::resolver resolver(io_service_);
+                boost::asio::ip::tcp::resolver::query query(host, "80");
+                boost::asio::ip::tcp::resolver::iterator iter =
+                    resolver.resolve(query);
+                std::for_each(iter, {}, [&](auto& it) {
+                    auto ip = it.endpoint().address().to_string();
+                    mapLocal(ip, host);
+                });
+            };
+            resolve("r.ripple.com");
+            resolve("zaphod.alloy.ee");
+            resolve("sahyadri.isrdc.in");
+        }
     }
 
     bool
@@ -1226,6 +1269,7 @@ public:
     {
         if (arg() == "")
             return false;
+        std::cout << arg() << std::endl;
         boost::char_separator<char> sep(",");
         boost::char_separator<char> sep1(":");
         typedef boost::tokenizer<boost::char_separator<char>> t_tokenizer;
@@ -1242,9 +1286,13 @@ public:
                 baseIp_ = (*it).substr(3);
             else if (*it == "batch")
                 batch_ = true;
-            else if ((*it).substr(0, 8) == "default:")
+            else if ((*it).substr(0, 9) == "duration:")
+                duration_ = std::stoi((*it).substr(9));
+            else if (*it == "resolve")
+                resolve_ = true;
+            else if ((*it).substr(0, 4) == "max:")
             {
-                std::string const val = (*it).substr(8);
+                std::string const val = (*it).substr(4);
                 t_tokenizer tok1(val, sep1);
                 auto it1 = tok1.begin();
                 std::uint16_t max_out = std::stoi(*it1);
@@ -1318,27 +1366,28 @@ public:
         }
 
         std::ifstream inf("stop");
-        if (timeSinceStart() > 3600 || inf.good() || !doLog())
+        if (timeSinceStart() > duration_ || inf.good() || !doLog())
         {
             outputNetwork();
             stop();
         }
         else
         {
-            addNode();
+            //addNode();
             setTimer();
         }
     }
 
-    /** Add a node to test network connectability
+    /** Add a node to test network connectivity
      */
     void
     addNode()
     {
         std::ifstream inf("add");
-        if (!nodeAdded_ && inf.good())
+        if (!nodeAdded_ && (inf.good() || networkStable_))
         {
             std::string const node("172.0.2.237");
+            std::cout << "added node " << node << std::endl;
             nodeAdded_ = true;
             ip2Local_.insert(global_local(node, node));
             mkNode(node, false, 10, 10, true);
@@ -1485,6 +1534,8 @@ public:
             tot_peers_out_.clear();
         tot_peers_in_.push_back(tot_in);
         tot_peers_out_.push_back(tot_out);
+        if (avg_pct_out >= 96 && avg_pct_in >= 96)
+            networkStable_ = true;
         // stop if the network doesn't change
         if (tot_peers_in_.size() >= 6 and tot_peers_out_.size() >= 6)
         {
