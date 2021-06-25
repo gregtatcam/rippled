@@ -54,9 +54,9 @@ namespace ripple {
 namespace test {
 
 /** Unit-tests for testing Overlay (peer-2-peer only) network. There is
- * a think application layer implementation to send/receive the endpoints.
- * There are two test overlay_net_test, which creates a small network of
- * five interconnected nodes. And overlay_xrpl_test, which attempts to
+ * a thin application layer implementation to send/receive the endpoints.
+ * There are two tests: 1) overlay_net_test, which creates a small network of
+ * five interconnected nodes; 2) overlay_xrpl_test, which attempts to
  * replicate complete XRPL network overlay. Each test has more detailed
  * description.
  */
@@ -1136,7 +1136,9 @@ public:
  * (On Ubuntu 20.20: ulimit -n 65536, also may need to update
  * /etc/security/limits.conf, /etc/sysctl.conf, /etc/pam.d/common-session,
  * /etc/systemd/system.conf). The test runs until no changes are detected in the
- * network - the number of in/out peers remains the same after four minutes.
+ * network - the number of in/out peers remains the same after four minutes or
+ * the test duration exceeds duration_ sec. duration_ can be passed to the test
+ * as an argument.
  */
 class overlay_xrpl_test : public overlay_net_test
 {
