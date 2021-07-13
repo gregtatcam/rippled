@@ -102,30 +102,17 @@ SlotImp::recent_t::recent_t(clock_type& clock) : cache(clock)
 }
 
 void
-SlotImp::recent_t::insert(beast::IP::Endpoint const& ep, int hops)
+SlotImp::recent_t::insert(beast::IP::Endpoint const& ep)
 {
-    auto const result(cache.emplace(ep, hops));
+    auto const result(cache.emplace(ep));
     if (!result.second)
-    {
-        // NOTE Other logic depends on this <= inequality.
-        if (hops <= result.first->second)
-        {
-            result.first->second = hops;
-            cache.touch(result.first);
-        }
-    }
+        cache.touch(result.first);
 }
 
 bool
-SlotImp::recent_t::filter(beast::IP::Endpoint const& ep, int hops)
+SlotImp::recent_t::filter(beast::IP::Endpoint const& ep)
 {
-    auto const iter(cache.find(ep));
-    if (iter == cache.end())
-        return false;
-    // We avoid sending an endpoint if we heard it
-    // from them recently at the same or lower hop count.
-    // NOTE Other logic depends on this <= inequality.
-    return iter->second <= hops;
+    return !(cache.find(ep) == cache.end());
 }
 
 void

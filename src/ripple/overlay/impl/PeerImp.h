@@ -277,7 +277,7 @@ public:
         class FwdIt,
         class = typename std::enable_if_t<std::is_same<
             typename std::iterator_traits<FwdIt>::value_type,
-            PeerFinder::Endpoint>::value>>
+            beast::IP::Endpoint>::value>>
     void
     sendEndpoints(FwdIt first, FwdIt last);
 
@@ -658,8 +658,7 @@ PeerImp::sendEndpoints(FwdIt first, FwdIt last)
     while (first != last)
     {
         auto& tme2(*tm.add_endpoints_v2());
-        tme2.set_endpoint(first->address.to_string());
-        tme2.set_hops(first->hops);
+        tme2.set_endpoint(first->to_string());
         first++;
     }
     tm.set_version(2);

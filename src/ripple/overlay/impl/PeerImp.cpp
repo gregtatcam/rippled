@@ -1352,7 +1352,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
     if (tracking_.load() != Tracking::converged || m->version() != 2)
         return;
 
-    std::vector<PeerFinder::Endpoint> endpoints;
+    std::vector<beast::IP::Endpoint> endpoints;
     endpoints.reserve(m->endpoints_v2().size());
 
     for (auto const& tm : m->endpoints_v2())
@@ -1365,16 +1365,13 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
             continue;
         }
 
-        // If hops == 0, this Endpoint describes the peer we are connected
+        // If empty endpoint, this Endpoint describes the peer we are connected
         // to -- in that case, we take the remote address seen on the
         // socket and store that in the IP::Endpoint. If this is the first
         // time, then we'll verify that their listener can receive incoming
-        // by performing a connectivity test.  if hops > 0, then we just
-        // take the address/port we were given
+        // by performing a connectivity test.
 
-        endpoints.emplace_back(
-            tm.hops() > 0 ? *result : remote_address_.at_port(result->port()),
-            tm.hops());
+        endpoints.emplace_back(*result);
     }
 
     if (!endpoints.empty())

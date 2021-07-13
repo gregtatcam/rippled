@@ -56,11 +56,11 @@ enum {
         can use any settings it wants.
     */
     ,
-    minOutCount = 10
+    minOutCount = 5
 
     /** The default value of Config::maxPeers. */
     ,
-    defaultMaxPeers = 21
+    defaultMaxPeers = 11
 
     /** Max redirects we will accept from one connection.
         Redirects are limited for security purposes, to prevent

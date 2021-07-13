@@ -21,7 +21,7 @@
 #define RIPPLE_PEERFINDER_SLOTIMP_H_INCLUDED
 
 #include <ripple/beast/container/aged_container_utility.h>
-#include <ripple/beast/container/aged_unordered_map.h>
+#include <ripple/beast/container/aged_unordered_set.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/peerfinder/Slot.h>
 #include <atomic>
@@ -33,7 +33,7 @@ namespace PeerFinder {
 class SlotImp : public Slot
 {
 private:
-    using recent_type = beast::aged_unordered_map<beast::IP::Endpoint, int>;
+    using recent_type = beast::aged_unordered_set<beast::IP::Endpoint>;
 
 public:
     using ptr = std::shared_ptr<SlotImp>;
@@ -155,11 +155,11 @@ public:
             sending a slot the same address too frequently.
         */
         void
-        insert(beast::IP::Endpoint const& ep, int hops);
+        insert(beast::IP::Endpoint const& ep);
 
         /** Returns `true` if we should not send endpoint to the slot. */
         bool
-        filter(beast::IP::Endpoint const& ep, int hops);
+        filter(beast::IP::Endpoint const& ep);
 
     private:
         void

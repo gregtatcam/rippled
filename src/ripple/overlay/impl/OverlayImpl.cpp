@@ -372,8 +372,8 @@ OverlayImpl::makeRedirectResponse(
     msg.body() = Json::objectValue;
     {
         Json::Value& ips = (msg.body()["peer-ips"] = Json::arrayValue);
-        for (auto const& _ : m_peerFinder->redirect(slot))
-            ips.append(_.address.to_string());
+        for (auto const& e : m_peerFinder->redirect(slot))
+            ips.append(e.to_string());
     }
     msg.prepare_payload();
     return std::make_shared<SimpleWriter>(msg);

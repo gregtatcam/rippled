@@ -188,7 +188,7 @@ public:
         return m_logic.activate(impl, key, reserved);
     }
 
-    std::vector<Endpoint>
+    std::vector<beast::IP::Endpoint>
     redirect(std::shared_ptr<Slot> const& slot) override
     {
         SlotImp::ptr impl(std::dynamic_pointer_cast<SlotImp>(slot));
@@ -207,7 +207,8 @@ public:
         m_logic.once_per_second();
     }
 
-    std::vector<std::pair<std::shared_ptr<Slot>, std::vector<Endpoint>>>
+    std::vector<
+        std::pair<std::shared_ptr<Slot>, std::vector<beast::IP::Endpoint>>>
     buildEndpointsForPeers() override
     {
         return m_logic.buildEndpointsForPeers();

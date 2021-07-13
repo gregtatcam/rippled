@@ -261,7 +261,6 @@ message TMEndpoints
     message TMEndpointv2
     {
         required string endpoint = 1;
-        required uint32 hops     = 2;
     }
     repeated TMEndpointv2   endpoints_v2 = 3;
 };
