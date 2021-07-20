@@ -81,6 +81,8 @@ private:
     std::optional<std::uint32_t> manifestListSeq_;
     // Protects the message and the sequence list of manifests
     std::mutex manifestLock_;
+    bool evicting_{false};
+    std::mutex evictingMutex_;
 
     //--------------------------------------------------------------------------
 
@@ -403,6 +405,14 @@ protected:
         ProtocolVersion protocol,
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr) override;
+
+    /** Try to evict inbound non-fixed and non-reserved slots. Exclude N
+     * peers with smallest latency, N peers with recently received validations
+     * or proposals, and 50% with longest connection
+     * @return true if evicted at least one peer
+     */
+    bool
+    tryToEvict() override;
 };
 
 }  // namespace ripple

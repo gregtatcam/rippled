@@ -271,6 +271,9 @@ protected:
         Resource::Consumer consumer,
         std::unique_ptr<stream_type>&& stream_ptr) = 0;
 
+    virtual bool
+    tryToEvict() = 0;
+
     std::shared_ptr<Writer>
     makeRedirectResponse(
         std::shared_ptr<PeerFinder::Slot> const& slot,

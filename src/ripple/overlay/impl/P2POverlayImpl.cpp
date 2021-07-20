@@ -26,6 +26,7 @@
 #include <ripple/overlay/impl/InboundHandoff.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/predicates.h>
+#include <ripple/peerfinder/impl/Tuning.h>
 #include <ripple/peerfinder/make_Manager.h>
 #include <ripple/rpc/handlers/GetCounts.h>
 #include <ripple/rpc/json_body.h>
@@ -204,7 +205,8 @@ P2POverlayImpl::onHandoff(
                 p2pConfig_.requestor.reservedPeer(publicKey);
             auto const result =
                 m_peerFinder->activate(slot, publicKey, reserved);
-            if (result != PeerFinder::Result::success)
+            if ((result == PeerFinder::Result::conditional && !tryToEvict()) ||
+                result != PeerFinder::Result::success)
             {
                 m_peerFinder->on_closed(slot);
                 JLOG(journal.debug())
@@ -292,8 +294,8 @@ P2POverlayImpl::makeRedirectResponse(
     msg.body() = Json::objectValue;
     {
         Json::Value& ips = (msg.body()["peer-ips"] = Json::arrayValue);
-        for (auto const& _ : m_peerFinder->redirect(slot))
-            ips.append(_.address.to_string());
+        for (auto const& e : m_peerFinder->redirect(slot))
+            ips.append(e.to_string());
     }
     msg.prepare_payload();
     return std::make_shared<SimpleWriter>(msg);

@@ -133,15 +133,7 @@ The CMake file defines a number of configure-time options which can be
 examined by running `cmake-gui` or `ccmake` to generated the build. In
 particular, the `unity` option allows you to select between the unity and
 non-unity builds. `unity` builds are faster to compile since they combine
-multiple sources into a single compiliation unit - this is the default if you
-don't specify. `nounity` builds can be helpful for detecting include omissions
-or for finding other build-related issues, but aren't generally needed for
-testing and running.
-
-* `-Dunity=ON` to enable/disable unity builds (defaults to ON)  
-* `-Dassert=ON` to enable asserts
-* `-Djemalloc=ON` to enable jemalloc support for heap checking
-* `-Dsan=thread` to enable the thread sanitizer with clang
+clang
 * `-Dsan=address` to enable the address sanitizer with clang
 * `-Dstatic=ON` to enable static linking library dependencies
 * `-Dreporting=ON` to build code neccessary for reporting mode (defaults to OFF)

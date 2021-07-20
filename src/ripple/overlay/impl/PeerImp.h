@@ -25,6 +25,7 @@
 #include <ripple/overlay/Squelch.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
+#include <ripple/peerfinder/impl/NetGroup.h>
 #include <ripple/protocol/STTx.h>
 #include <ripple/protocol/STValidation.h>
 #include <ripple/resource/Fees.h>
@@ -75,6 +76,8 @@ private:
     std::optional<std::uint32_t> lastPingSeq_;
     clock_type::time_point lastPingTime_;
     clock_type::time_point const creationTime_;
+    //  last received valid validation or proposal epoch time in msec
+    std::atomic_uint64_t lastValProp_{0};
 
     reduce_relay::Squelch<UptimeClock> squelch_;
     inline static std::atomic_bool reduceRelayReady_{false};
@@ -123,6 +126,8 @@ private:
     bool vpReduceRelayEnabled_ = false;
     bool ledgerReplayEnabled_ = false;
     LedgerReplayMsgHandler ledgerReplayMsgHandler_;
+    std::uint64_t netGroup_;
+    std::atomic_bool evicted_{false};
 
 public:
     PeerImp(PeerImp const&) = delete;
@@ -167,7 +172,7 @@ public:
         class FwdIt,
         class = typename std::enable_if_t<std::is_same<
             typename std::iterator_traits<FwdIt>::value_type,
-            PeerFinder::Endpoint>::value>>
+            std::pair<beast::IP::Endpoint, std::uint32_t>>::value>>
     void
     sendEndpoints(FwdIt first, FwdIt last);
 
@@ -265,6 +270,40 @@ public:
     /** Return any known shard info from this peer and its sub peers. */
     std::optional<hash_map<PublicKey, ShardInfo>>
     getPeerShardInfo() const;
+
+    std::uint32_t
+    latency() const
+    {
+        std::lock_guard sl(recentLock_);
+        return latency_ ? latency_->count()
+                        : std::numeric_limits<std::uint32_t>::max();
+    }
+
+    std::uint64_t
+    lastValProp() const
+    {
+        return lastValProp_.load();
+    }
+
+    Tracking
+    tracking() const
+    {
+        return tracking_.load();
+    }
+
+    std::uint64_t
+    netGroup() const
+    {
+        return netGroup_;
+    }
+
+    std::pair<bool, bool>
+    canEvict() const
+    {
+        return {
+            evicted_,
+            inbound_ && !evicted_ && !slot_->reserved() && !slot_->fixed()};
+    }
 
 private:
     void
@@ -425,6 +464,7 @@ private:
     }
 
     friend class P2PeerImp<PeerImp>;
+    friend class OverlayImpl;
     // P2P events/methods
     void
     onEvtRun();
@@ -471,8 +511,8 @@ PeerImp::sendEndpoints(FwdIt first, FwdIt last)
     while (first != last)
     {
         auto& tme2(*tm.add_endpoints_v2());
-        tme2.set_endpoint(first->address.to_string());
-        tme2.set_hops(first->hops);
+        tme2.set_endpoint(first->first.to_string());
+        tme2.set_hops(first->second);
         first++;
     }
     tm.set_version(2);

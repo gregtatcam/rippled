@@ -543,7 +543,8 @@ target_sources (rippled PRIVATE
        subdir: peerfinder
   #]===============================]
   src/ripple/peerfinder/impl/Bootcache.cpp
-  src/ripple/peerfinder/impl/Endpoint.cpp
+  src/ripple/peerfinder/impl/CSipHasher.cpp
+  src/ripple/peerfinder/impl/NetGroup.cpp
   src/ripple/peerfinder/impl/PeerfinderConfig.cpp
   src/ripple/peerfinder/impl/PeerfinderManager.cpp
   src/ripple/peerfinder/impl/SlotImp.cpp

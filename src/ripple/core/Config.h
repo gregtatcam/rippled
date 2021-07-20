@@ -155,6 +155,8 @@ public:
     std::size_t PEERS_MAX = 0;
     std::size_t PEERS_OUT_MAX = 0;
     std::size_t PEERS_IN_MAX = 0;
+    // evict peers when a number of input slots caps out - experimental feature
+    bool EVICT_PEERS = false;
 
     std::chrono::seconds WEBSOCKET_PING_FREQ = std::chrono::minutes{5};
 

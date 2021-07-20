@@ -187,7 +187,7 @@ public:
         return m_logic.activate(impl, key, reserved);
     }
 
-    std::vector<Endpoint>
+    std::vector<beast::IP::Endpoint>
     redirect(std::shared_ptr<Slot> const& slot) override
     {
         SlotImp::ptr impl(std::dynamic_pointer_cast<SlotImp>(slot));
@@ -206,7 +206,9 @@ public:
         m_logic.once_per_second();
     }
 
-    std::vector<std::pair<std::shared_ptr<Slot>, std::vector<Endpoint>>>
+    std::vector<std::pair<
+        std::shared_ptr<Slot>,
+        std::vector<std::pair<beast::IP::Endpoint, std::uint32_t>>>>
     buildEndpointsForPeers() override
     {
         return m_logic.buildEndpointsForPeers();
@@ -235,6 +237,12 @@ public:
     onWrite(beast::PropertyStream::Map& map) override
     {
         m_logic.onWrite(map);
+    }
+
+    int
+    cacheSize() const override
+    {
+        return m_logic.livecache_.size();
     }
 
 private:
@@ -271,7 +279,7 @@ private:
 
 //------------------------------------------------------------------------------
 
-Manager::Manager() : beast::PropertyStream::Source("peerfinder")
+Manager::Manager() noexcept : beast::PropertyStream::Source("peerfinder")
 {
 }
 

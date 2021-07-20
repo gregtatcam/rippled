@@ -104,6 +104,10 @@ PeerImp::PeerImp(
           FEATURE_LEDGER_REPLAY,
           app_.config().LEDGER_REPLAY))
     , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
+    , netGroup_([&]() {
+        NetGroup ng(remote_address_);
+        return ng.calculateKeyedNetGroup();
+    }())
 {
     if (auto member = app_.cluster().member(publicKey_))
     {
@@ -161,6 +165,10 @@ PeerImp::PeerImp(
           FEATURE_LEDGER_REPLAY,
           app_.config().LEDGER_REPLAY))
     , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
+    , netGroup_([&]() {
+        NetGroup ng(remote_address_);
+        return ng.calculateKeyedNetGroup();
+    }())
 {
     JLOG(journal_.debug()) << "compression enabled "
                            << (compressionEnabled_ == Compressed::On)
@@ -1235,7 +1243,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
     if (tracking_.load() != Tracking::converged || m->version() != 2)
         return;
 
-    std::vector<PeerFinder::Endpoint> endpoints;
+    std::vector<std::pair<beast::IP::Endpoint, std::uint32_t>> endpoints;
     endpoints.reserve(m->endpoints_v2().size());
 
     for (auto const& tm : m->endpoints_v2())
@@ -1248,16 +1256,13 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
             continue;
         }
 
-        // If hops == 0, this Endpoint describes the peer we are connected
+        // If empty endpoint, this Endpoint describes the peer we are connected
         // to -- in that case, we take the remote address seen on the
         // socket and store that in the IP::Endpoint. If this is the first
         // time, then we'll verify that their listener can receive incoming
-        // by performing a connectivity test.  if hops > 0, then we just
-        // take the address/port we were given
+        // by performing a connectivity test.
 
-        endpoints.emplace_back(
-            tm.hops() > 0 ? *result : remote_address_.at_port(result->port()),
-            tm.hops());
+        endpoints.emplace_back(*result, tm.hops());
     }
 
     if (!endpoints.empty())
@@ -2552,6 +2557,10 @@ PeerImp::checkPropose(
 
     if (relay)
     {
+        using namespace std::chrono;
+        lastValProp_.store(
+            duration_cast<milliseconds>(clock_type::now().time_since_epoch())
+                .count());
         // haveMessage contains peers, which are suppressed; i.e. the peers
         // are the source of the message, consequently the message should
         // not be relayed to these peers. But the message must be counted
@@ -2585,6 +2594,11 @@ PeerImp::checkValidation(
         if (app_.getOPs().recvValidation(val, std::to_string(id())) ||
             cluster())
         {
+            using namespace std::chrono;
+            lastValProp_.store(duration_cast<milliseconds>(
+                                   clock_type::now().time_since_epoch())
+                                   .count());
+
             auto const suppression =
                 sha512Half(makeSlice(val->getSerialized()));
             // haveMessage contains peers, which are suppressed; i.e. the peers

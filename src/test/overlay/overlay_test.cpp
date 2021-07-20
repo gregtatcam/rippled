@@ -28,6 +28,8 @@
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/make_Overlay.h>
+#include <ripple/peerfinder/impl/NetGroup.h>
+#include <ripple/peerfinder/impl/Tuning.h>
 #include <ripple/server/Server.h>
 #include <ripple/server/Session.h>
 #include <ripple.pb.h>
@@ -38,6 +40,7 @@
 #include <boost/bimap.hpp>
 #include <boost/circular_buffer.hpp>
 #include <boost/regex.hpp>
+#include <boost/sort/sort.hpp>
 #include <boost/thread.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -63,9 +66,21 @@ namespace test {
 
 class OverlayImplTest;
 class VirtualNetwork;
+class PeerImpTest;
+
+std::mutex logMutex;
+
+struct EvictionCandidate
+{
+    std::uint32_t latency;
+    std::uint32_t uptime;
+    std::uint64_t netGroup;
+    std::uint32_t lastValProp;
+    std::weak_ptr<PeerImpTest> peer;
+};
 
 static std::string
-name(std::string const& n, int i)
+mkName(std::string const& n, int i)
 {
     return n + std::to_string(i);
 }
@@ -124,18 +139,18 @@ struct VirtualNode
               logs_->journal("Resource")))
         , resolver_(ResolverAsio::New(
               io_service_,
-              logs_->journal(name("Overlay", id_))))
+              logs_->journal(mkName("Overlay", id_))))
         , identity_(randomKeyPair(KeyType::secp256k1))
         , overlay_(std::make_shared<OverlayImplTest>(
               *this,
               parent,
               peerPort,
-              name("Overlay", id_)))
+              mkName("Overlay", id_)))
         , serverPort_(1)
         , server_(make_Server(
               *overlay_,
               io_service_,
-              logs_->journal(name("Server", id_))))
+              logs_->journal(mkName("Server", id_))))
         , name_(ip)
         , out_max_(out_max)
         , in_max_(in_max)
@@ -169,7 +184,8 @@ struct VirtualNode
         if (dbPath != "")
         {
             std::string cmd = "mkdir -p " + dbPath;
-            system(cmd.c_str());
+            auto ret = system(cmd.c_str());
+            (void)ret;
         }
         config->legacy("database_path", dbPath);
         (*config)["server"].append("port_peer");
@@ -239,6 +255,11 @@ protected:
     std::unordered_map<int, std::shared_ptr<VirtualNode>> nodes_;
     std::chrono::time_point<std::chrono::steady_clock> start_;
     std::unordered_map<std::string, std::string> bootstrap_;
+    // global ip:local ip
+    boost::bimap<std::string, std::string> ip2Local_;
+    using global_local = boost::bimap<std::string, std::string>::value_type;
+    std::string baseIp_ = "172.0";
+    std::uint16_t static constexpr maxSubaddr_ = 255;
     // features
     // limit connections to bootstrap nodes from the same node
     bool limitBootstrapConnections_ = false;
@@ -302,6 +323,18 @@ public:
         return res;
     }
 
+    std::string
+    getGlobalIp(std::string const& localIp)
+    {
+        return ip2Local_.right.at(localIp);
+    }
+
+    std::string
+    getLocalIp(std::string const& globalIp)
+    {
+        return ip2Local_.left.at(globalIp);
+    }
+
 protected:
     void
     add(std::shared_ptr<VirtualNode> const& node)
@@ -326,6 +359,19 @@ class PeerImpTest : public DefaultPeerImp<PeerImpTest>
 {
     friend class P2PeerImp<PeerImpTest>;
     VirtualNode& node_;
+    clock_type::time_point creationTime_;
+    std::uint64_t netGroup_{0};
+    std::uint32_t latency_{0};
+    std::uint32_t lastValProp_{0};
+    std::atomic_bool evicted_{false};
+
+    std::uint64_t
+    getNetGroup()
+    {
+        NetGroup ng{beast::IP::Endpoint::from_string(
+            node_.net_.getGlobalIp(remote_address_.address().to_string()))};
+        return ng.calculateKeyedNetGroup();
+    }
 
 public:
     PeerImpTest(
@@ -348,6 +394,10 @@ public:
               false,
               overlay)
         , node_(node)
+        , creationTime_(clock_type::now())
+        , netGroup_(getNetGroup())
+        , latency_(rand_int(10000))
+        , lastValProp_(rand_int(10000))
     {
     }
 
@@ -371,10 +421,60 @@ public:
               false,
               overlay)
         , node_(node)
+        , creationTime_(clock_type::now())
+        , netGroup_(getNetGroup())
+        , latency_(rand_int(10000))
+        , lastValProp_(rand_int(10000))
     {
     }
 
     ~PeerImpTest();
+
+    std::uint32_t
+    uptime() const
+    {
+        using namespace std::chrono;
+        return static_cast<std::uint32_t>(
+            duration_cast<seconds>(clock_type::now() - creationTime_).count());
+    }
+
+    std::uint64_t
+    netGroup() const
+    {
+        return netGroup_;
+    }
+
+    std::uint32_t
+    latency() const
+    {
+        return latency_;
+    }
+
+    std::uint32_t
+    lastValProp() const
+    {
+        return lastValProp_;
+    }
+
+    void
+    evict()
+    {
+        evicted_ = true;
+    }
+
+    bool
+    evicted() const
+    {
+        return evicted_.load();
+    }
+
+    std::pair<bool, bool>
+    canEvict() const
+    {
+        return {
+            evicted_,
+            inbound_ && !evicted_ && !slot_->reserved() && !slot_->fixed()};
+    }
 
 private:
     /** P2P hook. Enables p2p layer to hand over protocol message
@@ -420,17 +520,14 @@ private:
     void
     onMessage(std::shared_ptr<protocol::TMEndpoints> const& m)
     {
-        std::vector<PeerFinder::Endpoint> endpoints;
+        std::vector<std::pair<beast::IP::Endpoint, std::uint32_t>> endpoints;
         endpoints.reserve(m->endpoints_v2().size());
 
         for (auto const& tm : m->endpoints_v2())
         {
             if (auto result =
                     beast::IP::Endpoint::from_string_checked(tm.endpoint()))
-                endpoints.emplace_back(
-                    tm.hops() > 0 ? *result
-                                  : remote_address_.at_port(result->port()),
-                    tm.hops());
+                endpoints.emplace_back(*result, tm.hops());
         }
 
         if (!endpoints.empty())
@@ -526,7 +623,6 @@ class OverlayImplTest : public DefaultOverlayImpl,
 {
 private:
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> timer_;
-    std::mutex peersMutex_;
     hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImpTest>>
         peers_;
     VirtualNode& node_;
@@ -543,6 +639,11 @@ private:
     std::size_t intervalStart_{0};
     float totalRemoved_{0};
     std::atomic<float> rollingAvgRemoved_{0};
+    std::atomic_bool evicting_{false};
+    std::mutex evictingMutex_;
+    std::atomic_uint16_t nIn_{0};
+    std::atomic_uint16_t nOut_{0};
+    std::atomic_bool stopping_{false};
 
 public:
     virtual ~OverlayImplTest()
@@ -583,13 +684,14 @@ public:
         timer_.expires_from_now(std::chrono::seconds(1));
         timer_.async_wait(strand_.wrap(std::bind(
             &OverlayImplTest::onTimer,
-            this->shared_from_this(),
+            shared_from_this(),
             std::placeholders::_1)));
     }
 
     void
     cancelTimer()
     {
+        stopping_ = true;
         timer_.cancel();
     }
 
@@ -604,7 +706,7 @@ public:
     void
     onTimer(boost::system::error_code const& ec)
     {
-        if (ec)
+        if (ec || stopping_)
             return;
         peerFinder().once_per_second();
         sendEndpoints();
@@ -645,7 +747,7 @@ public:
         auto [nout, nin] = getPeersCounts();
         std::vector<std::shared_ptr<PeerImpTest>> active;
         {
-            std::lock_guard l(peersMutex_);
+            std::lock_guard l(mutex_);
             active.reserve(nin);
             for (auto [slot, peer] : peers_)
             {
@@ -658,7 +760,9 @@ public:
         auto ns = 3 * nin / 100;
         std::random_shuffle(active.begin(), active.end());
         for (auto i = 0; i < ns; ++i)
+        {
             active[i]->stop();
+        }
         inboundPrunningTimer_ = 0;
         totalRemoved_ += ns;
         float const timeElapsed = node_.net_.timeSinceStart() - intervalStart_;
@@ -750,16 +854,27 @@ public:
     }
 
     void
-    onPeerDeactivate(std::shared_ptr<PeerFinder::Slot> const& slot)
+    onPeerDeactivate(
+        std::shared_ptr<PeerFinder::Slot> const& slot,
+        PeerImpTest::id_t id,
+        bool inbound)
     {
         Counts::deactivateCnt++;
-        std::lock_guard l(peersMutex_);
+        std::lock_guard l(mutex_);
         // erase if it's one of the bootstrap nodes so can connect again
-        if (auto it = node_.bootstrap_.find(
-                slot->remote_endpoint().address().to_string());
-            it != node_.bootstrap_.end() &&
-            bootstrapConnected_.find(it->second) != bootstrapConnected_.end())
-            bootstrapConnected_.erase(it->second);
+        if (node_.net_.limitConnections())
+        {
+            if (auto it = node_.bootstrap_.find(
+                    slot->remote_endpoint().address().to_string());
+                it != node_.bootstrap_.end() &&
+                bootstrapConnected_.find(it->second) !=
+                    bootstrapConnected_.end())
+                bootstrapConnected_.erase(it->second);
+        }
+        if (inbound)
+            nIn_--;
+        else
+            nOut_--;
         peers_.erase(slot);
     }
 
@@ -772,21 +887,7 @@ public:
     std::pair<std::uint16_t, std::uint16_t>
     getPeersCounts()
     {
-        std::lock_guard l(peersMutex_);
-        std::uint16_t nin = 0;
-        std::uint16_t nout = 0;
-        for (auto [slot, peer] : peers_)
-        {
-            (void)slot;
-            if (auto p = peer.lock())
-            {
-                if (p->inbound())
-                    nin++;
-                else
-                    nout++;
-            }
-        }
-        return {nout, nin};
+        return {nOut_.load(), nIn_.load()};
     }
 
     void
@@ -794,7 +895,7 @@ public:
         std::ofstream& of,
         boost::bimap<std::string, std::string> const& ip2Local)
     {
-        std::lock_guard l(peersMutex_);
+        std::lock_guard l(mutex_);
         for (auto [slot, peer] : peers_)
         {
             (void)slot;
@@ -834,7 +935,7 @@ public:
     {
         if (node_.net_.limitConnections())
         {
-            std::lock_guard l(peersMutex_);
+            std::lock_guard l(mutex_);
             if (auto it = node_.bootstrap_.find(address.address().to_string());
                 it != node_.bootstrap_.end() &&
                 bootstrapConnected_.find(it->second) !=
@@ -854,7 +955,7 @@ protected:
     void
     addPeer(std::shared_ptr<PeerImpTest> const& peer)
     {
-        std::lock_guard l(peersMutex_);
+        std::lock_guard l(mutex_);
         peers_.emplace(peer->slot(), peer);
         if (node_.net_.limitConnections())
         {
@@ -885,6 +986,7 @@ protected:
             std::move(stream_ptr),
             *this);
         Counts::inPeersCnt++;
+        nIn_++;
         addPeer(peer);
         return peer;
     }
@@ -910,8 +1012,108 @@ protected:
             id,
             *this);
         Counts::outPeersCnt++;
+        nOut_++;
         addPeer(peer);
         return peer;
+    }
+
+    template <typename Cmp>
+    void
+    eraseFirstN(
+        std::vector<EvictionCandidate>& candidates,
+        std::size_t N,
+        Cmp&& cmp)
+    {
+        boost::sort::flat_stable_sort(
+            candidates.begin(), candidates.end(), cmp);
+        auto size = std::min(N, candidates.size());
+        candidates.erase(candidates.begin(), candidates.begin() + size);
+    }
+
+    bool
+    tryToEvict() override
+    {
+        {
+            std::lock_guard l(evictingMutex_);
+            if (evicting_)
+                return false;
+            evicting_ = true;
+        }
+
+        std::vector<EvictionCandidate> candidates;
+        candidates.reserve(m_peerFinder->config().inPeers);
+        {
+            std::lock_guard lock(mutex_);
+            for (auto it : peers_)
+            {
+                if (auto peer = it.second.lock())
+                {
+                    auto res = peer->canEvict();
+                    // some peers are being evicted
+                    if (res.first)
+                    {
+                        evicting_ = false;
+                        return false;
+                    }
+                    if (res.second)
+                        candidates.push_back(
+                            {peer->latency(),
+                             peer->uptime(),
+                             peer->netGroup(),
+                             peer->lastValProp(),
+                             it.second});
+                }
+            }
+        }
+        // 8 latency, 4 validation and proposal, 4 net groups,
+        // and 50% longest connected
+        if (candidates.size() < (8 + 4 + 4 + 2))
+        {
+            evicting_ = false;
+            return false;
+        }
+
+        using EC = EvictionCandidate;
+        // exclude N peers from the network groups
+        eraseFirstN(candidates, 4, [](EC const& p1, EC const& p2) {
+            return p1.netGroup >= p2.netGroup;
+        });  // descending, converged first, null at the end
+        // exclude N peers with smallest latency
+        eraseFirstN(candidates, 8, [](EC const& p1, EC const& p2) {
+            return p1.latency < p2.latency;
+        });  // ascending, converged first, null at the end
+        // exclude N peers that we recently got the validations and proposals
+        // from
+        eraseFirstN(candidates, 4, [](EC const& p1, EC const& p2) {
+            return p1.lastValProp >= p2.lastValProp;
+        });  // descending, converged first, null at the end
+        // exclude 50% of peers that have been connected the longest
+        eraseFirstN(
+            candidates, candidates.size() / 2, [](EC const& p1, EC const& p2) {
+                return p1.uptime >= p2.uptime;
+            });  // descending, converged first, null at the end
+
+        bool evicted = false;
+        if (!candidates.empty())
+        {
+            std::size_t toEvict = ripple::PeerFinder::Tuning::percentToEvict *
+                m_peerFinder->config().inPeers / 100;
+            std::shuffle(candidates.begin(), candidates.end(), default_prng());
+            for (auto it = candidates.begin();
+                 it != candidates.end() && toEvict > 0;
+                 ++it, --toEvict)
+            {
+                if (auto peer = it->peer.lock())
+                {
+                    evicted = true;
+                    peer->evict();
+                    peer->stop();
+                }
+            }
+        }
+
+        evicting_ = false;
+        return evicted;
     }
 
 private:
@@ -935,8 +1137,8 @@ private:
                      first++)
                 {
                     auto& tme2(*tm.add_endpoints_v2());
-                    tme2.set_endpoint(first->address.to_string());
-                    tme2.set_hops(first->hops);
+                    tme2.set_endpoint(first->first.to_string());
+                    tme2.set_hops(first->second);
                 }
                 tm.set_version(2);
                 Counts::msgSendCnt++;
@@ -949,7 +1151,8 @@ private:
 
 PeerImpTest::~PeerImpTest()
 {
-    static_cast<OverlayImplTest&>(overlay_).onPeerDeactivate(slot_);
+    static_cast<OverlayImplTest&>(overlay_).onPeerDeactivate(
+        slot_, id_, inbound_);
 }
 
 void
@@ -969,11 +1172,6 @@ class overlay_net_test : public beast::unit_test::suite,
 {
 protected:
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> overlayTimer_;
-    // global ip:local ip
-    boost::bimap<std::string, std::string> ip2Local_;
-    using global_local = boost::bimap<std::string, std::string>::value_type;
-    std::string baseIp_ = "172.0";
-    std::uint16_t static constexpr maxSubaddr_ = 255;
     std::uint16_t tot_out_ = 0;
     std::uint16_t tot_in_ = 0;
     std::optional<std::pair<std::uint16_t, std::uint16_t>> max_default_{};
@@ -1429,6 +1627,8 @@ public:
         std::uint16_t no_peers = 0;
         std::vector<float> removed;
         float avg_removed = 0;
+        std::vector<float> cache;
+        float avg_cache = 0;
         for (auto [id, node] : nodes_)
         {
             (void)id;
@@ -1472,6 +1672,8 @@ public:
                 avg_removed += *r;
                 removed.push_back(*r);
             }
+            avg_cache += node->overlay_->peerFinder().cacheSize();
+            cache.push_back(node->overlay_->peerFinder().cacheSize());
         }
         auto stats = [](auto& avg, auto N, auto sample) {
             avg = avg / N;
@@ -1506,6 +1708,7 @@ public:
             max_anin = nodes_[VirtualNode::sid_ - 1]->in_max_;
         }
         auto sd_removed = stats(avg_removed, removed.size(), removed);
+        auto sd_cache = stats(avg_cache, cache.size(), cache);
         {
             std::cout.precision(2);
             std::cout << timeSinceStart() << ", out: " << tot_out
@@ -1525,7 +1728,8 @@ public:
                       << ", redirects: " << sum << "/" << sd_redirects
                       << ", add node out/in/redirect " << max_anout << "/"
                       << anout << ", " << max_anin << "/" << anin << ", "
-                      << an_redirect << std::endl
+                      << an_redirect << ", live cache: " << avg_cache << "/"
+                      << sd_cache << std::endl
                       << std::flush;
         }
         if (tot_peers_in_.size() > 0 &&
