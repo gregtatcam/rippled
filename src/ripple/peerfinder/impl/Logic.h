@@ -475,7 +475,7 @@ public:
         std::lock_guard _(lock_);
         RedirectHandouts h(slot);
         handoutEndpoints<std::reference_wrapper<const beast::IP::Endpoint>>(
-            &h, (&h) + 1, [&](auto endpoints, auto it) {
+            &h, (&h) + 1, [&](auto& endpoints, auto it) {
                 endpoints.push_back(it->first);
             });
         return std::move(h.list());
@@ -548,7 +548,7 @@ public:
         //
         {
             handoutEndpoints<std::reference_wrapper<const beast::IP::Endpoint>>(
-                &h, (&h) + 1, [&](auto endpoints, auto it) {
+                &h, (&h) + 1, [&](auto& endpoints, auto it) {
                     endpoints.push_back(it->first);
                 });
             if (!h.list().empty())
@@ -664,7 +664,7 @@ public:
             handoutEndpoints<std::pair<
                 std::reference_wrapper<const beast::IP::Endpoint>,
                 std::uint32_t>>(
-                targets.begin(), targets.end(), [&](auto endpoints, auto it) {
+                targets.begin(), targets.end(), [&](auto& endpoints, auto it) {
                     endpoints.emplace_back(it->first, it->second);
                 });
 
