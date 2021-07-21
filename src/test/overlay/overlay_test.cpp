@@ -118,6 +118,7 @@ struct VirtualNode
         std::uint16_t peerPort,
         std::uint16_t out_max,
         std::uint16_t in_max,
+        bool evict = false,
         bool testNode = false)
         : ip_(ip)
         , id_(sid_)
@@ -128,7 +129,8 @@ struct VirtualNode
               isFixed,
               bootstrap,
               out_max,
-              in_max))
+              in_max,
+              evict))
         , logs_(std::make_unique<jtx::SuiteLogs>(suite))
         , timeKeeper_(std::make_unique<ManualTimeKeeper>())
         , collector_(CollectorManager::New(
@@ -174,6 +176,7 @@ struct VirtualNode
         std::unordered_map<std::string, std::string> const& bootstrap,
         std::uint16_t out_max,
         std::uint16_t in_max,
+        bool evict = false,
         std::string const& dbPath = "",
         bool http = false)
     {
@@ -196,6 +199,7 @@ struct VirtualNode
         config->PEER_PRIVATE = false;
         config->PEERS_OUT_MAX = out_max;
         config->PEERS_IN_MAX = in_max;
+        config->EVICT_PEERS = evict;
 
         if (http)
         {
@@ -265,6 +269,7 @@ protected:
     bool limitBootstrapConnections_ = false;
     // handle max out of inbound connections
     bool handleInboundPrunning_ = false;
+    bool evictConfig_ = false;
 
 public:
     virtual ~VirtualNetwork() = default;
@@ -1229,6 +1234,7 @@ protected:
             peerPort,
             out_max,
             in_max,
+            evictConfig_,
             testNode);
         add(node);
         node->run();
@@ -1531,6 +1537,7 @@ public:
     void
     startNodes()
     {
+        evictConfig_ = true;
         std::vector<std::string> ips;
         ips.reserve(netConfig_.size());
         std::for_each(netConfig_.begin(), netConfig_.end(), [&](auto it) {
