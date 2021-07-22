@@ -39,7 +39,7 @@ make_Overlay(
     Application& app,
     Overlay::Setup const& setup,
     Stoppable& parent,
-    ServerHandler& serverHandler,
+    std::uint16_t overlayPort,
     Resource::Manager& resourceManager,
     Resolver& resolver,
     boost::asio::io_service& io_service,

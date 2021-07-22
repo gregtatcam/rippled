@@ -1385,6 +1385,9 @@ ApplicationImp::setup()
     // Server
     //
     //----------------------------------------------------------------------
+    // hack
+    auto setup =
+        setup_ServerHandler(*config_, beast::logstream{m_journal.error()});
 
     // VFALCO NOTE Unfortunately, in stand-alone mode some code still
     //             foolishly calls overlay(). When this is fixed we can
@@ -1397,7 +1400,7 @@ ApplicationImp::setup()
             *this,
             setup_Overlay(*config_),
             *m_jobQueue,
-            *serverHandler_,
+            setup.overlay.port,
             *m_resourceManager,
             *m_resolver,
             get_io_service(),
@@ -1425,8 +1428,8 @@ ApplicationImp::setup()
     {
         try
         {
-            auto setup = setup_ServerHandler(
-                *config_, beast::logstream{m_journal.error()});
+            // auto setup = setup_ServerHandler(
+            //    *config_, beast::logstream{m_journal.error()});
             setup.makeContexts();
             serverHandler_->setup(setup, m_journal);
         }
