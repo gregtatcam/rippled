@@ -428,7 +428,7 @@ private:
         mutable_buffers_type const& buffers) override;
 
     virtual bool
-    onEvtSend(std::shared_ptr<Message> const&) override;
+    onEvtSendFilter(std::shared_ptr<Message> const&) override;
 
     std::shared_ptr<PeerImp>
     shared()

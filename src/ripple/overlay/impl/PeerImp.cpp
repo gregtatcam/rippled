@@ -116,7 +116,8 @@ PeerImp::~PeerImp()
 
     overlay_.deletePeer(id_);
     overlay_.onPeerDeactivate(id_);
-    overlay_.remove(slot_);
+    // TODO, temp moved to ~P2PeerImp()
+    // overlay_.remove(slot_);
 
     if (inCluster)
     {
@@ -563,7 +564,7 @@ PeerImp::onEvtDoProtocolStart()
 }
 
 bool
-PeerImp::onEvtSend(std::shared_ptr<Message> const& m)
+PeerImp::onEvtSendFilter(std::shared_ptr<Message> const& m)
 {
     auto validator = m->getValidatorKey();
     return validator && !squelch_.expireSquelch(*validator);

@@ -271,7 +271,7 @@ private:
     onEvtRun() = 0;
 
     virtual bool
-    onEvtSend(std::shared_ptr<Message> const&) = 0;
+    onEvtSendFilter(std::shared_ptr<Message> const&) = 0;
 
     virtual void
     onEvtClose() = 0;

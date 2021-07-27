@@ -98,6 +98,9 @@ P2PeerImp::P2PeerImp(
 P2PeerImp::~P2PeerImp()
 {
     overlay_.peerFinder().on_closed(slot_);
+    // TODO, temp moved from ~PeerImp(), slot_ is destroyed here
+    // invalid in ~PeerImp()
+    overlay_.remove(slot_);
 }
 
 void
@@ -154,7 +157,7 @@ P2PeerImp::send(std::shared_ptr<Message> const& m)
     if (detaching_)
         return;
 
-    if (!onEvtSend(m))
+    if (!onEvtSendFilter(m))
         return;
 
     overlay_.reportTraffic(
