@@ -73,41 +73,26 @@ PeerImp::PeerImp(
     Resource::Consumer consumer,
     std::unique_ptr<stream_type>&& stream_ptr,
     OverlayImpl& overlay)
-    : Child(overlay)
-    , app_(app)
-    , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
+    : P2PeerImp(
+          app,
+          id,
+          slot,
+          std::move(request),
+          publicKey,
+          protocol,
+          std::move(stream_ptr),
+          overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
-    , journal_(sink_)
     , p_journal_(p_sink_)
-    , stream_ptr_(std::move(stream_ptr))
-    , socket_(stream_ptr_->next_layer().socket())
-    , stream_(*stream_ptr_)
-    , strand_(socket_.get_executor())
     , timer_(waitable_timer{socket_.get_executor()})
-    , remote_address_(slot->remote_endpoint())
-    , overlay_(overlay)
-    , inbound_(true)
-    , protocol_(protocol)
     , tracking_(Tracking::unknown)
     , trackingTime_(clock_type::now())
-    , publicKey_(publicKey)
     , lastPingTime_(clock_type::now())
     , creationTime_(clock_type::now())
     , squelch_(app_.journal("Squelch"))
     , usage_(consumer)
     , fee_(Resource::feeLightPeer)
     , slot_(slot)
-    , request_(std::move(request))
-    , headers_(request_)
-    , compressionEnabled_(
-          peerFeatureEnabled(
-              headers_,
-              FEATURE_COMPR,
-              "lz4",
-              app_.config().COMPRESSION)
-              ? Compressed::On
-              : Compressed::Off)
     , vpReduceRelayEnabled_(peerFeatureEnabled(
           headers_,
           FEATURE_VPRR,
@@ -131,7 +116,6 @@ PeerImp::~PeerImp()
 
     overlay_.deletePeer(id_);
     overlay_.onPeerDeactivate(id_);
-    overlay_.peerFinder().on_closed(slot_);
     overlay_.remove(slot_);
 
     if (inCluster)
@@ -148,11 +132,8 @@ stringIsUint256Sized(std::string const& pBuffStr)
 }
 
 void
-PeerImp::run()
+PeerImp::onEvtRun()
 {
-    if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&PeerImp::run, shared_from_this()));
-
     auto parseLedgerHash =
         [](std::string const& value) -> std::optional<uint256> {
         if (uint256 ret; ret.parseHex(value))
@@ -195,94 +176,6 @@ PeerImp::run()
         if (previous)
             previousLedgerHash_ = *previous;
     }
-
-    if (inbound_)
-        doAccept();
-    else
-        doProtocolStart();
-
-    // Anything else that needs to be done with the connection should be
-    // done in doProtocolStart
-}
-
-void
-PeerImp::stop()
-{
-    if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&PeerImp::stop, shared_from_this()));
-    if (socket_.is_open())
-    {
-        // The rationale for using different severity levels is that
-        // outbound connections are under our control and may be logged
-        // at a higher level, but inbound connections are more numerous and
-        // uncontrolled so to prevent log flooding the severity is reduced.
-        //
-        if (inbound_)
-        {
-            JLOG(journal_.debug()) << "Stop";
-        }
-        else
-        {
-            JLOG(journal_.info()) << "Stop";
-        }
-    }
-    close();
-}
-
-//------------------------------------------------------------------------------
-
-void
-PeerImp::send(std::shared_ptr<Message> const& m)
-{
-    if (!strand_.running_in_this_thread())
-        return post(strand_, std::bind(&PeerImp::send, shared_from_this(), m));
-    if (gracefulClose_)
-        return;
-    if (detaching_)
-        return;
-
-    auto validator = m->getValidatorKey();
-    if (validator && !squelch_.expireSquelch(*validator))
-        return;
-
-    overlay_.reportTraffic(
-        safe_cast<TrafficCount::category>(m->getCategory()),
-        false,
-        static_cast<int>(m->getBuffer(compressionEnabled_).size()));
-
-    auto sendq_size = send_queue_.size();
-
-    if (sendq_size < Tuning::targetSendQueue)
-    {
-        // To detect a peer that does not read from their
-        // side of the connection, we expect a peer to have
-        // a small senq periodically
-        large_sendq_ = 0;
-    }
-    else if (auto sink = journal_.debug();
-             sink && (sendq_size % Tuning::sendQueueLogFreq) == 0)
-    {
-        std::string const n = name();
-        sink << (n.empty() ? remote_address_.to_string() : n)
-             << " sendq: " << sendq_size;
-    }
-
-    send_queue_.push(m);
-
-    if (sendq_size != 0)
-        return;
-
-    boost::asio::async_write(
-        stream_,
-        boost::asio::buffer(
-            send_queue_.front()->getBuffer(compressionEnabled_)),
-        bind_executor(
-            strand_,
-            std::bind(
-                &PeerImp::onWriteMessage,
-                shared_from_this(),
-                std::placeholders::_1,
-                std::placeholders::_2)));
 }
 
 void
@@ -312,14 +205,6 @@ bool
 PeerImp::cluster() const
 {
     return static_cast<bool>(app_.cluster().member(publicKey_));
-}
-
-std::string
-PeerImp::getVersion() const
-{
-    if (inbound_)
-        return headers_["User-Agent"].to_string();
-    return headers_["Server"].to_string();
 }
 
 Json::Value
@@ -521,57 +406,10 @@ PeerImp::hasRange(std::uint32_t uMin, std::uint32_t uMax)
 //------------------------------------------------------------------------------
 
 void
-PeerImp::close()
+PeerImp::onEvtClose()
 {
-    assert(strand_.running_in_this_thread());
-    if (socket_.is_open())
-    {
-        detaching_ = true;  // DEPRECATED
-        error_code ec;
-        timer_.cancel(ec);
-        socket_.close(ec);
-        overlay_.incPeerDisconnect();
-        if (inbound_)
-        {
-            JLOG(journal_.debug()) << "Closed";
-        }
-        else
-        {
-            JLOG(journal_.info()) << "Closed";
-        }
-    }
-}
-
-void
-PeerImp::fail(std::string const& reason)
-{
-    if (!strand_.running_in_this_thread())
-        return post(
-            strand_,
-            std::bind(
-                (void (Peer::*)(std::string const&)) & PeerImp::fail,
-                shared_from_this(),
-                reason));
-    if (journal_.active(beast::severities::kWarning) && socket_.is_open())
-    {
-        std::string const n = name();
-        JLOG(journal_.warn()) << (n.empty() ? remote_address_.to_string() : n)
-                              << " failed: " << reason;
-    }
-    close();
-}
-
-void
-PeerImp::fail(std::string const& name, error_code ec)
-{
-    assert(strand_.running_in_this_thread());
-    if (socket_.is_open())
-    {
-        JLOG(journal_.warn())
-            << name << " from " << toBase58(TokenType::NodePublic, publicKey_)
-            << " at " << remote_address_.to_string() << ": " << ec.message();
-    }
-    close();
+    error_code ec;
+    timer_.cancel(ec);
 }
 
 hash_map<PublicKey, NodeStore::ShardInfo> const
@@ -582,24 +420,9 @@ PeerImp::getPeerShardInfos() const
 }
 
 void
-PeerImp::gracefulClose()
+PeerImp::onEvtGracefulClose()
 {
-    assert(strand_.running_in_this_thread());
-    assert(socket_.is_open());
-    assert(!gracefulClose_);
-    gracefulClose_ = true;
-#if 0
-    // Flush messages
-    while(send_queue_.size() > 1)
-        send_queue_.pop_back();
-#endif
-    if (send_queue_.size() > 0)
-        return;
     setTimer();
-    stream_.async_shutdown(bind_executor(
-        strand_,
-        std::bind(
-            &PeerImp::onShutdown, shared_from_this(), std::placeholders::_1)));
 }
 
 void
@@ -615,8 +438,7 @@ PeerImp::setTimer()
     }
     timer_.async_wait(bind_executor(
         strand_,
-        std::bind(
-            &PeerImp::onTimer, shared_from_this(), std::placeholders::_1)));
+        std::bind(&PeerImp::onTimer, shared(), std::placeholders::_1)));
 }
 
 // convenience for ignoring the error code
@@ -628,14 +450,6 @@ PeerImp::cancelTimer()
 }
 
 //------------------------------------------------------------------------------
-
-std::string
-PeerImp::makePrefix(id_t id)
-{
-    std::stringstream ss;
-    ss << "[" << std::setfill('0') << std::setw(3) << id << "] ";
-    return ss.str();
-}
 
 void
 PeerImp::onTimer(error_code const& ec)
@@ -699,98 +513,9 @@ PeerImp::onTimer(error_code const& ec)
 }
 
 void
-PeerImp::onShutdown(error_code ec)
+PeerImp::onEvtShutdown()
 {
     cancelTimer();
-    // If we don't get eof then something went wrong
-    if (!ec)
-    {
-        JLOG(journal_.error()) << "onShutdown: expected error condition";
-        return close();
-    }
-    if (ec != boost::asio::error::eof)
-        return fail("onShutdown", ec);
-    close();
-}
-
-//------------------------------------------------------------------------------
-void
-PeerImp::doAccept()
-{
-    assert(read_buffer_.size() == 0);
-
-    JLOG(journal_.debug()) << "doAccept: " << remote_address_;
-
-    auto const sharedValue = makeSharedValue(*stream_ptr_, journal_);
-
-    // This shouldn't fail since we already computed
-    // the shared value successfully in OverlayImpl
-    if (!sharedValue)
-        return fail("makeSharedValue: Unexpected failure");
-
-    JLOG(journal_.info()) << "Protocol: " << to_string(protocol_);
-    JLOG(journal_.info()) << "Public Key: "
-                          << toBase58(TokenType::NodePublic, publicKey_);
-
-    if (auto member = app_.cluster().member(publicKey_))
-    {
-        {
-            std::unique_lock lock{nameMutex_};
-            name_ = *member;
-        }
-        JLOG(journal_.info()) << "Cluster name: " << *member;
-    }
-
-    overlay_.activate(shared_from_this());
-
-    // XXX Set timer: connection is in grace period to be useful.
-    // XXX Set timer: connection idle (idle may vary depending on connection
-    // type.)
-
-    auto write_buffer = std::make_shared<boost::beast::multi_buffer>();
-
-    boost::beast::ostream(*write_buffer) << makeResponse(
-        !overlay_.peerFinder().config().peerPrivate,
-        request_,
-        overlay_.setup().public_ip,
-        remote_address_.address(),
-        *sharedValue,
-        overlay_.setup().networkID,
-        protocol_,
-        app_);
-
-    // Write the whole buffer and only start protocol when that's done.
-    boost::asio::async_write(
-        stream_,
-        write_buffer->data(),
-        boost::asio::transfer_all(),
-        bind_executor(
-            strand_,
-            [this, write_buffer, self = shared_from_this()](
-                error_code ec, std::size_t bytes_transferred) {
-                if (!socket_.is_open())
-                    return;
-                if (ec == boost::asio::error::operation_aborted)
-                    return;
-                if (ec)
-                    return fail("onWriteResponse", ec);
-                if (write_buffer->size() == bytes_transferred)
-                    return doProtocolStart();
-                return fail("Failed to write header");
-            }));
-}
-
-std::string
-PeerImp::name() const
-{
-    std::shared_lock read_lock{nameMutex_};
-    return name_;
-}
-
-std::string
-PeerImp::domain() const
-{
-    return headers_["Server-Domain"].to_string();
 }
 
 //------------------------------------------------------------------------------
@@ -798,10 +523,8 @@ PeerImp::domain() const
 // Protocol logic
 
 void
-PeerImp::doProtocolStart()
+PeerImp::onEvtDoProtocolStart()
 {
-    onReadMessage(error_code(), 0);
-
     // Send all the validator lists that have been loaded
     if (inbound_ && supportsFeature(ProtocolFeature::ValidatorListPropagation))
     {
@@ -839,109 +562,119 @@ PeerImp::doProtocolStart()
     setTimer();
 }
 
-// Called repeatedly with protocol message data
-void
-PeerImp::onReadMessage(error_code ec, std::size_t bytes_transferred)
+bool
+PeerImp::onEvtSend(std::shared_ptr<Message> const& m)
 {
-    if (!socket_.is_open())
-        return;
-    if (ec == boost::asio::error::operation_aborted)
-        return;
-    if (ec == boost::asio::error::eof)
-    {
-        JLOG(journal_.info()) << "EOF";
-        return gracefulClose();
-    }
-    if (ec)
-        return fail("onReadMessage", ec);
-    if (auto stream = journal_.trace())
-    {
-        if (bytes_transferred > 0)
-            stream << "onReadMessage: " << bytes_transferred << " bytes";
-        else
-            stream << "onReadMessage";
-    }
-
-    metrics_.recv.add_message(bytes_transferred);
-
-    read_buffer_.commit(bytes_transferred);
-
-    auto hint = Tuning::readBufferBytes;
-
-    while (read_buffer_.size() > 0)
-    {
-        std::size_t bytes_consumed;
-        std::tie(bytes_consumed, ec) =
-            invokeProtocolMessage(read_buffer_.data(), *this, hint);
-        if (ec)
-            return fail("onReadMessage", ec);
-        if (!socket_.is_open())
-            return;
-        if (gracefulClose_)
-            return;
-        if (bytes_consumed == 0)
-            break;
-        read_buffer_.consume(bytes_consumed);
-    }
-
-    // Timeout on writes only
-    stream_.async_read_some(
-        read_buffer_.prepare(std::max(Tuning::readBufferBytes, hint)),
-        bind_executor(
-            strand_,
-            std::bind(
-                &PeerImp::onReadMessage,
-                shared_from_this(),
-                std::placeholders::_1,
-                std::placeholders::_2)));
+    auto validator = m->getValidatorKey();
+    return validator && !squelch_.expireSquelch(*validator);
 }
 
-void
-PeerImp::onWriteMessage(error_code ec, std::size_t bytes_transferred)
+bool
+PeerImp::onEvtProtocolMessage(
+    detail::MessageHeader const& header,
+    boost::beast::multi_buffer::mutable_buffers_type const& buffers)
 {
-    if (!socket_.is_open())
-        return;
-    if (ec == boost::asio::error::operation_aborted)
-        return;
-    if (ec)
-        return fail("onWriteMessage", ec);
-    if (auto stream = journal_.trace())
-    {
-        if (bytes_transferred > 0)
-            stream << "onWriteMessage: " << bytes_transferred << " bytes";
-        else
-            stream << "onWriteMessage";
-    }
+    bool success = false;
 
-    metrics_.sent.add_message(bytes_transferred);
-
-    assert(!send_queue_.empty());
-    send_queue_.pop();
-    if (!send_queue_.empty())
+    switch (header.message_type)
     {
-        // Timeout on writes only
-        return boost::asio::async_write(
-            stream_,
-            boost::asio::buffer(
-                send_queue_.front()->getBuffer(compressionEnabled_)),
-            bind_executor(
-                strand_,
-                std::bind(
-                    &PeerImp::onWriteMessage,
-                    shared_from_this(),
-                    std::placeholders::_1,
-                    std::placeholders::_2)));
+        case protocol::mtMANIFESTS:
+            success =
+                detail::invoke<protocol::TMManifests>(header, buffers, *this);
+            break;
+        case protocol::mtPING:
+            success = detail::invoke<protocol::TMPing>(header, buffers, *this);
+            break;
+        case protocol::mtCLUSTER:
+            success =
+                detail::invoke<protocol::TMCluster>(header, buffers, *this);
+            break;
+        case protocol::mtENDPOINTS:
+            success =
+                detail::invoke<protocol::TMEndpoints>(header, buffers, *this);
+            break;
+        case protocol::mtTRANSACTION:
+            success =
+                detail::invoke<protocol::TMTransaction>(header, buffers, *this);
+            break;
+        case protocol::mtGET_LEDGER:
+            success =
+                detail::invoke<protocol::TMGetLedger>(header, buffers, *this);
+            break;
+        case protocol::mtLEDGER_DATA:
+            success =
+                detail::invoke<protocol::TMLedgerData>(header, buffers, *this);
+            break;
+        case protocol::mtPROPOSE_LEDGER:
+            success =
+                detail::invoke<protocol::TMProposeSet>(header, buffers, *this);
+            break;
+        case protocol::mtSTATUS_CHANGE:
+            success = detail::invoke<protocol::TMStatusChange>(
+                header, buffers, *this);
+            break;
+        case protocol::mtHAVE_SET:
+            success = detail::invoke<protocol::TMHaveTransactionSet>(
+                header, buffers, *this);
+            break;
+        case protocol::mtVALIDATION:
+            success =
+                detail::invoke<protocol::TMValidation>(header, buffers, *this);
+            break;
+        case protocol::mtGET_PEER_SHARD_INFO:
+            success = detail::invoke<protocol::TMGetPeerShardInfo>(
+                header, buffers, *this);
+            break;
+        case protocol::mtPEER_SHARD_INFO:
+            success = detail::invoke<protocol::TMPeerShardInfo>(
+                header, buffers, *this);
+            break;
+        case protocol::mtVALIDATORLIST:
+            success = detail::invoke<protocol::TMValidatorList>(
+                header, buffers, *this);
+            break;
+        case protocol::mtVALIDATORLISTCOLLECTION:
+            success = detail::invoke<protocol::TMValidatorListCollection>(
+                header, buffers, *this);
+            break;
+        case protocol::mtGET_OBJECTS:
+            success = detail::invoke<protocol::TMGetObjectByHash>(
+                header, buffers, *this);
+            break;
+        case protocol::mtSQUELCH:
+            success =
+                detail::invoke<protocol::TMSquelch>(header, buffers, *this);
+            break;
+        case protocol::mtPROOF_PATH_REQ:
+            success = detail::invoke<protocol::TMProofPathRequest>(
+                header, buffers, *this);
+            break;
+        case protocol::mtPROOF_PATH_RESPONSE:
+            success = detail::invoke<protocol::TMProofPathResponse>(
+                header, buffers, *this);
+            break;
+        case protocol::mtREPLAY_DELTA_REQ:
+            success = detail::invoke<protocol::TMReplayDeltaRequest>(
+                header, buffers, *this);
+            break;
+        case protocol::mtREPLAY_DELTA_RESPONSE:
+            success = detail::invoke<protocol::TMReplayDeltaResponse>(
+                header, buffers, *this);
+            break;
+        case protocol::mtGET_PEER_SHARD_INFO_V2:
+            success = detail::invoke<protocol::TMGetPeerShardInfoV2>(
+                header, buffers, *this);
+            break;
+        case protocol::mtPEER_SHARD_INFO_V2:
+            success = detail::invoke<protocol::TMPeerShardInfoV2>(
+                header, buffers, *this);
+            break;
+        default:
+            onMessageUnknown(header.message_type);
+            success = true;
+            break;
     }
-
-    if (gracefulClose_)
-    {
-        return stream_.async_shutdown(bind_executor(
-            strand_,
-            std::bind(
-                &PeerImp::onShutdown,
-                shared_from_this(),
-                std::placeholders::_1)));
-    }
+    return success;
 }
 
 //------------------------------------------------------------------------------
@@ -997,7 +730,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMManifests> const& m)
         fee_ = Resource::feeMediumBurdenPeer;
 
     // VFALCO What's the right job type?
-    auto that = shared_from_this();
+    auto that = shared();
     app_.getJobQueue().addJob(
         jtVALIDATION_ut, "receiveManifests", [this, that, m](Job&) {
             overlay_.onManifests(m, that);
@@ -1511,7 +1244,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMTransaction> const& m)
             app_.getJobQueue().addJob(
                 jtTRANSACTION,
                 "recvTransaction->checkTransaction",
-                [weak = std::weak_ptr<PeerImp>(shared_from_this()),
+                [weak = std::weak_ptr<PeerImp>(shared()),
                  flags,
                  checkSignature,
                  stx](Job&) {
@@ -1614,7 +1347,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetLedger> const& m)
     }
 
     // Queue a job to process the request
-    std::weak_ptr<PeerImp> weak = shared_from_this();
+    std::weak_ptr<PeerImp> weak = shared();
     app_.getJobQueue().addJob(jtLEDGER_REQ, "recvGetLedger", [weak, m](Job&) {
         if (auto peer = weak.lock())
             peer->processLedgerRequest(m);
@@ -1632,7 +1365,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMProofPathRequest> const& m)
     }
 
     fee_ = Resource::feeMediumBurdenPeer;
-    std::weak_ptr<PeerImp> weak = shared_from_this();
+    std::weak_ptr<PeerImp> weak = shared();
     app_.getJobQueue().addJob(
         jtREPLAY_REQ, "recvProofPathRequest", [weak, m](Job&) {
             if (auto peer = weak.lock())
@@ -1681,7 +1414,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMReplayDeltaRequest> const& m)
     }
 
     fee_ = Resource::feeMediumBurdenPeer;
-    std::weak_ptr<PeerImp> weak = shared_from_this();
+    std::weak_ptr<PeerImp> weak = shared();
     app_.getJobQueue().addJob(
         jtREPLAY_REQ, "recvReplayDeltaRequest", [weak, m](Job&) {
             if (auto peer = weak.lock())
@@ -1800,7 +1533,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMLedgerData> const& m)
     // Otherwise check if received data for a candidate transaction set
     if (m->type() == protocol::liTS_CANDIDATE)
     {
-        std::weak_ptr<PeerImp> weak{shared_from_this()};
+        std::weak_ptr<PeerImp> weak{shared()};
         app_.getJobQueue().addJob(
             jtTXN_DATA, "recvPeerData", [weak, ledgerHash, m](Job&) {
                 if (auto peer = weak.lock())
@@ -1813,7 +1546,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMLedgerData> const& m)
     }
 
     // Consume the message
-    app_.getInboundLedgers().gotLedgerData(ledgerHash, shared_from_this(), m);
+    app_.getInboundLedgers().gotLedgerData(ledgerHash, shared(), m);
 }
 
 void
@@ -1902,7 +1635,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMProposeSet> const& m)
             app_.timeKeeper().closeTime(),
             calcNodeID(app_.validatorManifests().getMasterKey(publicKey))});
 
-    std::weak_ptr<PeerImp> weak = shared_from_this();
+    std::weak_ptr<PeerImp> weak = shared();
     app_.getJobQueue().addJob(
         isTrusted ? jtPROPOSAL_t : jtPROPOSAL_ut,
         "recvPropose->checkPropose",
@@ -2482,7 +2215,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMValidation> const& m)
         }
         if (isTrusted || cluster() || !app_.getFeeTrack().isLoadedLocal())
         {
-            std::weak_ptr<PeerImp> weak = shared_from_this();
+            std::weak_ptr<PeerImp> weak = shared();
             app_.getJobQueue().addJob(
                 isTrusted ? jtVALIDATION_t : jtVALIDATION_ut,
                 "recvValidation->checkValidation",
@@ -2652,8 +2385,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMSquelch> const& m)
     if (!strand_.running_in_this_thread())
         return post(
             strand_,
-            std::bind(
-                (on_message_fn)&PeerImp::onMessage, shared_from_this(), m));
+            std::bind((on_message_fn)&PeerImp::onMessage, shared(), m));
 
     if (!m->has_validatorpubkey())
     {
@@ -2731,7 +2463,7 @@ PeerImp::doFetchPack(const std::shared_ptr<protocol::TMGetObjectByHash>& packet)
 
     uint256 const hash{packet->ledgerhash()};
 
-    std::weak_ptr<PeerImp> weak = shared_from_this();
+    std::weak_ptr<PeerImp> weak = shared();
     auto elapsed = UptimeClock::now();
     auto const pap = &app_;
     app_.getJobQueue().addJob(
@@ -3374,46 +3106,6 @@ PeerImp::reduceRelayReady()
             reduce_relay::epoch<std::chrono::minutes>(UptimeClock::now()) >
             reduce_relay::WAIT_ON_BOOTUP;
     return vpReduceRelayEnabled_ && reduceRelayReady_;
-}
-
-void
-PeerImp::Metrics::add_message(std::uint64_t bytes)
-{
-    using namespace std::chrono_literals;
-    std::unique_lock lock{mutex_};
-
-    totalBytes_ += bytes;
-    accumBytes_ += bytes;
-    auto const timeElapsed = clock_type::now() - intervalStart_;
-    auto const timeElapsedInSecs =
-        std::chrono::duration_cast<std::chrono::seconds>(timeElapsed);
-
-    if (timeElapsedInSecs >= 1s)
-    {
-        auto const avgBytes = accumBytes_ / timeElapsedInSecs.count();
-        rollingAvg_.push_back(avgBytes);
-
-        auto const totalBytes =
-            std::accumulate(rollingAvg_.begin(), rollingAvg_.end(), 0ull);
-        rollingAvgBytes_ = totalBytes / rollingAvg_.size();
-
-        intervalStart_ = clock_type::now();
-        accumBytes_ = 0;
-    }
-}
-
-std::uint64_t
-PeerImp::Metrics::average_bytes() const
-{
-    std::shared_lock lock{mutex_};
-    return rollingAvgBytes_;
-}
-
-std::uint64_t
-PeerImp::Metrics::total_bytes() const
-{
-    std::shared_lock lock{mutex_};
-    return totalBytes_;
 }
 
 }  // namespace ripple
