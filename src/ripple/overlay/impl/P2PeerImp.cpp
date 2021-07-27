@@ -90,9 +90,6 @@ P2PeerImp::P2PeerImp(
               ? Compressed::On
               : Compressed::Off)
 {
-    JLOG(journal_.debug()) << " compression enabled "
-                           << (compressionEnabled_ == Compressed::On) << " "
-                           << id_;
 }
 
 P2PeerImp::~P2PeerImp()
@@ -157,7 +154,7 @@ P2PeerImp::send(std::shared_ptr<Message> const& m)
     if (detaching_)
         return;
 
-    if (!onEvtSendFilter(m))
+    if (onEvtSendFilter(m))
         return;
 
     overlay_.reportTraffic(

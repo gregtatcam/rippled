@@ -22,27 +22,13 @@
 
 #include <ripple/app/consensus/RCLCxPeerPos.h>
 #include <ripple/app/ledger/impl/LedgerReplayMsgHandler.h>
-//#include <ripple/basics/Log.h>
 #include <ripple/basics/RangeSet.h>
-//#include <ripple/beast/utility/WrappedSink.h>
 #include <ripple/nodestore/ShardInfo.h>
 #include <ripple/overlay/Squelch.h>
-//#include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
-//#include <ripple/overlay/impl/ProtocolMessage.h>
-//#include <ripple/overlay/impl/ProtocolVersion.h>
-//#include <ripple/peerfinder/PeerfinderManager.h>
-//#include <ripple/protocol/Protocol.h>
 #include <ripple/protocol/STTx.h>
 #include <ripple/protocol/STValidation.h>
 #include <ripple/resource/Fees.h>
-
-//#include <boost/circular_buffer.hpp>
-//#include <boost/endian/conversion.hpp>
-//#include <boost/thread/shared_mutex.hpp>
-#include <cstdint>
-#include <optional>
-#include <queue>
 
 namespace ripple {
 
@@ -115,7 +101,6 @@ private:
     protocol::TMStatusChange last_status_;
     Resource::Consumer usage_;
     Resource::Charge fee_;
-    std::shared_ptr<PeerFinder::Slot> const slot_;
     std::unique_ptr<LoadEvent> load_event_;
     // The highest sequence of each PublisherList that has
     // been sent to or received from this peer.
@@ -471,7 +456,6 @@ PeerImp::PeerImp(
     , squelch_(app_.journal("Squelch"))
     , usage_(usage)
     , fee_(Resource::feeLightPeer)
-    , slot_(std::move(slot))
     , vpReduceRelayEnabled_(peerFeatureEnabled(
           headers_,
           FEATURE_VPRR,
@@ -482,8 +466,6 @@ PeerImp::PeerImp(
           app_.config().LEDGER_REPLAY))
     , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
 {
-    read_buffer_.commit(boost::asio::buffer_copy(
-        read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));
     JLOG(journal_.debug()) << "compression enabled "
                            << (compressionEnabled_ == Compressed::On)
                            << " vp reduce-relay enabled "

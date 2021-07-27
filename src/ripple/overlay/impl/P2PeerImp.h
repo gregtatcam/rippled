@@ -20,21 +20,13 @@
 #ifndef RIPPLE_OVERLAY_P2PEERIMP_H_INCLUDED
 #define RIPPLE_OVERLAY_P2PEERIMP_H_INCLUDED
 
-//#include <ripple/app/consensus/RCLCxPeerPos.h>
-//#include <ripple/app/ledger/impl/LedgerReplayMsgHandler.h>
 #include <ripple/basics/Log.h>
-//#include <ripple/basics/RangeSet.h>
 #include <ripple/beast/utility/WrappedSink.h>
-//#include <ripple/nodestore/ShardInfo.h>
-//#include <ripple/overlay/Squelch.h>
 #include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/protocol/Protocol.h>
-//#include <ripple/protocol/STTx.h>
-//#include <ripple/protocol/STValidation.h>
-//#include <ripple/resource/Fees.h>
 
 #include <boost/circular_buffer.hpp>
 #include <boost/endian/conversion.hpp>
@@ -338,9 +330,6 @@ P2PeerImp::P2PeerImp(
 {
     read_buffer_.commit(boost::asio::buffer_copy(
         read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));
-    JLOG(journal_.debug()) << "compression enabled "
-                           << (compressionEnabled_ == Compressed::On) << " "
-                           << id_;
 }
 
 }  // namespace ripple
