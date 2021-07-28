@@ -81,12 +81,12 @@ public:
     virtual ~Overlay() = default;
 
     virtual void
-    start()
+    start()  // P2P
     {
     }
 
     virtual void
-    stop()
+    stop()  // P2P
     {
     }
 
@@ -95,18 +95,18 @@ public:
     onHandoff(
         std::unique_ptr<stream_type>&& bundle,
         http_request_type&& request,
-        boost::asio::ip::tcp::endpoint remote_address) = 0;
+        boost::asio::ip::tcp::endpoint remote_address) = 0;  // P2P
 
     /** Establish a peer connection to the specified endpoint.
         The call returns immediately, the connection attempt is
         performed asynchronously.
     */
     virtual void
-    connect(beast::IP::Endpoint const& address) = 0;
+    connect(beast::IP::Endpoint const& address) = 0;  // P2P
 
     /** Returns the maximum number of peers we are configured to allow. */
     virtual int
-    limit() = 0;
+    limit() = 0;  // P2P
 
     /** Returns the number of active peers.
         Active peers are only those peers that have completed the
@@ -224,7 +224,7 @@ public:
                 server. An unseated optional, otherwise.
     */
     virtual std::optional<std::uint32_t>
-    networkID() const = 0;
+    networkID() const = 0;  // P2P
 };
 
 }  // namespace ripple

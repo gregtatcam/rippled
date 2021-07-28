@@ -335,9 +335,6 @@ P2PeerImp::doAccept()
         JLOG(journal_.info()) << "Cluster name: " << *member;
     }
 
-    // TODO, remove the cast once P2POverlayImp is added
-    overlay_.activate(std::static_pointer_cast<PeerImp>(shared_from_this()));
-
     // XXX Set timer: connection is in grace period to be useful.
     // XXX Set timer: connection idle (idle may vary depending on connection
     // type.)

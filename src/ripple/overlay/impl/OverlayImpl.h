@@ -20,66 +20,25 @@
 #ifndef RIPPLE_OVERLAY_OVERLAYIMPL_H_INCLUDED
 #define RIPPLE_OVERLAY_OVERLAYIMPL_H_INCLUDED
 
-#include <ripple/app/main/Application.h>
-#include <ripple/basics/Resolver.h>
-#include <ripple/basics/UnorderedContainers.h>
-#include <ripple/basics/chrono.h>
 #include <ripple/core/Job.h>
-#include <ripple/overlay/Message.h>
-#include <ripple/overlay/Overlay.h>
 #include <ripple/overlay/Slot.h>
-#include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/TrafficCount.h>
-#include <ripple/peerfinder/PeerfinderManager.h>
-#include <ripple/resource/ResourceManager.h>
-#include <ripple/rpc/ServerHandler.h>
-#include <ripple/server/Handoff.h>
 #include <boost/asio/basic_waitable_timer.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ssl/context.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/container/flat_map.hpp>
-#include <atomic>
-#include <cassert>
-#include <chrono>
-#include <condition_variable>
-#include <cstdint>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <unordered_map>
 
 namespace ripple {
 
 class PeerImp;
 class BasicConfig;
 
-class OverlayImpl : public Overlay, public reduce_relay::SquelchHandler
+class OverlayImpl : public P2POverlayImpl, public reduce_relay::SquelchHandler
 {
-public:
-    class Child
-    {
-    protected:
-        OverlayImpl& overlay_;
-
-        explicit Child(OverlayImpl& overlay);
-
-        virtual ~Child();
-
-    public:
-        virtual void
-        stop() = 0;
-    };
-
 private:
-    using clock_type = std::chrono::steady_clock;
-    using socket_type = boost::asio::ip::tcp::socket;
-    using address_type = boost::asio::ip::address;
-    using endpoint_type = boost::asio::ip::tcp::endpoint;
-    using error_code = boost::system::error_code;
-
     struct Timer : Child, std::enable_shared_from_this<Timer>
     {
+        // TODO, duplicate but subclass
+        // letting the p2p handle lifetime of the class
+        OverlayImpl& overlay_;
         boost::asio::basic_waitable_timer<clock_type> timer_;
         bool stopping_{false};
 
@@ -95,24 +54,10 @@ private:
         on_timer(error_code ec);
     };
 
-    Application& app_;
-    boost::asio::io_service& io_service_;
-    std::optional<boost::asio::io_service::work> work_;
-    boost::asio::io_service::strand strand_;
-    mutable std::recursive_mutex mutex_;  // VFALCO use std::mutex
-    std::condition_variable_any cond_;
     std::weak_ptr<Timer> timer_;
-    boost::container::flat_map<Child*, std::weak_ptr<Child>> list_;
-    Setup setup_;
-    beast::Journal const journal_;
-    ServerHandler& serverHandler_;
-    Resource::Manager& m_resourceManager;
-    std::unique_ptr<PeerFinder::Manager> m_peerFinder;
     TrafficCount m_traffic;
     hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImp>> m_peers;
     hash_map<Peer::id_t, std::weak_ptr<PeerImp>> ids_;
-    Resolver& m_resolver;
-    std::atomic<Peer::id_t> next_id_;
     int timer_count_;
     std::atomic<uint64_t> jqTransOverflow_{0};
     std::atomic<uint64_t> peerDisconnects_{0};
@@ -123,8 +68,6 @@ private:
     std::condition_variable csCV_;
     // Peer IDs expecting to receive a last link notification
     std::set<std::uint32_t> csIDs_;
-
-    std::optional<std::uint32_t> networkID_;
 
     reduce_relay::Slots<UptimeClock> slots_;
 
@@ -157,36 +100,6 @@ public:
 
     void
     stop() override;
-
-    PeerFinder::Manager&
-    peerFinder()
-    {
-        return *m_peerFinder;
-    }
-
-    Resource::Manager&
-    resourceManager()
-    {
-        return m_resourceManager;
-    }
-
-    Setup const&
-    setup() const
-    {
-        return setup_;
-    }
-
-    Handoff
-    onHandoff(
-        std::unique_ptr<stream_type>&& bundle,
-        http_request_type&& request,
-        endpoint_type remote_endpoint) override;
-
-    void
-    connect(beast::IP::Endpoint const& remote_endpoint) override;
-
-    int
-    limit() override;
 
     std::size_t
     size() const override;
@@ -237,14 +150,6 @@ public:
     void
     remove(std::shared_ptr<PeerFinder::Slot> const& slot);
 
-    /** Called when a peer has connected successfully
-        This is called after the peer handshake has been completed and during
-        peer activation. At this point, the peer address and the public key
-        are known.
-    */
-    void
-    activate(std::shared_ptr<PeerImp> const& peer);
-
     // Called when an active peer is destroyed.
     void
     onPeerDeactivate(Peer::id_t id);
@@ -280,48 +185,6 @@ public:
     onManifests(
         std::shared_ptr<protocol::TMManifests> const& m,
         std::shared_ptr<PeerImp> const& from);
-
-    static bool
-    isPeerUpgrade(http_request_type const& request);
-
-    template <class Body>
-    static bool
-    isPeerUpgrade(boost::beast::http::response<Body> const& response)
-    {
-        if (!is_upgrade(response))
-            return false;
-        return response.result() ==
-            boost::beast::http::status::switching_protocols;
-    }
-
-    template <class Fields>
-    static bool
-    is_upgrade(boost::beast::http::header<true, Fields> const& req)
-    {
-        if (req.version() < 11)
-            return false;
-        if (req.method() != boost::beast::http::verb::get)
-            return false;
-        if (!boost::beast::http::token_list{req["Connection"]}.exists(
-                "upgrade"))
-            return false;
-        return true;
-    }
-
-    template <class Fields>
-    static bool
-    is_upgrade(boost::beast::http::header<false, Fields> const& req)
-    {
-        if (req.version() < 11)
-            return false;
-        if (!boost::beast::http::token_list{req["Connection"]}.exists(
-                "upgrade"))
-            return false;
-        return true;
-    }
-
-    static std::string
-    makePrefix(std::uint32_t id);
 
     void
     reportTraffic(TrafficCount::category cat, bool isInbound, int bytes);
@@ -421,19 +284,6 @@ private:
     void
     unsquelch(PublicKey const& validator, Peer::id_t id) const override;
 
-    std::shared_ptr<Writer>
-    makeRedirectResponse(
-        std::shared_ptr<PeerFinder::Slot> const& slot,
-        http_request_type const& request,
-        address_type remote_address);
-
-    std::shared_ptr<Writer>
-    makeErrorResponse(
-        std::shared_ptr<PeerFinder::Slot> const& slot,
-        http_request_type const& request,
-        address_type remote_address,
-        std::string msg);
-
     /** Handles crawl requests. Crawl returns information about the
         node and its peers so crawlers can map the network.
 
@@ -459,13 +309,6 @@ private:
     */
     bool
     processHealth(http_request_type const& req, Handoff& handoff);
-
-    /** Handles non-peer protocol requests.
-
-        @return true if the request was handled.
-    */
-    bool
-    processRequest(http_request_type const& req, Handoff& handoff);
 
     /** Returns information about peers on the overlay network.
         Reported through the /crawl API
@@ -500,20 +343,8 @@ private:
     //
     // PropertyStream
     //
-
     void
     onWrite(beast::PropertyStream::Map& stream) override;
-
-    //--------------------------------------------------------------------------
-
-    void
-    remove(Child& child);
-
-    void
-    stopChildren();
-
-    void
-    autoConnect();
 
     void
     sendEndpoints();
@@ -580,6 +411,34 @@ private:
         }
         m_stats.peerDisconnects = getPeerDisconnect();
     }
+    // Implementation of delegated events handling from the p2p layer
+private:
+    bool
+    onEvtProcessRequest(http_request_type const& req, Handoff& handoff)
+        override;
+
+    std::shared_ptr<P2PeerImp>
+    mkInboundPeer(
+        Application& app,
+        Peer::id_t id,
+        std::shared_ptr<PeerFinder::Slot> const& slot,
+        http_request_type&& request,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        Resource::Consumer consumer,
+        std::unique_ptr<stream_type>&& stream_ptr) override;
+
+    std::shared_ptr<P2PeerImp>
+    mkOutboundPeer(
+        Application& app,
+        std::unique_ptr<stream_type>&& stream_ptr,
+        boost::beast::multi_buffer const& buffers,
+        std::shared_ptr<PeerFinder::Slot>&& slot,
+        http_response_type&& response,
+        Resource::Consumer usage,
+        PublicKey const& publicKey,
+        ProtocolVersion protocol,
+        id_t id) override;
 };
 
 }  // namespace ripple
