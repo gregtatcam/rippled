@@ -115,8 +115,6 @@ PeerImp::~PeerImp()
 
     overlay_.deletePeer(id_);
     overlay_.onPeerDeactivate(id_);
-    // TODO, temp moved to ~P2PeerImp()
-    // overlay_.remove(slot_);
 
     if (inCluster)
     {

@@ -141,30 +141,9 @@ void
 OverlayImpl::add_active(std::shared_ptr<PeerImp> const& peer)
 {
     // the lock is held by the p2p
-
-    {
-        auto const result = m_peers.emplace(peer->slot(), peer);
-        assert(result.second);
-        (void)result.second;
-    }
-
-    {
-        auto const result = ids_.emplace(
-            std::piecewise_construct,
-            std::make_tuple(peer->id()),
-            std::make_tuple(peer));
-        assert(result.second);
-        (void)result.second;
-    }
-}
-
-void
-OverlayImpl::remove(std::shared_ptr<PeerFinder::Slot> const& slot)
-{
-    std::lock_guard lock(mutex_);
-    auto const iter = m_peers.find(slot);
-    assert(iter != m_peers.end());
-    m_peers.erase(iter);
+    auto result = peers_.emplace(peer->id(), peer->slot(), peer);
+    assert(result.second);
+    (void)result.second;
 }
 
 void
@@ -214,7 +193,10 @@ void
 OverlayImpl::onPeerDeactivate(Peer::id_t id)
 {
     std::lock_guard lock(mutex_);
-    ids_.erase(id);
+    auto& id_index = peers_.get<0>();
+    auto it = id_index.find(id);
+    if (it != id_index.end())
+        id_index.erase(it);
 }
 
 void
@@ -314,8 +296,8 @@ OverlayImpl::crawlShards(bool includePublicKey, std::uint32_t relays)
 
         {
             std::lock_guard lock{mutex_};
-            for (auto const& id : ids_)
-                csIDs_.emplace(id.first);
+            for (auto const& it : peers_)
+                csIDs_.emplace(it.id);
         }
 
         // Request peer shard info
@@ -384,7 +366,7 @@ std::size_t
 OverlayImpl::size() const
 {
     std::lock_guard lock(mutex_);
-    return ids_.size();
+    return peers_.size();
 }
 
 Json::Value
@@ -752,9 +734,10 @@ std::shared_ptr<Peer>
 OverlayImpl::findPeerByShortID(Peer::id_t const& id) const
 {
     std::lock_guard lock(mutex_);
-    auto const iter = ids_.find(id);
-    if (iter != ids_.end())
-        return iter->second.lock();
+    auto const& id_index = peers_.get<0>();
+    auto const iter = id_index.find(id);
+    if (iter != id_index.end())
+        return iter->peer.lock();
     return {};
 }
 
@@ -764,9 +747,10 @@ std::shared_ptr<Peer>
 OverlayImpl::findPeerByPublicKey(PublicKey const& pubKey)
 {
     std::lock_guard lock(mutex_);
-    for (auto const& e : ids_)
+    auto const& id_index = peers_.get<0>();
+    for (auto const& e : id_index)
     {
-        if (auto peer = e.second.lock())
+        if (auto peer = e.peer.lock())
         {
             if (peer->getNodePublic() == pubKey)
                 return peer;
@@ -868,9 +852,10 @@ OverlayImpl::sendEndpoints()
         std::shared_ptr<PeerImp> peer;
         {
             std::lock_guard lock(mutex_);
-            auto const iter = m_peers.find(e.first);
-            if (iter != m_peers.end())
-                peer = iter->second.lock();
+            auto const& slot_index = peers_.get<1>();
+            auto const iter = slot_index.find(e.first);
+            if (iter != slot_index.end())
+                peer = iter->peer.lock();
         }
         if (peer)
             peer->sendEndpoints(e.second.begin(), e.second.end());

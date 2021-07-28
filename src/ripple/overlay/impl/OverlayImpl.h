@@ -24,15 +24,58 @@
 #include <ripple/overlay/Slot.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/TrafficCount.h>
+
 #include <boost/asio/basic_waitable_timer.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/member.hpp>
+#include <boost/multi_index_container.hpp>
 
 namespace ripple {
 
 class PeerImp;
 class BasicConfig;
 
+inline std::size_t
+hash_value(std::shared_ptr<PeerFinder::Slot> const& slot)
+{
+    beast::uhash<> hasher;
+    return hasher(slot);
+}
+
 class OverlayImpl : public P2POverlayImpl, public reduce_relay::SquelchHandler
 {
+    struct ById
+    {
+    };
+    struct BySlot
+    {
+    };
+    struct PeerItem
+    {
+        PeerItem(
+            Peer::id_t i,
+            std::shared_ptr<PeerFinder::Slot> const& s,
+            std::shared_ptr<PeerImp> const& p)
+            : id(i), slot(s), peer(p)
+        {
+        }
+        Peer::id_t id;
+        std::shared_ptr<PeerFinder::Slot> slot;
+        std::weak_ptr<PeerImp> peer;
+    };
+    // Intermediate types to help with readability
+    template <class tag, typename Type, Type PeerItem::*PtrToMember>
+    using hashed_unique = boost::multi_index::hashed_unique<
+        boost::multi_index::tag<tag>,
+        boost::multi_index::member<PeerItem, Type, PtrToMember>>;
+    // Intermediate types to help with readability
+    using indexing = boost::multi_index::indexed_by<
+        hashed_unique<ById, Peer::id_t, &PeerItem::id>,
+        hashed_unique<
+            BySlot,
+            std::shared_ptr<PeerFinder::Slot>,
+            &PeerItem::slot>>;
+
 private:
     struct Timer : Child, std::enable_shared_from_this<Timer>
     {
@@ -56,8 +99,7 @@ private:
 
     std::weak_ptr<Timer> timer_;
     TrafficCount m_traffic;
-    hash_map<std::shared_ptr<PeerFinder::Slot>, std::weak_ptr<PeerImp>> m_peers;
-    hash_map<Peer::id_t, std::weak_ptr<PeerImp>> ids_;
+    boost::multi_index::multi_index_container<PeerItem, indexing> peers_;
     int timer_count_;
     std::atomic<uint64_t> jqTransOverflow_{0};
     std::atomic<uint64_t> peerDisconnects_{0};
@@ -147,9 +189,6 @@ public:
     void
     add_active(std::shared_ptr<PeerImp> const& peer);
 
-    void
-    remove(std::shared_ptr<PeerFinder::Slot> const& slot);
-
     // Called when an active peer is destroyed.
     void
     onPeerDeactivate(Peer::id_t id);
@@ -167,10 +206,10 @@ public:
 
             // Iterate over a copy of the peer list because peer
             // destruction can invalidate iterators.
-            wp.reserve(ids_.size());
+            wp.reserve(peers_.size());
 
-            for (auto& x : ids_)
-                wp.push_back(x.second);
+            for (auto const& x : peers_)
+                wp.push_back(x.peer);
         }
 
         for (auto& w : wp)
