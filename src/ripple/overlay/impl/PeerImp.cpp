@@ -74,7 +74,7 @@ PeerImp::PeerImp(
     std::unique_ptr<stream_type>&& stream_ptr,
     OverlayImpl& overlay)
     : P2PeerImp(
-          app,
+          overlay.p2pConfig(),
           id,
           slot,
           std::move(request),
@@ -82,6 +82,8 @@ PeerImp::PeerImp(
           protocol,
           std::move(stream_ptr),
           overlay)
+    , app_(app)
+    , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{socket_.get_executor()})
@@ -564,7 +566,13 @@ bool
 PeerImp::onEvtSendFilter(std::shared_ptr<Message> const& m)
 {
     auto validator = m->getValidatorKey();
-    return validator && !squelch_.expireSquelch(*validator);
+    auto res = validator && !squelch_.expireSquelch(*validator);
+    if (!res)
+        overlay_.reportTraffic(
+            safe_cast<TrafficCount::category>(m->getCategory()),
+            false,
+            static_cast<int>(m->getBuffer(compressionEnabled_).size()));
+    return res;
 }
 
 bool

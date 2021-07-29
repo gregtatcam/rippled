@@ -22,7 +22,6 @@
 
 #include <ripple/basics/Log.h>
 #include <ripple/beast/utility/WrappedSink.h>
-#include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/ProtocolMessage.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
@@ -37,6 +36,8 @@
 #include <queue>
 
 namespace ripple {
+
+class P2POverlayImpl;
 
 class P2PeerImp : public Peer,
                   public std::enable_shared_from_this<P2PeerImp>,
@@ -54,7 +55,7 @@ protected:
     using mutable_buffers_type =
         boost::beast::multi_buffer::mutable_buffers_type;
 
-    Application& app_;
+    P2PConfig const& p2pConfig_;
     id_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
@@ -67,9 +68,6 @@ protected:
     // the current conditions as closely as possible.
     beast::IP::Endpoint const remote_address_;
 
-    // These are up here to prevent warnings about order of initializations
-    //
-    OverlayImpl& overlay_;
     bool const inbound_;
 
     // Protocol version to use for this link
@@ -134,20 +132,20 @@ public:
 
     /** Create an active incoming peer from an established ssl connection. */
     P2PeerImp(
-        Application& app,
+        P2PConfig const& p2pConfig,
         id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         std::unique_ptr<stream_type>&& stream_ptr,
-        OverlayImpl& overlay);
+        P2POverlayImpl& overlay);
 
     /** Create outgoing, handshaked peer. */
     // VFALCO legacyPublicKey should be implied by the Slot
     template <class Buffers>
     P2PeerImp(
-        Application& app,
+        P2PConfig const& p2pConfig,
         std::unique_ptr<stream_type>&& stream_ptr,
         Buffers const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,
@@ -155,7 +153,7 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id,
-        OverlayImpl& overlay);
+        P2POverlayImpl& overlay);
 
     virtual ~P2PeerImp();
 
@@ -293,7 +291,7 @@ private:
 
 template <class Buffers>
 P2PeerImp::P2PeerImp(
-    Application& app,
+    P2PConfig const& p2pConfig,
     std::unique_ptr<stream_type>&& stream_ptr,
     Buffers const& buffers,
     std::shared_ptr<PeerFinder::Slot>&& slot,
@@ -301,18 +299,17 @@ P2PeerImp::P2PeerImp(
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     id_t id,
-    OverlayImpl& overlay)
+    P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
+    , p2pConfig_(p2pConfig)
     , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
+    , sink_(p2pConfig_.logs().journal("Peer"), makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
     , stream_(*stream_ptr_)
     , strand_(socket_.get_executor())
     , remote_address_(slot->remote_endpoint())
-    , overlay_(overlay)
     , inbound_(false)
     , protocol_(protocol)
     , publicKey_(publicKey)
@@ -324,7 +321,7 @@ P2PeerImp::P2PeerImp(
               headers_,
               FEATURE_COMPR,
               "lz4",
-              app_.config().COMPRESSION)
+              p2pConfig_.config().COMPRESSION)
               ? Compressed::On
               : Compressed::Off)
 {

@@ -21,6 +21,7 @@
 #include <ripple/basics/random.h>
 #include <ripple/basics/safe_cast.h>
 #include <ripple/overlay/Cluster.h>
+#include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/impl/Tuning.h>
 #include <ripple/overlay/predicates.h>
@@ -39,25 +40,24 @@ namespace ripple {
 class PeerImp;
 
 P2PeerImp::P2PeerImp(
-    Application& app,
+    P2PConfig const& p2pConfig,
     id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     http_request_type&& request,
     PublicKey const& publicKey,
     ProtocolVersion protocol,
     std::unique_ptr<stream_type>&& stream_ptr,
-    OverlayImpl& overlay)
+    P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
+    , p2pConfig_(p2pConfig)
     , id_(id)
-    , sink_(app_.journal("Peer"), makePrefix(id))
+    , sink_(p2pConfig.logs().journal("Peer"), makePrefix(id))
     , journal_(sink_)
     , stream_ptr_(std::move(stream_ptr))
     , socket_(stream_ptr_->next_layer().socket())
     , stream_(*stream_ptr_)
     , strand_(socket_.get_executor())
     , remote_address_(slot->remote_endpoint())
-    , overlay_(overlay)
     , inbound_(true)
     , protocol_(protocol)
     , publicKey_(publicKey)
@@ -69,7 +69,7 @@ P2PeerImp::P2PeerImp(
               headers_,
               FEATURE_COMPR,
               "lz4",
-              app_.config().COMPRESSION)
+              p2pConfig_.config().COMPRESSION)
               ? Compressed::On
               : Compressed::Off)
 {
@@ -136,11 +136,6 @@ P2PeerImp::send(std::shared_ptr<Message> const& m)
 
     if (onEvtSendFilter(m))
         return;
-
-    overlay_.reportTraffic(
-        safe_cast<TrafficCount::category>(m->getCategory()),
-        false,
-        static_cast<int>(m->getBuffer(compressionEnabled_).size()));
 
     auto sendq_size = send_queue_.size();
 
@@ -306,7 +301,7 @@ P2PeerImp::doAccept()
     JLOG(journal_.info()) << "Public Key: "
                           << toBase58(TokenType::NodePublic, publicKey_);
 
-    if (auto member = app_.cluster().member(publicKey_))
+    if (auto member = p2pConfig_.clusterMember(publicKey_))
     {
         {
             std::unique_lock lock{nameMutex_};
@@ -329,7 +324,7 @@ P2PeerImp::doAccept()
         *sharedValue,
         overlay_.setup().networkID,
         protocol_,
-        app_);
+        p2pConfig_);
 
     // Write the whole buffer and only start protocol when that's done.
     boost::asio::async_write(

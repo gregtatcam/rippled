@@ -26,7 +26,7 @@
 namespace ripple {
 
 ConnectAttempt::ConnectAttempt(
-    Application& app,
+    P2PConfig const& p2pConfig,
     boost::asio::io_service& io_service,
     endpoint_type const& remote_endpoint,
     Resource::Consumer usage,
@@ -36,7 +36,7 @@ ConnectAttempt::ConnectAttempt(
     beast::Journal journal,
     P2POverlayImpl& overlay)
     : Child(overlay)
-    , app_(app)
+    , p2pConfig_(p2pConfig)
     , id_(id)
     , sink_(journal, OverlayImpl::makePrefix(id))
     , journal_(sink_)
@@ -203,9 +203,9 @@ ConnectAttempt::onHandshake(error_code ec)
 
     req_ = makeRequest(
         !overlay_.peerFinder().config().peerPrivate,
-        app_.config().COMPRESSION,
-        app_.config().VP_REDUCE_RELAY_ENABLE,
-        app_.config().LEDGER_REPLAY);
+        p2pConfig_.config().COMPRESSION,
+        p2pConfig_.config().VP_REDUCE_RELAY_ENABLE,
+        p2pConfig_.config().LEDGER_REPLAY);
 
     buildHandshake(
         req_,
@@ -213,7 +213,7 @@ ConnectAttempt::onHandshake(error_code ec)
         overlay_.setup().networkID,
         overlay_.setup().public_ip,
         remote_endpoint_.address(),
-        app_);
+        p2pConfig_);
 
     setTimer();
     boost::beast::http::async_write(
@@ -358,7 +358,7 @@ ConnectAttempt::processResponse()
             overlay_.setup().networkID,
             overlay_.setup().public_ip,
             remote_endpoint_.address(),
-            app_);
+            p2pConfig_);
 
         JLOG(journal_.info())
             << "Public Key: " << toBase58(TokenType::NodePublic, publicKey);
@@ -366,7 +366,7 @@ ConnectAttempt::processResponse()
         JLOG(journal_.debug())
             << "Protocol: " << to_string(*negotiatedProtocol);
 
-        auto const member = app_.cluster().member(publicKey);
+        auto const member = p2pConfig_.clusterMember(publicKey);
         if (member)
         {
             JLOG(journal_.info()) << "Cluster name: " << *member;
@@ -378,7 +378,6 @@ ConnectAttempt::processResponse()
             return fail("Outbound slots full");
 
         overlay_.addOutboundPeer(
-            app_,
             std::move(stream_ptr_),
             read_buf_,
             std::move(slot_),

@@ -29,7 +29,8 @@
 #include <ripple/beast/core/LexicalCast.h>
 #include <ripple/nodestore/DatabaseShard.h>
 #include <ripple/overlay/Cluster.h>
-#include <ripple/overlay/impl/ConnectAttempt.h>
+#include <ripple/overlay/impl/OverlayImpl.h>
+#include <ripple/overlay/impl/P2PConfigImpl.h>
 #include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/predicates.h>
 #include <ripple/peerfinder/make_Manager.h>
@@ -108,7 +109,7 @@ OverlayImpl::OverlayImpl(
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
     : P2POverlayImpl(
-          app,
+          P2PConfigImpl(app),
           setup,
           serverHandler,
           resourceManager,
@@ -116,6 +117,7 @@ OverlayImpl::OverlayImpl(
           io_service,
           config,
           collector)
+    , app_(app)
     , timer_count_(0)
     , slots_(app, *this)
     , m_stats(
@@ -954,7 +956,6 @@ OverlayImpl::deleteIdlePeers()
 
 std::shared_ptr<P2PeerImp>
 OverlayImpl::mkInboundPeer(
-    Application& app,
     Peer::id_t id,
     std::shared_ptr<PeerFinder::Slot> const& slot,
     http_request_type&& request,
@@ -986,7 +987,6 @@ OverlayImpl::mkInboundPeer(
 
 std::shared_ptr<P2PeerImp>
 OverlayImpl::mkOutboundPeer(
-    Application& app,
     std::unique_ptr<stream_type>&& stream_ptr,
     boost::beast::multi_buffer const& buffers,
     std::shared_ptr<PeerFinder::Slot>&& slot,

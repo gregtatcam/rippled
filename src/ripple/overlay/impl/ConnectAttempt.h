@@ -45,7 +45,7 @@ private:
     using stream_type = boost::beast::ssl_stream<middle_type>;
     using shared_context = std::shared_ptr<boost::asio::ssl::context>;
 
-    Application& app_;
+    P2PConfig const& p2pConfig_;
     std::uint32_t const id_;
     beast::WrappedSink sink_;
     beast::Journal const journal_;
@@ -63,7 +63,7 @@ private:
 
 public:
     ConnectAttempt(
-        Application& app,
+        P2PConfig const& p2pConfig,
         boost::asio::io_service& io_service,
         endpoint_type const& remote_endpoint,
         Resource::Consumer usage,

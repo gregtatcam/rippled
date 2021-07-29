@@ -20,21 +20,23 @@
 #ifndef RIPPLE_OVERLAY_P2POVERLAYIMPL_H_INCLUDED
 #define RIPPLE_OVERLAY_P2POVERLAYIMPL_H_INCLUDED
 
-#include <ripple/app/main/Application.h>
 #include <ripple/basics/Resolver.h>
 #include <ripple/basics/UnorderedContainers.h>
 #include <ripple/basics/chrono.h>
 #include <ripple/overlay/Message.h>
 #include <ripple/overlay/Overlay.h>
 #include <ripple/overlay/impl/Handshake.h>
+#include <ripple/overlay/impl/P2PConfigImpl.h>
 #include <ripple/peerfinder/PeerfinderManager.h>
 #include <ripple/resource/ResourceManager.h>
 #include <ripple/rpc/ServerHandler.h>
 #include <ripple/server/Handoff.h>
+
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/container/flat_map.hpp>
+
 #include <atomic>
 #include <cassert>
 #include <chrono>
@@ -74,7 +76,7 @@ protected:
     using endpoint_type = boost::asio::ip::tcp::endpoint;
     using error_code = boost::system::error_code;
 
-    Application& app_;
+    P2PConfigImpl p2pConfig_;
     boost::asio::io_service& io_service_;
     std::optional<boost::asio::io_service::work> work_;
     boost::asio::io_service::strand strand_;
@@ -95,7 +97,7 @@ protected:
 
 public:
     P2POverlayImpl(
-        Application& app,
+        P2PConfigImpl const& p2pConfig,
         Setup const& setup,
         ServerHandler& serverHandler,
         Resource::Manager& resourceManager,
@@ -199,7 +201,6 @@ public:
 
     void
     addInboundPeer(
-        Application& app,
         Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
@@ -210,7 +211,6 @@ public:
 
     void
     addOutboundPeer(
-        Application& app,
         std::unique_ptr<stream_type>&& stream_ptr,
         boost::beast::multi_buffer const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,
@@ -219,6 +219,12 @@ public:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id);
+
+    P2PConfig const&
+    p2pConfig() const
+    {
+        return p2pConfig_;
+    }
 
 protected:
     std::shared_ptr<Writer>
@@ -259,7 +265,6 @@ private:
 
     virtual std::shared_ptr<P2PeerImp>
     mkInboundPeer(
-        Application& app,
         Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
@@ -270,7 +275,6 @@ private:
 
     virtual std::shared_ptr<P2PeerImp>
     mkOutboundPeer(
-        Application& app,
         std::unique_ptr<stream_type>&& stream_ptr,
         boost::beast::multi_buffer const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,

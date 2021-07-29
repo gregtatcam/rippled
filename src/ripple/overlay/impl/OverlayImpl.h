@@ -22,6 +22,7 @@
 
 #include <ripple/core/Job.h>
 #include <ripple/overlay/Slot.h>
+#include <ripple/overlay/impl/P2PConfigImpl.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
 #include <ripple/overlay/impl/TrafficCount.h>
 
@@ -97,6 +98,7 @@ private:
         on_timer(error_code ec);
     };
 
+    Application& app_;
     std::weak_ptr<Timer> timer_;
     TrafficCount m_traffic;
     boost::multi_index::multi_index_container<PeerItem, indexing> peers_;
@@ -458,7 +460,6 @@ private:
 
     std::shared_ptr<P2PeerImp>
     mkInboundPeer(
-        Application& app,
         Peer::id_t id,
         std::shared_ptr<PeerFinder::Slot> const& slot,
         http_request_type&& request,
@@ -469,7 +470,6 @@ private:
 
     std::shared_ptr<P2PeerImp>
     mkOutboundPeer(
-        Application& app,
         std::unique_ptr<stream_type>&& stream_ptr,
         boost::beast::multi_buffer const& buffers,
         std::shared_ptr<PeerFinder::Slot>&& slot,

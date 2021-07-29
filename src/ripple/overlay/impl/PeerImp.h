@@ -25,6 +25,7 @@
 #include <ripple/basics/RangeSet.h>
 #include <ripple/nodestore/ShardInfo.h>
 #include <ripple/overlay/Squelch.h>
+#include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/protocol/STTx.h>
 #include <ripple/protocol/STValidation.h>
@@ -45,6 +46,8 @@ private:
     using waitable_timer =
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
+    Application& app_;
+    OverlayImpl& overlay_;  // TODO duplicate decl, but a subclass
     beast::WrappedSink p_sink_;
     beast::Journal const p_journal_;
     waitable_timer timer_;
@@ -437,7 +440,7 @@ PeerImp::PeerImp(
     id_t id,
     OverlayImpl& overlay)
     : P2PeerImp(
-          app,
+          overlay.p2pConfig(),
           std::move(stream_ptr),
           buffers,
           std::move(slot),
@@ -446,6 +449,8 @@ PeerImp::PeerImp(
           protocol,
           id,
           overlay)
+    , app_(app)
+    , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)
     , timer_(waitable_timer{socket_.get_executor()})
