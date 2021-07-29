@@ -85,7 +85,7 @@ protected:
     boost::container::flat_map<Child*, std::weak_ptr<Child>> list_;
     Setup setup_;
     beast::Journal const journal_;
-    ServerHandler& serverHandler_;
+    std::uint16_t overlayPort_;
     Resource::Manager& m_resourceManager;
     std::unique_ptr<PeerFinder::Manager> m_peerFinder;
     Resolver& m_resolver;
@@ -99,7 +99,7 @@ public:
     P2POverlayImpl(
         P2PConfigImpl const& p2pConfig,
         Setup const& setup,
-        ServerHandler& serverHandler,
+        std::uint16_t overlayPort,
         Resource::Manager& resourceManager,
         Resolver& resolver,
         boost::asio::io_service& io_service,

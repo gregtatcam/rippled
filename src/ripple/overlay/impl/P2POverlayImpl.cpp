@@ -49,7 +49,7 @@ P2POverlayImpl::Child::~Child()
 P2POverlayImpl::P2POverlayImpl(
     P2PConfigImpl const& p2pConfig,
     Setup const& setup,
-    ServerHandler& serverHandler,
+    std::uint16_t overlayPort,
     Resource::Manager& resourceManager,
     Resolver& resolver,
     boost::asio::io_service& io_service,
@@ -61,7 +61,7 @@ P2POverlayImpl::P2POverlayImpl(
     , strand_(io_service_)
     , setup_(setup)
     , journal_(p2pConfig_.logs().journal("Overlay"))
-    , serverHandler_(serverHandler)
+    , overlayPort_(overlayPort)
     , m_resourceManager(resourceManager)
     , m_peerFinder(PeerFinder::make_Manager(
           io_service,
@@ -328,7 +328,7 @@ P2POverlayImpl::start()
 {
     PeerFinder::Config config = PeerFinder::Config::makeConfig(
         p2pConfig_.config(),
-        serverHandler_.setup().overlay.port,
+        overlayPort_,
         !p2pConfig_.isValidator(),
         setup_.ipLimit);
 

@@ -102,7 +102,7 @@ OverlayImpl::Timer::on_timer(error_code ec)
 OverlayImpl::OverlayImpl(
     Application& app,
     Setup const& setup,
-    ServerHandler& serverHandler,
+    std::uint16_t overlayPort,
     Resource::Manager& resourceManager,
     Resolver& resolver,
     boost::asio::io_service& io_service,
@@ -111,7 +111,7 @@ OverlayImpl::OverlayImpl(
     : P2POverlayImpl(
           P2PConfigImpl(app),
           setup,
-          serverHandler,
+          overlayPort,
           resourceManager,
           resolver,
           io_service,
@@ -1124,7 +1124,7 @@ std::unique_ptr<Overlay>
 make_Overlay(
     Application& app,
     Overlay::Setup const& setup,
-    ServerHandler& serverHandler,
+    std::uint16_t overlayPort,
     Resource::Manager& resourceManager,
     Resolver& resolver,
     boost::asio::io_service& io_service,
@@ -1134,7 +1134,7 @@ make_Overlay(
     return std::make_unique<OverlayImpl>(
         app,
         setup,
-        serverHandler,
+        overlayPort,
         resourceManager,
         resolver,
         io_service,
