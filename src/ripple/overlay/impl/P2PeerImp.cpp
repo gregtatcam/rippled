@@ -36,8 +36,6 @@
 #include <sstream>
 
 namespace ripple {
-// TODO, remove the cast once P2POverlayImp is added
-class PeerImp;
 
 P2PeerImp::P2PeerImp(
     P2PConfig const& p2pConfig,
