@@ -47,7 +47,7 @@ private:
         boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
 
     Application& app_;
-    OverlayImpl& overlay_;  // TODO duplicate decl, but a subclass
+    OverlayImpl& overlay_;
     beast::WrappedSink p_sink_;
     beast::Journal const p_journal_;
     waitable_timer timer_;

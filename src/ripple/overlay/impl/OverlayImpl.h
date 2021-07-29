@@ -80,8 +80,6 @@ class OverlayImpl : public P2POverlayImpl, public reduce_relay::SquelchHandler
 private:
     struct Timer : Child, std::enable_shared_from_this<Timer>
     {
-        // TODO, duplicate but subclass
-        // letting the p2p handle lifetime of the class
         OverlayImpl& overlay_;
         boost::asio::basic_waitable_timer<clock_type> timer_;
         bool stopping_{false};
