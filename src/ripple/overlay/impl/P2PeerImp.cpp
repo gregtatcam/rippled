@@ -189,7 +189,6 @@ P2PeerImp::close()
         // timer_.cancel(ec);
         onEvtClose();
         socket_.close(ec);
-        overlay_.incPeerDisconnect();
         if (inbound_)
         {
             JLOG(journal_.debug()) << "Closed";

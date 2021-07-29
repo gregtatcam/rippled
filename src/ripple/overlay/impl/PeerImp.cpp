@@ -410,6 +410,7 @@ PeerImp::onEvtClose()
 {
     error_code ec;
     timer_.cancel(ec);
+    overlay_.incPeerDisconnect();
 }
 
 hash_map<PublicKey, NodeStore::ShardInfo> const
