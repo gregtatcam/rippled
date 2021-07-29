@@ -48,21 +48,32 @@ protected:
     using socket_type = boost::asio::ip::tcp::socket;
     using middle_type = boost::beast::tcp_stream;
     using stream_type = boost::beast::ssl_stream<middle_type>;
-    using address_type = boost::asio::ip::address;
     using endpoint_type = boost::asio::ip::tcp::endpoint;
     using Compressed = compression::Compressed;
     using mutable_buffers_type =
         boost::beast::multi_buffer::mutable_buffers_type;
     using const_buffers_type = boost::beast::multi_buffer::const_buffers_type;
 
+private:
     P2PConfig const& p2pConfig_;
-    id_t const id_;
     beast::WrappedSink sink_;
-    beast::Journal const journal_;
     std::unique_ptr<stream_type> stream_ptr_;
     socket_type& socket_;
     stream_type& stream_;
-    boost::asio::strand<boost::asio::executor> strand_;
+    bool detaching_ = false;
+    std::string name_;
+    boost::shared_mutex mutable nameMutex_;
+    boost::beast::multi_buffer read_buffer_;
+    http_request_type request_;
+    http_response_type response_;
+    std::queue<std::shared_ptr<Message>> send_queue_;
+    bool gracefulClose_ = false;
+    std::uint32_t large_sendq_ = 0;
+
+protected:
+    id_t const id_;
+    beast::Journal const journal_;
+    boost::asio::strand<boost::asio::executor> const strand_;
 
     // Updated at each stage of the connection process to reflect
     // the current conditions as closely as possible.
@@ -71,24 +82,15 @@ protected:
     bool const inbound_;
 
     // Protocol version to use for this link
-    ProtocolVersion protocol_;
+    ProtocolVersion const protocol_;
 
-    bool detaching_ = false;
     // Node public key of peer.
     PublicKey const publicKey_;
-    std::string name_;
-    boost::shared_mutex mutable nameMutex_;
 
     std::shared_ptr<PeerFinder::Slot> const slot_;
-    boost::beast::multi_buffer read_buffer_;
-    http_request_type request_;
-    http_response_type response_;
     boost::beast::http::fields const& headers_;
-    std::queue<std::shared_ptr<Message>> send_queue_;
-    bool gracefulClose_ = false;
-    int large_sendq_ = 0;
 
-    Compressed compressionEnabled_ = Compressed::Off;
+    Compressed const compressionEnabled_ = Compressed::Off;
 
     friend class OverlayImpl;
 
@@ -183,6 +185,32 @@ public:
         return remote_address_;
     }
 
+    bool
+    isSocketOpen() const
+    {
+        return socket_.is_open();
+    }
+
+    socket_type::executor_type
+    getSocketExecutor() const
+    {
+        return socket_.get_executor();
+    }
+
+    std::size_t
+    sendQueueSize() const
+    {
+        return send_queue_.size();
+    }
+
+    std::uint32_t
+    incLargeSendQueue()
+    {
+        auto q = large_sendq_;
+        large_sendq_++;
+        return q;
+    }
+
     //
     // Identity
     //
@@ -219,11 +247,18 @@ protected:
     void
     fail(std::string const& name, error_code ec);
 
-    void
-    gracefulClose();
-
     static std::string
     makePrefix(id_t id);
+
+    std::string
+    name() const;
+
+    std::string
+    domain() const;
+
+private:
+    void
+    gracefulClose();
 
     // Called when SSL shutdown completes
     void
@@ -231,12 +266,6 @@ protected:
 
     void
     doAccept();
-
-    std::string
-    name() const;
-
-    std::string
-    domain() const;
 
     //
     // protocol message loop
@@ -254,8 +283,8 @@ protected:
     void
     onWriteMessage(error_code ec, std::size_t bytes_transferred);
 
-private:
-    // Allow the application layer to custom handle the events.
+    //--------------------------------------------------------------------------
+    // Delegate custom handling of events to the application layer.
     virtual void
     onEvtRun() = 0;
 
@@ -280,9 +309,7 @@ private:
         mutable_buffers_type const& buffers) = 0;
 
     friend std::pair<std::size_t, boost::system::error_code>
-    invokeProtocolMessage<
-        boost::beast::multi_buffer::mutable_buffers_type,
-        P2PeerImp>(
+    invokeProtocolMessage<mutable_buffers_type, P2PeerImp>(
         mutable_buffers_type const& buffers,
         P2PeerImp& handler,
         std::size_t& hint);

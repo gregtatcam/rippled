@@ -69,6 +69,17 @@ public:
         stop() = 0;
     };
 
+private:
+    P2PConfigImpl const p2pConfig_;
+    std::optional<boost::asio::io_service::work> work_;
+    std::condition_variable_any cond_;
+    boost::container::flat_map<Child*, std::weak_ptr<Child>> list_;
+    std::uint16_t const overlayPort_;
+    Resource::Manager& m_resourceManager;
+    Resolver& m_resolver;
+    std::atomic<Peer::id_t> next_id_;
+    std::optional<std::uint32_t> networkID_;
+
 protected:
     using clock_type = std::chrono::steady_clock;
     using socket_type = boost::asio::ip::tcp::socket;
@@ -76,22 +87,12 @@ protected:
     using endpoint_type = boost::asio::ip::tcp::endpoint;
     using error_code = boost::system::error_code;
 
-    P2PConfigImpl p2pConfig_;
     boost::asio::io_service& io_service_;
-    std::optional<boost::asio::io_service::work> work_;
     boost::asio::io_service::strand strand_;
     mutable std::recursive_mutex mutex_;  // VFALCO use std::mutex
-    std::condition_variable_any cond_;
-    boost::container::flat_map<Child*, std::weak_ptr<Child>> list_;
-    Setup setup_;
+    Setup const setup_;
     beast::Journal const journal_;
-    std::uint16_t overlayPort_;
-    Resource::Manager& m_resourceManager;
     std::unique_ptr<PeerFinder::Manager> m_peerFinder;
-    Resolver& m_resolver;
-    std::atomic<Peer::id_t> next_id_;
-
-    std::optional<std::uint32_t> networkID_;
 
     //--------------------------------------------------------------------------
 
@@ -226,7 +227,26 @@ public:
         return p2pConfig_;
     }
 
+    void
+    addChild(std::shared_ptr<Child> const& child)
+    {
+        std::lock_guard l(mutex_);
+        list_.emplace(child.get(), child);
+    }
+
 protected:
+    void
+    autoConnect();
+
+private:
+    //--------------------------------------------------------------------------
+
+    void
+    remove(Child& child);
+
+    void
+    stopChildren();
+
     std::shared_ptr<Writer>
     makeRedirectResponse(
         std::shared_ptr<PeerFinder::Slot> const& slot,
@@ -247,19 +267,7 @@ protected:
     bool
     processRequest(http_request_type const& req, Handoff& handoff);
 
-    //--------------------------------------------------------------------------
-
-    void
-    remove(Child& child);
-
-    void
-    stopChildren();
-
-    void
-    autoConnect();
-
     // Delegation of events handling to the application layer
-private:
     virtual bool
     onEvtProcessRequest(http_request_type const& req, Handoff& handoff) = 0;
 

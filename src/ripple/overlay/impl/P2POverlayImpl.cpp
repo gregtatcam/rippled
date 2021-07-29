@@ -56,21 +56,21 @@ P2POverlayImpl::P2POverlayImpl(
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
     : p2pConfig_(p2pConfig)
+    , work_(std::in_place, std::ref(io_service))
+    , overlayPort_(overlayPort)
+    , m_resourceManager(resourceManager)
+    , m_resolver(resolver)
+    , next_id_(1)
     , io_service_(io_service)
-    , work_(std::in_place, std::ref(io_service_))
     , strand_(io_service_)
     , setup_(setup)
     , journal_(p2pConfig_.logs().journal("Overlay"))
-    , overlayPort_(overlayPort)
-    , m_resourceManager(resourceManager)
     , m_peerFinder(PeerFinder::make_Manager(
           io_service,
           stopwatch(),
           p2pConfig_.logs().journal("PeerFinder"),
           config,
           collector))
-    , m_resolver(resolver)
-    , next_id_(1)
 {
 }
 

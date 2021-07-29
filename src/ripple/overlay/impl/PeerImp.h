@@ -115,8 +115,8 @@ private:
 
     // true if validation/proposal reduce-relay feature is enabled
     // on the peer.
-    bool vpReduceRelayEnabled_ = false;
-    bool ledgerReplayEnabled_ = false;
+    bool const vpReduceRelayEnabled_;
+    bool const ledgerReplayEnabled_;
     LedgerReplayMsgHandler ledgerReplayMsgHandler_;
 
     friend class OverlayImpl;
@@ -258,6 +258,12 @@ public:
     getPeerShardInfos() const;
 
 private:
+    std::shared_ptr<PeerImp>
+    shared()
+    {
+        return std::static_pointer_cast<PeerImp>(shared_from_this());
+    }
+
     void
     setTimer();
 
@@ -273,7 +279,6 @@ private:
     bool
     reduceRelayReady();
 
-public:
     //--------------------------------------------------------------------------
     //
     // ProtocolStream
@@ -343,7 +348,32 @@ public:
     void
     onMessage(std::shared_ptr<protocol::TMReplayDeltaResponse> const& m);
 
-private:
+    template <
+        class T,
+        class = std::enable_if_t<
+            std::is_base_of<::google::protobuf::Message, T>::value>>
+    bool
+    invoke(
+        detail::MessageHeader const& header,
+        mutable_buffers_type const& buffers)
+    {
+        auto const m = detail::parseMessageContent<T>(header, buffers);
+        if (!m)
+            return false;
+
+        using namespace ripple::compression;
+        onMessageBegin(
+            header.message_type,
+            m,
+            header.payload_wire_size,
+            header.uncompressed_size,
+            header.algorithm != Algorithm::None);
+        onMessage(m);
+        onMessageEnd(header.message_type, m);
+
+        return true;
+    }
+
     //--------------------------------------------------------------------------
     // lockedRecentLock is passed as a reminder to callers that recentLock_
     // must be locked.
@@ -393,7 +423,8 @@ private:
     void
     processLedgerRequest(std::shared_ptr<protocol::TMGetLedger> const& m);
 
-private:
+    //--------------------------------------------------------------------------
+    // Implementation of p2p delegated events handling
     void
     onEvtRun() override;
 
@@ -416,12 +447,6 @@ private:
 
     virtual bool
     onEvtSendFilter(std::shared_ptr<Message> const&) override;
-
-    std::shared_ptr<PeerImp>
-    shared()
-    {
-        return std::static_pointer_cast<PeerImp>(shared_from_this());
-    }
 };
 
 //------------------------------------------------------------------------------

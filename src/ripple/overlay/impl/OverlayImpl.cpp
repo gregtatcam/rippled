@@ -154,8 +154,7 @@ OverlayImpl::start()
     P2POverlayImpl::start();
 
     auto const timer = std::make_shared<Timer>(*this);
-    std::lock_guard lock(mutex_);
-    list_.emplace(timer.get(), timer);
+    addChild(timer);
     timer_ = timer;
     timer->async_wait();
 }

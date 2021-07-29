@@ -87,7 +87,7 @@ PeerImp::PeerImp(
     , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)
-    , timer_(waitable_timer{socket_.get_executor()})
+    , timer_(waitable_timer{getSocketExecutor()})
     , tracking_(Tracking::unknown)
     , trackingTime_(clock_type::now())
     , lastPingTime_(clock_type::now())
@@ -137,7 +137,7 @@ PeerImp::PeerImp(
     , overlay_(overlay)
     , p_sink_(app_.journal("Protocol"), makePrefix(id))
     , p_journal_(p_sink_)
-    , timer_(waitable_timer{socket_.get_executor()})
+    , timer_(waitable_timer{getSocketExecutor()})
     , tracking_(Tracking::unknown)
     , trackingTime_(clock_type::now())
     , lastPingTime_(clock_type::now())
@@ -506,7 +506,7 @@ PeerImp::cancelTimer()
 void
 PeerImp::onTimer(error_code const& ec)
 {
-    if (!socket_.is_open())
+    if (!isSocketOpen())
         return;
 
     if (ec == boost::asio::error::operation_aborted)
@@ -519,7 +519,7 @@ PeerImp::onTimer(error_code const& ec)
         return close();
     }
 
-    if (large_sendq_++ >= Tuning::sendqIntervals)
+    if (incLargeSendQueue() >= Tuning::sendqIntervals)
     {
         fail("Large send queue");
         return;
@@ -637,95 +637,74 @@ PeerImp::onEvtProtocolMessage(
     switch (header.message_type)
     {
         case protocol::mtMANIFESTS:
-            success =
-                detail::invoke<protocol::TMManifests>(header, buffers, *this);
+            success = invoke<protocol::TMManifests>(header, buffers);
             break;
         case protocol::mtPING:
-            success = detail::invoke<protocol::TMPing>(header, buffers, *this);
+            success = invoke<protocol::TMPing>(header, buffers);
             break;
         case protocol::mtCLUSTER:
-            success =
-                detail::invoke<protocol::TMCluster>(header, buffers, *this);
+            success = invoke<protocol::TMCluster>(header, buffers);
             break;
         case protocol::mtENDPOINTS:
-            success =
-                detail::invoke<protocol::TMEndpoints>(header, buffers, *this);
+            success = invoke<protocol::TMEndpoints>(header, buffers);
             break;
         case protocol::mtTRANSACTION:
-            success =
-                detail::invoke<protocol::TMTransaction>(header, buffers, *this);
+            success = invoke<protocol::TMTransaction>(header, buffers);
             break;
         case protocol::mtGET_LEDGER:
-            success =
-                detail::invoke<protocol::TMGetLedger>(header, buffers, *this);
+            success = invoke<protocol::TMGetLedger>(header, buffers);
             break;
         case protocol::mtLEDGER_DATA:
-            success =
-                detail::invoke<protocol::TMLedgerData>(header, buffers, *this);
+            success = invoke<protocol::TMLedgerData>(header, buffers);
             break;
         case protocol::mtPROPOSE_LEDGER:
-            success =
-                detail::invoke<protocol::TMProposeSet>(header, buffers, *this);
+            success = invoke<protocol::TMProposeSet>(header, buffers);
             break;
         case protocol::mtSTATUS_CHANGE:
-            success = detail::invoke<protocol::TMStatusChange>(
-                header, buffers, *this);
+            success = invoke<protocol::TMStatusChange>(header, buffers);
             break;
         case protocol::mtHAVE_SET:
-            success = detail::invoke<protocol::TMHaveTransactionSet>(
-                header, buffers, *this);
+            success = invoke<protocol::TMHaveTransactionSet>(header, buffers);
             break;
         case protocol::mtVALIDATION:
-            success =
-                detail::invoke<protocol::TMValidation>(header, buffers, *this);
+            success = invoke<protocol::TMValidation>(header, buffers);
             break;
         case protocol::mtGET_PEER_SHARD_INFO:
-            success = detail::invoke<protocol::TMGetPeerShardInfo>(
-                header, buffers, *this);
+            success = invoke<protocol::TMGetPeerShardInfo>(header, buffers);
             break;
         case protocol::mtPEER_SHARD_INFO:
-            success = detail::invoke<protocol::TMPeerShardInfo>(
-                header, buffers, *this);
+            success = invoke<protocol::TMPeerShardInfo>(header, buffers);
             break;
         case protocol::mtVALIDATORLIST:
-            success = detail::invoke<protocol::TMValidatorList>(
-                header, buffers, *this);
+            success = invoke<protocol::TMValidatorList>(header, buffers);
             break;
         case protocol::mtVALIDATORLISTCOLLECTION:
-            success = detail::invoke<protocol::TMValidatorListCollection>(
-                header, buffers, *this);
+            success =
+                invoke<protocol::TMValidatorListCollection>(header, buffers);
             break;
         case protocol::mtGET_OBJECTS:
-            success = detail::invoke<protocol::TMGetObjectByHash>(
-                header, buffers, *this);
+            success = invoke<protocol::TMGetObjectByHash>(header, buffers);
             break;
         case protocol::mtSQUELCH:
-            success =
-                detail::invoke<protocol::TMSquelch>(header, buffers, *this);
+            success = invoke<protocol::TMSquelch>(header, buffers);
             break;
         case protocol::mtPROOF_PATH_REQ:
-            success = detail::invoke<protocol::TMProofPathRequest>(
-                header, buffers, *this);
+            success = invoke<protocol::TMProofPathRequest>(header, buffers);
             break;
         case protocol::mtPROOF_PATH_RESPONSE:
-            success = detail::invoke<protocol::TMProofPathResponse>(
-                header, buffers, *this);
+            success = invoke<protocol::TMProofPathResponse>(header, buffers);
             break;
         case protocol::mtREPLAY_DELTA_REQ:
-            success = detail::invoke<protocol::TMReplayDeltaRequest>(
-                header, buffers, *this);
+            success = invoke<protocol::TMReplayDeltaRequest>(header, buffers);
             break;
         case protocol::mtREPLAY_DELTA_RESPONSE:
-            success = detail::invoke<protocol::TMReplayDeltaResponse>(
-                header, buffers, *this);
+            success = invoke<protocol::TMReplayDeltaResponse>(header, buffers);
             break;
         case protocol::mtGET_PEER_SHARD_INFO_V2:
-            success = detail::invoke<protocol::TMGetPeerShardInfoV2>(
-                header, buffers, *this);
+            success = invoke<protocol::TMGetPeerShardInfoV2>(header, buffers);
             break;
         case protocol::mtPEER_SHARD_INFO_V2:
-            success = detail::invoke<protocol::TMPeerShardInfoV2>(
-                header, buffers, *this);
+            success = invoke<protocol::TMPeerShardInfoV2>(header, buffers);
             break;
         default:
             onMessageUnknown(header.message_type);
@@ -2303,7 +2282,7 @@ PeerImp::onMessage(std::shared_ptr<protocol::TMGetObjectByHash> const& m)
     if (packet.query())
     {
         // this is a query
-        if (send_queue_.size() >= Tuning::dropSendQueue)
+        if (sendQueueSize() >= Tuning::dropSendQueue)
         {
             JLOG(p_journal_.debug()) << "GetObject: Large send queue";
             return;
@@ -2961,7 +2940,7 @@ PeerImp::processLedgerRequest(std::shared_ptr<protocol::TMGetLedger> const& m)
     }
     else
     {
-        if (send_queue_.size() >= Tuning::dropSendQueue)
+        if (sendQueueSize() >= Tuning::dropSendQueue)
         {
             JLOG(p_journal_.debug())
                 << "processLedgerRequest: Large send queue";

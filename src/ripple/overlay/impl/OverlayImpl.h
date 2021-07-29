@@ -45,6 +45,7 @@ hash_value(std::shared_ptr<PeerFinder::Slot> const& slot)
 
 class OverlayImpl : public P2POverlayImpl, public reduce_relay::SquelchHandler
 {
+private:
     struct ById
     {
     };
@@ -77,7 +78,6 @@ class OverlayImpl : public P2POverlayImpl, public reduce_relay::SquelchHandler
             std::shared_ptr<PeerFinder::Slot>,
             &PeerItem::slot>>;
 
-private:
     struct Timer : Child, std::enable_shared_from_this<Timer>
     {
         OverlayImpl& overlay_;
@@ -186,9 +186,6 @@ public:
     // OverlayImpl
     //
 
-    void
-    add_active(std::shared_ptr<PeerImp> const& peer);
-
     // Called when an active peer is destroyed.
     void
     onPeerDeactivate(Peer::id_t id);
@@ -264,12 +261,6 @@ public:
         return peerDisconnectsCharges_;
     }
 
-    std::optional<std::uint32_t>
-    networkID() const override
-    {
-        return networkID_;
-    }
-
     Json::Value
     crawlShards(bool includePublicKey, std::uint32_t relays) override;
 
@@ -314,6 +305,9 @@ public:
     deletePeer(Peer::id_t id);
 
 private:
+    void
+    add_active(std::shared_ptr<PeerImp> const& peer);
+
     void
     squelch(
         PublicKey const& validator,
@@ -450,8 +444,10 @@ private:
         }
         m_stats.peerDisconnects = getPeerDisconnect();
     }
-    // Implementation of delegated events handling from the p2p layer
+
 private:
+    //--------------------------------------------------------------------------
+    // Implementation of delegated events handling from the p2p layer
     bool
     onEvtProcessRequest(http_request_type const& req, Handoff& handoff)
         override;
