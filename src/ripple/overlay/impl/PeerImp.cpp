@@ -35,6 +35,7 @@
 #include <ripple/beast/core/SemanticVersion.h>
 #include <ripple/nodestore/DatabaseShard.h>
 #include <ripple/overlay/Cluster.h>
+#include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/impl/Tuning.h>
 #include <ripple/overlay/predicates.h>
@@ -105,6 +106,56 @@ PeerImp::PeerImp(
     , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
 {
     JLOG(journal_.debug()) << " compression enabled "
+                           << (compressionEnabled_ == Compressed::On)
+                           << " vp reduce-relay enabled "
+                           << vpReduceRelayEnabled_ << " on " << remote_address_
+                           << " " << id_;
+}
+
+PeerImp::PeerImp(
+    Application& app,
+    std::unique_ptr<stream_type>&& stream_ptr,
+    const_buffers_type const& buffers,
+    std::shared_ptr<PeerFinder::Slot>&& slot,
+    http_response_type&& response,
+    Resource::Consumer usage,
+    PublicKey const& publicKey,
+    ProtocolVersion protocol,
+    id_t id,
+    OverlayImpl& overlay)
+    : P2PeerImp(
+          overlay.p2pConfig(),
+          std::move(stream_ptr),
+          buffers,
+          std::move(slot),
+          std::move(response),
+          publicKey,
+          protocol,
+          id,
+          overlay)
+    , app_(app)
+    , overlay_(overlay)
+    , p_sink_(app_.journal("Protocol"), makePrefix(id))
+    , p_journal_(p_sink_)
+    , timer_(waitable_timer{socket_.get_executor()})
+    , tracking_(Tracking::unknown)
+    , trackingTime_(clock_type::now())
+    , lastPingTime_(clock_type::now())
+    , creationTime_(clock_type::now())
+    , squelch_(app_.journal("Squelch"))
+    , usage_(usage)
+    , fee_(Resource::feeLightPeer)
+    , vpReduceRelayEnabled_(peerFeatureEnabled(
+          headers_,
+          FEATURE_VPRR,
+          app_.config().VP_REDUCE_RELAY_ENABLE))
+    , ledgerReplayEnabled_(peerFeatureEnabled(
+          headers_,
+          FEATURE_LEDGER_REPLAY,
+          app_.config().LEDGER_REPLAY))
+    , ledgerReplayMsgHandler_(app, app.getLedgerReplayer())
+{
+    JLOG(journal_.debug()) << "compression enabled "
                            << (compressionEnabled_ == Compressed::On)
                            << " vp reduce-relay enabled "
                            << vpReduceRelayEnabled_ << " on " << remote_address_

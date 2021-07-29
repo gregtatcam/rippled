@@ -20,7 +20,6 @@
 #include <ripple/json/json_reader.h>
 #include <ripple/overlay/Cluster.h>
 #include <ripple/overlay/impl/ConnectAttempt.h>
-#include <ripple/overlay/impl/PeerImp.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
 
 namespace ripple {
@@ -38,7 +37,7 @@ ConnectAttempt::ConnectAttempt(
     : Child(overlay)
     , p2pConfig_(p2pConfig)
     , id_(id)
-    , sink_(journal, OverlayImpl::makePrefix(id))
+    , sink_(journal, P2POverlayImpl::makePrefix(id))
     , journal_(sink_)
     , remote_endpoint_(remote_endpoint)
     , usage_(usage)
@@ -323,7 +322,7 @@ ConnectAttempt::processResponse()
         }
     }
 
-    if (!OverlayImpl::isPeerUpgrade(response_))
+    if (!P2POverlayImpl::isPeerUpgrade(response_))
     {
         JLOG(journal_.info())
             << "Unable to upgrade to peer protocol: " << response_.result()

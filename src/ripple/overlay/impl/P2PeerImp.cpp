@@ -73,6 +73,45 @@ P2PeerImp::P2PeerImp(
 {
 }
 
+P2PeerImp::P2PeerImp(
+    P2PConfig const& p2pConfig,
+    std::unique_ptr<stream_type>&& stream_ptr,
+    const_buffers_type const& buffers,
+    std::shared_ptr<PeerFinder::Slot>&& slot,
+    http_response_type&& response,
+    PublicKey const& publicKey,
+    ProtocolVersion protocol,
+    id_t id,
+    P2POverlayImpl& overlay)
+    : Child(overlay)
+    , p2pConfig_(p2pConfig)
+    , id_(id)
+    , sink_(p2pConfig_.logs().journal("Peer"), makePrefix(id))
+    , journal_(sink_)
+    , stream_ptr_(std::move(stream_ptr))
+    , socket_(stream_ptr_->next_layer().socket())
+    , stream_(*stream_ptr_)
+    , strand_(socket_.get_executor())
+    , remote_address_(slot->remote_endpoint())
+    , inbound_(false)
+    , protocol_(protocol)
+    , publicKey_(publicKey)
+    , slot_(std::move(slot))
+    , response_(std::move(response))
+    , headers_(response_)
+    , compressionEnabled_(
+          peerFeatureEnabled(
+              headers_,
+              FEATURE_COMPR,
+              "lz4",
+              p2pConfig_.config().COMPRESSION)
+              ? Compressed::On
+              : Compressed::Off)
+{
+    read_buffer_.commit(boost::asio::buffer_copy(
+        read_buffer_.prepare(boost::asio::buffer_size(buffers)), buffers));
+}
+
 P2PeerImp::~P2PeerImp()
 {
     overlay_.peerFinder().on_closed(slot_);
