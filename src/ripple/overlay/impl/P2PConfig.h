@@ -20,12 +20,19 @@
 #ifndef RIPPLE_OVERLAY_P2PCONFIG_H_INCLUDED
 #define RIPPLE_OVERLAY_P2PCONFIG_H_INCLUDED
 
-#include <ripple/protocol/PublicKey.h>
+#include <ripple/basics/base_uint.h>
+#include <ripple/basics/chrono.h>
+
 #include <optional>
 #include <string>
 #include <utility>
 
 namespace ripple {
+
+class Config;
+class Logs;
+class PublicKey;
+class SecretKey;
 
 /** Request properties from the Application
  */

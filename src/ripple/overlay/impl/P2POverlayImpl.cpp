@@ -22,6 +22,7 @@
 #include <ripple/beast/core/LexicalCast.h>
 #include <ripple/overlay/impl/ConnectAttempt.h>
 #include <ripple/overlay/impl/P2POverlayImpl.h>
+#include <ripple/overlay/impl/P2PeerImp.h>
 #include <ripple/overlay/predicates.h>
 #include <ripple/peerfinder/make_Manager.h>
 #include <ripple/rpc/handlers/GetCounts.h>

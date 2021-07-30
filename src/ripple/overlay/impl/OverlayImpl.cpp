@@ -32,6 +32,7 @@
 #include <ripple/overlay/impl/OverlayImpl.h>
 #include <ripple/overlay/impl/P2PConfigImpl.h>
 #include <ripple/overlay/impl/PeerImp.h>
+#include <ripple/overlay/impl/Tuning.h>
 #include <ripple/overlay/predicates.h>
 #include <ripple/peerfinder/make_Manager.h>
 #include <ripple/rpc/handlers/GetCounts.h>

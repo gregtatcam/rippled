@@ -33,6 +33,7 @@
 #include <memory>
 #include <mutex>
 #include <numeric>
+#include <shared_mutex>
 #include <sstream>
 
 namespace ripple {

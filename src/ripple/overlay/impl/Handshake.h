@@ -20,6 +20,7 @@
 #ifndef RIPPLE_OVERLAY_HANDSHAKE_H_INCLUDED
 #define RIPPLE_OVERLAY_HANDSHAKE_H_INCLUDED
 
+#include <ripple/beast/net/IPAddress.h>
 #include <ripple/beast/utility/Journal.h>
 #include <ripple/overlay/impl/P2PConfig.h>
 #include <ripple/overlay/impl/ProtocolVersion.h>
