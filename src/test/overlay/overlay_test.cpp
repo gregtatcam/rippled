@@ -626,15 +626,15 @@ public:
         beast::Journal journal,
         P2POverlayImpl& overlay)
         : ConnectAttempt(
-        p2pConfig,
-        io_service,
-        remote_endpoint,
-        usage,
-        context,
-        id,
-        slot,
-        journal,
-        overlay)
+              p2pConfig,
+              io_service,
+              remote_endpoint,
+              usage,
+              context,
+              id,
+              slot,
+              journal,
+              overlay)
     {
         // Bind to this node configured ip
         auto sec = p2pConfig_.config().section("port_peer");
@@ -1048,6 +1048,7 @@ PeerImpTest::~PeerImpTest()
 class overlay_net_test : public VirtualNetwork
 {
     boost::asio::basic_waitable_timer<std::chrono::steady_clock> overlayTimer_;
+
 public:
     overlay_net_test() : overlayTimer_(io_service_)
     {
@@ -1069,10 +1070,10 @@ public:
     {
         testcase("Overlay");
         auto mkIp = [&](auto str) {
-          std::string ip = baseIp_ + str;
-          ip2Local_.insert(global_local(ip, ip));
-          bootstrap_[ip] = ip;
-          return ip;
+            std::string ip = baseIp_ + str;
+            ip2Local_.insert(global_local(ip, ip));
+            bootstrap_[ip] = ip;
+            return ip;
         };
         std::vector<std::string> nodes = {
             mkIp(".0.0"),

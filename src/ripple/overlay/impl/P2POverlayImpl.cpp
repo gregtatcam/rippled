@@ -546,7 +546,7 @@ P2POverlayImpl::mkConnectAttempt(
     std::shared_ptr<PeerFinder::Slot> const& slot,
     std::uint16_t id)
 {
-    return  std::make_shared<ConnectAttempt>(
+    return std::make_shared<ConnectAttempt>(
         *p2pConfig_,
         io_service_,
         beast::IPAddressConversion::to_asio_endpoint(remote_endpoint),
