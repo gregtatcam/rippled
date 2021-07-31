@@ -110,7 +110,7 @@ OverlayImpl::OverlayImpl(
     BasicConfig const& config,
     beast::insight::Collector::ptr const& collector)
     : P2POverlayImpl(
-          P2PConfigImpl(app),
+          std::move(std::make_unique<P2PConfigImpl>(app)),
           setup,
           overlayPort,
           resourceManager,

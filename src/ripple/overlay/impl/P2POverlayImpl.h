@@ -51,6 +51,7 @@ namespace ripple {
 
 class BasicConfig;
 class P2PeerImp;
+class ConnectAttempt;
 
 class P2POverlayImpl : public Overlay
 {
@@ -70,7 +71,7 @@ public:
     };
 
 private:
-    P2PConfigImpl const p2pConfig_;
+    std::unique_ptr<P2PConfig> const p2pConfig_;
     std::optional<boost::asio::io_service::work> work_;
     std::condition_variable_any cond_;
     boost::container::flat_map<Child*, std::weak_ptr<Child>> list_;
@@ -98,7 +99,7 @@ protected:
 
 public:
     P2POverlayImpl(
-        P2PConfigImpl const& p2pConfig,
+        std::unique_ptr<P2PConfig>&& p2pConfig,
         Setup const& setup,
         std::uint16_t overlayPort,
         Resource::Manager& resourceManager,
@@ -224,7 +225,7 @@ public:
     P2PConfig const&
     p2pConfig() const
     {
-        return p2pConfig_;
+        return *p2pConfig_;
     }
 
     void
@@ -291,6 +292,13 @@ private:
         PublicKey const& publicKey,
         ProtocolVersion protocol,
         id_t id) = 0;
+    //--------------------------------------------------------------------------
+    virtual std::shared_ptr<ConnectAttempt>
+    mkConnectAttempt(
+        beast::IP::Endpoint const& remote_endpoint,
+        Resource::Consumer const& usage,
+        std::shared_ptr<PeerFinder::Slot> const& slot,
+        std::uint16_t id);
 };
 
 }  // namespace ripple
