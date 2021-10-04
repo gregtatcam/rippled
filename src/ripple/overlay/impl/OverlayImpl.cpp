@@ -1161,23 +1161,29 @@ OverlayImpl::getActivePeers(
     std::size_t& enabledInSkip) const
 {
     Overlay::PeerSequence ret;
+    disabled = 0;
+    enabledInSkip = 0;
     std::lock_guard lock(mutex_);
 
     active = ids_.size();
-    ret.reserve(ids_.size() - toSkip.size());
+    ret.reserve(active);
 
     for (auto& [id, w] : ids_)
     {
         if (auto p = w.lock())
         {
-            // tx rr feature disabled
-            if (!p->txReduceRelayEnabled())
-                disabled++;
+            // tx reduce-relay feature (trrf) disabled -
+            // count all trrf disabled peers whether in skip or not
+            auto txRREnabled = p->txReduceRelayEnabled();
+            if (!txRREnabled)
+                ++disabled;
 
+            // aggregate peers not in skip whether ttrf enabled or not
             if (toSkip.count(id) == 0)
                 ret.emplace_back(std::move(p));
-            else if (p->txReduceRelayEnabled())
-                enabledInSkip++;
+            // count trrf enabled peers in skip
+            else if (txRREnabled)
+                ++enabledInSkip;
         }
     }
 
