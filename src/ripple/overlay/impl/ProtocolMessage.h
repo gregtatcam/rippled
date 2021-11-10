@@ -187,9 +187,8 @@ parseMessageHeader(
     assert(iter != buffersEnd(bufs));
 
     // Check valid header compressed message:
-    // - 4 bits are the compression algorithm, 1st bit is always set to 1
-    // - 2 bits are always set to 0
-    // - 26 bits are the payload size
+    // - 2 bits are the compression algorithm, 1st bit is always set to 1
+    // - 30 bits are the payload size
     // - 32 bits are the uncompressed data size
     if (*iter & 0x80)
     {
@@ -202,13 +201,13 @@ parseMessageHeader(
             return std::nullopt;
         }
 
-        if (*iter & 0x0C)
+        /*if (*iter & 0x0C)
         {
             ec = make_error_code(boost::system::errc::protocol_error);
             return std::nullopt;
-        }
+        }*/
 
-        hdr.algorithm = static_cast<compression::Algorithm>(*iter & 0xF0);
+        hdr.algorithm = static_cast<compression::Algorithm>(*iter & 0xC0);
 
         if (hdr.algorithm != compression::Algorithm::LZ4)
         {
@@ -219,8 +218,8 @@ parseMessageHeader(
         for (int i = 0; i != 4; ++i)
             hdr.payload_wire_size = (hdr.payload_wire_size << 8) + *iter++;
 
-        // clear the top four bits (the compression bits).
-        hdr.payload_wire_size &= 0x0FFFFFFF;
+        // clear the top two bits (the compression bits).
+        hdr.payload_wire_size &= 0x3FFFFFFF;
 
         hdr.total_wire_size = hdr.header_size + hdr.payload_wire_size;
 
@@ -234,9 +233,9 @@ parseMessageHeader(
     }
 
     // Check valid header uncompressed message:
-    // - 6 bits are set to 0
+    // - 2 bits are set to 0
     // - 26 bits are the payload size
-    if ((*iter & 0xFC) == 0)
+    if ((*iter & 0xC0) == 0)
     {
         hdr.header_size = headerBytes;
 

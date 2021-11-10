@@ -394,6 +394,7 @@ public:
         protocol::TMValidatorList validator_list;
         protocol::TMValidatorListCollection validator_list_collection;
 
+#if 0
         // 4.5KB
         doTest(buildManifests(20), protocol::mtMANIFESTS, 4, "TMManifests20");
         // 22KB
@@ -434,12 +435,14 @@ public:
             protocol::mtLEDGER_DATA,
             100,
             "TMLedgerData100000");
-        // 61MB
+#endif
+        // ~1GB
         doTest(
-            buildLedgerData(500000, *logs),
+            buildLedgerData(10000000, *logs),
             protocol::mtLEDGER_DATA,
-            100,
-            "TMLedgerData500000");
+            1000,
+            "TMLedgerData10000000");
+#if 0
         // 7.7KB
         doTest(
             buildGetObjectByHash(),
@@ -457,6 +460,7 @@ public:
             protocol::mtVALIDATORLISTCOLLECTION,
             4,
             "TMValidatorListCollection");
+#endif
     }
 
     void
@@ -530,7 +534,7 @@ public:
     run() override
     {
         testProtocol();
-        testHandshake();
+        //testHandshake();
     }
 };
 

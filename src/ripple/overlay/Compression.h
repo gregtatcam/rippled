@@ -33,7 +33,7 @@ std::size_t constexpr headerBytesCompressed = 10;
 
 // All values other than 'none' must have the high bit. The low order four bits
 // must be 0.
-enum class Algorithm : std::uint8_t { None = 0x00, LZ4 = 0x90 };
+enum class Algorithm : std::uint8_t { None = 0x00, LZ4 = 0xC0 };
 
 enum class Compressed : std::uint8_t { On, Off };
 

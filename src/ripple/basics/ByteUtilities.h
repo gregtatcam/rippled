@@ -36,6 +36,13 @@ megabytes(T value) noexcept
     return kilobytes(kilobytes(value));
 }
 
+template <class T>
+constexpr auto
+gigabytes(T value) noexcept
+{
+    return kilobytes(megabytes(value));
+}
+
 static_assert(kilobytes(2) == 2048, "kilobytes(2) == 2048");
 static_assert(megabytes(3) == 3145728, "megabytes(3) == 3145728");
 }  // namespace ripple

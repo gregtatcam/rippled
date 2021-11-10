@@ -157,9 +157,8 @@ Message::compress()
         - The first 32 bits, together, represent the compression algorithm
           and payload size:
             - The first bit is set to 1 to indicate the message is compressed.
-            - The next 3 bits indicate the compression algorithm.
-            - The next 2 bits are reserved at this time and set to 0.
-            - The remaining 26 bits represent the payload size.
+            - The next 1 bits indicate the compression algorithm.
+            - The remaining 30 bits represent the payload size.
         - The next 16 bits represent the message type.
         - The remaining 32 bits are the uncompressed message size.
 
@@ -180,22 +179,23 @@ Message::setHeader(
 {
     auto h = in;
 
-    auto pack = [](std::uint8_t*& in, std::uint32_t size) {
+    auto pack = [](std::uint8_t*& in, std::uint32_t size, std::uint8_t flag) {
         *in++ = static_cast<std::uint8_t>(
-            (size >> 24) & 0x0F);  // leftmost 4 are compression bits
+            (size >> 24) & flag);
         *in++ = static_cast<std::uint8_t>((size >> 16) & 0xFF);
         *in++ = static_cast<std::uint8_t>((size >> 8) & 0xFF);
         *in++ = static_cast<std::uint8_t>(size & 0xFF);
     };
 
-    pack(in, payloadBytes);
+    // leftmost 2 are compression bits
+    pack(in, payloadBytes, 0x3F);
 
     *in++ = static_cast<std::uint8_t>((type >> 8) & 0xFF);
     *in++ = static_cast<std::uint8_t>(type & 0xFF);
 
     if (compression != Algorithm::None)
     {
-        pack(in, uncompressedBytes);
+        pack(in, uncompressedBytes, 0xFF);
         *h |= static_cast<std::uint8_t>(compression);
     }
 }
