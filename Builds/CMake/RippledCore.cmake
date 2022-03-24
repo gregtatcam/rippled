@@ -414,6 +414,7 @@ target_sources (rippled PRIVATE
   src/ripple/app/rdb/impl/RelationalDBInterface_postgres.cpp
   src/ripple/app/rdb/impl/RelationalDBInterface_shards.cpp
   src/ripple/app/tx/impl/AMMCreate.cpp
+  src/ripple/app/tx/impl/AMMTrade.cpp
   src/ripple/app/tx/impl/ApplyContext.cpp
   src/ripple/app/tx/impl/BookTip.cpp
   src/ripple/app/tx/impl/CancelCheck.cpp

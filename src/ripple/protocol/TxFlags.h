@@ -80,6 +80,13 @@ const std::uint32_t tfSell = 0x00080000;
 const std::uint32_t tfOfferCreateMask =
     ~(tfUniversal | tfPassive | tfImmediateOrCancel | tfFillOrKill | tfSell);
 
+// AMMTrade flags:
+const std::uint32_t tfAMMDeposit = 0x00010000;
+const std::uint32_t tfAMMWithdraw = 0x00020000;
+const std::uint32_t tfAMMSwap = 0x00040000;
+const std::uint32_t tfAMMTradeMask =
+    ~(tfUniversal | tfAMMDeposit | tfAMMWithdraw | tfAMMSwap);
+
 // Payment flags:
 const std::uint32_t tfNoRippleDirect = 0x00010000;
 const std::uint32_t tfPartialPayment = 0x00020000;

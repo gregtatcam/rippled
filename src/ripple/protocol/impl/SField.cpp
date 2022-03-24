@@ -94,6 +94,8 @@ CONSTRUCT_TYPED_SFIELD(sfUNLModifyDisabling,    "UNLModifyDisabling",   UINT8,  
 CONSTRUCT_TYPED_SFIELD(sfLedgerEntryType,       "LedgerEntryType",      UINT16,     1, SField::sMD_Never);
 CONSTRUCT_TYPED_SFIELD(sfTransactionType,       "TransactionType",      UINT16,     2);
 CONSTRUCT_TYPED_SFIELD(sfSignerWeight,          "SignerWeight",         UINT16,     3);
+CONSTRUCT_TYPED_SFIELD(sfLPTokens,              "LPTokens",             UINT16,     4);
+CONSTRUCT_TYPED_SFIELD(sfSlippage,              "Slippage",             UINT16,     5);
 
 // 16-bit integers (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfVersion,               "Version",              UINT16,    16);
@@ -205,6 +207,15 @@ CONSTRUCT_TYPED_SFIELD(sfAsset2Details,         "Asset2Details",        AMOUNT, 
 CONSTRUCT_TYPED_SFIELD(sfMinimumOffer,          "MinimumOffer",         AMOUNT,    16);
 CONSTRUCT_TYPED_SFIELD(sfRippleEscrow,          "RippleEscrow",         AMOUNT,    17);
 CONSTRUCT_TYPED_SFIELD(sfDeliveredAmount,       "DeliveredAmount",      AMOUNT,    18);
+CONSTRUCT_TYPED_SFIELD(sfAsset1InDetails,       "Asset1InDetails",      AMOUNT,    19);
+CONSTRUCT_TYPED_SFIELD(sfAsset2InAmount,        "Asset2InAmount",       AMOUNT,    21);
+CONSTRUCT_TYPED_SFIELD(sfAsset1OutDetails,      "Asset1OutDetails",     AMOUNT,    22);
+CONSTRUCT_TYPED_SFIELD(sfAsset2OutAmount,       "Asset2OutAmount",      AMOUNT,    23);
+CONSTRUCT_TYPED_SFIELD(sfAssetInDetails,        "AssetInDetails",       AMOUNT,    24);
+CONSTRUCT_TYPED_SFIELD(sfAssetOutDetails,       "AssetOutDetails",      AMOUNT,    25);
+CONSTRUCT_TYPED_SFIELD(sfAssetDetails,          "AssetDetails",         AMOUNT,    26);
+CONSTRUCT_TYPED_SFIELD(sfMaxSP,                 "MaxSP",                AMOUNT,    27);
+CONSTRUCT_TYPED_SFIELD(sfMaxEP,                 "MaxEP",                AMOUNT,    28);
 
 // variable length (common)
 CONSTRUCT_TYPED_SFIELD(sfPublicKey,             "PublicKey",            VL,         1);

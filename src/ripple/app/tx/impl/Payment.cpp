@@ -399,6 +399,7 @@ Payment::doApply()
             PaymentSandbox pv(&view());
             JLOG(j_.debug()) << "Entering RippleCalc in payment: "
                              << ctx_.tx.getTransactionID();
+            auto start = std::chrono::high_resolution_clock::now();
             rc = path::RippleCalc::rippleCalculate(
                 pv,
                 maxSourceAmount,
@@ -408,6 +409,11 @@ Payment::doApply()
                 spsPaths,
                 ctx_.app.logs(),
                 &rcInput);
+            auto elapsed = std::chrono::high_resolution_clock::now() - start;
+            std::uint64_t microseconds =
+                std::chrono::duration_cast<std::chrono::microseconds>(elapsed)
+                    .count();
+            std::cout << "microseconds " << microseconds << std::endl;
             // VFALCO NOTE We might not need to apply, depending
             //             on the TER. But always applying *should*
             //             be safe.

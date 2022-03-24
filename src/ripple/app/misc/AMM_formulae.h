@@ -88,6 +88,201 @@ calcAMMLPT(
     Issue const& lptIssue,
     std::uint8_t weight1);
 
+/** Get fee multiplier (1 - tfee)
+ * @tfee trading fee in basis points
+ */
+inline STAmount
+getFeeMult(std::uint16_t tfee)
+{
+    STAmount const c{noIssue(), 100000};
+    return divide(c - STAmount{noIssue(), tfee}, c, noIssue());
+}
+
+/** Get fee multiplier (1 - (1 - Wb) * tfee) or
+ * c = 100 * 100000,  mult = (c - (100 - weight) * tfee)/ c
+ * @tfee trading fee in basis points
+ * @weight weight {0, 100}
+ */
+inline STAmount
+getFeeMult(std::uint16_t tfee, std::uint16_t weight)
+{
+    STAmount const c{noIssue(), 10000000};  // 100 * 100000
+    auto const num = c - STAmount{noIssue(), (100 - weight) * tfee};
+    return divide(num, c, noIssue());
+}
+
+inline STAmount
+getPct(STAmount const& asset, std::uint16_t pct)
+{
+    auto const ratio = divide(
+        STAmount{noIssue(), pct}, STAmount{noIssue(), 100000}, noIssue());
+    return multiply(asset, ratio, asset.issue());
+}
+
+/** Swap asset out
+ */
+template <typename TIn, typename TOut>
+TIn
+swapAssetOut(
+    TAmounts<TIn, TOut> const& reserves,
+    Issue const& issueIn,  // TEMP, NEED LIB TO SUPPORT XRP/IOU OPS
+    Issue const& issueOut,
+    TOut const& out,
+    std::uint8_t weightIn,
+    std::uint16_t tfee)
+{
+    // Simplified formulae if equal weights
+    assert(weightIn == 50);
+    auto const feeMult = getFeeMult(tfee);
+    auto const num =
+        multiply(toSTAmount(reserves.in), toSTAmount(out), issueIn);
+    auto const den =
+        multiply(toSTAmount(reserves.out - out), feeMult, issueOut);
+    return detail::get<TIn>(divide(num, den, issueIn));
+}
+
+/** Swap asset in
+ */
+template <typename TIn, typename TOut>
+TOut
+swapAssetIn(
+    TAmounts<TIn, TOut> const& reserves,
+    Issue const& issueIn,
+    Issue const& issueOut,
+    TIn const& in,
+    std::uint16_t weightIn,
+    std::uint8_t tfee)
+{
+    // Simplified formulae if equal weights
+    assert(weightIn == 50);
+    auto const feeMult = getFeeMult(tfee);
+    auto const inwfee = [&] {
+        if constexpr (std::is_same_v<TIn, STAmount>)
+            return multiply(toSTAmount(in), feeMult, issueIn);
+        else if constexpr (std::is_same_v<TIn, XRPAmount>)
+            return multiply(toSTAmount(in), feeMult, xrpIssue());
+        return multiply(toSTAmount(in), feeMult, noIssue());
+    }();
+    auto const num = multiply(toSTAmount(reserves.out), inwfee, issueOut);
+    auto const den = toSTAmount(reserves.in) + inwfee;
+    return detail::get<TOut>(divide(num, den, issueOut));
+}
+
+/** Change offer quality to match the target quality
+ */
+template <typename TIn, typename TOut>
+std::optional<std::pair<TIn, TOut>>
+changeQuality(
+    TAmounts<TIn, TOut> const& reserves,
+    Issue const& issueIn,
+    Issue const& issueOut,
+    Quality const& newQuality,
+    std::uint16_t weightIn,
+    std::uint8_t tfee)
+{
+    // Simplified formulae if equal weights
+    assert(weightIn == 50);
+    auto const curQuality = Quality(reserves);
+    if (curQuality < newQuality)
+        return std::nullopt;
+    auto const mult = std::sqrt(detail::saToDouble(divide(
+                          curQuality.rate(), newQuality.rate(), issueOut))) -
+        1.;
+    auto const out = detail::get<TOut>(multiply(
+        toSTAmount(reserves.out), detail::toSTAfromDouble(mult), issueOut));
+    auto const in =
+        swapAssetOut(reserves, issueIn, issueOut, out, weightIn, tfee);
+    return std::make_pair(in, out);
+}
+
+/** Calculate LP Tokens given asset's deposit amount.
+ * @param asset1Balance current AMM asset1 balance
+ * @param asset1Deposit requested asset1 deposit amount
+ * @param lpTokensBalance LP Tokens balance
+ * @param weight1 asset1 pool weight percentage
+ * @param tfee trading fee in basis points
+ * @return seated tokens in amount on success
+ */
+std::optional<STAmount>
+calcLPTokensIn(
+    STAmount const& asset1Balance,
+    STAmount const& asset1Deposit,
+    STAmount const& lpTokensBalance,
+    std::uint16_t weight1,
+    std::uint16_t tfee);
+
+/** Calculate asset deposit given LP Tokens.
+ * @param asset1Balance current AMM asset1 balance
+ * @param lpTokensBalance LP Tokens balance
+ * @param ammTokensBalance AMM LPT balance
+ * @param weight1 asset1 pool weight percentage
+ * @param tfee trading fee in basis points
+ * @return
+ */
+std::optional<STAmount>
+calcAssetIn(
+    STAmount const& asset1Balance,
+    STAmount const& lpTokensBalance,
+    STAmount const& ammTokensBalance,
+    std::uint16_t weight1,
+    std::uint16_t tfee);
+
+/** Calculate LP Tokens given asset's withdraw amount.
+ * @param asset1Balance current AMM asset1 balance
+ * @param asset1Withdraw requested asset1 withdraw amount
+ * @param lpTokensBalance LP Tokens balance
+ * @param weight1 asset1 pool weight percentage
+ * @param tfee trading fee in basis points
+ * @return seated tokens out amount on success
+ */
+std::optional<STAmount>
+calcLPTokensOut(
+    STAmount const& asset1Balance,
+    STAmount const& asset1Withdraw,
+    STAmount const& lpTokensBalance,
+    std::uint16_t weight1,
+    std::uint16_t tfee);
+
+/** Calculate AMM's Spot Price
+ * @param asset1Balance current AMM asset1 balance
+ * @param asset2Balance current AMM asset2 balance
+ * @param weight1 asset1 pool weight percentage
+ * @param tfee trading fee in basis points
+ * @return spot price
+ */
+STAmount
+calcSpotPrice(
+    STAmount const& asset1Balance,
+    STAmount const& asset2Balance,
+    std::uint8_t weight1,
+    std::uint16_t tfee);
+
+/** Calculate effective price.
+ * @param asset1Balance current AMM asset1 balance
+ * @param asset2Balance current AMM asset2 balance
+ * @return effective price
+ */
+STAmount
+calcEffectivePrice(
+    STAmount const& asset1Balance,
+    STAmount const& asset2Balance);
+
+/** Get asset2 amount based on new AMM's Spot Price.
+ * @param asset1Balance current AMM asset1 balance
+ * @param asset2Balance current AMM asset2 balance
+ * @param newSP requested Spot Price
+ * @param weight1 asset1 pool weight percentage
+ * @param tfee trading fee in basis points
+ * @return
+ */
+std::optional<STAmount>
+changeSpotPrice(
+    STAmount const& asset1Balance,
+    STAmount const& asset2Balance,
+    STAmount const& newSP,
+    std::uint8_t weight1,
+    std::uint16_t tfee);
+
 }  // namespace ripple
 
 #endif  // RIPPLE_APP_MISC_AMM_FORMULAE_H_INCLUDED

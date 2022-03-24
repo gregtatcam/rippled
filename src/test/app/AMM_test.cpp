@@ -273,10 +273,209 @@ struct AMM_test : public beast::unit_test::suite
     }
 
     void
+    testAddLiquidity()
+    {
+        testcase("Add Liquidity");
+
+        using namespace jtx;
+        Env env{*this};
+
+        auto const gw = AccountX{"gateway"};
+        auto const USD = gw["USD"];
+        AccountX const alice{"alice"};
+        AccountX const carol{"carol"};
+
+        env.fund(XRP(30000), alice, carol, gw);
+        env.trust(USD(30000), alice);
+        env.trust(USD(30000), carol);
+
+        env(pay(gw, alice, USD(20000)));
+        env(pay(gw, carol, USD(20000)));
+
+        AMM ammAlice(env, alice, XRP(10000), USD(10000));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(10000), USD(10000), IOUAmount{10000000, 0}));
+
+        // 10% equal deposit
+        ammAlice.deposit(carol, 10000);
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(11000), USD(11000), IOUAmount{11000000, 0}));
+
+        // 1000 USD deposit
+        ammAlice.deposit(carol, USD(1000));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(11000), USD(12000), IOUAmount{1148912529307604, -8}));
+
+        // 1000 XRP deposit
+        ammAlice.deposit(carol, XRP(1000));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(12000),
+            USD(12000),
+            IOUAmount{1199999999999997, -8}));  // loss in precision
+
+        // 10% of USD
+        ammAlice.deposit(carol, 10000, USD(0));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(12000), USD(14520), IOUAmount{1319999999999997, -8}));
+
+        // 10% of XRP
+        ammAlice.deposit(carol, 10000, XRP(0));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(14520), USD(14520), IOUAmount{1451999999999997, -8}));
+    }
+
+    void
+    testWithdrawLiquidity()
+    {
+        testcase("Withdraw Liquidity");
+
+        using namespace jtx;
+        Env env{*this};
+
+        auto const gw = AccountX{"gateway"};
+        auto const USD = gw["USD"];
+        AccountX const alice{"alice"};
+        AccountX const carol{"carol"};
+
+        env.fund(XRP(30000), alice, carol, gw);
+        env.trust(USD(30000), alice);
+        env.trust(USD(30000), carol);
+
+        env(pay(gw, alice, USD(20000)));
+        env(pay(gw, carol, USD(20000)));
+
+        // Alice created AMM.
+        AMM ammAlice(env, alice, XRP(10000), USD(10000));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(10000), USD(10000), IOUAmount{10000000, 0}));
+
+        // Should fail - Carol is not a Liquidity Provider.
+        // There is no even the trust line for LPT.
+        ammAlice.withdraw(
+            carol, 10000, std::nullopt, std::optional<ter>(tefINTERNAL));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(10000), USD(10000), IOUAmount{10000000, 0}));
+
+        // 10% equal deposit by Carol. Carol is now LP.
+        ammAlice.deposit(carol, 10000);
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(11000), USD(11000), IOUAmount{11000000, 0}));
+
+        // Should fail - Carol withdraws more than deposited
+        ammAlice.withdraw(
+            carol,
+            20000,
+            std::nullopt,
+            std::optional<ter>(tecAMM_FAILED_WITHDRAW));
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(11000), USD(11000), IOUAmount{11000000, 0}));
+
+        // 5% equal withdraw by Carol
+        ammAlice.withdraw(carol, 5000);
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(10450), USD(10450), IOUAmount{10450000, 0}));
+
+        // 10% equal withdraw by Alice
+        ammAlice.withdraw(alice, 10000);
+        BEAST_EXPECT(ammAlice.expectBalances(
+            XRP(9405), USD(9405), IOUAmount{9405000, 0}));
+    }
+
+    void
+    testPerformance()
+    {
+        testcase("Performance");
+
+        auto const N = 1;
+        std::vector<std::uint64_t> t(N);
+        auto stats = [&](std::string const& msg) {
+            auto const avg =
+                static_cast<float>(std::accumulate(t.begin(), t.end(), 0)) /
+                static_cast<float>(N);
+            auto const sd = std::accumulate(
+                t.begin(), t.end(), 0., [&](auto accum, auto const& v) {
+                    return accum + (v - avg) * (v - avg);
+                });
+            std::cout << msg << " avg " << avg << " sd "
+                      << std::sqrt(sd / static_cast<float>(N))
+                      << std::endl;
+        };
+
+        for (auto i = 0; i < N; i++)
+        {
+            using namespace jtx;
+            Env env(*this);
+
+            auto const gw = AccountX("gateway");
+            auto const USD = gw["USD"];
+            auto const EUR = gw["EUR"];
+            AccountX const alice{"alice"};
+            AccountX const carol{"carol"};
+            AccountX const bob{"bob"};
+
+            env.fund(XRP(1000), alice, carol, bob, gw);
+            env.trust(USD(1000), carol);
+            env.trust(EUR(1000), alice);
+            env.trust(USD(1000), bob);
+
+            env(pay(gw, alice, EUR(1000)));
+            env(pay(gw, bob, USD(1000)));
+
+            env(offer(bob, EUR(1000), USD(1000)));
+
+            auto start = std::chrono::high_resolution_clock::now();
+            env(pay(alice, carol, USD(1000)), path(~USD), sendmax(EUR(1000)));
+            auto elapsed = std::chrono::high_resolution_clock::now() - start;
+            std::uint64_t microseconds =
+                std::chrono::duration_cast<std::chrono::microseconds>(elapsed)
+                    .count();
+            t.push_back(microseconds);
+        }
+        stats("single offer");
+
+        t.clear();
+        for (auto i = 0; i < N; i++)
+        {
+            using namespace jtx;
+            Env env(*this);
+
+            auto const gw = AccountX("gateway");
+            auto const USD = gw["USD"];
+            auto const EUR = gw["EUR"];
+            AccountX const alice{"alice"};
+            AccountX const carol{"carol"};
+            AccountX const bob{"bob"};
+
+            env.fund(XRP(1000), alice, carol, bob, gw);
+            env.trust(USD(1000), carol);
+            env.trust(EUR(1100), alice);
+            env.trust(USD(1000), bob);
+
+            env(pay(gw, alice, EUR(1100)));
+            env(pay(gw, bob, USD(1000)));
+
+            for (auto j = 0; j < 10; j++)
+                env(offer(bob, EUR(100 + j), USD(100)));
+
+            auto start = std::chrono::high_resolution_clock::now();
+            env(pay(alice, carol, USD(1000)), path(~USD), sendmax(EUR(1100)));
+            auto elapsed = std::chrono::high_resolution_clock::now() - start;
+            std::uint64_t microseconds =
+                std::chrono::duration_cast<std::chrono::microseconds>(elapsed)
+                    .count();
+            t.push_back(microseconds);
+        }
+        stats("multiple offers");
+    }
+
+    void
     run() override
     {
-        testInvalidInstance();
-        testInstanceCreate();
+        testPerformance();
+        // testInvalidInstance();
+        // testInstanceCreate();
+        // testAddLiquidity();
+        // testWithdrawLiquidity();
     }
 };
 

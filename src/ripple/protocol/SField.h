@@ -347,6 +347,8 @@ extern SF_UINT8 const sfAssetWeight;
 extern SF_UINT16 const sfLedgerEntryType;
 extern SF_UINT16 const sfTransactionType;
 extern SF_UINT16 const sfSignerWeight;
+extern SF_UINT16 const sfLPTokens;
+extern SF_UINT16 const sfSlippage;
 
 // 16-bit integers (uncommon)
 extern SF_UINT16 const sfVersion;
@@ -452,6 +454,15 @@ extern SF_AMOUNT const sfSendMax;
 extern SF_AMOUNT const sfDeliverMin;
 extern SF_AMOUNT const sfAsset1Details;
 extern SF_AMOUNT const sfAsset2Details;
+extern SF_AMOUNT const sfAsset1InDetails;
+extern SF_AMOUNT const sfAsset2InAmount;
+extern SF_AMOUNT const sfAsset1OutDetails;
+extern SF_AMOUNT const sfAsset2OutAmount;
+extern SF_AMOUNT const sfAssetInDetails;
+extern SF_AMOUNT const sfAssetOutDetails;
+extern SF_AMOUNT const sfAssetDetails;
+extern SF_AMOUNT const sfMaxEP;
+extern SF_AMOUNT const sfMaxSP;
 
 // currency amount (uncommon)
 extern SF_AMOUNT const sfMinimumOffer;

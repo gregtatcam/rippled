@@ -19,6 +19,7 @@
 
 #include <ripple/app/tx/applySteps.h>
 #include <ripple/app/tx/impl/AMMCreate.h>
+#include <ripple/app/tx/impl/AMMTrade.h>
 #include <ripple/app/tx/impl/ApplyContext.h>
 #include <ripple/app/tx/impl/CancelCheck.h>
 #include <ripple/app/tx/impl/CancelOffer.h>
@@ -135,6 +136,8 @@ invoke_preflight(PreflightContext const& ctx)
             return invoke_preflight_helper<Change>(ctx);
         case ttAMM_CREATE:
             return invoke_preflight_helper<AMMCreate>(ctx);
+        case ttAMM_TRADE:
+            return invoke_preflight_helper<AMMTrade>(ctx);
         default:
             assert(false);
             return {temUNKNOWN, TxConsequences{temUNKNOWN}};
@@ -228,6 +231,8 @@ invoke_preclaim(PreclaimContext const& ctx)
             return invoke_preclaim<Change>(ctx);
         case ttAMM_CREATE:
             return invoke_preclaim<AMMCreate>(ctx);
+        case ttAMM_TRADE:
+            return invoke_preclaim<AMMTrade>(ctx);
         default:
             assert(false);
             return temUNKNOWN;
@@ -283,6 +288,8 @@ invoke_calculateBaseFee(ReadView const& view, STTx const& tx)
             return Change::calculateBaseFee(view, tx);
         case ttAMM_CREATE:
             return AMMCreate::calculateBaseFee(view, tx);
+        case ttAMM_TRADE:
+            return AMMTrade::calculateBaseFee(view, tx);
         default:
             assert(false);
             return FeeUnit64{0};
@@ -417,6 +424,10 @@ invoke_apply(ApplyContext& ctx)
         }
         case ttAMM_CREATE: {
             AMMCreate p(ctx);
+            return p();
+        }
+        case ttAMM_TRADE: {
+            AMMTrade p(ctx);
             return p();
         }
         default:

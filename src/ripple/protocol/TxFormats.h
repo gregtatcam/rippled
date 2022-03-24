@@ -126,6 +126,10 @@ enum TxType : std::uint16_t
 
     /** This transaction type creates an AMM instance */
     ttAMM_CREATE = 23,
+
+    /** This transaction type trades against AMM instance */
+    ttAMM_TRADE = 24,
+
     /** This system-generated transaction type is used to update the status of the various amendments.
 
         For details, see: https://xrpl.org/amendments.html

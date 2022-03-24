@@ -82,6 +82,8 @@ enum TEMcodes : TERUnderlyingType {
     temMALFORMED = -299,
 
     temBAD_AMM,
+    temBAD_AMM_OPTIONS,
+    temBAD_AMM_TOKENS,
     temBAD_AMOUNT,
     temBAD_CURRENCY,
     temBAD_EXPIRATION,
@@ -279,7 +281,12 @@ enum TECcodes : TERUnderlyingType {
     tecKILLED = 150,
     tecHAS_OBLIGATIONS = 151,
     tecTOO_SOON = 152,
-    tecHOOK_ERROR [[maybe_unused]] = 153
+    tecHOOK_ERROR [[maybe_unused]] = 153,
+    tecUNFUNDED_AMM = 154,
+    tecAMM_BALANCE = 155,
+    tecAMM_FAILED_DEPOSIT = 166,
+    tecAMM_FAILED_WITHDRAW = 167,
+    tecAMM_INVALID_TOKENS = 168,
 };
 
 //------------------------------------------------------------------------------

@@ -87,6 +87,24 @@ TxFormats::TxFormats()
             {sfTradingFee, soeREQUIRED},
         },
         commonFields);
+
+    add(jss::AMMTrade,
+        ttAMM_TRADE,
+        {
+            {sfAMMAccount, soeREQUIRED},
+            {sfAsset1InDetails, soeOPTIONAL},
+            {sfAsset2InAmount, soeOPTIONAL},
+            {sfAsset1OutDetails, soeOPTIONAL},
+            {sfAsset2OutAmount, soeOPTIONAL},
+            {sfAssetInDetails, soeOPTIONAL},
+            {sfAssetOutDetails, soeOPTIONAL},
+            {sfAssetDetails, soeOPTIONAL},
+            {sfSlippage, soeOPTIONAL},
+            {sfMaxEP, soeOPTIONAL},
+            {sfLPTokens, soeOPTIONAL},
+        },
+        commonFields);
+
     add(jss::OfferCancel,
         ttOFFER_CANCEL,
         {

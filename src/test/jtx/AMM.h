@@ -44,6 +44,15 @@ class AMM
     void
     create(std::uint32_t tfee = 0);
 
+    void
+    deposit(std::optional<Account> const& account, Json::Value& jv);
+
+    void
+    withdraw(
+        std::optional<Account> const& account,
+        Json::Value& jv,
+        std::optional<ter> const& ter = {});
+
 public:
     AMM(Env& env,
         Account const& account,
@@ -85,6 +94,34 @@ public:
 
     bool
     accountRootExists() const;
+
+    void
+    deposit(
+        std::optional<Account> const& account,
+        std::uint16_t tokens,
+        std::optional<STAmount> const& asset1InDetails = {});
+
+    void
+    deposit(
+        std::optional<Account> const& account,
+        STAmount const& asset1InDetails,
+        std::optional<STAmount> const& asset2InAmount = {},
+        std::optional<STAmount> const& maxSP = {});
+
+    void
+    withdraw(
+        std::optional<Account> const& account,
+        std::uint16_t tokens,
+        std::optional<STAmount> const& asset1OutDetails = {},
+        std::optional<ter> const& ter = {});
+
+    void
+    withdraw(
+        std::optional<Account> const& account,
+        STAmount const& asset1OutDetails,
+        std::optional<STAmount> const& asset2OutAmount = {},
+        std::optional<STAmount> const& maxSP = {},
+        std::optional<ter> const& ter = {});
 };
 
 namespace amm {

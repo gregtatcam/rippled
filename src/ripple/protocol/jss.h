@@ -48,10 +48,15 @@ JSS(AccountRoot);            // ledger type.
 JSS(AccountSet);             // transaction type.
 JSS(AMMAccount);             // field
 JSS(AMMInstanceCreate);      // transaction type
+JSS(AMMTrade);               // transaction type
 JSS(Amendments);             // ledger type.
 JSS(Amount);                 // in: TransactionSign; field.
 JSS(Asset1Details);          // in/out: AMM IOU/XRP pool amount
 JSS(Asset2Details);          // in/out: AMM IOU pool amount
+JSS(Asset1InDetails);        // in: AMM Deposit option
+JSS(Asset2InAmount);         // in: AMM Deposit option
+JSS(Asset1OutDetails);       // in: AMM Withdraw option
+JSS(Asset2OutAmount);        // in: AMM Withdraw option
 JSS(AssetWeight);            // in/out: AMM asset1 weight
 JSS(Check);                  // ledger type.
 JSS(CheckCancel);            // transaction type.
@@ -75,6 +80,8 @@ JSS(Invalid);                //
 JSS(LastLedgerSequence);     // in: TransactionSign; field
 JSS(LedgerHashes);           // ledger type.
 JSS(LimitAmount);            // field.
+JSS(LPTokens);               // in: AMM Deposit/Withdraw option
+JSS(MaxEP);                  // in: AMM Deposit option
 JSS(Offer);                  // ledger type.
 JSS(OfferCancel);            // transaction type.
 JSS(OfferCreate);            // transaction type.

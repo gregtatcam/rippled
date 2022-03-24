@@ -157,6 +157,97 @@ AMM::expectAmmInfo(
         lptBalance == STAmount{balance, lptIssue_};
 }
 
+void
+AMM::deposit(std::optional<Account> const& account, Json::Value& jv)
+{
+    jv[jss::Account] = account ? account->human() : creatorAccount_.human();
+    jv[jss::AMMAccount] = to_string(ammAccountID_);
+    jv[jss::TransactionType] = jss::AMMTrade;
+    jv[jss::Flags] = tfAMMDeposit;
+    if (ter_)
+        env_(jv, *ter_);
+    else
+        env_(jv);
+}
+
+void
+AMM::deposit(
+    std::optional<Account> const& account,
+    std::uint16_t tokens,
+    std::optional<STAmount> const& asset1InDetails)
+{
+    Json::Value jv;
+    jv[jss::LPTokens] = tokens;
+    if (asset1InDetails)
+        asset1InDetails->setJson(jv[jss::Asset1InDetails]);
+    deposit(account, jv);
+}
+
+void
+AMM::deposit(
+    std::optional<Account> const& account,
+    STAmount const& asset1InDetails,
+    std::optional<STAmount> const& asset2InAmount,
+    std::optional<STAmount> const& maxEP)
+{
+    assert(!(asset2InAmount && maxEP));
+    Json::Value jv;
+    asset1InDetails.setJson(jv[jss::Asset1InDetails]);
+    if (asset2InAmount)
+        asset2InAmount->setJson(jv[jss::Asset2InAmount]);
+    if (maxEP)
+        maxEP->setJson(jv[jss::MaxEP]);
+    deposit(account, jv);
+}
+
+void
+AMM::withdraw(
+    std::optional<Account> const& account,
+    Json::Value& jv,
+    std::optional<ter> const& ter)
+{
+    jv[jss::Account] = account ? account->human() : creatorAccount_.human();
+    jv[jss::AMMAccount] = to_string(ammAccountID_);
+    jv[jss::TransactionType] = jss::AMMTrade;
+    jv[jss::Flags] = tfAMMWithdraw;
+    if (ter)
+        env_(jv, *ter);
+    else
+        env_(jv);
+}
+
+void
+AMM::withdraw(
+    std::optional<Account> const& account,
+    std::uint16_t tokens,
+    std::optional<STAmount> const& asset1OutDetails,
+    std::optional<ter> const& ter)
+{
+    Json::Value jv;
+    jv[jss::LPTokens] = tokens;
+    if (asset1OutDetails)
+        asset1OutDetails->setJson(jv[jss::Asset1OutDetails]);
+    withdraw(account, jv, ter);
+}
+
+void
+AMM::withdraw(
+    std::optional<Account> const& account,
+    STAmount const& asset1OutDetails,
+    std::optional<STAmount> const& asset2OutAmount,
+    std::optional<STAmount> const& maxEP,
+    std::optional<ter> const& ter)
+{
+    assert(!(asset2OutAmount && maxEP));
+    Json::Value jv;
+    asset1OutDetails.setJson(jv[jss::Asset1OutDetails]);
+    if (asset2OutAmount)
+        asset2OutAmount->setJson(jv[jss::Asset2OutAmount]);
+    if (maxEP)
+        maxEP->setJson(jv[jss::MaxEP]);
+    withdraw(account, jv, ter);
+}
+
 namespace amm {
 Json::Value
 trust(AccountID const& account, STAmount const& amount, std::uint32_t flags)
