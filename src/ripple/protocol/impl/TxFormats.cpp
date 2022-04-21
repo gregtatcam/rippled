@@ -93,7 +93,7 @@ TxFormats::TxFormats()
     add(jss::AMMDeposit,
         ttAMM_DEPOSIT,
         {
-            {sfAMMAccount, soeREQUIRED},
+            {sfAMMHash, soeREQUIRED},
             {sfAsset1In, soeOPTIONAL},
             {sfAsset2In, soeOPTIONAL},
             {sfMaxSP, soeOPTIONAL},
@@ -104,7 +104,7 @@ TxFormats::TxFormats()
     add(jss::AMMWithdraw,
         ttAMM_WITHDRAW,
         {
-            {sfAMMAccount, soeREQUIRED},
+            {sfAMMHash, soeREQUIRED},
             {sfAsset1Out, soeOPTIONAL},
             {sfAsset2Out, soeOPTIONAL},
             {sfMaxSP, soeOPTIONAL},
@@ -115,7 +115,7 @@ TxFormats::TxFormats()
     add(jss::AMMSwap,
         ttAMM_SWAP,
         {
-            {sfAMMAccount, soeREQUIRED},
+            {sfAMMHash, soeREQUIRED},
             {sfAssetIn, soeOPTIONAL},
             {sfAssetOut, soeOPTIONAL},
             {sfMaxSP, soeOPTIONAL},

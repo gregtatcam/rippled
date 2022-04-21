@@ -268,6 +268,15 @@ LedgerFormats::LedgerFormats()
         },
         commonFields);
     // clang-format on
+
+    add(jss::AMM,
+        ltAMM,
+        {
+            {sfAMMAccount, soeREQUIRED},
+            {sfAssetWeight, soeREQUIRED},
+            {sfTradingFee, soeREQUIRED},
+        },
+        commonFields);
 }
 
 LedgerFormats const&
