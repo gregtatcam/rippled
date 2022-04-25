@@ -96,7 +96,7 @@ TxFormats::TxFormats()
             {sfAMMHash, soeREQUIRED},
             {sfAsset1In, soeOPTIONAL},
             {sfAsset2In, soeOPTIONAL},
-            {sfMaxSP, soeOPTIONAL},
+            {sfEPrice, soeOPTIONAL},
             {sfLPTokens, soeOPTIONAL},
         },
         commonFields);

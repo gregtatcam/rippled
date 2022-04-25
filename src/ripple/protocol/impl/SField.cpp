@@ -251,6 +251,7 @@ CONSTRUCT_TYPED_SFIELD(sfMaxSP,                 "MaxSP",                AMOUNT, 
 CONSTRUCT_TYPED_SFIELD(sfLPTokens,              "LPTokens",             AMOUNT,    28);
 CONSTRUCT_TYPED_SFIELD(sfAssetIn,               "AssetIn",              AMOUNT,    29);
 CONSTRUCT_TYPED_SFIELD(sfAssetOut,              "AssetOut",             AMOUNT,    30);
+CONSTRUCT_TYPED_SFIELD(sfEPrice,                "EPrice",               AMOUNT,    31);
 
 // Reserve 20 & 21 for Hooks
 
