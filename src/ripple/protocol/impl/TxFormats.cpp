@@ -107,7 +107,7 @@ TxFormats::TxFormats()
             {sfAMMHash, soeREQUIRED},
             {sfAsset1Out, soeOPTIONAL},
             {sfAsset2Out, soeOPTIONAL},
-            {sfMaxSP, soeOPTIONAL},
+            {sfEPrice, soeOPTIONAL},
             {sfLPTokens, soeOPTIONAL},
         },
         commonFields);
@@ -118,7 +118,7 @@ TxFormats::TxFormats()
             {sfAMMHash, soeREQUIRED},
             {sfAssetIn, soeOPTIONAL},
             {sfAssetOut, soeOPTIONAL},
-            {sfMaxSP, soeOPTIONAL},
+            {sfLimitSpotPrice, soeOPTIONAL},
             {sfSlippage, soeOPTIONAL},
         },
         commonFields);
