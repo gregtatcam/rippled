@@ -550,6 +550,31 @@ flow(
 
     TOutAmt remainingOut(outReq);
 
+    std::uint32_t N = 10;
+    auto deltaOut = [&] {
+      auto const saAmount = toSTAmount(remainingOut);
+      auto const delta = divide(saAmount, STAmount{noIssue(), N, 0}, saAmount.issue());
+      if constexpr (std::is_same_v<TOutAmt, XRPAmount>)
+          return delta.xrp();
+      else if constexpr (std::is_same_v<TOutAmt, IOUAmount>)
+          return delta.iou();
+      else
+          return delta;
+    }();
+    auto deltaIn = [&]() -> std::optional<TInAmt> {
+      if (!remainingIn)
+          return remainingIn;
+      auto const saAmount = toSTAmount(*remainingIn);
+      auto const delta = divide(saAmount, STAmount{noIssue(), N, 0}, saAmount.issue());
+      if constexpr (std::is_same_v<TInAmt, XRPAmount>)
+          return delta.xrp();
+      else if constexpr (std::is_same_v<TInAmt, IOUAmount>)
+          return delta.iou();
+            else
+                return delta;
+        }();
+    auto const outReq_ = deltaOut;
+
     PaymentSandbox sb(&baseView);
 
     // non-dry strands
@@ -574,161 +599,169 @@ flow(
     // successful
     boost::container::flat_set<uint256> ofrsToRmOnFail;
 
-    while (remainingOut > beast::zero &&
-           (!remainingIn || *remainingIn > beast::zero))
-    {
-        ++curTry;
-        if (curTry >= maxTries)
+    auto doIters = [&](TOutAmt remainingOut_, std::optional<TInAmt> remainingIn_) -> FlowResult<TInAmt, TOutAmt> {
+        while (remainingOut_ > beast::zero &&
+               (!remainingIn_ || *remainingIn_ > beast::zero))
         {
-            return {telFAILED_PROCESSING, std::move(ofrsToRmOnFail)};
-        }
-
-        activeStrands.activateNext(sb, limitQuality);
-
-        boost::container::flat_set<uint256> ofrsToRm;
-        std::optional<BestStrand> best;
-        if (flowDebugInfo)
-            flowDebugInfo->newLiquidityPass();
-        // Index of strand to mark as inactive (remove from the active list) if
-        // the liquidity is used. This is used for strands that consume too many
-        // offers Constructed as `false,0` to workaround a gcc warning about
-        // uninitialized variables
-        std::optional<std::size_t> markInactiveOnUse;
-        for (size_t strandIndex = 0, sie = activeStrands.size();
-             strandIndex != sie;
-             ++strandIndex)
-        {
-            Strand const* strand = activeStrands.get(strandIndex);
-            if (!strand)
+            ++curTry;
+            if (curTry >= maxTries)
             {
-                // should not happen
-                continue;
+                return {telFAILED_PROCESSING, std::move(ofrsToRmOnFail)};
             }
-            if (offerCrossing && limitQuality)
-            {
-                auto const strandQ = qualityUpperBound(sb, *strand);
-                if (!strandQ || *strandQ < *limitQuality)
-                    continue;
-            }
-            auto f = flow<TInAmt, TOutAmt>(
-                sb, *strand, remainingIn, remainingOut, j);
 
-            // rm bad offers even if the strand fails
-            SetUnion(ofrsToRm, f.ofrsToRm);
+            activeStrands.activateNext(sb, limitQuality);
 
-            offersConsidered += f.ofrsUsed;
-
-            if (!f.success || f.out == beast::zero)
-                continue;
-
+            boost::container::flat_set<uint256> ofrsToRm;
+            std::optional<BestStrand> best;
             if (flowDebugInfo)
-                flowDebugInfo->pushLiquiditySrc(
-                    EitherAmount(f.in), EitherAmount(f.out));
-
-            assert(
-                f.out <= remainingOut && f.sandbox &&
-                (!remainingIn || f.in <= *remainingIn));
-
-            Quality const q(f.out, f.in);
-
-            JLOG(j.trace())
-                << "New flow iter (iter, in, out): " << curTry - 1 << " "
-                << to_string(f.in) << " " << to_string(f.out);
-
-            if (limitQuality && q < *limitQuality)
+                flowDebugInfo->newLiquidityPass();
+            // Index of strand to mark as inactive (remove from the active list)
+            // if the liquidity is used. This is used for strands that consume
+            // too many offers Constructed as `false,0` to workaround a gcc
+            // warning about uninitialized variables
+            std::optional<std::size_t> markInactiveOnUse;
+            for (size_t strandIndex = 0, sie = activeStrands.size();
+                 strandIndex != sie;
+                 ++strandIndex)
             {
-                JLOG(j.trace())
-                    << "Path rejected by limitQuality"
-                    << " limit: " << *limitQuality << " path q: " << q;
-                continue;
-            }
-
-            if (baseView.rules().enabled(featureFlowSortStrands))
-            {
-                assert(!best);
-                if (!f.inactive)
-                    activeStrands.push(strand);
-                best.emplace(f.in, f.out, std::move(*f.sandbox), *strand, q);
-                activeStrands.pushRemainingCurToNext(strandIndex + 1);
-                break;
-            }
-
-            activeStrands.push(strand);
-
-            if (!best || best->quality < q ||
-                (best->quality == q && best->out < f.out))
-            {
-                // If this strand is inactive (because it consumed too many
-                // offers) and ends up having the best quality, remove it
-                // from the activeStrands. If it doesn't end up having the
-                // best quality, keep it active.
-
-                if (f.inactive)
+                Strand const* strand = activeStrands.get(strandIndex);
+                if (!strand)
                 {
-                    // This should be `nextSize`, not `size`. This issue is
-                    // fixed in featureFlowSortStrands.
-                    markInactiveOnUse = activeStrands.size() - 1;
+                    // should not happen
+                    continue;
                 }
-                else
+                if (offerCrossing && limitQuality)
                 {
+                    auto const strandQ = qualityUpperBound(sb, *strand);
+                    if (!strandQ || *strandQ < *limitQuality)
+                        continue;
+                }
+                auto f = flow<TInAmt, TOutAmt>(
+                    sb, *strand, remainingIn_, remainingOut_, j);
+
+                // rm bad offers even if the strand fails
+                SetUnion(ofrsToRm, f.ofrsToRm);
+
+                offersConsidered += f.ofrsUsed;
+
+                if (!f.success || f.out == beast::zero)
+                    continue;
+
+                if (flowDebugInfo)
+                    flowDebugInfo->pushLiquiditySrc(
+                        EitherAmount(f.in), EitherAmount(f.out));
+
+                assert(
+                    f.out <= remainingOut_ && f.sandbox &&
+                    (!remainingIn_ || f.in <= *remainingIn_));
+
+                Quality const q(f.out, f.in);
+
+                JLOG(j.trace())
+                    << "New flow iter (iter, in, out): " << curTry - 1 << " "
+                    << to_string(f.in) << " " << to_string(f.out);
+
+                if (limitQuality && q < *limitQuality)
+                {
+                    JLOG(j.trace())
+                        << "Path rejected by limitQuality"
+                        << " limit: " << *limitQuality << " path q: " << q;
+                    continue;
+                }
+
+                if (baseView.rules().enabled(featureFlowSortStrands))
+                {
+                    assert(!best);
+                    if (!f.inactive)
+                        activeStrands.push(strand);
+                    best.emplace(
+                        f.in, f.out, std::move(*f.sandbox), *strand, q);
+                    activeStrands.pushRemainingCurToNext(strandIndex + 1);
+                    break;
+                }
+
+                activeStrands.push(strand);
+
+                if (!best || best->quality < q ||
+                    (best->quality == q && best->out < f.out))
+                {
+                    // If this strand is inactive (because it consumed too many
+                    // offers) and ends up having the best quality, remove it
+                    // from the activeStrands. If it doesn't end up having the
+                    // best quality, keep it active.
+
+                    if (f.inactive)
+                    {
+                        // This should be `nextSize`, not `size`. This issue is
+                        // fixed in featureFlowSortStrands.
+                        markInactiveOnUse = activeStrands.size() - 1;
+                    }
+                    else
+                    {
+                        markInactiveOnUse.reset();
+                    }
+
+                    best.emplace(
+                        f.in, f.out, std::move(*f.sandbox), *strand, q);
+                }
+            }
+
+            bool const shouldBreak = [&] {
+                if (baseView.rules().enabled(featureFlowSortStrands))
+                    return !best || offersConsidered >= maxOffersToConsider;
+                return !best;
+            }();
+
+            if (best)
+            {
+                if (markInactiveOnUse)
+                {
+                    activeStrands.removeIndex(*markInactiveOnUse);
                     markInactiveOnUse.reset();
                 }
+                savedIns.insert(best->in);
+                savedOuts.insert(best->out);
+                remainingOut_ = outReq_ - sum(savedOuts);
+                if (sendMax)
+                    remainingIn_ = *sendMax - sum(savedIns);
 
-                best.emplace(f.in, f.out, std::move(*f.sandbox), *strand, q);
+                if (flowDebugInfo)
+                    flowDebugInfo->pushPass(
+                        EitherAmount(best->in),
+                        EitherAmount(best->out),
+                        activeStrands.size());
+
+                JLOG(j.trace())
+                    << "Best path: in: " << to_string(best->in)
+                    << " out: " << to_string(best->out)
+                    << " remainingOut: " << to_string(remainingOut_);
+
+                best->sb.apply(sb);
             }
-        }
-
-        bool const shouldBreak = [&] {
-            if (baseView.rules().enabled(featureFlowSortStrands))
-                return !best || offersConsidered >= maxOffersToConsider;
-            return !best;
-        }();
-
-        if (best)
-        {
-            if (markInactiveOnUse)
+            else
             {
-                activeStrands.removeIndex(*markInactiveOnUse);
-                markInactiveOnUse.reset();
+                JLOG(j.trace()) << "All strands dry.";
             }
-            savedIns.insert(best->in);
-            savedOuts.insert(best->out);
-            remainingOut = outReq - sum(savedOuts);
-            if (sendMax)
-                remainingIn = *sendMax - sum(savedIns);
 
-            if (flowDebugInfo)
-                flowDebugInfo->pushPass(
-                    EitherAmount(best->in),
-                    EitherAmount(best->out),
-                    activeStrands.size());
-
-            JLOG(j.trace()) << "Best path: in: " << to_string(best->in)
-                            << " out: " << to_string(best->out)
-                            << " remainingOut: " << to_string(remainingOut);
-
-            best->sb.apply(sb);
-        }
-        else
-        {
-            JLOG(j.trace()) << "All strands dry.";
-        }
-
-        best.reset();  // view in best must be destroyed before modifying base
-                       // view
-        if (!ofrsToRm.empty())
-        {
-            SetUnion(ofrsToRmOnFail, ofrsToRm);
-            for (auto const& o : ofrsToRm)
+            best.reset();  // view in best must be destroyed before modifying
+                           // base view
+            if (!ofrsToRm.empty())
             {
-                if (auto ok = sb.peek(keylet::offer(o)))
-                    offerDelete(sb, ok, j);
+                SetUnion(ofrsToRmOnFail, ofrsToRm);
+                for (auto const& o : ofrsToRm)
+                {
+                    if (auto ok = sb.peek(keylet::offer(o)))
+                        offerDelete(sb, ok, j);
+                }
             }
-        }
 
-        if (shouldBreak)
-            break;
-    }
+            if (shouldBreak)
+                break;
+        }
+        return {telFAILED_PROCESSING, std::move(ofrsToRmOnFail)};
+    };
+    for (std::uint32_t i = 0; i < N; i++)
+        doIters(deltaOut, deltaIn);
 
     auto const actualOut = sum(savedOuts);
     auto const actualIn = sum(savedIns);
