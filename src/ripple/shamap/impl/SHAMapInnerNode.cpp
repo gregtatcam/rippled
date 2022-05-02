@@ -34,7 +34,6 @@
 #include <iterator>
 #include <utility>
 
-#ifndef __aarch64__
 // This is used for the _mm_pause instruction:
 #ifndef __aarch64__
 #include <immintrin.h>
