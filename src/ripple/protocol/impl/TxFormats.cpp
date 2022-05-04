@@ -87,6 +87,7 @@ TxFormats::TxFormats()
             {sfAsset1, soeREQUIRED},
             {sfAsset2, soeREQUIRED},
             {sfTradingFee, soeREQUIRED},
+            {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
 
@@ -98,6 +99,7 @@ TxFormats::TxFormats()
             {sfAsset2In, soeOPTIONAL},
             {sfEPrice, soeOPTIONAL},
             {sfLPTokens, soeOPTIONAL},
+            {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
 
@@ -109,6 +111,7 @@ TxFormats::TxFormats()
             {sfAsset2Out, soeOPTIONAL},
             {sfEPrice, soeOPTIONAL},
             {sfLPTokens, soeOPTIONAL},
+            {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
 
@@ -120,6 +123,7 @@ TxFormats::TxFormats()
             {sfAssetOut, soeOPTIONAL},
             {sfLimitSpotPrice, soeOPTIONAL},
             {sfSlippage, soeOPTIONAL},
+            {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
 
