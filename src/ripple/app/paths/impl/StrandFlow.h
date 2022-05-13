@@ -550,29 +550,31 @@ flow(
 
     TOutAmt remainingOut(outReq);
 
-    std::uint32_t N = 10;
+    extern std::uint32_t numPEIters;
     auto deltaOut = [&] {
-      auto const saAmount = toSTAmount(remainingOut);
-      auto const delta = divide(saAmount, STAmount{noIssue(), N, 0}, saAmount.issue());
-      if constexpr (std::is_same_v<TOutAmt, XRPAmount>)
-          return delta.xrp();
-      else if constexpr (std::is_same_v<TOutAmt, IOUAmount>)
-          return delta.iou();
-      else
-          return delta;
+        auto const saAmount = toSTAmount(remainingOut);
+        auto const delta = divide(
+            saAmount, STAmount{noIssue(), numPEIters, 0}, saAmount.issue());
+        if constexpr (std::is_same_v<TOutAmt, XRPAmount>)
+            return delta.xrp();
+        else if constexpr (std::is_same_v<TOutAmt, IOUAmount>)
+            return delta.iou();
+        else
+            return delta;
     }();
     auto deltaIn = [&]() -> std::optional<TInAmt> {
-      if (!remainingIn)
-          return remainingIn;
-      auto const saAmount = toSTAmount(*remainingIn);
-      auto const delta = divide(saAmount, STAmount{noIssue(), N, 0}, saAmount.issue());
-      if constexpr (std::is_same_v<TInAmt, XRPAmount>)
-          return delta.xrp();
-      else if constexpr (std::is_same_v<TInAmt, IOUAmount>)
-          return delta.iou();
-            else
-                return delta;
-        }();
+        if (!remainingIn)
+            return remainingIn;
+        auto const saAmount = toSTAmount(*remainingIn);
+        auto const delta = divide(
+            saAmount, STAmount{noIssue(), numPEIters, 0}, saAmount.issue());
+        if constexpr (std::is_same_v<TInAmt, XRPAmount>)
+            return delta.xrp();
+        else if constexpr (std::is_same_v<TInAmt, IOUAmount>)
+            return delta.iou();
+        else
+            return delta;
+    }();
     auto const outReq_ = deltaOut;
 
     PaymentSandbox sb(&baseView);
@@ -599,7 +601,9 @@ flow(
     // successful
     boost::container::flat_set<uint256> ofrsToRmOnFail;
 
-    auto doIters = [&](TOutAmt remainingOut_, std::optional<TInAmt> remainingIn_) -> FlowResult<TInAmt, TOutAmt> {
+    auto doIters =
+        [&](TOutAmt remainingOut_,
+            std::optional<TInAmt> remainingIn_) -> FlowResult<TInAmt, TOutAmt> {
         while (remainingOut_ > beast::zero &&
                (!remainingIn_ || *remainingIn_ > beast::zero))
         {
@@ -760,7 +764,7 @@ flow(
         }
         return {telFAILED_PROCESSING, std::move(ofrsToRmOnFail)};
     };
-    for (std::uint32_t i = 0; i < N; i++)
+    for (std::uint32_t i = 0; i < numPEIters; i++)
         doIters(deltaOut, deltaIn);
 
     auto const actualOut = sum(savedOuts);
