@@ -19,7 +19,7 @@
 #include "test/jtx.h"
 
 namespace ripple {
-std::uint32_t numPEIters = 1;
+std::uint32_t numPEIters = 10;
 namespace test {
 
 class Performance_test : public beast::unit_test::suite
