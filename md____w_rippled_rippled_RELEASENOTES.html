@@ -71,6 +71,60 @@ $(function() {
 @2x.png "XRP"</div></div>
    <p>This document contains the release notes for <code>rippled</code>, the reference server implementation of the XRP Ledger protocol. To learn more about how to build, run or update a <code>rippled</code> server, visit <a href="https://xrpl.org/install-rippled.html">https://xrpl.org/install-rippled.html</a></p>
 <p>Have new ideas? Need help with setting up your node? Come visit us <a href="https://github.com/ripple/rippled/issues/new/choose">here</a></p>
+<h1><a class="anchor" id="autotoc_md310"></a>
+Introducing XRP Ledger version 1.9.1</h1>
+<p>Version 1.9.1 of <code>rippled</code>, the reference server implementation of the XRP Ledger protocol, is now available. This release includes several important fixes, including a fix for a syncing issue from 1.9.0, a new fix amendment to correct a bug in the new Non-Fungible Tokens (NFTs) code, and a new amendment to allow multi-signing by up to 32 signers.</p>
+<h2><a class="anchor" id="autotoc_md311"></a>
+Action Required</h2>
+<p>This release introduces two new amendments to the XRP Ledger protocol. These amendments are now open for voting according to the XRP Ledger's <a href="https://xrpl.org/amendments.html">amendment process</a>, which enables protocol changes following two weeks of &gt;80% support from trusted validators.</p>
+<p>If you operate an XRP Ledger server, then you should upgrade to version 1.9.1 within two weeks, to ensure service continuity. The exact time that protocol changes take effect depends on the voting decisions of the decentralized network.</p>
+<p>The <b>fixNFTokenDirV1</b> amendment fixes a bug in code associated with the <b>NonFungibleTokensV1</b> amendment, so the fixNFTokenDirV1 amendment should be enabled first. All validator operators are encouraged to <a href="https://xrpl.org/configure-amendment-voting.html">configure amendment voting</a> to oppose the NonFungibleTokensV1 amendment until <em>after</em> the fixNFTokenDirV1 amendment has become enabled. For more information about NFTs on the XRP Ledger, see <a href="https://xrpl.org/nft-conceptual-overview.html">NFT Conceptual Overview</a>.</p>
+<p>The <b>ExpandedSignerList</b> amendment extends the ledger's built-in multi-signing functionality so that each list can contain up to 32 entries instead of the current limit of 8. Additionally, this amendment allows each signer to have an arbitrary 256-bit data field associated with it. This data can be used to identify the signer or provide other metadata that is useful for organizations, smart contracts, or other purposes.</p>
+<h2><a class="anchor" id="autotoc_md312"></a>
+Install / Upgrade</h2>
+<p>On supported platforms, see the <a href="https://xrpl.org/install-rippled.html">instructions on installing or updating <code>rippled</code></a>.</p>
+<h2><a class="anchor" id="autotoc_md313"></a>
+Changelog</h2>
+<p>This release contains the following features and improvements.</p>
+<h2><a class="anchor" id="autotoc_md314"></a>
+New Features and Amendments</h2>
+<ul>
+<li><b>Introduce fixNFTokenDirV1 Amendment</b> - This amendment fixes an off-by-one error that occurred in some corner cases when determining which <code>NFTokenPage</code> an <code>NFToken</code> object belongs on. It also adjusts the constraints of <code>NFTokenPage</code> invariant checks, so that certain error cases fail with a suitable error code such as <code>tecNO_SUITABLE_TOKEN_PAGE</code> instead of failing with a <code>tecINVARIANT_FAILED</code> error code. (<a href="https://github.com/ripple/rippled/pull/4155">#4155</a>)</li>
+<li><b>Introduce ExpandedSignerList Amendment</b> - This amendment expands the maximum signer list size to 32 entries and allows each signer to have an optional 256-bit <code>WalletLocator</code> field containing arbitrary data. (<a href="https://github.com/ripple/rippled/pull/4097">#4097</a>)</li>
+<li><b>Pause online deletion rather than canceling it if the server fails health check</b> - The server stops performing online deletion of old ledger history if the server fails its internal health check during this time. Online deletion can now resume after the server recovers, rather than having to start over. (<a href="https://github.com/ripple/rippled/pull/4139">#4139</a>)</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md315"></a>
+Bug Fixes and Performance Improvements</h2>
+<ul>
+<li><b>Fix performance issues introduced in 1.9.0</b> - Readjusts some parameters of the ledger acquisition engine to revert some changes introduced in 1.9.0 that had adverse effects on some systems, including causing some systems to fail to sync to the network. (<a href="https://github.com/ripple/rippled/pull/4152">#4152</a>)</li>
+<li><b>Improve Memory Efficiency of Path Finding</b> - Finding paths for cross-currency payments is a resource-intensive operation. While that remains true, this fix improves memory usage of pathfinding by discarding trust line results that cannot be used before those results are fully loaded or cached. (<a href="https://github.com/ripple/rippled/pull/4111">#4111</a>)</li>
+<li><b>Fix incorrect CMake behavior on Windows when platform is unspecified or x64</b> - Fixes handling of platform selection when using the cmake-gui tool to build on Windows. The generator expects <code>Win64</code> but the GUI only provides <code>x64</code> as an option, which raises an error. This fix only raises an error if the platform is <code>Win32</code> instead, allowing the generation of solution files to succeed. (<a href="https://github.com/ripple/rippled/pull/4150">#4150</a>)</li>
+<li><b>Fix test failures with newer MSVC compilers on Windows</b> - Fixes some cases where the API handler code used string pointer comparisons, which may not work correctly with some versions of the MSVC compiler. (<a href="https://github.com/ripple/rippled/pull/4149">#4149</a>)</li>
+<li><b>Update minimum Boost version to 1.71.0</b> - This release is compatible with Boost library versions 1.71.0 through 1.77.0. The build configuration and documentation have been updated to reflect this. (<a href="https://github.com/ripple/rippled/pull/4134">#4134</a>)</li>
+<li><b>Fix unit test failures for DatabaseDownloader</b> - Increases a timeout in the <code>DatabaseDownloader</code> code and adjusts unit tests so that the code does not return spurious failures, and more data is logged if it does fail. (<a href="https://github.com/ripple/rippled/pull/4021">#4021</a>)</li>
+<li><b>Refactor relational database interface</b> - Improves code comments, naming, and organization of the module that interfaces with relational databases (such as the SQLite database used for tracking transaction history). (<a href="https://github.com/ripple/rippled/pull/3965">#3965</a>)</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md316"></a>
+Contributions</h2>
+<h3><a class="anchor" id="autotoc_md317"></a>
+GitHub</h3>
+<p>The public source code repository for <code>rippled</code> is hosted on GitHub at <a href="https://github.com/ripple/rippled">https://github.com/ripple/rippled</a>.</p>
+<p>We welcome contributions, big and small, and invite everyone to join the community of XRP Ledger developers and help us build the Internet of Value.</p>
+<h3><a class="anchor" id="autotoc_md318"></a>
+Credits</h3>
+<p>The following people contributed directly to this release:</p>
+<ul>
+<li>Devon White <a href="#" onclick="location.href='mai'+'lto:'+'dwh'+'it'+'e@r'+'ip'+'ple'+'.c'+'om'; return false;">dwhit<span style="display: none;">.nosp@m.</span>e@ri<span style="display: none;">.nosp@m.</span>pple.<span style="display: none;">.nosp@m.</span>com</a></li>
+<li>Ed Hennis <a href="#" onclick="location.href='mai'+'lto:'+'ed@'+'ri'+'ppl'+'e.'+'com'; return false;">ed@ri<span style="display: none;">.nosp@m.</span>pple<span style="display: none;">.nosp@m.</span>.com</a></li>
+<li>Gregory Popovitch <a href="#" onclick="location.href='mai'+'lto:'+'gre'+'g7'+'mdp'+'@g'+'mai'+'l.'+'com'; return false;">greg7<span style="display: none;">.nosp@m.</span>mdp@<span style="display: none;">.nosp@m.</span>gmail<span style="display: none;">.nosp@m.</span>.com</a></li>
+<li>Mark Travis <a href="#" onclick="location.href='mai'+'lto:'+'mtr'+'av'+'is@'+'ri'+'ppl'+'e.'+'com'; return false;">mtrav<span style="display: none;">.nosp@m.</span>is@r<span style="display: none;">.nosp@m.</span>ipple<span style="display: none;">.nosp@m.</span>.com</a></li>
+<li>Manoj Doshi <a href="#" onclick="location.href='mai'+'lto:'+'mdo'+'sh'+'i@r'+'ip'+'ple'+'.c'+'om'; return false;">mdosh<span style="display: none;">.nosp@m.</span>i@ri<span style="display: none;">.nosp@m.</span>pple.<span style="display: none;">.nosp@m.</span>com</a></li>
+<li>Nik Bougalis <a href="#" onclick="location.href='mai'+'lto:'+'nik'+'b@'+'bou'+'ga'+'lis'+'.n'+'et'; return false;">nikb@<span style="display: none;">.nosp@m.</span>boug<span style="display: none;">.nosp@m.</span>alis.<span style="display: none;">.nosp@m.</span>net</a></li>
+<li>Richard Holland <a href="#" onclick="location.href='mai'+'lto:'+'ric'+'ha'+'rd.'+'ho'+'lla'+'nd'+'@st'+'ar'+'sto'+'ne'+'.co'+'.n'+'z'; return false;">richa<span style="display: none;">.nosp@m.</span>rd.h<span style="display: none;">.nosp@m.</span>ollan<span style="display: none;">.nosp@m.</span>d@st<span style="display: none;">.nosp@m.</span>arsto<span style="display: none;">.nosp@m.</span>ne.c<span style="display: none;">.nosp@m.</span>o.nz</a></li>
+<li>Scott Schurr <a href="#" onclick="location.href='mai'+'lto:'+'sco'+'tt'+'@ri'+'pp'+'le.'+'co'+'m'; return false;">scott<span style="display: none;">.nosp@m.</span>@rip<span style="display: none;">.nosp@m.</span>ple.c<span style="display: none;">.nosp@m.</span>om</a></li>
+</ul>
+<p>For a real-time view of all lifetime contributors, including links to the commits made by each, please visit the "Contributors" section of the GitHub repository: <a href="https://github.com/ripple/rippled/graphs/contributors">https://github.com/ripple/rippled/graphs/contributors</a>.</p>
+<p>We welcome external contributions and are excited to see the broader XRP Ledger community continue to grow and thrive.</p>
 <h1><a class="anchor" id="autotoc_md319"></a>
 Change log</h1>
 <ul>
