@@ -702,6 +702,78 @@ private:
     }
 
     void
+    testPayment()
+    {
+        testcase("Payment");
+        using namespace jtx;
+        using namespace std::chrono;
+
+        auto constexpr N = 100;
+        auto stats = [](std::array<std::uint64_t, N> const& t,
+                        std::string const& msg) {
+            auto const sum = std::accumulate(t.begin(), t.end(), 0.0);
+            auto const avg = sum / static_cast<double>(t.size());
+            auto sd = std::accumulate(
+                t.begin(), t.end(), 0.0, [&](auto const init, auto const r) {
+                    return init + pow((r - avg), 2);
+                });
+            sd = sqrt(sd / t.size());
+            std::cout << msg << " exec time: avg " << avg << " "
+                      << " sd " << sd << std::endl;
+        };
+
+        std::array<std::uint64_t, N> t;
+        std::array<std::uint64_t, N> t1;
+        for (int i = 0; i < N; ++i)
+        {
+            proc([&](AMM& ammAlice, Env& env) {
+                auto const start = high_resolution_clock::now();
+                env(pay(carol, alice, USD(100)),
+                    // path(~USD),
+                    sendmax(XRP(200)),
+                    txflags(tfPartialPayment));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t[i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount{10101010101},
+                    USD(9900),
+                    IOUAmount{10000000, 0},
+                    alice));
+            });
+            {
+                Env env{*this};
+                env.fund(jtx::XRP(30000), alice, carol, gw);
+                env.trust(USD(30000), alice);
+                env.trust(USD(30000), carol);
+                env.trust(EUR(30000), alice);
+                env.trust(EUR(30000), carol);
+
+                env(pay(gw, alice, USD(30000)));
+                env(pay(gw, carol, USD(30000)));
+                env(pay(gw, alice, EUR(30000)));
+                env(pay(gw, carol, EUR(30000)));
+                AMM ammAlice(env, alice, EUR(10000), USD(10000), false, 50, 0);
+                auto const start = high_resolution_clock::now();
+                env(pay(carol, alice, USD(100)),
+                    // path(~USD),
+                    sendmax(EUR(200)),
+                    txflags(tfPartialPayment));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t1[i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    STAmount{EUR.issue(), 101010101010101llu, -10},
+                    USD(9900),
+                    IOUAmount{10000, 0},
+                    alice));
+            }
+        }
+        stats(t, "AMM XRP/IOU Payment");
+        stats(t1, "AMM IOU/IOU Payment");
+    }
+
+    void
     testAmendment()
     {
         testcase("Amendment");
@@ -716,12 +788,13 @@ private:
     void
     run() override
     {
-        testInvalidInstance();
-        testInstanceCreate();
-        testDeposit();
-        testWithdraw();
-        testSwap();
-        testRequireAuth();
+        // testInvalidInstance();
+        // testInstanceCreate();
+        // testDeposit();
+        // testWithdraw();
+        // testSwap();
+        // testRequireAuth();
+        testPayment();
     }
 };
 

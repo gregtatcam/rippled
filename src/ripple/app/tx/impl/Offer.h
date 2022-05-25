@@ -48,7 +48,7 @@ public:
 template <class TIn = STAmount, class TOut = STAmount>
 class TOffer : private TOfferBase<TIn, TOut>
 {
-private:
+protected:
     SLE::pointer m_entry;
     Quality m_quality;
     AccountID m_account;
@@ -105,7 +105,7 @@ public:
     }
 
     /** Adjusts the offer to indicate that we consumed some (or all) of it. */
-    void
+    virtual void
     consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed)
     {
         if (consumed.in > m_amounts.in)
@@ -135,6 +135,12 @@ public:
     issueIn() const;
     Issue
     issueOut() const;
+
+    virtual bool
+    isAMM() const
+    {
+        return false;
+    }
 };
 
 using Offer = TOffer<>;

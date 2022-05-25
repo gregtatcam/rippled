@@ -206,4 +206,20 @@ averageSlippageOut(
         slippageSlopeOut(assetBalance, assetOut, assetWeight, tfee);
 }
 
+std::optional<std::pair<STAmount, STAmount>>
+changeSpotPriceQuality(
+    STAmount const& poolIn,
+    STAmount const& poolOut,
+    Quality const& quality,
+    std::uint8_t weightIn,
+    std::uint32_t tfee)
+{
+    if (auto const takerPays =
+            changeSpotPrice(poolIn, poolOut, quality.rate(), weightIn, tfee))
+        return std::make_pair(
+            *takerPays,
+            swapAssetIn(poolIn, poolOut, *takerPays, weightIn, tfee));
+    return std::nullopt;
+}
+
 }  // namespace ripple

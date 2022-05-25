@@ -172,8 +172,8 @@ TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
     }
 
     TAmounts<TTakerPays, TTakerGets> const ofrAmts{
-        toAmount<TTakerPays>(offer_.amount().in),
-        toAmount<TTakerGets>(offer_.amount().out)};
+        toAmount<TTakerPays>(offer().amount().in),
+        toAmount<TTakerGets>(offer().amount().out)};
 
     if constexpr (!inIsXRP && !outIsXRP)
     {
@@ -184,11 +184,11 @@ TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
     TTakerGets const ownerFunds = toAmount<TTakerGets>(*ownerFunds_);
 
     auto const effectiveAmounts = [&] {
-        if (offer_.owner() != offer_.issueOut().account &&
+        if (offer().owner() != offer().issueOut().account &&
             ownerFunds < ofrAmts.out)
         {
             // adjust the amounts by owner funds
-            return offer_.quality().ceil_out(ofrAmts, ownerFunds);
+            return offer().quality().ceil_out(ofrAmts, ownerFunds);
         }
         return ofrAmts;
     }();
@@ -197,7 +197,7 @@ TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
         return false;
 
     Quality const effectiveQuality{effectiveAmounts};
-    return effectiveQuality < offer_.quality();
+    return effectiveQuality < offer().quality();
 }
 
 template <class TIn, class TOut>
@@ -215,10 +215,10 @@ TOfferStreamBase<TIn, TOut>::step()
         ownerFunds_ = std::nullopt;
         // BookTip::step deletes the current offer from the view before
         // advancing to the next (unless the ledger entry is missing).
-        if (!tip_.step(j_))
+        if (!doStep())
             return false;
 
-        std::shared_ptr<SLE> entry = tip_.entry();
+        std::shared_ptr<SLE> entry = getEntry();
 
         // If we exceed the maximum number of allowed steps, we're done.
         if (!counter_.step())
@@ -243,25 +243,25 @@ TOfferStreamBase<TIn, TOut>::step()
             continue;
         }
 
-        offer_ = TOffer<TIn, TOut>(entry, tip_.quality());
+        makeOffer();
 
-        auto const amount(offer_.amount());
+        auto const amount(offer().amount());
 
         // Remove if either amount is zero
         if (amount.empty())
         {
             JLOG(j_.warn()) << "Removing bad offer " << entry->key();
             permRmOffer(entry->key());
-            offer_ = TOffer<TIn, TOut>{};
+            resetOffer();
             continue;
         }
 
         // Calculate owner funds
         ownerFunds_ = accountFundsHelper(
             view_,
-            offer_.owner(),
+            offer().owner(),
             amount.out,
-            offer_.issueOut(),
+            offer().issueOut(),
             fhZERO_IF_FROZEN,
             j_);
 
@@ -273,9 +273,9 @@ TOfferStreamBase<TIn, TOut>::step()
             // offer is "found unfunded" versus "became unfunded"
             auto const original_funds = accountFundsHelper(
                 cancelView_,
-                offer_.owner(),
+                offer().owner(),
                 amount.out,
-                offer_.issueOut(),
+                offer().issueOut(),
                 fhZERO_IF_FROZEN,
                 j_);
 
@@ -289,14 +289,14 @@ TOfferStreamBase<TIn, TOut>::step()
                 JLOG(j_.trace())
                     << "Removing became unfunded offer " << entry->key();
             }
-            offer_ = TOffer<TIn, TOut>{};
+            resetOffer();
             // See comment at top of loop for how the offer is removed
             continue;
         }
 
         bool const rmSmallIncreasedQOffer = [&] {
-            bool const inIsXRP = isXRP(offer_.issueIn());
-            bool const outIsXRP = isXRP(offer_.issueOut());
+            bool const inIsXRP = isXRP(offer().issueIn());
+            bool const outIsXRP = isXRP(offer().issueOut());
             if (inIsXRP && !outIsXRP)
             {
                 // Without the `if constexpr`, the
@@ -331,9 +331,9 @@ TOfferStreamBase<TIn, TOut>::step()
         {
             auto const original_funds = accountFundsHelper(
                 cancelView_,
-                offer_.owner(),
+                offer().owner(),
                 amount.out,
-                offer_.issueOut(),
+                offer().issueOut(),
                 fhZERO_IF_FROZEN,
                 j_);
 
@@ -350,7 +350,7 @@ TOfferStreamBase<TIn, TOut>::step()
                                     "to reduced quality "
                                  << entry->key();
             }
-            offer_ = TOffer<TIn, TOut>{};
+            resetOffer();
             // See comment at top of loop for how the offer is removed
             continue;
         }
@@ -373,6 +373,110 @@ FlowOfferStream<TIn, TOut>::permRmOffer(uint256 const& offerIndex)
 {
     permToRemove_.insert(offerIndex);
 }
+
+/*---------------------------------------------------------------------------*/
+template <typename TIn, typename TOut>
+FlowLiquidityStream<TIn, TOut>::FlowLiquidityStream(
+    ApplyView& view,
+    ApplyView& cancelView,
+    Book const& book,
+    NetClock::time_point when,
+    StepCounter& counter,
+    AMMOffers<TIn, TOut>& ammOffers,
+    TIn const* remainingIn,
+    TOut const* remainingOut,
+    beast::Journal journal)
+    : FlowOfferStream<TIn, TOut>(view, cancelView, book, when, counter, journal)
+    , ammOffers_(ammOffers)
+    , remainingIn_(remainingIn)
+    , remainingOut_(remainingOut)
+    , AMMOffer_(std::nullopt)
+    , cachedCLOBOffer_(false)
+{
+}
+
+template <typename TIn, typename TOut>
+bool
+FlowLiquidityStream<TIn, TOut>::doStep()
+{
+    if (!cachedCLOBOffer_)
+        cachedCLOBOffer_ = TOfferStreamBase<TIn, TOut>::doStep();
+
+    AMMOffer_ = [&]() -> AMMOffer_t {
+        auto getAMMOffer = [&]() -> AMMOffer_t {
+            if (auto ammOffer = ammOffers_.tip(); ammOffer)
+                return ammOffer;
+            JLOG(this->j_.error())
+                << "FlowLiquidityStream::doStep failed AMM tip";
+            return std::nullopt;
+        };
+        if (ammOffers_.size() == 0)
+            return std::nullopt;
+        auto const adjusted = adjustAMMOffer(cachedCLOBOffer_);
+        // There is CLOB and AMM offer - select
+        // the best quality offer
+        if (cachedCLOBOffer_)
+        {
+            if (adjusted)
+                return getAMMOffer();
+            return std::nullopt;
+        }
+        return getAMMOffer();
+    }();
+
+    auto const res = AMMOffer_ || cachedCLOBOffer_;
+    if (!AMMOffer_ && cachedCLOBOffer_)
+        cachedCLOBOffer_ = false;
+    return res;
+}
+
+template <typename TIn, typename TOut>
+bool
+FlowLiquidityStream<TIn, TOut>::adjustAMMOffer(bool haveCLOBOffer)
+{
+    if (haveCLOBOffer)
+    {
+        // match CLOB offer quality
+        ammOffers_.changeQuality(this->tip_.quality());
+        if (!ammOffers_.tip())  // should not happen
+            Throw<std::logic_error>("AMM offer is not available");
+        auto& ammOffer = ammOffers_.tip()->get();
+
+        if (remainingOut_ && ammOffer.amount().out > *remainingOut_)
+            ammOffer.updateTakerGets(*remainingOut_);
+        if (remainingIn_ && ammOffer.amount().in > *remainingIn_)
+            ammOffer.updateTakerPays(*remainingIn_);
+        if (ammOffer.quality() > this->tip_.quality())
+            return true;
+        if (ammOffer.quality() == this->tip_.quality())
+        {
+            auto const takerPays =
+                get<TIn>(this->tip_.entry()->getFieldAmount(sfTakerPays));
+            auto const takerGets =
+                get<TOut>(this->tip_.entry()->getFieldAmount(sfTakerGets));
+            if (ammOffer.amount().out > takerGets)
+                return true;
+            if (ammOffer.amount().out < takerGets)
+                return false;
+            if (ammOffer.amount().in < takerPays)
+                return true;
+            // TODO which one to use if all params equal?
+            // It may matter in selecting the best quality Strand
+        }
+        return false;
+    }
+    else if (remainingOut_)
+        ammOffers_.updateTakerGets(*remainingOut_);
+    else if (remainingIn_)
+        ammOffers_.updateTakerPays(*remainingIn_);
+
+    return false;
+}
+
+template class FlowLiquidityStream<STAmount, STAmount>;
+template class FlowLiquidityStream<IOUAmount, IOUAmount>;
+template class FlowLiquidityStream<XRPAmount, IOUAmount>;
+template class FlowLiquidityStream<IOUAmount, XRPAmount>;
 
 template class FlowOfferStream<STAmount, STAmount>;
 template class FlowOfferStream<IOUAmount, IOUAmount>;

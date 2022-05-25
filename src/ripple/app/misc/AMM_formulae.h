@@ -172,6 +172,23 @@ changeSpotPrice(
     std::uint8_t weight1,
     std::uint16_t tfee);
 
+/** Find in/out amounts to change the spot price quality to the requested
+ * quality.
+ * @param poolIn AMM poolIn balance
+ * @param poolOut AMM poolOut balance
+ * @param quality requested quality
+ * @param weightIn poolIn weight percentage
+ * @param tfee trading fee in basis points
+ * @return seated in/out amounts if the quality can be changed
+ */
+std::optional<std::pair<STAmount, STAmount>>
+changeSpotPriceQuality(
+    STAmount const& poolIn,
+    STAmount const& poolOut,
+    Quality const& quality,
+    std::uint8_t weightIn,
+    std::uint32_t tfee);
+
 /** Swap assetIn into the pool and swap out a proportional amount
  * of the other asset.
  * @param asset1Balance current AMM asset1 balance
@@ -261,6 +278,20 @@ averageSlippageOut(
     STAmount const& assetOut,
     std::uint8_t assetWeight,
     std::uint16_t tfee);
+
+/** Get amount based on T
+ */
+template <typename T>
+T
+get(STAmount const& a)
+{
+    if constexpr (std::is_same_v<T, IOUAmount>)
+        return a.iou();
+    else if constexpr (std::is_same_v<T, XRPAmount>)
+        return a.xrp();
+    else
+        return a;
+}
 
 }  // namespace ripple
 
