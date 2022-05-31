@@ -502,6 +502,7 @@ flow(
     std::optional<Quality> const& limitQuality,
     std::optional<STAmount> const& sendMaxST,
     beast::Journal j,
+    AMMOfferGen& ammOfferGen,
     path::detail::FlowDebugInfo* flowDebugInfo = nullptr)
 {
     // Used to track the strand that offers the best quality (output/input
@@ -574,9 +575,13 @@ flow(
     // successful
     boost::container::flat_set<uint256> ofrsToRmOnFail;
 
+    // should it be adjusted based on the active strands size?
+    ammOfferGen.setGenFibSeq(strands.size() > 1);
     while (remainingOut > beast::zero &&
            (!remainingIn || *remainingIn > beast::zero))
     {
+        // std::cout << "flow: in " << toStr(*remainingIn) << " out " <<
+        // toStr(remainingOut) << std::endl;
         ++curTry;
         if (curTry >= maxTries)
         {
@@ -708,6 +713,8 @@ flow(
                             << " remainingOut: " << to_string(remainingOut);
 
             best->sb.apply(sb);
+            for (auto const& step : best->strand)
+                step->applied(sb);
         }
         else
         {

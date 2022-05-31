@@ -28,6 +28,8 @@
 
 namespace ripple {
 
+class AMMOfferGen;
+
 /** AMMOffers is a container of all AMM offers for the given Book.
  * There might be multiple AMM instances for the same Book with
  * different weights.
@@ -46,7 +48,11 @@ private:
     beast::Journal const j_;
 
 public:
-    AMMOffers(ReadView const& view, Book const& book, beast::Journal const j);
+    AMMOffers(
+        ReadView const& view,
+        Book const& book,
+        AMMOfferGen& ammOfferGen,
+        beast::Journal const j);
     ~AMMOffers() = default;
 
     AMMOffers(AMMOffers const&) = delete;
@@ -89,6 +95,7 @@ template <typename TIn, typename TOut>
 AMMOffers<TIn, TOut>::AMMOffers(
     ReadView const& view,
     Book const& book,
+    AMMOfferGen& ammOfferGen,
     beast::Journal const j)
     : j_(j)
 {
@@ -104,8 +111,8 @@ AMMOffers<TIn, TOut>::AMMOffers(
         if (assetIn == beast::zero || assetOut == beast::zero)
             JLOG(j_.fatal()) << "AMMOffers: failed to get AMM " << ammAccountID;
         else
-            ammOffers_.emplace_back(std::move(
-                AMMOffer<TIn, TOut>{sle, ammAccountID, assetIn, assetOut, j}));
+            ammOffers_.emplace_back(std::move(AMMOffer<TIn, TOut>{
+                sle, ammAccountID, assetIn, assetOut, ammOfferGen, j}));
     }
 }
 

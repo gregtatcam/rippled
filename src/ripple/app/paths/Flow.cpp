@@ -19,6 +19,7 @@
 
 #include <ripple/app/paths/Credit.h>
 #include <ripple/app/paths/Flow.h>
+#include <ripple/app/paths/impl/AMMOfferGen.h>
 #include <ripple/app/paths/impl/AmountSpec.h>
 #include <ripple/app/paths/impl/Steps.h>
 #include <ripple/app/paths/impl/StrandFlow.h>
@@ -84,6 +85,8 @@ flow(
     if (sendMax)
         sendMaxIssue = sendMax->issue();
 
+    AMMOfferGen ammOfferGen;
+
     // convert the paths to a collection of strands. Each strand is the
     // collection of account->account steps and book steps that may be used in
     // this payment.
@@ -98,6 +101,7 @@ flow(
         defaultPaths,
         ownerPaysTransferFee,
         offerCrossing,
+        ammOfferGen,
         j);
 
     if (toStrandsTer != tesSUCCESS)
@@ -145,6 +149,7 @@ flow(
                 limitQuality,
                 sendMax,
                 j,
+                ammOfferGen,
                 flowDebugInfo));
     }
 
@@ -163,6 +168,7 @@ flow(
                 limitQuality,
                 sendMax,
                 j,
+                ammOfferGen,
                 flowDebugInfo));
     }
 
@@ -181,6 +187,7 @@ flow(
                 limitQuality,
                 sendMax,
                 j,
+                ammOfferGen,
                 flowDebugInfo));
     }
 
@@ -198,6 +205,7 @@ flow(
             limitQuality,
             sendMax,
             j,
+            ammOfferGen,
             flowDebugInfo));
 }
 

@@ -20,6 +20,7 @@
 #define RIPPLE_TX_AMMOFFER_H_INCLUDED
 
 #include <ripple/app/misc/AMM_formulae.h>
+#include <ripple/app/paths/impl/AMMOfferGen.h>
 #include <ripple/app/tx/impl/Offer.h>
 
 namespace ripple {
@@ -48,6 +49,11 @@ class AMMOffer : public TOffer<TIn, TOut>
     std::uint8_t weightIn_;         // Asset in weight
     std::uint32_t tfee_;            // AMM trading fee
     beast::Journal j_;
+    AMMOfferGen& ammOfferGen_;
+    TAmounts<TIn, TOut> fibSeq_;
+    Number fX_;
+    Number fY_;
+    std::uint8_t fibSeqN_;
 
 public:
     AMMOffer(
@@ -55,7 +61,20 @@ public:
         AccountID const& ammAccountID,
         STAmount const& assetIn,
         STAmount const& assetOut,
+        AMMOfferGen& ammOfferGen,
         beast::Journal const j);
+
+    AMMOffer&
+    operator=(AMMOffer const& offer)
+    {
+        reserves_ = offer.reserves_;
+        ammAccountID_ = offer.ammAccountID_;
+        weightIn_ = offer.weightIn_;
+        tfee_ = offer.tfee_;
+        j_ = offer.j_;
+        ammOfferGen_ = offer.ammOfferGen_;
+        fibSeq_ = offer.fibSeq_;
+    }
 
     /** Updates offer size given takerGets
      */
@@ -140,12 +159,37 @@ AMMOffer<TIn, TOut>::makeTOfferSLE(
     return offerSLE;
 }
 
+template <typename T>
+T
+get(Number const& n)
+{
+    if constexpr (std::is_same_v<T, IOUAmount>)
+        return (IOUAmount)n;
+    else if constexpr (std::is_same_v<T, XRPAmount>)
+        return (XRPAmount)n;
+    else
+        return STAmount{noIssue(), n.mantissa(), n.exponent()};
+}
+
+template <typename T>
+std::string
+toStr(T const& a)
+{
+    std::stringstream str;
+    if constexpr (std::is_same_v<T, IOUAmount> || std::is_same_v<T, IOUAmount>)
+        str << to_string(a);
+    else
+        str << a;
+    return str.str();
+}
+
 template <typename TIn, typename TOut>
 AMMOffer<TIn, TOut>::AMMOffer(
     std::shared_ptr<SLE const> const& amm,
     AccountID const& ammAccountID,
     STAmount const& assetIn,
     STAmount const& assetOut,
+    AMMOfferGen& ammOfferGen,
     beast::Journal const j)
     : TOffer<TIn, TOut>(
           AMMOffer::makeTOfferSLE(ammAccountID, assetIn, assetOut),
@@ -158,39 +202,70 @@ AMMOffer<TIn, TOut>::AMMOffer(
           this->issueOut())}
     , tfee_{amm->getFieldU32(sfTradingFee)}
     , j_(j)
+    , ammOfferGen_(ammOfferGen)
+    , fibSeqN_(0)
 {
+    auto const SP = calcSpotPrice(
+        toSTAmount(reserves_.out), toSTAmount(reserves_.in), weightIn_, tfee_);
+    fibSeq_.out = get<TOut>((Number(5) / 10000) * reserves_.out / 2);
+    fibSeq_.in = get<TIn>(Number(SP) * fibSeq_.out);
+#if 0
+    std::cout << "initial fib "
+              << (int)fibSeqN_ << " in "
+              << toStr(fibSeq_.in) << " out "
+              << toStr(fibSeq_.out) << std::endl;
+#endif
+    fX_ = 0;
+    fY_ = fibSeq_.out;
+    // set initial size to fib seq
+    updateOfferSize(fibSeq_.in, fibSeq_.out);
 }
 
 template <typename TIn, typename TOut>
 void
 AMMOffer<TIn, TOut>::updateTakerGets(TOut const& out)
 {
-    auto const in = swapAssetOut(
-        toSTAmount(reserves_.out),
-        toSTAmount(reserves_.in),
-        toSTAmount(out),
-        weightIn_,
-        tfee_);
-    updateOfferSize(get<TIn>(in), out);
+    if (auto const inFibSeq = ammOfferGen_.inFibSeq();
+        inFibSeq && fibSeq_.out > out || !inFibSeq)
+    {
+        // std::cout << "updateTakerGets " << inFibSeq << " " <<
+        // toStr(fibSeq_.out) << " " << toStr(out) << std::endl;
+        auto const in = swapAssetOut(
+            toSTAmount(reserves_.out),
+            toSTAmount(reserves_.in),
+            toSTAmount(out),
+            weightIn_,
+            tfee_);
+        updateOfferSize(get<TIn>(in), out);
+    }
 }
 
 template <typename TIn, typename TOut>
 void
 AMMOffer<TIn, TOut>::updateTakerPays(TIn const& in)
 {
-    auto const out = swapAssetIn(
-        toSTAmount(reserves_.in),
-        toSTAmount(reserves_.out),
-        toSTAmount(in),
-        weightIn_,
-        tfee_);
-    updateOfferSize(in, get<TOut>(out));
+    if (auto const inFibSeq = ammOfferGen_.inFibSeq();
+        inFibSeq && fibSeq_.in > in || !inFibSeq)
+    {
+        // std::cout << "updateTakerPays " << inFibSeq << " " <<
+        // toStr(fibSeq_.in) << " " << toStr(in) << std::endl;
+        auto const out = swapAssetIn(
+            toSTAmount(reserves_.in),
+            toSTAmount(reserves_.out),
+            toSTAmount(in),
+            weightIn_,
+            tfee_);
+        updateOfferSize(in, get<TOut>(out));
+    }
 }
 
 template <typename TIn, typename TOut>
 bool
 AMMOffer<TIn, TOut>::changeQuality(Quality const& quality)
 {
+    // don't update if in fib seq mode
+    if (ammOfferGen_.inFibSeq())
+        return false;
     if (auto const res = changeSpotPriceQuality(
             toSTAmount(reserves_.in),
             toSTAmount(reserves_.out),
@@ -208,19 +283,50 @@ template <typename TIn, typename TOut>
 void
 AMMOffer<TIn, TOut>::updateReserves(ReadView const& view)
 {
-    auto const amm = view.read(keylet::account(ammAccountID_));
-    assert(amm);
-    auto const [assetIn, assetOut, _] = getAMMBalances(
-        view,
-        ammAccountID_,
-        std::nullopt,
-        this->issueIn(),
-        this->issueOut(),
-        j_);
-    (void)_;
-    reserves_ = {get<TIn>(assetIn), get<TOut>(assetOut)};
-    // Reset the size to reflect the best theoretical quality
-    updateOfferSize(reserves_.in, reserves_.out);
+    if (ammOfferGen_.inFibSeq())
+    {
+        reserves_.in += fibSeq_.in;
+        reserves_.out -= fibSeq_.out;
+        ++fibSeqN_;
+        Number ftotal = fX_ + fY_;
+        fibSeq_.out = get<TOut>(ftotal);
+        auto const product = Number(reserves_.out) * reserves_.in;
+        auto const takerPaysPrime =
+            product / (reserves_.out - fibSeq_.out) - reserves_.in;
+        fibSeq_.in = get<TIn>(takerPaysPrime / feeMult(tfee_));
+#if 0
+        std::cout << "updateReserves fib "
+                         << " pool in " << toStr(reserves_.in)
+                         << " pool out " << toStr(reserves_.out) << " "
+                         << (int)fibSeqN_ << " in "
+                         << toStr(fibSeq_.in) << " out "
+                         << toStr(fibSeq_.out) << std::endl;
+#endif
+        JLOG(j_.debug()) << "updateReserves fib " << (int)fibSeqN_ << " in "
+                         << toStr(fibSeq_.in) << " out " << toStr(fibSeq_.out);
+        fX_ = fY_;
+        fY_ = ftotal;
+        updateOfferSize(fibSeq_.in, fibSeq_.out);
+    }
+    else
+    {
+        // Maybe it's better update based on the offer size? must be the same
+        auto const amm = view.read(keylet::account(ammAccountID_));
+        assert(amm);
+        auto const [assetIn, assetOut, _] = getAMMBalances(
+            view,
+            ammAccountID_,
+            std::nullopt,
+            this->issueIn(),
+            this->issueOut(),
+            j_);
+        (void)_;
+        reserves_ = {get<TIn>(assetIn), get<TOut>(assetOut)};
+        // Reset the size to reflect the best theoretical quality
+        JLOG(j_.debug()) << "updateReserves one path in "
+                         << assetIn << " " << assetOut;
+        updateOfferSize(reserves_.in, reserves_.out);
+    }
 }
 
 template <typename TIn, typename TOut>
@@ -231,18 +337,6 @@ AMMOffer<TIn, TOut>::updateOfferSize(TIn const& in, TOut const& out)
     this->m_amounts.out = out;
     this->m_quality = Quality(in, out);
     this->setFieldAmounts();
-}
-
-template <typename T>
-std::string
-toStr(T const& a)
-{
-    std::stringstream str;
-    if constexpr (std::is_same_v<T, IOUAmount> || std::is_same_v<T, IOUAmount>)
-        str << to_string(a);
-    else
-        str << a;
-    return str.str();
 }
 
 template <typename TIn, typename TOut>
@@ -259,6 +353,15 @@ AMMOffer<TIn, TOut>::consume(
             << ", consumed in/out " << toStr(consumed.in) << " "
             << toStr(consumed.out);
         Throw<std::logic_error>(str.str());
+    }
+    else
+    {
+        // std::cout << "AMMOffer consume: offer size in/out "
+        //     << toStr(this->m_amounts.in) << " " << toStr(this->m_amounts.out)
+        //     << std::endl;
+        JLOG(j_.debug()) << "AMMOffer::consume in "
+                         << toStr(this->m_amounts.in) << " out "
+                         << toStr(this->m_amounts.out);
     }
 }
 

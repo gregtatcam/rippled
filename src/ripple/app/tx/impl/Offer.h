@@ -59,6 +59,7 @@ protected:
 
 public:
     TOffer() = default;
+    virtual ~TOffer() = default;
 
     TOffer(SLE::pointer const& entry, Quality quality);
 

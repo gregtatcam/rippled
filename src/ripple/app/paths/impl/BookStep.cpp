@@ -92,7 +92,7 @@ public:
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
-        , ammOffers_(ctx.view, book_, ctx.j)
+        , ammOffers_(ctx.view, book_, ctx.ammOfferGen, ctx.j)
         , j_(ctx.j)
     {
     }
