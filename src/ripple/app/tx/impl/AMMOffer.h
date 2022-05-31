@@ -216,6 +216,8 @@ AMMOffer<TIn, TOut>::AMMOffer(
               << toStr(fibSeq_.in) << " out "
               << toStr(fibSeq_.out) << std::endl;
 #endif
+    JLOG(j_.debug()) << "AMMOffer::AMMOffer in " << toStr(reserves_.in) << " "
+                     << toStr(reserves_.out);
     fX_ = 0;
     fY_ = fibSeq_.out;
     // set initial size to fib seq
@@ -227,7 +229,7 @@ void
 AMMOffer<TIn, TOut>::updateTakerGets(TOut const& out)
 {
     if (auto const inFibSeq = ammOfferGen_.inFibSeq();
-        inFibSeq && fibSeq_.out > out || !inFibSeq)
+        (inFibSeq && fibSeq_.out > out) || !inFibSeq)
     {
         // std::cout << "updateTakerGets " << inFibSeq << " " <<
         // toStr(fibSeq_.out) << " " << toStr(out) << std::endl;
@@ -246,7 +248,7 @@ void
 AMMOffer<TIn, TOut>::updateTakerPays(TIn const& in)
 {
     if (auto const inFibSeq = ammOfferGen_.inFibSeq();
-        inFibSeq && fibSeq_.in > in || !inFibSeq)
+        (inFibSeq && fibSeq_.in > in) || !inFibSeq)
     {
         // std::cout << "updateTakerPays " << inFibSeq << " " <<
         // toStr(fibSeq_.in) << " " << toStr(in) << std::endl;
@@ -311,21 +313,10 @@ AMMOffer<TIn, TOut>::updateReserves(ReadView const& view)
     }
     else
     {
-        // Maybe it's better update based on the offer size? must be the same
-        auto const amm = view.read(keylet::account(ammAccountID_));
-        assert(amm);
-        auto const [assetIn, assetOut, _] = getAMMBalances(
-            view,
-            ammAccountID_,
-            std::nullopt,
-            this->issueIn(),
-            this->issueOut(),
-            j_);
-        (void)_;
-        reserves_ = {get<TIn>(assetIn), get<TOut>(assetOut)};
-        // Reset the size to reflect the best theoretical quality
-        JLOG(j_.debug()) << "updateReserves one path in " << assetIn << " "
-                         << assetOut;
+        reserves_.in += this->m_amounts.in;
+        reserves_.out -= this->m_amounts.out;
+        JLOG(j_.debug()) << "updateReserves one path in " << toStr(reserves_.in)
+                         << " out " << toStr(reserves_.out);
         updateOfferSize(reserves_.in, reserves_.out);
     }
 }
@@ -360,8 +351,12 @@ AMMOffer<TIn, TOut>::consume(
         // std::cout << "AMMOffer consume: offer size in/out "
         //     << toStr(this->m_amounts.in) << " " << toStr(this->m_amounts.out)
         //     << std::endl;
-        JLOG(j_.debug()) << "AMMOffer::consume in " << toStr(this->m_amounts.in)
-                         << " out " << toStr(this->m_amounts.out);
+        auto const [assetIn, assetOut] = getAMMPoolBalances(
+            view, ammAccountID_, this->issueIn(), this->issueOut(), j_);
+        JLOG(j_.debug()) << "AMMOffer::consume reserves in " << assetIn
+                         << " out " << assetOut << " offer in "
+                         << toStr(this->m_amounts.in) << " out "
+                         << toStr(this->m_amounts.out);
     }
 }
 
