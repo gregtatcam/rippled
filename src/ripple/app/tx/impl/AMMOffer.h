@@ -323,8 +323,8 @@ AMMOffer<TIn, TOut>::updateReserves(ReadView const& view)
         (void)_;
         reserves_ = {get<TIn>(assetIn), get<TOut>(assetOut)};
         // Reset the size to reflect the best theoretical quality
-        JLOG(j_.debug()) << "updateReserves one path in "
-                         << assetIn << " " << assetOut;
+        JLOG(j_.debug()) << "updateReserves one path in " << assetIn << " "
+                         << assetOut;
         updateOfferSize(reserves_.in, reserves_.out);
     }
 }
@@ -359,9 +359,8 @@ AMMOffer<TIn, TOut>::consume(
         // std::cout << "AMMOffer consume: offer size in/out "
         //     << toStr(this->m_amounts.in) << " " << toStr(this->m_amounts.out)
         //     << std::endl;
-        JLOG(j_.debug()) << "AMMOffer::consume in "
-                         << toStr(this->m_amounts.in) << " out "
-                         << toStr(this->m_amounts.out);
+        JLOG(j_.debug()) << "AMMOffer::consume in " << toStr(this->m_amounts.in)
+                         << " out " << toStr(this->m_amounts.out);
     }
 }
 
