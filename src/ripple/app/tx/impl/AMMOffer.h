@@ -74,6 +74,7 @@ public:
         j_ = offer.j_;
         ammOfferGen_ = offer.ammOfferGen_;
         fibSeq_ = offer.fibSeq_;
+        return *this;
     }
 
     /** Updates offer size given takerGets
