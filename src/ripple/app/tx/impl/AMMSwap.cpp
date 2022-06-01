@@ -243,7 +243,11 @@ AMMSwap::swapAssets(
     STAmount const& asset2Balance)
 {
     if (assetOut > asset2Balance)
+    {
+        JLOG(ctx_.journal.debug())
+            << "AMM Swap: invalid balance " << assetOut << " " << asset2Balance;
         return tecAMM_BALANCE;
+    }
 
     auto res = accountSend(view, account_, ammAccount, assetIn, ctx_.journal);
     if (res != tesSUCCESS)
@@ -259,6 +263,9 @@ AMMSwap::swapAssets(
             << "AMM Swap: failed to swap out " << assetOut;
         return res;
     }
+
+    JLOG(ctx_.journal.trace()) << "AMM Swap: swap in " << assetIn << " out "
+                               << assetOut << " balance " << asset2Balance;
 
     return tesSUCCESS;
 }
