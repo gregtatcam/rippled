@@ -87,7 +87,7 @@ AMMSwap::preclaim(PreclaimContext const& ctx)
     auto const sleAMM = getAMMSle(ctx.view, ctx.tx[sfAMMHash]);
     if (!sleAMM)
     {
-        JLOG(ctx.j.debug()) << "AMM Deposit: Invalid AMM account";
+        JLOG(ctx.j.debug()) << "AMM Swap: Invalid AMM account";
         return temBAD_SRC_ACCOUNT;
     }
     auto const assetOut = ctx.tx[~sfAssetOut];
@@ -103,23 +103,23 @@ AMMSwap::preclaim(PreclaimContext const& ctx)
         lpTokens <= beast::zero)
     {
         JLOG(ctx.j.error())
-            << "AMM Deposit: reserves or tokens balance is zero";
+            << "AMM Swap: reserves or tokens balance is zero";
         return tecAMM_BALANCE;
     }
     if (assetIn && *assetIn > asset1)
     {
-        JLOG(ctx.j.error()) << "AMM Deposit: invalid swap in amount";
+        JLOG(ctx.j.error()) << "AMM Swap: invalid swap in amount";
         return tecAMM_BALANCE;
     }
     if (assetOut && *assetOut > asset2)
     {
-        JLOG(ctx.j.error()) << "AMM Deposit: invalid swap out amount";
+        JLOG(ctx.j.error()) << "AMM Swap: invalid swap out amount";
         return tecAMM_BALANCE;
     }
 
     if (isFrozen(ctx.view, assetIn) || isFrozen(ctx.view, assetOut))
     {
-        JLOG(ctx.j.debug()) << "AMM Deposit involves frozen asset";
+        JLOG(ctx.j.debug()) << "AMM Swap involves frozen asset";
         return tecFROZEN;
     }
 
