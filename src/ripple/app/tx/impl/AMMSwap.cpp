@@ -102,8 +102,7 @@ AMMSwap::preclaim(PreclaimContext const& ctx)
     if (asset1 <= beast::zero || asset2 <= beast::zero ||
         lpTokens <= beast::zero)
     {
-        JLOG(ctx.j.error())
-            << "AMM Swap: reserves or tokens balance is zero";
+        JLOG(ctx.j.error()) << "AMM Swap: reserves or tokens balance is zero";
         return tecAMM_BALANCE;
     }
     if (assetIn && *assetIn > asset1)
