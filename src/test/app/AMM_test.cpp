@@ -770,10 +770,7 @@ private:
                 sendmax(XRP(200)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{10101009469},
-                USD(9900),
-                IOUAmount{10000000, 0},
-                alice));
+                XRPAmount{10101009469}, USD(9900), IOUAmount{10000000, 0}));
         });
         // two paths XRP/USD, offers are not used because of low quality
         // Should fail because exceed 10 iterations and partial payment is
@@ -789,7 +786,7 @@ private:
                 sendmax(XRP(700)),
                 ter(tecPATH_PARTIAL));
             BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{10000}, USD(10000), IOUAmount{10000000, 0}, alice));
+                XRP(10000), USD(10000), IOUAmount{10000000, 0}));
         });
     }
 
