@@ -484,7 +484,11 @@ AMMSwap::swap(
             weight1,
             tfee);
     else
+    {
+        JLOG(ctx_.journal.debug()) << "Swap failed " << asset1Balance << " "
+                                   << asset << " " << assetLimit;
         return tecAMM_FAILED_SWAP;
+    }
 }
 
 }  // namespace ripple
