@@ -404,6 +404,19 @@ AMM::swap(
 }
 
 void
+AMM::swap(
+    std::optional<Account> const& account,
+    STAmount const& asset,
+    STAmount const& assetLimit,
+    std::optional<ter> const& ter)
+{
+    Json::Value jv;
+    asset.setJson(jv[jss::Asset]);
+    assetLimit.setJson(jv[jss::AssetLimit]);
+    swap(account, jv, ter);
+}
+
+void
 AMM::swapOut(
     std::optional<Account> const& account,
     STAmount const& assetOut,

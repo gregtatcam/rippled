@@ -685,6 +685,20 @@ private:
                 XRPAmount{11111111111}, USD(9000), IOUAmount{10000000, 0}));
         });
 
+        // Swap in
+        proc([&](AMM& ammAlice, Env&) {
+            ammAlice.swap(alice, USD(10100), USD(100));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{9900990100}, USD(10100), IOUAmount{10000000, 0}));
+        });
+
+        // Swap out
+        proc([&](AMM& ammAlice, Env&) {
+            ammAlice.swap(alice, USD(9900), USD(100));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10101010101}, USD(9900), IOUAmount{10000000, 0}));
+        });
+
 #if 0
         // Swap out USD1000, limitSP not to exceed 1100000
         proc([&](AMM& ammAlice, Env&) {

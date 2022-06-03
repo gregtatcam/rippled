@@ -65,6 +65,8 @@ JSS(Asset2Out);              // in: AMM Withdraw option
 JSS(AssetIn);                // in: AMM Swap option
 JSS(AssetOut);               // in: AMM Swap option
 JSS(AssetWeight);            // in/out: AMM asset1 weight
+JSS(Asset);                  // in: AMM asset
+JSS(AssetLimit);             // in: AMM assetLimit
 JSS(Check);                  // ledger type.
 JSS(CheckCancel);            // transaction type.
 JSS(CheckCash);              // transaction type.

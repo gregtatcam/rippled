@@ -248,6 +248,8 @@ CONSTRUCT_TYPED_SFIELD(sfLPTokens,              "LPTokens",             AMOUNT, 
 CONSTRUCT_TYPED_SFIELD(sfAssetIn,               "AssetIn",              AMOUNT,    29);
 CONSTRUCT_TYPED_SFIELD(sfAssetOut,              "AssetOut",             AMOUNT,    30);
 CONSTRUCT_TYPED_SFIELD(sfEPrice,                "EPrice",               AMOUNT,    31);
+CONSTRUCT_TYPED_SFIELD(sfAsset,                 "Asset",                AMOUNT,    32);
+CONSTRUCT_TYPED_SFIELD(sfAssetLimit,            "AssetLimit",           AMOUNT,    33);
 
 // variable length (common)
 CONSTRUCT_TYPED_SFIELD(sfPublicKey,             "PublicKey",            VL,         1);

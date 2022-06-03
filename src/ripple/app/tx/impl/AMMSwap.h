@@ -203,6 +203,29 @@ private:
         STAmount const& limitSP,
         std::uint8_t weight1,
         std::uint16_t tfee);
+
+    /** If asset > assetBalanace then swapIn not exceeding assetLimit
+     * If asset < assetBalance then swapOut not exceeding assetLimit
+     * @param view
+     * @param ammAccount AMM account
+     * @param asset1Balance current AMM asset1 balance
+     * @param asset2Balance current AMM asset2 balance
+     * @param asset requested balance of either asset1 or asset2
+     * @param assetLimit swap in/out limit
+     * @param weight1 asset1 weight
+     * @param tfee trading fee in basis points
+     * @return
+     */
+    TER
+    swap(
+        Sandbox& view,
+        AccountID const ammAccount,
+        STAmount const& asset1Balance,
+        STAmount const& asset2Balance,
+        STAmount const& asset,
+        STAmount const& assetLimit,
+        std::uint8_t weight1,
+        std::uint16_t tfee);
 };
 
 }  // namespace ripple

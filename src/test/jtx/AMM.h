@@ -215,6 +215,15 @@ public:
         STAmount const& limitSP,
         std::optional<ter> const& ter = std::nullopt);
 
+    // This could be either swap in/out depending on
+    // the combination of asset/assetLimit
+    void
+    swap(
+        std::optional<Account> const& account,
+        STAmount const& asset,
+        STAmount const& assetLimit,
+        std::optional<ter> const& ter = std::nullopt);
+
     AccountID
     ammAccount() const
     {

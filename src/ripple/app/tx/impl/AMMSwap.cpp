@@ -54,8 +54,14 @@ AMMSwap::preflight(PreflightContext const& ctx)
     auto const assetOut = ctx.tx[~sfAssetOut];
     auto const limitSP = ctx.tx[~sfLimitSpotPrice];
     auto const slippage = ctx.tx[~sfSlippage];
-    if ((!assetIn && !assetOut) || (assetIn && assetOut) ||
-        (limitSP && slippage))
+    auto const asset = ctx.tx[~sfAsset];
+    auto const assetLimit = ctx.tx[~sfAssetLimit];
+    if ((!assetIn && !assetOut && !asset && !assetLimit) ||
+        ((asset && !assetLimit) || (!asset && assetLimit)) ||
+        (asset && asset->issue() != assetLimit->issue()) ||
+        (assetIn && assetOut) || (limitSP && slippage) ||
+        (assetIn && (asset || assetLimit)) ||
+        (assetOut && (asset || assetLimit)))
     {
         JLOG(ctx.j.debug()) << "Malformed transaction: invalid combination of "
                                "fields.";
@@ -76,6 +82,16 @@ AMMSwap::preflight(PreflightContext const& ctx)
         JLOG(ctx.j.debug()) << "Malformed transaction: invalid LimitSpotPrice";
         return *res;
     }
+    else if (auto const res = validAmount(asset))
+    {
+        JLOG(ctx.j.debug()) << "Malformed transaction: invalid asset";
+        return *res;
+    }
+    else if (auto const res = validAmount(assetLimit))
+    {
+        JLOG(ctx.j.debug()) << "Malformed transaction: invalid assetLimit";
+        return *res;
+    }
     // TODO CHECK slippage
 
     return preflight2(ctx);
@@ -92,6 +108,7 @@ AMMSwap::preclaim(PreclaimContext const& ctx)
     }
     auto const assetOut = ctx.tx[~sfAssetOut];
     auto const assetIn = ctx.tx[~sfAssetIn];
+    auto const assetLimit = ctx.tx[~sfAssetLimit];
     auto const [asset1, asset2, lpTokens] = getAMMBalances(
         ctx.view,
         sleAMM->getAccountID(sfAMMAccount),
@@ -139,6 +156,8 @@ AMMSwap::applyGuts(Sandbox& sb)
     auto const limitSP = ctx_.tx[~sfLimitSpotPrice];
     auto const slippage = ctx_.tx[~sfSlippage];
     auto const sleAMM = ctx_.view().peek(keylet::amm(ctx_.tx[sfAMMHash]));
+    auto const asset = ctx_.tx[~sfAsset];
+    auto const assetLimit = ctx_.tx[~sfAssetLimit];
     assert(sleAMM);
     auto const ammAccountID = sleAMM->getAccountID(sfAMMAccount);
     // asset1 corresponds to assetIn and asset2 corresponds to assetOut
@@ -146,7 +165,8 @@ AMMSwap::applyGuts(Sandbox& sb)
         sb,
         ammAccountID,
         std::nullopt,
-        assetIn ? std::optional<Issue>(assetIn->issue()) : std::nullopt,
+        assetIn ? std::optional<Issue>(assetIn->issue())
+                : (asset ? std::optional<Issue>(asset->issue()) : std::nullopt),
         assetOut ? std::optional<Issue>(assetOut->issue()) : std::nullopt,
         ctx_.journal);
 
@@ -156,7 +176,17 @@ AMMSwap::applyGuts(Sandbox& sb)
 
     TER result = tesSUCCESS;
 
-    if (assetIn)
+    if (asset)
+        result = swap(
+            sb,
+            ammAccountID,
+            asset1,
+            asset2,
+            *asset,
+            *assetLimit,
+            weight1,
+            tfee);
+    else if (assetIn)
     {
         if (limitSP)
             result = swapInLimitSP(
@@ -422,6 +452,39 @@ AMMSwap::swapOutSlippage(
         assetOutUpd,
         weight1,
         tfee);
+}
+
+TER
+AMMSwap::swap(
+    Sandbox& view,
+    AccountID const ammAccount,
+    STAmount const& asset1Balance,
+    STAmount const& asset2Balance,
+    STAmount const& asset,
+    STAmount const& assetLimit,
+    std::uint8_t weight1,
+    std::uint16_t tfee)
+{
+    if (asset1Balance > asset && (asset1Balance - asset) <= assetLimit)
+        return swapOut(
+            view,
+            ammAccount,
+            asset2Balance,
+            asset1Balance,
+            asset1Balance - asset,
+            weight1,
+            tfee);
+    else if (asset1Balance < asset && (asset - asset1Balance) <= assetLimit)
+        return swapIn(
+            view,
+            ammAccount,
+            asset1Balance,
+            asset2Balance,
+            asset - asset1Balance,
+            weight1,
+            tfee);
+    else
+        return tecAMM_FAILED_SWAP;
 }
 
 }  // namespace ripple

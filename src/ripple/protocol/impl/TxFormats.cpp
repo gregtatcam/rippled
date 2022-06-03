@@ -123,6 +123,8 @@ TxFormats::TxFormats()
             {sfAssetOut, soeOPTIONAL},
             {sfLimitSpotPrice, soeOPTIONAL},
             {sfSlippage, soeOPTIONAL},
+            {sfAsset, soeOPTIONAL},
+            {sfAssetLimit, soeOPTIONAL},
             {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
