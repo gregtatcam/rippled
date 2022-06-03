@@ -742,6 +742,58 @@ private:
     }
 
     void
+    testPayment()
+    {
+        testcase("Payment");
+        using namespace jtx;
+        // one path XRP/USD
+        proc([&](AMM& ammAlice, Env& env) {
+            env(pay(carol, alice, USD(100)),
+                // path(~USD),
+                sendmax(XRP(200)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10101010101},
+                USD(9900),
+                IOUAmount{10000000, 0},
+                alice));
+        });
+        // two paths XRP/USD, offers are not used because of low quality
+        proc([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            fund(env, gw, {bob}, {USD(20), GBP(20)}, false);
+            env(offer(bob, XRP(10), GBP(10)));
+            env(offer(bob, GBP(10), USD(1)));
+            env(pay(carol, alice, USD(100)),
+                path(~USD),
+                path(~GBP, ~USD),
+                sendmax(XRP(200)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10101009469},
+                USD(9900),
+                IOUAmount{10000000, 0},
+                alice));
+        });
+        // two paths XRP/USD, offers are not used because of low quality
+        // Should fail because exceed 10 iterations and partial payment is
+        // not set.
+        proc([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            fund(env, gw, {bob}, {USD(20), GBP(20)}, false);
+            env(offer(bob, XRP(10), GBP(10)));
+            env(offer(bob, GBP(10), USD(1)));
+            env(pay(carol, alice, USD(600)),
+                path(~USD),
+                path(~GBP, ~USD),
+                sendmax(XRP(700)),
+                ter(tecPATH_PARTIAL));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10000}, USD(10000), IOUAmount{10000000, 0}, alice));
+        });
+    }
+
+    void
     testAmendment()
     {
         testcase("Amendment");
@@ -762,6 +814,7 @@ private:
         testWithdraw();
         testSwap();
         testRequireAuth();
+        testPayment();
     }
 };
 

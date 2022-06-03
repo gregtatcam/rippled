@@ -128,6 +128,12 @@ public:
     void
     consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed) override;
 
+    std::uint8_t
+    fibSeqN() const
+    {
+        return fibSeqN_;
+    }
+
 private:
     /** Instantiates SLE required for TOffer.
      */
@@ -229,7 +235,7 @@ void
 AMMOffer<TIn, TOut>::updateTakerGets(TOut const& out)
 {
     if (auto const inFibSeq = ammOfferGen_.inFibSeq();
-        (inFibSeq && fibSeq_.out > out) || !inFibSeq)
+        (inFibSeq && fibSeqN_ <= 10 && fibSeq_.out > out) || !inFibSeq)
     {
         // std::cout << "updateTakerGets " << inFibSeq << " " <<
         // toStr(fibSeq_.out) << " " << toStr(out) << std::endl;
@@ -248,7 +254,7 @@ void
 AMMOffer<TIn, TOut>::updateTakerPays(TIn const& in)
 {
     if (auto const inFibSeq = ammOfferGen_.inFibSeq();
-        (inFibSeq && fibSeq_.in > in) || !inFibSeq)
+        (inFibSeq && fibSeqN_ <= 10 && fibSeq_.in > in) || !inFibSeq)
     {
         // std::cout << "updateTakerPays " << inFibSeq << " " <<
         // toStr(fibSeq_.in) << " " << toStr(in) << std::endl;
@@ -309,7 +315,10 @@ AMMOffer<TIn, TOut>::updateReserves(ReadView const& view)
                          << toStr(fibSeq_.in) << " out " << toStr(fibSeq_.out);
         fX_ = fY_;
         fY_ = ftotal;
-        updateOfferSize(fibSeq_.in, fibSeq_.out);
+        if (fibSeqN_ > 10)
+            updateOfferSize(beast::zero, beast::zero);
+        else
+            updateOfferSize(fibSeq_.in, fibSeq_.out);
     }
     else
     {

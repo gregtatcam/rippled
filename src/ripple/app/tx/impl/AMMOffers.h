@@ -204,10 +204,12 @@ template <typename TIn, typename TOut>
 void
 AMMOffers<TIn, TOut>::reset()
 {
-    ammOffers_.insert(
-        ammOffers_.end(),
-        std::make_move_iterator(consumed_.begin()),
-        std::make_move_iterator(consumed_.end()));
+    for (auto i = 0; i < consumed_.size(); ++i)
+        if (consumed_[i].fibSeqN() < 10)
+            ammOffers_.insert(
+                ammOffers_.end(),
+                std::make_move_iterator(consumed_.begin() + i),
+                std::make_move_iterator(consumed_.begin() + i + 1));
     consumed_.clear();
 }
 
