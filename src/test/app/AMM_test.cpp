@@ -73,8 +73,29 @@ domap(std::string const& s, std::optional<idmap_t> const& idmap)
     return str;
 }
 
+std::vector<std::pair<STAmount, STAmount>>
+offersFromJson(Json::Value const& j)
+{
+    if (!j.isMember("result") || !j["result"].isMember("status") ||
+        j["result"]["status"].asString() != "success" ||
+        !j["result"].isMember("offers") || !j["result"]["offers"].isArray())
+        return {};
+    Json::Value offers = j["result"]["offers"];
+    std::vector<std::pair<STAmount, STAmount>> res{};
+    for (auto it = offers.begin(); it != offers.end(); ++it)
+    {
+        STAmount gets;
+        STAmount pays;
+        if (!amountFromJsonNoThrow(gets, (*it)["taker_gets"]) ||
+            !amountFromJsonNoThrow(pays, (*it)["taker_pays"]))
+            return {};
+        res.emplace_back(std::make_pair(gets, pays));
+    }
+    return res;
+}
+
 template <typename E>
-void
+Json::Value
 readOffers(
     E& env,
     AccountID const& acct,
@@ -82,19 +103,18 @@ readOffers(
 {
     Json::Value jv;
     jv[jss::account] = to_string(acct);
-    auto const r = rpc(env, "account_offers", jv);
-    std::cout << "offers " << domap(r.toStyledString(), idmap) << std::endl;
+    return rpc(env, "account_offers", jv);
 }
 
 template <typename E>
-void
+Json::Value
 readOffers(E& env, AccountX const& acct)
 {
-    readOffers(env, acct.id(), acct.idmap());
+    return readOffers(env, acct.id(), acct.idmap());
 }
 
 template <typename E>
-void
+Json::Value
 readLines(
     E& env,
     AccountID const& acctId,
@@ -103,16 +123,14 @@ readLines(
 {
     Json::Value jv;
     jv[jss::account] = to_string(acctId);
-    auto const r = rpc(env, "account_lines", jv);
-    std::cout << name << " account lines " << domap(r.toStyledString(), idmap)
-              << std::endl;
+    return rpc(env, "account_lines", jv);
 }
 
 template <typename E>
-void
+Json::Value
 readLines(E& env, AccountX const& acct)
 {
-    readLines(env, acct.id(), acct.name(), acct.idmap());
+    return readLines(env, acct.id(), acct.name(), acct.idmap());
 }
 
 class Test : public beast::unit_test::suite
@@ -787,6 +805,34 @@ private:
                 ter(tecPATH_PARTIAL));
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRP(10000), USD(10000), IOUAmount{10000000, 0}));
+        });
+
+        // Multiple AMM with the last limiting step. This results
+        // in a partial payment.
+        proc([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            fund(env, gw, {bob, carol}, {EUR(20000), GBP(20000)}, false);
+            env(offer(bob, EUR(45), GBP(30)));
+            AMM ammBob(env, bob, XRP(10000), GBP(7000));
+            env(pay(carol, alice, USD(50)),
+                path(~GBP, ~XRP, ~USD),
+                sendmax(EUR(40)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10037951286},
+                STAmount{USD.issue(), 9962191808427008llu, -12},
+                IOUAmount{10000000, 0}));
+            BEAST_EXPECT(ammBob.expectBalances(
+                XRPAmount{9962048714},
+                STAmount{GBP.issue(), 7026666666666666llu, -12},
+                IOUAmount{8366600265340758, -9}));
+            auto const res = offersFromJson(readOffers(env, bob));
+            BEAST_EXPECT(
+                res.size() == 1 &&
+
+                res[0].first ==
+                    STAmount(GBP.issue(), 3333333333333333llu, -15) &&
+                res[0].second == STAmount(EUR.issue(), 5, 0));
         });
     }
 
