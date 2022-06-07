@@ -995,10 +995,12 @@ struct AMM_manual_test : public Test
         using namespace std::chrono;
 
         auto constexpr N = 10;
+        auto constexpr Ntests = 8;
 
-        std::array<std::uint64_t, N> t[7];
+        std::array<std::uint64_t, N> t[Ntests];
         for (int i = 0; i < N; ++i)
         {
+            std::uint16_t Nt = 0;
             // one path XRP/USD
             proc([&](AMM& ammAlice, Env& env) {
                 auto const start = high_resolution_clock::now();
@@ -1007,7 +1009,7 @@ struct AMM_manual_test : public Test
                     sendmax(XRP(200)),
                     txflags(tfPartialPayment));
                 auto const elapsed = high_resolution_clock::now() - start;
-                t[0][i] =
+                t[Nt++][i] =
                     duration_cast<std::chrono::microseconds>(elapsed).count();
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRPAmount{10101010101},
@@ -1028,7 +1030,7 @@ struct AMM_manual_test : public Test
                     sendmax(XRP(200)),
                     txflags(tfPartialPayment));
                 auto const elapsed = high_resolution_clock::now() - start;
-                t[1][i] =
+                t[Nt++][i] =
                     duration_cast<std::chrono::microseconds>(elapsed).count();
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRPAmount{10101009469},
@@ -1045,8 +1047,9 @@ struct AMM_manual_test : public Test
                         sendmax(EUR(200)),
                         txflags(tfPartialPayment));
                     auto const elapsed = high_resolution_clock::now() - start;
-                    t[2][i] = duration_cast<std::chrono::microseconds>(elapsed)
-                                  .count();
+                    t[Nt++][i] =
+                        duration_cast<std::chrono::microseconds>(elapsed)
+                            .count();
                     BEAST_EXPECT(ammAlice.expectBalances(
                         STAmount{EUR.issue(), 101010101010101llu, -10},
                         USD(9900),
@@ -1069,8 +1072,9 @@ struct AMM_manual_test : public Test
                         sendmax(EUR(200)),
                         txflags(tfPartialPayment));
                     auto const elapsed = high_resolution_clock::now() - start;
-                    t[3][i] = duration_cast<std::chrono::microseconds>(elapsed)
-                                  .count();
+                    t[Nt++][i] =
+                        duration_cast<std::chrono::microseconds>(elapsed)
+                            .count();
                     BEAST_EXPECT(ammAlice.expectBalances(
                         STAmount{EUR.issue(), 1010100946969697llu, -11},
                         USD(9900),
@@ -1079,6 +1083,32 @@ struct AMM_manual_test : public Test
                 },
                 std::make_pair(USD(10000), EUR(10000)),
                 IOUAmount{10000, 0});
+            // One path with multiple AMM
+            proc([&](AMM& ammAlice, Env& env) {
+                env.fund(jtx::XRP(300000), bob);
+                fund(
+                    env,
+                    gw,
+                    {bob},
+                    {USD(30000), EUR(30000), GBP(30000)},
+                    false);
+                AMM ammEUR_GBP(env, bob, EUR(10000), GBP(7000));
+                AMM ammGBP_XRP(env, bob, GBP(7000), XRP(10000));
+                fund(env, gw, {carol, alice}, {EUR(1000)}, false);
+                auto const start = high_resolution_clock::now();
+                env(pay(carol, alice, USD(100)),
+                    path(~GBP, ~XRP, ~USD),
+                    sendmax(EUR(100)),
+                    txflags(tfPartialPayment));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t[Nt++][i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+                std::cout << ammAlice.ammRpcInfo()->toStyledString();
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount{101010101010101},
+                    USD(9900),
+                    IOUAmount{10000, 0}));
+            });
             {
                 Env env{*this};
                 env.fund(jtx::XRP(30000), alice, carol, gw);
@@ -1086,7 +1116,7 @@ struct AMM_manual_test : public Test
                 auto const start = high_resolution_clock::now();
                 env(pay(carol, alice, XRP(100)));
                 auto const elapsed = high_resolution_clock::now() - start;
-                t[4][i] =
+                t[Nt++][i] =
                     duration_cast<std::chrono::microseconds>(elapsed).count();
             }
             {
@@ -1101,7 +1131,7 @@ struct AMM_manual_test : public Test
                 auto const start = high_resolution_clock::now();
                 env(pay(carol, alice, USD(100)));
                 auto const elapsed = high_resolution_clock::now() - start;
-                t[5][i] =
+                t[Nt++][i] =
                     duration_cast<std::chrono::microseconds>(elapsed).count();
             }
             // Two paths, order book offer
@@ -1118,7 +1148,7 @@ struct AMM_manual_test : public Test
                     sendmax(XRP(100)),
                     txflags(tfPartialPayment));
                 auto const elapsed = high_resolution_clock::now() - start;
-                t[6][i] =
+                t[Nt++][i] =
                     duration_cast<std::chrono::microseconds>(elapsed).count();
             }
         }
@@ -1126,9 +1156,10 @@ struct AMM_manual_test : public Test
         stats(t[1], "AMM XRP/IOU two paths Payment");
         stats(t[2], "AMM IOU/IOU Payment");
         stats(t[3], "AMM IOU/IOU two paths Payment");
-        stats(t[4], "XRP Payment");
-        stats(t[5], "IOU Payment");
-        stats(t[5], "XRP/IOU Payment, order book");
+        stats(t[4], "AMM IOU/IOU one path multiple AMM Payment");
+        stats(t[5], "XRP Payment");
+        stats(t[6], "IOU Payment");
+        stats(t[7], "XRP/IOU Payment, order book");
     }
 
     void
