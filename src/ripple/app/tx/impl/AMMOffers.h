@@ -99,21 +99,20 @@ AMMOffers<TIn, TOut>::AMMOffers(
     beast::Journal const j)
     : j_(j)
 {
-    // TODO. Must add an AMM group to contain hashes for different
-    // weights
-    auto const ammHash = calcAMMHash(50, book.in, book.out);
-    if (auto const sle = view.read(keylet::amm(ammHash)); sle)
-    {
-        auto const ammAccountID = sle->getAccountID(sfAMMAccount);
-        auto const [assetIn, assetOut, _] = getAMMBalances(
-            view, ammAccountID, std::nullopt, book.in, book.out, j);
-        (void)_;
-        if (assetIn == beast::zero || assetOut == beast::zero)
-            JLOG(j_.fatal()) << "AMMOffers: failed to get AMM " << ammAccountID;
-        else
-            ammOffers_.emplace_back(std::move(AMMOffer<TIn, TOut>{
-                sle, ammAccountID, assetIn, assetOut, ammOfferGen, j}));
-    }
+    forEachAMM(
+        view, calcAMMGroupHash(book.in, book.out), [&](STObject const& amm) {
+            auto const ammAccountID = amm.getAccountID(sfAMMAccount);
+            auto const [assetIn, assetOut, _] = getAMMBalances(
+                view, ammAccountID, std::nullopt, book.in, book.out, j);
+            (void)_;
+            if (assetIn == beast::zero || assetOut == beast::zero)
+                JLOG(j_.fatal())
+                    << "AMMOffers: failed to get AMM " << ammAccountID;
+            else
+                ammOffers_.emplace_back(std::move(AMMOffer<TIn, TOut>{
+                    amm, ammAccountID, assetIn, assetOut, ammOfferGen, j}));
+            return true;
+        });
 }
 
 template <typename TIn, typename TOut>

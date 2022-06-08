@@ -1092,8 +1092,8 @@ struct AMM_manual_test : public Test
                     {bob},
                     {USD(30000), EUR(30000), GBP(30000)},
                     false);
-                AMM ammEUR_GBP(env, bob, EUR(10000), GBP(7000));
-                AMM ammGBP_XRP(env, bob, GBP(7000), XRP(10000));
+                AMM ammEUR_GBP(env, bob, EUR(10000), GBP(10000));
+                AMM ammGBP_XRP(env, bob, GBP(10000), XRP(10000));
                 fund(env, gw, {carol, alice}, {EUR(1000)}, false);
                 auto const start = high_resolution_clock::now();
                 env(pay(carol, alice, USD(100)),
@@ -1103,11 +1103,14 @@ struct AMM_manual_test : public Test
                 auto const elapsed = high_resolution_clock::now() - start;
                 t[Nt++][i] =
                     duration_cast<std::chrono::microseconds>(elapsed).count();
-                std::cout << ammAlice.ammRpcInfo()->toStyledString();
-                BEAST_EXPECT(ammAlice.expectBalances(
-                    XRPAmount{101010101010101},
-                    USD(9900),
+                BEAST_EXPECT(ammEUR_GBP.expectBalances(
+                    EUR(10100),
+                    STAmount{GBP.issue(), 9900989480198023llu, -12},
                     IOUAmount{10000, 0}));
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount{10098036193},
+                    STAmount{USD.issue(), 990292328629822llu, -11},
+                    IOUAmount{10000000, 0}));
             });
             {
                 Env env{*this};

@@ -57,7 +57,7 @@ class AMMOffer : public TOffer<TIn, TOut>
 
 public:
     AMMOffer(
-        std::shared_ptr<SLE const> const& amm,
+        STObject const& amm,
         AccountID const& ammAccountID,
         STAmount const& assetIn,
         STAmount const& assetOut,
@@ -192,7 +192,7 @@ toStr(T const& a)
 
 template <typename TIn, typename TOut>
 AMMOffer<TIn, TOut>::AMMOffer(
-    std::shared_ptr<SLE const> const& amm,
+    STObject const& amm,
     AccountID const& ammAccountID,
     STAmount const& assetIn,
     STAmount const& assetOut,
@@ -204,10 +204,10 @@ AMMOffer<TIn, TOut>::AMMOffer(
     , reserves_({toAmount<TIn>(assetIn), toAmount<TOut>(assetOut)})
     , ammAccountID_(ammAccountID)
     , weightIn_{orderWeight(
-          amm->getFieldU8(sfAssetWeight),
+          amm.getFieldU8(sfAssetWeight),
           this->issueIn(),
           this->issueOut())}
-    , tfee_{amm->getFieldU32(sfTradingFee)}
+    , tfee_{amm.getFieldU32(sfTradingFee)}
     , j_(j)
     , ammOfferGen_(ammOfferGen)
     , fibSeqN_(0)

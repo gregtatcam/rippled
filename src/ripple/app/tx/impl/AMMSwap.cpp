@@ -100,8 +100,11 @@ AMMSwap::preflight(PreflightContext const& ctx)
 TER
 AMMSwap::preclaim(PreclaimContext const& ctx)
 {
-    auto const sleAMM = getAMMSle(ctx.view, ctx.tx[sfAMMHash]);
-    if (!sleAMM)
+    auto const weight1 = ctx.tx.isFieldPresent(sfAssetWeight)
+        ? ctx.tx.getFieldU8(sfAssetWeight)
+        : 50;
+    auto const amm = findAMM(ctx.view, ctx.tx[sfAMMHash], weight1);
+    if (!amm)
     {
         JLOG(ctx.j.debug()) << "AMM Swap: Invalid AMM account";
         return temBAD_SRC_ACCOUNT;
@@ -111,7 +114,7 @@ AMMSwap::preclaim(PreclaimContext const& ctx)
     auto const assetLimit = ctx.tx[~sfAssetLimit];
     auto const [asset1, asset2, lpTokens] = getAMMBalances(
         ctx.view,
-        sleAMM->getAccountID(sfAMMAccount),
+        amm->getAccountID(sfAMMAccount),
         std::nullopt,
         assetIn ? std::optional<Issue>(assetIn->issue()) : std::nullopt,
         assetOut ? std::optional<Issue>(assetOut->issue()) : std::nullopt,
@@ -155,11 +158,15 @@ AMMSwap::applyGuts(Sandbox& sb)
     auto const assetOut = ctx_.tx[~sfAssetOut];
     auto const limitSP = ctx_.tx[~sfLimitSpotPrice];
     auto const slippage = ctx_.tx[~sfSlippage];
-    auto const sleAMM = ctx_.view().peek(keylet::amm(ctx_.tx[sfAMMHash]));
+    auto const weight1 = ctx_.tx.isFieldPresent(sfAssetWeight)
+        ? ctx_.tx.getFieldU8(sfAssetWeight)
+        : 50;
+    auto const amm = findAMM(ctx_.view(), ctx_.tx[sfAMMHash], weight1);
+    assert(amm);
     auto const asset = ctx_.tx[~sfAsset];
     auto const assetLimit = ctx_.tx[~sfAssetLimit];
-    assert(sleAMM);
-    auto const ammAccountID = sleAMM->getAccountID(sfAMMAccount);
+    assert(amm);
+    auto const ammAccountID = amm->getAccountID(sfAMMAccount);
     // asset1 corresponds to assetIn and asset2 corresponds to assetOut
     auto const [asset1, asset2, lptAMMBalance] = getAMMBalances(
         sb,
@@ -170,9 +177,7 @@ AMMSwap::applyGuts(Sandbox& sb)
         assetOut ? std::optional<Issue>(assetOut->issue()) : std::nullopt,
         ctx_.journal);
 
-    auto const tfee = sleAMM->getFieldU32(sfTradingFee);
-    auto const weight1 = orderWeight(
-        sleAMM->getFieldU8(sfAssetWeight), asset1.issue(), asset2.issue());
+    auto const tfee = amm->getFieldU32(sfTradingFee);
 
     TER result = tesSUCCESS;
 
