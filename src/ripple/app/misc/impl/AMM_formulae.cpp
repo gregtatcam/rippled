@@ -101,16 +101,21 @@ calcSpotPrice(
 
 std::optional<STAmount>
 changeSpotPrice(
-    STAmount const& asset1Balance,
-    STAmount const& asset2Balance,
+    STAmount const& assetInBalance,
+    STAmount const& assetOutBalance,
     STAmount const& newSP,
-    std::uint8_t weight1,
+    std::uint8_t weightIn,
     std::uint16_t tfee)
 {
-    auto const sp = calcSpotPrice(asset1Balance, asset2Balance, weight1, tfee);
-    auto const res = asset1Balance * (power(newSP / sp, weight1, 100) - 1);
+    auto const sp =
+        calcSpotPrice(assetInBalance, assetOutBalance, weightIn, tfee);
+    // can't change to a better or same SP
+    if (Number(newSP) <= sp)
+        return std::nullopt;
+    auto const res =
+        assetInBalance * (power(newSP / sp, 100 - weightIn, 100) - 1);
     if (res > 0)
-        return toSTAmount(asset1Balance.issue(), res);
+        return toSTAmount(assetInBalance.issue(), res);
     return std::nullopt;
 }
 
@@ -214,11 +219,17 @@ changeSpotPriceQuality(
     std::uint8_t weightIn,
     std::uint32_t tfee)
 {
-    if (auto const takerPays =
-            changeSpotPrice(poolIn, poolOut, quality.rate(), weightIn, tfee))
+    auto const weightOut = 100 - weightIn;
+    auto const curQuality = Quality(Amounts{poolIn, poolOut});
+    auto const takerPays = poolIn *
+        (power(quality.rate() / curQuality.rate(), weightOut, 100) - 1);
+    if (takerPays > 0)
+    {
+        auto const saTakerPays = toSTAmount(poolIn.issue(), takerPays);
         return std::make_pair(
-            *takerPays,
-            swapAssetIn(poolIn, poolOut, *takerPays, weightIn, tfee));
+            saTakerPays,
+            swapAssetIn(poolIn, poolOut, saTakerPays, weightIn, tfee));
+    }
     return std::nullopt;
 }
 

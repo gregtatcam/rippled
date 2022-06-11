@@ -829,11 +829,32 @@ private:
             auto const res = offersFromJson(readOffers(env, bob));
             BEAST_EXPECT(
                 res.size() == 1 &&
-
                 res[0].first ==
                     STAmount(GBP.issue(), 3333333333333333llu, -15) &&
                 res[0].second == STAmount(EUR.issue(), 5, 0));
         });
+
+        // Offer and AMM. AMM has a better quality up to around 2.5XRP/2.5USD.
+        // AMM offer is consumed first. Then the offer is partially
+        // consumed.
+        {
+            Env env(*this);
+            fund(env, gw, {alice, carol, bob}, {USD(2000)}, true);
+            AMM ammAlice(env, alice, XRP(1000), USD(1005));
+            env(offer(bob, XRP(10), USD(10)));
+            env(pay(carol, alice, USD(10)),
+                sendmax(XRP(10)),
+                txflags(tfPartialPayment));
+            auto const offers = offersFromJson(readOffers(env, bob));
+            BEAST_EXPECT(
+                ammAlice.expectBalances(
+                    XRPAmount{1002496882},
+                    STAmount{USD.issue(), 1002496883576343llu, -12},
+                    IOUAmount{1002496882788171, -9}) &&
+                offers[0].first ==
+                    STAmount(USD.issue(), 250311642365788llu, -14) &&
+                offers[0].second == XRPAmount{2503116});
+        }
     }
 
     void

@@ -437,33 +437,19 @@ FlowLiquidityStream<TIn, TOut>::adjustAMMOffer(bool haveCLOBOffer)
     if (haveCLOBOffer)
     {
         // match CLOB offer quality
-        ammOffers_.changeQuality(this->tip_.quality());
         if (!ammOffers_.tip())  // should not happen
             Throw<std::logic_error>("AMM offer is not available");
         auto& ammOffer = ammOffers_.tip()->get();
-
-        if (remainingOut_ && ammOffer.amount().out > *remainingOut_)
-            ammOffer.updateTakerGets(*remainingOut_);
-        if (remainingIn_ && ammOffer.amount().in > *remainingIn_)
-            ammOffer.updateTakerPays(*remainingIn_);
-        if (ammOffer.quality() > this->tip_.quality())
-            return true;
-        if (ammOffer.quality() == this->tip_.quality())
+        // It this still valid if there are multiple offers with unequal
+        // weights? Should this be handled with AMMOffers::changeQuality()
+        if (ammOffer.changeQuality(this->tip_.quality()))
         {
-            auto const takerPays =
-                get<TIn>(this->tip_.entry()->getFieldAmount(sfTakerPays));
-            auto const takerGets =
-                get<TOut>(this->tip_.entry()->getFieldAmount(sfTakerGets));
-            if (ammOffer.amount().out > takerGets)
-                return true;
-            if (ammOffer.amount().out < takerGets)
-                return false;
-            if (ammOffer.amount().in < takerPays)
-                return true;
-            // TODO which one to use if all params equal?
-            // It may matter in selecting the best quality Strand
+            if (remainingOut_ && ammOffer.amount().out > *remainingOut_)
+                ammOffer.updateTakerGets(*remainingOut_);
+            else if (remainingIn_ && ammOffer.amount().in > *remainingIn_)
+                ammOffer.updateTakerPays(*remainingIn_);
+            return true;
         }
-        return false;
     }
     else if (remainingOut_)
         ammOffers_.updateTakerGets(*remainingOut_);

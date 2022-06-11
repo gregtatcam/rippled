@@ -280,7 +280,8 @@ AMMOffer<TIn, TOut>::changeQuality(Quality const& quality)
             toSTAmount(reserves_.out),
             quality,
             weightIn_,
-            tfee_))
+            tfee_);
+        res->first > beast::zero && res->second > beast::zero)
     {
         updateOfferSize(get<TIn>(res->first), get<TOut>(res->second));
         return true;

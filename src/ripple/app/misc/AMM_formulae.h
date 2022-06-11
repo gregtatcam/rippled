@@ -166,8 +166,8 @@ calcSpotPrice(
  */
 std::optional<STAmount>
 changeSpotPrice(
-    STAmount const& asset1Balance,
-    STAmount const& asset2Balance,
+    STAmount const& assetInBalance,
+    STAmount const& assetOuBalance,
     STAmount const& newSP,
     std::uint8_t weight1,
     std::uint16_t tfee);
