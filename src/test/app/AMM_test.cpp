@@ -542,7 +542,7 @@ private:
                 alice, USD(1000), std::nullopt, XRPAmount{1100000});
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRP(10000),
-                STAmount{USD.issue(), 95119115182985llu, -10},
+                STAmount{USD.issue(), static_cast<std::uint64_t>(95119115182985), -10},
                 IOUAmount{9752902910568, -6}));
         });
 
@@ -633,7 +633,10 @@ private:
             ammAlice.withdraw(carol, 0, USD(0));
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRP(11000),
-                STAmount{USD.issue(), 90909090909091llu, -10},
+                STAmount{
+                    USD.issue(),
+                    static_cast<std::uint64_t>(90909090909091),
+                    -10},
                 IOUAmount{10000000, 0}));
         });
 
@@ -679,7 +682,10 @@ private:
             ammAlice.swapIn(alice, USD(1000), std::nullopt, XRPAmount{1100000});
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRPAmount{9534625893},
-                STAmount{USD.issue(), 1048808848170152llu, -11},
+                STAmount{
+                    USD.issue(),
+                    static_cast<std::uint64_t>(1048808848170152),
+                    -11},
                 IOUAmount{10000000, 0}));
         });
 
@@ -723,7 +729,7 @@ private:
             ammAlice.swapOut(alice, USD(1000), XRPAmount{1100000});
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRPAmount{10513133959},
-                STAmount{USD.issue(), 951191151829848llu, -11},
+                STAmount{USD.issue(), static_cast<std::uint64_t>(951191151829848), -11},
                 IOUAmount{10000000, 0}));
         });
 
@@ -820,17 +826,26 @@ private:
                 txflags(tfPartialPayment));
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRPAmount{10037951286},
-                STAmount{USD.issue(), 9962191808427008llu, -12},
+                STAmount{
+                    USD.issue(),
+                    static_cast<std::uint64_t>(9962191808427008),
+                    -12},
                 IOUAmount{10000000, 0}));
             BEAST_EXPECT(ammBob.expectBalances(
                 XRPAmount{9962048714},
-                STAmount{GBP.issue(), 7026666666666666llu, -12},
+                STAmount{
+                    GBP.issue(),
+                    static_cast<std::uint64_t>(7026666666666666),
+                    -12},
                 IOUAmount{8366600265340758, -9}));
             auto const res = offersFromJson(readOffers(env, bob));
             BEAST_EXPECT(
                 res.size() == 1 &&
                 res[0].first ==
-                    STAmount(GBP.issue(), 3333333333333333llu, -15) &&
+                    STAmount(
+                        GBP.issue(),
+                        static_cast<std::uint64_t>(3333333333333333),
+                        -15) &&
                 res[0].second == STAmount(EUR.issue(), 5, 0));
         });
 
@@ -849,10 +864,16 @@ private:
             BEAST_EXPECT(
                 ammAlice.expectBalances(
                     XRPAmount{1002496882},
-                    STAmount{USD.issue(), 1002496883576343llu, -12},
+                    STAmount{
+                        USD.issue(),
+                        static_cast<std::uint64_t>(1002496883576343),
+                        -12},
                     IOUAmount{1002496882788171, -9}) &&
                 offers[0].first ==
-                    STAmount(USD.issue(), 250311642365788llu, -14) &&
+                    STAmount(
+                        USD.issue(),
+                        static_cast<std::uint64_t>(250311642365788),
+                        -14) &&
                 offers[0].second == XRPAmount{2503116});
         }
     }
@@ -1072,7 +1093,10 @@ struct AMM_manual_test : public Test
                         duration_cast<std::chrono::microseconds>(elapsed)
                             .count();
                     BEAST_EXPECT(ammAlice.expectBalances(
-                        STAmount{EUR.issue(), 101010101010101llu, -10},
+                        STAmount{
+                            EUR.issue(),
+                            static_cast<std::uint64_t>(101010101010101),
+                            -10},
                         USD(9900),
                         IOUAmount{10000, 0},
                         alice));
@@ -1097,7 +1121,10 @@ struct AMM_manual_test : public Test
                         duration_cast<std::chrono::microseconds>(elapsed)
                             .count();
                     BEAST_EXPECT(ammAlice.expectBalances(
-                        STAmount{EUR.issue(), 1010100946969697llu, -11},
+                        STAmount{
+                            EUR.issue(),
+                            static_cast<std::uint64_t>(1010100946969697),
+                            -11},
                         USD(9900),
                         IOUAmount{10000, 0},
                         alice));
@@ -1126,11 +1153,17 @@ struct AMM_manual_test : public Test
                     duration_cast<std::chrono::microseconds>(elapsed).count();
                 BEAST_EXPECT(ammEUR_GBP.expectBalances(
                     EUR(10100),
-                    STAmount{GBP.issue(), 9900989480198023llu, -12},
+                    STAmount{
+                        GBP.issue(),
+                        static_cast<std::uint64_t>(9900989480198023),
+                        -12},
                     IOUAmount{10000, 0}));
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRPAmount{10098036193},
-                    STAmount{USD.issue(), 990292328629822llu, -11},
+                    STAmount{
+                        USD.issue(),
+                        static_cast<std::uint64_t>(990292328629822),
+                        -11},
                     IOUAmount{10000000, 0}));
             });
             {
