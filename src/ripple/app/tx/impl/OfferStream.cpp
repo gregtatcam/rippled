@@ -382,16 +382,15 @@ FlowLiquidityStream<TIn, TOut>::FlowLiquidityStream(
     Book const& book,
     NetClock::time_point when,
     StepCounter& counter,
-    AMMOffers<TIn, TOut>& ammOffers,
+    AMMOffer_t const& ammOffer,
     TIn const* remainingIn,
     TOut const* remainingOut,
     beast::Journal journal)
     : FlowOfferStream<TIn, TOut>(view, cancelView, book, when, counter, journal)
-    , ammOffers_(ammOffers)
     , remainingIn_(remainingIn)
     , remainingOut_(remainingOut)
-    , AMMOffer_(std::nullopt)
     , cachedCLOBOffer_(false)
+    , ammOffer_(ammOffer)
 {
 }
 
@@ -402,30 +401,12 @@ FlowLiquidityStream<TIn, TOut>::doStep()
     if (!cachedCLOBOffer_)
         cachedCLOBOffer_ = TOfferStreamBase<TIn, TOut>::doStep();
 
-    AMMOffer_ = [&]() -> AMMOffer_t {
-        auto getAMMOffer = [&]() -> AMMOffer_t {
-            if (auto ammOffer = ammOffers_.tip(); ammOffer)
-                return ammOffer;
-            JLOG(this->j_.error())
-                << "FlowLiquidityStream::doStep failed AMM tip";
-            return std::nullopt;
-        };
-        if (ammOffers_.size() == 0)
-            return std::nullopt;
-        auto const adjusted = adjustAMMOffer(cachedCLOBOffer_);
-        // There is CLOB and AMM offer - select
-        // the best quality offer
-        if (cachedCLOBOffer_)
-        {
-            if (adjusted)
-                return getAMMOffer();
-            return std::nullopt;
-        }
-        return getAMMOffer();
-    }();
+    bool const AMMOffer = ammOffer_ && adjustAMMOffer(cachedCLOBOffer_);
+    if (!AMMOffer)
+        ammOffer_.reset();
 
-    auto const res = AMMOffer_ || cachedCLOBOffer_;
-    if (!AMMOffer_ && cachedCLOBOffer_)
+    auto const res = AMMOffer || cachedCLOBOffer_;
+    if (!AMMOffer && cachedCLOBOffer_)
         cachedCLOBOffer_ = false;
     return res;
 }
@@ -434,29 +415,29 @@ template <typename TIn, typename TOut>
 bool
 FlowLiquidityStream<TIn, TOut>::adjustAMMOffer(bool haveCLOBOffer)
 {
+    if (!ammOffer_.has_value())  // should not happen
+        Throw<std::logic_error>("AMM offer is not available");
+
     if (haveCLOBOffer)
     {
-        // match CLOB offer quality
-        if (!ammOffers_.tip())  // should not happen
-            Throw<std::logic_error>("AMM offer is not available");
-        auto& ammOffer = ammOffers_.tip()->get();
-        // It this still valid if there are multiple offers with unequal
-        // weights? Should this be handled with AMMOffers::changeQuality()
-        if (ammOffer.changeQuality(this->tip_.quality()))
+        // change AMM spot price quality
+        if (ammOffer_->get().changeQuality(this->tip_.quality()))
         {
-            if (remainingOut_ && ammOffer.amount().out > *remainingOut_)
-                ammOffer.updateTakerGets(*remainingOut_);
-            else if (remainingIn_ && ammOffer.amount().in > *remainingIn_)
-                ammOffer.updateTakerPays(*remainingIn_);
+            if (remainingOut_ && ammOffer_->get().amount().out > *remainingOut_)
+                ammOffer_->get().updateTakerGets(*remainingOut_);
+            else if (
+                remainingIn_ && ammOffer_->get().amount().in > *remainingIn_)
+                ammOffer_->get().updateTakerPays(*remainingIn_);
             return true;
         }
+        return false;
     }
     else if (remainingOut_)
-        ammOffers_.updateTakerGets(*remainingOut_);
+        ammOffer_->get().updateTakerGets(*remainingOut_);
     else if (remainingIn_)
-        ammOffers_.updateTakerPays(*remainingIn_);
+        ammOffer_->get().updateTakerPays(*remainingIn_);
 
-    return false;
+    return true;
 }
 
 template class FlowLiquidityStream<STAmount, STAmount>;

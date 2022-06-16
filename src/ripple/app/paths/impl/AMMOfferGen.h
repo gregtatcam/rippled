@@ -25,7 +25,7 @@ namespace ripple {
 class AMMOfferGen
 {
 private:
-    bool genFibSec_ = false;
+    bool useAMM_ = false;
 
 public:
     AMMOfferGen() = default;
@@ -33,15 +33,15 @@ public:
     AMMOfferGen(AMMOfferGen const&) = delete;
 
     void
-    setGenFibSeq(bool gen)
+    useAMMLiquidity(bool useAMM)
     {
-        genFibSec_ = gen;
+        useAMM_ = useAMM;
     }
 
     bool
-    inFibSeq() const
+    useAMM() const
     {
-        return genFibSec_;
+        return useAMM_;
     }
 };
 

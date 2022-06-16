@@ -576,7 +576,7 @@ flow(
     boost::container::flat_set<uint256> ofrsToRmOnFail;
 
     // should it be adjusted based on the active strands size?
-    ammOfferGen.setGenFibSeq(strands.size() > 1);
+    ammOfferGen.useAMMLiquidity(strands.size() == 1);
     while (remainingOut > beast::zero &&
            (!remainingIn || *remainingIn > beast::zero))
     {

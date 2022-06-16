@@ -22,6 +22,7 @@
 #include <ripple/app/misc/AMM_formulae.h>
 #include <ripple/app/paths/impl/AMMOfferGen.h>
 #include <ripple/app/tx/impl/Offer.h>
+#include <ripple/basics/Log.h>
 
 namespace ripple {
 
@@ -46,22 +47,15 @@ class AMMOffer : public TOffer<TIn, TOut>
 {
     TAmounts<TIn, TOut> reserves_;  // AMM current pool reserves
     AccountID ammAccountID_;        // AMM root account id
-    std::uint8_t weightIn_;         // Asset in weight
     std::uint32_t tfee_;            // AMM trading fee
     beast::Journal j_;
-    AMMOfferGen& ammOfferGen_;
-    TAmounts<TIn, TOut> fibSeq_;
-    Number fX_;
-    Number fY_;
-    std::uint8_t fibSeqN_;
 
 public:
     AMMOffer(
-        STObject const& amm,
+        std::shared_ptr<const SLE> const& amm,
         AccountID const& ammAccountID,
         STAmount const& assetIn,
         STAmount const& assetOut,
-        AMMOfferGen& ammOfferGen,
         beast::Journal const j);
 
     AMMOffer&
@@ -69,11 +63,8 @@ public:
     {
         reserves_ = offer.reserves_;
         ammAccountID_ = offer.ammAccountID_;
-        weightIn_ = offer.weightIn_;
         tfee_ = offer.tfee_;
         j_ = offer.j_;
-        ammOfferGen_ = offer.ammOfferGen_;
-        fibSeq_ = offer.fibSeq_;
         return *this;
     }
 
@@ -127,12 +118,6 @@ public:
      */
     void
     consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed) override;
-
-    std::uint8_t
-    fibSeqN() const
-    {
-        return fibSeqN_;
-    }
 
 private:
     /** Instantiates SLE required for TOffer.
@@ -192,94 +177,55 @@ toStr(T const& a)
 
 template <typename TIn, typename TOut>
 AMMOffer<TIn, TOut>::AMMOffer(
-    STObject const& amm,
+    std::shared_ptr<const SLE> const& amm,
     AccountID const& ammAccountID,
     STAmount const& assetIn,
     STAmount const& assetOut,
-    AMMOfferGen& ammOfferGen,
     beast::Journal const j)
     : TOffer<TIn, TOut>(
           AMMOffer::makeTOfferSLE(ammAccountID, assetIn, assetOut),
           Quality{assetOut, assetIn})
     , reserves_({toAmount<TIn>(assetIn), toAmount<TOut>(assetOut)})
     , ammAccountID_(ammAccountID)
-    , weightIn_{orderWeight(
-          amm.getFieldU8(sfAssetWeight),
-          this->issueIn(),
-          this->issueOut())}
-    , tfee_{amm.getFieldU32(sfTradingFee)}
+    , tfee_{amm->getFieldU32(sfTradingFee)}
     , j_(j)
-    , ammOfferGen_(ammOfferGen)
-    , fibSeqN_(0)
 {
-    auto const SP = calcSpotPrice(
-        toSTAmount(reserves_.out), toSTAmount(reserves_.in), weightIn_, tfee_);
-    fibSeq_.out = get<TOut>((Number(5) / 10000) * reserves_.out / 2);
-    fibSeq_.in = get<TIn>(Number(SP) * fibSeq_.out);
-#if 0
-    std::cout << "initial fib "
-              << (int)fibSeqN_ << " in "
-              << toStr(fibSeq_.in) << " out "
-              << toStr(fibSeq_.out) << std::endl;
-#endif
     JLOG(j_.debug()) << "AMMOffer::AMMOffer in " << toStr(reserves_.in) << " "
                      << toStr(reserves_.out);
-    fX_ = 0;
-    fY_ = fibSeq_.out;
-    // set initial size to fib seq
-    updateOfferSize(fibSeq_.in, fibSeq_.out);
 }
 
 template <typename TIn, typename TOut>
 void
 AMMOffer<TIn, TOut>::updateTakerGets(TOut const& out)
 {
-    if (auto const inFibSeq = ammOfferGen_.inFibSeq();
-        (inFibSeq && fibSeqN_ <= 10 && fibSeq_.out > out) || !inFibSeq)
-    {
-        // std::cout << "updateTakerGets " << inFibSeq << " " <<
-        // toStr(fibSeq_.out) << " " << toStr(out) << std::endl;
-        auto const in = swapAssetOut(
-            toSTAmount(reserves_.out),
-            toSTAmount(reserves_.in),
-            toSTAmount(out),
-            weightIn_,
-            tfee_);
-        updateOfferSize(get<TIn>(in), out);
-    }
+    auto const in = swapAssetOut(
+        toSTAmount(reserves_.out),
+        toSTAmount(reserves_.in),
+        toSTAmount(out),
+        tfee_);
+    updateOfferSize(get<TIn>(in), out);
 }
 
 template <typename TIn, typename TOut>
 void
 AMMOffer<TIn, TOut>::updateTakerPays(TIn const& in)
 {
-    if (auto const inFibSeq = ammOfferGen_.inFibSeq();
-        (inFibSeq && fibSeqN_ <= 10 && fibSeq_.in > in) || !inFibSeq)
-    {
-        // std::cout << "updateTakerPays " << inFibSeq << " " <<
-        // toStr(fibSeq_.in) << " " << toStr(in) << std::endl;
-        auto const out = swapAssetIn(
-            toSTAmount(reserves_.in),
-            toSTAmount(reserves_.out),
-            toSTAmount(in),
-            weightIn_,
-            tfee_);
-        updateOfferSize(in, get<TOut>(out));
-    }
+    auto const out = swapAssetIn(
+        toSTAmount(reserves_.in),
+        toSTAmount(reserves_.out),
+        toSTAmount(in),
+        tfee_);
+    updateOfferSize(in, get<TOut>(out));
 }
 
 template <typename TIn, typename TOut>
 bool
 AMMOffer<TIn, TOut>::changeQuality(Quality const& quality)
 {
-    // don't update if in fib seq mode
-    if (ammOfferGen_.inFibSeq())
-        return false;
     if (auto const res = changeSpotPriceQuality(
             toSTAmount(reserves_.in),
             toSTAmount(reserves_.out),
             quality,
-            weightIn_,
             tfee_);
         res->first > beast::zero && res->second > beast::zero)
     {
@@ -293,42 +239,11 @@ template <typename TIn, typename TOut>
 void
 AMMOffer<TIn, TOut>::updateReserves(ReadView const& view)
 {
-    if (ammOfferGen_.inFibSeq())
-    {
-        reserves_.in += fibSeq_.in;
-        reserves_.out -= fibSeq_.out;
-        ++fibSeqN_;
-        Number ftotal = fX_ + fY_;
-        fibSeq_.out = get<TOut>(ftotal);
-        auto const product = Number(reserves_.out) * reserves_.in;
-        auto const takerPaysPrime =
-            product / (reserves_.out - fibSeq_.out) - reserves_.in;
-        fibSeq_.in = get<TIn>(takerPaysPrime / feeMult(tfee_));
-#if 0
-        std::cout << "updateReserves fib "
-                         << " pool in " << toStr(reserves_.in)
-                         << " pool out " << toStr(reserves_.out) << " "
-                         << (int)fibSeqN_ << " in "
-                         << toStr(fibSeq_.in) << " out "
-                         << toStr(fibSeq_.out) << std::endl;
-#endif
-        JLOG(j_.debug()) << "updateReserves fib " << (int)fibSeqN_ << " in "
-                         << toStr(fibSeq_.in) << " out " << toStr(fibSeq_.out);
-        fX_ = fY_;
-        fY_ = ftotal;
-        if (fibSeqN_ > 10)
-            updateOfferSize(beast::zero, beast::zero);
-        else
-            updateOfferSize(fibSeq_.in, fibSeq_.out);
-    }
-    else
-    {
-        reserves_.in += this->m_amounts.in;
-        reserves_.out -= this->m_amounts.out;
-        JLOG(j_.debug()) << "updateReserves one path in " << toStr(reserves_.in)
-                         << " out " << toStr(reserves_.out);
-        updateOfferSize(reserves_.in, reserves_.out);
-    }
+    reserves_.in += this->m_amounts.in;
+    reserves_.out -= this->m_amounts.out;
+    JLOG(j_.debug()) << "updateReserves one path in " << toStr(reserves_.in)
+                     << " out " << toStr(reserves_.out);
+    updateOfferSize(reserves_.in, reserves_.out);
 }
 
 template <typename TIn, typename TOut>

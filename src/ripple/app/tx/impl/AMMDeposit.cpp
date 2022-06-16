@@ -89,18 +89,15 @@ AMMDeposit::preflight(PreflightContext const& ctx)
 TER
 AMMDeposit::preclaim(PreclaimContext const& ctx)
 {
-    auto const weight1 = ctx.tx.isFieldPresent(sfAssetWeight)
-        ? ctx.tx.getFieldU8(sfAssetWeight)
-        : 50;
-    auto const amm = findAMM(ctx.view, ctx.tx[sfAMMHash], weight1);
-    if (!amm)
+    auto const ammSle = ctx.view.read(keylet::amm(ctx.tx[sfAMMHash]));
+    if (!ammSle)
     {
         JLOG(ctx.j.debug()) << "AMM Deposit: Invalid AMM account";
         return temBAD_SRC_ACCOUNT;
     }
     auto const [asset1, asset2, lptAMMBalance] = getAMMBalances(
         ctx.view,
-        amm->getAccountID(sfAMMAccount),
+        ammSle->getAccountID(sfAMMAccount),
         std::nullopt,
         std::nullopt,
         std::nullopt,
@@ -135,12 +132,9 @@ AMMDeposit::applyGuts(Sandbox& sb)
     auto const asset2In = ctx_.tx[~sfAsset2In];
     auto const ePrice = ctx_.tx[~sfEPrice];
     auto const lpTokens = ctx_.tx[~sfLPTokens];
-    auto const weight1 = ctx_.tx.isFieldPresent(sfAssetWeight)
-        ? ctx_.tx.getFieldU8(sfAssetWeight)
-        : 50;
-    auto const amm = findAMM(ctx_.view(), ctx_.tx[sfAMMHash], weight1);
-    assert(amm);
-    auto const ammAccountID = amm->getAccountID(sfAMMAccount);
+    auto const ammSle = ctx_.view().read(keylet::amm(ctx_.tx[sfAMMHash]));
+    assert(ammSle);
+    auto const ammAccountID = ammSle->getAccountID(sfAMMAccount);
     auto const [asset1, asset2, lptAMMBalance] = getAMMBalances(
         sb,
         ammAccountID,
@@ -149,7 +143,7 @@ AMMDeposit::applyGuts(Sandbox& sb)
         asset2In ? asset2In->issue() : std::optional<Issue>{},
         ctx_.journal);
 
-    auto const tfee = amm->getFieldU32(sfTradingFee);
+    auto const tfee = ammSle->getFieldU32(sfTradingFee);
 
     TER result = tesSUCCESS;
 
@@ -166,13 +160,7 @@ AMMDeposit::applyGuts(Sandbox& sb)
                 *asset2In);
         else if (lpTokens)
             result = singleDepositTokens(
-                sb,
-                ammAccountID,
-                asset1,
-                lptAMMBalance,
-                *lpTokens,
-                weight1,
-                tfee);
+                sb, ammAccountID, asset1, lptAMMBalance, *lpTokens, tfee);
         else if (ePrice)
             result = singleDepositEPrice(
                 sb,
@@ -182,17 +170,10 @@ AMMDeposit::applyGuts(Sandbox& sb)
                 *asset1In,
                 lptAMMBalance,
                 *ePrice,
-                weight1,
                 tfee);
         else
             result = singleDeposit(
-                sb,
-                ammAccountID,
-                asset1,
-                lptAMMBalance,
-                *asset1In,
-                weight1,
-                tfee);
+                sb, ammAccountID, asset1, lptAMMBalance, *asset1In, tfee);
     }
     else if (lpTokens)
         result = equalDepositTokens(
@@ -348,11 +329,10 @@ AMMDeposit::singleDeposit(
     STAmount const& asset1Balance,
     STAmount const& lptAMMBalance,
     STAmount const& asset1In,
-    std::uint8_t weight1,
     std::uint16_t tfee)
 {
     auto const tokens =
-        calcLPTokensIn(asset1Balance, asset1In, lptAMMBalance, weight1, tfee);
+        calcLPTokensIn(asset1Balance, asset1In, lptAMMBalance, tfee);
     if (tokens == beast::zero)
         return tecAMM_INVALID_TOKENS;
     return deposit(view, ammAccount, asset1In, std::nullopt, tokens);
@@ -365,11 +345,10 @@ AMMDeposit::singleDepositTokens(
     STAmount const& asset1Balance,
     STAmount const& lptAMMBalance,
     STAmount const& tokens,
-    std::uint8_t weight1,
     std::uint16_t tfee)
 {
     auto const asset1Deposit =
-        calcAssetIn(asset1Balance, tokens, lptAMMBalance, weight1, tfee);
+        calcAssetIn(asset1Balance, tokens, lptAMMBalance, tfee);
     return deposit(view, ammAccount, asset1Deposit, std::nullopt, tokens);
 }
 
@@ -382,7 +361,6 @@ AMMDeposit::singleDepositEPrice(
     STAmount const& asset1In,
     STAmount const& lptAMMBalance,
     STAmount const& ePrice,
-    std::uint8_t weight1,
     std::uint16_t tfee)
 {
 #if 0

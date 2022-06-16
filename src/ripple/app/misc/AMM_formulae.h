@@ -40,15 +40,13 @@ toSTAmount(Issue const& issue, Number const& n)
 /** Calculate LP Tokens given AMM pool reserves.
  * @param asset1 AMM one side of the pool reserve
  * @param asset2 AMM another side of the pool reserve
- * @param weight1 xrp pool weight
  * @return LP Tokens as IOU
  */
 STAmount
 calcAMMLPT(
     STAmount const& asset1,
     STAmount const& asset2,
-    Issue const& lptIssue,
-    std::uint8_t weight1);
+    Issue const& lptIssue);
 
 /** Convert to the fee from the basis points
  * @param tfee  trading fee in basis points
@@ -73,16 +71,15 @@ feeMult(std::uint16_t tfee)
  * @weight weight {0, 100}
  */
 inline Number
-feeMult(std::uint16_t tfee, std::uint16_t weight)
+feeMultHalf(std::uint16_t tfee)
 {
-    return 1 - getFee(tfee) * (1 - Number{weight} / 100);
+    return 1 - getFee(tfee) / 2;
 }
 
 /** Calculate LP Tokens given asset's deposit amount.
  * @param asset1Balance current AMM asset1 balance
  * @param asset1Deposit requested asset1 deposit amount
  * @param lpTokensBalance LP Tokens balance
- * @param weight1 asset1 pool weight percentage
  * @param tfee trading fee in basis points
  * @return tokens
  */
@@ -91,14 +88,12 @@ calcLPTokensIn(
     STAmount const& asset1Balance,
     STAmount const& asset1Deposit,
     STAmount const& lpTokensBalance,
-    std::uint16_t weight1,
     std::uint16_t tfee);
 
 /** Calculate asset deposit given LP Tokens.
  * @param asset1Balance current AMM asset1 balance
  * @param lpTokensBalance LP Tokens balance
  * @param ammTokensBalance AMM LPT balance
- * @param weight1 asset1 pool weight percentage
  * @param tfee trading fee in basis points
  * @return
  */
@@ -107,14 +102,12 @@ calcAssetIn(
     STAmount const& asset1Balance,
     STAmount const& lpTokensBalance,
     STAmount const& ammTokensBalance,
-    std::uint16_t weight1,
     std::uint16_t tfee);
 
 /** Calculate LP Tokens given asset's withdraw amount.
  * @param asset1Balance current AMM asset1 balance
  * @param asset1Withdraw requested asset1 withdraw amount
  * @param lpTokensBalance LP Tokens balance
- * @param weight1 asset1 pool weight percentage
  * @param tfee trading fee in basis points
  * @return tokens out amount
  */
@@ -123,14 +116,12 @@ calcLPTokensOut(
     STAmount const& asset1Balance,
     STAmount const& asset1Withdraw,
     STAmount const& lpTokensBalance,
-    std::uint16_t weight1,
     std::uint16_t tfee);
 
 /** Calculate asset withdrawal by tokens
  * @param assetBalance balance of the asset being withdrawn
  * @param lptAMMBalance total AMM Tokens balance
  * @param lpTokens LP Tokens balance
- * @param weight asset pool weight
  * @param tfee trading fee in basis points
  * @return calculated asset amount
  */
@@ -139,13 +130,11 @@ calcWithdrawalByTokens(
     STAmount const& assetBalance,
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
-    std::uint8_t weight,
     std::uint32_t tfee);
 
 /** Calculate AMM's Spot Price
  * @param asset1Balance current AMM asset1 balance
  * @param asset2Balance current AMM asset2 balance
- * @param weight1 asset1 pool weight percentage
  * @param tfee trading fee in basis points
  * @return spot price
  */
@@ -153,14 +142,12 @@ STAmount
 calcSpotPrice(
     STAmount const& asset1Balance,
     STAmount const& asset2Balance,
-    std::uint8_t weight1,
     std::uint16_t tfee);
 
 /** Get asset2 amount based on new AMM's Spot Price.
  * @param asset1Balance current AMM asset1 balance
  * @param asset2Balance current AMM asset2 balance
  * @param newSP requested SP of asset1 relative to asset2
- * @param weight1 asset1 pool weight percentage
  * @param tfee trading fee in basis points
  * @return
  */
@@ -169,7 +156,6 @@ changeSpotPrice(
     STAmount const& assetInBalance,
     STAmount const& assetOuBalance,
     STAmount const& newSP,
-    std::uint8_t weight1,
     std::uint16_t tfee);
 
 /** Find in/out amounts to change the spot price quality to the requested
@@ -177,7 +163,6 @@ changeSpotPrice(
  * @param poolIn AMM poolIn balance
  * @param poolOut AMM poolOut balance
  * @param quality requested quality
- * @param weightIn poolIn weight percentage
  * @param tfee trading fee in basis points
  * @return seated in/out amounts if the quality can be changed
  */
@@ -186,7 +171,6 @@ changeSpotPriceQuality(
     STAmount const& poolIn,
     STAmount const& poolOut,
     Quality const& quality,
-    std::uint8_t weightIn,
     std::uint32_t tfee);
 
 /** Swap assetIn into the pool and swap out a proportional amount
@@ -194,7 +178,6 @@ changeSpotPriceQuality(
  * @param asset1Balance current AMM asset1 balance
  * @param asset2Balance current AMM asset2 balance
  * @param assetIn amount to swap in, same issue as asset1Balance
- * @param weight1 asset1 pool weight percentage
  * @param tfee trading fee in basis points
  * @return
  */
@@ -203,7 +186,6 @@ swapAssetIn(
     STAmount const& asset1Balance,
     STAmount const& asset2Balance,
     STAmount const& assetIn,
-    std::uint8_t weight1,
     std::uint16_t tfee);
 
 /** Swap assetOut out of the pool and swap in a proportional amount
@@ -211,7 +193,6 @@ swapAssetIn(
  * @param asset1Balance current AMM asset1 balance
  * @param asset2Balance current AMM asset2 balance
  * @param assetOut amount to swap out, same issue as asset1Balance
- * @param weight1 asset1 pool weight percentage
  * @param tfee trading fee in basis points
  * @return
  */
@@ -220,63 +201,6 @@ swapAssetOut(
     STAmount const& asset1Balance,
     STAmount const& asset2Balance,
     STAmount const& assetOut,
-    std::uint8_t weight1,
-    std::uint16_t tfee);
-
-/** Slippage slope asset in
- * @param assetBalance current AMM asset balance
- * @param assetIn asset to calculate the slippage for
- * @param assetWeight asset weight percentage
- * @param tfee trading fee in basis points
- * @return
- */
-Number
-slippageSlopeIn(
-    STAmount const& assetBalance,
-    STAmount const& assetIn,
-    std::uint8_t assetWeight,
-    std::uint16_t tfee);
-
-/** Average slippage asset in
- * @param assetBalance current AMM asset balance
- * @param assetIn asset to calculate the slippage for
- * @param assetWeight asset weight percentage
- * @param tfee trading fee in basis points
- * @return
- */
-Number
-averageSlippageIn(
-    STAmount const& assetBalance,
-    STAmount const& assetIn,
-    std::uint8_t assetWeight,
-    std::uint16_t tfee);
-
-/** Slippage slope asset out
- * @param assetBalance current AMM asset balance
- * @param assetOut asset to calculate the slippage for
- * @param assetWeight asset weight percentage
- * @param tfee trading fee in basis points
- * @return
- */
-Number
-slippageSlopeOut(
-    STAmount const& assetBalance,
-    STAmount const& assetOut,
-    std::uint8_t assetWeight,
-    std::uint16_t tfee);
-
-/** Average slippage asset out
- * @param assetBalance current AMM asset balance
- * @param assetOut asset to calculate the slippage for
- * @param assetWeight asset weight percentage
- * @param tfee trading fee in basis points
- * @return
- */
-Number
-averageSlippageOut(
-    STAmount const& assetBalance,
-    STAmount const& assetOut,
-    std::uint8_t assetWeight,
     std::uint16_t tfee);
 
 /** Get amount based on T

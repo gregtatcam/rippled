@@ -89,18 +89,15 @@ AMMWithdraw::preflight(PreflightContext const& ctx)
 TER
 AMMWithdraw::preclaim(PreclaimContext const& ctx)
 {
-    auto const weight1 = ctx.tx.isFieldPresent(sfAssetWeight)
-        ? ctx.tx.getFieldU8(sfAssetWeight)
-        : 50;
-    auto const amm = findAMM(ctx.view, ctx.tx[sfAMMHash], weight1);
-    if (!amm)
+    auto const ammSle = ctx.view.read(keylet::amm(ctx.tx[sfAMMHash]));
+    if (!ammSle)
     {
         JLOG(ctx.j.debug()) << "AMM Withdraw: Invalid AMM account";
         return temBAD_SRC_ACCOUNT;
     }
     auto const asset1Out = ctx.tx[~sfAsset1Out];
     auto const asset2Out = ctx.tx[~sfAsset2Out];
-    auto const ammAccountID = amm->getAccountID(sfAMMAccount);
+    auto const ammAccountID = ammSle->getAccountID(sfAMMAccount);
     auto const lptBalance =
         getLPTokens(ctx.view, ammAccountID, ctx.tx[sfAccount], ctx.j);
     auto const lpTokens = getTxLPTokens(ctx.view, ammAccountID, ctx.tx, ctx.j);
@@ -134,12 +131,9 @@ AMMWithdraw::applyGuts(Sandbox& sb)
     auto const asset1Out = ctx_.tx[~sfAsset1Out];
     auto const asset2Out = ctx_.tx[~sfAsset2Out];
     auto const ePrice = ctx_.tx[~sfEPrice];
-    auto const weight1 = ctx_.tx.isFieldPresent(sfAssetWeight)
-        ? ctx_.tx.getFieldU8(sfAssetWeight)
-        : 50;
-    auto const amm = findAMM(ctx_.view(), ctx_.tx[sfAMMHash], weight1);
-    assert(amm);
-    auto const ammAccountID = amm->getAccountID(sfAMMAccount);
+    auto const ammSle = ctx_.view().read(keylet::amm(ctx_.tx[sfAMMHash]));
+    assert(ammSle);
+    auto const ammAccountID = ammSle->getAccountID(sfAMMAccount);
     auto const lpTokens =
         getTxLPTokens(ctx_.view(), ammAccountID, ctx_.tx, ctx_.journal);
     auto const [asset1, asset2, lptAMMBalance] = getAMMBalances(
@@ -150,7 +144,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         asset2Out ? asset2Out->issue() : std::optional<Issue>{},
         ctx_.journal);
 
-    auto const tfee = amm->getFieldU32(sfTradingFee);
+    auto const tfee = ammSle->getFieldU32(sfTradingFee);
 
     TER result = tesSUCCESS;
 
@@ -173,7 +167,6 @@ AMMWithdraw::applyGuts(Sandbox& sb)
                 lptAMMBalance,
                 *asset1Out,
                 *lpTokens,
-                weight1,
                 tfee);
         else if (ePrice)
             result = singleWithdrawEPrice(
@@ -184,17 +177,10 @@ AMMWithdraw::applyGuts(Sandbox& sb)
                 lptAMMBalance,
                 *asset1Out,
                 *ePrice,
-                weight1,
                 tfee);
         else
             result = singleWithdrawal(
-                sb,
-                ammAccountID,
-                asset1,
-                lptAMMBalance,
-                *asset1Out,
-                weight1,
-                tfee);
+                sb, ammAccountID, asset1, lptAMMBalance, *asset1Out, tfee);
     }
     else if (lpTokens)
         result = equalWithdrawalTokens(
@@ -256,7 +242,6 @@ AMMWithdraw::withdraw(
         view, ammAccount, account_, asset1.issue(), std::nullopt, ctx_.journal);
     // The balances exceed LP holding or withdrawing all tokens and
     // there is some balance remaining.
-    // TODO, needs work. Also see Swap balance validation
     if (lpTokens == beast::zero || lpTokens > lptAMM)
     {
         JLOG(ctx_.journal.debug())
@@ -367,11 +352,10 @@ AMMWithdraw::singleWithdrawal(
     STAmount const& asset1Balance,
     STAmount const& lptAMMBalance,
     STAmount const& asset1Out,
-    std::uint8_t weight,
     std::uint16_t tfee)
 {
     auto const tokens =
-        calcLPTokensOut(asset1Balance, asset1Out, lptAMMBalance, weight, tfee);
+        calcLPTokensOut(asset1Balance, asset1Out, lptAMMBalance, tfee);
     return withdraw(
         view, ammAccount, asset1Out, std::nullopt, lptAMMBalance, tokens);
 }
@@ -384,11 +368,10 @@ AMMWithdraw::singleWithdrawalTokens(
     STAmount const& lptAMMBalance,
     STAmount const& asset1Out,
     STAmount const& tokens,
-    std::uint8_t weight,
     std::uint16_t tfee)
 {
-    auto const asset1Withdraw = calcWithdrawalByTokens(
-        asset1Balance, lptAMMBalance, tokens, weight, tfee);
+    auto const asset1Withdraw =
+        calcWithdrawalByTokens(asset1Balance, lptAMMBalance, tokens, tfee);
     if (asset1Out == beast::zero || asset1Withdraw >= asset1Out)
         return withdraw(
             view,
@@ -409,7 +392,6 @@ AMMWithdraw::singleWithdrawEPrice(
     STAmount const& lptAMMBalance,
     STAmount const& asset1Out,
     STAmount const& ePrice,
-    std::uint8_t weight1,
     std::uint16_t tfee)
 {
 #if 0

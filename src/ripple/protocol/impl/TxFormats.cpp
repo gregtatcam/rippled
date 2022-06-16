@@ -115,20 +115,6 @@ TxFormats::TxFormats()
         },
         commonFields);
 
-    add(jss::AMMSwap,
-        ttAMM_SWAP,
-        {
-            {sfAMMHash, soeREQUIRED},
-            {sfAssetIn, soeOPTIONAL},
-            {sfAssetOut, soeOPTIONAL},
-            {sfLimitSpotPrice, soeOPTIONAL},
-            {sfSlippage, soeOPTIONAL},
-            {sfAsset, soeOPTIONAL},
-            {sfAssetLimit, soeOPTIONAL},
-            {sfTicketSequence, soeOPTIONAL},
-        },
-        commonFields);
-
     add(jss::OfferCancel,
         ttOFFER_CANCEL,
         {

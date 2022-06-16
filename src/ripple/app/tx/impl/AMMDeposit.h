@@ -123,7 +123,6 @@ private:
      * @param asset1Balance current AMM asset1 balance
      * @param lptAMMBalance current AMM LPT balance
      * @param asset1In requested asset1 deposit amount
-     * @param weight1 asset1 pool weight percentage
      * @param tfee trading fee in basis points
      * @return
      */
@@ -134,7 +133,6 @@ private:
         STAmount const& asset1Balance,
         STAmount const& lptAMMBalance,
         STAmount const& asset1In,
-        std::uint8_t weight1,
         std::uint16_t tfee);
 
     /** Single asset deposit by the tokens. The trading fee is charged.
@@ -145,7 +143,6 @@ private:
      * @param asset1Balance current AMM asset1 balance
      * @param lptAMMBalance current AMM LPT balance
      * @param tokens number of tokens to deposit
-     * @param weight1 asset1 pool weight percentage
      * @param tfee trading fee in basis points
      * @return
      */
@@ -156,7 +153,6 @@ private:
         STAmount const& asset1Balance,
         STAmount const& lptAMMBalance,
         STAmount const& tokens,
-        std::uint8_t weight1,
         std::uint16_t tfee);
 
     /** Single asset deposit with the constraint that the effective price
@@ -168,7 +164,6 @@ private:
      * @param asset1In requested asset1 deposit amount
      * @param lptAMMBalance current AMM LPT balance
      * @param ePrice maximum effective price
-     * @param weight1
      * @param tfee
      * @return
      */
@@ -181,7 +176,6 @@ private:
         STAmount const& asset1In,
         STAmount const& lptAMMBalance,
         STAmount const& ePrice,
-        std::uint8_t weight1,
         std::uint16_t tfee);
 };
 

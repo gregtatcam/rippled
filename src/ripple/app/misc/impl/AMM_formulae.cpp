@@ -23,14 +23,19 @@
 
 namespace ripple {
 
+inline Number
+power2(Number const& n)
+{
+    return n * n;
+}
+
 STAmount
 calcAMMLPT(
     STAmount const& asset1,
     STAmount const& asset2,
-    Issue const& lptIssue,
-    std::uint8_t weight1)
+    Issue const& lptIssue)
 {
-    auto const tokens = power(asset1 / asset2, weight1, 100) * asset2;
+    auto const tokens = root(asset1 * asset2, 2);
     return toSTAmount(lptIssue, tokens);
 }
 
@@ -39,16 +44,12 @@ calcLPTokensIn(
     STAmount const& asset1Balance,
     STAmount const& asset1Deposit,
     STAmount const& lpTokensBalance,
-    std::uint16_t weight,
     std::uint16_t tfee)
 {
     return toSTAmount(
         lpTokensBalance.issue(),
         lpTokensBalance *
-            (power(
-                 1 + (asset1Deposit * feeMult(tfee, weight)) / asset1Balance,
-                 weight,
-                 100) -
+            (root(1 + (asset1Deposit * feeMultHalf(tfee)) / asset1Balance, 2) -
              1));
 }
 
@@ -57,14 +58,12 @@ calcAssetIn(
     STAmount const& asset1Balance,
     STAmount const& lpTokensBalance,
     STAmount const& lptAMMBalance,
-    std::uint16_t weight1,
     std::uint16_t tfee)
 {
     return toSTAmount(
         asset1Balance.issue(),
-        ((power(Number{lpTokensBalance} / lptAMMBalance + 1, 100, weight1) -
-          1) /
-         feeMult(tfee, weight1)) *
+        ((power2(lpTokensBalance / lptAMMBalance + 1) - 1) /
+         feeMultHalf(tfee)) *
             asset1Balance);
 }
 
@@ -73,30 +72,24 @@ calcLPTokensOut(
     STAmount const& asset1Balance,
     STAmount const& asset1Withdraw,
     STAmount const& lpTokensBalance,
-    std::uint16_t weight,
     std::uint16_t tfee)
 {
     return toSTAmount(
         lpTokensBalance.issue(),
         lpTokensBalance *
             (1 -
-             power(
-                 1 - asset1Withdraw / (asset1Balance * feeMult(tfee, weight)),
-                 weight,
-                 100)));
+             root(
+                 1 - asset1Withdraw / (asset1Balance * feeMultHalf(tfee)), 2)));
 }
 
 STAmount
 calcSpotPrice(
     STAmount const& asset1Balance,
     STAmount const& asset2Balance,
-    std::uint8_t weight1,
     std::uint16_t tfee)
 {
     return toSTAmount(
-        noIssue(),
-        Number{asset2Balance} * weight1 /
-            (asset1Balance * (100 - weight1) * feeMult(tfee)));
+        noIssue(), Number{asset2Balance} / (asset1Balance * feeMult(tfee)));
 }
 
 std::optional<STAmount>
@@ -104,16 +97,13 @@ changeSpotPrice(
     STAmount const& assetInBalance,
     STAmount const& assetOutBalance,
     STAmount const& newSP,
-    std::uint8_t weightIn,
     std::uint16_t tfee)
 {
-    auto const sp =
-        calcSpotPrice(assetInBalance, assetOutBalance, weightIn, tfee);
+    auto const sp = calcSpotPrice(assetInBalance, assetOutBalance, tfee);
     // can't change to a better or same SP
     if (Number(newSP) <= sp)
         return std::nullopt;
-    auto const res =
-        assetInBalance * (power(newSP / sp, 100 - weightIn, 100) - 1);
+    auto const res = assetInBalance * (root(newSP / sp, 2) - 1);
     if (res > 0)
         return toSTAmount(assetInBalance.issue(), res);
     return std::nullopt;
@@ -124,17 +114,12 @@ swapAssetIn(
     STAmount const& asset1Balance,
     STAmount const& asset2Balance,
     STAmount const& assetIn,
-    std::uint8_t weight1,
     std::uint16_t tfee)
 {
     return toSTAmount(
         asset2Balance.issue(),
         asset2Balance *
-            (1 -
-             power(
-                 asset1Balance / (asset1Balance + assetIn * feeMult(tfee)),
-                 weight1,
-                 100 - weight1)));
+            (1 - asset1Balance / (asset1Balance + assetIn * feeMult(tfee))));
 }
 
 STAmount
@@ -142,17 +127,11 @@ swapAssetOut(
     STAmount const& asset1Balance,
     STAmount const& asset2Balance,
     STAmount const& assetOut,
-    std::uint8_t weight1,
     std::uint16_t tfee)
 {
     return toSTAmount(
         asset2Balance.issue(),
-        asset2Balance *
-            (power(
-                 asset1Balance / (asset1Balance - assetOut),
-                 weight1,
-                 100 - weight1) -
-             1) /
+        asset2Balance * (asset1Balance / (asset1Balance - assetOut) - 1) /
             feeMult(tfee));
 }
 
@@ -161,54 +140,12 @@ calcWithdrawalByTokens(
     STAmount const& assetBalance,
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
-    std::uint8_t weight,
     std::uint32_t tfee)
 {
     return toSTAmount(
         assetBalance.issue(),
-        assetBalance * (1 - power(1 - lpTokens / lptAMMBalance, 100, weight)) *
-            feeMult(tfee, weight));
-}
-
-Number
-slippageSlopeIn(
-    STAmount const& assetBalance,
-    STAmount const& assetIn,
-    std::uint8_t assetWeight,
-    std::uint16_t tfee)
-{
-    return feeMult(tfee) * 100 / (2 * assetBalance * (100 - assetWeight));
-}
-
-Number
-averageSlippageIn(
-    STAmount const& assetBalance,
-    STAmount const& assetIn,
-    std::uint8_t assetWeight,
-    std::uint16_t tfee)
-{
-    return assetIn * slippageSlopeIn(assetBalance, assetIn, assetWeight, tfee);
-}
-
-Number
-slippageSlopeOut(
-    STAmount const& assetBalance,
-    STAmount const& assetOut,
-    std::uint8_t assetWeight,
-    std::uint16_t tfee)
-{
-    return Number{100} / (2 * assetBalance * assetWeight);
-}
-
-Number
-averageSlippageOut(
-    STAmount const& assetBalance,
-    STAmount const& assetOut,
-    std::uint8_t assetWeight,
-    std::uint16_t tfee)
-{
-    return assetOut *
-        slippageSlopeOut(assetBalance, assetOut, assetWeight, tfee);
+        assetBalance * (1 - power2(1 - lpTokens / lptAMMBalance)) *
+            feeMultHalf(tfee));
 }
 
 std::optional<std::pair<STAmount, STAmount>>
@@ -216,19 +153,16 @@ changeSpotPriceQuality(
     STAmount const& poolIn,
     STAmount const& poolOut,
     Quality const& quality,
-    std::uint8_t weightIn,
     std::uint32_t tfee)
 {
-    auto const weightOut = 100 - weightIn;
     auto const curQuality = Quality(Amounts{poolIn, poolOut});
-    auto const takerPays = poolIn *
-        (power(quality.rate() / curQuality.rate(), weightOut, 100) - 1);
+    auto const takerPays =
+        poolIn * (root(quality.rate() / curQuality.rate(), 2) - 1);
     if (takerPays > 0)
     {
         auto const saTakerPays = toSTAmount(poolIn.issue(), takerPays);
         return std::make_pair(
-            saTakerPays,
-            swapAssetIn(poolIn, poolOut, saTakerPays, weightIn, tfee));
+            saTakerPays, swapAssetIn(poolIn, poolOut, saTakerPays, tfee));
     }
     return std::nullopt;
 }

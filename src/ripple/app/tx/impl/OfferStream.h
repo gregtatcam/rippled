@@ -20,7 +20,7 @@
 #ifndef RIPPLE_APP_BOOK_OFFERSTREAM_H_INCLUDED
 #define RIPPLE_APP_BOOK_OFFERSTREAM_H_INCLUDED
 
-#include <ripple/app/tx/impl/AMMOffers.h>
+#include <ripple/app/tx/impl/AMMOffer.h>
 #include <ripple/app/tx/impl/BookTip.h>
 #include <ripple/app/tx/impl/Offer.h>
 #include <ripple/basics/Log.h>
@@ -236,10 +236,10 @@ private:
     using AMMOffer_t =
         std::optional<std::reference_wrapper<AMMOffer<TIn, TOut>>>;
     // AMMOffers instantiated in the BookStep
-    AMMOffers<TIn, TOut>& ammOffers_;
+    AMMOffer_t ammOffer_;
+    AMMOffer_t ammOfferCached_{};  // hack for now
     TIn const* remainingIn_;
     TOut const* remainingOut_;
-    AMMOffer_t AMMOffer_;
     bool cachedCLOBOffer_;
 
 public:
@@ -249,14 +249,13 @@ public:
         Book const& book,
         NetClock::time_point when,
         StepCounter& counter,
-        AMMOffers<TIn, TOut>& ammOffers,
+        AMMOffer_t const& ammOffer,
         TIn const* remainingIn,
         TOut const* remainingOut,
         beast::Journal journal);
 
     ~FlowLiquidityStream()
     {
-        ammOffers_.reset();
     }
 
 protected:
@@ -265,28 +264,36 @@ protected:
     SLE::pointer
     getEntry() const override
     {
-        if (AMMOffer_)
-            return AMMOffer_->get().getEntry();
+        if (ammOffer_)
+            return ammOffer_->get().getEntry();
         return TOfferStreamBase<TIn, TOut>::getEntry();
     }
     TOffer<TIn, TOut>&
     offer() const override
     {
-        if (AMMOffer_)
-            return AMMOffer_->get();
+        if (ammOfferCached_)
+            return ammOfferCached_->get();
         return TOfferStreamBase<TIn, TOut>::offer();
     }
     virtual void
     resetOffer() override
     {
-        AMMOffer_ = std::nullopt;
+        ammOffer_.reset();
         TOfferStreamBase<TIn, TOut>::resetOffer();
     }
     void
     makeOffer() override
     {
-        if (!AMMOffer_)
+        if (ammOffer_)
+        {
+            ammOfferCached_ = ammOffer_;
+            ammOffer_.reset();
+        }
+        else
+        {
+            ammOfferCached_.reset();
             TOfferStreamBase<TIn, TOut>::makeOffer();
+        }
     }
     bool
     adjustAMMOffer(bool haveCLOBOffer);

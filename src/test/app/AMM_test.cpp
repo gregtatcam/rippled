@@ -657,97 +657,6 @@ private:
     }
 
     void
-    testSwap()
-    {
-        testcase("Swap");
-
-        using namespace jtx;
-
-        // Swap in USD1000
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swapIn(alice, USD(1000));
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{9090909091}, USD(11000), IOUAmount{10000000, 0}));
-        });
-
-        // Swap in USD1000, Slippage not to exceed 10000
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swapIn(alice, USD(1000), 10000);
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{9090909091}, USD(11000), IOUAmount{10000000, 0}));
-        });
-
-        // Swap in USD1000, limitSP not to exceed 1100000
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swapIn(alice, USD(1000), std::nullopt, XRPAmount{1100000});
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{9534625893},
-                STAmount{
-                    USD.issue(),
-                    static_cast<std::uint64_t>(1048808848170152),
-                    -11},
-                IOUAmount{10000000, 0}));
-        });
-
-        // Swap in USD1000, limitSP not to exceed 110000.
-        // This transaction fails.
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swapIn(
-                alice,
-                USD(1000),
-                std::nullopt,
-                XRPAmount{110000},
-                ter(tecAMM_FAILED_SWAP));
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRP(10000), USD(10000), IOUAmount{10000000, 0}));
-        });
-
-        // Swap out
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swapOut(alice, USD(1000));
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{11111111111}, USD(9000), IOUAmount{10000000, 0}));
-        });
-
-        // Swap in
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swap(alice, USD(10100), USD(100));
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{9900990100}, USD(10100), IOUAmount{10000000, 0}));
-        });
-
-        // Swap out
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swap(alice, USD(9900), USD(100));
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{10101010101}, USD(9900), IOUAmount{10000000, 0}));
-        });
-
-#if 0
-        // Swap out USD1000, limitSP not to exceed 1100000
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swapOut(alice, USD(1000), XRPAmount{1100000});
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{10513133959},
-                STAmount{USD.issue(), static_cast<std::uint64_t>(951191151829848), -11},
-                IOUAmount{10000000, 0}));
-        });
-
-        // Swap out USD1000, limitSP not to exceed 900000
-        // This transaction fails.
-        proc([&](AMM& ammAlice, Env&) {
-            ammAlice.swapOut(
-                alice,
-                USD(1000),
-                XRPAmount{900000},
-                std::optional<ter>(tecAMM_FAILED_SWAP));
-            BEAST_EXPECT(ammAlice.expectBalances(
-                XRP(10000), USD(10000), IOUAmount{10000000, 0}));
-        });
-#endif
-    }
-
-    void
     testRequireAuth()
     {
         testcase("Require Authorization");
@@ -782,35 +691,20 @@ private:
                 IOUAmount{10000000, 0},
                 alice));
         });
-        // two paths XRP/USD, offers are not used because of low quality
+        // two paths XRP/USD, AMM is not used
         proc([&](AMM& ammAlice, Env& env) {
             env.fund(jtx::XRP(30000), bob);
-            fund(env, gw, {bob}, {USD(20), GBP(20)}, false);
-            env(offer(bob, XRP(10), GBP(10)));
-            env(offer(bob, GBP(10), USD(1)));
+            fund(env, gw, {bob}, {USD(200), GBP(200)}, false);
+            env(offer(bob, XRP(90), GBP(100)));
+            env(offer(bob, GBP(100), USD(100)));
             env(pay(carol, alice, USD(100)),
                 path(~USD),
                 path(~GBP, ~USD),
-                sendmax(XRP(200)),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{10101009469}, USD(9900), IOUAmount{10000000, 0}));
-        });
-        // two paths XRP/USD, offers are not used because of low quality
-        // Should fail because exceed 10 iterations and partial payment is
-        // not set.
-        proc([&](AMM& ammAlice, Env& env) {
-            env.fund(jtx::XRP(30000), bob);
-            fund(env, gw, {bob}, {USD(20), GBP(20)}, false);
-            env(offer(bob, XRP(10), GBP(10)));
-            env(offer(bob, GBP(10), USD(1)));
-            env(pay(carol, alice, USD(600)),
-                path(~USD),
-                path(~GBP, ~USD),
-                sendmax(XRP(700)),
-                ter(tecPATH_PARTIAL));
-            BEAST_EXPECT(ammAlice.expectBalances(
                 XRP(10000), USD(10000), IOUAmount{10000000, 0}));
+            BEAST_EXPECT(offersFromJson(readOffers(env, bob)).size() == 0);
         });
 
         // Multiple AMM with the last limiting step. This results
@@ -823,29 +717,31 @@ private:
             env(pay(carol, alice, USD(50)),
                 path(~GBP, ~XRP, ~USD),
                 sendmax(EUR(40)),
-                txflags(tfPartialPayment));
+                txflags(
+                    tfPartialPayment |
+                    tfNoRippleDirect));  // force no default path
             BEAST_EXPECT(ammAlice.expectBalances(
-                XRPAmount{10037951286},
+                XRPAmount{10037950664},
                 STAmount{
                     USD.issue(),
-                    static_cast<std::uint64_t>(9962191808427008),
-                    -12},
+                    static_cast<std::uint64_t>(996219281677076),
+                    -11},
                 IOUAmount{10000000, 0}));
             BEAST_EXPECT(ammBob.expectBalances(
-                XRPAmount{9962048714},
+                XRPAmount{9962049336},
                 STAmount{
                     GBP.issue(),
                     static_cast<std::uint64_t>(7026666666666666),
                     -12},
-                IOUAmount{8366600265340758, -9}));
+                IOUAmount{8366600265340755, -9}));
             auto const res = offersFromJson(readOffers(env, bob));
             BEAST_EXPECT(
                 res.size() == 1 &&
                 res[0].first ==
                     STAmount(
                         GBP.issue(),
-                        static_cast<std::uint64_t>(3333333333333333),
-                        -15) &&
+                        static_cast<std::uint64_t>(333333333333333),
+                        -14) &&
                 res[0].second == STAmount(EUR.issue(), 5, 0));
         });
 
@@ -856,7 +752,7 @@ private:
             Env env(*this);
             fund(env, gw, {alice, carol, bob}, {USD(2000)}, true);
             AMM ammAlice(env, alice, XRP(1000), USD(1005));
-            env(offer(bob, XRP(10), USD(10)));
+            env(offer(bob, XRP(10), USD(10)), txflags(tfPassive));
             env(pay(carol, alice, USD(10)),
                 sendmax(XRP(10)),
                 txflags(tfPartialPayment));
@@ -897,7 +793,6 @@ private:
         testInstanceCreate();
         testDeposit();
         testWithdraw();
-        testSwap();
         testRequireAuth();
         testPayment();
     }
@@ -905,30 +800,6 @@ private:
 
 struct AMM_manual_test : public Test
 {
-    void
-    testSwapOutPerf()
-    {
-        testcase("Performance 100 Swap Out");
-        using namespace std::chrono;
-
-        auto const start = high_resolution_clock::now();
-        for (int i = 0; i < 100; ++i)
-        {
-            swapAssetOut(
-                STAmount{noIssue(), 10000 + 1, 0},
-                STAmount{noIssue(), 10000 + 1, 0},
-                STAmount{noIssue(), i, 0},
-                80,
-                1000);
-        }
-        auto const elapsed = high_resolution_clock::now() - start;
-
-        std::cout << "100 swap out "
-                  << duration_cast<std::chrono::microseconds>(elapsed).count()
-                  << std::endl;
-        BEAST_EXPECT(true);
-    }
-
     void
     testFibonnaciPerf()
     {
@@ -1059,27 +930,6 @@ struct AMM_manual_test : public Test
                     IOUAmount{10000000, 0},
                     alice));
             });
-            // two paths XRP/USD, offers are not used because of low quality
-            proc([&](AMM& ammAlice, Env& env) {
-                env.fund(jtx::XRP(30000), bob);
-                fund(env, gw, {bob}, {USD(20), GBP(20)}, false);
-                env(offer(bob, XRP(10), GBP(10)));
-                env(offer(bob, GBP(10), USD(1)));
-                auto const start = high_resolution_clock::now();
-                env(pay(carol, alice, USD(100)),
-                    path(~USD),
-                    path(~GBP, ~USD),
-                    sendmax(XRP(200)),
-                    txflags(tfPartialPayment));
-                auto const elapsed = high_resolution_clock::now() - start;
-                t[Nt++][i] =
-                    duration_cast<std::chrono::microseconds>(elapsed).count();
-                BEAST_EXPECT(ammAlice.expectBalances(
-                    XRPAmount{10101009469},
-                    USD(9900),
-                    IOUAmount{10000000, 0},
-                    alice));
-            });
             // one path IOU/IOU
             proc(
                 [&](AMM& ammAlice, Env& env) {
@@ -1103,34 +953,6 @@ struct AMM_manual_test : public Test
                 },
                 std::make_pair(USD(10000), EUR(10000)),
                 IOUAmount{10000, 0});
-            // two paths EUR/USD, offers are not used because of low quality
-            proc(
-                [&](AMM& ammAlice, Env& env) {
-                    env.fund(jtx::XRP(30000), bob);
-                    fund(env, gw, {bob}, {USD(10)}, false);
-                    env(offer(bob, EUR(10), XRP(10)));
-                    env(offer(bob, XRP(10), USD(1)));
-                    auto const start = high_resolution_clock::now();
-                    env(pay(carol, alice, USD(100)),
-                        path(~USD),
-                        path(~XRP, ~USD),
-                        sendmax(EUR(200)),
-                        txflags(tfPartialPayment));
-                    auto const elapsed = high_resolution_clock::now() - start;
-                    t[Nt++][i] =
-                        duration_cast<std::chrono::microseconds>(elapsed)
-                            .count();
-                    BEAST_EXPECT(ammAlice.expectBalances(
-                        STAmount{
-                            EUR.issue(),
-                            static_cast<std::uint64_t>(1010100946969697),
-                            -11},
-                        USD(9900),
-                        IOUAmount{10000, 0},
-                        alice));
-                },
-                std::make_pair(USD(10000), EUR(10000)),
-                IOUAmount{10000, 0});
             // One path with multiple AMM
             proc([&](AMM& ammAlice, Env& env) {
                 env.fund(jtx::XRP(300000), bob);
@@ -1147,7 +969,7 @@ struct AMM_manual_test : public Test
                 env(pay(carol, alice, USD(100)),
                     path(~GBP, ~XRP, ~USD),
                     sendmax(EUR(100)),
-                    txflags(tfPartialPayment));
+                    txflags(tfPartialPayment | tfNoRippleDirect));
                 auto const elapsed = high_resolution_clock::now() - start;
                 t[Nt++][i] =
                     duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -1155,14 +977,14 @@ struct AMM_manual_test : public Test
                     EUR(10100),
                     STAmount{
                         GBP.issue(),
-                        static_cast<std::uint64_t>(9900989480198023),
-                        -12},
+                        static_cast<std::uint64_t>(990099009900991),
+                        -11},
                     IOUAmount{10000, 0}));
                 BEAST_EXPECT(ammAlice.expectBalances(
-                    XRPAmount{10098036193},
+                    XRPAmount{10098039215},
                     STAmount{
                         USD.issue(),
-                        static_cast<std::uint64_t>(990292328629822),
+                        static_cast<std::uint64_t>(990291262203224),
                         -11},
                     IOUAmount{10000000, 0}));
             });
@@ -1210,19 +1032,16 @@ struct AMM_manual_test : public Test
             }
         }
         stats(t[0], "AMM XRP/IOU Payment");
-        stats(t[1], "AMM XRP/IOU two paths Payment");
-        stats(t[2], "AMM IOU/IOU Payment");
-        stats(t[3], "AMM IOU/IOU two paths Payment");
-        stats(t[4], "AMM IOU/IOU one path multiple AMM Payment");
-        stats(t[5], "XRP Payment");
-        stats(t[6], "IOU Payment");
-        stats(t[7], "XRP/IOU Payment, order book");
+        stats(t[1], "AMM IOU/IOU Payment");
+        stats(t[2], "AMM IOU/IOU one path multiple AMM Payment");
+        stats(t[3], "XRP Payment");
+        stats(t[4], "IOU Payment");
+        stats(t[5], "XRP/IOU Payment, order book");
     }
 
     void
     run() override
     {
-        testSwapOutPerf();
         testFibonnaciPerf();
         testPaymentPerf();
     }

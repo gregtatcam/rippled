@@ -17,10 +17,11 @@
 */
 //==============================================================================
 
+#include <ripple/app/misc/AMM.h>
 #include <ripple/app/paths/Credit.h>
 #include <ripple/app/paths/impl/FlatSets.h>
 #include <ripple/app/paths/impl/Steps.h>
-#include <ripple/app/tx/impl/AMMOffers.h>
+#include <ripple/app/tx/impl/AMMOffer.h>
 #include <ripple/app/tx/impl/OfferStream.h>
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/Log.h>
@@ -60,8 +61,9 @@ protected:
         be partially consumed multiple times during a payment.
     */
     std::uint32_t offersUsed_ = 0;
-    // All AMM offers for the given Book
-    mutable AMMOffers<TIn, TOut> ammOffers_;
+    // AMM offer for the given Book
+    mutable std::optional<AMMOffer<TIn, TOut>> ammOffer_;
+    AMMOfferGen& ammOfferGen_;
     beast::Journal const j_;
 
     struct Cache
@@ -92,9 +94,24 @@ public:
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
-        , ammOffers_(ctx.view, book_, ctx.ammOfferGen, ctx.j)
+        , ammOffer_(std::nullopt)
+        , ammOfferGen_(ctx.ammOfferGen)
         , j_(ctx.j)
     {
+        if (auto const amm =
+                ctx.view.read(keylet::amm(calcAMMGroupHash(in, out))))
+        {
+            auto const ammAccountID = amm->getAccountID(sfAMMAccount);
+            auto const [assetIn, assetOut, _] = getAMMBalances(
+                ctx.view, ammAccountID, std::nullopt, in, out, ctx.j);
+            (void)_;
+            if (assetIn == beast::zero || assetOut == beast::zero)
+                JLOG(j_.fatal())
+                    << "BookStep: failed to get AMM " << ammAccountID;
+            else
+                ammOffer_ = AMMOffer<TIn, TOut>(
+                    amm, ammAccountID, assetIn, assetOut, ctx.j);
+        }
     }
 
     Book const&
@@ -172,7 +189,8 @@ public:
     void
     applied(ReadView const& view) override
     {
-        ammOffers_.updateReserves(view);
+        if (ammOffer_)
+            ammOffer_->updateReserves(view);
     }
 
 protected:
@@ -496,25 +514,24 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
     // This can be simplified (and sped up) if directories are never empty.
     Sandbox sb(&v, tapNONE);
     BookTip bt(sb, book_);
-    auto const ammOfferTip = ammOffers_.tip();
     auto const btStep = bt.step(j_);
-    if (!btStep && !ammOfferTip)
+    if (!btStep && !ammOffer_)
         return {std::nullopt, dir};
     auto const quality = [&] {
-        if (ammOfferTip && btStep)
+        if (ammOffer_ && btStep)
         {
             // AMM quality is the best theoretical quality
             // with the given reserves. Note, that once
             // the AMM offer size changes, the quality
             // gets smaller. This doesn't matter since
             // all AMM Strands are executed anyways.
-            if (ammOfferTip->get().quality() > bt.quality())
-                return ammOfferTip->get().quality();
+            if (ammOffer_->quality() > bt.quality())
+                return ammOffer_->quality();
             else
                 return bt.quality();
         }
-        else if (ammOfferTip)
-            return ammOfferTip->get().quality();
+        else if (ammOffer_)
+            return ammOffer_->quality();
         else
             return bt.quality();
     }();
@@ -608,6 +625,13 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 
     typename FlowOfferStream<TIn, TOut>::StepCounter counter(
         maxOffersToConsume_, j_);
+    auto ammOffer =
+        [&]() -> std::optional<std::reference_wrapper<AMMOffer<TIn, TOut>>> {
+        if (ammOfferGen_.useAMM() && ammOffer_.has_value())
+            return std::ref(
+                const_cast<AMMOffer<TIn, TOut>&>(ammOffer_.value()));
+        return std::nullopt;
+    }();
 
     FlowLiquidityStream<TIn, TOut> offers(
         sb,
@@ -615,7 +639,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         book_,
         sb.parentCloseTime(),
         counter,
-        ammOffers_,
+        ammOffer,
         remainingIn,
         remainingOut,
         j_);
@@ -747,8 +771,6 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     }
 
     offer.consume(sb, ofrAmt);
-    if (offer.isAMM())
-        ammOffers_.consume(offer);
 }
 
 template <class TCollection>
