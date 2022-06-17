@@ -485,7 +485,6 @@ extern SF_AMOUNT const sfAsset2In;
 extern SF_AMOUNT const sfAsset1Out;
 extern SF_AMOUNT const sfAsset2Out;
 extern SF_AMOUNT const sfEPrice;
-extern SF_AMOUNT const sfAsset;
 
 // currency amount (uncommon)
 extern SF_AMOUNT const sfMinimumOffer;

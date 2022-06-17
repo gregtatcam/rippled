@@ -425,16 +425,24 @@ private:
                 XRP(10201), USD(10000), IOUAmount{10100000, 0}));
         });
 
-#if 0  // specs in works
-       // Single deposit with SP not exceeding specified:
-       // 100USD with SP not to exceed 100000 (USD relative to XRP)
-        proc([&](AMM& ammAlice) {
+        // Single deposit with SP not exceeding specified:
+        // 100USD with EP not to exceed 0.1 (AssetIn/TokensOut)
+        proc([&](AMM& ammAlice, Env&) {
             ammAlice.deposit(
-                carol, USD(1000), std::nullopt, XRPAmount{1000000});
+                carol, USD(1000), std::nullopt, STAmount{USD.issue(), 1, -1});
             BEAST_EXPECT(ammAlice.expectBalances(
-                XRP(10000), USD(11000), IOUAmount{104880884817015, -7}));
+                XRP(10000), USD(11000), IOUAmount{1048808848170152, -8}));
         });
-#endif
+
+        // Single deposit with SP not exceeding specified:
+        // 100USD with EP not to exceed 0.1 (AssetIn/TokensOut)
+        proc([&](AMM& ammAlice, Env&) {
+            ammAlice.deposit(
+                carol, USD(0), std::nullopt, STAmount{USD.issue(), 10, 0});
+            std::cout << ammAlice.ammRpcInfo()->toStyledString();
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10000), USD(11000), IOUAmount{1048808848170152, -8}));
+        });
     }
 
     void

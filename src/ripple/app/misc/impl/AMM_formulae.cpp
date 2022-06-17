@@ -23,12 +23,6 @@
 
 namespace ripple {
 
-inline Number
-power2(Number const& n)
-{
-    return n * n;
-}
-
 STAmount
 calcAMMLPT(
     STAmount const& asset1,
@@ -62,7 +56,7 @@ calcAssetIn(
 {
     return toSTAmount(
         asset1Balance.issue(),
-        ((power2(lpTokensBalance / lptAMMBalance + 1) - 1) /
+        ((power(lpTokensBalance / lptAMMBalance + 1, 2) - 1) /
          feeMultHalf(tfee)) *
             asset1Balance);
 }
@@ -144,7 +138,7 @@ calcWithdrawalByTokens(
 {
     return toSTAmount(
         assetBalance.issue(),
-        assetBalance * (1 - power2(1 - lpTokens / lptAMMBalance)) *
+        assetBalance * (1 - power(1 - lpTokens / lptAMMBalance, 2)) *
             feeMultHalf(tfee));
 }
 

@@ -160,7 +160,6 @@ private:
      * @param view
      * @param ammAccount AMM account
      * @param asset1Balance current AMM asset1 balance
-     * @param asset2Balance current AMM asset2 balance
      * @param asset1In requested asset1 deposit amount
      * @param lptAMMBalance current AMM LPT balance
      * @param ePrice maximum effective price
@@ -172,7 +171,6 @@ private:
         Sandbox& view,
         AccountID const& ammAccount,
         STAmount const& asset1Balance,
-        STAmount const& asset2Balance,
         STAmount const& asset1In,
         STAmount const& lptAMMBalance,
         STAmount const& ePrice,

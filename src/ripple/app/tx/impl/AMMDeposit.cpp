@@ -67,7 +67,9 @@ AMMDeposit::preflight(PreflightContext const& ctx)
         JLOG(ctx.j.debug()) << "Malformed transaction: invalid LPTokens";
         return temBAD_AMM_TOKENS;
     }
-    else if (auto const res = validAmount(asset1In, lpTokens.has_value()))
+    else if (
+        auto const res =
+            validAmount(asset1In, (lpTokens.has_value() || ePrice.has_value())))
     {
         JLOG(ctx.j.debug()) << "Malformed transaction: invalid Asset1In";
         return *res;
@@ -166,7 +168,6 @@ AMMDeposit::applyGuts(Sandbox& sb)
                 sb,
                 ammAccountID,
                 asset1,
-                asset2,
                 *asset1In,
                 lptAMMBalance,
                 *ePrice,
@@ -357,21 +358,28 @@ AMMDeposit::singleDepositEPrice(
     Sandbox& view,
     AccountID const& ammAccount,
     STAmount const& asset1Balance,
-    STAmount const& asset2Balance,
     STAmount const& asset1In,
     STAmount const& lptAMMBalance,
     STAmount const& ePrice,
     std::uint16_t tfee)
 {
-#if 0
-    auto const tokens = calcLPTokensIn(
-        asset1Balance, asset1In, lptAMMBalance, weight1, tfee);
+    if (asset1In != beast::zero)
+    {
+        auto const tokens =
+            calcLPTokensIn(asset1Balance, asset1In, lptAMMBalance, tfee);
+        if (tokens == beast::zero)
+            return tecAMM_FAILED_DEPOSIT;
+        auto const ep = Number{asset1In} / tokens;
+        if (ep <= ePrice)
+            return deposit(view, ammAccount, asset1In, std::nullopt, tokens);
+    }
 
-    auto const ep = Number{asset1In} / tokens;
-    if (asset1In != STAmount{asset1In.issue(), 0} && ep <= ePrice)
-        return deposit(view, ammAccount, asset1In, std::nullopt, tokens);
-#endif
-    return tecAMM_INVALID_TOKENS;
+    auto const asset1In_ = toSTAmount(
+        asset1Balance.issue(),
+        power(ePrice * lptAMMBalance, 2) * feeMultHalf(tfee) / asset1Balance -
+            2 * ePrice * lptAMMBalance);
+    auto const tokens = toSTAmount(lptAMMBalance.issue(), asset1In_ / ePrice);
+    return deposit(view, ammAccount, asset1In_, std::nullopt, tokens);
 }
 
 }  // namespace ripple

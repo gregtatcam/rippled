@@ -173,7 +173,6 @@ AMMWithdraw::applyGuts(Sandbox& sb)
                 sb,
                 ammAccountID,
                 asset1,
-                asset2,
                 lptAMMBalance,
                 *asset1Out,
                 *ePrice,
@@ -388,32 +387,25 @@ AMMWithdraw::singleWithdrawEPrice(
     Sandbox& view,
     AccountID const& ammAccount,
     STAmount const& asset1Balance,
-    STAmount const& asset2Balance,
     STAmount const& lptAMMBalance,
     STAmount const& asset1Out,
     STAmount const& ePrice,
     std::uint16_t tfee)
 {
-#if 0
-    auto const asset1BalanceUpd = asset1Balance - asset1Out;
-    auto const sp =
-        calcSpotPrice(asset1BalanceUpd, asset2Balance, weight1, tfee);
-    auto const asset1Deposit = [&]() -> std::optional<STAmount> {
-        if (sp <= STAmount{noIssue(), maxSP.mantissa(), maxSP.exponent()})
-            return asset1Out;
-        return changeSpotPrice(
-            asset1Balance, asset2Balance, maxSP, weight1, tfee);
-    }();
-    if (!asset1Deposit)
-        return tecAMM_FAILED_DEPOSIT;
-    auto const tokens = calcLPTokensOut(
-        asset1Balance, *asset1Deposit, lptAMMBalance, weight1, tfee);
-    if (!tokens)
-        return tecAMM_FAILED_DEPOSIT;
-    return withdraw(
-        view, ammAccount, *asset1Deposit, std::nullopt, lptAMMBalance, tokens);
-#endif
-    return tecAMM_FAILED_DEPOSIT;
+    auto const tokens =
+        Number(2) - 1 / (asset1Balance * ePrice * feeMultHalf(tfee));
+    auto const asset1Out_ = toSTAmount(asset1Out.issue(), tokens / ePrice);
+    if (asset1Out == beast::zero ||
+        (asset1Out != beast::zero && asset1Out_ >= asset1Out))
+        withdraw(
+            view,
+            ammAccount,
+            asset1Out_,
+            std::nullopt,
+            lptAMMBalance,
+            toSTAmount(lptAMMBalance.issue(), tokens));
+
+    return tecAMM_FAILED_WITHDRAW;
 }
 
 std::optional<STAmount>

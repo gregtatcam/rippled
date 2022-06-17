@@ -163,9 +163,8 @@ private:
      * @param view
      * @param ammAccount AMM account
      * @param asset1Balance current AMM asset1 balance
-     * @param asset2Balance current AMM asset2 balance
      * @param lptAMMBalance current AMM LPT balance
-     * @param asset1Out aset1 withdraw amount
+     * @param asset1Out asset1 withdraw amount
      * @param ePrice maximum asset1 effective price
      * @param tfee trading fee in basis points
      * @return
@@ -175,7 +174,6 @@ private:
         Sandbox& view,
         AccountID const& ammAccount,
         STAmount const& asset1Balance,
-        STAmount const& asset2Balance,
         STAmount const& lptAMMBalance,
         STAmount const& asset1Out,
         STAmount const& ePrice,
