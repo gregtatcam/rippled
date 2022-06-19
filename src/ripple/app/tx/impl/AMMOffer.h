@@ -19,6 +19,7 @@
 #ifndef RIPPLE_TX_AMMOFFER_H_INCLUDED
 #define RIPPLE_TX_AMMOFFER_H_INCLUDED
 
+#include <ripple/app/misc/AMM.h>
 #include <ripple/app/misc/AMM_formulae.h>
 #include <ripple/app/paths/impl/AMMOfferGen.h>
 #include <ripple/app/tx/impl/Offer.h>
@@ -42,18 +43,17 @@ namespace ripple {
  * offer's quality changes with the offer size and the offers must be
  * ordered by quality and consumed in this order by the BookStep.
  */
-template <typename TIn, typename TOut>
+template <typename TIn = STAmount, typename TOut = STAmount>
 class AMMOffer : public TOffer<TIn, TOut>
 {
     TAmounts<TIn, TOut> reserves_;  // AMM current pool reserves
-    AccountID ammAccountID_;        // AMM root account id
     std::uint32_t tfee_;            // AMM trading fee
     beast::Journal j_;
 
 public:
     AMMOffer(
+        ReadView const& view,
         std::shared_ptr<const SLE> const& amm,
-        AccountID const& ammAccountID,
         STAmount const& assetIn,
         STAmount const& assetOut,
         beast::Journal const j);
@@ -62,7 +62,6 @@ public:
     operator=(AMMOffer const& offer)
     {
         reserves_ = offer.reserves_;
-        ammAccountID_ = offer.ammAccountID_;
         tfee_ = offer.tfee_;
         j_ = offer.j_;
         return *this;
@@ -93,22 +92,10 @@ public:
     void
     updateReserves(ReadView const& view);
 
-    AccountID
-    account() const
-    {
-        return ammAccountID_;
-    }
-
     bool
     isAMM() const override
     {
         return true;
-    }
-
-    SLE::pointer
-    getEntry() const
-    {
-        return this->m_entry;
     }
 
     /** Consume the offer. This method validates that the consumed size
@@ -119,15 +106,34 @@ public:
     void
     consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed) override;
 
-private:
-    /** Instantiates SLE required for TOffer.
+    /** AMM offer is always fully consumed
      */
-    static SLE::pointer
-    makeTOfferSLE(
-        AccountID const& ammAccountID,
-        STAmount const& assetIn,
-        STAmount const& assetOut);
+    bool
+    fully_consumed() const override
+    {
+        return true;
+    }
 
+    std::string
+    id() const override
+    {
+        return "";
+    }
+
+    uint256
+    key() const override
+    {
+        return uint256{0};
+    }
+
+    static std::optional<AMMOffer<TIn, TOut>>
+    makeOffer(
+        ReadView const& view,
+        Issue const& in,
+        Issue const& out,
+        beast::Journal j);
+
+private:
     /** Updates TOffer taketGets/takerPays
      */
     void
@@ -135,20 +141,26 @@ private:
 };
 
 template <typename TIn, typename TOut>
-SLE::pointer
-AMMOffer<TIn, TOut>::makeTOfferSLE(
-    AccountID const& ammAccountID,
-    STAmount const& assetIn,
-    STAmount const& assetOut)
+std::optional<AMMOffer<TIn, TOut>>
+AMMOffer<TIn, TOut>::makeOffer(
+    ReadView const& view,
+    Issue const& in,
+    Issue const& out,
+    beast::Journal j)
 {
-    std::uint32_t const seq = 1;
-    auto const offer_index = keylet::offer(ammAccountID, seq);
-    auto offerSLE = std::make_shared<SLE>(offer_index);
-    offerSLE->setAccountID(sfAccount, ammAccountID);
-    offerSLE->setFieldU32(sfSequence, seq);
-    offerSLE->setFieldAmount(sfTakerPays, assetIn);
-    offerSLE->setFieldAmount(sfTakerGets, assetOut);
-    return offerSLE;
+    if (auto const ammSle = view.read(keylet::amm(calcAMMGroupHash(in, out))))
+    {
+        auto const [assetIn, assetOut, _] = getAMMBalances(
+            view, ammSle->getAccountID(sfAMMAccount), std::nullopt, in, out, j);
+        if (assetIn == beast::zero || assetOut == beast::zero)
+        {
+            JLOG(j.fatal()) << "BookStep: failed to get AMM "
+                            << ammSle->getAccountID(sfAMMAccount);
+            Throw<std::runtime_error>("AMM has 0 balance.");
+        }
+        return AMMOffer<TIn, TOut>(view, ammSle, assetIn, assetOut, j);
+    }
+    return std::nullopt;
 }
 
 template <typename T>
@@ -177,21 +189,36 @@ toStr(T const& a)
 
 template <typename TIn, typename TOut>
 AMMOffer<TIn, TOut>::AMMOffer(
+    ReadView const& view,
     std::shared_ptr<const SLE> const& amm,
-    AccountID const& ammAccountID,
     STAmount const& assetIn,
     STAmount const& assetOut,
     beast::Journal const j)
-    : TOffer<TIn, TOut>(
-          AMMOffer::makeTOfferSLE(ammAccountID, assetIn, assetOut),
-          Quality{assetOut, assetIn})
-    , reserves_({toAmount<TIn>(assetIn), toAmount<TOut>(assetOut)})
-    , ammAccountID_(ammAccountID)
+    : TOffer<TIn, TOut>(Quality{}, amm->getAccountID(sfAMMAccount))
+    , reserves_{toAmount<TIn>(assetIn), toAmount<TOut>(assetOut)}
     , tfee_{amm->getFieldU32(sfTradingFee)}
     , j_(j)
 {
-    JLOG(j_.debug()) << "AMMOffer::AMMOffer in " << toStr(reserves_.in) << " "
-                     << toStr(reserves_.out);
+    this->m_quality = Quality{assetOut, assetIn};
+    this->m_amounts = reserves_;
+    this->issIn_ = assetIn.issue();
+    this->issOut_ = assetOut.issue();
+}
+
+template <>
+inline AMMOffer<STAmount, STAmount>::AMMOffer(
+    ReadView const& view,
+    std::shared_ptr<const SLE> const& amm,
+    STAmount const& assetIn,
+    STAmount const& assetOut,
+    beast::Journal const j)
+    : TOffer<>(Quality{}, amm->getAccountID(sfAMMAccount))
+    , reserves_{assetIn, assetOut}
+    , tfee_{amm->getFieldU32(sfTradingFee)}
+    , j_(j)
+{
+    this->m_quality = Quality{assetOut, assetIn};
+    this->m_amounts = reserves_;
 }
 
 template <typename TIn, typename TOut>
@@ -252,8 +279,7 @@ AMMOffer<TIn, TOut>::updateOfferSize(TIn const& in, TOut const& out)
 {
     this->m_amounts.in = in;
     this->m_amounts.out = out;
-    this->m_quality = Quality(in, out);
-    this->setFieldAmounts();
+    this->m_quality = Quality{out, in};
 }
 
 template <typename TIn, typename TOut>
@@ -277,7 +303,7 @@ AMMOffer<TIn, TOut>::consume(
         //     << toStr(this->m_amounts.in) << " " << toStr(this->m_amounts.out)
         //     << std::endl;
         auto const [assetIn, assetOut] = getAMMPoolBalances(
-            view, ammAccountID_, this->issueIn(), this->issueOut(), j_);
+            view, this->m_account, this->issueIn(), this->issueOut(), j_);
         JLOG(j_.debug()) << "AMMOffer::consume reserves in " << assetIn
                          << " out " << assetOut << " offer in "
                          << toStr(this->m_amounts.in) << " out "

@@ -780,6 +780,22 @@ private:
                         -14) &&
                 offers[0].second == XRPAmount{2503116});
         }
+
+        // Offer cross
+        proc(
+            [&](AMM& ammAlice, Env& env) {
+                env.fund(jtx::XRP(30000), bob);
+                fund(env, gw, {bob}, {USD(200)}, false);
+                env(offer(bob, XRP(100), USD(100)));
+                BEAST_EXPECT(
+                    ammAlice.expectBalances(
+                        XRP(10000),
+                        USD(10100),
+                        IOUAmount{1004987562112089, -8}) &&
+                    offersFromJson(readOffers(env, bob)).size() == 0);
+            },
+            std::make_pair(XRP(10100), USD(10000)),
+            IOUAmount{1004987562112089, -8});
     }
 
     void

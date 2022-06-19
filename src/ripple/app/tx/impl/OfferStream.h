@@ -20,7 +20,6 @@
 #ifndef RIPPLE_APP_BOOK_OFFERSTREAM_H_INCLUDED
 #define RIPPLE_APP_BOOK_OFFERSTREAM_H_INCLUDED
 
-#include <ripple/app/tx/impl/AMMOffer.h>
 #include <ripple/app/tx/impl/BookTip.h>
 #include <ripple/app/tx/impl/Offer.h>
 #include <ripple/basics/Log.h>
@@ -76,7 +75,7 @@ protected:
     bool validBook_;
     NetClock::time_point const expire_;
     BookTip tip_;
-    mutable TOffer<TIn, TOut> clobOffer_;
+    OrderBookOffer<TIn, TOut> offer_;
     std::optional<TOut> ownerFunds_;
     StepCounter& counter_;
 
@@ -89,36 +88,6 @@ protected:
     template <class TTakerPays, class TTakerGets>
     bool
     shouldRmSmallIncreasedQOffer() const;
-
-    virtual bool
-    doStep()
-    {
-        return tip_.step(j_);
-    }
-
-    virtual SLE::pointer
-    getEntry() const
-    {
-        return tip_.entry();
-    }
-
-    virtual TOffer<TIn, TOut>&
-    offer() const
-    {
-        return clobOffer_;
-    }
-
-    virtual void
-    resetOffer()
-    {
-        clobOffer_ = TOffer<TIn, TOut>{};
-    }
-
-    virtual void
-    makeOffer()
-    {
-        clobOffer_ = TOffer<TIn, TOut>(tip_.entry(), tip_.quality());
-    }
 
 public:
     TOfferStreamBase(
@@ -138,7 +107,7 @@ public:
     TOffer<TIn, TOut>&
     tip() const
     {
-        return const_cast<TOfferStreamBase*>(this)->offer();
+        return const_cast<TOfferStreamBase*>(this)->offer_;
     }
 
     /** Advance to the next valid offer.
@@ -224,81 +193,6 @@ public:
         return permToRemove_;
     }
 };
-
-/** Provides Liquidity stream. Combines AMM and CLOB offers in the stream.
- *
- */
-template <typename TIn, typename TOut>
-class FlowLiquidityStream : public FlowOfferStream<TIn, TOut>
-{
-private:
-    using StepCounter = typename TOfferStreamBase<TIn, TOut>::StepCounter;
-    using AMMOffer_t =
-        std::optional<std::reference_wrapper<AMMOffer<TIn, TOut>>>;
-    // AMMOffers instantiated in the BookStep
-    AMMOffer_t ammOffer_;
-    AMMOffer_t ammOfferCached_{};  // hack for now
-    TIn const* remainingIn_;
-    TOut const* remainingOut_;
-    bool cachedCLOBOffer_;
-
-public:
-    FlowLiquidityStream(
-        ApplyView& view,
-        ApplyView& cancelView,
-        Book const& book,
-        NetClock::time_point when,
-        StepCounter& counter,
-        AMMOffer_t const& ammOffer,
-        TIn const* remainingIn,
-        TOut const* remainingOut,
-        beast::Journal journal);
-
-    ~FlowLiquidityStream()
-    {
-    }
-
-protected:
-    bool
-    doStep() override;
-    SLE::pointer
-    getEntry() const override
-    {
-        if (ammOffer_)
-            return ammOffer_->get().getEntry();
-        return TOfferStreamBase<TIn, TOut>::getEntry();
-    }
-    TOffer<TIn, TOut>&
-    offer() const override
-    {
-        if (ammOfferCached_)
-            return ammOfferCached_->get();
-        return TOfferStreamBase<TIn, TOut>::offer();
-    }
-    virtual void
-    resetOffer() override
-    {
-        ammOffer_.reset();
-        TOfferStreamBase<TIn, TOut>::resetOffer();
-    }
-    void
-    makeOffer() override
-    {
-        if (ammOffer_)
-        {
-            ammOfferCached_ = ammOffer_;
-            ammOffer_.reset();
-        }
-        else
-        {
-            ammOfferCached_.reset();
-            TOfferStreamBase<TIn, TOut>::makeOffer();
-        }
-    }
-    bool
-    adjustAMMOffer(bool haveCLOBOffer);
-};
-
 }  // namespace ripple
 
 #endif

@@ -46,22 +46,20 @@ public:
 };
 
 template <class TIn = STAmount, class TOut = STAmount>
-class TOffer : private TOfferBase<TIn, TOut>
+class TOffer : protected TOfferBase<TIn, TOut>
 {
 protected:
-    SLE::pointer m_entry;
     Quality m_quality;
     AccountID m_account;
-
     TAmounts<TIn, TOut> m_amounts;
-    void
-    setFieldAmounts();
 
 public:
+    TOffer(Quality const& quality, AccountID const& accountID)
+        : m_quality(quality), m_account(accountID)
+    {
+    }
     TOffer() = default;
     virtual ~TOffer() = default;
-
-    TOffer(SLE::pointer const& entry, Quality quality);
 
     /** Returns the quality of the offer.
         Conceptually, the quality is the ratio of output to input currency.
@@ -95,42 +93,18 @@ public:
     }
 
     /** Returns `true` if no more funds can flow through this offer. */
-    bool
-    fully_consumed() const
-    {
-        if (m_amounts.in <= beast::zero)
-            return true;
-        if (m_amounts.out <= beast::zero)
-            return true;
-        return false;
-    }
+    virtual bool
+    fully_consumed() const = 0;
 
     /** Adjusts the offer to indicate that we consumed some (or all) of it. */
     virtual void
-    consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed)
-    {
-        if (consumed.in > m_amounts.in)
-            Throw<std::logic_error>("can't consume more than is available.");
+    consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed) = 0;
 
-        if (consumed.out > m_amounts.out)
-            Throw<std::logic_error>("can't produce more than is available.");
+    virtual std::string
+    id() const = 0;
 
-        m_amounts -= consumed;
-        setFieldAmounts();
-        view.update(m_entry);
-    }
-
-    std::string
-    id() const
-    {
-        return to_string(m_entry->key());
-    }
-
-    uint256
-    key() const
-    {
-        return m_entry->key();
-    }
+    virtual uint256
+    key() const = 0;
 
     Issue
     issueIn() const;
@@ -138,7 +112,62 @@ public:
     issueOut() const;
 
     virtual bool
-    isAMM() const
+    isAMM() const = 0;
+};
+
+template <typename TIn = STAmount, typename TOut = STAmount>
+class OrderBookOffer : public TOffer<TIn, TOut>
+{
+private:
+    SLE::pointer m_entry;
+
+    void
+    setFieldAmounts();
+
+public:
+    OrderBookOffer(SLE::pointer const& entry, Quality quality);
+    OrderBookOffer() = default;
+
+    /** Returns `true` if no more funds can flow through this offer. */
+    bool
+    fully_consumed() const override
+    {
+        if (this->m_amounts.in <= beast::zero)
+            return true;
+        if (this->m_amounts.out <= beast::zero)
+            return true;
+        return false;
+    }
+
+    /** Adjusts the offer to indicate that we consumed some (or all) of it. */
+    void
+    consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed) override
+    {
+        if (consumed.in > this->m_amounts.in)
+            Throw<std::logic_error>("can't consume more than is available.");
+
+        if (consumed.out > this->m_amounts.out)
+            Throw<std::logic_error>("can't produce more than is available.");
+
+        this->m_amounts -= consumed;
+        setFieldAmounts();
+        view.update(m_entry);
+    }
+
+    std::string
+    id() const override
+    {
+        return to_string(m_entry->key());
+    }
+
+    uint256
+    key() const override
+    {
+        return m_entry->key();
+    }
+
+    bool
+    isAMM() const override
     {
         return false;
     }
@@ -147,35 +176,33 @@ public:
 using Offer = TOffer<>;
 
 template <class TIn, class TOut>
-TOffer<TIn, TOut>::TOffer(SLE::pointer const& entry, Quality quality)
-    : m_entry(entry)
-    , m_quality(quality)
-    , m_account(m_entry->getAccountID(sfAccount))
+OrderBookOffer<TIn, TOut>::OrderBookOffer(
+    SLE::pointer const& entry,
+    Quality quality)
+    : TOffer<TIn, TOut>(quality, entry->getAccountID(sfAccount)), m_entry(entry)
 {
     auto const tp = m_entry->getFieldAmount(sfTakerPays);
     auto const tg = m_entry->getFieldAmount(sfTakerGets);
-    m_amounts.in = toAmount<TIn>(tp);
-    m_amounts.out = toAmount<TOut>(tg);
+    this->m_amounts.in = toAmount<TIn>(tp);
+    this->m_amounts.out = toAmount<TOut>(tg);
     this->issIn_ = tp.issue();
     this->issOut_ = tg.issue();
 }
 
 template <>
-inline TOffer<STAmount, STAmount>::TOffer(
+inline OrderBookOffer<STAmount, STAmount>::OrderBookOffer(
     SLE::pointer const& entry,
     Quality quality)
-    : m_entry(entry)
-    , m_quality(quality)
-    , m_account(m_entry->getAccountID(sfAccount))
-    , m_amounts(
-          m_entry->getFieldAmount(sfTakerPays),
-          m_entry->getFieldAmount(sfTakerGets))
+    : TOffer<>(quality, entry->getAccountID(sfAccount)), m_entry(entry)
 {
+    this->m_amounts = {
+        m_entry->getFieldAmount(sfTakerPays),
+        m_entry->getFieldAmount(sfTakerGets)};
 }
 
 template <class TIn, class TOut>
 void
-TOffer<TIn, TOut>::setFieldAmounts()
+OrderBookOffer<TIn, TOut>::setFieldAmounts()
 {
 #ifdef _MSC_VER
     assert(0);
@@ -186,7 +213,7 @@ TOffer<TIn, TOut>::setFieldAmounts()
 
 template <>
 inline void
-TOffer<STAmount, STAmount>::setFieldAmounts()
+OrderBookOffer<STAmount, STAmount>::setFieldAmounts()
 {
     m_entry->setFieldAmount(sfTakerPays, m_amounts.in);
     m_entry->setFieldAmount(sfTakerGets, m_amounts.out);
@@ -194,26 +221,30 @@ TOffer<STAmount, STAmount>::setFieldAmounts()
 
 template <>
 inline void
-TOffer<IOUAmount, IOUAmount>::setFieldAmounts()
+OrderBookOffer<IOUAmount, IOUAmount>::setFieldAmounts()
 {
-    m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in, issIn_));
-    m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, issOut_));
+    m_entry->setFieldAmount(
+        sfTakerPays, toSTAmount(m_amounts.in, this->issIn_));
+    m_entry->setFieldAmount(
+        sfTakerGets, toSTAmount(m_amounts.out, this->issOut_));
 }
 
 template <>
 inline void
-TOffer<IOUAmount, XRPAmount>::setFieldAmounts()
+OrderBookOffer<IOUAmount, XRPAmount>::setFieldAmounts()
 {
-    m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in, issIn_));
+    m_entry->setFieldAmount(
+        sfTakerPays, toSTAmount(m_amounts.in, this->issIn_));
     m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out));
 }
 
 template <>
 inline void
-TOffer<XRPAmount, IOUAmount>::setFieldAmounts()
+OrderBookOffer<XRPAmount, IOUAmount>::setFieldAmounts()
 {
     m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in));
-    m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, issOut_));
+    m_entry->setFieldAmount(
+        sfTakerGets, toSTAmount(m_amounts.out, this->issOut_));
 }
 
 template <class TIn, class TOut>

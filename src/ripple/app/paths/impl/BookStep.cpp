@@ -21,8 +21,7 @@
 #include <ripple/app/paths/Credit.h>
 #include <ripple/app/paths/impl/FlatSets.h>
 #include <ripple/app/paths/impl/Steps.h>
-#include <ripple/app/tx/impl/AMMOffer.h>
-#include <ripple/app/tx/impl/OfferStream.h>
+#include <ripple/app/tx/impl/LiquidityStream.h>
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/Log.h>
 #include <ripple/basics/XRPAmount.h>
@@ -98,20 +97,7 @@ public:
         , ammOfferGen_(ctx.ammOfferGen)
         , j_(ctx.j)
     {
-        if (auto const amm =
-                ctx.view.read(keylet::amm(calcAMMGroupHash(in, out))))
-        {
-            auto const ammAccountID = amm->getAccountID(sfAMMAccount);
-            auto const [assetIn, assetOut, _] = getAMMBalances(
-                ctx.view, ammAccountID, std::nullopt, in, out, ctx.j);
-            (void)_;
-            if (assetIn == beast::zero || assetOut == beast::zero)
-                JLOG(j_.fatal())
-                    << "BookStep: failed to get AMM " << ammAccountID;
-            else
-                ammOffer_ = AMMOffer<TIn, TOut>(
-                    amm, ammAccountID, assetIn, assetOut, ctx.j);
-        }
+        ammOffer_ = AMMOffer<TIn, TOut>::makeOffer(ctx.view, in, out, j_);
     }
 
     Book const&
@@ -271,7 +257,7 @@ public:
         AccountID const&,
         TOffer<TIn, TOut> const& offer,
         std::optional<Quality>&,
-        FlowLiquidityStream<TIn, TOut>&,
+        FlowOfferStream<TIn, TOut>&,
         bool) const
     {
         return false;
@@ -376,7 +362,7 @@ public:
         AccountID const& strandDst,
         TOffer<TIn, TOut> const& offer,
         std::optional<Quality>& ofrQ,
-        FlowLiquidityStream<TIn, TOut>& offers,
+        FlowOfferStream<TIn, TOut>& offers,
         bool const offerAttempted) const
     {
         // This method supports some correct but slightly surprising
@@ -658,8 +644,14 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         else if (*ofrQ != offer.quality())
             break;
 
-        if (static_cast<TDerived const*>(this)->limitSelfCrossQuality(
-                strandSrc_, strandDst_, offer, ofrQ, offers, offerAttempted))
+        if (!offer.isAMM() &&
+            static_cast<TDerived const*>(this)->limitSelfCrossQuality(
+                strandSrc_,
+                strandDst_,
+                offer,
+                ofrQ,
+                offers.offerStream(),
+                offerAttempted))
             continue;
 
         // Make sure offer owner has authorization to own IOUs from issuer.
@@ -683,7 +675,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 {
                     // Offer owner not authorized to hold IOU from issuer.
                     // Remove this offer even if no crossing occurs.
-                    offers.permRmOffer(offer.key());
+                    // TODO have to handle for AMM
+                    offers.offerStream().permRmOffer(offer.key());
                     if (!offerAttempted)
                         // Change quality only if no previous offers were tried.
                         ofrQ = std::nullopt;
@@ -732,7 +725,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
             break;
     }
 
-    return {offers.permToRemove(), counter.count()};
+    return {offers.offerStream().permToRemove(), counter.count()};
 }
 
 template <class TIn, class TOut, class TDerived>
