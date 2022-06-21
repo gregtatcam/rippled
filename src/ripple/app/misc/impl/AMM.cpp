@@ -88,7 +88,7 @@ getAMMPoolFullBalances(
                  !isFrozen(view, ammAccountID, issue.currency, issue.account))
         {
             auto amount = sle->getFieldAmount(sfBalance);
-            if (ammAccountID > issue.account)
+            if (amount.negative())
                 amount.negate();
             amount.setIssuer(issue.account);
             return amount;
