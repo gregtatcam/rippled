@@ -16,12 +16,13 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 //==============================================================================
-#ifndef RIPPLE_TX_AMMOFFER_H_INCLUDED
-#define RIPPLE_TX_AMMOFFER_H_INCLUDED
+#ifndef RIPPLE_APP_TX_AMMOFFER_H_INCLUDED
+#define RIPPLE_APP_TX_AMMOFFER_H_INCLUDED
 
 #include <ripple/app/misc/AMM.h>
 #include <ripple/app/misc/AMM_formulae.h>
 #include <ripple/app/paths/impl/AMMOfferGen.h>
+#include <ripple/app/tx/impl/AMMPool.h>
 #include <ripple/app/tx/impl/Offer.h>
 #include <ripple/basics/Log.h>
 
@@ -83,15 +84,6 @@ public:
     bool
     changeQuality(Quality const& quality);
 
-    /** Update pool reserves and set the offer size
-     * to the reserves. This changes the offer quality
-     * to the best theoretical quality. This method
-     * must be only called when the best quality
-     * Strand is applied.
-     */
-    void
-    updateReserves(ReadView const& view);
-
     bool
     isAMM() const override
     {
@@ -148,18 +140,10 @@ AMMOffer<TIn, TOut>::makeOffer(
     Issue const& out,
     beast::Journal j)
 {
-    if (auto const ammSle = view.read(keylet::amm(calcAMMGroupHash(in, out))))
-    {
-        auto const [assetIn, assetOut, _] = getAMMBalances(
-            view, ammSle->getAccountID(sfAMMAccount), std::nullopt, in, out, j);
-        if (assetIn == beast::zero || assetOut == beast::zero)
-        {
-            JLOG(j.fatal()) << "BookStep: failed to get AMM "
-                            << ammSle->getAccountID(sfAMMAccount);
-            Throw<std::runtime_error>("AMM has 0 balance.");
-        }
-        return AMMOffer<TIn, TOut>(view, ammSle, assetIn, assetOut, j);
-    }
+    AMMPool<TIn, TOut> pool(view, in, out, j);
+    if (pool)
+        return AMMOffer<TIn, TOut>(
+            view, pool.entry(), pool.balances()->in, pool.balances()->out, j);
     return std::nullopt;
 }
 
@@ -264,17 +248,6 @@ AMMOffer<TIn, TOut>::changeQuality(Quality const& quality)
 
 template <typename TIn, typename TOut>
 void
-AMMOffer<TIn, TOut>::updateReserves(ReadView const& view)
-{
-    reserves_.in += this->m_amounts.in;
-    reserves_.out -= this->m_amounts.out;
-    JLOG(j_.debug()) << "updateReserves one path in " << toStr(reserves_.in)
-                     << " out " << toStr(reserves_.out);
-    updateOfferSize(reserves_.in, reserves_.out);
-}
-
-template <typename TIn, typename TOut>
-void
 AMMOffer<TIn, TOut>::updateOfferSize(TIn const& in, TOut const& out)
 {
     this->m_amounts.in = in;
@@ -313,4 +286,4 @@ AMMOffer<TIn, TOut>::consume(
 
 }  // namespace ripple
 
-#endif  // RIPPLE_TX_AMMOFFER_H_INCLUDED
+#endif  // RIPPLE_APP_TX_AMMOFFER_H_INCLUDED

@@ -69,6 +69,37 @@ getAMMPoolBalances(
     return std::make_pair(assetInBalance, assetOutBalance);
 }
 
+std::pair<STAmount, STAmount>
+getAMMPoolFullBalances(
+    ReadView const& view,
+    AccountID const& ammAccountID,
+    Issue const& in,
+    Issue const& out,
+    beast::Journal const j)
+{
+    auto funds = [&](Issue const& issue) {
+        if (isXRP(issue))
+        {
+            if (auto const sle = view.read(keylet::account(ammAccountID)))
+                return sle->getFieldAmount(sfBalance);
+        }
+        else if (auto const sle = view.read(
+                     keylet::line(ammAccountID, issue.account, issue.currency));
+                 !isFrozen(view, ammAccountID, issue.currency, issue.account))
+        {
+            auto amount = sle->getFieldAmount(sfBalance);
+            if (ammAccountID > issue.account)
+                amount.negate();
+            amount.setIssuer(issue.account);
+            return amount;
+        }
+
+        return STAmount{};
+    };
+
+    return std::make_pair(funds(in), funds(out));
+}
+
 template <typename F>
 void
 forEeachAMMTrustLine(ReadView const& view, AccountID const& ammAccountID, F&& f)
@@ -200,13 +231,10 @@ getAMMSle(ReadView const& view, uint256 ammHash)
     return sle;
 }
 
-std::uint8_t
-orderWeight(std::uint8_t weight, Issue const& issue1, Issue const& issue2)
+std::shared_ptr<STLedgerEntry const>
+getAMMSle(ReadView const& view, Issue const& issue1, Issue const& issue2)
 {
-    if (issue1 < issue2)
-        return weight;
-    else
-        return 100 - weight;
+    return getAMMSle(view, calcAMMGroupHash(issue1, issue2));
 }
 
 bool

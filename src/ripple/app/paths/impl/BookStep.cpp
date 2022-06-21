@@ -21,6 +21,7 @@
 #include <ripple/app/paths/Credit.h>
 #include <ripple/app/paths/impl/FlatSets.h>
 #include <ripple/app/paths/impl/Steps.h>
+#include <ripple/app/tx/impl/AMMPool.h>
 #include <ripple/app/tx/impl/LiquidityStream.h>
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/Log.h>
@@ -60,8 +61,6 @@ protected:
         be partially consumed multiple times during a payment.
     */
     std::uint32_t offersUsed_ = 0;
-    // AMM offer for the given Book
-    mutable std::optional<AMMOffer<TIn, TOut>> ammOffer_;
     AMMOfferGen& ammOfferGen_;
     beast::Journal const j_;
 
@@ -93,11 +92,9 @@ public:
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
-        , ammOffer_(std::nullopt)
         , ammOfferGen_(ctx.ammOfferGen)
         , j_(ctx.j)
     {
-        ammOffer_ = AMMOffer<TIn, TOut>::makeOffer(ctx.view, in, out, j_);
     }
 
     Book const&
@@ -168,15 +165,6 @@ public:
     inactive() const override
     {
         return inactive_;
-    }
-
-    /* Update the pool reserves once the best quality Strand is applied.
-     */
-    void
-    applied(ReadView const& view) override
-    {
-        if (ammOffer_)
-            ammOffer_->updateReserves(view);
     }
 
 protected:
@@ -496,28 +484,29 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
     DebtDirection prevStepDir) const
 {
     auto const dir = this->debtDirection(v, StrandDirection::forward);
+    auto const ammPool = AMMPool<TIn, TOut>(v, book_.in, book_.out, j_);
 
     // This can be simplified (and sped up) if directories are never empty.
     Sandbox sb(&v, tapNONE);
     BookTip bt(sb, book_);
     auto const btStep = bt.step(j_);
-    if (!btStep && !ammOffer_)
+    if (!btStep && !ammPool)
         return {std::nullopt, dir};
     auto const quality = [&] {
-        if (ammOffer_ && btStep)
+        if (ammPool && btStep)
         {
             // AMM quality is the best theoretical quality
             // with the given reserves. Note, that once
             // the AMM offer size changes, the quality
             // gets smaller. This doesn't matter since
             // all AMM Strands are executed anyways.
-            if (ammOffer_->quality() > bt.quality())
-                return ammOffer_->quality();
+            if (*ammPool.spotPriceQuality() > bt.quality())
+                return *ammPool.spotPriceQuality();
             else
                 return bt.quality();
         }
-        else if (ammOffer_)
-            return ammOffer_->quality();
+        else if (ammPool)
+            return *ammPool.spotPriceQuality();
         else
             return bt.quality();
     }();
@@ -611,13 +600,6 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 
     typename FlowOfferStream<TIn, TOut>::StepCounter counter(
         maxOffersToConsume_, j_);
-    auto ammOffer =
-        [&]() -> std::optional<std::reference_wrapper<AMMOffer<TIn, TOut>>> {
-        if (ammOfferGen_.useAMM() && ammOffer_.has_value())
-            return std::ref(
-                const_cast<AMMOffer<TIn, TOut>&>(ammOffer_.value()));
-        return std::nullopt;
-    }();
 
     FlowLiquidityStream<TIn, TOut> offers(
         sb,
@@ -625,7 +607,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         book_,
         sb.parentCloseTime(),
         counter,
-        ammOffer,
+        ammOfferGen_.useAMM(),
         remainingIn,
         remainingOut,
         j_);

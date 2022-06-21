@@ -713,8 +713,6 @@ flow(
                             << " remainingOut: " << to_string(remainingOut);
 
             best->sb.apply(sb);
-            for (auto const& step : best->strand)
-                step->applied(sb);
         }
         else
         {

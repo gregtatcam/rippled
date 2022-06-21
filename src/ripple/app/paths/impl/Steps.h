@@ -285,12 +285,6 @@ public:
         return stream;
     }
 
-    /** Step was applied to the PaymentSandbox */
-    virtual void
-    applied(ReadView const&)
-    {
-    }
-
 private:
     virtual std::string
     logString() const = 0;

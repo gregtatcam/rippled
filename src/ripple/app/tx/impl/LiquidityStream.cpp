@@ -71,12 +71,15 @@ FlowLiquidityStream<TIn, TOut>::FlowLiquidityStream(
     Book const& book,
     NetClock::time_point when,
     StepCounter& counter,
-    AMMOffer_t const& ammOffer,
+    bool useAMMLiquidity,
     TIn const* remainingIn,
     TOut const* remainingOut,
     beast::Journal journal)
     : offerStream_(view, cancelView, book, when, counter, journal)
-    , ammOffer_(ammOffer)
+    , ammOffer_(
+          useAMMLiquidity
+              ? AMMOffer<TIn, TOut>::makeOffer(view, book.in, book.out, journal)
+              : std::nullopt)
     , view_(view)
     , j_(journal)
     , cachedOBOffer_(false)
@@ -103,37 +106,33 @@ FlowLiquidityStream<TIn, TOut>::step()
     {
         if (cachedOBOffer_)
         {
-            if (ammOffer_->get().changeQuality(offerStream_.tip().quality()))
+            if (ammOffer_->changeQuality(offerStream_.tip().quality()))
             {
-                if (remainingOut_ &&
-                    ammOffer_->get().amount().out > *remainingOut_)
-                    ammOffer_->get().updateTakerGets(*remainingOut_);
-                else if (
-                    remainingIn_ &&
-                    ammOffer_->get().amount().in > *remainingIn_)
-                    ammOffer_->get().updateTakerPays(*remainingIn_);
+                if (remainingOut_ && ammOffer_->amount().out > *remainingOut_)
+                    ammOffer_->updateTakerGets(*remainingOut_);
+                else if (remainingIn_ && ammOffer_->amount().in > *remainingIn_)
+                    ammOffer_->updateTakerPays(*remainingIn_);
                 useAMMOffer_ = true;
             }
         }
         else
         {
             if (remainingOut_)
-                ammOffer_->get().updateTakerGets(*remainingOut_);
+                ammOffer_->updateTakerGets(*remainingOut_);
             else if (remainingIn_)
-                ammOffer_->get().updateTakerPays(*remainingIn_);
+                ammOffer_->updateTakerPays(*remainingIn_);
             useAMMOffer_ = true;
         }
     }
 
     if (useAMMOffer_)
     {
-        auto const& ammOffer = ammOffer_.value().get();
-        auto const amount(ammOffer.amount());
+        auto const amount(ammOffer_->amount());
         ownerFunds_ = accountFundsHelper(
             view_,
-            ammOffer.owner(),
+            ammOffer_->owner(),
             amount.out,
-            ammOffer.issueOut(),
+            ammOffer_->issueOut(),
             fhZERO_IF_FROZEN,
             j_);
     }
@@ -153,7 +152,7 @@ FlowLiquidityStream<TIn, TOut>::tip() const
     {
         if (!ammOffer_.has_value())
             Throw<std::logic_error>("Offer is not available.");
-        return ammOffer_.value().get();
+        return const_cast<FlowLiquidityStream*>(this)->ammOffer_.value();
     }
     return offerStream_.tip();
 }

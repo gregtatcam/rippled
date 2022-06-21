@@ -17,8 +17,8 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_APP_LIQUIDITYSTREAM_H_INCLUDED
-#define RIPPLE_APP_LIQUIDITYSTREAM_H_INCLUDED
+#ifndef RIPPLE_APP_TX_LIQUIDITYSTREAM_H_INCLUDED
+#define RIPPLE_APP_TX_LIQUIDITYSTREAM_H_INCLUDED
 
 #include <ripple/app/tx/impl/AMMOffer.h>
 #include <ripple/app/tx/impl/OfferStream.h>
@@ -33,10 +33,8 @@ class FlowLiquidityStream
 {
 private:
     FlowOfferStream<TIn, TOut> offerStream_;
-    using AMMOffer_t =
-        std::optional<std::reference_wrapper<AMMOffer<TIn, TOut>>>;
     using StepCounter = typename TOfferStreamBase<TIn, TOut>::StepCounter;
-    AMMOffer_t ammOffer_;
+    std::optional<AMMOffer<TIn, TOut>> ammOffer_;
     ApplyView& view_;
     beast::Journal const j_;
     bool cachedOBOffer_;
@@ -52,7 +50,7 @@ public:
         Book const& book,
         NetClock::time_point when,
         StepCounter& counter,
-        AMMOffer_t const& ammOffer,
+        bool useAMMLiquidity,
         TIn const* remainingIn,
         TOut const* remainingOut,
         beast::Journal journal);
@@ -96,4 +94,4 @@ public:
 
 }  // namespace ripple
 
-#endif  // RIPPLE_APP_LIQUIDITYSTREAM_H_INCLUDED
+#endif  // RIPPLE_APP_TX_LIQUIDITYSTREAM_H_INCLUDED

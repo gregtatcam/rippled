@@ -781,7 +781,7 @@ private:
                 offers[0].second == XRPAmount{2503116});
         }
 
-        // Offer cross
+        // Offer crossing
         proc(
             [&](AMM& ammAlice, Env& env) {
                 env.fund(jtx::XRP(30000), bob);

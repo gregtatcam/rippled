@@ -78,13 +78,24 @@ getAMMPoolBalances(
     Issue const& out,
     beast::Journal const j);
 
+/** Get AMM pool balances including the assets acquired during payment.
+ */
+std::pair<STAmount, STAmount>
+getAMMPoolFullBalances(
+    ReadView const& view,
+    AccountID const& ammAccountID,
+    Issue const& in,
+    Issue const& out,
+    beast::Journal const j);
+
 /** Get AMM pool and LPT balances.
  * If issue1 is set then return reserves
  * in the order issue1 first. If in addition
  * issue2 is set then validate it matches
  * the issue of the second asset. This
- * method is needed for AMMTrade functionality
- * when trade options don't include both issues.
+ * method is needed for AMMDeposit/AMMWithdraw
+ * functionality when the trade options either
+ * include none of the issue or one.
  */
 std::tuple<STAmount, STAmount, STAmount>
 getAMMBalances(
@@ -117,21 +128,22 @@ isFrozen(ReadView const& view, std::optional<STAmount> const& a);
 /** Get AMM SLE and verify that the AMM account exists.
  * Return null if SLE not found or AMM account doesn't exist.
  * @param view
+ * @param issue1
+ * @param issue2
+ * @param ammHash
+ * @return
+ */
+std::shared_ptr<STLedgerEntry const>
+getAMMSle(ReadView const& view, Issue const& issue1, Issue const& issue2);
+
+/** Get AMM SLE and verify that the AMM account exists.
+ * Return null if SLE not found or AMM account doesn't exist.
+ * @param view
  * @param ammHash
  * @return
  */
 std::shared_ptr<STLedgerEntry const>
 getAMMSle(ReadView const& view, uint256 ammHash);
-
-/** Return weight:
- * If issue1 < issue2
- *   weight
- * else
- *   100 - weight
- * where weight corresponds to issue1.
- */
-std::uint8_t
-orderWeight(std::uint8_t weight, Issue const& issue1, Issue const& issue2);
 
 /** Check if the account requires authorization.
  *  Return true if issuer's account, account, and trust line exist
