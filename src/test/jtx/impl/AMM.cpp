@@ -357,7 +357,7 @@ AMM::withdraw(
     std::optional<STAmount> const& maxEP,
     std::optional<ter> const& ter)
 {
-    assert(!(asset2Out && limitSP));
+    assert(!(asset2Out && maxEP));
     Json::Value jv;
     asset1Out.setJson(jv[jss::Asset1Out]);
     if (asset2Out)
