@@ -33,37 +33,23 @@ class AMMPool
 {
 private:
     std::shared_ptr<STLedgerEntry const> ammSle_;
-    std::optional<Amounts> pool_;
-    mutable std::optional<Amounts> cached_;
+    Amounts pool_;
+    bool dirty_;
+    beast::Journal const j_;
 
 public:
     AMMPool(
         ReadView const& view,
         Issue const& in,
         Issue const& out,
-        beast::Journal j)
-        : ammSle_{getAMMSle(view, in, out)}, pool_{}
-    {
-        if (ammSle_)
-        {
-            auto const [assetIn, assetOut] = getAMMPoolFullBalances(
-                view, ammSle_->getAccountID(sfAMMAccount), in, out, j);
-            if (assetIn <= beast::zero || assetOut <= beast::zero)
-            {
-                JLOG(j.debug()) << "AMMPool: 0 balances";
-                ammSle_ = nullptr;
-            }
-            else
-                pool_ = Amounts(assetIn, assetOut);
-        }
-    }
+        beast::Journal j);
 
     operator bool() const
     {
         return ammSle_ != nullptr;
     }
 
-    std::optional<Amounts>
+    Amounts
     balances() const
     {
         return pool_;
@@ -79,24 +65,61 @@ public:
     spotPriceQuality() const
     {
         if (ammSle_)
-            return Quality(*pool_);
+            return Quality(pool_);
         return std::nullopt;
     }
 
     void
-    applyCached()
+    setDirty()
     {
-        if (ammSle_ && cached_)
-            pool_ = {pool_->in + cached_->in, pool_->out - cached_->out};
+        dirty_ = true;
     }
 
     void
-    cacheConsumed(STAmount const& in, STAmount const& out) const
-    {
-        if (ammSle_)
-            cached_ = Amounts{in, out};
-    }
+    updatePool(ReadView const& view, bool enable);
 };
+
+template <typename TIn, typename TOut>
+AMMPool<TIn, TOut>::AMMPool(
+    ReadView const& view,
+    Issue const& in,
+    Issue const& out,
+    beast::Journal j)
+    : ammSle_{nullptr}, pool_{STAmount{in}, STAmount{out}}, dirty_(true), j_(j)
+{
+    updatePool(view, true);
+}
+
+template <typename TIn, typename TOut>
+void
+AMMPool<TIn, TOut>::updatePool(ReadView const& view, bool enable)
+{
+    if (!enable)
+        ammSle_ = nullptr;
+    else if (dirty_)
+    {
+        if (!ammSle_)
+            ammSle_ = getAMMSle(view, pool_.in.issue(), pool_.out.issue());
+        if (ammSle_)
+        {
+            auto const [assetIn, assetOut] = getAMMPoolFullBalances(
+                view,
+                ammSle_->getAccountID(sfAMMAccount),
+                pool_.in.issue(),
+                pool_.out.issue(),
+                j_);
+            if (assetIn <= beast::zero || assetOut <= beast::zero)
+            {
+                JLOG(j_.debug()) << "AMMPool: 0 balances";
+                ammSle_ = nullptr;
+            }
+            else
+                pool_ = Amounts(assetIn, assetOut);
+        }
+    }
+
+    dirty_ = false;
+}
 
 }  // namespace ripple
 

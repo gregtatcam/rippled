@@ -50,7 +50,7 @@ public:
         Book const& book,
         NetClock::time_point when,
         StepCounter& counter,
-        AMMPool<TIn, TOut> const* ammPool,
+        AMMPool<TIn, TOut>& ammPool,
         TIn const* remainingIn,
         TOut const* remainingOut,
         beast::Journal journal);

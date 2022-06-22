@@ -47,22 +47,20 @@ namespace ripple {
 template <typename TIn = STAmount, typename TOut = STAmount>
 class AMMOffer : public TOffer<TIn, TOut>
 {
-    TAmounts<TIn, TOut> reserves_;  // AMM current pool reserves
-    std::uint32_t tfee_;            // AMM trading fee
+    AMMPool<TIn, TOut>& pool_;
+    std::uint32_t tfee_;  // AMM trading fee
     beast::Journal j_;
 
 public:
     AMMOffer(
         ReadView const& view,
-        std::shared_ptr<const SLE> const& amm,
-        STAmount const& assetIn,
-        STAmount const& assetOut,
+        AMMPool<TIn, TOut>& pool,
         beast::Journal const j);
 
     AMMOffer&
     operator=(AMMOffer const& offer)
     {
-        reserves_ = offer.reserves_;
+        pool_ = offer.pool_;
         tfee_ = offer.tfee_;
         j_ = offer.j_;
         return *this;
@@ -118,31 +116,12 @@ public:
         return uint256{0};
     }
 
-    static std::optional<AMMOffer<TIn, TOut>>
-    makeOffer(
-        ReadView const& view,
-        AMMPool<TIn, TOut> const& ammPool,
-        beast::Journal j);
-
 private:
     /** Updates TOffer taketGets/takerPays
      */
     void
     updateOfferSize(TIn const& in, TOut const& out);
 };
-
-template <typename TIn, typename TOut>
-std::optional<AMMOffer<TIn, TOut>>
-AMMOffer<TIn, TOut>::makeOffer(
-    ReadView const& view,
-    AMMPool<TIn, TOut> const& pool,
-    beast::Journal j)
-{
-    if (pool)
-        return AMMOffer<TIn, TOut>(
-            view, pool.entry(), pool.balances()->in, pool.balances()->out, j);
-    return std::nullopt;
-}
 
 template <typename T>
 T
@@ -171,35 +150,43 @@ toStr(T const& a)
 template <typename TIn, typename TOut>
 AMMOffer<TIn, TOut>::AMMOffer(
     ReadView const& view,
-    std::shared_ptr<const SLE> const& amm,
-    STAmount const& assetIn,
-    STAmount const& assetOut,
+    AMMPool<TIn, TOut>& pool,
     beast::Journal const j)
-    : TOffer<TIn, TOut>(Quality{}, amm->getAccountID(sfAMMAccount))
-    , reserves_{toAmount<TIn>(assetIn), toAmount<TOut>(assetOut)}
-    , tfee_{amm->getFieldU32(sfTradingFee)}
+    : TOffer<TIn, TOut>(Quality{}, pool.entry()->getAccountID(sfAMMAccount))
+    , pool_(pool)
+    , tfee_{pool.entry()->getFieldU32(sfTradingFee)}
     , j_(j)
 {
-    this->m_quality = Quality{assetOut, assetIn};
-    this->m_amounts = reserves_;
-    this->issIn_ = assetIn.issue();
-    this->issOut_ = assetOut.issue();
+    pool_.updatePool(view, true);
+    this->m_quality = Quality{pool_.balances()};
+    this->m_amounts = {
+        get<TIn>(pool_.balances().in), get<TOut>(pool_.balances().out)};
+    this->issIn_ = pool_.balances().in.issue();
+    this->issOut_ = pool_.balances().out.issue();
 }
 
 template <>
 inline AMMOffer<STAmount, STAmount>::AMMOffer(
     ReadView const& view,
-    std::shared_ptr<const SLE> const& amm,
-    STAmount const& assetIn,
-    STAmount const& assetOut,
+    AMMPool<STAmount, STAmount>& pool,
     beast::Journal const j)
-    : TOffer<>(Quality{}, amm->getAccountID(sfAMMAccount))
-    , reserves_{assetIn, assetOut}
-    , tfee_{amm->getFieldU32(sfTradingFee)}
+    : TOffer<>(Quality{}, pool.entry()->getAccountID(sfAMMAccount))
+    , pool_(pool)
+    , tfee_{pool.entry()->getFieldU32(sfTradingFee)}
     , j_(j)
 {
-    this->m_quality = Quality{assetOut, assetIn};
-    this->m_amounts = reserves_;
+    pool_.updatePool(view, true);
+    this->m_quality = Quality{pool_.balances()};
+    this->m_amounts = pool_.balances();
+}
+
+template <typename T>
+STAmount
+toSTAmount(T const& amount, Issue const& issue)
+{
+    if constexpr (std::is_same_v<T, IOUAmount>)
+        return toSTAmount(amount, issue);
+    return amount;
 }
 
 template <typename TIn, typename TOut>
@@ -207,9 +194,9 @@ void
 AMMOffer<TIn, TOut>::updateTakerGets(TOut const& out)
 {
     auto const in = swapAssetOut(
-        toSTAmount(reserves_.out),
-        toSTAmount(reserves_.in),
-        toSTAmount(out),
+        pool_.balances().out,
+        pool_.balances().in,
+        toSTAmount(out, pool_.balances().out.issue()),
         tfee_);
     updateOfferSize(get<TIn>(in), out);
 }
@@ -219,9 +206,9 @@ void
 AMMOffer<TIn, TOut>::updateTakerPays(TIn const& in)
 {
     auto const out = swapAssetIn(
-        toSTAmount(reserves_.in),
-        toSTAmount(reserves_.out),
-        toSTAmount(in),
+        pool_.balances().in,
+        pool_.balances().out,
+        toSTAmount(in, pool_.balances().in.issue()),
         tfee_);
     updateOfferSize(in, get<TOut>(out));
 }
@@ -231,10 +218,7 @@ bool
 AMMOffer<TIn, TOut>::changeQuality(Quality const& quality)
 {
     if (auto const res = changeSpotPriceQuality(
-            toSTAmount(reserves_.in),
-            toSTAmount(reserves_.out),
-            quality,
-            tfee_);
+            pool_.balances().in, pool_.balances().out, quality, tfee_);
         res->first > beast::zero && res->second > beast::zero)
     {
         updateOfferSize(get<TIn>(res->first), get<TOut>(res->second));
@@ -249,7 +233,7 @@ AMMOffer<TIn, TOut>::updateOfferSize(TIn const& in, TOut const& out)
 {
     this->m_amounts.in = in;
     this->m_amounts.out = out;
-    this->m_quality = Quality{out, in};
+    this->m_quality = Quality{this->m_amounts};
 }
 
 template <typename TIn, typename TOut>
@@ -279,6 +263,7 @@ AMMOffer<TIn, TOut>::consume(
                          << toStr(this->m_amounts.in) << " out "
                          << toStr(this->m_amounts.out);
     }
+    pool_.setDirty();
 }
 
 }  // namespace ripple

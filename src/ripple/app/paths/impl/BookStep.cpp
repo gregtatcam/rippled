@@ -61,7 +61,7 @@ protected:
         be partially consumed multiple times during a payment.
     */
     std::uint32_t offersUsed_ = 0;
-    AMMPool<TIn, TOut> ammPool_;
+    mutable AMMPool<TIn, TOut> ammPool_;
     AMMOfferGen& ammOfferGen_;
     beast::Journal const j_;
 
@@ -167,12 +167,6 @@ public:
     inactive() const override
     {
         return inactive_;
-    }
-
-    void
-    applied() override
-    {
-        ammPool_.applyCached();
     }
 
 protected:
@@ -499,6 +493,8 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
     auto const btStep = bt.step(j_);
     if (!btStep && !ammPool_)
         return {std::nullopt, dir};
+    if (ammPool_)
+        ammPool_.updatePool(v, ammOfferGen_.useAMM());
     auto const quality = [&] {
         if (ammPool_ && btStep)
         {
@@ -614,7 +610,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         book_,
         sb.parentCloseTime(),
         counter,
-        ammOfferGen_.useAMM() ? &ammPool_ : nullptr,
+        ammPool_,
         remainingIn,
         remainingOut,
         j_);
@@ -753,8 +749,6 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     }
 
     offer.consume(sb, ofrAmt);
-    ammPool_.cacheConsumed(
-        toSTAmount(ofrAmt.in, book_.in), toSTAmount(ownerGives, book_.out));
 }
 
 template <class TCollection>

@@ -285,11 +285,6 @@ public:
         return stream;
     }
 
-    virtual void
-    applied()
-    {
-    }
-
 private:
     virtual std::string
     logString() const = 0;

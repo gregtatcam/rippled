@@ -71,16 +71,15 @@ FlowLiquidityStream<TIn, TOut>::FlowLiquidityStream(
     Book const& book,
     NetClock::time_point when,
     StepCounter& counter,
-    AMMPool<TIn, TOut> const* ammPool,
+    AMMPool<TIn, TOut>& ammPool,
     TIn const* remainingIn,
     TOut const* remainingOut,
     beast::Journal journal)
     : offerStream_(view, cancelView, book, when, counter, journal)
     , ammOffer_(
-          ammPool != nullptr
-              ? std::optional<AMMOffer<TIn, TOut>>(
-                    AMMOffer<TIn, TOut>::makeOffer(view, *ammPool, journal))
-              : std::nullopt)
+          ammPool ? std::optional<AMMOffer<TIn, TOut>>(
+                        AMMOffer<TIn, TOut>(view, ammPool, journal))
+                  : std::nullopt)
     , view_(view)
     , j_(journal)
     , cachedOBOffer_(false)
