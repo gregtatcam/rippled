@@ -50,14 +50,12 @@ public:
         Book const& book,
         NetClock::time_point when,
         StepCounter& counter,
-        bool useAMMLiquidity,
+        AMMPool<TIn, TOut> const* ammPool,
         TIn const* remainingIn,
         TOut const* remainingOut,
         beast::Journal journal);
 
-    ~FlowLiquidityStream()
-    {
-    }
+    ~FlowLiquidityStream() = default;
 
     /** Advance to the next valid order book or AMM offer.
         This automatically removes:

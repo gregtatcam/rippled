@@ -121,8 +121,7 @@ public:
     static std::optional<AMMOffer<TIn, TOut>>
     makeOffer(
         ReadView const& view,
-        Issue const& in,
-        Issue const& out,
+        AMMPool<TIn, TOut> const& ammPool,
         beast::Journal j);
 
 private:
@@ -136,11 +135,9 @@ template <typename TIn, typename TOut>
 std::optional<AMMOffer<TIn, TOut>>
 AMMOffer<TIn, TOut>::makeOffer(
     ReadView const& view,
-    Issue const& in,
-    Issue const& out,
+    AMMPool<TIn, TOut> const& pool,
     beast::Journal j)
 {
-    AMMPool<TIn, TOut> pool(view, in, out, j);
     if (pool)
         return AMMOffer<TIn, TOut>(
             view, pool.entry(), pool.balances()->in, pool.balances()->out, j);

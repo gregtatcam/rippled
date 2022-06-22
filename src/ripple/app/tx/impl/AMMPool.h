@@ -34,6 +34,7 @@ class AMMPool
 private:
     std::shared_ptr<STLedgerEntry const> ammSle_;
     std::optional<Amounts> pool_;
+    mutable std::optional<Amounts> cached_;
 
 public:
     AMMPool(
@@ -80,6 +81,20 @@ public:
         if (ammSle_)
             return Quality(*pool_);
         return std::nullopt;
+    }
+
+    void
+    applyCached()
+    {
+        if (ammSle_ && cached_)
+            pool_ = {pool_->in + cached_->in, pool_->out - cached_->out};
+    }
+
+    void
+    cacheConsumed(STAmount const& in, STAmount const& out) const
+    {
+        if (ammSle_)
+            cached_ = Amounts{in, out};
     }
 };
 

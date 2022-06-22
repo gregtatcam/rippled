@@ -61,6 +61,7 @@ protected:
         be partially consumed multiple times during a payment.
     */
     std::uint32_t offersUsed_ = 0;
+    AMMPool<TIn, TOut> ammPool_;
     AMMOfferGen& ammOfferGen_;
     beast::Journal const j_;
 
@@ -92,6 +93,7 @@ public:
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
+        , ammPool_(ctx.view, in, out, ctx.j)
         , ammOfferGen_(ctx.ammOfferGen)
         , j_(ctx.j)
     {
@@ -165,6 +167,12 @@ public:
     inactive() const override
     {
         return inactive_;
+    }
+
+    void
+    applied() override
+    {
+        ammPool_.applyCached();
     }
 
 protected:
@@ -484,29 +492,28 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
     DebtDirection prevStepDir) const
 {
     auto const dir = this->debtDirection(v, StrandDirection::forward);
-    auto const ammPool = AMMPool<TIn, TOut>(v, book_.in, book_.out, j_);
 
     // This can be simplified (and sped up) if directories are never empty.
     Sandbox sb(&v, tapNONE);
     BookTip bt(sb, book_);
     auto const btStep = bt.step(j_);
-    if (!btStep && !ammPool)
+    if (!btStep && !ammPool_)
         return {std::nullopt, dir};
     auto const quality = [&] {
-        if (ammPool && btStep)
+        if (ammPool_ && btStep)
         {
             // AMM quality is the best theoretical quality
             // with the given reserves. Note, that once
             // the AMM offer size changes, the quality
             // gets smaller. This doesn't matter since
             // all AMM Strands are executed anyways.
-            if (*ammPool.spotPriceQuality() > bt.quality())
-                return *ammPool.spotPriceQuality();
+            if (*ammPool_.spotPriceQuality() > bt.quality())
+                return *ammPool_.spotPriceQuality();
             else
                 return bt.quality();
         }
-        else if (ammPool)
-            return *ammPool.spotPriceQuality();
+        else if (ammPool_)
+            return *ammPool_.spotPriceQuality();
         else
             return bt.quality();
     }();
@@ -607,7 +614,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         book_,
         sb.parentCloseTime(),
         counter,
-        ammOfferGen_.useAMM(),
+        ammOfferGen_.useAMM() ? &ammPool_ : nullptr,
         remainingIn,
         remainingOut,
         j_);
@@ -746,6 +753,8 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     }
 
     offer.consume(sb, ofrAmt);
+    ammPool_.cacheConsumed(
+        toSTAmount(ofrAmt.in, book_.in), toSTAmount(ownerGives, book_.out));
 }
 
 template <class TCollection>
