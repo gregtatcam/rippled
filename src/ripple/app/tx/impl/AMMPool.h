@@ -49,7 +49,7 @@ public:
         return ammSle_ != nullptr;
     }
 
-    Amounts
+    Amounts const&
     balances() const
     {
         return pool_;
