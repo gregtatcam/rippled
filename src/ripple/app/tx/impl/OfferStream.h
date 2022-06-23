@@ -104,7 +104,7 @@ public:
         Offers are always presented in decreasing quality.
         Only valid if step() returned `true`.
     */
-    TOffer<TIn, TOut>&
+    OrderBookOffer<TIn, TOut>&
     tip() const
     {
         return const_cast<TOfferStreamBase*>(this)->offer_;

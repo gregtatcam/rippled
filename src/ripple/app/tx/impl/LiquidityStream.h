@@ -74,12 +74,6 @@ public:
     TOffer<TIn, TOut>&
     tip() const;
 
-    FlowOfferStream<TIn, TOut>&
-    offerStream()
-    {
-        return offerStream_;
-    }
-
     TOut
     ownerFunds() const
     {
@@ -87,6 +81,20 @@ public:
             return *ownerFunds_;
         else
             return offerStream_.ownerFunds();
+    }
+
+    void
+    permRmOffer(uint256 key)
+    {
+        // TODO, should handle auth case for AMM
+        if (key != uint256{0})
+            offerStream_.permRmOffer(key);
+    }
+
+    boost::container::flat_set<uint256> const&
+    permToRemove() const
+    {
+        return offerStream_.permToRemove();
     }
 };
 

@@ -82,12 +82,6 @@ public:
     bool
     changeQuality(Quality const& quality);
 
-    bool
-    isAMM() const override
-    {
-        return true;
-    }
-
     /** Consume the offer. This method validates that the consumed size
      * is the same as the offer size. The offer size can not be changed
      * at this point since it will change the offer quality. See the class
@@ -102,12 +96,6 @@ public:
     fully_consumed() const override
     {
         return true;
-    }
-
-    std::string
-    id() const override
-    {
-        return "";
     }
 
     uint256

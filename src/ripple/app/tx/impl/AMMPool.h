@@ -61,12 +61,12 @@ public:
         return ammSle_;
     }
 
-    std::optional<Quality>
+    Quality
     spotPriceQuality() const
     {
         if (ammSle_)
             return Quality(pool_);
-        return std::nullopt;
+        return Quality{};
     }
 
     void

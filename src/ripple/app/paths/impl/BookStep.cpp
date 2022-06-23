@@ -247,7 +247,7 @@ public:
         AccountID const&,
         TOffer<TIn, TOut> const& offer,
         std::optional<Quality>&,
-        FlowOfferStream<TIn, TOut>&,
+        FlowLiquidityStream<TIn, TOut>&,
         bool) const
     {
         return false;
@@ -352,7 +352,7 @@ public:
         AccountID const& strandDst,
         TOffer<TIn, TOut> const& offer,
         std::optional<Quality>& ofrQ,
-        FlowOfferStream<TIn, TOut>& offers,
+        FlowLiquidityStream<TIn, TOut>& offers,
         bool const offerAttempted) const
     {
         // This method supports some correct but slightly surprising
@@ -503,13 +503,13 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
             // the AMM offer size changes, the quality
             // gets smaller. This doesn't matter since
             // all AMM Strands are executed anyways.
-            if (*ammPool_.spotPriceQuality() > bt.quality())
-                return *ammPool_.spotPriceQuality();
+            if (ammPool_.spotPriceQuality() > bt.quality())
+                return ammPool_.spotPriceQuality();
             else
                 return bt.quality();
         }
         else if (ammPool_)
-            return *ammPool_.spotPriceQuality();
+            return ammPool_.spotPriceQuality();
         else
             return bt.quality();
     }();
@@ -629,14 +629,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         else if (*ofrQ != offer.quality())
             break;
 
-        if (!offer.isAMM() &&
-            static_cast<TDerived const*>(this)->limitSelfCrossQuality(
-                strandSrc_,
-                strandDst_,
-                offer,
-                ofrQ,
-                offers.offerStream(),
-                offerAttempted))
+        if (static_cast<TDerived const*>(this)->limitSelfCrossQuality(
+                strandSrc_, strandDst_, offer, ofrQ, offers, offerAttempted))
             continue;
 
         // Make sure offer owner has authorization to own IOUs from issuer.
@@ -660,8 +654,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 {
                     // Offer owner not authorized to hold IOU from issuer.
                     // Remove this offer even if no crossing occurs.
-                    // TODO have to handle for AMM
-                    offers.offerStream().permRmOffer(offer.key());
+                    offers.permRmOffer(offer.key());
                     if (!offerAttempted)
                         // Change quality only if no previous offers were tried.
                         ofrQ = std::nullopt;
@@ -710,7 +703,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
             break;
     }
 
-    return {offers.offerStream().permToRemove(), counter.count()};
+    return {offers.permToRemove(), counter.count()};
 }
 
 template <class TIn, class TOut, class TDerived>

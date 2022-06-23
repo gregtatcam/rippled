@@ -100,9 +100,6 @@ public:
     virtual void
     consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed) = 0;
 
-    virtual std::string
-    id() const = 0;
-
     virtual uint256
     key() const = 0;
 
@@ -110,9 +107,6 @@ public:
     issueIn() const;
     Issue
     issueOut() const;
-
-    virtual bool
-    isAMM() const = 0;
 };
 
 template <typename TIn = STAmount, typename TOut = STAmount>
@@ -155,7 +149,7 @@ public:
     }
 
     std::string
-    id() const override
+    id() const
     {
         return to_string(m_entry->key());
     }
@@ -165,15 +159,9 @@ public:
     {
         return m_entry->key();
     }
-
-    bool
-    isAMM() const override
-    {
-        return false;
-    }
 };
 
-using Offer = TOffer<>;
+using Offer = OrderBookOffer<>;
 
 template <class TIn, class TOut>
 OrderBookOffer<TIn, TOut>::OrderBookOffer(
@@ -277,7 +265,7 @@ TOffer<STAmount, STAmount>::issueOut() const
 
 template <class TIn, class TOut>
 inline std::ostream&
-operator<<(std::ostream& os, TOffer<TIn, TOut> const& offer)
+operator<<(std::ostream& os, OrderBookOffer<TIn, TOut> const& offer)
 {
     return os << offer.id();
 }
