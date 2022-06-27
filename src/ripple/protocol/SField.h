@@ -403,6 +403,7 @@ extern SF_UINT32 const sfBurnedNFTokens;
 extern SF_UINT32 const sfHookStateCount;
 extern SF_UINT32 const sfEmitGeneration;
 extern SF_UINT32 const sfFirstNFTokenSequence;
+extern SF_UINT32 const sfVoteWeight;
 
 // 64-bit integers (common)
 extern SF_UINT64 const sfIndexNext;
@@ -567,7 +568,7 @@ extern SField const sfSignerEntry;
 extern SField const sfNFToken;
 extern SField const sfEmitDetails;
 extern SField const sfHook;
-extern SField const sfAMM;
+extern SField const sfVoteEntry;
 
 extern SField const sfSigner;
 extern SField const sfMajority;
@@ -590,7 +591,7 @@ extern SField const sfAffectedNodes;
 extern SField const sfMemos;
 extern SField const sfNFTokens;
 extern SField const sfHooks;
-extern SField const sfAMMs;
+extern SField const sfVoteEntries;
 
 // array of objects (uncommon)
 extern SField const sfMajorities;
