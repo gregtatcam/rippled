@@ -154,6 +154,7 @@ CONSTRUCT_TYPED_SFIELD(sfHookStateCount,        "HookStateCount",       UINT32, 
 CONSTRUCT_TYPED_SFIELD(sfEmitGeneration,        "EmitGeneration",       UINT32,    46);
 // reserve 47 for LockCount(Hooks)
 CONSTRUCT_TYPED_SFIELD(sfVoteWeight,            "VoteWeight",           UINT32,    48);
+CONSTRUCT_TYPED_SFIELD(sfTimeStamp,             "TimeStamp",            UINT32,    49);
 CONSTRUCT_TYPED_SFIELD(sfFirstNFTokenSequence,  "FirstNFTokenSequence", UINT32,    50);
 
 // 64-bit integers (common)
@@ -235,6 +236,8 @@ CONSTRUCT_TYPED_SFIELD(sfSendMax,               "SendMax",              AMOUNT, 
 CONSTRUCT_TYPED_SFIELD(sfDeliverMin,            "DeliverMin",           AMOUNT,    10);
 CONSTRUCT_TYPED_SFIELD(sfAsset1,                "Asset1",               AMOUNT,    11);
 CONSTRUCT_TYPED_SFIELD(sfAsset2,                "Asset2",               AMOUNT,    12);
+CONSTRUCT_TYPED_SFIELD(sfMinSlotPrice,          "MinSlotPrice",         AMOUNT,    13);
+CONSTRUCT_TYPED_SFIELD(sfMaxSlotPrice,          "MaxSlotPrice",         AMOUNT,    14);
 
 // currency amount (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfMinimumOffer,          "MinimumOffer",         AMOUNT,    16);
@@ -245,8 +248,9 @@ CONSTRUCT_TYPED_SFIELD(sfAsset1In,              "Asset1In",             AMOUNT, 
 CONSTRUCT_TYPED_SFIELD(sfAsset2In,              "Asset2In",             AMOUNT,    21);
 CONSTRUCT_TYPED_SFIELD(sfAsset1Out,             "Asset1Out",            AMOUNT,    22);
 CONSTRUCT_TYPED_SFIELD(sfAsset2Out,             "Asset2Out",            AMOUNT,    23);
-CONSTRUCT_TYPED_SFIELD(sfLPTokens,              "LPTokens",             AMOUNT,    28);
-CONSTRUCT_TYPED_SFIELD(sfEPrice,                "EPrice",               AMOUNT,    31);
+CONSTRUCT_TYPED_SFIELD(sfLPTokens,              "LPTokens",             AMOUNT,    24);
+CONSTRUCT_TYPED_SFIELD(sfEPrice,                "EPrice",               AMOUNT,    25);
+CONSTRUCT_TYPED_SFIELD(sfPrice,                 "Price",                AMOUNT,    26);
 
 // Reserve 20 & 21 for Hooks
 
@@ -336,6 +340,8 @@ CONSTRUCT_UNTYPED_SFIELD(sfHookDefinition,      "HookDefinition",       OBJECT, 
 CONSTRUCT_UNTYPED_SFIELD(sfHookParameter,       "HookParameter",        OBJECT,    23);
 CONSTRUCT_UNTYPED_SFIELD(sfHookGrant,           "HookGrant",            OBJECT,    24);
 CONSTRUCT_UNTYPED_SFIELD(sfVoteEntry,           "VoteEntry",            OBJECT,    25);
+CONSTRUCT_UNTYPED_SFIELD(sfAuctionSlot,         "AuctionSlot",          OBJECT,    27);
+CONSTRUCT_UNTYPED_SFIELD(sfAuthAccount,         "AuthAccount",          OBJECT,    28);
 
 // array of objects
 //                                                                            ARRAY/1 is reserved for end of array
@@ -350,6 +356,7 @@ CONSTRUCT_UNTYPED_SFIELD(sfMemos,               "Memos",                ARRAY,  
 CONSTRUCT_UNTYPED_SFIELD(sfNFTokens,            "NFTokens",             ARRAY,     10);
 CONSTRUCT_UNTYPED_SFIELD(sfHooks,               "Hooks",                ARRAY,     11);
 CONSTRUCT_UNTYPED_SFIELD(sfVoteEntries,         "VoteEntries",          ARRAY,     14);
+CONSTRUCT_UNTYPED_SFIELD(sfAuthAccounts,        "AuthAccounts",         ARRAY,     15);
 
 // array of objects (uncommon)
 CONSTRUCT_UNTYPED_SFIELD(sfMajorities,          "Majorities",           ARRAY,     16);
