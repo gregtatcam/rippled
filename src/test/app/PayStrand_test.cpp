@@ -17,6 +17,7 @@
 
 #include <ripple/app/paths/Flow.h>
 #include <ripple/app/paths/RippleCalc.h>
+#include <ripple/app/paths/impl/AMMOfferGen.h>
 #include <ripple/app/paths/impl/Steps.h>
 #include <ripple/basics/contract.h>
 #include <ripple/basics/safe_cast.h>
@@ -657,6 +658,8 @@ struct PayStrand_test : public beast::unit_test::suite
         using B = ripple::Book;
         using XRPS = XRPEndpointStepInfo;
 
+        AMMOfferGen ammOfferGen;
+
         auto test = [&, this](
                         jtx::Env& env,
                         Issue const& deliver,
@@ -674,6 +677,7 @@ struct PayStrand_test : public beast::unit_test::suite
                 path,
                 true,
                 false,
+                ammOfferGen,
                 env.app().logs().journal("Flow"));
             BEAST_EXPECT(ter == expTer);
             if (sizeof...(expSteps) != 0)
@@ -701,6 +705,7 @@ struct PayStrand_test : public beast::unit_test::suite
                     path,
                     true,
                     false,
+                    ammOfferGen,
                     env.app().logs().journal("Flow"));
                 (void)_;
                 BEAST_EXPECT(ter == tesSUCCESS);
@@ -717,6 +722,7 @@ struct PayStrand_test : public beast::unit_test::suite
                     path,
                     true,
                     false,
+                    ammOfferGen,
                     env.app().logs().journal("Flow"));
                 (void)_;
                 BEAST_EXPECT(ter == tesSUCCESS);
@@ -836,6 +842,7 @@ struct PayStrand_test : public beast::unit_test::suite
                         STPath(),
                         true,
                         false,
+                        ammOfferGen,
                         flowJournal);
                     BEAST_EXPECT(r.first == temBAD_PATH);
                 }
@@ -851,6 +858,7 @@ struct PayStrand_test : public beast::unit_test::suite
                         STPath(),
                         true,
                         false,
+                        ammOfferGen,
                         flowJournal);
                     BEAST_EXPECT(r.first == temBAD_PATH);
                 }
@@ -866,6 +874,7 @@ struct PayStrand_test : public beast::unit_test::suite
                         STPath(),
                         true,
                         false,
+                        ammOfferGen,
                         flowJournal);
                     BEAST_EXPECT(r.first == temBAD_PATH);
                 }
@@ -1002,6 +1011,7 @@ struct PayStrand_test : public beast::unit_test::suite
                 STPath(),
                 true,
                 false,
+                ammOfferGen,
                 env.app().logs().journal("Flow"));
             BEAST_EXPECT(ter == tesSUCCESS);
             BEAST_EXPECT(equal(strand, D{alice, gw, usdC}));
@@ -1028,6 +1038,7 @@ struct PayStrand_test : public beast::unit_test::suite
                 path,
                 false,
                 false,
+                ammOfferGen,
                 env.app().logs().journal("Flow"));
             BEAST_EXPECT(ter == tesSUCCESS);
             BEAST_EXPECT(equal(

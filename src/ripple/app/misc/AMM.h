@@ -84,7 +84,7 @@ ammPoolHolds(
 std::tuple<STAmount, STAmount, STAmount>
 ammHolds(
     ReadView const& view,
-    SLE const& ammSle,
+    STLedgerEntry const& ammSle,
     std::optional<Issue> const& optIssue1,
     std::optional<Issue> const& optIssue2,
     beast::Journal const j);
@@ -133,12 +133,12 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
  * accounts.
  */
 std::uint32_t
-getTradingFee(SLE const& ammSle, AccountID const& account);
+getTradingFee(STLedgerEntry const& ammSle, AccountID const& account);
 
 /** Get Issue from sfToken1/sfToken2 fields.
  */
 std::pair<Issue, Issue>
-getTokensIssue(SLE const& ammSle);
+getTokensIssue(STLedgerEntry const& ammSle);
 
 }  // namespace ripple
 

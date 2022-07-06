@@ -37,6 +37,7 @@ class ApplyView;
 enum class DebtDirection { issues, redeems };
 enum class QualityDirection { in, out };
 enum class StrandDirection { forward, reverse };
+class AMMOfferGen;
 
 inline bool
 redeems(DebtDirection dir)
@@ -375,6 +376,7 @@ toStrand(
     STPath const& path,
     bool ownerPaysTransferFee,
     bool offerCrossing,
+    AMMOfferGen& ammOfferGen,
     beast::Journal j);
 
 /**
@@ -413,6 +415,7 @@ toStrands(
     bool addDefaultPath,
     bool ownerPaysTransferFee,
     bool offerCrossing,
+    AMMOfferGen& ammOfferGen,
     beast::Journal j);
 
 /// @cond INTERNAL
@@ -521,6 +524,7 @@ struct StrandContext
         than once
     */
     boost::container::flat_set<Issue>& seenBookOuts;
+    AMMOfferGen& ammOfferGen;
     beast::Journal const j;
 
     /** StrandContext constructor. */
@@ -540,7 +544,8 @@ struct StrandContext
         std::array<boost::container::flat_set<Issue>, 2>&
             seenDirectIssues_,  ///< For detecting currency loops
         boost::container::flat_set<Issue>&
-            seenBookOuts_,   ///< For detecting book loops
+            seenBookOuts_,  ///< For detecting book loops
+        AMMOfferGen& ammOfferGen_,
         beast::Journal j_);  ///< Journal for logging
 };
 

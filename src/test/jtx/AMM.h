@@ -24,6 +24,8 @@
 #include <ripple/protocol/STAmount.h>
 #include <ripple/rpc/GRPCHandlers.h>
 #include <test/jtx/Account.h>
+#include <test/jtx/Env.h>
+#include <test/jtx/ter.h>
 #include <test/rpc/GRPCTestClientBase.h>
 
 namespace ripple {

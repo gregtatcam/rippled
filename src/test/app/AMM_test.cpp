@@ -918,9 +918,9 @@ private:
     }
 
     void
-    testPayment()
+    testInvalidAMMPayment()
     {
-        testcase("Payment");
+        testcase("Invalid AMM Payment");
         using namespace jtx;
 
         // Can't pay into/out of AMM account.
@@ -935,6 +935,126 @@ private:
             env(pay(ammAlice.ammAccount(), carol, USD(10)),
                 ter(tefMASTER_DISABLED));
         });
+    }
+
+    void
+    testPayment()
+    {
+        testcase("Payment");
+        using namespace jtx;
+#if 0
+        // one path XRP/USD
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env(pay(carol, alice, USD(100)),
+                // path(~USD),
+                sendmax(XRP(200)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10101010101},
+                USD(9900),
+                IOUAmount{10000000, 0},
+                alice));
+        });
+        // two paths XRP/USD, AMM is not used
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            fund(env, gw, {bob}, {USD(200), GBP(200)}, Fund::None);
+            env(offer(bob, XRP(90), GBP(100)));
+            env(offer(bob, GBP(100), USD(100)));
+            env(pay(carol, alice, USD(100)),
+                path(~USD),
+                path(~GBP, ~USD),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10000), USD(10000), IOUAmount{10000000, 0}));
+            BEAST_EXPECT(offersFromJson(readOffers(env, bob)).size() == 0);
+        });
+
+        // Multiple AMM with the last limiting step. This results
+        // in a partial payment.
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            fund(env, gw, {bob, carol}, {EUR(20000), GBP(20000)}, Fund::None);
+            env(offer(bob, EUR(45), GBP(30)));
+            AMM ammBob(env, bob, XRP(10000), GBP(7000));
+            env(pay(carol, alice, USD(50)),
+                path(~GBP, ~XRP, ~USD),
+                sendmax(EUR(40)),
+                txflags(
+                    tfPartialPayment |
+                    tfNoRippleDirect));  // force no default path
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10037950664},
+                STAmount{
+                    USD.issue(),
+                    static_cast<std::uint64_t>(996219281677076),
+                    -11},
+                IOUAmount{10000000, 0}));
+            BEAST_EXPECT(ammBob.expectBalances(
+                XRPAmount{9962049336},
+                STAmount{
+                    GBP.issue(),
+                    static_cast<std::uint64_t>(7026666666666666),
+                    -12},
+                IOUAmount{8366600265340755, -9}));
+            auto const res = offersFromJson(readOffers(env, bob));
+            BEAST_EXPECT(
+                res.size() == 1 &&
+                res[0].first ==
+                    STAmount(
+                        GBP.issue(),
+                        static_cast<std::uint64_t>(333333333333333),
+                        -14) &&
+                res[0].second == STAmount(EUR.issue(), 5, 0));
+        });
+#endif
+
+        // Offer and AMM. AMM has a better quality up to around 2.5XRP/2.5USD.
+        // AMM offer is consumed first. Then the offer is partially
+        // consumed.
+        {
+            Env env(*this);
+            fund(env, gw, {alice, carol, bob}, {USD(2000)}, Fund::All);
+            AMM ammAlice(env, alice, XRP(1000), USD(1005));
+            env(offer(bob, XRP(10), USD(10)), txflags(tfPassive));
+            env(pay(carol, alice, USD(10)),
+                sendmax(XRP(10)),
+                txflags(tfPartialPayment));
+            auto const offers = offersFromJson(readOffers(env, bob));
+            // std::cout << ammAlice.ammRpcInfo()->toStyledString();
+            // std::cout << readOffers(env, bob).toStyledString();
+            BEAST_EXPECT(
+                ammAlice.expectBalances(
+                    XRPAmount{1002496882},
+                    STAmount{
+                        USD.issue(),
+                        static_cast<std::uint64_t>(1002496883576343),
+                        -12},
+                    IOUAmount{1002496882788171, -9}) &&
+                offers[0].first ==
+                    STAmount(
+                        USD.issue(),
+                        static_cast<std::uint64_t>(250311642365788),
+                        -14) &&
+                offers[0].second == XRPAmount{2503116});
+        }
+
+        // Offer crossing
+        testAMM(
+            [&](AMM& ammAlice, Env& env) {
+                env.fund(jtx::XRP(30000), bob);
+                fund(env, gw, {bob}, {USD(200)}, Fund::None);
+                env(offer(bob, XRP(100), USD(100)));
+                BEAST_EXPECT(
+                    ammAlice.expectBalances(
+                        XRP(10000),
+                        USD(10100),
+                        IOUAmount{1004987562112089, -8}) &&
+                    offersFromJson(readOffers(env, bob)).size() == 0);
+            },
+            std::make_pair(XRP(10100), USD(10000)),
+            IOUAmount{1004987562112089, -8});
     }
 
     void
@@ -959,6 +1079,7 @@ private:
         testRequireAuth();
         testFeeVote();
         testBid();
+        testInvalidAMMPayment();
         testPayment();
     }
 };
@@ -1066,9 +1187,154 @@ struct AMM_manual_test : public Test
     }
 
     void
+    testPaymentPerf()
+    {
+        testcase("Payment Performance");
+        using namespace jtx;
+        using namespace std::chrono;
+
+        auto constexpr N = 10;
+        auto constexpr Ntests = 8;
+
+        std::array<std::uint64_t, N> t[Ntests];
+        for (int i = 0; i < N; ++i)
+        {
+            std::uint16_t Nt = 0;
+            // one path XRP/USD
+            testAMM([&](AMM& ammAlice, Env& env) {
+                auto const start = high_resolution_clock::now();
+                env(pay(carol, alice, USD(100)),
+                    // path(~USD),
+                    sendmax(XRP(200)),
+                    txflags(tfPartialPayment));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t[Nt++][i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount{10101010101},
+                    USD(9900),
+                    IOUAmount{10000000, 0},
+                    alice));
+            });
+            // one path IOU/IOU
+            testAMM(
+                [&](AMM& ammAlice, Env& env) {
+                    auto const start = high_resolution_clock::now();
+                    env(pay(carol, alice, USD(100)),
+                        path(~USD),
+                        sendmax(EUR(200)),
+                        txflags(tfPartialPayment));
+                    auto const elapsed = high_resolution_clock::now() - start;
+                    t[Nt++][i] =
+                        duration_cast<std::chrono::microseconds>(elapsed)
+                            .count();
+                    BEAST_EXPECT(ammAlice.expectBalances(
+                        STAmount{
+                            EUR.issue(),
+                            static_cast<std::uint64_t>(101010101010101),
+                            -10},
+                        USD(9900),
+                        IOUAmount{10000, 0},
+                        alice));
+                },
+                std::make_pair(USD(10000), EUR(10000)),
+                IOUAmount{10000, 0});
+            // One path with multiple AMM
+            testAMM([&](AMM& ammAlice, Env& env) {
+                env.fund(jtx::XRP(300000), bob);
+                fund(
+                    env,
+                    gw,
+                    {bob},
+                    {USD(30000), EUR(30000), GBP(30000)},
+                    Fund::None);
+                AMM ammEUR_GBP(env, bob, EUR(10000), GBP(10000));
+                AMM ammGBP_XRP(env, bob, GBP(10000), XRP(10000));
+                fund(env, gw, {carol, alice}, {EUR(1000)}, Fund::None);
+                auto const start = high_resolution_clock::now();
+                env(pay(carol, alice, USD(100)),
+                    path(~GBP, ~XRP, ~USD),
+                    sendmax(EUR(100)),
+                    txflags(tfPartialPayment | tfNoRippleDirect));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t[Nt++][i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+                BEAST_EXPECT(ammEUR_GBP.expectBalances(
+                    EUR(10100),
+                    STAmount{
+                        GBP.issue(),
+                        static_cast<std::uint64_t>(990099009900991),
+                        -11},
+                    IOUAmount{10000, 0}));
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount{10098039215},
+                    STAmount{
+                        USD.issue(),
+                        static_cast<std::uint64_t>(990291262203224),
+                        -11},
+                    IOUAmount{10000000, 0}));
+            });
+            {
+                Env env{*this};
+                env.fund(jtx::XRP(30000), alice, carol, gw);
+
+                auto const start = high_resolution_clock::now();
+                env(pay(carol, alice, XRP(100)));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t[Nt++][i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+            }
+            {
+                Env env{*this};
+                env.fund(jtx::XRP(30000), alice, carol, gw);
+                env.trust(USD(30000), alice);
+                env.trust(USD(30000), carol);
+
+                env(pay(gw, alice, USD(10000)));
+                env(pay(gw, carol, USD(10000)));
+
+                auto const start = high_resolution_clock::now();
+                env(pay(carol, alice, USD(100)));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t[Nt++][i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+            }
+            // Two paths, order book offer
+            {
+                Env env{*this};
+                fund(
+                    env,
+                    gw,
+                    {alice, carol, bob},
+                    {USD(200), GBP(200)},
+                    Fund::All);
+                env(offer(alice, XRP(10), GBP(10)));
+                env(offer(alice, GBP(10), USD(1)));
+                env(offer(carol, XRP(100), USD(100)));
+                auto const start = high_resolution_clock::now();
+                env(pay(bob, carol, USD(100)),
+                    path(~USD),
+                    path(~GBP, ~USD),
+                    sendmax(XRP(100)),
+                    txflags(tfPartialPayment));
+                auto const elapsed = high_resolution_clock::now() - start;
+                t[Nt++][i] =
+                    duration_cast<std::chrono::microseconds>(elapsed).count();
+            }
+        }
+        stats(t[0], "AMM XRP/IOU Payment");
+        stats(t[1], "AMM IOU/IOU Payment");
+        stats(t[2], "AMM IOU/IOU one path multiple AMM Payment");
+        stats(t[3], "XRP Payment");
+        stats(t[4], "IOU Payment");
+        stats(t[5], "XRP/IOU Payment, order book");
+    }
+
+    void
     run() override
     {
         testFibonnaciPerf();
+        testPaymentPerf();
     }
 };
 

@@ -18,6 +18,7 @@
 //==============================================================================
 
 #include <ripple/app/paths/Flow.h>
+#include <ripple/app/paths/impl/AMMOfferGen.h>
 #include <ripple/app/paths/impl/Steps.h>
 #include <ripple/app/paths/impl/StrandFlow.h>
 #include <ripple/basics/contract.h>
@@ -245,6 +246,7 @@ class TheoreticalQuality_test : public beast::unit_test::suite
         std::optional<Quality> const& expectedQ = {})
     {
         PaymentSandbox sb(closed.get(), tapNONE);
+        AMMOfferGen ammOfferGen;
 
         auto const sendMaxIssue = [&rcp]() -> std::optional<Issue> {
             if (rcp.sendMax)
@@ -265,6 +267,7 @@ class TheoreticalQuality_test : public beast::unit_test::suite
             /*defaultPaths*/ rcp.paths.empty(),
             sb.rules().enabled(featureOwnerPaysFee),
             /*offerCrossing*/ false,
+            ammOfferGen,
             dummyJ);
 
         BEAST_EXPECT(sr.first == tesSUCCESS);

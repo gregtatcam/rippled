@@ -19,6 +19,7 @@
 
 #include <ripple/app/misc/AMM.h>
 #include <ripple/basics/random.h>
+#include <ripple/protocol/TxFlags.h>
 #include <ripple/protocol/jss.h>
 #include <ripple/rpc/impl/GRPCHelpers.h>
 #include <ripple/rpc/impl/RPCHelpers.h>
