@@ -137,7 +137,6 @@ transResults()
         MAKE_ERROR(telNETWORK_ID_MAKES_TX_NON_CANONICAL, "Transactions submitted to this node/network must NOT include a NetworkID field."),
 
         MAKE_ERROR(temMALFORMED,                 "Malformed transaction."),
-        MAKE_ERROR(temBAD_AMM,                   "Malformed: AMM Instance."),
         MAKE_ERROR(temBAD_AMM_OPTIONS,           "Malformed: Invalid combination of options."),
         MAKE_ERROR(temBAD_AMM_TOKENS,            "Malformed: Invalid LPTokens."),
         MAKE_ERROR(temBAD_AMOUNT,                "Can only send positive amounts."),
