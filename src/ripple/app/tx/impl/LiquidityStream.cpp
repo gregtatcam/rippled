@@ -74,6 +74,7 @@ FlowLiquidityStream<TIn, TOut>::step()
     else if (cachedOBOffer_)
     {
         cachedOBOffer_ = false;
+        ammOffer_.reset();
         return true;
     }
 

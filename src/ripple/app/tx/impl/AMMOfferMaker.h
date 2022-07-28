@@ -270,7 +270,7 @@ AMMOfferMaker<TIn, TOut>::makeOffer(
                 return Amounts{
                     toSTAmount(*remIn, offerAmounts->in.issue()),
                     swapAssetIn(*offerAmounts, *remIn, tradingFee_)};
-            return balances;
+            return offerAmounts;
         }
     }();
 
