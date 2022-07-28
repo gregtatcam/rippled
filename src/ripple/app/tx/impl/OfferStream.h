@@ -75,7 +75,7 @@ protected:
     bool validBook_;
     NetClock::time_point const expire_;
     BookTip tip_;
-    TOffer<TIn, TOut> offer_;
+    OrderBookOffer<TIn, TOut> offer_;
     std::optional<TOut> ownerFunds_;
     StepCounter& counter_;
 
@@ -104,7 +104,7 @@ public:
         Offers are always presented in decreasing quality.
         Only valid if step() returned `true`.
     */
-    TOffer<TIn, TOut>&
+    OrderBookOffer<TIn, TOut>&
     tip() const
     {
         return const_cast<TOfferStreamBase*>(this)->offer_;

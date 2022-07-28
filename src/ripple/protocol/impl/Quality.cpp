@@ -67,6 +67,8 @@ Quality::operator--(int)
 Amounts
 Quality::ceil_in(Amounts const& amount, STAmount const& limit) const
 {
+    std::cout << "ceil_in " << amount.in << " " << amount.out << " " << limit
+              << " " << m_value << std::endl;
     if (amount.in > limit)
     {
         Amounts result(

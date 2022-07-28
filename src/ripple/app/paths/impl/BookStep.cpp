@@ -17,10 +17,12 @@
 */
 //==============================================================================
 
+#include <ripple/app/misc/AMM.h>
 #include <ripple/app/paths/Credit.h>
 #include <ripple/app/paths/impl/FlatSets.h>
 #include <ripple/app/paths/impl/Steps.h>
-#include <ripple/app/tx/impl/OfferStream.h>
+#include <ripple/app/tx/impl/AMMOfferMaker.h>
+#include <ripple/app/tx/impl/LiquidityStream.h>
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/Log.h>
 #include <ripple/basics/XRPAmount.h>
@@ -59,6 +61,8 @@ protected:
         be partially consumed multiple times during a payment.
     */
     std::uint32_t offersUsed_ = 0;
+    std::optional<AMMOfferMaker<TIn, TOut>> ammMaker_;
+    AMMOfferCounter& ammOfferCounter_;
     beast::Journal const j_;
 
     struct Cache
@@ -89,8 +93,19 @@ public:
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
+        , ammMaker_{std::nullopt}
+        , ammOfferCounter_(ctx.ammOfferCounter)
         , j_(ctx.j)
     {
+        if (auto const ammSle = getAMMSle(ctx.view, calcAMMGroupHash(in, out)))
+            ammMaker_.emplace(
+                ctx.view,
+                ammSle->getAccountID(sfAMMAccount),
+                ammSle->getFieldU16(sfTradingFee),
+                in,
+                out,
+                ammOfferCounter_,
+                ctx.j);
     }
 
     Book const&
@@ -203,6 +218,8 @@ private:
         PaymentSandbox& sb,
         ApplyView& afView,
         DebtDirection prevStepDebtDir,
+        TIn const* remainingIn,
+        TOut const* remainingOut,
         Callback& callback) const;
 
     void
@@ -239,7 +256,7 @@ public:
         AccountID const&,
         TOffer<TIn, TOut> const& offer,
         std::optional<Quality>&,
-        FlowOfferStream<TIn, TOut>&,
+        FlowLiquidityStream<TIn, TOut>&,
         bool) const
     {
         return false;
@@ -344,7 +361,7 @@ public:
         AccountID const& strandDst,
         TOffer<TIn, TOut> const& offer,
         std::optional<Quality>& ofrQ,
-        FlowOfferStream<TIn, TOut>& offers,
+        FlowLiquidityStream<TIn, TOut>& offers,
         bool const offerAttempted) const
     {
         // This method supports some correct but slightly surprising
@@ -482,11 +499,33 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
     // This can be simplified (and sped up) if directories are never empty.
     Sandbox sb(&v, tapNONE);
     BookTip bt(sb, book_);
-    if (!bt.step(j_))
+    auto const clobQ =
+        bt.step(j_) ? std::optional<Quality>(bt.quality()) : std::nullopt;
+    auto const ammOffer =
+        ammMaker_.has_value() ? ammMaker_->makeOffer(v, clobQ) : std::nullopt;
+    if (!clobQ && !ammOffer)
         return {std::nullopt, dir};
+    auto const quality = [&] {
+        if (ammOffer && clobQ)
+        {
+            // AMM quality is the best theoretical quality
+            // with the given reserves. Note, that once
+            // the AMM offer size changes, the quality
+            // gets smaller. This doesn't matter since
+            // all AMM Strands are executed anyways.
+            if (ammOffer->quality() > *clobQ)
+                return ammOffer->quality();
+            else
+                return *clobQ;
+        }
+        else if (ammOffer)
+            return ammOffer->quality();
+        else
+            return *clobQ;
+    }();
 
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
-        v, bt.quality(), prevStepDir);
+        v, quality, prevStepDir);
     return {q, dir};
 }
 
@@ -551,6 +590,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
     PaymentSandbox& sb,
     ApplyView& afView,
     DebtDirection prevStepDir,
+    TIn const* remainingIn,
+    TOut const* remainingOut,
     Callback& callback) const
 {
     // Charge the offer owner, not the sender
@@ -573,8 +614,16 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
     typename FlowOfferStream<TIn, TOut>::StepCounter counter(
         maxOffersToConsume_, j_);
 
-    FlowOfferStream<TIn, TOut> offers(
-        sb, afView, book_, sb.parentCloseTime(), counter, j_);
+    FlowLiquidityStream<TIn, TOut> offers(
+        sb,
+        afView,
+        book_,
+        sb.parentCloseTime(),
+        counter,
+        ammMaker_,
+        remainingIn,
+        remainingOut,
+        j_);
 
     bool const flowCross = afView.rules().enabled(featureFlowCross);
     bool offerAttempted = false;
@@ -793,7 +842,8 @@ BookStep<TIn, TOut, TDerived>::revImp(
                 return prevStep_->debtDirection(sb, StrandDirection::reverse);
             return DebtDirection::issues;
         }();
-        auto const r = forEachOffer(sb, afView, prevStepDebtDir, eachOffer);
+        auto const r = forEachOffer(
+            sb, afView, prevStepDebtDir, nullptr, &remainingOut, eachOffer);
         boost::container::flat_set<uint256> toRm = std::move(std::get<0>(r));
         std::uint32_t const offersConsumed = std::get<1>(r);
         offersUsed_ = offersConsumed;
@@ -963,7 +1013,8 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
                 return prevStep_->debtDirection(sb, StrandDirection::forward);
             return DebtDirection::issues;
         }();
-        auto const r = forEachOffer(sb, afView, prevStepDebtDir, eachOffer);
+        auto const r = forEachOffer(
+            sb, afView, prevStepDebtDir, &remainingIn, nullptr, eachOffer);
         boost::container::flat_set<uint256> toRm = std::move(std::get<0>(r));
         std::uint32_t const offersConsumed = std::get<1>(r);
         offersUsed_ = offersConsumed;

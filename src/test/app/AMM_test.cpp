@@ -21,6 +21,7 @@
 #include <boost/regex.hpp>
 #include <test/jtx.h>
 #include <test/jtx/AMM.h>
+#include <test/jtx/sendmax.h>
 
 #include <chrono>
 #include <utility>
@@ -1541,6 +1542,121 @@ private:
     }
 
     void
+    testBasicPayment()
+    {
+        testcase("Basic Payment");
+        using namespace jtx;
+
+        // Partial payment ~99.0099USD for 100XRP.
+        // Force one path with tfNoRippleDirect.
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            env(pay(bob, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment | tfNoRippleDirect));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10100),
+                STAmount(USD, static_cast<std::int64_t>(990099009900991), -11),
+                IOUAmount{10000000, 0}));
+        });
+
+        // Partial payment ~99.0099USD for 100XRP, use default path.
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            env(pay(bob, carol, USD(100)),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10100),
+                STAmount(USD, static_cast<std::int64_t>(990099009900991), -11),
+                IOUAmount{10000000, 0}));
+        });
+
+        // Partial payment 17.50 for ~17.5XRP, use path and default path.
+        // While this payment is basically identical to above, the result
+        // is vastly different due to, perhaps undesirable, one path
+        // optimization in two examples above. This payment is multi-path
+        // and therefore uses Fibonacci sequence for AMM offers, limited
+        // to four iterations, resulting in a smaller payment. Four
+        // offers of takerGets 2.5USD, 2.5USD, 5USD, 7.5USD are generated.
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env.fund(jtx::XRP(30000), bob);
+            env(pay(bob, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount(10017530051),
+                STAmount(USD, 99825, -1),
+                IOUAmount{10000000, 0}));
+        });
+
+        // Non-default path (with AMM) has a better quality than default path.
+        // The max possible liquidity is taken out of non-default
+        // path ~17.5XRP/17.5EUR, 17.5EUR/~17.47USD. The rest
+        // is taken from the offer.
+        {
+            Env env(*this);
+            fund(env, gw, {alice, carol}, {USD(30000), EUR(30000)}, Fund::All);
+            env.fund(XRP(1000), bob);
+            auto ammEUR_XRP = AMM(env, alice, XRP(10000), EUR(10000));
+            auto ammUSD_EUR = AMM(env, alice, EUR(10000), USD(10000));
+            env(offer(alice, XRP(101), USD(100)), txflags(tfPassive));
+            env(pay(bob, carol, USD(100)),
+                path(~EUR, ~USD),
+                sendmax(XRP(102)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammEUR_XRP.expectBalances(
+                XRPAmount(10017530051),
+                STAmount(EUR, 99825, -1),
+                IOUAmount{10000000, 0}));
+            BEAST_EXPECT(ammUSD_EUR.expectBalances(
+                STAmount(USD, static_cast<std::int64_t>(9982529967221687), -12),
+                STAmount(EUR, 100175, -1),
+                IOUAmount{10000, 0}));
+            auto const offers = offersFromJson(readOffers(env, alice));
+            BEAST_EXPECT(
+                offers.size() == 1 && offers[0].second == XRPAmount(17644733) &&
+                offers[0].first ==
+                    STAmount(
+                        USD, static_cast<std::int64_t>(174700327783141), -13));
+        }
+
+        // Default path (with AMM) has a better quality than a non-default path.
+        // The max possible liquidity is taken out of default
+        // path ~17.5XRP/17.5USD. The rest is taken from the offer.
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env.fund(XRP(1000), bob);
+            env.trust(EUR(2000), alice);
+            env(pay(gw, alice, EUR(1000)));
+            env(offer(alice, XRP(101), EUR(100)), txflags(tfPassive));
+            env(offer(alice, EUR(100), USD(100)), txflags(tfPassive));
+            env(pay(bob, carol, USD(100)),
+                path(~EUR, ~USD),
+                sendmax(XRP(102)),
+                txflags(tfPartialPayment));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount(10017530051),
+                STAmount(USD, 99825, -1),
+                IOUAmount{10000000, 0}));
+            auto const offers = offersFromJson(readOffers(env, alice));
+            BEAST_EXPECT(offers.size() == 2);
+            for (auto const& offer : offers)
+            {
+                if (offer.first.issue() == EUR)
+                    BEAST_EXPECT(
+                        offer.first == STAmount(EUR, 175, -1) &&
+                        offer.second == XRPAmount(17675000));
+                else
+                    BEAST_EXPECT(
+                        offer.first == STAmount(USD, 175, -1) &&
+                        offer.second == STAmount(EUR, 175, -1));
+            }
+        });
+    }
+
+    void
     testAmendment()
     {
         testcase("Amendment");
@@ -1555,6 +1671,7 @@ private:
     void
     run() override
     {
+#if 0
         testInvalidInstance();
         testInstanceCreate();
         testInvalidDeposit();
@@ -1566,6 +1683,8 @@ private:
         testInvalidBid();
         testBid();
         testInvalidAMMPayment();
+#endif
+        testBasicPayment();
     }
 };
 

@@ -243,7 +243,7 @@ TOfferStreamBase<TIn, TOut>::step()
             continue;
         }
 
-        offer_ = TOffer<TIn, TOut>(entry, tip_.quality());
+        offer_ = OrderBookOffer<TIn, TOut>(entry, tip_.quality());
 
         auto const amount(offer_.amount());
 
@@ -252,7 +252,7 @@ TOfferStreamBase<TIn, TOut>::step()
         {
             JLOG(j_.warn()) << "Removing bad offer " << entry->key();
             permRmOffer(entry->key());
-            offer_ = TOffer<TIn, TOut>{};
+            offer_ = OrderBookOffer<TIn, TOut>{};
             continue;
         }
 
@@ -289,7 +289,7 @@ TOfferStreamBase<TIn, TOut>::step()
                 JLOG(j_.trace())
                     << "Removing became unfunded offer " << entry->key();
             }
-            offer_ = TOffer<TIn, TOut>{};
+            offer_ = OrderBookOffer<TIn, TOut>{};
             // See comment at top of loop for how the offer is removed
             continue;
         }
@@ -350,7 +350,7 @@ TOfferStreamBase<TIn, TOut>::step()
                                     "to reduced quality "
                                  << entry->key();
             }
-            offer_ = TOffer<TIn, TOut>{};
+            offer_ = OrderBookOffer<TIn, TOut>{};
             // See comment at top of loop for how the offer is removed
             continue;
         }

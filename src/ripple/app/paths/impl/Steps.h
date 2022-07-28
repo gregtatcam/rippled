@@ -20,6 +20,7 @@
 #ifndef RIPPLE_APP_PATHS_IMPL_PAYSTEPS_H_INCLUDED
 #define RIPPLE_APP_PATHS_IMPL_PAYSTEPS_H_INCLUDED
 
+#include <ripple/app/paths/AMMOfferCounter.h>
 #include <ripple/app/paths/impl/AmountSpec.h>
 #include <ripple/basics/Log.h>
 #include <ripple/protocol/Quality.h>
@@ -375,6 +376,7 @@ toStrand(
     STPath const& path,
     bool ownerPaysTransferFee,
     bool offerCrossing,
+    AMMOfferCounter& ammOfferCounter,
     beast::Journal j);
 
 /**
@@ -413,6 +415,7 @@ toStrands(
     bool addDefaultPath,
     bool ownerPaysTransferFee,
     bool offerCrossing,
+    AMMOfferCounter& ammOfferCounter,
     beast::Journal j);
 
 /// @cond INTERNAL
@@ -521,6 +524,7 @@ struct StrandContext
         than once
     */
     boost::container::flat_set<Issue>& seenBookOuts;
+    AMMOfferCounter& ammOfferCounter;
     beast::Journal const j;
 
     /** StrandContext constructor. */
@@ -540,7 +544,8 @@ struct StrandContext
         std::array<boost::container::flat_set<Issue>, 2>&
             seenDirectIssues_,  ///< For detecting currency loops
         boost::container::flat_set<Issue>&
-            seenBookOuts_,   ///< For detecting book loops
+            seenBookOuts_,  ///< For detecting book loops
+        AMMOfferCounter& ammOfferCounter_,
         beast::Journal j_);  ///< Journal for logging
 };
 
