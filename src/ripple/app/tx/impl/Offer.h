@@ -155,8 +155,11 @@ public:
         if (consumed.out > this->m_amounts.out)
             Throw<std::logic_error>("can't produce more than is available.");
 
-        std::cout << "CLOB offer consumed: in " << toStr(this->m_amounts.in)
-                  << " out " << toStr(this->m_amounts.out) << std::endl;
+        std::cout << "CLOB offer consumed: offer in "
+                  << toStr(this->m_amounts.in) << " out "
+                  << toStr(this->m_amounts.out) << " consumed in "
+                  << toStr(consumed.in) << " out " << toStr(consumed.out)
+                  << std::endl;
 
         this->m_amounts -= consumed;
         setFieldAmounts();

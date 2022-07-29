@@ -1654,6 +1654,38 @@ private:
                         offer.second == STAmount(EUR, 175, -1));
             }
         });
+
+        // Default path with AMM and Order Book offer. AMM is consumed first,
+        // remaining amount is consumed by the offer.
+        testAMM(
+            [&](AMM& ammAlice, Env& env) {
+                fund(env, gw, {bob}, {USD(100)}, Fund::Acct);
+                env(offer(bob, XRP(100), USD(100)), txflags(tfPassive));
+                env(pay(alice, carol, USD(200)),
+                    sendmax(XRP(200)),
+                    txflags(tfPartialPayment));
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount(9999499987),
+                    STAmount(
+                        USD, static_cast<std::int64_t>(999949998799875), -11),
+                    IOUAmount{999949998749938, -8}));
+                BEAST_EXPECT(
+                    readLines(
+                        env, carol)[jss::result][jss::lines][0u][jss::balance]
+                        .asString() == "30199.99999999999");
+            },
+            std::make_pair(XRP(9900), USD(10100)),
+            IOUAmount{999949998749938, -8});
+
+        // Offer crossing
+        testAMM(
+            [&](AMM& ammAlice, Env& env) {
+                fund(env, gw, {bob}, {USD(1000)}, Fund::Acct);
+                env(offer(bob, USD(100), XRP(100)));
+                std::cout << ammAlice.ammRpcInfo()->toStyledString();
+            },
+            std::make_pair(XRP(9900), USD(10100)),
+            IOUAmount{999949998749938, -8});
     }
 
     void

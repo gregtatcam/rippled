@@ -798,6 +798,11 @@ BookStep<TIn, TOut, TDerived>::revImp(
 
         if (stpAmt.out <= remainingOut)
         {
+            std::cout << "stpAmt.out <= remainingOut offer " << toStr(ofrAmt.in)
+                      << " " << toStr(ofrAmt.out) << " step "
+                      << toStr(stpAmt.in) << " " << toStr(stpAmt.out)
+                      << " gives " << toStr(ownerGives) << " remOut "
+                      << toStr(remainingOut) << std::endl;
             savedIns.insert(stpAmt.in);
             savedOuts.insert(stpAmt.out);
             result = TAmounts<TIn, TOut>(sum(savedIns), sum(savedOuts));
@@ -809,6 +814,11 @@ BookStep<TIn, TOut, TDerived>::revImp(
         }
         else
         {
+            std::cout << "stpAmt.out > remainingOut offer " << toStr(ofrAmt.in)
+                      << " " << toStr(ofrAmt.out) << " step "
+                      << toStr(stpAmt.in) << " " << toStr(stpAmt.out)
+                      << " gives " << toStr(ownerGives) << " remOut "
+                      << toStr(remainingOut) << std::endl;
             auto ofrAdjAmt = ofrAmt;
             auto stpAdjAmt = stpAmt;
             auto ownerGivesAdj = ownerGives;
@@ -825,6 +835,10 @@ BookStep<TIn, TOut, TDerived>::revImp(
             savedOuts.insert(remainingOut);
             result.in = sum(savedIns);
             result.out = out;
+            std::cout << "\t after adjustment offer " << toStr(ofrAdjAmt.in)
+                      << " " << toStr(ofrAdjAmt.out) << " step "
+                      << toStr(stpAdjAmt.in) << " " << toStr(stpAdjAmt.out)
+                      << " gives " << toStr(ownerGivesAdj) << std::endl;
             this->consumeOffer(sb, offer, ofrAdjAmt, stpAdjAmt, ownerGivesAdj);
 
             // Explicitly check whether the offer is funded.  Given that we have
@@ -926,6 +940,11 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
         typename boost::container::flat_multiset<TOut>::const_iterator lastOut;
         if (stpAmt.in <= remainingIn)
         {
+            std::cout << "stpAmt.in <= remainingIn offer " << toStr(ofrAmt.in)
+                      << " " << toStr(ofrAmt.out) << " step "
+                      << toStr(stpAmt.in) << " " << toStr(stpAmt.out)
+                      << " gives " << toStr(ownerGives) << " remIn "
+                      << toStr(remainingIn) << std::endl;
             savedIns.insert(stpAmt.in);
             lastOut = savedOuts.insert(stpAmt.out);
             result = TAmounts<TIn, TOut>(sum(savedIns), sum(savedOuts));
@@ -934,6 +953,11 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
         }
         else
         {
+            std::cout << "stpAmt.in > remainingIn offer " << toStr(ofrAmt.in)
+                      << " " << toStr(ofrAmt.out) << " step "
+                      << toStr(stpAmt.in) << " " << toStr(stpAmt.out)
+                      << " gives " << toStr(ownerGives) << " remIn "
+                      << toStr(remainingIn) << std::endl;
             limitStepIn(
                 offer.quality(),
                 ofrAdjAmt,
@@ -946,6 +970,10 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
             lastOut = savedOuts.insert(stpAdjAmt.out);
             result.out = sum(savedOuts);
             result.in = in;
+            std::cout << "\tafter adjustment offer " << toStr(ofrAdjAmt.in)
+                      << " " << toStr(ofrAdjAmt.out) << " step "
+                      << toStr(stpAdjAmt.in) << " " << toStr(stpAdjAmt.out)
+                      << " gives " << toStr(ownerGivesAdj) << std::endl;
 
             processMore = false;
         }
@@ -973,6 +1001,15 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
                 transferRateIn,
                 transferRateOut,
                 remainingOut);
+
+            std::cout
+                << "\t\tafter adjustment, result.out > cache_->out result out "
+                << toStr(result.out) << " " << toStr(cache_->out) << " in "
+                << toStr(result.in) << " " << toStr(cache_->in) << " offer "
+                << toStr(ofrAdjAmtRev.in) << " " << toStr(ofrAdjAmtRev.out)
+                << " step " << toStr(stpAdjAmtRev.in) << " "
+                << toStr(stpAdjAmtRev.out) << " gives "
+                << toStr(ownerGivesAdjRev) << std::endl;
 
             if (stpAdjAmtRev.in == remainingIn)
             {
@@ -1014,7 +1051,7 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
             return DebtDirection::issues;
         }();
         auto const r = forEachOffer(
-            sb, afView, prevStepDebtDir, &remainingIn, nullptr, eachOffer);
+            sb, afView, prevStepDebtDir, &remainingIn, &cache_->out, eachOffer);
         boost::container::flat_set<uint256> toRm = std::move(std::get<0>(r));
         std::uint32_t const offersConsumed = std::get<1>(r);
         offersUsed_ = offersConsumed;

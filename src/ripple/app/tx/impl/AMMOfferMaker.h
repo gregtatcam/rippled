@@ -208,8 +208,12 @@ AMMOfferMaker<TIn, TOut>::makeOffer(
 
     auto const balances = fetchBalances(view);
 
+    std::cout << "makeOffer: balances " << balances_.in << " " << balances_.out
+              << " new balances " << balances.in << " " << balances.out
+              << std::endl;
+
     if (clobQuality.has_value())
-        std::cout << "makeOffer: " << clobQuality->rate() << std::endl;
+        std::cout << "makeOffer: rate " << clobQuality->rate() << std::endl;
 
     auto const offerAmounts = [&]() -> std::optional<Amounts> {
         if (offerCounter_.multiPath())
@@ -262,27 +266,45 @@ AMMOfferMaker<TIn, TOut>::makeOffer(
             if (!offerAmounts.has_value())
                 return std::nullopt;
             // Change offer size based on swap in/out formulas
-            if (remOut && Number(offerAmounts->out) > *remOut)
+            if (remOut && !remIn && Number(offerAmounts->out) > *remOut)
                 return Amounts{
                     swapAssetOut(*offerAmounts, *remOut, tradingFee_),
                     toSTAmount(*remOut, offerAmounts->out.issue())};
+            // remIn can also have remOut, where remOut is step's cache_.out
+            // we want to make sure we don't produce more out in fwd
             if (remIn && Number(offerAmounts->in) > *remIn)
-                return Amounts{
-                    toSTAmount(*remIn, offerAmounts->in.issue()),
-                    swapAssetIn(*offerAmounts, *remIn, tradingFee_)};
+            {
+                auto in = toSTAmount(*remIn, offerAmounts->in.issue());
+                auto out = swapAssetIn(*offerAmounts, *remIn, tradingFee_);
+                auto const saRemOut =
+                    toSTAmount(*remOut, offerAmounts->out.issue());
+                if (out > saRemOut)
+                {
+                    out = saRemOut;
+                    in = swapAssetOut(*offerAmounts, out, tradingFee_);
+                }
+                return Amounts{in, out};
+            }
             return offerAmounts;
         }
     }();
 
     balances_ = balances;
 
-    if (offerAmounts.has_value())
+    if (offerAmounts.has_value() && offerAmounts->in > beast::zero &&
+        offerAmounts->out > beast::zero)
+    {
+        std::cout << "makeOffer: creating " << offerAmounts->in << " "
+                  << offerAmounts->out << ", rate "
+                  << Quality(*offerAmounts).rate() << std::endl;
         return AMMOffer<TIn, TOut>(
             *offerAmounts,
             ammAccountID_,
             [&]() { dirty_ = true; },
             [&]() { offerCounter_.incrementCounter(); },
             j_);
+    }
+    std::cout << "makeOffer: not selected\n";
     return std::nullopt;
 }
 

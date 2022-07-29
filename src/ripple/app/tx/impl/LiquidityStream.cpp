@@ -38,7 +38,9 @@ FlowLiquidityStream<TIn, TOut>::FlowLiquidityStream(
     , cachedOBOffer_(offerStream_.step())
     , useAMMOffer_(false)
 {
-    std::cout << "FlowLiquidityStream: " << cachedOBOffer_ << std::endl;
+    std::cout << "FlowLiquidityStream: " << cachedOBOffer_ << " remIn "
+              << (remainingIn ? toStr(*remainingIn) : "") << " remOut "
+              << (remainingOut ? toStr(*remainingOut) : "") << std::endl;
     // AMMOffer can be used only once at any payment engine iteration,
     // and it can only be used in front of a CLOB offer.
     if (ammMaker)
