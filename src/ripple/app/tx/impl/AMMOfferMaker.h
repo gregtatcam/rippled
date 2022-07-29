@@ -209,8 +209,7 @@ AMMOfferMaker<TIn, TOut>::makeOffer(
     auto const balances = fetchBalances(view);
 
     std::cout << "makeOffer: balances " << balances_.in << " " << balances_.out
-              << " new balances " << balances.in << " " << balances.out
-              << std::endl;
+              << " new balances " << balances.in << " " << balances.out << std::endl;
 
     if (clobQuality.has_value())
         std::cout << "makeOffer: rate " << clobQuality->rate() << std::endl;
@@ -241,13 +240,21 @@ AMMOfferMaker<TIn, TOut>::makeOffer(
             if (clobQuality && quality < clobQuality.value())
                 return std::nullopt;
             // Change offer size proportionally to the quality
-            if (remOut && Number(offerAmounts.out) > *remOut)
+            if (remOut && !remIn && Number(offerAmounts.out) > *remOut)
                 return quality.ceil_out(
                     offerAmounts,
                     toSTAmount(*remOut, offerAmounts.out.issue()));
             if (remIn && Number(offerAmounts.in) > *remIn)
-                return quality.ceil_in(
+            {
+                auto amounts = quality.ceil_in(
                     offerAmounts, toSTAmount(*remIn, offerAmounts.in.issue()));
+                auto const saRemOut = toSTAmount(*remOut, offerAmounts.out.issue());
+                if (remOut && amounts.out > saRemOut)
+                    amounts = quality.ceil_out(
+                        offerAmounts,
+                        toSTAmount(*remOut, offerAmounts.out.issue()));
+                return amounts;
+            }
             return offerAmounts;
         }
         else
@@ -276,8 +283,7 @@ AMMOfferMaker<TIn, TOut>::makeOffer(
             {
                 auto in = toSTAmount(*remIn, offerAmounts->in.issue());
                 auto out = swapAssetIn(*offerAmounts, *remIn, tradingFee_);
-                auto const saRemOut =
-                    toSTAmount(*remOut, offerAmounts->out.issue());
+                auto const saRemOut = toSTAmount(*remOut, offerAmounts->out.issue());
                 if (out > saRemOut)
                 {
                     out = saRemOut;
