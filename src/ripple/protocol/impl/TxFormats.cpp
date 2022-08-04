@@ -84,7 +84,6 @@ TxFormats::TxFormats()
     add(jss::AMMInstanceCreate,
         ttAMM_CREATE,
         {
-            {sfAMMAccount, soeREQUIRED},
             {sfAsset1, soeREQUIRED},
             {sfAsset2, soeREQUIRED},
             {sfTradingFee, soeREQUIRED},
