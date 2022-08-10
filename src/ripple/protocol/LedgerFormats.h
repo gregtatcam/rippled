@@ -249,6 +249,7 @@ enum LedgerSpecificFlags {
         0x10000000,               // True, reject new paychans
     lsfDisallowIncomingTrustline =
         0x20000000,               // True, reject new trustlines (only if no issued assets)
+    lsfAMM = 0x40000000,          // True, AMM account
 
     // ltOFFER
     lsfPassive = 0x00010000,
@@ -274,8 +275,6 @@ enum LedgerSpecificFlags {
     // ltNFTOKEN_OFFER
     lsfSellNFToken = 0x00000001,
 
-    // ltAMM
-    lsfAMM = 0x00010000, // True, AMM account
 };
 
 //------------------------------------------------------------------------------
