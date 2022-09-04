@@ -81,6 +81,7 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/LedgerFormats.cpp
   src/ripple/protocol/impl/PublicKey.cpp
   src/ripple/protocol/impl/Quality.cpp
+  src/ripple/protocol/impl/QualityFunction.cpp
   src/ripple/protocol/impl/Rate2.cpp
   src/ripple/protocol/impl/Rules.cpp
   src/ripple/protocol/impl/SField.cpp
@@ -212,6 +213,7 @@ install (
     src/ripple/protocol/Protocol.h
     src/ripple/protocol/PublicKey.h
     src/ripple/protocol/Quality.h
+    src/ripple/protocol/QualityFunction.h
     src/ripple/protocol/Rate.h
     src/ripple/protocol/Rules.h
     src/ripple/protocol/SField.h
@@ -376,6 +378,8 @@ target_sources (rippled PRIVATE
   src/ripple/app/reporting/ReportingETL.cpp
   src/ripple/app/reporting/ETLSource.cpp
   src/ripple/app/reporting/P2pProxy.cpp
+  src/ripple/app/misc/impl/AMM.cpp
+  src/ripple/app/misc/impl/AMM_formulae.cpp
   src/ripple/app/misc/CanonicalTXSet.cpp
   src/ripple/app/misc/FeeVoteImpl.cpp
   src/ripple/app/misc/HashRouter.cpp
@@ -401,6 +405,7 @@ target_sources (rippled PRIVATE
   src/ripple/app/paths/RippleCalc.cpp
   src/ripple/app/paths/RippleLineCache.cpp
   src/ripple/app/paths/TrustLine.cpp
+  src/ripple/app/paths/impl/AMMLiquidity.cpp
   src/ripple/app/paths/impl/BookStep.cpp
   src/ripple/app/paths/impl/DirectStep.cpp
   src/ripple/app/paths/impl/PaySteps.cpp
@@ -417,6 +422,11 @@ target_sources (rippled PRIVATE
   src/ripple/app/rdb/impl/UnitaryShard.cpp
   src/ripple/app/rdb/impl/Vacuum.cpp
   src/ripple/app/rdb/impl/Wallet.cpp
+  src/ripple/app/tx/impl/AMMBid.cpp
+  src/ripple/app/tx/impl/AMMCreate.cpp
+  src/ripple/app/tx/impl/AMMDeposit.cpp
+  src/ripple/app/tx/impl/AMMVote.cpp
+  src/ripple/app/tx/impl/AMMWithdraw.cpp
   src/ripple/app/tx/impl/ApplyContext.cpp
   src/ripple/app/tx/impl/BookTip.cpp
   src/ripple/app/tx/impl/CancelCheck.cpp
@@ -582,6 +592,7 @@ target_sources (rippled PRIVATE
   src/ripple/rpc/handlers/AccountObjects.cpp
   src/ripple/rpc/handlers/AccountOffers.cpp
   src/ripple/rpc/handlers/AccountTx.cpp
+  src/ripple/rpc/handlers/AMMInfo.cpp
   src/ripple/rpc/handlers/BlackList.cpp
   src/ripple/rpc/handlers/BookOffers.cpp
   src/ripple/rpc/handlers/CanDelete.cpp
@@ -685,6 +696,7 @@ if (tests)
     src/test/app/AccountDelete_test.cpp
     src/test/app/AccountTxPaging_test.cpp
     src/test/app/AmendmentTable_test.cpp
+    src/test/app/AMM_test.cpp
     src/test/app/Check_test.cpp
     src/test/app/CrossingLimits_test.cpp
     src/test/app/DeliverMin_test.cpp
@@ -824,6 +836,7 @@ if (tests)
     src/test/jtx/Env_test.cpp
     src/test/jtx/WSClient_test.cpp
     src/test/jtx/impl/Account.cpp
+    src/test/jtx/impl/AMM.cpp
     src/test/jtx/impl/Env.cpp
     src/test/jtx/impl/JSONRPCClient.cpp
     src/test/jtx/impl/ManualTimeKeeper.cpp
@@ -942,6 +955,7 @@ if (tests)
     src/test/rpc/AccountSet_test.cpp
     src/test/rpc/AccountTx_test.cpp
     src/test/rpc/AmendmentBlocked_test.cpp
+    src/test/rpc/AMMInfo_test.cpp
     src/test/rpc/Book_test.cpp
     src/test/rpc/DepositAuthorized_test.cpp
     src/test/rpc/DeliveredAmount_test.cpp
