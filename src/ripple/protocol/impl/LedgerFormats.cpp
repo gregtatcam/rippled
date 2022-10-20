@@ -276,7 +276,8 @@ LedgerFormats::LedgerFormats()
             {sfVoteSlots, soeOPTIONAL},
             {sfAuctionSlot, soeOPTIONAL},
             {sfLPTokenBalance, soeREQUIRED},
-            {sfAMMToken, soeREQUIRED}
+            {sfToken1, soeREQUIRED},
+            {sfToken2, soeREQUIRED}
         },
         commonFields);
 
