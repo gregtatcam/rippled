@@ -82,7 +82,7 @@ TxFormats::TxFormats()
         commonFields);
 
     add(jss::AMMCreate,
-        ttAMM_INSTANCE_CREATE,
+        ttAMM_CREATE,
         {
             {sfAmount, soeREQUIRED},
             {sfAmount2, soeREQUIRED},
@@ -132,8 +132,8 @@ TxFormats::TxFormats()
         {
             {sfAsset, soeREQUIRED},
             {sfAsset2, soeREQUIRED},
-            {sfMinSlotPrice, soeOPTIONAL},
-            {sfMaxSlotPrice, soeOPTIONAL},
+            {sfMinBidPrice, soeOPTIONAL},
+            {sfMaxBidPrice, soeOPTIONAL},
             {sfAuthAccounts, soeOPTIONAL},
             {sfTicketSequence, soeOPTIONAL},
         },
