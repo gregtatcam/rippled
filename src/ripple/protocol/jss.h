@@ -88,8 +88,8 @@ JSS(Invalid);                //
 JSS(LastLedgerSequence);     // in: TransactionSign; field
 JSS(LedgerHashes);           // ledger type.
 JSS(LimitAmount);            // field.
-JSS(MaxBidPrice);            // in: AMM Bid
-JSS(MinBidPrice);            // in: AMM Bid
+JSS(BidMax);                 // in: AMM Bid
+JSS(BidMin);                 // in: AMM Bid
 JSS(NetworkID);              // field.
 JSS(NFTokenBurn);            // transaction type.
 JSS(NFTokenMint);            // transaction type.
