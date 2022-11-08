@@ -79,6 +79,7 @@ JSS(Escrow);               // ledger type.
 JSS(EscrowCancel);         // transaction type.
 JSS(EscrowCreate);         // transaction type.
 JSS(EscrowFinish);         // transaction type.
+JSS(Expiration);           // out: AMM info
 JSS(Fee);                  // in/out: TransactionSign; field.
 JSS(FeeSettings);          // ledger type.
 JSS(Flags);                // in/out: TransactionSign; field.
@@ -87,8 +88,8 @@ JSS(Invalid);              //
 JSS(LastLedgerSequence);   // in: TransactionSign; field
 JSS(LedgerHashes);         // ledger type.
 JSS(LimitAmount);          // field.
-JSS(MaxBidPrice);          // in: AMM Bid
-JSS(MinBidPrice);          // in: AMM Bid
+JSS(BidMax);               // in: AMM Bid
+JSS(BidMin);               // in: AMM Bid
 JSS(NFTokenBurn);          // transaction type.
 JSS(NFTokenMint);          // transaction type.
 JSS(NFTokenOffer);         // ledger type.
