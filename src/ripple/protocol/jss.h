@@ -128,7 +128,6 @@ JSS(TakerGets);              // field.
 JSS(TakerPays);              // field.
 JSS(Ticket);                 // ledger type.
 JSS(TicketCreate);           // transaction type.
-JSS(TimeInterval);           // out: AMM Auction Slot
 JSS(TxnSignature);           // field.
 JSS(TradingFee);             // in/out: AMM trading fee
 JSS(TransactionType);        // in: TransactionSign.
@@ -170,9 +169,11 @@ JSS(api_version);            // in: many, out: Version
 JSS(api_version_low);        // out: Version
 JSS(applied);                // out: SubmitTransaction
 JSS(asks);                   // out: Subscribe
-JSS(asset);                  // int: AMM info
-JSS(asset2);                 // int: AMM info
+JSS(asset);                  // in: AMM info
+JSS(asset2);                 // in: AMM info
 JSS(assets);                 // out: GatewayBalances
+JSS(asset_frozen);           // in: AMM info
+JSS(asset2_frozen);          // in: AMM info
 JSS(authorized);             // out: AccountLines
 JSS(auth_change);            // out: AccountInfo
 JSS(auth_change_queued);     // out: AccountInfo
@@ -605,6 +606,7 @@ JSS(ticket_count);          // out: AccountInfo
 JSS(ticket_seq);            // in: LedgerEntry
 JSS(time);
 JSS(timeouts);                // out: InboundLedger
+JSS(time_interval);           // out: AMM Auction Slot
 JSS(track);                   // out: PeerImp
 JSS(traffic);                 // out: Overlay
 JSS(total);                   // out: counters
