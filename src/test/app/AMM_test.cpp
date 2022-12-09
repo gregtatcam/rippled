@@ -2416,23 +2416,22 @@ private:
         using namespace jtx;
         using namespace std::chrono;
 
-        // Bid 100 tokens. The slot is not owned and the MinSlotPrice is 110
-        // (currently 0.001% of the pool token balance).
+        // Bid 100 tokens. The slot is not owned, pay bidMin.
         testAMM([&](AMM& ammAlice, Env& env) {
             ammAlice.deposit(carol, 1000000);
-            ammAlice.bid(carol, 100);
+            ammAlice.bid(carol, 110);
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 0));
             // 100 tokens are burned.
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRP(11000), USD(11000), IOUAmount{10999890, 0}));
         });
 
-        // Start bid at computed price. The slot is not owned and the
-        // MinSlotPrice is 110.
+        // Start bid at 0. The slot is not owned and the
+        // MinSlotPrice is 0.
         testAMM([&](AMM& ammAlice, Env& env) {
             ammAlice.deposit(carol, 1000000);
-            // Bid, pay the computed price.
-            ammAlice.bid(carol);
+            // Bid, pay bidMin.
+            ammAlice.bid(carol, 110);
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 0));
 
             fund(env, gw, {bob}, {USD(10000)}, Fund::Acct);
@@ -2441,7 +2440,7 @@ private:
             ammAlice.bid(bob);
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 0));
 
-            // Bid MaxSlotPrice fails because the computed price is higher.
+            // Bid bidMax fails because the computed price is higher.
             ammAlice.bid(
                 carol,
                 std::nullopt,
@@ -2481,8 +2480,8 @@ private:
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRP(12000), USD(12000), IOUAmount{12000000, 0}));
 
-            // Initial state, not owned. Default MinSlotPrice.
-            ammAlice.bid(carol);
+            // Initial state, not owned. Pay bidMin.
+            ammAlice.bid(carol, 110);
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 0));
 
             // 1st Interval after close, price for 0th interval.
@@ -2501,14 +2500,14 @@ private:
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, std::nullopt, 10));
 
             // 0 Interval.
-            ammAlice.bid(carol);
+            ammAlice.bid(carol, 110);
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, std::nullopt));
-            // ~574.591 tokens burned on bidding fees.
+            // ~307.939 tokens burnt on bidding fees.
             BEAST_EXPECT(ammAlice.expectBalances(
-                XRP(12000), USD(12000), IOUAmount{1199942540904166, -8}));
+                XRP(12000), USD(12000), IOUAmount{119996920611875, -7}));
         });
 
-        // Pool's fee 1%. Bid to pay computed price.
+        // Pool's fee 1%. Bid bidMin.
         // Auction slot owner and auth account trade at discounted fee (0).
         // Other accounts trade at 1% fee.
         testAMM(
@@ -2516,7 +2515,7 @@ private:
                 fund(env, gw, {bob}, {USD(10000)}, Fund::Acct);
                 ammAlice.deposit(bob, 1000000);
                 ammAlice.deposit(carol, 1000000);
-                ammAlice.bid(carol, std::nullopt, std::nullopt, {bob});
+                ammAlice.bid(carol, 120, std::nullopt, {bob});
                 BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 0));
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRP(12000), USD(12000), IOUAmount{11999880, 0}));
@@ -2654,7 +2653,8 @@ private:
                     path(~XRP),
                     sendmax(USD(1000000000)),
                     ter(tecPATH_PARTIAL));
-                // This works, because of the sendmax limit
+#if 0  // TBD
+       // This works, because of the sendmax limit
                 env(pay(alice, carol, USD(99.99)),
                     path(~USD),
                     sendmax(XRP(1)),
@@ -2663,6 +2663,7 @@ private:
                     path(~USD),
                     sendmax(XRP(1)),
                     ter(tesSUCCESS));
+#endif
             },
             {{XRP(100), USD(100)}});
     }
@@ -4942,7 +4943,7 @@ private:
     void
     path_find_06()
     {
-        testcase("Path Find: non-XRP -> non-XRP, same currency)");
+        testcase("Path Find: non-XRP -> non-XRP, same currency");
         using namespace jtx;
         Env env = pathTestEnv();
         Account A1{"A1"};

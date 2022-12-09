@@ -53,6 +53,7 @@ class AMM
     Number minSlotPrice_;
     std::optional<IOUAmount> bidMin_;
     std::optional<IOUAmount> bidMax_;
+    // Multi-signature
     std::optional<msig> msig_;
     std::uint32_t fee_;
 

@@ -97,7 +97,7 @@ public:
             env.fund(XRP(1000), bob, ed, bill);
             ammAlice.bid(alice, 100, std::nullopt, {carol, bob, ed, bill});
             BEAST_EXPECT(ammAlice.expectAmmRpcInfo(
-                XRP(10080), USD(10080), IOUAmount{100798992, -1}));
+                XRP(10080), USD(10080), IOUAmount{10079900}));
             std::unordered_set<std::string> authAccounts = {
                 carol.human(), bob.human(), ed.human(), bill.human()};
             auto const ammInfo = ammAlice.ammRpcInfo();
@@ -135,7 +135,7 @@ public:
                         alice.human() &&
                         auctionSlot[jss::discounted_fee].asUInt() == 0 &&
                         auctionSlot[jss::price][jss::value].asString() ==
-                        "100.8" &&
+                        "100" &&
                         auctionSlot[jss::price][jss::currency].asString() ==
                         to_string(ammAlice.lptIssue().currency) &&
                         auctionSlot[jss::price][jss::issuer].asString() ==

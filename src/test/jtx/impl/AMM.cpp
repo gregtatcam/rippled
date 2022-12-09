@@ -576,7 +576,6 @@ AMM::bid(
                 static_cast<STObject const&>(amm->peekAtField(sfAuctionSlot));
             lastPurchasePrice_ = auctionSlot[sfPrice].iou();
         }
-        minSlotPrice_ = (*amm)[sfLPTokenBalance].iou() / 100000;
     }
     bidMin_ = std::nullopt;
     bidMax_ = std::nullopt;
@@ -630,7 +629,11 @@ AMM::expectedPurchasePrice(
     std::uint32_t constexpr nIntervals = 20;
 
     if (!timeSlot)
-        return IOUAmount(minSlotPrice_);
+    {
+        if (bidMin_ && !bidMax_)
+            return *bidMin_;
+        return IOUAmount(0);
+    }
 
     auto const computedPrice = [&]() {
         if (timeSlot == 0)
