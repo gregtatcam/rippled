@@ -157,9 +157,16 @@ public:
         testAMM([&](AMM& ammAlice, Env& env) {
             env(fset(gw, asfGlobalFreeze));
             env.close();
-            auto const info = ammAlice.ammRpcInfo();
-            BEAST_EXPECT(
-                info && (*info)[jss::amm][jss::asset2_frozen].asBool() == true);
+            auto test = [&](bool freeze) {
+                auto const info = ammAlice.ammRpcInfo();
+                BEAST_EXPECT(
+                    info &&
+                    (*info)[jss::amm][jss::asset2_frozen].asBool() == freeze);
+            };
+            test(true);
+            env(fclear(gw, asfGlobalFreeze));
+            env.close();
+            test(false);
         });
     }
 
