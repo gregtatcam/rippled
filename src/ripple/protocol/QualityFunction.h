@@ -39,7 +39,7 @@ private:
     Number m_;
     // intercept
     Number b_;
-    // seater if QF is for CLOB offer.
+    // seated if QF is for CLOB offer.
     // note that m_ is 0 in this case
     std::optional<Quality> quality_;
 

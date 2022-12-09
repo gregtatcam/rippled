@@ -89,7 +89,7 @@ AMMLiquidity<TIn, TOut>::generateFibSeqOffer(
     return cur;
 }
 
-/** Simulate infinite amount when swapping out one pool's side.
+/** "Infinite" amount.
  */
 template <typename T>
 T
@@ -139,14 +139,14 @@ AMMLiquidity<TIn, TOut>::getOffer(
     auto offer = [&]() -> std::optional<AMMOffer<TIn, TOut>> {
         if (ammContext_.multiPath())
         {
-            auto const offer = generateFibSeqOffer(balances);
-            if (clobQuality && Quality{offer} < clobQuality)
+            auto const amounts = generateFibSeqOffer(balances);
+            if (clobQuality && Quality{amounts} < clobQuality)
                 return std::nullopt;
             return AMMOffer<TIn, TOut>(
-                *this, offer, std::nullopt, Quality{offer});
+                *this, amounts, std::nullopt, Quality{amounts});
         }
         else if (
-            auto const offer = clobQuality
+            auto const amounts = clobQuality
                 ? changeSpotPriceQuality(balances, *clobQuality, tradingFee_)
                 : balances)
         {
@@ -155,7 +155,7 @@ AMMLiquidity<TIn, TOut>::getOffer(
             // "infinite" input. The size is going to be changed in BookStep
             // per either deliver amount limit, or sendmax, or available
             // output or input funds.
-            if (balances == offer)
+            if (balances == amounts)
             {
                 return AMMOffer<TIn, TOut>(
                     *this,
@@ -164,7 +164,7 @@ AMMLiquidity<TIn, TOut>::getOffer(
                     Quality{balances});
             }
             return AMMOffer<TIn, TOut>(
-                *this, *offer, balances, Quality{*offer});
+                *this, *amounts, balances, Quality{*amounts});
         }
         return std::nullopt;
     }();
