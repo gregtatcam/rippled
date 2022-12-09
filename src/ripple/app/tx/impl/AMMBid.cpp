@@ -257,7 +257,6 @@ applyBid(
     };
 
     // No one owns the slot or expired slot.
-    // The bidder pays MinSlotPrice
     if (auto const acct = auctionSlot[~sfAccount]; !acct || !validOwner(*acct))
     {
         if (auto const payPrice = getPayPrice(MinSlotPrice); !payPrice)

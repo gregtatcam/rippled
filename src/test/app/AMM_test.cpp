@@ -71,7 +71,7 @@ getAccountLines(jtx::Env& env, AccountID const& acctId, IOU... ious)
     Json::Value res;
     for (auto const& line : jrr["lines"])
     {
-        for (auto const iou : {ious...})
+        for (auto const& iou : {ious...})
         {
             if (line["currency"].asString() == to_string(iou.currency))
             {

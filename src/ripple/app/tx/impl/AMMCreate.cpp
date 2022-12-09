@@ -251,6 +251,7 @@ applyCreate(
         if (auto const res =
                 accountSend(sb, account_, *ammAccount, amount, ctx_.journal))
             return res;
+        // Set AMM flag on AMM trustline
         if (!isXRP(amount))
         {
             if (SLE::pointer sleRippleState =
