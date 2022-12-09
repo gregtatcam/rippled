@@ -183,6 +183,7 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
         **ammSle,
         amount ? amount->issue() : std::optional<Issue>{},
         amount2 ? amount2->issue() : std::optional<Issue>{},
+        FreezeHandling::fhZERO_IF_FROZEN,
         ctx.j);
     if (!expected)
         return expected.error();
@@ -290,6 +291,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         **ammSle,
         amount ? amount->issue() : std::optional<Issue>{},
         amount2 ? amount2->issue() : std::optional<Issue>{},
+        FreezeHandling::fhZERO_IF_FROZEN,
         ctx_.journal);
     if (!expected)
         return {expected.error(), false};
@@ -427,8 +429,13 @@ AMMWithdraw::withdraw(
     if (!ammSle)
         return {ammSle.error(), STAmount{}};
     auto const lpTokens = ammLPHolds(view, **ammSle, account_, ctx_.journal);
-    auto const expected =
-        ammHolds(view, **ammSle, amountWithdraw.issue(), std::nullopt, j_);
+    auto const expected = ammHolds(
+        view,
+        **ammSle,
+        amountWithdraw.issue(),
+        std::nullopt,
+        FreezeHandling::fhZERO_IF_FROZEN,
+        j_);
     if (!expected)
         return {expected.error(), STAmount{}};
     auto const [amountBalance, amount2Balance, _] = *expected;

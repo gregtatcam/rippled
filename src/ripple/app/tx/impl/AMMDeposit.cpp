@@ -155,8 +155,13 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
         return terNO_AMM;
     }
 
-    auto const expected =
-        ammHolds(ctx.view, **ammSle, std::nullopt, std::nullopt, ctx.j);
+    auto const expected = ammHolds(
+        ctx.view,
+        **ammSle,
+        std::nullopt,
+        std::nullopt,
+        FreezeHandling::fhZERO_IF_FROZEN,
+        ctx.j);
     if (!expected)
         return expected.error();
     auto const [amountBalance, amount2Balance, lptAMMBalance] = *expected;
@@ -277,6 +282,7 @@ AMMDeposit::applyGuts(Sandbox& sb)
         **ammSle,
         amount ? amount->issue() : std::optional<Issue>{},
         amount2 ? amount2->issue() : std::optional<Issue>{},
+        FreezeHandling::fhZERO_IF_FROZEN,
         ctx_.journal);
     if (!expected)
         return {expected.error(), false};

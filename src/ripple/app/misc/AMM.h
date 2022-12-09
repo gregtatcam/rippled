@@ -70,8 +70,8 @@ ammPoolHolds(
     AccountID const& ammAccountID,
     Issue const& issue1,
     Issue const& issue2,
-    beast::Journal const j,
-    FreezeHandling freezeHandling = FreezeHandling::fhZERO_IF_FROZEN);
+    FreezeHandling freezeHandling,
+    beast::Journal const j);
 
 /** Get AMM pool and LP token balances. If both optIssue are
  * provided then they are used as the AMM token pair issues.
@@ -83,8 +83,8 @@ ammHolds(
     SLE const& ammSle,
     std::optional<Issue> const& optIssue1,
     std::optional<Issue> const& optIssue2,
-    beast::Journal const j,
-    FreezeHandling freezeHandling = FreezeHandling::fhZERO_IF_FROZEN);
+    FreezeHandling freezeHandling,
+    beast::Journal const j);
 
 /** Get the balance of LP tokens.
  */

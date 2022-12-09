@@ -169,8 +169,8 @@ AMM::expectBalances(
             ammAccountID,
             asset1.issue(),
             asset2.issue(),
-            env_.journal,
-            FreezeHandling::fhIGNORE_FREEZE);
+            FreezeHandling::fhIGNORE_FREEZE,
+            env_.journal);
         auto const lptAMMBalance = account
             ? ammLPHolds(*env_.current(), *amm, *account, env_.journal)
             : amm->getFieldAmount(sfLPTokenBalance);

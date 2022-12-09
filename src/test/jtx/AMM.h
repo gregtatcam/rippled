@@ -55,6 +55,7 @@ class AMM
     std::optional<IOUAmount> bidMax_;
     // Multi-signature
     std::optional<msig> msig_;
+    // Transaction fee
     std::uint32_t fee_;
 
 public:

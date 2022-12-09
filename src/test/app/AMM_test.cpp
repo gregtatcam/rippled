@@ -2426,8 +2426,7 @@ private:
                 XRP(11000), USD(11000), IOUAmount{10999890, 0}));
         });
 
-        // Start bid at 0. The slot is not owned and the
-        // MinSlotPrice is 0.
+        // Start bid at bidMin 110. The slot is not owned.
         testAMM([&](AMM& ammAlice, Env& env) {
             ammAlice.deposit(carol, 1000000);
             // Bid, pay bidMin.
