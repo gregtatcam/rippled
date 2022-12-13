@@ -87,11 +87,12 @@ private:
     applyGuts(Sandbox& view);
 
     /** Withdraw requested assets and token from AMM into LP account.
+     * Return new total LPToken balance.
      * @param view
      * @param ammAccount
      * @param amountWithdraw
      * @param amount2Withdraw
-     * @param lptAMMBalance current AMM LPT balance
+     * @param lpTokensAMMBalance current AMM LPT balance
      * @param lpTokensWithdraw
      * @return
      */
@@ -101,7 +102,7 @@ private:
         AccountID const& ammAccount,
         STAmount const& amountWithdraw,
         std::optional<STAmount> const& amount2Withdraw,
-        STAmount const& lpAMMBalance,
+        STAmount const& lpTokensAMMBalance,
         STAmount const& lpTokensWithdraw);
 
     /** Equal-asset withdrawal (LPTokens) of some AMM instance pools

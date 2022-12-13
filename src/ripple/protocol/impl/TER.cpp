@@ -46,7 +46,6 @@ transResults()
         MAKE_ERROR(tecAMM_INVALID_TOKENS,            "AMM invalid LP tokens."),
         MAKE_ERROR(tecAMM_FAILED_DEPOSIT,            "AMM failed deposit."),
         MAKE_ERROR(tecAMM_FAILED_WITHDRAW,           "AMM failed withdraw."),
-        MAKE_ERROR(tecAMM_EXISTS,                    "AMM instance exists."),
         MAKE_ERROR(tecAMM_FAILED_BID,                "AMM failed bid."),
         MAKE_ERROR(tecAMM_FAILED_VOTE,               "AMM failed vote."),
         MAKE_ERROR(tecCLAIM,                         "Fee claimed. Sequence used. No action."),
@@ -137,7 +136,6 @@ transResults()
         MAKE_ERROR(telNETWORK_ID_MAKES_TX_NON_CANONICAL, "Transactions submitted to this node/network must NOT include a NetworkID field."),
 
         MAKE_ERROR(temMALFORMED,                 "Malformed transaction."),
-        MAKE_ERROR(temBAD_AMM_OPTIONS,           "Malformed: Invalid combination of options."),
         MAKE_ERROR(temBAD_AMM_TOKENS,            "Malformed: Invalid LPTokens."),
         MAKE_ERROR(temBAD_AMOUNT,                "Can only send positive amounts."),
         MAKE_ERROR(temBAD_CURRENCY,              "Malformed: Bad currency."),

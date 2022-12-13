@@ -231,7 +231,8 @@ public:
     }
 
     IOUAmount
-    getLPTokensBalance() const;
+    getLPTokensBalance(
+        std::optional<AccountID> const& account = std::nullopt) const;
 
     friend std::ostream&
     operator<<(std::ostream& s, AMM const& amm)
@@ -239,6 +240,14 @@ public:
         if (auto const res = amm.ammRpcInfo())
             s << res->toStyledString();
         return s;
+    }
+
+    std::string
+    operator[](AccountID const& lp)
+    {
+        if (auto const res = ammRpcInfo(lp))
+            return res->toStyledString();
+        return {};
     }
 
 private:

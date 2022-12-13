@@ -181,8 +181,16 @@ AMM::expectBalances(
 }
 
 IOUAmount
-AMM::getLPTokensBalance() const
+AMM::getLPTokensBalance(std::optional<AccountID> const& account) const
 {
+    if (account)
+        return accountHolds(
+                   *env_.current(),
+                   *account,
+                   lptIssue_,
+                   FreezeHandling::fhZERO_IF_FROZEN,
+                   env_.journal)
+            .iou();
     if (auto const amm =
             env_.current()->read(keylet::amm(asset1_.issue(), asset2_.issue())))
         return amm->getFieldAmount(sfLPTokenBalance).iou();

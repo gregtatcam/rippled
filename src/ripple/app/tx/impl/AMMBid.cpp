@@ -78,7 +78,7 @@ AMMBid::preflight(PreflightContext const& ctx)
             authAccounts.size() > maxAuthAccounts)
         {
             JLOG(ctx.j.debug()) << "AMM Bid: Invalid number of AuthAccounts.";
-            return temBAD_AMM_OPTIONS;
+            return temMALFORMED;
         }
     }
 
