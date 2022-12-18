@@ -41,6 +41,10 @@
 
 namespace ripple {
 
+template <typename TIn, typename TOut, typename Offer>
+concept IsOffer = std::is_same_v<Offer, TOffer<TIn, TOut>> ||
+    std::is_same_v<Offer, AMMOffer<TIn, TOut>>;
+
 template <class TIn, class TOut, class TDerived>
 class BookStep : public StepImp<TIn, TOut, BookStep<TIn, TOut, TDerived>>
 {
@@ -230,6 +234,7 @@ private:
 
     // Offer is either TOffer or AMMOffer
     template <typename Offer>
+    requires IsOffer<TIn, TOut, Offer>
     void
     consumeOffer(
         PaymentSandbox& sb,
@@ -280,6 +285,7 @@ public:
 
     // Never limit self cross quality on a payment.
     template <typename Offer>
+    requires IsOffer<TIn, TOut, Offer>
     bool
     limitSelfCrossQuality(
         AccountID const&,
@@ -388,6 +394,7 @@ public:
     }
 
     template <typename Offer>
+    requires IsOffer<TIn, TOut, Offer>
     bool
     limitSelfCrossQuality(
         AccountID const& strandSrc,
@@ -567,6 +574,7 @@ BookStep<TIn, TOut, TDerived>::offersUsed() const
 
 // Adjust the offer amount and step amount subject to the given input limit
 template <class TIn, class TOut, class Offer>
+requires IsOffer<TIn, TOut, Offer>
 static void
 limitStepIn(
     Offer const& offer,
@@ -591,6 +599,7 @@ limitStepIn(
 
 // Adjust the offer amount and step amount subject to the given output limit
 template <class TIn, class TOut, class Offer>
+requires IsOffer<TIn, TOut, Offer>
 static void
 limitStepOut(
     Offer const& offer,
@@ -780,7 +789,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 }
 
 template <class TIn, class TOut, class TDerived>
-template <class Offer>
+template <typename Offer>
+requires IsOffer<TIn, TOut, Offer>
 void
 BookStep<TIn, TOut, TDerived>::consumeOffer(
     PaymentSandbox& sb,

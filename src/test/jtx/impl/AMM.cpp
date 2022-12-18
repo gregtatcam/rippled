@@ -354,7 +354,7 @@ AMM::deposit(
 void
 AMM::deposit(
     std::optional<Account> const& account,
-    std::uint64_t tokens,
+    LPToken tokens,
     std::optional<STAmount> const& asset1In,
     std::optional<std::uint32_t> const& flags,
     std::optional<ter> const& ter)
@@ -396,7 +396,7 @@ AMM::deposit(
 void
 AMM::deposit(
     std::optional<Account> const& account,
-    std::optional<std::uint64_t> tokens,
+    std::optional<LPToken> tokens,
     std::optional<STAmount> const& asset1In,
     std::optional<STAmount> const& asset2In,
     std::optional<STAmount> const& maxEP,
@@ -409,10 +409,7 @@ AMM::deposit(
         ter_ = *ter;
     Json::Value jv;
     if (tokens)
-    {
-        STAmount saTokens{lptIssue_, *tokens, 0};
-        saTokens.setJson(jv[jss::LPTokenOut]);
-    }
+        tokens->tokens(lptIssue_).setJson(jv[jss::LPTokenOut]);
     if (asset1In)
         asset1In->setJson(jv[jss::Amount]);
     if (asset2In)
@@ -458,7 +455,7 @@ AMM::withdraw(
 void
 AMM::withdraw(
     std::optional<Account> const& account,
-    std::optional<std::uint64_t> const& tokens,
+    std::optional<LPToken> const& tokens,
     std::optional<STAmount> const& asset1Out,
     std::optional<std::uint32_t> const& flags,
     std::optional<ter> const& ter)
@@ -499,7 +496,7 @@ AMM::withdraw(
 void
 AMM::withdraw(
     std::optional<Account> const& account,
-    std::optional<std::uint64_t> const& tokens,
+    std::optional<LPToken> const& tokens,
     std::optional<STAmount> const& asset1Out,
     std::optional<STAmount> const& asset2Out,
     std::optional<IOUAmount> const& maxEP,
@@ -510,10 +507,7 @@ AMM::withdraw(
 {
     Json::Value jv;
     if (tokens)
-    {
-        STAmount saTokens{lptIssue_, *tokens, 0};
-        saTokens.setJson(jv[jss::LPTokenIn]);
-    }
+        tokens->tokens(lptIssue_).setJson(jv[jss::LPTokenIn]);
     if (asset1Out)
         asset1Out->setJson(jv[jss::Amount]);
     if (asset2Out)

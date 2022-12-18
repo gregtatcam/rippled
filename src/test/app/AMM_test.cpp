@@ -1367,6 +1367,25 @@ private:
                 std::nullopt,
                 ter(tecAMM_FAILED_DEPOSIT));
         });
+
+        // Tiny deposit
+        testAMM([&](AMM& ammAlice, Env&) {
+            ammAlice.deposit(
+                carol,
+                IOUAmount{1, -4},
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED_DEPOSIT));
+        });
+        testAMM([&](AMM& ammAlice, Env&) {
+            ammAlice.deposit(
+                carol,
+                STAmount{USD, 1, -11},
+                std::nullopt,
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED_DEPOSIT));
+        });
     }
 
     void
@@ -1482,6 +1501,32 @@ private:
             // 0.0625 - 0.05(AMM) - 0.25*0.05=0.0125(fee)=0
             BEAST_EXPECT(expectLine(env, carol, BTC(0)));
         }
+
+        // Tiny deposits
+        testAMM([&](AMM& ammAlice, Env&) {
+            ammAlice.deposit(carol, IOUAmount{1, -3});
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10000000001},
+                STAmount{USD, UINT64_C(10000000001), -6},
+                IOUAmount{10000000001, -3}));
+            BEAST_EXPECT(ammAlice.expectLPTokens(carol, IOUAmount{1, -3}));
+        });
+        testAMM([&](AMM& ammAlice, Env&) {
+            ammAlice.deposit(carol, XRPAmount{1});
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10000000001},
+                USD(10000),
+                IOUAmount{100000000005, -4}));
+            BEAST_EXPECT(ammAlice.expectLPTokens(carol, IOUAmount{5, -4}));
+        });
+        testAMM([&](AMM& ammAlice, Env&) {
+            ammAlice.deposit(carol, STAmount{USD, 1, -10});
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10000),
+                STAmount{USD, UINT64_C(100000000000001), -10},
+                IOUAmount{1000000000000005, -8}));
+            BEAST_EXPECT(ammAlice.expectLPTokens(carol, IOUAmount{5, -8}));
+        });
     }
 
     void
@@ -1846,6 +1891,24 @@ private:
             },
             std::nullopt,
             1000);
+
+        // Tiny withdraw
+        testAMM([&](AMM& ammAlice, Env&) {
+            // XRP amount to withdraw is 0
+            ammAlice.withdraw(
+                alice,
+                IOUAmount{1, -5},
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED_WITHDRAW));
+            // Calculated tokens to withdraw are 0
+            ammAlice.withdraw(
+                alice,
+                std::nullopt,
+                STAmount{USD, 1, -11},
+                std::nullopt,
+                ter(tecAMM_FAILED_WITHDRAW));
+        });
     }
 
     void
@@ -2061,6 +2124,30 @@ private:
             // 0.0625 - 0.025*0.5=0.0125(deposit fee)=0.05
             BEAST_EXPECT(expectLine(env, carol, BTC(0.05)));
         }
+
+        // Tiny withdraw
+        testAMM([&](AMM& ammAlice, Env&) {
+            // By tokens
+            ammAlice.withdraw(alice, IOUAmount{1, -3});
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{9999999999},
+                STAmount{USD, UINT64_C(9999999999), -6},
+                IOUAmount{9999999999, -3}));
+        });
+        testAMM([&](AMM& ammAlice, Env&) {
+            // Single XRP pool
+            ammAlice.withdraw(alice, std::nullopt, XRPAmount{1});
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{9999999999}, USD(10000), IOUAmount{99999999995, -4}));
+        });
+        testAMM([&](AMM& ammAlice, Env&) {
+            // Single USD pool
+            ammAlice.withdraw(alice, std::nullopt, STAmount{USD, 1, -10});
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10000),
+                STAmount{USD, UINT64_C(99999999999999), -10},
+                IOUAmount{999999999999995, -8}));
+        });
     }
 
     void
@@ -6596,6 +6683,87 @@ private:
         testToStrand(all);
         testRIPD1373(all);
         testLoop(all);
+    }
+
+    void
+    testSwap()
+    {
+        testcase("Swap1");
+        using namespace jtx;
+
+        std::uint16_t tfee = 1000;
+        auto const gw = Account("gw");
+        auto const USD = gw["USD"];
+        auto const GBP = gw["GBP"];
+        auto const issueIn = USD;
+        auto const issueOut = GBP;
+        auto const in = STAmount{USD, 1000};
+        auto const out = STAmount{GBP, 1000};
+        auto const assetIn = STAmount{USD, 1};
+        auto const assetOut = STAmount{GBP, 1};
+
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 100; ++i)
+        {
+            auto const fm = 1 - Number{tfee} / 100000;
+            auto const res = in - (in * out) / (in + assetIn * fm);
+        }
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        std::cout << "Number(swapIn) math: "
+                  << std::chrono::duration_cast<std::chrono::microseconds>(
+                         elapsed)
+                         .count()
+                  << std::endl;
+
+        start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 100; ++i)
+        {
+            auto const n1 = STAmount{1};
+            auto const feeMult =
+                n1 - divide(STAmount{tfee}, STAmount{100000}, n1.issue());
+            auto const en = multiply(in, out, issueOut);
+            auto const den = in + multiply(assetIn, feeMult, issueIn);
+            auto const res = out - divide(en, den, issueOut);
+        }
+        elapsed = std::chrono::high_resolution_clock::now() - start;
+        std::cout << "STAmount(swapIn) math: "
+                  << std::chrono::duration_cast<std::chrono::microseconds>(
+                         elapsed)
+                         .count()
+                  << std::endl;
+
+        start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 100; ++i)
+        {
+            auto const fm = 1 - Number{tfee} / 100000;
+            auto const res = ((in * out) / (out - assetOut) - in) / fm;
+        }
+        elapsed = std::chrono::high_resolution_clock::now() - start;
+        std::cout << "Number(swapOut) math: "
+                  << std::chrono::duration_cast<std::chrono::microseconds>(
+                         elapsed)
+                         .count()
+                  << std::endl;
+
+        start = std::chrono::high_resolution_clock::now();
+        for (int i = 0; i < 100; ++i)
+        {
+            auto const n1 = STAmount{1};
+            auto const feeMult =
+                n1 - divide(STAmount{tfee}, STAmount{100000}, n1.issue());
+            auto const en = multiply(in, out, issueIn);
+            auto const den = out + assetOut;
+            auto const res =
+                divide(divide(en, den, issueIn) - in, feeMult, issueIn);
+        }
+        elapsed = std::chrono::high_resolution_clock::now() - start;
+        std::cout << "STAmount(swapOut) math: "
+                  << std::chrono::duration_cast<std::chrono::microseconds>(
+                         elapsed)
+                         .count()
+                  << std::endl;
+
+        BEAST_EXPECT(true);
     }
 
     void

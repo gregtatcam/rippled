@@ -113,6 +113,7 @@ private:
      * @param amountBalance current LP asset1 balance
      * @param amount2Balance current LP asset2 balance
      * @param lptAMMBalance current AMM LPT balance
+     * @param lpTokens current LPT balance
      * @param lpTokensWithdraw amount of tokens to withdraw
      * @return
      */
@@ -123,6 +124,7 @@ private:
         STAmount const& amountBalance,
         STAmount const& amount2Balance,
         STAmount const& lptAMMBalance,
+        STAmount const& lpTokens,
         STAmount const& lpTokensWithdraw);
 
     /** Withdraw both assets (Asset1Out, Asset2Out) with the constraints

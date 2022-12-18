@@ -341,6 +341,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
                 amountBalance,
                 amount2Balance,
                 lptAMMBalance,
+                lpTokens,
                 *lpTokensWithdraw);
         // should not happen.
         JLOG(j_.error()) << "AMM Withdraw: invalid options.";
@@ -437,6 +438,19 @@ AMMWithdraw::withdraw(
         return {tecAMM_FAILED_WITHDRAW, STAmount{}};
     }
 
+    // Withdrawing more than the pool's balance
+    if (amountWithdraw > curBalance || amount2Withdraw > curBalance2)
+    {
+        JLOG(ctx_.journal.debug())
+            << "AMM Withdraw: withdrawing more than the pool's balance "
+            << " curBalance: " << curBalance << " " << amountWithdraw
+            << " curBalance2: " << curBalance2 << " "
+            << (amount2Withdraw ? *amount2Withdraw : STAmount{})
+            << " lpTokensBalance: " << lpTokensWithdraw << " lptBalance "
+            << lpTokensAMMBalance;
+        return {tecAMM_FAILED_WITHDRAW, STAmount{}};
+    }
+
     // Withdraw amountWithdraw
     auto res =
         ammSend(view, ammAccount, account_, amountWithdraw, ctx_.journal);
@@ -505,8 +519,10 @@ AMMWithdraw::equalWithdrawTokens(
     STAmount const& amountBalance,
     STAmount const& amount2Balance,
     STAmount const& lptAMMBalance,
+    STAmount const& lpTokens,
     STAmount const& lpTokensWithdraw)
 {
+    // Withdrawing all tokens in the pool
     if ((ctx_.tx[sfFlags] & tfWithdrawAll) && lpTokensWithdraw == lptAMMBalance)
         return withdraw(
             view,
@@ -516,11 +532,46 @@ AMMWithdraw::equalWithdrawTokens(
             lptAMMBalance,
             lpTokensWithdraw);
     auto const frac = divide(lpTokensWithdraw, lptAMMBalance, noIssue());
+    auto getAmounts = [&](auto const& frac) {
+        return std::make_pair(
+            multiply(amountBalance, frac, amountBalance.issue()),
+            multiply(amount2Balance, frac, amount2Balance.issue()));
+    };
+    auto const [withdrawAmount, withdraw2Amount] = getAmounts(frac);
+    // The amount of requested tokens to withdraw results
+    // in one-sided pool withdrawal
+    if (withdrawAmount == beast::zero || withdraw2Amount == beast::zero)
+    {
+        // LP can request more tokens to withdraw, which doesn't result
+        // in single pool withdrawal
+        if (lpTokensWithdraw < lpTokens)
+        {
+            auto const frac = divide(lpTokens, lptAMMBalance, noIssue());
+            auto const [withdrawAmount, withdraw2Amount] = getAmounts(frac);
+            if (withdrawAmount != beast::zero && withdraw2Amount != beast::zero)
+                return {tecAMM_FAILED_WITHDRAW, STAmount{}};
+            // Total LP tokens withdrawal still result in single pool withdrawal
+        }
+        // LP withdrawing all tokens, treat as the single tokens withdraw
+        // with no fee
+        auto const amount =
+            withdrawAmount == beast::zero ? withdrawAmount : withdraw2Amount;
+        auto const balance =
+            amount.issue() == amountBalance ? amountBalance : amount2Balance;
+        return singleWithdrawTokens(
+            view,
+            ammAccount,
+            balance,
+            lptAMMBalance,
+            amount,
+            lpTokensWithdraw,
+            0);
+    }
     return withdraw(
         view,
         ammAccount,
-        multiply(amountBalance, frac, amountBalance.issue()),
-        multiply(amount2Balance, frac, amount2Balance.issue()),
+        withdrawAmount,
+        withdraw2Amount,
         lptAMMBalance,
         lpTokensWithdraw);
 }
@@ -627,7 +678,7 @@ AMMWithdraw::singleWithdrawTokens(
         return withdraw(
             view,
             ammAccount,
-            toSTAmount(amount.issue(), amountWithdraw),
+            amountWithdraw,
             std::nullopt,
             lptAMMBalance,
             lpTokensWithdraw);

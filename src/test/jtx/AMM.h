@@ -35,6 +35,29 @@ namespace ripple {
 namespace test {
 namespace jtx {
 
+class LPToken
+{
+    IOUAmount tokens_;
+
+public:
+    LPToken(std::uint64_t tokens) : tokens_(tokens)
+    {
+    }
+    LPToken(IOUAmount tokens) : tokens_(tokens)
+    {
+    }
+    IOUAmount const&
+    tokens() const
+    {
+        return tokens_;
+    }
+    STAmount
+    tokens(Issue const& ammIssue) const
+    {
+        return STAmount{tokens_, ammIssue};
+    }
+};
+
 /** Convenience class to test AMM functionality.
  */
 class AMM
@@ -126,7 +149,7 @@ public:
     void
     deposit(
         std::optional<Account> const& account,
-        std::uint64_t tokens,
+        LPToken tokens,
         std::optional<STAmount> const& asset1InDetails = std::nullopt,
         std::optional<std::uint32_t> const& flags = std::nullopt,
         std::optional<ter> const& ter = std::nullopt);
@@ -143,7 +166,7 @@ public:
     void
     deposit(
         std::optional<Account> const& account,
-        std::optional<std::uint64_t> tokens,
+        std::optional<LPToken> tokens,
         std::optional<STAmount> const& asset1In,
         std::optional<STAmount> const& asset2In,
         std::optional<STAmount> const& maxEP,
@@ -155,7 +178,7 @@ public:
     void
     withdraw(
         std::optional<Account> const& account,
-        std::optional<std::uint64_t> const& tokens,
+        std::optional<LPToken> const& tokens,
         std::optional<STAmount> const& asset1OutDetails = std::nullopt,
         std::optional<std::uint32_t> const& flags = std::nullopt,
         std::optional<ter> const& ter = std::nullopt);
@@ -184,7 +207,7 @@ public:
     void
     withdraw(
         std::optional<Account> const& account,
-        std::optional<std::uint64_t> const& tokens,
+        std::optional<LPToken> const& tokens,
         std::optional<STAmount> const& asset1Out,
         std::optional<STAmount> const& asset2Out,
         std::optional<IOUAmount> const& maxEP,
@@ -247,6 +270,14 @@ public:
     {
         if (auto const res = ammRpcInfo(lp))
             return res->toStyledString();
+        return {};
+    }
+
+    Json::Value
+    operator()(AccountID const& lp)
+    {
+        if (auto const res = ammRpcInfo(lp))
+            return *res;
         return {};
     }
 
