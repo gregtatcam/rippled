@@ -122,6 +122,7 @@ public:
     expectLPTokens(AccountID const& account, IOUAmount const& tokens) const;
 
     /**
+     * @param fee expected discounted fee
      * @param timeSlot expected time slot
      * @param purchasedTimeSlot time slot corresponding to the purchased price
      */
@@ -130,6 +131,12 @@ public:
         std::uint32_t fee,
         std::optional<std::uint8_t> timeSlot,
         std::optional<std::uint8_t> purchasedTimeSlot = std::nullopt,
+        std::optional<std::string> const& ledger_index = std::nullopt) const;
+    bool
+    expectAuctionSlot(
+        std::uint32_t fee,
+        std::optional<std::uint8_t> timeSlot,
+        IOUAmount expectedPrice,
         std::optional<std::string> const& ledger_index = std::nullopt) const;
 
     bool
@@ -227,8 +234,10 @@ public:
 
     void
     bid(std::optional<Account> const& account,
-        std::optional<std::variant<int, STAmount>> const& bidMin = std::nullopt,
-        std::optional<std::variant<int, STAmount>> const& bidMax = std::nullopt,
+        std::optional<std::variant<int, IOUAmount, STAmount>> const& bidMin =
+            std::nullopt,
+        std::optional<std::variant<int, IOUAmount, STAmount>> const& bidMax =
+            std::nullopt,
         std::vector<Account> const& authAccounts = {},
         std::optional<std::uint32_t> const& flags = std::nullopt,
         std::optional<jtx::seq> const& seq = std::nullopt,
@@ -331,6 +340,9 @@ private:
         Json::Value const& jv,
         std::optional<jtx::seq> const& seq,
         std::optional<ter> const& ter);
+
+    bool
+    expectAuctionSlot(auto&& cb) const;
 };
 
 namespace amm {

@@ -41,10 +41,6 @@
 
 namespace ripple {
 
-template <typename TIn, typename TOut, typename Offer>
-concept IsOffer = std::is_same_v<Offer, TOffer<TIn, TOut>> ||
-    std::is_same_v<Offer, AMMOffer<TIn, TOut>>;
-
 template <class TIn, class TOut, class TDerived>
 class BookStep : public StepImp<TIn, TOut, BookStep<TIn, TOut, TDerived>>
 {
@@ -233,12 +229,10 @@ private:
         Callback& callback) const;
 
     // Offer is either TOffer or AMMOffer
-    template <typename Offer>
-    requires IsOffer<TIn, TOut, Offer>
     void
     consumeOffer(
         PaymentSandbox& sb,
-        Offer& offer,
+        auto& offer,
         TAmounts<TIn, TOut> const& ofrAmt,
         TAmounts<TIn, TOut> const& stepAmt,
         TOut const& ownerGives) const;
@@ -284,13 +278,11 @@ public:
     using BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>::qualityUpperBound;
 
     // Never limit self cross quality on a payment.
-    template <typename Offer>
-    requires IsOffer<TIn, TOut, Offer>
     bool
     limitSelfCrossQuality(
         AccountID const&,
         AccountID const&,
-        Offer const& offer,
+        auto const& offer,
         std::optional<Quality>&,
         FlowOfferStream<TIn, TOut>&,
         bool) const
@@ -393,13 +385,11 @@ public:
     {
     }
 
-    template <typename Offer>
-    requires IsOffer<TIn, TOut, Offer>
     bool
     limitSelfCrossQuality(
         AccountID const& strandSrc,
         AccountID const& strandDst,
-        Offer const& offer,
+        auto const& offer,
         std::optional<Quality>& ofrQ,
         FlowOfferStream<TIn, TOut>& offers,
         bool const offerAttempted) const
@@ -573,11 +563,10 @@ BookStep<TIn, TOut, TDerived>::offersUsed() const
 }
 
 // Adjust the offer amount and step amount subject to the given input limit
-template <class TIn, class TOut, class Offer>
-requires IsOffer<TIn, TOut, Offer>
+template <class TIn, class TOut>
 static void
 limitStepIn(
-    Offer const& offer,
+    auto const& offer,
     TAmounts<TIn, TOut>& ofrAmt,
     TAmounts<TIn, TOut>& stpAmt,
     TOut& ownerGives,
@@ -598,11 +587,10 @@ limitStepIn(
 }
 
 // Adjust the offer amount and step amount subject to the given output limit
-template <class TIn, class TOut, class Offer>
-requires IsOffer<TIn, TOut, Offer>
+template <class TIn, class TOut>
 static void
 limitStepOut(
-    Offer const& offer,
+    auto const& offer,
     TAmounts<TIn, TOut>& ofrAmt,
     TAmounts<TIn, TOut>& stpAmt,
     TOut& ownerGives,
@@ -789,12 +777,10 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 }
 
 template <class TIn, class TOut, class TDerived>
-template <typename Offer>
-requires IsOffer<TIn, TOut, Offer>
 void
 BookStep<TIn, TOut, TDerived>::consumeOffer(
     PaymentSandbox& sb,
-    Offer& offer,
+    auto& offer,
     TAmounts<TIn, TOut> const& ofrAmt,
     TAmounts<TIn, TOut> const& stepAmt,
     TOut const& ownerGives) const

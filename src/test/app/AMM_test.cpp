@@ -113,7 +113,8 @@ stpath_append_one(STPath& st, jtx::Account const& account)
 }
 
 template <class T>
-std::enable_if_t<std::is_constructible<jtx::Account, T>::value>
+    requires std::is_constructible_v<jtx::Account, T>
+void
 stpath_append_one(STPath& st, T const& t)
 {
     stpath_append_one(st, jtx::Account{t});
@@ -1908,6 +1909,19 @@ private:
                 STAmount{USD, 1, -11},
                 std::nullopt,
                 ter(tecAMM_FAILED_WITHDRAW));
+            ammAlice.deposit(carol, STAmount{USD, 1, -10});
+            ammAlice.withdraw(
+                carol,
+                std::nullopt,
+                STAmount{USD, 1, -9},
+                std::nullopt,
+                ter(tecAMM_FAILED_WITHDRAW));
+            ammAlice.withdraw(
+                carol,
+                std::nullopt,
+                XRPAmount{1},
+                std::nullopt,
+                ter(tecAMM_FAILED_WITHDRAW));
         });
     }
 
@@ -2685,6 +2699,27 @@ private:
             },
             std::nullopt,
             1000);
+
+        // Bid tiny amount
+        testAMM([&](AMM& ammAlice, Env&) {
+            // Can bid a tiny amount
+            auto const tiny = Number{STAmount::cMinValue, STAmount::cMinOffset};
+            ammAlice.bid(alice, IOUAmount{tiny});
+            // Auction slot purchase price is equal to the tiny amount
+            BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 0, IOUAmount{tiny}));
+            // The purchase price is too small to affect the total tokens
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10000), USD(10000), ammAlice.tokens()));
+            // Bid the tiny amount
+            ammAlice.bid(
+                alice, IOUAmount{STAmount::cMinValue, STAmount::cMinOffset});
+            // Pay slightly higher price
+            BEAST_EXPECT(ammAlice.expectAuctionSlot(
+                0, 0, IOUAmount{tiny * Number{105, -2}}));
+            // The purchase price is still too small to affect the total tokens
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10000), USD(10000), ammAlice.tokens()));
+        });
     }
 
     void
