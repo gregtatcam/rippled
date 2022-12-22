@@ -31,12 +31,6 @@
 
 namespace ripple {
 
-TxConsequences
-AMMCreate::makeTxConsequences(PreflightContext const& ctx)
-{
-    return TxConsequences{ctx.tx};
-}
-
 NotTEC
 AMMCreate::preflight(PreflightContext const& ctx)
 {
@@ -59,7 +53,7 @@ AMMCreate::preflight(PreflightContext const& ctx)
     {
         JLOG(ctx.j.debug())
             << "AMM Instance: tokens can not have the same currency/issuer.";
-        return temBAD_AMM_TOKENS;
+        return temAMM_BAD_TOKENS;
     }
 
     if (auto const err = invalidAMMAmount(amount))
@@ -162,7 +156,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     {
         JLOG(ctx.j.debug())
             << "AMM Instance: insufficient funds, " << amount << " " << amount2;
-        return tecUNFUNDED_AMM;
+        return tecAMM_UNFUNDED;
     }
 
     return tesSUCCESS;

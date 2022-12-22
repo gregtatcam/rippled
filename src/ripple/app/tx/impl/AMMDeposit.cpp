@@ -28,12 +28,6 @@
 
 namespace ripple {
 
-TxConsequences
-AMMDeposit::makeTxConsequences(PreflightContext const& ctx)
-{
-    return TxConsequences{ctx.tx};
-}
-
 NotTEC
 AMMDeposit::preflight(PreflightContext const& ctx)
 {
@@ -105,13 +99,13 @@ AMMDeposit::preflight(PreflightContext const& ctx)
     {
         JLOG(ctx.j.debug()) << "AMM Deposit: invalid tokens, same issue."
                             << amount->issue() << " " << amount2->issue();
-        return temBAD_AMM_TOKENS;
+        return temAMM_BAD_TOKENS;
     }
 
     if (lpTokens && *lpTokens <= beast::zero)
     {
         JLOG(ctx.j.debug()) << "AMM Deposit: invalid LPTokens";
-        return temBAD_AMM_TOKENS;
+        return temAMM_BAD_TOKENS;
     }
 
     if (auto const res = invalidAMMAmount(
@@ -193,7 +187,7 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
                 keylet::line(accountID, lpIssue.account, lpIssue.currency));
             return (xrpLiquid(ctx.view, accountID, !sle, ctx.j) >= deposit)
                 ? TER(tesSUCCESS)
-                : (!sle ? tecINSUF_RESERVE_LINE : tecUNFUNDED_AMM);
+                : (!sle ? tecINSUF_RESERVE_LINE : tecAMM_UNFUNDED);
         }
         return (accountHolds(
                     ctx.view,
@@ -202,49 +196,48 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
                     FreezeHandling::fhZERO_IF_FROZEN,
                     ctx.j) >= deposit)
             ? TER(tesSUCCESS)
-            : tecUNFUNDED_AMM;
+            : tecAMM_UNFUNDED;
     };
 
     auto const amount = ctx.tx[~sfAmount];
     auto const amount2 = ctx.tx[~sfAmount2];
 
-    if (amount)
-    {
-        if (auto const ter = requireAuth(ctx.view, amount->issue(), accountID))
+    auto checkAmount = [&](auto const& amount) -> TER {
+        if (amount)
         {
-            JLOG(ctx.j.debug()) << "AMM Deposit: account is not authorized, "
-                                << amount->issue();
-            return ter;
+            // This normally should not happen.
+            // Account is not authorized to hold the assets it's depositing,
+            // or it doesn't even have a trust line for them
+            if (auto const ter =
+                    requireAuth(ctx.view, amount->issue(), accountID))
+            {
+                JLOG(ctx.j.debug())
+                    << "AMM Deposit: account is not authorized, "
+                    << amount->issue();
+                return ter;
+            }
+            if (auto const ter = balance(*amount))
+            {
+                JLOG(ctx.j.debug())
+                    << "AMM Deposit: account has insufficient funds, "
+                    << *amount;
+                return ter;
+            }
         }
-        if (auto const ter = balance(*amount))
-        {
-            JLOG(ctx.j.debug())
-                << "AMM Deposit: account has insufficient funds, " << *amount;
-            return ter;
-        }
-    }
+        return tesSUCCESS;
+    };
 
-    if (amount2)
-    {
-        if (auto const ter = requireAuth(ctx.view, amount2->issue(), accountID))
-        {
-            JLOG(ctx.j.debug()) << "AMM Deposit: account is not authorized, "
-                                << amount2->issue();
-            return ter;
-        }
-        if (auto const ter = balance(*amount2))
-        {
-            JLOG(ctx.j.debug())
-                << "AMM Deposit: account has insufficient funds, " << *amount2;
-            return ter;
-        }
-    }
+    if (auto const ter = checkAmount(amount))
+        return ter;
+
+    if (auto const ter = checkAmount(amount2))
+        return ter;
 
     if (auto const lpTokens = ctx.tx[~sfLPTokenOut];
         lpTokens && lpTokens->issue() != lptAMMBalance.issue())
     {
         JLOG(ctx.j.debug()) << "AMM Deposit: invalid LPTokens.";
-        return temBAD_AMM_TOKENS;
+        return temAMM_BAD_TOKENS;
     }
 
     // Check the reserve for LPToken trustline if not LP.
@@ -402,7 +395,7 @@ AMMDeposit::deposit(
         JLOG(ctx_.journal.debug())
             << "AMM Deposit: account has insufficient balance to deposit "
             << amountDeposit;
-        return {tecUNFUNDED_AMM, STAmount{}};
+        return {tecAMM_UNFUNDED, STAmount{}};
     }
     if (amountDeposit <= beast::zero)
     {
@@ -427,7 +420,7 @@ AMMDeposit::deposit(
             JLOG(ctx_.journal.debug())
                 << "AMM Deposit: account has insufficient balance to deposit "
                 << *amount2Deposit;
-            return {tecUNFUNDED_AMM, STAmount{}};
+            return {tecAMM_UNFUNDED, STAmount{}};
         }
         if (*amount2Deposit <= beast::zero)
         {
@@ -478,15 +471,24 @@ AMMDeposit::equalDepositTokens(
     STAmount const& lptAMMBalance,
     STAmount const& lpTokensDeposit)
 {
-    auto const frac =
-        divide(lpTokensDeposit, lptAMMBalance, lptAMMBalance.issue());
-    return deposit(
-        view,
-        ammAccount,
-        multiply(amountBalance, frac, amountBalance.issue()),
-        multiply(amount2Balance, frac, amount2Balance.issue()),
-        lptAMMBalance,
-        lpTokensDeposit);
+    try
+    {
+        auto const frac =
+            divide(lpTokensDeposit, lptAMMBalance, lptAMMBalance.issue());
+        return deposit(
+            view,
+            ammAccount,
+            multiply(amountBalance, frac, amountBalance.issue()),
+            multiply(amount2Balance, frac, amount2Balance.issue()),
+            lptAMMBalance,
+            lpTokensDeposit);
+    }
+    catch (std::exception const& e)
+    {
+        JLOG(j_.error()) << "AMMDeposit::equalDepositTokens exception "
+                         << e.what();
+    }
+    return {tecINTERNAL, STAmount{}};
 }
 
 /** Proportional deposit of pool assets with the constraints on the maximum
