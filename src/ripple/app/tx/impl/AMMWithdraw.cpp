@@ -336,6 +336,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         return std::make_pair(tecAMM_FAILED_WITHDRAW, STAmount{});
     }();
 
+    // AMM is deleted if zero tokens balance
     if (result == tesSUCCESS && newLPTokenBalance != beast::zero)
     {
         (*ammSle)->setFieldAmount(sfLPTokenBalance, newLPTokenBalance);
@@ -462,7 +463,7 @@ AMMWithdraw::withdraw(
         }
     }
 
-    auto const actualWithdraw = [&]() {
+    auto const actualTokensWithdraw = [&]() {
         if (!(ctx_.tx[sfFlags] & (tfWithdrawAll | tfOneAssetWithdrawAll)))
         {
             // New pool LPToken balance
@@ -473,18 +474,22 @@ AMMWithdraw::withdraw(
         }
         return lpTokensWithdraw;
     }();
-    if (actualWithdraw <= beast::zero || actualWithdraw > lpTokens)
+    if (actualTokensWithdraw <= beast::zero || actualTokensWithdraw > lpTokens)
     {
         JLOG(ctx_.journal.debug())
             << "AMM Withdraw: failed to withdraw, invalid LP tokens "
-            << " tokens: " << actualWithdraw << " " << lpTokens << " "
+            << " tokens: " << actualTokensWithdraw << " " << lpTokens << " "
             << lpTokensAMMBalance;
         return {tecAMM_FAILED_WITHDRAW, STAmount{}};
     }
 
     // Withdraw LP tokens
     res = redeemIOU(
-        view, account_, actualWithdraw, actualWithdraw.issue(), ctx_.journal);
+        view,
+        account_,
+        actualTokensWithdraw,
+        actualTokensWithdraw.issue(),
+        ctx_.journal);
     if (res != tesSUCCESS)
     {
         JLOG(ctx_.journal.debug())
@@ -492,10 +497,10 @@ AMMWithdraw::withdraw(
         return {res, STAmount{}};
     }
 
-    if (actualWithdraw == lpTokensAMMBalance)
+    if (actualTokensWithdraw == lpTokensAMMBalance)
         return {deleteAccount(view, ammAccount), STAmount{}};
 
-    return {tesSUCCESS, lpTokensAMMBalance - actualWithdraw};
+    return {tesSUCCESS, lpTokensAMMBalance - actualTokensWithdraw};
 }
 
 /** Proportional withdrawal of pool assets for the amount of LPTokens.
@@ -547,7 +552,7 @@ AMMWithdraw::equalWithdrawTokens(
             }
             // LP withdrawing all tokens, treat as the single tokens withdraw
             // with no fee
-            auto const amount = withdrawAmount == beast::zero ? withdrawAmount
+            auto const amount = withdrawAmount != beast::zero ? withdrawAmount
                                                               : withdraw2Amount;
             auto const balance = amount.issue() == amountBalance.issue()
                 ? amountBalance

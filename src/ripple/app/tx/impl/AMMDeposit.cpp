@@ -442,7 +442,7 @@ AMMDeposit::deposit(
     // Actual tokens to deposit
     // Amount types keep 16 digits. Summing up tokens from LP results in
     // loosing precision in the total balance; i.e. the resulting total balance
-    // is less than the actual sum of lp tokens. To adjust for this we subtract
+    // is less than the actual sum of lp tokens. To adjust for this, subtract
     // old tokens balance from the new one to cancel out the precision loss.
     // A similar adjustment is done in withdraw.
     auto const lpTokensDepositActual = newLPTokenBalance - lpTokensAMMBalance;

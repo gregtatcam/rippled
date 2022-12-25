@@ -224,7 +224,7 @@ AMM::expectAuctionSlot(
             purchasedTimeSlot = timeSlot;
 
         auto const lastPurchasePrice =
-            !timeSlot && !purchasedTimeSlot ? IOUAmount{0} : lastPurchasePrice_;
+            !purchasedTimeSlot ? IOUAmount{0} : lastPurchasePrice_;
         auto const expectedPrice =
             expectedPurchasePrice(purchasedTimeSlot, lastPurchasePrice);
         return slotFee == fee &&
