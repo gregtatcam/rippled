@@ -229,10 +229,11 @@ private:
         Callback& callback) const;
 
     // Offer is either TOffer or AMMOffer
+    template <typename Offer>
     void
     consumeOffer(
         PaymentSandbox& sb,
-        auto& offer,
+        Offer& offer,
         TAmounts<TIn, TOut> const& ofrAmt,
         TAmounts<TIn, TOut> const& stepAmt,
         TOut const& ownerGives) const;
@@ -278,11 +279,12 @@ public:
     using BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>::qualityUpperBound;
 
     // Never limit self cross quality on a payment.
+    template <typename Offer>
     bool
     limitSelfCrossQuality(
         AccountID const&,
         AccountID const&,
-        auto const& offer,
+        Offer const& offer,
         std::optional<Quality>&,
         FlowOfferStream<TIn, TOut>&,
         bool) const
@@ -385,11 +387,12 @@ public:
     {
     }
 
+    template <typename Offer>
     bool
     limitSelfCrossQuality(
         AccountID const& strandSrc,
         AccountID const& strandDst,
-        auto const& offer,
+        Offer const& offer,
         std::optional<Quality>& ofrQ,
         FlowOfferStream<TIn, TOut>& offers,
         bool const offerAttempted) const
@@ -563,10 +566,10 @@ BookStep<TIn, TOut, TDerived>::offersUsed() const
 }
 
 // Adjust the offer amount and step amount subject to the given input limit
-template <class TIn, class TOut>
+template <class TIn, class TOut, class Offer>
 static void
 limitStepIn(
-    auto const& offer,
+    Offer const& offer,
     TAmounts<TIn, TOut>& ofrAmt,
     TAmounts<TIn, TOut>& stpAmt,
     TOut& ownerGives,
@@ -587,10 +590,10 @@ limitStepIn(
 }
 
 // Adjust the offer amount and step amount subject to the given output limit
-template <class TIn, class TOut>
+template <class TIn, class TOut, class Offer>
 static void
 limitStepOut(
-    auto const& offer,
+    Offer const& offer,
     TAmounts<TIn, TOut>& ofrAmt,
     TAmounts<TIn, TOut>& stpAmt,
     TOut& ownerGives,
@@ -777,10 +780,11 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 }
 
 template <class TIn, class TOut, class TDerived>
+template <class Offer>
 void
 BookStep<TIn, TOut, TDerived>::consumeOffer(
     PaymentSandbox& sb,
-    auto& offer,
+    Offer& offer,
     TAmounts<TIn, TOut> const& ofrAmt,
     TAmounts<TIn, TOut> const& stepAmt,
     TOut const& ownerGives) const

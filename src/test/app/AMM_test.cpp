@@ -113,8 +113,7 @@ stpath_append_one(STPath& st, jtx::Account const& account)
 }
 
 template <class T>
-    requires std::is_constructible_v<jtx::Account, T>
-void
+std::enable_if_t<std::is_constructible<jtx::Account, T>::value>
 stpath_append_one(STPath& st, T const& t)
 {
     stpath_append_one(st, jtx::Account{t});
