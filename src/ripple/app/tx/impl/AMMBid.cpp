@@ -26,7 +26,6 @@
 #include <ripple/protocol/AMM.h>
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/STAccount.h>
-#include <ripple/protocol/STIssue.h>
 #include <ripple/protocol/TER.h>
 #include <ripple/protocol/TxFlags.h>
 
