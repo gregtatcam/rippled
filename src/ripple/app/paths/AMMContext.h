@@ -40,34 +40,19 @@ private:
     constexpr static std::uint8_t MaxIterations = 30;
     // Tx account owner is required to get the AMM trading fee in BookStep
     AccountID account_;
-    // true if payment has multiple paths
-    bool multiPath_{false};
     // Is true if AMM offer is consumed at a payment engine iteration.
     bool ammUsed_{false};
     // Counter of payment engine iterations with consumed AMM
     std::uint16_t ammIters_{0};
 
 public:
-    AMMContext(AccountID const& account, bool multiPath)
-        : account_(account), multiPath_(multiPath)
+    AMMContext(AccountID const& account) : account_(account)
     {
     }
     ~AMMContext() = default;
     AMMContext(AMMContext const&) = delete;
     AMMContext&
     operator=(AMMContext const&) = delete;
-
-    bool
-    multiPath() const
-    {
-        return multiPath_;
-    }
-
-    void
-    setMultiPath(bool fs)
-    {
-        multiPath_ = fs;
-    }
 
     void
     setAMMUsed()

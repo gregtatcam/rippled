@@ -35,15 +35,7 @@ template <typename TIn, typename TOut>
 class AMMOffer;
 
 /** AMMLiquidity class provides AMM offers to BookStep class.
- * The offers are generated in two ways. If there are multiple
- * paths specified to the payment transaction then the offers
- * are generated based on the Fibonacci sequence with
- * at most four payment engine iterations consuming AMM offers.
- * These offers behave the same way as CLOB offers in that if
- * there is a limiting step, then the offers are adjusted
- * based on their quality.
- * If there is only one path specified in the payment transaction
- * then the offers are generated based on the competing CLOB offer
+ * The offers are generated based on the competing CLOB offer
  * quality. In this case the offer's size is set in such a way
  * that the new AMM's pool spot price quality is equal to the CLOB's
  * offer quality.
@@ -52,7 +44,6 @@ template <typename TIn, typename TOut>
 class AMMLiquidity
 {
 private:
-    inline static const Number InitialFibSeqPct = Number(5) / 20000;
     AMMContext& ammContext_;
     AccountID const ammAccountID_;
     std::uint32_t const tradingFee_;
@@ -91,12 +82,6 @@ public:
         return ammAccountID_;
     }
 
-    bool
-    multiPath() const
-    {
-        return ammContext_.multiPath();
-    }
-
     std::uint32_t
     tradingFee() const
     {
@@ -126,14 +111,6 @@ private:
      */
     TAmounts<TIn, TOut>
     fetchBalances(ReadView const& view) const;
-
-    /** Generate AMM offers with the offer size based on Fibonacci sequence.
-     * The sequence corresponds to the payment engine iterations with AMM
-     * liquidity. Iterations that don't consume AMM offers don't count.
-     * Max out at four iterations with AMM offers.
-     */
-    TAmounts<TIn, TOut>
-    generateFibSeqOffer(TAmounts<TIn, TOut> const& balances) const;
 };
 
 }  // namespace ripple

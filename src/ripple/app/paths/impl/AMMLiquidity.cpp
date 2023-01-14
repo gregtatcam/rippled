@@ -53,42 +53,6 @@ AMMLiquidity<TIn, TOut>::fetchBalances(ReadView const& view) const
     return TAmounts{get<TIn>(assetIn), get<TOut>(assetOut)};
 }
 
-template <typename TIn, typename TOut>
-TAmounts<TIn, TOut>
-AMMLiquidity<TIn, TOut>::generateFibSeqOffer(
-    TAmounts<TIn, TOut> const& balances) const
-{
-    auto const n = ammContext_.curIters();
-    TAmounts<TIn, TOut> cur{};
-    Number x{};
-    Number y{};
-
-    cur.in = toAmount<TIn>(
-        getIssue(balances.in),
-        InitialFibSeqPct * initialBalances_.in,
-        Number::rounding_mode::upward);
-    cur.out = swapAssetIn(initialBalances_, cur.in, tradingFee_);
-    y = cur.out;
-    if (n == 0)
-        return cur;
-
-    std::uint16_t i = 0;
-    auto const total = [&]() {
-        Number total{};
-        do
-        {
-            total = x + y;
-            x = y;
-            y = total;
-        } while (++i < n);
-        return total;
-    }();
-    cur.out = toAmount<TOut>(
-        getIssue(balances.out), total, Number::rounding_mode::downward);
-    cur.in = swapAssetOut(balances, cur.out, tradingFee_);
-    return cur;
-}
-
 template <typename T>
 constexpr T
 maxAmount()
@@ -135,16 +99,7 @@ AMMLiquidity<TIn, TOut>::getOffer(
     }
 
     auto offer = [&]() -> std::optional<AMMOffer<TIn, TOut>> {
-        if (ammContext_.multiPath())
-        {
-            auto const amounts = generateFibSeqOffer(balances);
-            if (clobQuality && Quality{amounts} < clobQuality)
-                return std::nullopt;
-            return AMMOffer<TIn, TOut>(
-                *this, amounts, std::nullopt, Quality{amounts});
-        }
-        else if (
-            auto const amounts = clobQuality
+        if (auto const amounts = clobQuality
                 ? changeSpotPriceQuality(balances, *clobQuality, tradingFee_)
                 : balances)
         {
@@ -160,10 +115,11 @@ AMMLiquidity<TIn, TOut>::getOffer(
                     {maxAmount<TIn>(),
                      swapAssetIn(balances, maxAmount<TIn>(), tradingFee_)},
                     balances,
-                    Quality{balances});
+                    Quality{balances},
+                    clobQuality);
             }
             return AMMOffer<TIn, TOut>(
-                *this, *amounts, balances, Quality{*amounts});
+                *this, *amounts, balances, Quality{*amounts}, clobQuality);
         }
         return std::nullopt;
     }();

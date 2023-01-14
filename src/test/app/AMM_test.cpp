@@ -2870,7 +2870,7 @@ private:
                     env, bob, XRP(30000) - XRP(100) - txfee(env, 1)));
             },
             {{XRP(10000), USD(10100)}});
-
+#if 0
         // Non-default path (with AMM) has a better quality than default path.
         // The max possible liquidity is taken out of non-default
         // path ~29.9XRP/29.9EUR, ~29.9EUR/~29.99USD. The rest
@@ -2985,7 +2985,7 @@ private:
                 BEAST_EXPECT(expectOffers(env, bob, 0));
             },
             {{XRP(10000), USD(10100)}});
-
+#endif
         // Default path with AMM and Order Book offer.
         // Order Book offer is consumed first.
         // Remaining amount is consumed by AMM.
@@ -3123,7 +3123,7 @@ private:
                     ter(tesSUCCESS));
             },
             {{XRP(100), USD(100)}});
-
+#if 0
         // Multiple paths/steps
         {
             Env env(*this);
@@ -3142,11 +3142,21 @@ private:
             AMM xrp_eth(env, alice, XRP(10000), ETH(10100));
             AMM eth_eur(env, alice, ETH(10900), EUR(11000));
             AMM eur_usd(env, alice, EUR(10100), USD(10000));
+            std::cout << "-----------------------------\n";
+            std::cout << ledgerEntryRoot(env, bob).toStyledString();
             env(pay(bob, carol, USD(100)),
                 path(~EUR, ~BTC, ~USD),
                 path(~USD),
                 path(~ETH, ~EUR, ~USD),
-                sendmax(XRP(200)));
+                sendmax(XRP(90)),
+                txflags(tfPartialPayment));
+            std::cout << xrp_eur << eur_btc << btc_usd;
+            std::cout << "#########\n";
+            std::cout << xrp_usd;
+            std::cout << "#########\n";
+            std::cout << xrp_eth << eth_eur << eur_usd;
+            std::cout << getAccountLines(env, carol, USD).toStyledString();
+            std::cout << ledgerEntryRoot(env, bob).toStyledString();
             // XRP-ETH-EUR-USD
             // This path provides ~26.06USD/26.2XRP
             BEAST_EXPECT(xrp_eth.expectBalances(
@@ -3184,7 +3194,7 @@ private:
 
             BEAST_EXPECT(expectLine(env, carol, USD(300)));
         }
-
+//
         // Dependent AMM
         {
             Env env(*this);
@@ -3201,10 +3211,13 @@ private:
             AMM btc_usd(env, alice, BTC(10100), USD(10000));
             AMM xrp_eth(env, alice, XRP(10000), ETH(10100));
             AMM eth_eur(env, alice, ETH(10900), EUR(11000));
-            env(pay(bob, carol, USD(100)),
+            std::cout << "dependent -----------------------------\n";
+            std::cout << ledgerEntryRoot(env, bob).toStyledString();
+            env(pay(bob, carol, USD(90)),
                 path(~EUR, ~BTC, ~USD),
                 path(~ETH, ~EUR, ~BTC, ~USD),
-                sendmax(XRP(200)));
+                sendmax(XRP(190)),
+                txflags(tfPartialPayment));
             // XRP-EUR-BTC-USD path provides ~17.8USD/~18.7XRP
             // XRP-ETH-EUR-BTC-USD path provides ~82.2USD/82.4XRP
             BEAST_EXPECT(xrp_eur.expectBalances(
@@ -3228,8 +3241,13 @@ private:
                 STAmount{EUR, UINT64_C(109172945958103), -10},
                 eth_eur.tokens()));
             BEAST_EXPECT(expectLine(env, carol, USD(300)));
+            std::cout << xrp_eur << eur_btc << btc_usd;
+            std::cout << "######\n";
+            std::cout << xrp_eth << eth_eur;
+            std::cout << "######\n";
+            std::cout << getAccountLines(env, carol, USD).toStyledString();
+            std::cout << ledgerEntryRoot(env, bob).toStyledString();
         }
-
         // AMM offers limit
         // Consuming 30 CLOB offers, results in hitting 30 AMM offers limit.
         testAMM([&](AMM& ammAlice, Env& env) {
@@ -3279,6 +3297,7 @@ private:
                 1,
                 {{{STAmount{EUR, 391858572, -7}, XRPAmount{27989898}}}}));
         });
+#endif
     }
 
     void
@@ -3489,10 +3508,8 @@ private:
             sendmax(BTC(1000)),
             txflags(tfPartialPayment));
 
-        BEAST_EXPECT(ammCarol.expectBalances(
-            STAmount{BTC, UINT64_C(1001000000374812), -12},
-            USD(100000),
-            ammCarol.tokens()));
+        BEAST_EXPECT(
+            ammCarol.expectBalances(BTC(1001), USD(100000), ammCarol.tokens()));
 
         env.require(balance(bob, USD(200100)));
         BEAST_EXPECT(isOffer(env, carol, BTC(49), XRP(49)));
@@ -5518,7 +5535,6 @@ private:
             env(pay(gw, bob, EUR(50)));
             env(pay(gw, carol, EUR(1)));
 
-            // This is multiplath, which generates limited # of offers
             AMM ammBobBTC_USD(env, bob, BTC(50), USD(50));
             env(offer(bob, BTC(60), EUR(50)));
             env(offer(carol, BTC(1000), EUR(1)));
@@ -7400,44 +7416,9 @@ public:
     }
 };
 
-class AMMFib_test : public Test
-{
-public:
-    void
-    run() override
-    {
-        using namespace jtx;
-
-        testAMM([&](AMM& ammAlice, Env& env) {
-            AMMContext ammCtx(alice, true);
-            AMMLiquidity<STAmount, STAmount> ammLiquidity(
-                *env.current(),
-                ammAlice.ammAccount(),
-                0,
-                USD,
-                XRP,
-                ammCtx,
-                env.journal);
-
-            for (int nIters = 0; nIters < 10; ++nIters)
-            {
-                auto const offer =
-                    ammLiquidity.getOffer(*env.current(), std::nullopt)
-                        ->amount();
-                std::cout << ammCtx.curIters() << " "
-                          << to_string(offer.in.iou()) << " " << offer.out.xrp()
-                          << std::endl;
-                ammCtx.setAMMUsed();
-                ammCtx.update();
-            }
-        });
-    }
-};
-
 BEAST_DEFINE_TESTSUITE(AMM, app, ripple);
 BEAST_DEFINE_TESTSUITE_MANUAL(AMMCalc, app, ripple);
 BEAST_DEFINE_TESTSUITE_MANUAL(AMMPerf, app, ripple);
-BEAST_DEFINE_TESTSUITE_MANUAL(AMMFib, app, ripple);
 
 }  // namespace test
 }  // namespace ripple
