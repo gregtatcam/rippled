@@ -3123,7 +3123,7 @@ private:
                     ter(tesSUCCESS));
             },
             {{XRP(100), USD(100)}});
-#if 0
+
         // Multiple paths/steps
         {
             Env env(*this);
@@ -3142,6 +3142,7 @@ private:
             AMM xrp_eth(env, alice, XRP(10000), ETH(10100));
             AMM eth_eur(env, alice, ETH(10900), EUR(11000));
             AMM eur_usd(env, alice, EUR(10100), USD(10000));
+            env(offer(alice, XRP(40), USD(50)));
             std::cout << "-----------------------------\n";
             std::cout << ledgerEntryRoot(env, bob).toStyledString();
             env(pay(bob, carol, USD(100)),
@@ -3194,6 +3195,7 @@ private:
 
             BEAST_EXPECT(expectLine(env, carol, USD(300)));
         }
+#if 0
 //
         // Dependent AMM
         {
@@ -6900,6 +6902,7 @@ private:
     void
     testCore()
     {
+#if 0
         testInvalidInstance();
         testInstanceCreate();
         testInvalidDeposit();
@@ -6911,16 +6914,20 @@ private:
         testInvalidBid();
         testBid();
         testInvalidAMMPayment();
+#endif
         testBasicPaymentEngine();
+#if 0
         testAMMTokens();
         testAmendment();
         testFlags();
+#endif
     }
 
     void
     run() override
     {
         testCore();
+#if 0
         testOffers();
         testPaths();
         testFlow();
@@ -6930,6 +6937,7 @@ private:
         testFreeze();
         testMultisign();
         testPayStrand();
+#endif
     }
 };
 

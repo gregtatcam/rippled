@@ -621,7 +621,7 @@ private:
      * remainingOut or remainingIn. Return the quality.
      */
     template <typename T>
-    Quality
+    std::pair<Quality, T>
     reqFromActiveStrands(
         StrandsInstQ const& sortedStrands,
         StrandsIter& it,
@@ -696,7 +696,7 @@ private:
         //           << (it - cbegin);
 
         // endQ is seated
-        return *endQ;
+        return {*endQ, actual};
     }
 
     /** Get output from the strands at the given quality.
@@ -765,7 +765,7 @@ private:
 
         // std::cout << "limitOutputByInput: remIn: " << to_string(remainingIn);
 
-        auto const endQ = reqFromActiveStrands(
+        auto const [endQ, actual] = reqFromActiveStrands(
             sortedStrands,
             it,
             remainingIn,
@@ -773,18 +773,29 @@ private:
             &ActiveStrands::inFromStrands,
             &InstQFunction::splitInReqBetweenStrands);
 
+        // Entire remainingIn is used by one strand. We could figure
+        // the output corresponding to this remainingIn. But due to
+        // limited precision, the calculated output might be slightly
+        // less than required. This may result in extra payment
+        // engine iterations until the output converges to the
+        // requested amount. To avoid this, return the entire
+        // remainingOut. This way if there is a limit on
+        // remainingIn, it'll get adjusted in the forward iteration.
+        if (actual == remainingIn && (it - sortedStrands.cbegin()) == 1)
+            return remainingOut;
+
         // If remainingIn limits the output then find the output generated
         // by the active strands from the quality corresponding
         // to the remainingIn split between the active strands.
         if (auto const output =
                 outFromStrands(sortedStrands.cbegin(), it, endQ, issueOut);
-            output < beast::zero)
+            output <= beast::zero)
         {
             // std::cout << " out " << to_string(output) << " remOut "
             //           << to_string(remainingOut) << std::endl;
             return toAmount<TOut>(issueOut, Number{0});
         }
-        else if (output < remainingOut)
+        else if (output <= remainingOut)
         {
             // std::cout << " out " << to_string(output) << " remOut "
             //           << to_string(remainingOut) << std::endl;
@@ -825,7 +836,7 @@ private:
             StrandsIter it;
 
             // std::cout << "limitOutput: remOut " << to_string(remainingOut);
-            auto const endQ = reqFromActiveStrands(
+            auto const [endQ, actual] = reqFromActiveStrands(
                 sortedStrands,
                 it,
                 remainingOut,
@@ -834,7 +845,8 @@ private:
                 &InstQFunction::splitOutReqBetweenStrands);
             // std::cout << std::endl;
 
-            output = toAmount<TOut>(issueOut, bestQ.outFromQ(endQ));
+            if (actual < remainingOut && (it - sortedStrands.cbegin()) != 1)
+                output = toAmount<TOut>(issueOut, bestQ.outFromQ(endQ));
         }
 
         if (limitQuality)
