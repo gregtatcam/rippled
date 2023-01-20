@@ -213,6 +213,11 @@ public:
     Quality
     spotQuality() const;
 
+    /** Return the slope
+     */
+    Number
+    slope() const;
+
     /** Return qLimit
      */
     std::optional<Quality> const&

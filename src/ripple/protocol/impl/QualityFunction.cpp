@@ -141,6 +141,12 @@ InstQFunction::spotQuality() const
     return toQuality(b_);
 }
 
+Number
+InstQFunction::slope() const
+{
+    return m_;
+}
+
 std::optional<Quality> const&
 InstQFunction::qLimit() const
 {

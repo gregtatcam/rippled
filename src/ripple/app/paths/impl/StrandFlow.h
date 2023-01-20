@@ -510,8 +510,11 @@ public:
                         // higher qualities first
                         // const quality first if equal qualities
                         // and one is AMM
+                        // or higher slope if equal and both AMM
                         return lq > rq ||
-                            (lq == rq && liq.isConstQ() && !riq.isConstQ());
+                            (lq == rq &&
+                             ((liq.isConstQ() && !riq.isConstQ()) ||
+                              (liq.slope() > riq.slope())));
                     });
                 next_.clear();
                 next_.reserve(strandQuals.size());
@@ -647,13 +650,27 @@ private:
 
             for (; it != cend; ++it)
             {
+                // Get all strands at the same quality as the best quality
+                // and update the endQ
+                if (it->first.spotQuality() == cbegin->first.spotQuality())
+                {
+                    endQ = [&]() -> std::optional<Quality> {
+                        if (it->first.qLimit() && endQ)
+                            return std::max(*it->first.qLimit(), *endQ);
+                        else if (endQ)
+                            return endQ;
+                        return it->first.qLimit();
+                    }();
+                    continue;
+                }
                 // Stop at the first const quality or the endq.
                 // Once the spot price quality (SPQ) of the const quality
                 // strand is reached then this strand has the best quality.
                 // Endq (or quality limit) is somewhat similar. A non-const
                 // quality strand with a quality limit may change to a const
                 // quality strand once AMM offer is consumed.
-                if (it->first.isConstQ() || it->first.spotQuality() <= endQ)
+                else if (
+                    it->first.isConstQ() || it->first.spotQuality() <= endQ)
                 {
                     endQ = endQ ? std::min(it->first.spotQuality(), *endQ)
                                 : it->first.spotQuality();
