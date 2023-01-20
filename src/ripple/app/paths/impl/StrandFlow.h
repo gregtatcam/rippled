@@ -862,7 +862,10 @@ private:
                 &InstQFunction::splitOutReqBetweenStrands);
             // std::cout << std::endl;
 
-            if (actual < remainingOut && (it - sortedStrands.cbegin()) != 1)
+            // std::cout << "limitOutput: remOut " << to_string(remainingOut)
+            //           << " actual " << to_string(actual) << std::endl;
+
+            if (actual <= remainingOut && (it - sortedStrands.cbegin()) > 1)
                 output = toAmount<TOut>(issueOut, bestQ.outFromQ(endQ));
         }
 
