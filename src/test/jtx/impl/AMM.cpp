@@ -37,6 +37,14 @@ number(STAmount const& a)
     return a;
 }
 
+static IOUAmount
+initialTokens(STAmount const& asset1, STAmount const& asset2)
+{
+    auto const product = number(asset1) * number(asset2);
+    return (
+        IOUAmount)(product.mantissa() >= 0 ? root2(product) : root2(-product));
+}
+
 AMM::AMM(
     Env& env,
     Account const& account,
@@ -53,7 +61,7 @@ AMM::AMM(
     , creatorAccount_(account)
     , asset1_(asset1)
     , asset2_(asset2)
-    , initialLPTokens_((IOUAmount)root2(number(asset1) * number(asset2)))
+    , initialLPTokens_(initialTokens(asset1, asset2))
     , ter_(ter)
     , log_(log)
     , lastPurchasePrice_(0)
