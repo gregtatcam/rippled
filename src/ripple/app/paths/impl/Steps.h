@@ -190,18 +190,20 @@ public:
     virtual std::pair<std::optional<Quality>, DebtDirection>
     qualityUpperBound(ReadView const& v, DebtDirection prevStepDir) const = 0;
 
-    /** Get AvgQFunction. Used to find the maximum output from
-     * the best quality strand at a given payment engine iteration
-     * while optimizing overall payment quality.
+    /** Get QualityFunction. Used in one path optimization where
+     * the quality function is non-constant (has AMM) and there is
+     * limitQuality. QualityFunction allows calculation of
+     * required path output given requested limitQuality.
      * All steps, except for BookStep have the default
      * implementation.
      */
-    virtual std::pair<std::optional<AvgQFunction>, DebtDirection>
+    virtual std::pair<std::optional<QualityFunction>, DebtDirection>
     getQF(ReadView const& v, DebtDirection prevStepDir) const
     {
         if (auto const res = qualityUpperBound(v, prevStepDir); res.first)
             return {
-                AvgQFunction{*res.first, AvgQFunction::CLOBTag{}}, res.second};
+                QualityFunction{*res.first, QualityFunction::CLOBLikeTag{}},
+                res.second};
         else
             return {std::nullopt, res.second};
     }

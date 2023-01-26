@@ -81,7 +81,7 @@ AMMCreate::preflight(PreflightContext const& ctx)
 FeeUnit64
 AMMCreate::calculateBaseFee(ReadView const& view, STTx const& tx)
 {
-    // The fee required for AMMCreate is one owner reserve.  But the
+    // The fee required for AccountDelete is one owner reserve.  But the
     // owner reserve is stored in drops.  We need to convert it to fee units.
     Fees const& fees{view.fees()};
     std::pair<bool, FeeUnit64> const mulDivResult{

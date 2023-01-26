@@ -350,31 +350,6 @@ qualityUpperBound(ReadView const& v, Strand const& strand)
 };
 /// @endcond
 
-inline std::optional<AvgQFunction>
-avgQFunction(ReadView const& v, Strand const& strand)
-{
-    std::optional<AvgQFunction> stepQF;
-    AvgQFunction qf;
-    DebtDirection dir = DebtDirection::issues;
-    for (auto const& step : strand)
-    {
-        if (std::tie(stepQF, dir) = step->getQF(v, dir); stepQF)
-            qf.combineWithNext(*stepQF);
-        else
-            return std::nullopt;
-    }
-    return qf;
-}
-
-inline std::optional<InstQFunction>
-instQFunction(ReadView const& v, Strand const& strand)
-{
-    if (auto const qf = avgQFunction(v, strand); !qf)
-        return std::nullopt;
-    else
-        return InstQFunction(*qf);
-}
-
 /// @cond INTERNAL
 /** Limit remaining out only if one strand and limitQuality is included.
  * Targets one path payment with AMM where the average quality is linear
@@ -392,24 +367,31 @@ limitOut(
     TOutAmt const& remainingOut,
     Quality const& limitQuality)
 {
-    auto const qf = avgQFunction(v, strand);
-    if (!qf)
-        return remainingOut;
+    std::optional<QualityFunction> stepQF;
+    QualityFunction qf;
+    DebtDirection dir = DebtDirection::issues;
+    for (auto const& step : strand)
+    {
+        if (std::tie(stepQF, dir) = step->getQF(v, dir); stepQF)
+            qf.combineWithNext(*stepQF);
+        else
+            return remainingOut;
+    }
 
-    // AvgQFunction is constant
-    if (qf->isConstQ())
+    // QualityFunction is constant
+    if (qf.isConst())
         return remainingOut;
 
     auto const out = [&]() {
-        if (auto const out = qf->outFromQ(limitQuality); out == 0)
+        if (auto const out = qf.outFromAvgQ(limitQuality); !out)
             return remainingOut;
         else if constexpr (std::is_same_v<TOutAmt, XRPAmount>)
-            return (XRPAmount)out;
+            return (XRPAmount)*out;
         else if constexpr (std::is_same_v<TOutAmt, IOUAmount>)
-            return IOUAmount{out};
+            return IOUAmount{*out};
         else
             return STAmount{
-                remainingOut.issue(), out.mantissa(), out.exponent()};
+                remainingOut.issue(), out->mantissa(), out->exponent()};
     }();
     return std::min(out, remainingOut);
 };
@@ -423,57 +405,36 @@ limitOut(
    strand is added to `next_`. The strands in `next_` are searched after the
    current best liquidity is used.
  */
-template <typename TIn, typename TOut>
 class ActiveStrands
 {
-    using StrandsItem = std::pair<InstQFunction, Strand const*>;
-    using StrandsInstQ = std::vector<StrandsItem>;
-    using StrandsIter = StrandsInstQ::const_iterator;
-
 private:
     // Strands to be explored for liquidity
     std::vector<Strand const*> cur_;
     // Strands that may be explored for liquidity on the next iteration
     std::vector<Strand const*> next_;
-    // Initial remaining out amount
-    TOut remainingOut_;
-    // Initial remaining in amount
-    std::optional<TIn> remainingIn_;
 
 public:
-    ActiveStrands(
-        std::vector<Strand> const& strands,
-        std::optional<TIn> const& remainingIn,
-        TOut const& remainingOut)
+    ActiveStrands(std::vector<Strand> const& strands)
     {
         cur_.reserve(strands.size());
         next_.reserve(strands.size());
         for (auto& strand : strands)
             next_.push_back(&strand);
-        remainingOut_ = remainingOut;
-        remainingIn_ = remainingIn;
     }
 
     // Start a new iteration in the search for liquidity
-    // Set the current strands to the strands in `next_`.
-    // Return max output amount that this strand can
-    // generate.
-    TOut
-    activateNext(
-        ReadView const& v,
-        std::optional<Quality> const& limitQuality,
-        std::optional<TIn> const& remainingIn,
-        TOut const& remainingOut)
+    // Set the current strands to the strands in `next_`
+    void
+    activateNext(ReadView const& v, std::optional<Quality> const& limitQuality)
     {
-        TOut output = remainingOut;
         // add the strands in `next_` to `cur_`, sorted by theoretical quality.
         // Best quality first.
         cur_.clear();
         if (v.rules().enabled(featureFlowSortStrands) && !next_.empty())
         {
-            StrandsInstQ strandQuals;
+            std::vector<std::pair<Quality, Strand const*>> strandQuals;
             strandQuals.reserve(next_.size());
-            if (next_.size() > 1 || (next_.size() == 1 && limitQuality))
+            if (next_.size() > 1)  // no need to sort one strand
             {
                 for (Strand const* strand : next_)
                 {
@@ -482,9 +443,9 @@ public:
                         // should not happen
                         continue;
                     }
-                    if (auto const qual = instQFunction(v, *strand))
+                    if (auto const qual = qualityUpperBound(v, *strand))
                     {
-                        if (limitQuality && qual->spotQuality() < *limitQuality)
+                        if (limitQuality && *qual < *limitQuality)
                         {
                             // If a strand's quality is ever over limitQuality
                             // it is no longer part of the candidate set. Note
@@ -503,51 +464,18 @@ public:
                     strandQuals.begin(),
                     strandQuals.end(),
                     [](auto const& lhs, auto const& rhs) {
-                        auto const& liq = std::get<InstQFunction>(lhs);
-                        auto const& riq = std::get<InstQFunction>(rhs);
-                        auto const lq = liq.spotQuality();
-                        auto const rq = riq.spotQuality();
                         // higher qualities first
-                        // const quality first if equal qualities
-                        // and one is AMM
-                        // or higher slope if equal and both AMM
-                        return lq > rq ||
-                            (lq == rq &&
-                             ((liq.isConstQ() && !riq.isConstQ()) ||
-                              (liq.slope() > riq.slope())));
+                        return std::get<Quality>(lhs) > std::get<Quality>(rhs);
                     });
                 next_.clear();
                 next_.reserve(strandQuals.size());
                 for (auto const& sq : strandQuals)
                 {
-#if 0
-                    auto const strand = get<Strand const*>(sq);
-                    std::cout
-                        << (Number(1) /
-                            std::get<InstQFunction>(sq).spotQuality().rate())
-                        << " ";
-                    for (auto const& step : *strand)
-                    {
-                        if (step->bookStepBook())
-                            std::cout
-                                << to_string(step->bookStepBook()->in.currency)
-                                << "/"
-                                << to_string(step->bookStepBook()->out.currency)
-                                << " ";
-                    }
-#endif
-
                     next_.push_back(std::get<Strand const*>(sq));
                 }
-                //                std::cout << std::endl;
             }
-            if (strandQuals.size() > 0)
-                output = limitOutput(
-                    strandQuals, limitQuality, remainingIn, remainingOut);
         }
         std::swap(cur_, next_);
-
-        return output;
     }
 
     Strand const*
@@ -588,297 +516,6 @@ public:
         if (i >= next_.size())
             return;
         next_.erase(next_.begin() + i);
-    }
-
-private:
-    template <typename T>
-    using ReqFromStrands = T (*)(
-        StrandsIter const&,
-        StrandsIter const&,
-        Quality const&,
-        Issue const&);
-    using InstQStrandPair = std::pair<InstQFunction, Strand const*>;
-    using InstQGetter =
-        std::function<InstQFunction const&(InstQStrandPair const&)>;
-    using SplitBetweenStrands = Quality (*)(
-        StrandsIter const&,
-        StrandsIter const&,
-        Number const&,
-        InstQGetter const&);
-
-    /** Return relative diff. actual must be <= remaining.
-     */
-    static Number
-    relDiff(Number const& actual, Number const& remaining)
-    {
-        if (remaining == 0 || actual > remaining)
-            Throw<std::runtime_error>("relDiff 0 remaining");
-        return (remaining - actual) / remaining;
-    }
-
-    /** Given the remaining amount and the collection of quality functions
-     * compute the quality such that if that quality were used, the sum
-     * of all the amounts from all the quality functions (while respecting the
-     * quality limits) is as close to the remaining amount as possible, without
-     * going over that amount. Where the remaining amount is either
-     * remainingOut or remainingIn. Return the quality.
-     */
-    template <typename T>
-    std::pair<Quality, T>
-    reqFromActiveStrands(
-        StrandsInstQ const& sortedStrands,
-        StrandsIter& it,
-        T const& remaining,
-        T const& initialRemaining,
-        ReqFromStrands<T> reqFromStrands,
-        SplitBetweenStrands splitBetweenStrands)
-    {
-        auto const pct99_9 = Number(999, -3);
-        auto const cbegin = sortedStrands.cbegin();
-        auto const cend = sortedStrands.cend();
-        auto endQ = std::get<InstQFunction>(*cbegin).qLimit();
-        auto const remIssue = getIssue(remaining);
-
-        auto actual = [&]() {
-            auto actual = remaining;
-            it = cbegin + 1;
-
-            // If a small amount is left then use one strand
-            // for the entire remaining amount.
-            if (relDiff(remaining, initialRemaining) > pct99_9)
-                return remaining;
-
-            for (; it != cend; ++it)
-            {
-                // Get all strands at the same quality as the best quality
-                // and update the endQ
-                if (it->first.spotQuality() == cbegin->first.spotQuality())
-                {
-                    endQ = [&]() -> std::optional<Quality> {
-                        if (it->first.qLimit() && endQ)
-                            return std::max(*it->first.qLimit(), *endQ);
-                        else if (endQ)
-                            return endQ;
-                        return it->first.qLimit();
-                    }();
-                    continue;
-                }
-                // Stop at the first const quality or the endq.
-                // Once the spot price quality (SPQ) of the const quality
-                // strand is reached then this strand has the best quality.
-                // Endq (or quality limit) is somewhat similar. A non-const
-                // quality strand with a quality limit may change to a const
-                // quality strand once AMM offer is consumed.
-                else if (
-                    it->first.isConstQ() || it->first.spotQuality() <= endQ)
-                {
-                    endQ = endQ ? std::min(it->first.spotQuality(), *endQ)
-                                : it->first.spotQuality();
-                    // std::cout << " reqQ " << (Number(1) / endQ->rate()) << "
-                    // ";
-                    actual = reqFromStrands(cbegin, it, *endQ, remIssue);
-                    break;
-                }
-                endQ = [&]() -> std::optional<Quality> {
-                    if (it->first.qLimit() && endQ)
-                        return std::min(*it->first.qLimit(), *endQ);
-                    else if (endQ)
-                        return endQ;
-                    return it->first.qLimit();
-                }();
-                // std::cout << " reqQ "
-                //           << (Number(1) / it->first.spotQuality().rate())
-                //           << " ";
-                actual = reqFromStrands(
-                    cbegin, it, it->first.spotQuality(), remIssue);
-                if (actual >= remaining)
-                    break;
-            }
-            return actual;
-        }();
-
-        // Got all strands or more actual than requested remaining -
-        // split entire remaining between the strands.
-        if (it == cend || actual > remaining)
-            actual = remaining;
-
-        InstQGetter getter(
-            [](InstQStrandPair const& Q) -> InstQFunction const& {
-                return Q.first;
-            });
-        auto const q = splitBetweenStrands(cbegin, it, actual, getter);
-        endQ = endQ ? std::min(q, *endQ) : q;
-
-        // std::cout << " actual " << to_string(actual) << " #strands "
-        //           << (it - cbegin);
-
-        // endQ is seated
-        return {*endQ, actual};
-    }
-
-    /** Get output from the strands at the given quality.
-     */
-    static TOut
-    outFromStrands(
-        StrandsIter const& cbeginIt,
-        StrandsIter const& cendIt,
-        Quality const& q,
-        Issue const& issueOut)
-    {
-        Number output{0};
-        for (auto it = cbeginIt; it != cendIt; ++it)
-            output += std::get<InstQFunction>(*it).outFromQ(q);
-        return toAmount<TOut>(issueOut, output);
-    }
-
-    /** Get input from the strands at the given quality.
-     */
-    static TIn
-    inFromStrands(
-        StrandsIter const& cbeginIt,
-        StrandsIter const& cendIt,
-        Quality const& q,
-        Issue const& issueIn)
-    {
-        Number in{0};
-        for (auto it = cbeginIt; it != cendIt; ++it)
-            in += std::get<InstQFunction>(*it).inFromQ(q);
-        return toAmount<TIn>(issueIn, in);
-    }
-
-    /** When calculating the quality to generate required output or input
-     * amount from active independent strands, it is expected that when each
-     * strand's liquidity is consumed, all active strands end up at the same
-     * instant quality. However, due to the round-off, those qualities
-     * may differ by a tiny amount resulting in multiple payment engine
-     * iterations for the actual to reach the remaining amount. To address this
-     * scenario, ignore the actual if it differs from the remaining by
-     * a tiny amount.
-     */
-    template <typename T>
-    static T
-    roundOutput(T const& actual, T const& remaining)
-    {
-        Number const pct0_001(1, -5);
-        if (relDiff(actual, remaining) < pct0_001)
-            return remaining;
-        return actual;
-    }
-
-    /** Find the output limited by the input. This function is called
-     * if SendMax is included in the payment. SendMax may limit the output
-     * generated by the strand. SendMax itself can be limited by other
-     * factors such as the number of strands factored in the calculation or
-     * the strand's quality range limit.
-     */
-    std::optional<TOut>
-    limitOutputByInput(
-        StrandsInstQ const& sortedStrands,
-        TIn const& remainingIn,
-        TOut const& remainingOut)
-    {
-        auto const issueOut = getIssue(remainingOut);
-        StrandsInstQ::const_iterator it;
-
-        // std::cout << "limitOutputByInput: remIn: " << to_string(remainingIn);
-
-        auto const [endQ, actual] = reqFromActiveStrands(
-            sortedStrands,
-            it,
-            remainingIn,
-            *remainingIn_,
-            &ActiveStrands::inFromStrands,
-            &InstQFunction::splitInReqBetweenStrands);
-
-        // Entire remainingIn is used by one strand. We could figure
-        // the output corresponding to this remainingIn. But due to
-        // limited precision, the calculated output might be slightly
-        // less than required. This may result in extra payment
-        // engine iterations until the output converges to the
-        // requested amount. To avoid this, return the entire
-        // remainingOut. This way if there is a limit on
-        // remainingIn, it'll get adjusted in the forward iteration.
-        if (actual == remainingIn && (it - sortedStrands.cbegin()) == 1)
-            return remainingOut;
-
-        // If remainingIn limits the output then find the output generated
-        // by the active strands from the quality corresponding
-        // to the remainingIn split between the active strands.
-        if (auto const output =
-                outFromStrands(sortedStrands.cbegin(), it, endQ, issueOut);
-            output <= beast::zero)
-        {
-            // std::cout << " out " << to_string(output) << " remOut "
-            //           << to_string(remainingOut) << std::endl;
-            return toAmount<TOut>(issueOut, Number{0});
-        }
-        else if (output <= remainingOut)
-        {
-            // std::cout << " out " << to_string(output) << " remOut "
-            //           << to_string(remainingOut) << std::endl;
-            return toAmount<TOut>(
-                issueOut,
-                std::get<InstQFunction>(sortedStrands[0]).outFromQ(endQ));
-        }
-        // std::cout << std::endl;
-        return std::nullopt;
-    }
-
-    /** Find the max output that the best quality strand may generate.
-     * The output may be limited by remainingIn or other factors (see above).
-     */
-    TOut
-    limitOutput(
-        StrandsInstQ const& sortedStrands,
-        std::optional<Quality> const& limitQuality,
-        std::optional<TIn> const& remainingIn,
-        TOut const& remainingOut)
-    {
-        auto& bestQ = std::get<InstQFunction>(sortedStrands[0]);
-        // Best Q Strand has const quality. Don't have to set
-        // the output limit.
-        if (bestQ.isConstQ())
-            return remainingOut;
-
-        TOut output{remainingOut};
-        auto const issueOut = getIssue(remainingOut);
-        if (sortedStrands.size() > 1)
-        {
-            if (remainingIn)
-            {
-                if (auto const output = limitOutputByInput(
-                        sortedStrands, *remainingIn, remainingOut))
-                    return roundOutput(*output, remainingOut);
-            }
-            StrandsIter it;
-
-            // std::cout << "limitOutput: remOut " << to_string(remainingOut);
-            auto const [endQ, actual] = reqFromActiveStrands(
-                sortedStrands,
-                it,
-                remainingOut,
-                remainingOut_,
-                &ActiveStrands::outFromStrands,
-                &InstQFunction::splitOutReqBetweenStrands);
-            // std::cout << std::endl;
-
-            // std::cout << "limitOutput: remOut " << to_string(remainingOut)
-            //           << " actual " << to_string(actual) << std::endl;
-
-            if (actual <= remainingOut && (it - sortedStrands.cbegin()) > 1)
-                output = toAmount<TOut>(issueOut, bestQ.outFromQ(endQ));
-        }
-
-        if (limitQuality)
-            output = std::min(
-                output,
-                toAmount<TOut>(issueOut, bestQ.outFromAvgQ(*limitQuality)));
-
-        if (output <= beast::zero)
-            return toAmount<TOut>(issueOut, Number{0});
-        if (output < remainingOut)
-            return roundOutput(output, remainingOut);
-        return remainingOut;
     }
 };
 /// @endcond
@@ -966,8 +603,7 @@ flow(
     PaymentSandbox sb(&baseView);
 
     // non-dry strands
-    ActiveStrands<TInAmt, TOutAmt> activeStrands(
-        strands, remainingIn, remainingOut);
+    ActiveStrands activeStrands(strands);
 
     // Keeping a running sum of the amount in the order they are processed
     // will not give the best precision. Keep a collection so they may be summed
@@ -987,22 +623,7 @@ flow(
     // These offers only need to be removed if the payment is not
     // successful
     boost::container::flat_set<uint256> ofrsToRmOnFail;
-#if 0
-    std::unordered_map<std::string, Number> in;
-    std::unordered_map<std::string, Number> out;
-    Number totIn{0};
-    Number totOut{0};
-    auto key = [](Strand const& strand) {
-        std::stringstream str;
-        for (auto const& step : strand)
-        {
-            if (step->bookStepBook())
-                str << to_string(step->bookStepBook()->in.currency) << "/"
-                    << to_string(step->bookStepBook()->out.currency) << " ";
-        }
-        return str.str();
-    };
-#endif
+
     while (remainingOut > beast::zero &&
            (!remainingIn || *remainingIn > beast::zero))
     {
@@ -1012,8 +633,17 @@ flow(
             return {telFAILED_PROCESSING, std::move(ofrsToRmOnFail)};
         }
 
-        auto const limitRemainingOut = activeStrands.activateNext(
-            sb, limitQuality, remainingIn, remainingOut);
+        activeStrands.activateNext(sb, limitQuality);
+
+        ammContext.setMultiPath(activeStrands.size() > 1);
+
+        // Limit only if one strand and limitQuality
+        auto const limitRemainingOut = [&]() {
+            if (activeStrands.size() == 1 && limitQuality)
+                if (auto const strand = activeStrands.get(0))
+                    return limitOut(sb, *strand, remainingOut, *limitQuality);
+            return remainingOut;
+        }();
 
         boost::container::flat_set<uint256> ofrsToRm;
         std::optional<BestStrand> best;
@@ -1068,11 +698,6 @@ flow(
             JLOG(j.trace())
                 << "New flow iter (iter, in, out): " << curTry - 1 << " "
                 << to_string(f.in) << " " << to_string(f.out);
-#if 0
-            std::cout << "New flow iter (iter, in, out): " << curTry - 1 << " "
-                      << to_string(f.in) << " " << to_string(f.out)
-                      << std::endl;
-#endif
 
             if (limitQuality && q < *limitQuality)
             {
@@ -1145,19 +770,6 @@ flow(
             JLOG(j.trace()) << "Best path: in: " << to_string(best->in)
                             << " out: " << to_string(best->out)
                             << " remainingOut: " << to_string(remainingOut);
-#if 0
-            std::cout << "Best path: " << key(best->strand)
-                      << " in: " << to_string(best->in)
-                      << " out: " << to_string(best->out)
-                      << " remainingOut: " << to_string(remainingOut)
-                      << " remainingIn: "
-                      << (remainingIn ? to_string(*remainingIn) : "")
-                      << std::endl;
-            in[key(best->strand)] += best->in;
-            out[key(best->strand)] += best->out;
-            totIn += best->in;
-            totOut += best->out;
-#endif
 
             best->sb.apply(sb);
             ammContext.update();
@@ -1182,22 +794,12 @@ flow(
         if (shouldBreak)
             break;
     }
-#if 0
-    for (auto const& [key, val] : in)
-        std::cout << key << " " << val << " " << out[key] << std::endl;
-    std::cout << "total: " << totIn << " " << totOut << " q "
-              << (totOut / totIn) << std::endl;
-#endif
 
     auto const actualOut = sum(savedOuts);
     auto const actualIn = sum(savedIns);
 
     JLOG(j.trace()) << "Total flow: in: " << to_string(actualIn)
                     << " out: " << to_string(actualOut);
-#if 0
-    std::cout << "Total flow: in: " << to_string(actualIn)
-              << " out: " << to_string(actualOut) << std::endl;
-#endif
 
     if (actualOut != outReq)
     {

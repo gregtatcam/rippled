@@ -149,7 +149,7 @@ public:
     qualityUpperBound(ReadView const& v, DebtDirection prevStepDir)
         const override;
 
-    std::pair<std::optional<AvgQFunction>, DebtDirection>
+    std::pair<std::optional<QualityFunction>, DebtDirection>
     getQF(ReadView const& v, DebtDirection prevStepDir) const override;
 
     std::uint32_t
@@ -256,7 +256,7 @@ private:
     tipOfferQuality(ReadView const& view) const;
     // If seated then it is either AMM or CLOB quality function,
     // whichever is a better quality.
-    std::optional<AvgQFunction>
+    std::optional<QualityFunction>
     tipOfferQualityF(ReadView const& view) const;
 };
 
@@ -538,7 +538,7 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
 }
 
 template <class TIn, class TOut, class TDerived>
-std::pair<std::optional<AvgQFunction>, DebtDirection>
+std::pair<std::optional<QualityFunction>, DebtDirection>
 BookStep<TIn, TOut, TDerived>::getQF(
     ReadView const& v,
     DebtDirection prevStepDir) const
@@ -550,12 +550,12 @@ BookStep<TIn, TOut, TDerived>::getQF(
         return {std::nullopt, dir};
 
     // AMM - no fee adjustment
-    if (!res->isConstQ())
+    if (!res->isConst())
         return {*res, dir};
 
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
         v, *(res->quality()), prevStepDir);
-    return {AvgQFunction{q, AvgQFunction::CLOBTag{}}, dir};
+    return {QualityFunction{q, QualityFunction::CLOBLikeTag{}}, dir};
 }
 
 template <class TIn, class TOut, class TDerived>
@@ -870,13 +870,14 @@ BookStep<TIn, TOut, TDerived>::tipOfferQuality(ReadView const& view) const
 }
 
 template <class TIn, class TOut, class TDerived>
-std::optional<AvgQFunction>
+std::optional<QualityFunction>
 BookStep<TIn, TOut, TDerived>::tipOfferQualityF(ReadView const& view) const
 {
     if (auto const res = tip(view); !res)
         return std::nullopt;
     else if (std::holds_alternative<Quality>(*res))
-        return AvgQFunction{std::get<Quality>(*res), AvgQFunction::CLOBTag{}};
+        return QualityFunction{
+            std::get<Quality>(*res), QualityFunction::CLOBLikeTag{}};
     else
         return std::get<AMMOffer<TIn, TOut>>(*res).getQF();
 }

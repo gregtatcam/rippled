@@ -27,13 +27,11 @@ AMMOffer<TIn, TOut>::AMMOffer(
     AMMLiquidity<TIn, TOut> const& ammLiquidity,
     TAmounts<TIn, TOut> const& amounts,
     std::optional<TAmounts<TIn, TOut>> const& balances,
-    Quality const& quality,
-    std::optional<Quality> const& clobQuality)
+    Quality const& quality)
     : ammLiquidity_(ammLiquidity)
     , amounts_(amounts)
     , balances_(balances)
     , quality_(quality)
-    , qLimit_(clobQuality)
 {
 }
 
@@ -87,6 +85,8 @@ AMMOffer<TIn, TOut>::limitOut(
     TAmounts<TIn, TOut> const& offrAmt,
     TOut const& limit) const
 {
+    if (ammLiquidity_.multiPath())
+        return quality().ceil_out(offrAmt, limit);
     return {swapAssetOut(*balances_, limit, ammLiquidity_.tradingFee()), limit};
 }
 
@@ -96,18 +96,19 @@ AMMOffer<TIn, TOut>::limitIn(
     TAmounts<TIn, TOut> const& offrAmt,
     TIn const& limit) const
 {
+    if (ammLiquidity_.multiPath())
+        return quality().ceil_in(offrAmt, limit);
     return {limit, swapAssetIn(*balances_, limit, ammLiquidity_.tradingFee())};
 }
 
 template <typename TIn, typename TOut>
-AvgQFunction
+QualityFunction
 AMMOffer<TIn, TOut>::getQF() const
 {
-    return AvgQFunction{
-        *balances_,
-        qLimit_,
-        ammLiquidity_.tradingFee(),
-        AvgQFunction::AMMTag{}};
+    if (ammLiquidity_.multiPath())
+        return QualityFunction{quality(), QualityFunction::CLOBLikeTag{}};
+    return QualityFunction{
+        *balances_, ammLiquidity_.tradingFee(), QualityFunction::AMMTag{}};
 }
 
 template class AMMOffer<STAmount, STAmount>;
