@@ -3309,6 +3309,27 @@ private:
                 1,
                 {{{STAmount{EUR, 391858572, -7}, XRPAmount{27989898}}}}));
         });
+
+        // Offer crossing with AMM and another offer. AMM has a better
+        // quality and is consumed first.
+        {
+            Env env(*this);
+            fund(env, gw, {alice, carol, bob}, XRP(30000), {USD(30000)});
+            env(offer(bob, XRP(100), USD(100.001)));
+            AMM ammAlice(env, alice, XRP(10000), USD(10100));
+            env(offer(carol, USD(100), XRP(100)));
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRPAmount{10049825373},
+                STAmount{USD, UINT64_C(1004992586949302), -11},
+                ammAlice.tokens()));
+            BEAST_EXPECT(expectOffers(
+                env,
+                bob,
+                1,
+                {{{XRPAmount{50074629},
+                   STAmount{USD, UINT64_C(5007513050698), -11}}}}));
+            BEAST_EXPECT(expectLine(env, carol, USD(30100)));
+        }
     }
 
     void
@@ -4714,16 +4735,16 @@ private:
 
         // AMM is consumed up to the first cam Offer quality
         BEAST_EXPECT(ammCarol.expectBalances(
-            STAmount{A_BUX, UINT64_C(3093541659651603), -13},
-            STAmount{B_BUX, UINT64_C(3200215509984419), -13},
+            STAmount{A_BUX, UINT64_C(3093541659651604), -13},
+            STAmount{B_BUX, UINT64_C(3200215509984418), -13},
             ammCarol.tokens()));
         BEAST_EXPECT(expectOffers(
             env,
             cam,
             1,
             {{Amounts{
-                STAmount{B_BUX, UINT64_C(200215509984419), -13},
-                STAmount{A_BUX, UINT64_C(200215509984419), -13}}}}));
+                STAmount{B_BUX, UINT64_C(200215509984418), -13},
+                STAmount{A_BUX, UINT64_C(200215509984418), -13}}}}));
     }
 
     void

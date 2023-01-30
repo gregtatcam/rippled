@@ -161,13 +161,11 @@ AMM::ammRpcInfo(
     return std::nullopt;
 }
 
-bool
-AMM::expectBalances(
-    STAmount const& asset1,
-    STAmount const& asset2,
-    IOUAmount const& lpt,
-    std::optional<AccountID> const& account,
-    std::optional<std::string> const& ledger_index) const
+std::tuple<STAmount, STAmount, STAmount>
+AMM::balances(
+    Issue const& issue1,
+    Issue const& issue2,
+    std::optional<AccountID> const& account) const
 {
     if (auto const amm =
             env_.current()->read(keylet::amm(asset1_.issue(), asset2_.issue())))
@@ -176,16 +174,30 @@ AMM::expectBalances(
         auto const [asset1Balance, asset2Balance] = ammPoolHolds(
             *env_.current(),
             ammAccountID,
-            asset1.issue(),
-            asset2.issue(),
+            issue1,
+            issue2,
             FreezeHandling::fhIGNORE_FREEZE,
             env_.journal);
         auto const lptAMMBalance = account
             ? ammLPHolds(*env_.current(), *amm, *account, env_.journal)
             : amm->getFieldAmount(sfLPTokenBalance);
-        return asset1 == asset1Balance && asset2 == asset2Balance &&
-            lptAMMBalance == STAmount{lpt, lptIssue_};
+        return {asset1Balance, asset2Balance, lptAMMBalance};
     }
+    return {STAmount{}, STAmount{}, STAmount{}};
+}
+
+bool
+AMM::expectBalances(
+    STAmount const& asset1,
+    STAmount const& asset2,
+    IOUAmount const& lpt,
+    std::optional<AccountID> const& account,
+    std::optional<std::string> const& ledger_index) const
+{
+    auto const [asset1Balance, asset2Balance, lptAMMBalance] =
+        balances(asset1.issue(), asset2.issue(), account);
+    return asset1 == asset1Balance && asset2 == asset2Balance &&
+        lptAMMBalance == STAmount{lpt, lptIssue_};
     return false;
 }
 
