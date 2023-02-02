@@ -134,6 +134,11 @@ private:
      */
     TAmounts<TIn, TOut>
     generateFibSeqOffer(TAmounts<TIn, TOut> const& balances) const;
+
+    /** Generate max offer
+     */
+    AMMOffer<TIn, TOut>
+    maxOffer(TAmounts<TIn, TOut> const& balances) const;
 };
 
 }  // namespace ripple

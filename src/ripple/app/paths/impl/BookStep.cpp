@@ -735,25 +735,10 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 
     // At any payment engine iteration, AMM offer can only be consumed once.
     auto tryAMM = [&](std::optional<Quality> const& quality) -> bool {
-        try
-        {
-            if (auto ammOffer = getAMMOffer(sb, quality);
-                ammOffer && !execOffer(*ammOffer))
-                return false;
-            return true;
-        }
-        catch (std::overflow_error const& ex)
-        {
-            if (std::string(ex.what()).starts_with("Number"))
-                throw FlowException(tecPATH_DRY, ex.what());
-            throw ex;
-        }
-        catch (std::runtime_error const& ex)
-        {
-            if (std::string(ex.what()).starts_with("changeSpotPriceQuality"))
-                throw FlowException(tecINTERNAL, ex.what());
-            throw ex;
-        }
+        if (auto ammOffer = getAMMOffer(sb, quality);
+            ammOffer && !execOffer(*ammOffer))
+            return false;
+        return true;
     };
 
     if (offers.step())
@@ -821,25 +806,9 @@ BookStep<TIn, TOut, TDerived>::getAMMOffer(
     ReadView const& view,
     std::optional<Quality> const& clobQuality) const
 {
-    try
-    {
-        return ammLiquidity_ ? std::optional<AMMOffer<TIn, TOut>>(
-                                   ammLiquidity_->getOffer(view, clobQuality))
-                             : std::nullopt;
-    }
-    catch (std::overflow_error const& ex)
-    {
-        if (std::string(ex.what()).starts_with("Number"))
-            throw FlowException(tecPATH_DRY, ex.what());
-        throw ex;
-    }
-    catch (std::runtime_error const& ex)
-    {
-        if (std::string(ex.what()).starts_with("changeSpotPriceQuality"))
-            throw FlowException(tecINTERNAL, ex.what());
-        throw ex;
-    }
-    return std::nullopt;
+    return ammLiquidity_ ? std::optional<AMMOffer<TIn, TOut>>(
+                               ammLiquidity_->getOffer(view, clobQuality))
+                         : std::nullopt;
 }
 
 template <class TIn, class TOut, class TDerived>
