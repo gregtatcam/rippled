@@ -17,7 +17,7 @@
 */
 //==============================================================================
 
-#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMHelpers.h>
 
 #include <cmath>
 

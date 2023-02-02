@@ -19,7 +19,7 @@
 
 #include <ripple/app/tx/impl/AMMBid.h>
 
-#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMHelpers.h>
 #include <ripple/app/misc/AMMUtils.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/ledger/View.h>

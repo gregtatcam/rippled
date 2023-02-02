@@ -20,7 +20,7 @@
 #include <ripple/app/tx/impl/AMMCreate.h>
 
 #include <ripple/app/ledger/OrderBookDB.h>
-#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMHelpers.h>
 #include <ripple/app/misc/AMMUtils.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/ledger/View.h>

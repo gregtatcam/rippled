@@ -19,7 +19,7 @@
 
 #include <ripple/app/tx/impl/AMMVote.h>
 
-#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMHelpers.h>
 #include <ripple/app/misc/AMMUtils.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/protocol/AMMCore.h>

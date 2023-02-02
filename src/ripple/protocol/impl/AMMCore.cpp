@@ -68,7 +68,7 @@ invalidAMMAsset(
 {
     if (badCurrency() == issue.currency)
         return temBAD_CURRENCY;
-    if (isXRP(issue) && !issue.account.isNonZero())
+    if (isXRP(issue) && issue.account.isNonZero())
         return temBAD_ISSUER;
     if (pair && issue != pair->first && issue != pair->second)
         return temAMM_BAD_TOKENS;

@@ -20,7 +20,7 @@
 #ifndef RIPPLE_APP_TX_AMMLIQUIDITY_H_INCLUDED
 #define RIPPLE_APP_TX_AMMLIQUIDITY_H_INCLUDED
 
-#include "ripple/app/misc/AMMFormulas.h"
+#include "ripple/app/misc/AMMHelpers.h"
 #include "ripple/app/misc/AMMUtils.h"
 #include "ripple/app/paths/AMMContext.h"
 #include "ripple/basics/Log.h"

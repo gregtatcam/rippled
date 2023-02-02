@@ -19,7 +19,7 @@
 
 #include <ripple/app/tx/impl/AMMDeposit.h>
 
-#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMHelpers.h>
 #include <ripple/app/misc/AMMUtils.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/ledger/View.h>
@@ -122,7 +122,7 @@ AMMDeposit::preflight(PreflightContext const& ctx)
         }
     }
 
-    if (amount)
+    if (amount2)
     {
         if (auto const res = invalidAMMAmount(
                 *amount2, std::make_optional(std::make_pair(asset, asset2))))

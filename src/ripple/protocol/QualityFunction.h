@@ -20,7 +20,7 @@
 #ifndef RIPPLE_PROTOCOL_QUALITYFUNCTION_H_INCLUDED
 #define RIPPLE_PROTOCOL_QUALITYFUNCTION_H_INCLUDED
 
-#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMHelpers.h>
 #include <ripple/basics/Number.h>
 
 namespace ripple {

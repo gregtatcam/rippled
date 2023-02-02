@@ -19,7 +19,7 @@
 
 #include <ripple/app/tx/impl/AMMWithdraw.h>
 
-#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMHelpers.h>
 #include <ripple/app/misc/AMMUtils.h>
 #include <ripple/basics/Number.h>
 #include <ripple/ledger/Sandbox.h>
