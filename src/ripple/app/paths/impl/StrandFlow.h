@@ -392,7 +392,7 @@ limitOut(
         if (auto const out = qf->outFromAvgQ(limitQuality); !out)
             return remainingOut;
         else if constexpr (std::is_same_v<TOutAmt, XRPAmount>)
-            return (XRPAmount)*out;
+            return XRPAmount{*out};
         else if constexpr (std::is_same_v<TOutAmt, IOUAmount>)
             return IOUAmount{*out};
         else
