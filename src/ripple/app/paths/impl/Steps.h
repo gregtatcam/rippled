@@ -198,7 +198,7 @@ public:
      * implementation.
      */
     virtual std::pair<std::optional<QualityFunction>, DebtDirection>
-    getQF(ReadView const& v, DebtDirection prevStepDir) const
+    getQualityF(ReadView const& v, DebtDirection prevStepDir) const
     {
         if (auto const res = qualityUpperBound(v, prevStepDir); res.first)
             return {

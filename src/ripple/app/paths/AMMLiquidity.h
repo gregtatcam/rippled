@@ -38,7 +38,7 @@ class AMMOffer;
  * The offers are generated in two ways. If there are multiple
  * paths specified to the payment transaction then the offers
  * are generated based on the Fibonacci sequence with
- * at most four payment engine iterations consuming AMM offers.
+ * a limited number of payment engine iterations consuming AMM offers.
  * These offers behave the same way as CLOB offers in that if
  * there is a limiting step, then the offers are adjusted
  * based on their quality.
@@ -130,7 +130,7 @@ private:
     /** Generate AMM offers with the offer size based on Fibonacci sequence.
      * The sequence corresponds to the payment engine iterations with AMM
      * liquidity. Iterations that don't consume AMM offers don't count.
-     * Max out at four iterations with AMM offers.
+     * The number of iterations with AMM offers is limited.
      */
     TAmounts<TIn, TOut>
     generateFibSeqOffer(TAmounts<TIn, TOut> const& balances) const;

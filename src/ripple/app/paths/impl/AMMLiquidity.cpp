@@ -77,7 +77,14 @@ AMMLiquidity<TIn, TOut>::generateFibSeqOffer(
         Number total{};
         do
         {
-            total = x + y;
+            try
+            {
+                total = x + y;
+            }
+            catch (std::overflow_error const& e)
+            {
+                return Number{};
+            }
             x = y;
             y = total;
         } while (++i < n);

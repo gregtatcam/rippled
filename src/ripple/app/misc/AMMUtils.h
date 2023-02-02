@@ -77,7 +77,7 @@ ammLPHolds(
 
 /** Check if the account requires authorization.
  *  Return tecNO_AUTH or tecNO_LINE if it does
- *  and tesSUCCESS otherwise.
+ *  and tsSUCCESS otherwise.
  */
 TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);

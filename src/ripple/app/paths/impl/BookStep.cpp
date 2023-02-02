@@ -96,7 +96,6 @@ public:
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
-        , ammLiquidity_{}
         , j_(ctx.j)
     {
         if (auto const ammSle = ctx.view.read(keylet::amm(in, out)))
@@ -150,7 +149,7 @@ public:
         const override;
 
     std::pair<std::optional<QualityFunction>, DebtDirection>
-    getQF(ReadView const& v, DebtDirection prevStepDir) const override;
+    getQualityF(ReadView const& v, DebtDirection prevStepDir) const override;
 
     std::uint32_t
     offersUsed() const override;
@@ -229,11 +228,11 @@ private:
         Callback& callback) const;
 
     // Offer is either TOffer or AMMOffer
-    template <typename Offer>
+    template <template <typename, typename> typename Offer>
     void
     consumeOffer(
         PaymentSandbox& sb,
-        Offer& offer,
+        Offer<TIn, TOut>& offer,
         TAmounts<TIn, TOut> const& ofrAmt,
         TAmounts<TIn, TOut> const& stepAmt,
         TOut const& ownerGives) const;
@@ -279,12 +278,12 @@ public:
     using BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>::qualityUpperBound;
 
     // Never limit self cross quality on a payment.
-    template <typename Offer>
+    template <template <typename, typename> typename Offer>
     bool
     limitSelfCrossQuality(
         AccountID const&,
         AccountID const&,
-        Offer const& offer,
+        Offer<TIn, TOut> const& offer,
         std::optional<Quality>&,
         FlowOfferStream<TIn, TOut>&,
         bool) const
@@ -387,12 +386,12 @@ public:
     {
     }
 
-    template <typename Offer>
+    template <template <typename, typename> typename Offer>
     bool
     limitSelfCrossQuality(
         AccountID const& strandSrc,
         AccountID const& strandDst,
-        Offer const& offer,
+        Offer<TIn, TOut> const& offer,
         std::optional<Quality>& ofrQ,
         FlowOfferStream<TIn, TOut>& offers,
         bool const offerAttempted) const
@@ -430,8 +429,8 @@ public:
             strandSrc == offer.owner() && strandDst == offer.owner())
         {
             // Remove this offer even if no crossing occurs.
-            if (offer.removable())
-                offers.permRmOffer(offer.key());
+            if (auto const key = offer.key())
+                offers.permRmOffer(*key);
 
             // If no offers have been attempted yet then it's okay to move to
             // a different quality.
@@ -528,7 +527,7 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
 {
     auto const dir = this->debtDirection(v, StrandDirection::forward);
 
-    auto const res = tipOfferQuality(v);
+    std::optional<std::pair<Quality, bool>> const res = tipOfferQuality(v);
     if (!res)
         return {std::nullopt, dir};
 
@@ -539,13 +538,13 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
 
 template <class TIn, class TOut, class TDerived>
 std::pair<std::optional<QualityFunction>, DebtDirection>
-BookStep<TIn, TOut, TDerived>::getQF(
+BookStep<TIn, TOut, TDerived>::getQualityF(
     ReadView const& v,
     DebtDirection prevStepDir) const
 {
     auto const dir = this->debtDirection(v, StrandDirection::forward);
 
-    auto const res = tipOfferQualityF(v);
+    std::optional<QualityFunction> const res = tipOfferQualityF(v);
     if (!res)
         return {std::nullopt, dir};
 
@@ -610,27 +609,6 @@ limitStepOut(
         stpAmt.in =
             mulRatio(ofrAmt.in, transferRateIn, QUALITY_ONE, /*roundUp*/ true);
     }
-}
-
-template <typename F>
-auto
-ammExcepHandler(F&& f) -> decltype(f())
-{
-    try
-    {
-        return f();
-    }
-    catch (std::overflow_error const& ex)
-    {
-        // Number overflow, possible on swap and other AMM formulas.
-        // changeSpotPriceQuality() formulae may fail.
-        if (std::string(ex.what()).starts_with("Number") ||
-            std::string(ex.what()).starts_with("changeSpotPriceQuality"))
-            throw FlowException(tecPATH_DRY, ex.what());
-        throw ex;
-    }
-    decltype(f()) res{};
-    return res;
 }
 
 template <class TIn, class TOut, class TDerived>
@@ -704,8 +682,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 {
                     // Offer owner not authorized to hold IOU from issuer.
                     // Remove this offer even if no crossing occurs.
-                    if (offer.removable())
-                        offers.permRmOffer(offer.key());
+                    if (auto const key = offer.key())
+                        offers.permRmOffer(*key);
                     if (!offerAttempted)
                         // Change quality only if no previous offers were tried.
                         ofrQ = std::nullopt;
@@ -734,7 +712,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         auto ownerGives =
             mulRatio(ofrAmt.out, ofrOutRate, QUALITY_ONE, /*roundUp*/ false);
 
-        auto const funds = offer.unlimitedFunds()
+        auto const funds = offer.isFunded()
             ? ownerGives  // Offer owner is issuer; they have unlimited funds
             : offers.ownerFunds();
 
@@ -758,7 +736,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
     // At any payment engine iteration, AMM offer can only be consumed once.
     bool triedAMM = false;
     auto tryAMM = [&](std::optional<Quality> const& quality) -> bool {
-        return ammExcepHandler([&]() -> bool {
+        try
+        {
             if (!triedAMM)
             {
                 triedAMM = true;
@@ -767,7 +746,19 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                     return false;
             }
             return true;
-        });
+        }
+        catch (std::overflow_error const& ex)
+        {
+            if (std::string(ex.what()).starts_with("Number"))
+                throw FlowException(tecPATH_DRY, ex.what());
+            throw ex;
+        }
+        catch (std::runtime_error const& ex)
+        {
+            if (std::string(ex.what()).starts_with("changeSpotPriceQuality"))
+                throw FlowException(tecINTERNAL, ex.what());
+            throw ex;
+        }
     };
     while (offers.step())
     {
@@ -781,11 +772,11 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 }
 
 template <class TIn, class TOut, class TDerived>
-template <class Offer>
+template <template <typename, typename> typename Offer>
 void
 BookStep<TIn, TOut, TDerived>::consumeOffer(
     PaymentSandbox& sb,
-    Offer& offer,
+    Offer<TIn, TOut>& offer,
     TAmounts<TIn, TOut> const& ofrAmt,
     TAmounts<TIn, TOut> const& stepAmt,
     TOut const& ownerGives) const
@@ -825,11 +816,25 @@ BookStep<TIn, TOut, TDerived>::getAMMOffer(
     ReadView const& view,
     std::optional<Quality> const& clobQuality) const
 {
-    return ammExcepHandler([&]() -> std::optional<AMMOffer<TIn, TOut>> {
+    try
+    {
         return ammLiquidity_ ? std::optional<AMMOffer<TIn, TOut>>(
                                    ammLiquidity_->getOffer(view, clobQuality))
                              : std::nullopt;
-    });
+    }
+    catch (std::overflow_error const& ex)
+    {
+        if (std::string(ex.what()).starts_with("Number"))
+            throw FlowException(tecPATH_DRY, ex.what());
+        throw ex;
+    }
+    catch (std::runtime_error const& ex)
+    {
+        if (std::string(ex.what()).starts_with("changeSpotPriceQuality"))
+            throw FlowException(tecINTERNAL, ex.what());
+        throw ex;
+    }
+	return std::nullopt;
 }
 
 template <class TIn, class TOut, class TDerived>
@@ -880,14 +885,14 @@ BookStep<TIn, TOut, TDerived>::tipOfferQualityF(ReadView const& view) const
         return QualityFunction{
             std::get<Quality>(*res), QualityFunction::CLOBLikeTag{}};
     else
-        return std::get<AMMOffer<TIn, TOut>>(*res).getQF();
+        return std::get<AMMOffer<TIn, TOut>>(*res).getQualityF();
 }
 
 template <class TIn, class TOut, class TDerived>
 bool
 BookStep<TIn, TOut, TDerived>::overridesTransferFee(ReadView const& view) const
 {
-    if (auto const res = tipOfferQuality(view))
+    if (std::optional<std::pair<Quality, bool>> const res = tipOfferQuality(view))
         // This step doesn't pay the transfer fee if AMM
         return std::get<bool>(*res);
     return false;
