@@ -75,14 +75,9 @@ ammLPHolds(
     AccountID const& lpAccount,
     beast::Journal const j);
 
-/** Check if the line is frozen from the issuer.
- */
-bool
-isFrozen(ReadView const& view, STAmount const& a);
-
 /** Check if the account requires authorization.
  *  Return tecNO_AUTH or tecNO_LINE if it does
- *  and tsSUCCESS otherwise.
+ *  and tesSUCCESS otherwise.
  */
 TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
@@ -98,6 +93,10 @@ getTradingFee(
     AccountID const& account);
 
 /** Send w/o fees. Either from or to must be AMM account.
+ * This is the same as accountSend() except that the transfer
+ * fee is ignored if IOU is sent. The changes MUST BE ROLLED
+ * BACK IN CASE OF A FAILURE CODE otherwise a partial transfer
+ * takes place.
  */
 TER
 ammSend(
@@ -114,12 +113,6 @@ ammAccountHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
     const Issue& issue);
-
-Expected<std::shared_ptr<SLE const>, TER>
-getAMMSle(ReadView const& view, Issue const& issue1, Issue const& issue2);
-
-Expected<std::shared_ptr<SLE>, TER>
-getAMMSle(Sandbox& sb, Issue const& issue1, Issue const& issue2);
 
 }  // namespace ripple
 

@@ -19,11 +19,11 @@
 
 #include <ripple/app/tx/impl/AMMBid.h>
 
-#include <ripple/app/misc/AMM.h>
-#include <ripple/app/misc/AMM_formulae.h>
+#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMUtils.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/ledger/View.h>
-#include <ripple/protocol/AMM.h>
+#include <ripple/protocol/AMMCore.h>
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/STAccount.h>
 #include <ripple/protocol/TER.h>
@@ -82,7 +82,8 @@ AMMBid::preflight(PreflightContext const& ctx)
 TER
 AMMBid::preclaim(PreclaimContext const& ctx)
 {
-    auto const ammSle = getAMMSle(ctx.view, ctx.tx[sfAsset], ctx.tx[sfAsset2]);
+    auto const ammSle =
+        ctx.view.read(keylet::amm(ctx.tx[sfAsset], ctx.tx[sfAsset2]));
     if (!ammSle)
     {
         JLOG(ctx.j.debug()) << "AMM Bid: Invalid asset pair.";
@@ -102,8 +103,8 @@ AMMBid::preclaim(PreclaimContext const& ctx)
     }
 
     auto const lpTokens =
-        ammLPHolds(ctx.view, **ammSle, ctx.tx[sfAccount], ctx.j);
-    auto const lpTokensBalance = (**ammSle)[sfLPTokenBalance];
+        ammLPHolds(ctx.view, *ammSle, ctx.tx[sfAccount], ctx.j);
+    auto const lpTokensBalance = (*ammSle)[sfLPTokenBalance];
 
     auto const bidMin = ctx.tx[~sfBidMin];
 
@@ -153,14 +154,15 @@ applyBid(
     beast::Journal j_)
 {
     using namespace std::chrono;
-    auto const amm = getAMMSle(sb, ctx_.tx[sfAsset], ctx_.tx[sfAsset2]);
-    if (!amm)
-        return {amm.error(), false};
-    STAmount const lptAMMBalance = (**amm)[sfLPTokenBalance];
-    auto const lpTokens = ammLPHolds(sb, **amm, account_, ctx_.journal);
-    if (!(*amm)->isFieldPresent(sfAuctionSlot))
-        (*amm)->makeFieldPresent(sfAuctionSlot);
-    auto& auctionSlot = (*amm)->peekFieldObject(sfAuctionSlot);
+    auto const ammSle =
+        sb.peek(keylet::amm(ctx_.tx[sfAsset], ctx_.tx[sfAsset2]));
+    if (!ammSle)
+        return {tecINTERNAL, false};
+    STAmount const lptAMMBalance = (*ammSle)[sfLPTokenBalance];
+    auto const lpTokens = ammLPHolds(sb, *ammSle, account_, ctx_.journal);
+    if (!ammSle->isFieldPresent(sfAuctionSlot))
+        ammSle->makeFieldPresent(sfAuctionSlot);
+    auto& auctionSlot = ammSle->peekFieldObject(sfAuctionSlot);
     auto const current =
         duration_cast<seconds>(
             ctx_.view().info().parentCloseTime.time_since_epoch())
@@ -177,7 +179,7 @@ applyBid(
     // Account must exist, is LP, and the slot not expired.
     auto validOwner = [&](AccountID const& account) {
         return sb.read(keylet::account(account)) &&
-            ammLPHolds(sb, **amm, account, ctx_.journal) != beast::zero &&
+            ammLPHolds(sb, *ammSle, account, ctx_.journal) != beast::zero &&
             // Valid range is 0-19 but the tailing slot pays MinSlotPrice
             // and doesn't refund so the check is < instead of <= to optimize.
             timeSlot && *timeSlot < tailingSlot;
@@ -209,8 +211,8 @@ applyBid(
             JLOG(ctx_.journal.debug()) << "AMM Bid: failed to redeem.";
             return res;
         }
-        (*amm)->setFieldAmount(sfLPTokenBalance, lptAMMBalance - saBurn);
-        sb.update(*amm);
+        ammSle->setFieldAmount(sfLPTokenBalance, lptAMMBalance - saBurn);
+        sb.update(ammSle);
         return tesSUCCESS;
     };
 

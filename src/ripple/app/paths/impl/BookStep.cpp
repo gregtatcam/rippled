@@ -17,7 +17,7 @@
 */
 //==============================================================================
 
-#include <ripple/app/misc/AMM.h>
+#include <ripple/app/misc/AMMUtils.h>
 #include <ripple/app/paths/AMMLiquidity.h>
 #include <ripple/app/paths/AMMOffer.h>
 #include <ripple/app/paths/Credit.h>

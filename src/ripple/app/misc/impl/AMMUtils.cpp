@@ -16,10 +16,10 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 //==============================================================================
-#include <ripple/app/misc/AMM.h>
+#include <ripple/app/misc/AMMUtils.h>
 #include <ripple/basics/Log.h>
 #include <ripple/ledger/Sandbox.h>
-#include <ripple/protocol/AMM.h>
+#include <ripple/protocol/AMMCore.h>
 #include <ripple/protocol/STAccount.h>
 #include <ripple/protocol/STObject.h>
 
@@ -122,12 +122,6 @@ ammLPHolds(
         j);
 }
 
-bool
-isFrozen(ReadView const& view, STAmount const& a)
-{
-    return !a.native() && isGlobalFrozen(view, a.getIssuer());
-}
-
 TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
 {
@@ -195,7 +189,7 @@ ammSend(
 
     TER terResult = rippleCredit(view, issuer, to, amount, true, j);
 
-    if (tesSUCCESS == terResult)
+    if (terResult == tesSUCCESS)
         terResult = rippleCredit(view, from, issuer, amount, true, j);
 
     return terResult;
@@ -225,24 +219,6 @@ ammAccountHolds(
     }
 
     return STAmount{issue};
-}
-
-Expected<std::shared_ptr<SLE const>, TER>
-getAMMSle(ReadView const& view, Issue const& issue1, Issue const& issue2)
-{
-    if (auto const ammSle = view.read(keylet::amm(issue1, issue2)))
-        return ammSle;
-    else
-        return Unexpected(tecINTERNAL);
-}
-
-Expected<std::shared_ptr<SLE>, TER>
-getAMMSle(Sandbox& sb, Issue const& issue1, Issue const& issue2)
-{
-    if (auto ammSle = sb.peek(keylet::amm(issue1, issue2)))
-        return ammSle;
-    else
-        return Unexpected(tecINTERNAL);
 }
 
 }  // namespace ripple

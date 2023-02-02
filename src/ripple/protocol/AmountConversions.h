@@ -120,6 +120,73 @@ toAmount<XRPAmount>(XRPAmount const& amt)
     return amt;
 }
 
+namespace {
+
+/** Save, set, restore Number rounding mode.
+ * Applies to XRP only.
+ */
+class XRPRoundingMode
+{
+    bool xrp_;
+    Number::rounding_mode mode_;
+
+public:
+    XRPRoundingMode(Issue const& issue, Number::rounding_mode mode)
+        : xrp_(isXRP(issue)), mode_(Number::getround())
+    {
+        if (xrp_)
+            Number::setround(mode);
+    }
+    ~XRPRoundingMode()
+    {
+        if (xrp_)
+            Number::setround(mode_);
+    }
+};
+
+template <typename T>
+T
+toAmount(
+    Issue const& issue,
+    Number const& n,
+    Number::rounding_mode mode = Number::getround())
+{
+    XRPRoundingMode rm(issue, mode);
+    if constexpr (std::is_same_v<IOUAmount, T>)
+        return IOUAmount(n);
+    if constexpr (std::is_same_v<XRPAmount, T>)
+        return XRPAmount(static_cast<std::int64_t>(n));
+    if constexpr (std::is_same_v<STAmount, T>)
+    {
+        if (isXRP(issue))
+            return STAmount(issue, static_cast<std::int64_t>(n));
+        return STAmount(issue, n.mantissa(), n.exponent());
+    }
+}
+
+inline STAmount
+toSTAmount(
+    Issue const& issue,
+    Number const& n,
+    Number::rounding_mode mode = Number::getround())
+{
+    return toAmount<STAmount>(issue, n, mode);
+}
+
+template <typename T>
+STAmount
+toSTAmount(Issue const& issue, T const& a)
+{
+    if constexpr (std::is_same_v<IOUAmount, T>)
+        return toSTAmount(a, issue);
+    if constexpr (std::is_same_v<XRPAmount, T>)
+        return toSTAmount(a);
+    if constexpr (std::is_same_v<STAmount, T>)
+        return a;
+}
+
+}  // namespace
+
 }  // namespace ripple
 
 #endif

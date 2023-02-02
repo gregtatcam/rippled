@@ -20,11 +20,11 @@
 #include <ripple/app/tx/impl/AMMCreate.h>
 
 #include <ripple/app/ledger/OrderBookDB.h>
-#include <ripple/app/misc/AMM.h>
-#include <ripple/app/misc/AMM_formulae.h>
+#include <ripple/app/misc/AMMFormulas.h>
+#include <ripple/app/misc/AMMUtils.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/ledger/View.h>
-#include <ripple/protocol/AMM.h>
+#include <ripple/protocol/AMMCore.h>
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/STAccount.h>
 #include <ripple/protocol/STIssue.h>
@@ -125,7 +125,8 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
         return ter;
     }
 
-    if (isFrozen(ctx.view, amount) || isFrozen(ctx.view, amount2))
+    if (isGlobalFrozen(ctx.view, amount.getIssuer()) ||
+        isGlobalFrozen(ctx.view, amount2.getIssuer()))
     {
         JLOG(ctx.j.debug()) << "AMM Instance: involves frozen asset.";
         return tecFROZEN;

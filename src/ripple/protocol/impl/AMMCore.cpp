@@ -17,7 +17,7 @@
 */
 //==============================================================================
 
-#include <ripple/protocol/AMM.h>
+#include <ripple/protocol/AMMCore.h>
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/Rules.h>
 #include <ripple/protocol/STAmount.h>
