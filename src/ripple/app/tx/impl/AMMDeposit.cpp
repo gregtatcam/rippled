@@ -57,8 +57,8 @@ AMMDeposit::preflight(PreflightContext const& ctx)
     //   Amount and Amount2
     //   AssetLPToken and LPTokens
     //   Amount and EPrice
-    if (auto const subTxType = std::bitset<32>(flags & tfDepositSubTx);
-        subTxType.none() || subTxType.count() > 1)
+    if (auto const subTxType =
+            std::bitset<32>(flags & tfDepositSubTx).count() != 1)
     {
         JLOG(ctx.j.debug()) << "AMM Deposit: invalid flags.";
         return temMALFORMED;
@@ -110,27 +110,33 @@ AMMDeposit::preflight(PreflightContext const& ctx)
         return temAMM_BAD_TOKENS;
     }
 
-    if (auto const res = invalidAMMAmount(
-            amount,
-            std::make_optional(std::make_pair(asset, asset2)),
-            ePrice.has_value()))
-    {
-        JLOG(ctx.j.debug()) << "AMM Deposit: invalid Asset1In";
-        return res;
-    }
-
-    if (auto const res = invalidAMMAmount(
-            amount2, std::make_optional(std::make_pair(asset, asset2))))
-    {
-        JLOG(ctx.j.debug()) << "AMM Deposit: invalid Asset2InAmount";
-        return res;
-    }
-
-    // must be amount issue
     if (amount)
     {
         if (auto const res = invalidAMMAmount(
-                ePrice,
+                *amount,
+                std::make_optional(std::make_pair(asset, asset2)),
+                ePrice.has_value()))
+        {
+            JLOG(ctx.j.debug()) << "AMM Deposit: invalid Asset1In";
+            return res;
+        }
+    }
+
+    if (amount)
+    {
+        if (auto const res = invalidAMMAmount(
+                *amount2, std::make_optional(std::make_pair(asset, asset2))))
+        {
+            JLOG(ctx.j.debug()) << "AMM Deposit: invalid Asset2InAmount";
+            return res;
+        }
+    }
+
+    // must be amount issue
+    if (amount && ePrice)
+    {
+        if (auto const res = invalidAMMAmount(
+                *ePrice,
                 std::make_optional(
                     std::make_pair(amount->issue(), amount->issue()))))
         {
@@ -208,7 +214,7 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
     auto const amount = ctx.tx[~sfAmount];
     auto const amount2 = ctx.tx[~sfAmount2];
 
-    auto checkAmount = [&](auto const& amount) -> TER {
+    auto checkAmount = [&](std::optional<STAmount> const& amount) -> TER {
         if (amount)
         {
             // This normally should not happen.

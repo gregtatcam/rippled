@@ -60,8 +60,7 @@ AMMWithdraw::preflight(PreflightContext const& ctx)
     //   Amount and Amount2
     //   Amount and LPTokens
     //   Amount and EPrice
-    if (auto const subTxType = std::bitset<32>(flags & tfWithdrawSubTx);
-        subTxType.none() || subTxType.count() > 1)
+    if (std::bitset<32>(flags & tfWithdrawSubTx).count() != 1)
     {
         JLOG(ctx.j.debug()) << "AMM Withdraw: invalid flags.";
         return temMALFORMED;
@@ -123,26 +122,36 @@ AMMWithdraw::preflight(PreflightContext const& ctx)
         return temAMM_BAD_TOKENS;
     }
 
-    if (auto const res = invalidAMMAmount(
-            amount,
-            std::make_optional(std::make_pair(asset, asset2)),
-            (flags & (tfOneAssetWithdrawAll | tfOneAssetLPToken)) || ePrice))
+    if (amount)
     {
-        JLOG(ctx.j.debug()) << "AMM Withdraw: invalid Asset1Out";
-        return res;
+        if (auto const res = invalidAMMAmount(
+                *amount,
+                std::make_optional(std::make_pair(asset, asset2)),
+                (flags & (tfOneAssetWithdrawAll | tfOneAssetLPToken)) ||
+                    ePrice))
+        {
+            JLOG(ctx.j.debug()) << "AMM Withdraw: invalid Asset1Out";
+            return res;
+        }
     }
 
-    if (auto const res = invalidAMMAmount(
-            amount2, std::make_optional(std::make_pair(asset, asset2))))
+    if (amount2)
     {
-        JLOG(ctx.j.debug()) << "AMM Withdraw: invalid Asset2OutAmount";
-        return res;
+        if (auto const res = invalidAMMAmount(
+                *amount2, std::make_optional(std::make_pair(asset, asset2))))
+        {
+            JLOG(ctx.j.debug()) << "AMM Withdraw: invalid Asset2OutAmount";
+            return res;
+        }
     }
 
-    if (auto const res = invalidAMMAmount(ePrice))
+    if (ePrice)
     {
-        JLOG(ctx.j.debug()) << "AMM Withdraw: invalid EPrice";
-        return res;
+        if (auto const res = invalidAMMAmount(*ePrice))
+        {
+            JLOG(ctx.j.debug()) << "AMM Withdraw: invalid EPrice";
+            return res;
+        }
     }
 
     return preflight2(ctx);
@@ -199,7 +208,8 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
         return tecAMM_BALANCE;
     }
 
-    auto checkAmount = [&](auto const& amount, auto const& balance) -> TER {
+    auto checkAmount = [&](std::optional<STAmount> const& amount,
+                           auto const& balance) -> TER {
         if (amount)
         {
             if (auto const ter =

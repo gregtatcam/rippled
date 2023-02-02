@@ -53,16 +53,22 @@ AMMBid::preflight(PreflightContext const& ctx)
         return res;
     }
 
-    if (auto const res = invalidAMMAmount(ctx.tx[~sfBidMin]))
+    if (auto const bidMin = ctx.tx[~sfBidMin])
     {
-        JLOG(ctx.j.debug()) << "AMM Bid: invalid min slot price.";
-        return res;
+        if (auto const res = invalidAMMAmount(*bidMin))
+        {
+            JLOG(ctx.j.debug()) << "AMM Bid: invalid min slot price.";
+            return res;
+        }
     }
 
-    if (auto const res = invalidAMMAmount(ctx.tx[~sfBidMax]))
+    if (auto const bidMax = ctx.tx[~sfBidMax])
     {
-        JLOG(ctx.j.debug()) << "AMM Bid: invalid max slot price.";
-        return res;
+        if (auto const res = invalidAMMAmount(*bidMax))
+        {
+            JLOG(ctx.j.debug()) << "AMM Bid: invalid max slot price.";
+            return res;
+        }
     }
 
     if (ctx.tx.isFieldPresent(sfAuthAccounts))

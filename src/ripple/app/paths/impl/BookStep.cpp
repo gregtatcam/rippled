@@ -183,7 +183,7 @@ public:
     }
 
     bool
-    overridesTransferFee(ReadView const&) const override;
+    wavesTransferFee(ReadView const&) const override;
 
 protected:
     std::string
@@ -334,7 +334,7 @@ public:
         };
 
         auto const prevStepPaysTrFee =
-            !this->prevStep_ || !this->prevStep_->overridesTransferFee(v);
+            !this->prevStep_ || !this->prevStep_->wavesTransferFee(v);
         auto const trIn = redeems(prevStepDir) && prevStepPaysTrFee
             ? rate(this->book_.in.account)
             : parityRate;
@@ -632,7 +632,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
     };
 
     auto const prevStepPaysTrFee =
-        !prevStep_ || !prevStep_->overridesTransferFee(sb);
+        !prevStep_ || !prevStep_->wavesTransferFee(sb);
     std::uint32_t const trIn = redeems(prevStepDir) && prevStepPaysTrFee
         ? rate(book_.in.account)
         : QUALITY_ONE;
@@ -734,17 +734,12 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
     };
 
     // At any payment engine iteration, AMM offer can only be consumed once.
-    bool triedAMM = false;
     auto tryAMM = [&](std::optional<Quality> const& quality) -> bool {
         try
         {
-            if (!triedAMM)
-            {
-                triedAMM = true;
-                if (auto ammOffer = getAMMOffer(sb, quality);
-                    ammOffer && !execOffer(*ammOffer))
-                    return false;
-            }
+            if (auto ammOffer = getAMMOffer(sb, quality);
+                ammOffer && !execOffer(*ammOffer))
+                return false;
             return true;
         }
         catch (std::overflow_error const& ex)
@@ -760,13 +755,23 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
             throw ex;
         }
     };
-    while (offers.step())
+
+    if (offers.step())
     {
-        if (!tryAMM(offers.tip().quality()) || !execOffer(offers.tip()))
-            break;
+        if (tryAMM(offers.tip().quality()))
+        {
+            do
+            {
+                if (!execOffer(offers.tip()))
+                    break;
+            } while (offers.step());
+        }
     }
-    // Might have AMM offer if there is no CLOB offers.
-    tryAMM(std::nullopt);
+    else
+    {
+        // Might have AMM offer if there is no CLOB offers.
+        tryAMM(std::nullopt);
+    }
 
     return {offers.permToRemove(), counter.count()};
 }
@@ -868,8 +873,8 @@ BookStep<TIn, TOut, TDerived>::tipOfferQuality(ReadView const& view) const
 {
     if (auto const res = tip(view); !res)
         return std::nullopt;
-    else if (std::holds_alternative<Quality>(*res))
-        return std::make_pair(std::get<Quality>(*res), false);
+    else if (auto const q = std::get_if<Quality>(&(*res)))
+        return std::make_pair(*q, false);
     else
         return std::make_pair(
             std::get<AMMOffer<TIn, TOut>>(*res).quality(), true);
@@ -881,16 +886,15 @@ BookStep<TIn, TOut, TDerived>::tipOfferQualityF(ReadView const& view) const
 {
     if (auto const res = tip(view); !res)
         return std::nullopt;
-    else if (std::holds_alternative<Quality>(*res))
-        return QualityFunction{
-            std::get<Quality>(*res), QualityFunction::CLOBLikeTag{}};
+    else if (auto const q = std::get_if<Quality>(&(*res)))
+        return QualityFunction{*q, QualityFunction::CLOBLikeTag{}};
     else
         return std::get<AMMOffer<TIn, TOut>>(*res).getQualityF();
 }
 
 template <class TIn, class TOut, class TDerived>
 bool
-BookStep<TIn, TOut, TDerived>::overridesTransferFee(ReadView const& view) const
+BookStep<TIn, TOut, TDerived>::wavesTransferFee(ReadView const& view) const
 {
     if (std::optional<std::pair<Quality, bool>> const res =
             tipOfferQuality(view))
