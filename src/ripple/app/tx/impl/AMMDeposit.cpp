@@ -57,8 +57,7 @@ AMMDeposit::preflight(PreflightContext const& ctx)
     //   Amount and Amount2
     //   AssetLPToken and LPTokens
     //   Amount and EPrice
-    if (auto const subTxType =
-            std::bitset<32>(flags & tfDepositSubTx).count() != 1)
+    if (std::bitset<32>(flags & tfDepositSubTx).count() != 1)
     {
         JLOG(ctx.j.debug()) << "AMM Deposit: invalid flags.";
         return temMALFORMED;
