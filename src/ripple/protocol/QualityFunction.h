@@ -58,7 +58,6 @@ public:
         TAmounts<TIn, TOut> const& amounts,
         std::uint32_t tfee,
         AMMTag);
-    QualityFunction();
 
     /** Combines QF with the next step QF
      */
