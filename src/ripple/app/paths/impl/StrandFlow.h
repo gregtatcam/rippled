@@ -372,7 +372,8 @@ limitOut(
     DebtDirection dir = DebtDirection::issues;
     for (auto const& step : strand)
     {
-        if (std::tie(stepQualityF, dir) = step->getQualityF(v, dir); stepQualityF)
+        if (std::tie(stepQualityF, dir) = step->getQualityF(v, dir);
+            stepQualityF)
             qf.combineWithNext(*stepQualityF);
         else
             return remainingOut;

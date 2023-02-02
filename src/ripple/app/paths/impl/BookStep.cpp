@@ -834,7 +834,7 @@ BookStep<TIn, TOut, TDerived>::getAMMOffer(
             throw FlowException(tecINTERNAL, ex.what());
         throw ex;
     }
-	return std::nullopt;
+    return std::nullopt;
 }
 
 template <class TIn, class TOut, class TDerived>
@@ -892,7 +892,8 @@ template <class TIn, class TOut, class TDerived>
 bool
 BookStep<TIn, TOut, TDerived>::overridesTransferFee(ReadView const& view) const
 {
-    if (std::optional<std::pair<Quality, bool>> const res = tipOfferQuality(view))
+    if (std::optional<std::pair<Quality, bool>> const res =
+            tipOfferQuality(view))
         // This step doesn't pay the transfer fee if AMM
         return std::get<bool>(*res);
     return false;
