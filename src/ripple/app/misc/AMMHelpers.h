@@ -153,7 +153,8 @@ withdrawByTokens(
     std::uint32_t tfee);
 
 /** Find in/out amounts to change the spot price quality to the requested
- * quality.
+ * quality. Implements AMM Swap equation (11) and calls swapAssetIn
+ * to find the required offer size to change the spot price.
  * @param pool AMM pool balances
  * @param quality requested quality
  * @param tfee trading fee in basis points
@@ -198,7 +199,7 @@ changeSpotPriceQuality(
  */
 
 /** Swap assetIn into the pool and swap out a proportional amount
- * of the other asset.
+ * of the other asset. Implements AMM Swap equation (9).
  * @param pool current AMM pool balances
  * @param assetIn amount to swap in
  * @param tfee trading fee in basis points
@@ -218,7 +219,7 @@ swapAssetIn(
 }
 
 /** Swap assetOut out of the pool and swap in a proportional amount
- * of the other asset.
+ * of the other asset. Implements AMM Swap equation (10).
  * @param pool current AMM pool balances
  * @param assetOut amount to swap out
  * @param tfee trading fee in basis points

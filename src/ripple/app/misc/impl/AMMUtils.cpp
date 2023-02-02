@@ -51,10 +51,21 @@ ammHolds(
     beast::Journal const j)
 {
     auto const issues = [&]() -> std::optional<std::pair<Issue, Issue>> {
-        if (optIssue1 && optIssue2)
-            return {{*optIssue1, *optIssue2}};
         auto const issue1 = ammSle[sfAsset];
         auto const issue2 = ammSle[sfAsset2];
+        if (optIssue1 && optIssue2)
+        {
+            if (invalidAMMAssetPair(
+                    *optIssue1,
+                    *optIssue2,
+                    std::make_optional(std::make_pair(issue1, issue2))))
+            {
+                JLOG(j.debug()) << "ammHolds: Invalid optIssue1 or optIssue2 "
+                                << *optIssue1 << " " << *optIssue2;
+                return std::nullopt;
+            }
+            return {{*optIssue1, *optIssue2}};
+        }
         if (optIssue1)
         {
             if (*optIssue1 == issue1)
@@ -131,8 +142,7 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
         issuerAccount && (*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
         if (auto const trustLine =
-                view.read(keylet::line(account, issue.account, issue.currency));
-            trustLine)
+                view.read(keylet::line(account, issue.account, issue.currency)))
             return !((*trustLine)[sfFlags] &
                      ((account > issue.account) ? lsfLowAuth : lsfHighAuth))
                 ? TER{tecNO_AUTH}
