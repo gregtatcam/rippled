@@ -117,7 +117,7 @@ lpTokensIn(
  * @return
  */
 STAmount
-assetIn(
+ammAssetIn(
     STAmount const& asset1Balance,
     STAmount const& lpTokensBalance,
     STAmount const& ammTokensBalance,

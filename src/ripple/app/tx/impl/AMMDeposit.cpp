@@ -609,7 +609,7 @@ AMMDeposit::singleDepositTokens(
     std::uint16_t tfee)
 {
     auto const amountDeposit =
-        assetIn(amountBalance, lpTokensDeposit, lptAMMBalance, tfee);
+        ammAssetIn(amountBalance, lpTokensDeposit, lptAMMBalance, tfee);
     if (amountDeposit > amount)
         return {tecAMM_FAILED_DEPOSIT, STAmount{}};
     return deposit(
