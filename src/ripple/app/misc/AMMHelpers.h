@@ -32,30 +32,6 @@
 
 namespace ripple {
 
-template <typename T>
-Issue
-getIssue(T const& amt)
-{
-    if constexpr (std::is_same_v<IOUAmount, T>)
-        return noIssue();
-    if constexpr (std::is_same_v<XRPAmount, T>)
-        return xrpIssue();
-    if constexpr (std::is_same_v<STAmount, T>)
-        return amt.issue();
-}
-
-template <typename T>
-constexpr T
-get(STAmount const& a)
-{
-    if constexpr (std::is_same_v<IOUAmount, T>)
-        return a.iou();
-    if constexpr (std::is_same_v<XRPAmount, T>)
-        return a.xrp();
-    if constexpr (std::is_same_v<STAmount, T>)
-        return a;
-}
-
 /** Calculate LP Tokens given AMM pool reserves.
  * @param asset1 AMM one side of the pool reserve
  * @param asset2 AMM another side of the pool reserve
@@ -168,8 +144,7 @@ changeSpotPriceQuality(
     std::uint32_t tfee)
 {
     if (auto const nTakerPays =
-            (root2(pool.in * pool.out * quality.rate() / feeMult(tfee)) -
-             pool.in / feeMult(tfee));
+            (root2(pool.in * pool.out * quality.rate()) - pool.in);
         nTakerPays > 0)
     {
         auto const takerPays = toAmount<TIn>(

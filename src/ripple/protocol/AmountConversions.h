@@ -163,6 +163,30 @@ toSTAmount(Issue const& issue, T const& a)
         return a;
 }
 
+template <typename T>
+Issue
+getIssue(T const& amt)
+{
+    if constexpr (std::is_same_v<IOUAmount, T>)
+        return noIssue();
+    if constexpr (std::is_same_v<XRPAmount, T>)
+        return xrpIssue();
+    if constexpr (std::is_same_v<STAmount, T>)
+        return amt.issue();
+}
+
+template <typename T>
+constexpr T
+get(STAmount const& a)
+{
+    if constexpr (std::is_same_v<IOUAmount, T>)
+        return a.iou();
+    if constexpr (std::is_same_v<XRPAmount, T>)
+        return a.xrp();
+    if constexpr (std::is_same_v<STAmount, T>)
+        return a;
+}
+
 }  // namespace ripple
 
 #endif

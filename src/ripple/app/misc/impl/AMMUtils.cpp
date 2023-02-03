@@ -64,7 +64,7 @@ ammHolds(
                                 << *optIssue1 << " " << *optIssue2;
                 return std::nullopt;
             }
-            return {{*optIssue1, *optIssue2}};
+            return std::make_optional(std::make_pair(*optIssue1, *optIssue2));
         }
         if (optIssue1)
         {
@@ -131,26 +131,6 @@ ammLPHolds(
         ammSle[sfAMMAccount],
         lpAccount,
         j);
-}
-
-TER
-requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
-{
-    if (isXRP(issue) || issue.account == account)
-        return tesSUCCESS;
-    if (auto const issuerAccount = view.read(keylet::account(issue.account));
-        issuerAccount && (*issuerAccount)[sfFlags] & lsfRequireAuth)
-    {
-        if (auto const trustLine =
-                view.read(keylet::line(account, issue.account, issue.currency)))
-            return !((*trustLine)[sfFlags] &
-                     ((account > issue.account) ? lsfLowAuth : lsfHighAuth))
-                ? TER{tecNO_AUTH}
-                : tesSUCCESS;
-        return TER{tecNO_LINE};
-    }
-
-    return tesSUCCESS;
 }
 
 std::uint16_t

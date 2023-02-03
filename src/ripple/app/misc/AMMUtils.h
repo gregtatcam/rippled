@@ -75,13 +75,6 @@ ammLPHolds(
     AccountID const& lpAccount,
     beast::Journal const j);
 
-/** Check if the account requires authorization.
- *  Return tecNO_AUTH or tecNO_LINE if it does
- *  and tsSUCCESS otherwise.
- */
-TER
-requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
-
 /** Get AMM trading fee for the given account. The fee is discounted
  * if the account is the auction slot owner or one of the slot's authorized
  * accounts.
