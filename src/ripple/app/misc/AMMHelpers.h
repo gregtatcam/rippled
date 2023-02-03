@@ -130,7 +130,7 @@ withdrawByTokens(
 
 /** Find in/out amounts to change the spot price quality to the requested
  * quality. Implements AMM Swap equation (11) and calls swapAssetIn
- * to find the required offer size to change the spot price.
+ * to find the required offer size to change the spot price quality.
  * @param pool AMM pool balances
  * @param quality requested quality
  * @param tfee trading fee in basis points
