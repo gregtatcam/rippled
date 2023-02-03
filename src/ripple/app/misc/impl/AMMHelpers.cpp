@@ -19,8 +19,6 @@
 
 #include <ripple/app/misc/AMMHelpers.h>
 
-#include <cmath>
-
 namespace ripple {
 
 STAmount
