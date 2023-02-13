@@ -44,6 +44,7 @@ namespace ripple {
  *     LPTokens then fail transaction.
  * - If the account already holds a vote, then update VoteEntry.
  * - Calculate and update TradingFee.
+ * @see [XLS30d](https://github.com/XRPLF/XRPL-Standards/discussions/78)
  */
 class AMMVote : public Transactor
 {
