@@ -59,7 +59,8 @@ namespace ripple {
  * Price - price paid for the slot in LPTokens.
  * AuthAccounts - up to four accounts authorized to trade at
  *     the discounted fee.
- * @see [XLS30d](https://github.com/XRPLF/XRPL-Standards/discussions/78)
+ * @see [XLS30d:Continuous Auction
+ * Mechanism](https://github.com/XRPLF/XRPL-Standards/discussions/78)
  */
 class AMMBid : public Transactor
 {

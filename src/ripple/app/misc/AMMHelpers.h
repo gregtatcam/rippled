@@ -173,6 +173,10 @@ changeSpotPriceQuality(
              nTakerPaysPropose > 0)
     {
         auto const nTakerPays = [&]() {
+            // The fee might make the AMM offer quality less than CLOB quality.
+            // Therefore, AMM offer has to satisfy the constraint: o / i >= q.
+            // Substituting o with swapAssetIn() gives:
+            // i <= O / q - I / (1 - fee).
             auto const nTakerPaysConstraint =
                 pool.out * quality.rate() - pool.in / f;
             if (nTakerPaysPropose > nTakerPaysConstraint)
@@ -208,7 +212,8 @@ changeSpotPriceQuality(
 
 /** Swap assetIn into the pool and swap out a proportional amount
  * of the other asset. Implements AMM Swap in.
- * @see [XLS30d](https://github.com/XRPLF/XRPL-Standards/discussions/78)
+ * @see [XLS30d:AMM
+ * Swap](https://github.com/XRPLF/XRPL-Standards/discussions/78)
  * @param pool current AMM pool balances
  * @param assetIn amount to swap in
  * @param tfee trading fee in basis points
@@ -229,7 +234,8 @@ swapAssetIn(
 
 /** Swap assetOut out of the pool and swap in a proportional amount
  * of the other asset. Implements AMM Swap out.
- * @see [XLS30d](https://github.com/XRPLF/XRPL-Standards/discussions/78)
+ * @see [XLS30d:AMM
+ * Swap](https://github.com/XRPLF/XRPL-Standards/discussions/78)
  * @param pool current AMM pool balances
  * @param assetOut amount to swap out
  * @param tfee trading fee in basis points
