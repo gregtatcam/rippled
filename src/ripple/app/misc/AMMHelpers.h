@@ -136,12 +136,14 @@ withdrawByTokens(
  * @return true if within dist, false otherwise
  */
 inline bool
-checkRelativeDistance(
+withinRelativeDistance(
     Quality const& calcQuality,
     Quality const& reqQuality,
     Number const& dist)
 {
-    auto const [min, max] = std::minmax(calcQuality.rate(), reqQuality.rate());
+    // Rate is inverse of quality
+    auto const [min, max] = std::minmax(
+        Number(1) / calcQuality.rate(), Number(1) / reqQuality.rate());
     return (Number(max) - min) / max < dist;
 }
 
@@ -174,7 +176,7 @@ changeSpotPriceQuality(
     {
         auto const nTakerPays = [&]() {
             // The fee might make the AMM offer quality less than CLOB quality.
-            // Therefore, AMM offer has to satisfy the constraint: o / i >= q.
+            // Therefore, AMM offer has to satisfy this constraint: o / i >= q.
             // Substituting o with swapAssetIn() gives:
             // i <= O / q - I / (1 - fee).
             auto const nTakerPaysConstraint =
@@ -190,7 +192,7 @@ changeSpotPriceQuality(
                 TAmounts<TIn, TOut>{
                     takerPays, swapAssetIn(pool, takerPays, tfee)};
             Quality{amounts} < quality &&
-            !checkRelativeDistance(Quality{amounts}, quality, Number(1, -7)))
+            !withinRelativeDistance(Quality{amounts}, quality, Number(1, -7)))
             Throw<std::runtime_error>("changeSpotPriceQuality failed");
         else
             return amounts;

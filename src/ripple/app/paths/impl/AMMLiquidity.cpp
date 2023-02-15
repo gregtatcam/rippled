@@ -149,9 +149,7 @@ AMMLiquidity<TIn, TOut>::getOffer(
     auto const spotPriceQ = Quality{balances};
     if (clobQuality &&
         (spotPriceQ <= clobQuality ||
-         ((Number(clobQuality->rate()) - spotPriceQ.rate()) /
-              clobQuality->rate() <
-          Number(1, -7))))
+         withinRelativeDistance(spotPriceQ, *clobQuality, Number(1, -7))))
     {
         JLOG(j_.debug()) << "AMMLiquidity::getOffer, higher clob quality";
         return std::nullopt;
