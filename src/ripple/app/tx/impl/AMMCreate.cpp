@@ -178,8 +178,8 @@ applyCreate(
 
     // Mitigate same account exists possibility
     auto const ammAccount = [&]() -> Expected<AccountID, TER> {
-        std::uint16_t constexpr MaxAccountAttempts = 256;
-        for (auto p = 0; p < MaxAccountAttempts; ++p)
+        std::uint16_t constexpr maxAccountAttempts = 256;
+        for (auto p = 0; p < maxAccountAttempts; ++p)
         {
             auto const ammAccount =
                 ammAccountID(p, sb.info().parentHash, ammKeylet.key);
@@ -192,7 +192,7 @@ applyCreate(
     // AMM account already exists (should not happen)
     if (!ammAccount)
     {
-        JLOG(j_.debug()) << "AMM Instance: AMM already exists.";
+        JLOG(j_.error()) << "AMM Instance: AMM already exists.";
         return {ammAccount.error(), false};
     }
 
@@ -201,7 +201,7 @@ applyCreate(
         amount.issue().currency, amount2.issue().currency, *ammAccount);
     if (sb.read(keylet::line(*ammAccount, lptIss)))
     {
-        JLOG(j_.debug()) << "AMM Instance: LP Token already exists.";
+        JLOG(j_.error()) << "AMM Instance: LP Token already exists.";
         return {tecDUPLICATE, false};
     }
 
@@ -259,6 +259,17 @@ applyCreate(
     auctionSlot.setFieldAmount(sfPrice, STAmount{lpTokens.issue(), 0});
     sb.insert(ammSle);
 
+    // Add owner directory to link the root account and AMM object.
+    if (auto const page = sb.dirInsert(
+            keylet::ownerDir(*ammAccount),
+            ammSle->key(),
+            describeOwnerDir(*ammAccount));
+        !page)
+    {
+        JLOG(j_.debug()) << "AMM Instance: failed to insert owner dir";
+        return {tecINTERNAL, false};
+    }
+
     // Send LPT to LP.
     auto res = accountSend(sb, *ammAccount, account_, lpTokens, ctx_.journal);
     if (res != tesSUCCESS)
@@ -311,7 +322,7 @@ applyCreate(
         [&](Issue const& issueIn, Issue const& issueOut, std::uint64_t uRate) {
             Book const book{issueIn, issueOut};
             auto const dir = keylet::quality(keylet::book(book), uRate);
-            if (auto const bookExisted = static_cast<bool>(sb.peek(dir));
+            if (auto const bookExisted = static_cast<bool>(sb.read(dir));
                 !bookExisted)
                 ctx_.app.getOrderBookDB().addOrderBook(book);
         };
