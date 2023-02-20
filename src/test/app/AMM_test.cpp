@@ -2901,6 +2901,55 @@ private:
             },
             {{XRP(10000), USD(10100)}});
 
+        // Payment with limitQuality set.
+        testAMM(
+            [&](AMM& ammAlice, Env& env) {
+                env.fund(jtx::XRP(30000), bob);
+                env.close();
+                // Pays 10USD for 10XRP. A larger payment of ~99.11USD/100XRP
+                // would have been sent has it not been for limitQuality.
+                env(pay(bob, carol, USD(100)),
+                    path(~USD),
+                    sendmax(XRP(100)),
+                    txflags(
+                        tfNoRippleDirect | tfPartialPayment | tfLimitQuality));
+                env.close();
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRP(10010), USD(10000), ammAlice.tokens()));
+                // Initial balance 30,000 + 10(limited by limitQuality)
+                BEAST_EXPECT(expectLine(env, carol, USD(30010)));
+                // Initial balance 30,000 - 10(limited by limitQuality) - 10(tx
+                // fee)
+                BEAST_EXPECT(expectLedgerEntryRoot(
+                    env, bob, XRP(30000) - XRP(10) - txfee(env, 1)));
+
+                // Fails because of limitQuality. Would have sent
+                // ~98.91USD/110XRP has it not been for limitQuality.
+                env(pay(bob, carol, USD(100)),
+                    path(~USD),
+                    sendmax(XRP(100)),
+                    txflags(
+                        tfNoRippleDirect | tfPartialPayment | tfLimitQuality),
+                    ter(tecPATH_DRY));
+                env.close();
+            },
+            {{XRP(10000), USD(10010)}});
+
+        // Fail when partial payment is not set.
+        testAMM(
+            [&](AMM& ammAlice, Env& env) {
+                env.fund(jtx::XRP(30000), bob);
+                env.close();
+                // Pays 10USD for 10XRP. A larger payment of ~99.11USD/100XRP
+                // would have been sent has it not been for limitQuality.
+                env(pay(bob, carol, USD(100)),
+                    path(~USD),
+                    sendmax(XRP(100)),
+                    txflags(tfNoRippleDirect),
+                    ter(tecPATH_PARTIAL));
+            },
+            {{XRP(10000), USD(10000)}});
+
         // Non-default path (with AMM) has a better quality than default path.
         // The max possible liquidity is taken out of non-default
         // path ~29.9XRP/29.9EUR, ~29.9EUR/~29.99USD. The rest
