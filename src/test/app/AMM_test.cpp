@@ -1093,8 +1093,8 @@ private:
 
         // Invalid tokens - bogus currency
         testAMM([&](AMM& ammAlice, Env& env) {
-            auto const iss1 = Issue{Currency::fromVoid("abc"), gw.id()};
-            auto const iss2 = Issue{Currency::fromVoid("def"), gw.id()};
+            auto const iss1 = Issue{Currency(0xabc), gw.id()};
+            auto const iss2 = Issue{Currency(0xdef), gw.id()};
             ammAlice.deposit(
                 alice,
                 1000,
@@ -7900,7 +7900,7 @@ public:
     }
 };
 
-BEAST_DEFINE_TESTSUITE(AMM, app, ripple);
+BEAST_DEFINE_TESTSUITE_PRIO(AMM, app, ripple, 1);
 BEAST_DEFINE_TESTSUITE_MANUAL(AMMCalc, app, ripple);
 BEAST_DEFINE_TESTSUITE_MANUAL(AMMPerf, app, ripple);
 BEAST_DEFINE_TESTSUITE_MANUAL(AMMFib, app, ripple);
