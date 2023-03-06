@@ -1551,6 +1551,33 @@ private:
                 IOUAmount{1000000000000005, -8}));
             BEAST_EXPECT(ammAlice.expectLPTokens(carol, IOUAmount{5, -8}));
         });
+
+        // Issuer create/deposit
+        {
+            Env env(*this);
+            env.fund(XRP(30000), gw);
+            AMM ammGw(env, gw, XRP(10000), USD(10000));
+            BEAST_EXPECT(
+                ammGw.expectBalances(XRP(10000), USD(10000), ammGw.tokens()));
+            ammGw.deposit(gw, 1000000);
+            BEAST_EXPECT(ammGw.expectBalances(
+                XRP(11000), USD(11000), IOUAmount{11000000}));
+            ammGw.deposit(gw, USD(1000));
+            BEAST_EXPECT(ammGw.expectBalances(
+                XRP(11000), USD(12000), IOUAmount{1148912529307606, -8}));
+        }
+
+        // Issuer deposit
+        {
+            testAMM([&](AMM& ammAlice, Env& env) {
+                ammAlice.deposit(gw, 1000000);
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRP(11000), USD(11000), IOUAmount{11000000}));
+                ammAlice.deposit(gw, USD(1000));
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRP(11000), USD(12000), IOUAmount{1148912529307606, -8}));
+            });
+        }
     }
 
     void
