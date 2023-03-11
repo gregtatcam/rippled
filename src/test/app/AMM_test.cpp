@@ -3513,7 +3513,9 @@ private:
             BEAST_EXPECT(expectLine(env, carol, STAmount{token2, 1000100}));
         });
 
-        // LPs pay LPTokens directly. Must trust set .
+        // LPs pay LPTokens directly. Must trust set because the trust line
+        // is checked for the limit, which is 0 in the AMM auto-created
+        // trust line.
         testAMM([&](AMM& ammAlice, Env& env) {
             auto const token1 = ammAlice.lptIssue();
             env.trust(STAmount{token1, 2000000}, carol);
@@ -3531,6 +3533,15 @@ private:
                 ammAlice.expectLPTokens(alice, IOUAmount{9999900, 0}) &&
                 // Carol initial token1 1,000,000 + 100
                 ammAlice.expectLPTokens(carol, IOUAmount{1000100, 0}));
+
+            env.trust(STAmount{token1, 20000000}, alice);
+            env.close();
+            env(pay(carol, alice, STAmount{token1, 100}));
+            env.close();
+            // Back to the original balance
+            BEAST_EXPECT(
+                ammAlice.expectLPTokens(alice, IOUAmount{10000000, 0}) &&
+                ammAlice.expectLPTokens(carol, IOUAmount{1000000, 0}));
         });
 
         // AMM with two tokens from another AMM.

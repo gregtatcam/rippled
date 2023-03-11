@@ -141,10 +141,11 @@ withinRelativeDistance(
     Quality const& reqQuality,
     Number const& dist)
 {
+    if (calcQuality == reqQuality)
+        return true;
+    auto const [min, max] = std::minmax(calcQuality, reqQuality);
     // Rate is inverse of quality
-    auto const [min, max] = std::minmax(
-        Number(1) / calcQuality.rate(), Number(1) / reqQuality.rate());
-    return (Number(max) - min) / max < dist;
+    return ((min.rate() - max.rate()) / min.rate()) < dist;
 }
 
 /** Finds takerPays (i) and takerGets (o) such that given pool composition
@@ -185,6 +186,8 @@ changeSpotPriceQuality(
                 return nTakerPaysConstraint;
             return nTakerPaysPropose;
         }();
+        if (nTakerPays <= 0)
+            return std::nullopt;
         auto const takerPays = toAmount<TIn>(
             getIssue(pool.in), nTakerPays, Number::rounding_mode::upward);
         // should not fail
