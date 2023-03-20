@@ -36,7 +36,7 @@ AMMDeposit::preflight(PreflightContext const& ctx)
     if (!ammEnabled(ctx.rules))
         return temDISABLED;
 
-    if (auto const ret=preflight1(ctx); !isTesSuccess(ret))
+    if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
 
     auto const flags = ctx.tx.getFlags();
