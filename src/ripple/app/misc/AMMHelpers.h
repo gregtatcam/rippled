@@ -17,8 +17,8 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_APP_MISC_AMM_FORMULAE_H_INCLUDED
-#define RIPPLE_APP_MISC_AMM_FORMULAE_H_INCLUDED
+#ifndef RIPPLE_APP_MISC_AMMHELPERS_H_INCLUDED
+#define RIPPLE_APP_MISC_AMMHELPERS_H_INCLUDED
 
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/Number.h>
@@ -267,4 +267,4 @@ square(Number const& n);
 
 }  // namespace ripple
 
-#endif  // RIPPLE_APP_MISC_AMM_FORMULAE_H_INCLUDED
+#endif  // RIPPLE_APP_MISC_AMMHELPERS_H_INCLUDED
