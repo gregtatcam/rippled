@@ -2495,6 +2495,15 @@ private:
                 std::nullopt,
                 std::nullopt,
                 ter(tecAMM_INVALID_TOKENS));
+            ammAlice.bid(
+                carol,
+                std::nullopt,
+                std::nullopt,
+                {},
+                std::nullopt,
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_INVALID_TOKENS));
         });
 
         // Auth account is invalid.

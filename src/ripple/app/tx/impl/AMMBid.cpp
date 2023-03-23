@@ -109,6 +109,12 @@ AMMBid::preclaim(PreclaimContext const& ctx)
 
     auto const lpTokens =
         ammLPHolds(ctx.view, *ammSle, ctx.tx[sfAccount], ctx.j);
+    // Not LP
+    if (lpTokens == beast::zero)
+    {
+        JLOG(ctx.j.debug()) << "AMM Bid: account is not LP.";
+        return tecAMM_INVALID_TOKENS;
+    }
     auto const lpTokensBalance = (*ammSle)[sfLPTokenBalance];
 
     auto const bidMin = ctx.tx[~sfBidMin];
