@@ -972,7 +972,7 @@ private:
             BEAST_EXPECT(!ammAlice.ammExists());
         }
 
-        // Global freeze
+        // Globally frozen
         {
             Env env{*this};
             env.fund(XRP(30000), gw, alice);
@@ -989,7 +989,6 @@ private:
         {
             Env env{*this};
             env.fund(XRP(30000), gw, alice);
-            env.close();
             env.close();
             env(trust(gw, alice["USD"](30000)));
             env.close();
