@@ -186,10 +186,9 @@ applyBid(
     // the auction slot is not owned. Slot range is in {0-19}
     auto const timeSlot = ammAuctionTimeSlot(current, auctionSlot);
 
-    // Account must exist, is LP, and the slot not expired.
+    // Account must exist and the slot not expired.
     auto validOwner = [&](AccountID const& account) {
         return sb.read(keylet::account(account)) &&
-            ammLPHolds(sb, *ammSle, account, ctx_.journal) != beast::zero &&
             // Valid range is 0-19 but the tailing slot pays MinSlotPrice
             // and doesn't refund so the check is < instead of <= to optimize.
             timeSlot && *timeSlot < tailingSlot;

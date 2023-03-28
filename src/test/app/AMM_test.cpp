@@ -985,6 +985,20 @@ private:
             BEAST_EXPECT(!ammAlice.ammExists());
         }
 
+        // Individually frozen
+        {
+            Env env{*this};
+            env.fund(XRP(30000), gw, alice);
+            env.close();
+            env.close();
+            env(trust(gw, alice["USD"](30000)));
+            env.close();
+            env(trust(gw, alice["USD"](0), tfSetFreeze));
+            env.close();
+            AMM ammAlice(env, alice, XRP(10000), USD(10000), ter(tecFROZEN));
+            BEAST_EXPECT(!ammAlice.ammExists());
+        }
+
         // Insufficient reserve, XRP/IOU
         {
             Env env(*this);
@@ -1205,9 +1219,11 @@ private:
                 ter(terNO_AMM));
         });
 
-        // Frozen asset
+        // Globally frozen asset
         testAMM([&](AMM& ammAlice, Env& env) {
             env(fset(gw, asfGlobalFreeze));
+            // Can deposit non-frozen token
+            ammAlice.deposit(carol, XRP(100));
             ammAlice.deposit(
                 carol,
                 USD(100),
@@ -1215,13 +1231,43 @@ private:
                 std::nullopt,
                 std::nullopt,
                 ter(tecFROZEN));
-        });
-
-        // Frozen asset
-        testAMM([&](AMM& ammAlice, Env& env) {
-            env(fset(gw, asfGlobalFreeze));
             ammAlice.deposit(
                 carol, 1000000, std::nullopt, std::nullopt, ter(tecFROZEN));
+        });
+
+        // Individually frozen (AMM) account
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env(trust(gw, carol["USD"](0), tfSetFreeze));
+            env.close();
+            // Can deposit non-frozen token
+            ammAlice.deposit(carol, XRP(100));
+            ammAlice.deposit(
+                carol, 1000000, std::nullopt, std::nullopt, ter(tecFROZEN));
+            ammAlice.deposit(
+                carol,
+                USD(100),
+                std::nullopt,
+                std::nullopt,
+                std::nullopt,
+                ter(tecFROZEN));
+            env(trust(gw, carol["USD"](0), tfClearFreeze));
+            // Individually frozen AMM
+            env(trust(
+                gw,
+                STAmount{Issue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
+                tfSetFreeze));
+            env.close();
+            // Can deposit non-frozen token
+            ammAlice.deposit(carol, XRP(100));
+            ammAlice.deposit(
+                carol, 1000000, std::nullopt, std::nullopt, ter(tecFROZEN));
+            ammAlice.deposit(
+                carol,
+                USD(100),
+                std::nullopt,
+                std::nullopt,
+                std::nullopt,
+                ter(tecFROZEN));
         });
 
         // Insufficient XRP balance
@@ -1844,20 +1890,40 @@ private:
                 ter(terNO_AMM));
         });
 
-        // Frozen asset
+        // Globally frozen asset
         testAMM([&](AMM& ammAlice, Env& env) {
             env(fset(gw, asfGlobalFreeze));
             env.close();
+            // Can withdraw non-frozen token
+            ammAlice.withdraw(alice, XRP(100));
             ammAlice.withdraw(
-                carol, USD(100), std::nullopt, std::nullopt, ter(tecFROZEN));
+                alice, USD(100), std::nullopt, std::nullopt, ter(tecFROZEN));
+            ammAlice.withdraw(
+                alice, 1000, std::nullopt, std::nullopt, ter(tecFROZEN));
         });
 
-        // Frozen asset, balance is not available
+        // Individually frozen (AMM) account
         testAMM([&](AMM& ammAlice, Env& env) {
-            env(fset(gw, asfGlobalFreeze));
+            env(trust(gw, alice["USD"](0), tfSetFreeze));
             env.close();
+            // Can withdraw non-frozen token
+            ammAlice.withdraw(alice, XRP(100));
             ammAlice.withdraw(
-                carol, 1000, std::nullopt, std::nullopt, ter(tecFROZEN));
+                alice, 1000, std::nullopt, std::nullopt, ter(tecFROZEN));
+            ammAlice.withdraw(
+                alice, USD(100), std::nullopt, std::nullopt, ter(tecFROZEN));
+            env(trust(gw, alice["USD"](0), tfClearFreeze));
+            // Individually frozen AMM
+            env(trust(
+                gw,
+                STAmount{Issue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
+                tfSetFreeze));
+            // Can withdraw non-frozen token
+            ammAlice.withdraw(alice, XRP(100));
+            ammAlice.withdraw(
+                alice, 1000, std::nullopt, std::nullopt, ter(tecFROZEN));
+            ammAlice.withdraw(
+                alice, USD(100), std::nullopt, std::nullopt, ter(tecFROZEN));
         });
 
         // Carol is not a Liquidity Provider
@@ -2596,6 +2662,30 @@ private:
                 std::nullopt,
                 ter(temAMM_BAD_TOKENS));
         });
+
+        // Bid all tokens, still own the slot
+        {
+            Env env(*this);
+            fund(env, gw, {alice, bob}, XRP(1000), {USD(1000)});
+            AMM amm(env, gw, XRP(10), USD(1000));
+            auto const lpIssue = amm.lptIssue();
+            env.trust(STAmount{lpIssue, 100}, alice);
+            env.trust(STAmount{lpIssue, 50}, bob);
+            env(pay(gw, alice, STAmount{lpIssue, 100}));
+            env(pay(gw, bob, STAmount{lpIssue, 50}));
+            amm.bid(alice, 100);
+            // Alice doesn't have any more tokens, but
+            // she still owns the slot.
+            amm.bid(
+                bob,
+                std::nullopt,
+                50,
+                {},
+                std::nullopt,
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED_BID));
+        }
     }
 
     void
@@ -2799,6 +2889,30 @@ private:
             ammAlice.bid(alice, IOUAmount{100}, std::nullopt, {bob, dan});
             BEAST_EXPECT(ammAlice.expectAuctionSlot({bob, dan}));
         });
+
+        // Bid all tokens, still own the slot and trade at a discount
+        {
+            Env env(*this);
+            fund(env, gw, {alice, bob}, XRP(2000), {USD(2000)});
+            AMM amm(env, gw, XRP(1000), USD(1010), false, 1000);
+            auto const lpIssue = amm.lptIssue();
+            env.trust(STAmount{lpIssue, 100}, alice);
+            env.trust(STAmount{lpIssue, 50}, bob);
+            env(pay(gw, alice, STAmount{lpIssue, 100}));
+            env(pay(gw, bob, STAmount{lpIssue, 50}));
+            // Alice doesn't have anymore lp tokens
+            amm.bid(alice, 100);
+            // But trades without the fee since she still owns the slot
+            env(pay(alice, bob, USD(10)), path(~USD), sendmax(XRP(10)));
+            BEAST_EXPECT(amm.expectBalances(
+                XRP(1010), USD(1000), IOUAmount{1004887562112089, -9}));
+            // Bob pays the fee
+            env(pay(bob, alice, XRP(10)), path(~XRP), sendmax(USD(11)));
+            BEAST_EXPECT(amm.expectBalances(
+                XRP(1000),
+                STAmount{USD, UINT64_C(101010101010101), -11},
+                IOUAmount{1004887562112089, -9}));
+        }
     }
 
     void
@@ -2885,6 +2999,16 @@ private:
                     ter(tecPATH_PARTIAL));
             },
             {{XRP(100), USD(100)}});
+
+        // Globally frozen
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env(fset(gw, asfGlobalFreeze));
+            env(pay(alice, carol, USD(10)),
+                path(~USD),
+                txflags(tfPartialPayment),
+                sendmax(XRP(15)),
+                ter(tecPATH_DRY));
+        });
     }
 
     void

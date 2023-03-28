@@ -85,6 +85,12 @@ isFrozen(
     Currency const& currency,
     AccountID const& issuer);
 
+[[nodiscard]] inline bool
+isFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
+{
+    return isFrozen(view, account, issue.currency, issue.account);
+}
+
 // Returns the amount an account can spend without going into debt.
 //
 // <-- saAmount: amount of currency held by account. May be negative.

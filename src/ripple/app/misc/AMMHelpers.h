@@ -166,8 +166,8 @@ changeSpotPriceQuality(
     Quality const& quality,
     std::uint32_t tfee)
 {
-    auto const f = feeMult(tfee);
-    auto const a = f;
+    auto const f = feeMult(tfee);  // 1 - fee
+    auto const& a = f;
     auto const b = pool.in * (1 + f);
     Number const c = pool.in * pool.in - pool.in * pool.out * quality.rate();
     if (auto const res = b * b - 4 * a * c; res < 0)
