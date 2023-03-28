@@ -3002,10 +3002,46 @@ private:
         // Globally frozen
         testAMM([&](AMM& ammAlice, Env& env) {
             env(fset(gw, asfGlobalFreeze));
-            env(pay(alice, carol, USD(10)),
+            env(pay(alice, carol, USD(1)),
                 path(~USD),
-                txflags(tfPartialPayment),
-                sendmax(XRP(15)),
+                txflags(tfPartialPayment | tfNoRippleDirect),
+                sendmax(XRP(10)),
+                ter(tecPATH_DRY));
+            env(pay(alice, carol, XRP(1)),
+                path(~XRP),
+                txflags(tfPartialPayment | tfNoRippleDirect),
+                sendmax(USD(10)),
+                ter(tecPATH_DRY));
+        });
+
+        // Individually frozen AMM
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env(trust(
+                gw,
+                STAmount{Issue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
+                tfSetFreeze));
+            env.close();
+            env(pay(alice, carol, USD(1)),
+                path(~USD),
+                txflags(tfPartialPayment | tfNoRippleDirect),
+                sendmax(XRP(10)),
+                ter(tecPATH_DRY));
+            env(pay(alice, carol, XRP(1)),
+                path(~XRP),
+                txflags(tfPartialPayment | tfNoRippleDirect),
+                sendmax(USD(10)),
+                ter(tecPATH_DRY));
+        });
+
+        // Individually frozen accounts
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env(trust(gw, carol["USD"](0), tfSetFreeze));
+            env(trust(gw, alice["USD"](0), tfSetFreeze));
+            env.close();
+            env(pay(alice, carol, XRP(1)),
+                path(~XRP),
+                sendmax(USD(10)),
+                txflags(tfNoRippleDirect | tfPartialPayment),
                 ter(tecPATH_DRY));
         });
     }
@@ -3550,6 +3586,18 @@ private:
                    STAmount{USD, UINT64_C(5007513050698), -11}}}}));
             BEAST_EXPECT(expectLine(env, carol, USD(30100)));
         }
+
+        // Individually frozen account
+        testAMM([&](AMM& ammAlice, Env& env) {
+            env(trust(gw, carol["USD"](0), tfSetFreeze));
+            env(trust(gw, alice["USD"](0), tfSetFreeze));
+            env.close();
+            env(pay(alice, carol, USD(1)),
+                path(~USD),
+                sendmax(XRP(10)),
+                txflags(tfNoRippleDirect | tfPartialPayment),
+                ter(tesSUCCESS));
+        });
     }
 
     void
