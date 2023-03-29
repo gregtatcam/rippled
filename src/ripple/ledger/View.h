@@ -86,7 +86,10 @@ isIndividualFrozen(
     AccountID const& issuer);
 
 [[nodiscard]] inline bool
-isIndividualFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
+isIndividualFrozen(
+    ReadView const& view,
+    AccountID const& account,
+    Issue const& issue)
 {
     return isIndividualFrozen(view, account, issue.currency, issue.account);
 }
