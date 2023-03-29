@@ -3002,6 +3002,7 @@ private:
         // Globally frozen
         testAMM([&](AMM& ammAlice, Env& env) {
             env(fset(gw, asfGlobalFreeze));
+            env.close();
             env(pay(alice, carol, USD(1)),
                 path(~USD),
                 txflags(tfPartialPayment | tfNoRippleDirect),
