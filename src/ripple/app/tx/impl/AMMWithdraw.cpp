@@ -224,7 +224,7 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
                 return tecFROZEN;
             }
             // Account frozen
-            if (isFrozen(ctx.view, accountID, amount->issue()))
+            if (isIndividualFrozen(ctx.view, accountID, amount->issue()))
             {
                 JLOG(ctx.j.debug()) << "AMM Withdraw: account is frozen, "
                                     << to_string(accountID) << " "
@@ -281,8 +281,8 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
     if ((ctx.tx.getFlags() & tfLPToken) &&
         (isFrozen(ctx.view, ammAccountID, ctx.tx[sfAsset]) ||
          isFrozen(ctx.view, ammAccountID, ctx.tx[sfAsset2]) ||
-         isFrozen(ctx.view, accountID, ctx.tx[sfAsset]) ||
-         isFrozen(ctx.view, accountID, ctx.tx[sfAsset2])))
+         isIndividualFrozen(ctx.view, accountID, ctx.tx[sfAsset]) ||
+         isIndividualFrozen(ctx.view, accountID, ctx.tx[sfAsset2])))
     {
         JLOG(ctx.j.debug())
             << "AMM Withdraw: (AMM) account or currency is frozen, "
