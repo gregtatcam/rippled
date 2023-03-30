@@ -407,8 +407,8 @@ extern SF_UINT32 const sfMintedNFTokens;
 extern SF_UINT32 const sfBurnedNFTokens;
 extern SF_UINT32 const sfHookStateCount;
 extern SF_UINT32 const sfEmitGeneration;
-extern SF_UINT32 const sfFirstNFTokenSequence;
 extern SF_UINT32 const sfVoteWeight;
+extern SF_UINT32 const sfFirstNFTokenSequence;
 
 // 64-bit integers (common)
 extern SF_UINT64 const sfIndexNext;
