@@ -57,7 +57,7 @@ ammLPTIssue(
     AccountID const& ammAccountID);
 
 /** Validate the amount.
- * If zero is false and amount is beast::zero then invalid amount.
+ * If nonNegative is false and amount is beast::zero then invalid amount.
  * Return error code if invalid amount.
  * If pair then validate amount's issue matches one of the pair's issue.
  */
