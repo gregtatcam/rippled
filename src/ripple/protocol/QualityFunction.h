@@ -22,10 +22,9 @@
 
 #include <ripple/basics/Number.h>
 #include <ripple/protocol/AMMCore.h>
+#include <rippl/protocol/Quality.h>
 
 namespace ripple {
-
-class Quality;
 
 /** Average quality of a path as a function of `out`: q(out) = m * out + b,
  * where m = -1 / poolGets, b = poolPays / poolGets. If CLOB offer then
