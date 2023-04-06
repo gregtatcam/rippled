@@ -21,6 +21,7 @@
 #define RIPPLE_PROTOCOL_QUALITYFUNCTION_H_INCLUDED
 
 #include <ripple/basics/Number.h>
+#include <ripple/protocol/AMMCore.h>
 
 namespace ripple {
 
@@ -82,7 +83,7 @@ public:
         return quality_.has_value();
     }
 
-    std::optional<Quality>
+    std::optional<Quality> const&
     quality() const
     {
         return quality_;
@@ -97,7 +98,7 @@ QualityFunction::QualityFunction(
 {
     if (amounts.in <= beast::zero || amounts.out <= beast::zero)
         Throw<std::runtime_error>("QualityFunction amounts are 0.");
-    Number const cfee = 1 - Number{tfee} / 100000;
+    Number const cfee = feeMult(tfee);
     m_ = -cfee / amounts.in;
     b_ = amounts.out * cfee / amounts.in;
 }
