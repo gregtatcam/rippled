@@ -22,7 +22,7 @@
 
 #include <ripple/basics/Number.h>
 #include <ripple/protocol/AMMCore.h>
-#include <rippl/protocol/Quality.h>
+#include <ripple/protocol/Quality.h>
 
 namespace ripple {
 
