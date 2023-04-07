@@ -200,15 +200,15 @@ applyBid(
         auctionSlot.setAccountID(sfAccount, account_);
         auctionSlot.setFieldU32(sfExpiration, current + TOTAL_TIME_SLOT_SECS);
         if (fee == 0)
-            auctionSlot.makeFieldAbsent(sfDiscountedFee);
-        else if (auctionSlot.isFieldPresent(sfDiscountedFee))
+                auctionSlot.makeFieldAbsent(sfDiscountedFee);
+        else
             auctionSlot.setFieldU32(sfDiscountedFee, fee);
         auctionSlot.setFieldAmount(
             sfPrice, toSTAmount(lpTokens.issue(), minPrice));
         if (ctx_.tx.isFieldPresent(sfAuthAccounts))
             auctionSlot.setFieldArray(
                 sfAuthAccounts, ctx_.tx.getFieldArray(sfAuthAccounts));
-        else if (auctionSlot.isFieldPresent(sfAuthAccounts))
+        else
             auctionSlot.makeFieldAbsent(sfAuthAccounts);
         // Burn the remaining bid amount
         auto const saBurn = toSTAmount(lpTokens.issue(), burn);

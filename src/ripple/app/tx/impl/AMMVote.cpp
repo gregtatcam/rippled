@@ -198,7 +198,7 @@ applyVote(
     ammSle->setFieldArray(sfVoteSlots, updatedVoteSlots);
     if (auto const fee = static_cast<std::int64_t>(num / den))
         ammSle->setFieldU16(sfTradingFee, fee);
-    else if (ammSle->isFieldPresent(sfTradingFee))
+    else
         ammSle->makeFieldAbsent(sfTradingFee);
     sb.update(ammSle);
 
