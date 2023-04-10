@@ -200,7 +200,7 @@ applyBid(
         auctionSlot.setAccountID(sfAccount, account_);
         auctionSlot.setFieldU32(sfExpiration, current + TOTAL_TIME_SLOT_SECS);
         if (fee == 0)
-                auctionSlot.makeFieldAbsent(sfDiscountedFee);
+            auctionSlot.makeFieldAbsent(sfDiscountedFee);
         else
             auctionSlot.setFieldU32(sfDiscountedFee, fee);
         auctionSlot.setFieldAmount(
