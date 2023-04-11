@@ -155,8 +155,7 @@ doAMMInfo(RPC::JsonContext& context)
                 auctionSlot);
             auction[jss::time_interval] = timeSlot ? *timeSlot : 0;
             auctionSlot[sfPrice].setJson(auction[jss::price]);
-            auction[jss::discounted_fee] =
-                auctionSlot[sfDiscountedFee];
+            auction[jss::discounted_fee] = auctionSlot[sfDiscountedFee];
             auction[jss::account] =
                 to_string(auctionSlot.getAccountID(sfAccount));
             auction[jss::expiration] = to_string(NetClock::time_point{
