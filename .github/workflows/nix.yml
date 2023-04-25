@@ -60,34 +60,62 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           conan profile update settings.compiler.libcxx=libstdc++11 default
-      - name: learn Conan cache directory
-        id: conan-cache
-        run: |
-          echo "::set-output name=dir::$(conan config get storage.path)"
-      - name: restore Conan cache directory
-        uses: actions/cache@v2
+          conan profile update env.CC=${{ matrix.profile.cc }} default
+          conan profile update env.CXX=${{ matrix.profile.cxx }} default
+          conan profile update conf.tools.build:compiler_executables='{"c": "${{ matrix.profile.cc }}", "cpp": "${{ matrix.profile.cxx }}"}' default
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: dependencies
+        uses: ./.github/actions/dependencies
         with:
-            path: ${{ steps.conan-cache.outputs.dir }}
-            key: ${{ hashFiles('~/.conan/profiles/default', 'conanfile.py', 'external/rocksdb/*', '.github/workflows/nix.yml') }}
-      - name: export Snappy
-        run: conan export external/snappy snappy/1.1.9@
-      - name: install dependencies
+          configuration: ${{ matrix.configuration }}
+      - name: archive cache
+        run: tar -czf conan.tar -C ~/.conan .
+      - name: upload cache
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.platform }}-${{ matrix.compiler }}-${{ matrix.configuration }}
+          path: conan.tar
+
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux
+        compiler:
+          - gcc
+          - clang
+        configuration:
+          - Debug
+          - Release
+        cmake-args:
+          -
+          - "-Dunity=ON"
+    needs: dependencies
+    runs-on: [self-hosted, heavy]
+    container: thejohnfreeman/rippled-build-ubuntu:12e19cd9034b
+    env:
+      build_dir: .build
+    steps:
+      - name: download cache
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.platform }}-${{ matrix.compiler }}-${{ matrix.configuration }}
+      - name: extract cache
         run: |
-          mkdir ${build_dir}
-          cd ${build_dir}
-          conan install .. --build missing --settings build_type=${{ matrix.configuration }}
-      - name: configure
+          mkdir -p ~/.conan
+          tar -xzf conan.tar -C ~/.conan
+      - name: check environment
         run: |
-          cd ${build_dir}
-          cmake \
-            -G ${{ matrix.generator }} \
-            -DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake \
-            -DCMAKE_BUILD_TYPE=${{ matrix.configuration }} \
-            -Dassert=ON \
-            -Dcoverage=OFF \
-            -Dreporting=OFF \
-            -Dunity=OFF \
-            ..
+          echo ${PATH} | tr ':' '\n'
+          conan --version
+          cmake --version
+          env
+          ls ~/.conan
+      - name: checkout
+        uses: actions/checkout@v3
       - name: build
         run: |
           cmake --build ${build_dir} --target rippled --parallel $(nproc)
