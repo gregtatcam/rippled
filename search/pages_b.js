@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['peerfinder_27278',['PeerFinder',['../md_ripple_peerfinder_README.html',1,'']]],
-  ['proto_27279',['Proto',['../md_ripple_proto_README.html',1,'']]],
-  ['protocol_27280',['protocol',['../md_ripple_protocol_README.html',1,'']]]
+  ['open_20shard_20management_27340',['Open Shard Management',['../md_ripple_nodestore_ShardPool.html',1,'']]],
+  ['overlay_27341',['Overlay',['../md_ripple_overlay_README.html',1,'']]]
 ];
