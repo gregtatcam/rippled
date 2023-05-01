@@ -17,12 +17,13 @@
 */
 //==============================================================================
 
+#include <test/jtx/AMM.h>
+
 #include <ripple/app/misc/AMMUtils.h>
 #include <ripple/protocol/AMMCore.h>
 #include <ripple/protocol/AmountConversions.h>
 #include <ripple/protocol/jss.h>
 #include <ripple/rpc/impl/RPCHelpers.h>
-#include <test/jtx/AMM.h>
 #include <test/jtx/Env.h>
 
 namespace ripple {
@@ -41,8 +42,8 @@ static IOUAmount
 initialTokens(STAmount const& asset1, STAmount const& asset2)
 {
     auto const product = number(asset1) * number(asset2);
-    return (IOUAmount)(
-        product.mantissa() >= 0 ? root2(product) : root2(-product));
+    return (
+        IOUAmount)(product.mantissa() >= 0 ? root2(product) : root2(-product));
 }
 
 AMM::AMM(
@@ -70,8 +71,12 @@ AMM::AMM(
     , bidMax_()
     , msig_(ms)
     , fee_(fee)
+    , ammAccount_(create(tfee, flags, seq))
+    , lptIssue_(ripple::ammLPTIssue(
+          asset1_.issue().currency,
+          asset2_.issue().currency,
+          ammAccount_))
 {
-    create(tfee, flags, seq);
 }
 
 AMM::AMM(
@@ -95,7 +100,7 @@ AMM::AMM(
 {
 }
 
-void
+[[nodiscard]] AccountID
 AMM::create(
     std::uint32_t tfee,
     std::optional<std::uint32_t> flags,
@@ -120,16 +125,13 @@ AMM::create(
         if (auto const amm = env_.current()->read(
                 keylet::amm(asset1_.issue(), asset2_.issue())))
         {
-            ammAccount_ = amm->getAccountID(sfAccount);
-            lptIssue_ = ripple::ammLPTIssue(
-                asset1_.issue().currency,
-                asset2_.issue().currency,
-                ammAccount_);
+            return amm->getAccountID(sfAccount);
         }
     }
+    return {};
 }
 
-std::optional<Json::Value>
+Json::Value
 AMM::ammRpcInfo(
     std::optional<AccountID> const& account,
     std::optional<std::string> const& ledgerIndex,
@@ -145,7 +147,7 @@ AMM::ammRpcInfo(
         jv[jss::asset] =
             STIssue(sfAsset, tokens->first).getJson(JsonOptions::none);
         jv[jss::asset2] =
-            STIssue(sfAsset2, tokens->first).getJson(JsonOptions::none);
+            STIssue(sfAsset2, tokens->second).getJson(JsonOptions::none);
     }
     else
     {
@@ -158,7 +160,7 @@ AMM::ammRpcInfo(
     if (jr.isObject() && jr.isMember(jss::result) &&
         jr[jss::result].isMember(jss::status))
         return jr[jss::result];
-    return std::nullopt;
+    return Json::nullValue;
 }
 
 std::tuple<STAmount, STAmount, STAmount>
@@ -191,8 +193,7 @@ AMM::expectBalances(
     STAmount const& asset1,
     STAmount const& asset2,
     IOUAmount const& lpt,
-    std::optional<AccountID> const& account,
-    std::optional<std::string> const& ledger_index) const
+    std::optional<AccountID> const& account) const
 {
     auto const [asset1Balance, asset2Balance, lptAMMBalance] =
         balances(asset1.issue(), asset2.issue(), account);
@@ -235,8 +236,7 @@ bool
 AMM::expectAuctionSlot(
     std::uint32_t fee,
     std::optional<std::uint8_t> timeSlot,
-    std::optional<std::uint8_t> purchasedTimeSlot,
-    std::optional<std::string> const& ledger_index) const
+    std::optional<std::uint8_t> purchasedTimeSlot) const
 {
     return expectAuctionSlot([&](std::uint32_t slotFee,
                                  std::optional<std::uint8_t> slotInterval,
@@ -261,8 +261,7 @@ bool
 AMM::expectAuctionSlot(
     std::uint32_t fee,
     std::optional<std::uint8_t> timeSlot,
-    IOUAmount expectedPrice,
-    std::optional<std::string> const& ledger_index) const
+    IOUAmount expectedPrice) const
 {
     return expectAuctionSlot([&](std::uint32_t slotFee,
                                  std::optional<std::uint8_t> slotInterval,
@@ -298,11 +297,9 @@ AMM::expectAuctionSlot(std::vector<AccountID> const& authAccounts) const
 bool
 AMM::expectTradingFee(std::uint16_t fee) const
 {
-    if (auto const amm =
-            env_.current()->read(keylet::amm(asset1_.issue(), asset2_.issue()));
-        amm && (*amm)[sfTradingFee] == fee)
-        return true;
-    return false;
+    auto const amm =
+        env_.current()->read(keylet::amm(asset1_.issue(), asset2_.issue()));
+    return amm && (*amm)[sfTradingFee] == fee;
 }
 
 bool
@@ -322,9 +319,7 @@ AMM::expectAmmRpcInfo(
     std::optional<std::string> const& ledger_index) const
 {
     auto const jv = ammRpcInfo(account, ledger_index);
-    if (!jv)
-        return false;
-    return expectAmmInfo(asset1, asset2, balance, *jv);
+    return expectAmmInfo(asset1, asset2, balance, jv);
 }
 
 bool
@@ -336,7 +331,7 @@ AMM::expectAmmInfo(
 {
     if (!jvres.isMember(jss::amm))
         return false;
-    auto const jv = jvres[jss::amm];
+    auto const& jv = jvres[jss::amm];
     if (!jv.isMember(jss::amount) || !jv.isMember(jss::amount2) ||
         !jv.isMember(jss::lp_token))
         return false;
@@ -351,11 +346,7 @@ AMM::expectAmmInfo(
         return false;
     // ammRpcInfo returns unordered assets
     if (asset1Info.issue() != asset1.issue())
-    {
-        auto const tmp = asset1Info;
-        asset1Info = asset2Info;
-        asset2Info = tmp;
-    }
+        std::swap(asset1Info, asset2Info);
     return asset1 == asset1Info && asset2 == asset2Info &&
         lptBalance == STAmount{balance, lptIssue_};
 }
