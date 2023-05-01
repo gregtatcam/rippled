@@ -66,7 +66,6 @@ class AMM
     STAmount const asset1_;
     STAmount const asset2_;
     IOUAmount const initialLPTokens_;
-    std::optional<ter> ter_;
     bool log_;
     // Predict next purchase price
     IOUAmount lastPurchasePrice_;
@@ -302,15 +301,17 @@ private:
     AccountID
     create(
         std::uint32_t tfee = 0,
-        std::optional<std::uint32_t> flags = std::nullopt,
-        std::optional<jtx::seq> seq = std::nullopt);
+        std::optional<std::uint32_t> const& flags = std::nullopt,
+        std::optional<jtx::seq> const& seq = std::nullopt,
+        std::optional<ter> const& ter = std::nullopt);
 
     void
     deposit(
         std::optional<Account> const& account,
         Json::Value& jv,
         std::optional<std::pair<Issue, Issue>> const& assets = std::nullopt,
-        std::optional<jtx::seq> const& seq = std::nullopt);
+        std::optional<jtx::seq> const& seq = std::nullopt,
+        std::optional<ter> const& ter = std::nullopt);
 
     void
     withdraw(

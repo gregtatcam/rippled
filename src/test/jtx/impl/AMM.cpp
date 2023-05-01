@@ -63,7 +63,6 @@ AMM::AMM(
     , asset1_(asset1)
     , asset2_(asset2)
     , initialLPTokens_(initialTokens(asset1, asset2))
-    , ter_(ter)
     , log_(log)
     , lastPurchasePrice_(0)
     , minSlotPrice_(0)
@@ -71,7 +70,7 @@ AMM::AMM(
     , bidMax_()
     , msig_(ms)
     , fee_(fee)
-    , ammAccount_(create(tfee, flags, seq))
+    , ammAccount_(create(tfee, flags, seq, ter))
     , lptIssue_(ripple::ammLPTIssue(
           asset1_.issue().currency,
           asset2_.issue().currency,
@@ -103,8 +102,9 @@ AMM::AMM(
 [[nodiscard]] AccountID
 AMM::create(
     std::uint32_t tfee,
-    std::optional<std::uint32_t> flags,
-    std::optional<jtx::seq> seq)
+    std::optional<std::uint32_t> const& flags,
+    std::optional<jtx::seq> const& seq,
+    std::optional<ter> const& ter)
 {
     Json::Value jv;
     jv[jss::Account] = creatorAccount_.human();
@@ -118,9 +118,9 @@ AMM::create(
         jv[jss::Fee] = std::to_string(fee_);
     else
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
-    submit(jv, seq, ter_);
+    submit(jv, seq, ter);
 
-    if (!ter_ || env_.ter() == tesSUCCESS)
+    if (!ter || env_.ter() == tesSUCCESS)
     {
         if (auto const amm = env_.current()->read(
                 keylet::amm(asset1_.issue(), asset2_.issue())))
@@ -377,14 +377,15 @@ AMM::deposit(
     std::optional<Account> const& account,
     Json::Value& jv,
     std::optional<std::pair<Issue, Issue>> const& assets,
-    std::optional<jtx::seq> const& seq)
+    std::optional<jtx::seq> const& seq,
+    std::optional<ter> const& ter)
 {
     jv[jss::Account] = account ? account->human() : creatorAccount_.human();
     setTokens(jv, assets);
     jv[jss::TransactionType] = jss::AMMDeposit;
     if (fee_ != 0)
         jv[jss::Fee] = std::to_string(fee_);
-    submit(jv, seq, ter_);
+    submit(jv, seq, ter);
 }
 
 void
@@ -441,8 +442,6 @@ AMM::deposit(
     std::optional<jtx::seq> const& seq,
     std::optional<ter> const& ter)
 {
-    if (ter)
-        ter_ = *ter;
     Json::Value jv;
     if (tokens)
         tokens->tokens(lptIssue_).setJson(jv[jss::LPTokenOut]);
@@ -469,9 +468,7 @@ AMM::deposit(
             jvflags |= tfSingleAsset;
     }
     jv[jss::Flags] = jvflags;
-    deposit(account, jv, assets, seq);
-    if (ter)
-        ter_ = std::nullopt;
+    deposit(account, jv, assets, seq, ter);
 }
 
 void
