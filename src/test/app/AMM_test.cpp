@@ -1173,7 +1173,7 @@ private:
                 std::nullopt,
                 std::nullopt,
                 ter(tecAMM_FAILED_WITHDRAW));
-            // Similar to above but this time withdrawing from one side.
+            // Withdrawing from one side.
             // XRP by tokens
             ammAlice.withdraw(
                 alice,
@@ -1599,12 +1599,12 @@ private:
         });
 
         // Withdraw close to entire pool
+        // Equal by tokens
         testAMM([&](AMM& ammAlice, Env&) {
             ammAlice.withdraw(alice, IOUAmount{9999999999, -3});
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRPAmount{1}, STAmount{USD, 1, -6}, IOUAmount{1, -3}));
         });
-        // Withdraw close to entire one side
         // USD by tokens
         testAMM([&](AMM& ammAlice, Env&) {
             ammAlice.withdraw(alice, IOUAmount{9999999}, USD(0));
