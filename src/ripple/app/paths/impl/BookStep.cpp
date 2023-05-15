@@ -212,6 +212,12 @@ private:
         TAmounts<TIn, TOut> const& ofrAmt,
         TAmounts<TIn, TOut> const& stepAmt,
         TOut const& ownerGives) const;
+
+    virtual std::optional<Quality>
+    limitQuality() const
+    {
+        return std::nullopt;
+    }
 };
 
 //------------------------------------------------------------------------------
@@ -325,6 +331,12 @@ private:
         if (!limitQuality)
             Throw<FlowException>(tefINTERNAL, "Offer requires quality.");
         return *limitQuality;
+    }
+
+    std::optional<Quality>
+    limitQuality() const override
+    {
+        return qualityThreshold_;
     }
 
 public:
@@ -532,7 +544,8 @@ limitStepOut(
     std::uint32_t transferRateIn,
     std::uint32_t transferRateOut,
     TOut const& limit,
-    Rules const& rules)
+    Rules const& rules,
+    std::optional<Quality> const& limitQuality)
 {
     if (limit < stpAmt.out)
     {
@@ -540,11 +553,24 @@ limitStepOut(
         ownerGives = mulRatio(
             stpAmt.out, transferRateOut, QUALITY_ONE, /*roundUp*/ false);
         if (rules.enabled(fixReducedOffersV1))
+        {
+            TAmounts<TIn, TOut> const origOfrAmt = ofrAmt;
             // It turns out that the ceil_out implementation has some slop in
             // it.  ceil_out_strict removes that slop.  But removing that slop
             // affects transaction outcomes, so the change must be made using
             // an amendment.
             ofrAmt = ofrQ.ceil_out_strict(ofrAmt, stpAmt.out, /*roundUp*/ true);
+            // The adjustment above reduced the quality below
+            // the limitQuality. Re-adjust with roundUp set to false
+            // in order to increase the offer's quality. Note that limitQuality
+            // is seated only when offer crossing.
+            if (rules.enabled(fixReducedOffersV2) &&
+                limitQuality > Quality{ofrAmt})
+            {
+                ofrAmt = ofrQ.ceil_out_strict(
+                    origOfrAmt, stpAmt.out, /*roundUp*/ false);
+            }
+        }
         else
             ofrAmt = ofrQ.ceil_out(ofrAmt, stpAmt.out);
         stpAmt.in =
@@ -789,7 +815,8 @@ BookStep<TIn, TOut, TDerived>::revImp(
                 transferRateIn,
                 transferRateOut,
                 remainingOut,
-                afView.rules());
+                afView.rules(),
+                limitQuality());
             remainingOut = beast::zero;
             savedIns.insert(stpAdjAmt.in);
             savedOuts.insert(remainingOut);
@@ -942,7 +969,8 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
                 transferRateIn,
                 transferRateOut,
                 remainingOut,
-                afView.rules());
+                afView.rules(),
+                limitQuality());
 
             if (stpAdjAmtRev.in == remainingIn)
             {

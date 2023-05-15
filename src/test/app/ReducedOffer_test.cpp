@@ -607,12 +607,73 @@ public:
     }
 
     void
+    testReducedOfferV2()
+    {
+        testcase("reduced offer fix V2");
+        using namespace jtx;
+        auto const gw = Account("gw");
+        auto const TST = gw["TST"];
+        auto const LP1 = Account("LP1");
+        auto const LP2 = Account("LP2");
+
+        auto test = [&](Env& env, auto const& features) {
+            env.fund(XRP(30'000'000'000), gw);
+            env(offer(gw, XRP(11'500'000'000), TST(1'000'000'000)));
+
+            env.fund(XRP(10'000), LP1);
+            env.fund(XRP(10'000), LP2);
+            env(offer(LP1, TST(25), XRPAmount(287'500'000)));
+
+            std::uint32_t const lp1OfferSeq = env.seq(LP1);
+            env(offer(
+                    LP1,
+                    XRPAmount{18095133},
+                    STAmount{TST, UINT64_C(168737984885388), -14}),
+                txflags(tfPassive));
+
+            std::uint32_t lp2OfferSeq = env.seq(LP2);
+            env(offer(LP2, TST(25), XRPAmount(287'500'000)));
+
+            BEAST_EXPECT(!offerInLedger(env, LP1, lp1OfferSeq));
+
+            auto const v2Enabled = features[fixReducedOffersV2];
+
+            if (v2Enabled)
+            {
+                // offer is fully crossed
+                BEAST_EXPECT(!offerInLedger(env, LP2, lp2OfferSeq));
+            }
+            else
+            {
+                // offer is partially crossed
+                auto lp2Offer =
+                    ledgerEntryOffer(env, LP2, lp2OfferSeq)[jss::node];
+                BEAST_EXPECT(
+                    lp2Offer[jss::TakerGets].asString() == "268095132" &&
+                    lp2Offer[jss::TakerPays][jss::value].asString() ==
+                        "23.31262015114612");
+            }
+        };
+
+        for (FeatureBitset features :
+             {supported_amendments() - fixReducedOffersV1 - fixReducedOffersV2,
+              (supported_amendments() | fixReducedOffersV1) -
+                  fixReducedOffersV2,
+              supported_amendments() | fixReducedOffersV1 | fixReducedOffersV2})
+        {
+            Env env{*this, features};
+            test(env, features);
+        }
+    }
+
+    void
     run() override
     {
         testPartialCrossNewXrpIouQChange();
         testPartialCrossOldXrpIouQChange();
         testUnderFundedXrpIouQChange();
         testUnderFundedIouIouQChange();
+        testReducedOfferV2();
     }
 };
 
