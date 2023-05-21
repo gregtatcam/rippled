@@ -2172,7 +2172,7 @@ private:
                 }
                 auto const danFees =
                     danTokens - ammAlice.getLPTokensBalance(dan);
-                // dan pays about 10 times more in fees than carol, bob, ed.
+                // dan pays ~10 times more in fees than carol, bob, ed.
                 // the discounted fee is 10 times less than the trading fee.
                 BEAST_EXPECT(danFees == IOUAmount(499199574327, -8));
                 BEAST_EXPECT(ammAlice.expectBalances(
@@ -2187,11 +2187,11 @@ private:
                 // carol pays 100101 drops in fees
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRPAmount{13100100101}, USD(13000), ammTokens));
-                // Payment with the fee
+                // Payment with the trading fee
                 env(pay(alice, carol, XRP(100)), path(~XRP), sendmax(USD(110)));
                 env.close();
-                // alice pays 1.00925841612USD, which is ~10 times higher
-                // than carol's fee.
+                // alice pays 1.00925841612USD, which is ~10 times more
+                // than carol's fee
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRPAmount{13000100101},
                     STAmount{USD, UINT64_C(1310100932323055), -11},
@@ -2217,7 +2217,7 @@ private:
                 env(pay(carol, bob, USD(100)), path(~USD), sendmax(XRP(110)));
                 env.close();
                 // carol pays 1011728 drops in trading fee, which is
-                // ~10 times more than the discounted fee.
+                // ~10 times more than the discounted fee
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRPAmount(13101103138),
                     STAmount{USD, UINT64_C(1300100932323055), -11},
