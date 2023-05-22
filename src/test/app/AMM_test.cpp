@@ -1733,8 +1733,11 @@ private:
 
         // One vote sets fee to 1%.
         testAMM([&](AMM& ammAlice, Env& env) {
+            BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 0));
             ammAlice.vote({}, 1000);
             BEAST_EXPECT(ammAlice.expectTradingFee(1000));
+            // Discounted fee is 1/10 of trading fee.
+            BEAST_EXPECT(ammAlice.expectAuctionSlot(100, 0));
         });
 
         auto vote = [&](AMM& ammAlice,
