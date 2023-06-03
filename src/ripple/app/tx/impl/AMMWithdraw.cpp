@@ -589,8 +589,10 @@ AMMWithdraw::equalWithdrawTokens(
                 tfee);
 
         auto const frac = divide(lpTokensWithdraw, lptAMMBalance, noIssue());
-        auto const withdrawAmount = multiply(amountBalance, frac, amountBalance.issue());
-        auto const withdraw2Amount = multiply(amount2Balance, frac, amount2Balance.issue());
+        auto const withdrawAmount =
+            multiply(amountBalance, frac, amountBalance.issue());
+        auto const withdraw2Amount =
+            multiply(amount2Balance, frac, amount2Balance.issue());
         // LP is making equal withdrawal by tokens but the requested amount
         // of LP tokens is likely too small and results in one-sided pool
         // withdrawal due to round off. Fail so the user withdraws
