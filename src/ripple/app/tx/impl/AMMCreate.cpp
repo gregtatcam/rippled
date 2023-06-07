@@ -54,7 +54,7 @@ AMMCreate::preflight(PreflightContext const& ctx)
     {
         JLOG(ctx.j.debug())
             << "AMM Instance: tokens can not have the same currency/issuer.";
-        return temAMM_BAD_TOKENS;
+        return temBAD_AMM_TOKENS;
     }
 
     if (auto const err = invalidAMMAmount(amount))
@@ -149,7 +149,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     {
         JLOG(ctx.j.debug())
             << "AMM Instance: insufficient funds, " << amount << " " << amount2;
-        return tecAMM_UNFUNDED;
+        return tecUNFUNDED_AMM;
     }
 
     return tesSUCCESS;

@@ -123,7 +123,7 @@ AMMBid::preclaim(PreclaimContext const& ctx)
         if (bidMin->issue() != lpTokens.issue())
         {
             JLOG(ctx.j.debug()) << "AMM Bid: Invalid LPToken.";
-            return temAMM_BAD_TOKENS;
+            return temBAD_AMM_TOKENS;
         }
         if (*bidMin > lpTokens || *bidMin >= lpTokensBalance)
         {
@@ -138,7 +138,7 @@ AMMBid::preclaim(PreclaimContext const& ctx)
         if (bidMax->issue() != lpTokens.issue())
         {
             JLOG(ctx.j.debug()) << "AMM Bid: Invalid LPToken.";
-            return temAMM_BAD_TOKENS;
+            return temBAD_AMM_TOKENS;
         }
         if (*bidMax > lpTokens || *bidMax >= lpTokensBalance)
         {

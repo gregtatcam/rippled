@@ -1338,7 +1338,7 @@ private:
         // Alice doesn't have the funds
         {
             AMM ammAlice(
-                env, alice, USD(1000), XRP(1000), ter(tecAMM_UNFUNDED));
+                env, alice, USD(1000), XRP(1000), ter(tecUNFUNDED_AMM));
         }
 
         env(fset(gw, asfRequireAuth));
