@@ -263,8 +263,8 @@ applyBid(
             {
                 if (computedPrice <= *bidMax)
                     return computedPrice;
-                JLOG(ctx_.journal.debug())
-                    << "AMM Bid: not in range " << computedPrice << *bidMax;
+                JLOG(ctx_.journal.debug()) << "AMM Bid: not in range "
+                                           << computedPrice << " " << *bidMax;
                 return std::nullopt;
             }
             else

@@ -43,7 +43,7 @@
 namespace ripple {
 namespace test {
 
-struct AMMExtended_test : public jtx::Test
+struct AMMExtended_test : public jtx::AMMTest
 {
 private:
     void

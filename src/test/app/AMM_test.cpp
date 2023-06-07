@@ -38,7 +38,7 @@
 namespace ripple {
 namespace test {
 
-struct AMM_test : public jtx::Test
+struct AMM_test : public jtx::AMMTest
 {
 private:
     void
@@ -2403,28 +2403,18 @@ private:
 
         // Can't pay into AMM with escrow.
         testAMM([&](AMM& ammAlice, Env& env) {
-            auto const seq1 = env.seq(carol);
             env(escrow(carol, ammAlice.ammAccount(), XRP(1)),
                 condition(cb1),
                 finish_time(env.now() + 1s),
                 cancel_time(env.now() + 2s),
                 fee(1500),
-                ter(tesSUCCESS));
-            env.close();
-            env(finish(carol, carol, seq1),
-                condition(cb1),
-                fulfillment(fb1),
-                fee(1500),
                 ter(tecNO_PERMISSION));
-            env(cancel(carol, carol, seq1));
         });
 
         // Can't pay into AMM with paychan.
         testAMM([&](AMM& ammAlice, Env& env) {
             auto const pk = carol.pk();
             auto const settleDelay = 100s;
-            auto const chan =
-                channel(carol, ammAlice.ammAccount(), env.seq(carol));
             NetClock::time_point const cancelAfter =
                 env.current()->info().parentCloseTime + 200s;
             env(create(
@@ -2434,14 +2424,7 @@ private:
                     settleDelay,
                     pk,
                     cancelAfter),
-                ter(tesSUCCESS));
-            env(fund(carol, chan, XRP(1000)), ter(tesSUCCESS));
-            auto const reqBal = channelBalance(*env.current(), chan) + XRP(500);
-            auto const authAmt = reqBal + XRP(100);
-            env(claim(carol, chan, reqBal, authAmt), ter(tecNO_PERMISSION));
-            env.close(cancelAfter);
-            env(claim(carol, chan), txflags(tfClose));
-            BEAST_EXPECT(!channelExists(*env.current(), chan));
+                ter(tecNO_PERMISSION));
         });
 
         // Pay amounts close to one side of the pool
