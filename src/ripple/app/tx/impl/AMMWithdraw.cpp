@@ -598,7 +598,7 @@ AMMWithdraw::equalWithdrawTokens(
         // withdrawal due to round off. Fail so the user withdraws
         // more tokens.
         if (withdrawAmount == beast::zero || withdraw2Amount == beast::zero)
-            return {temBAD_AMOUNT, STAmount{}};
+            return {tecAMM_FAILED, STAmount{}};
 
         return withdraw(
             view,

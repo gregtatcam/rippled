@@ -1357,7 +1357,7 @@ private:
                 IOUAmount{1, -5},
                 std::nullopt,
                 std::nullopt,
-                ter(temBAD_AMOUNT));
+                ter(tecAMM_FAILED));
             // Calculated tokens to withdraw are 0
             ammAlice.withdraw(
                 alice,
