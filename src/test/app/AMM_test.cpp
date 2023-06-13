@@ -356,28 +356,108 @@ private:
             // Invalid options
             std::vector<std::tuple<
                 std::optional<std::uint32_t>,
+                std::optional<std::uint32_t>,
                 std::optional<STAmount>,
                 std::optional<STAmount>,
                 std::optional<STAmount>>>
                 invalidOptions = {
-                    // tokens, asset1In, asset2in, EPrice
-                    {1000, std::nullopt, USD(100), std::nullopt},
-                    {1000, std::nullopt, std::nullopt, STAmount{USD, 1, -1}},
-                    {std::nullopt,
+                    // flags, tokens, asset1In, asset2in, EPrice
+                    {tfLPToken, 1000, std::nullopt, USD(100), std::nullopt},
+                    {tfLPToken, 1000, XRP(100), std::nullopt, std::nullopt},
+                    {tfLPToken,
+                     1000,
+                     std::nullopt,
+                     std::nullopt,
+                     STAmount{USD, 1, -1}},
+                    {tfLPToken,
+                     std::nullopt,
+                     USD(100),
+                     std::nullopt,
+                     STAmount{USD, 1, -1}},
+                    {tfLPToken,
+                     1000,
+                     XRP(100),
+                     std::nullopt,
+                     STAmount{USD, 1, -1}},
+                    {tfSingleAsset,
+                     1000,
+                     std::nullopt,
+                     std::nullopt,
+                     std::nullopt},
+                    {tfSingleAsset,
+                     std::nullopt,
+                     std::nullopt,
+                     USD(100),
+                     std::nullopt},
+                    {tfSingleAsset,
+                     std::nullopt,
+                     std::nullopt,
+                     std::nullopt,
+                     STAmount{USD, 1, -1}},
+                    {tfTwoAsset,
+                     1000,
+                     std::nullopt,
+                     std::nullopt,
+                     std::nullopt},
+                    {tfTwoAsset,
+                     std::nullopt,
+                     XRP(100),
+                     USD(100),
+                     STAmount{USD, 1, -1}},
+                    {tfTwoAsset,
+                     std::nullopt,
+                     XRP(100),
+                     std::nullopt,
+                     std::nullopt},
+                    {tfTwoAsset,
+                     std::nullopt,
                      std::nullopt,
                      USD(100),
                      STAmount{USD, 1, -1}},
-                    {std::nullopt, XRP(100), USD(100), STAmount{USD, 1, -1}},
-                    {1000, XRP(100), USD(100), std::nullopt}};
+                    {tfOneAssetLPToken,
+                     1000,
+                     std::nullopt,
+                     std::nullopt,
+                     std::nullopt},
+                    {tfOneAssetLPToken,
+                     std::nullopt,
+                     XRP(100),
+                     USD(100),
+                     std::nullopt},
+                    {tfOneAssetLPToken,
+                     std::nullopt,
+                     XRP(100),
+                     std::nullopt,
+                     STAmount{USD, 1, -1}},
+                    {tfLimitLPToken,
+                     1000,
+                     std::nullopt,
+                     std::nullopt,
+                     std::nullopt},
+                    {tfLimitLPToken,
+                     1000,
+                     USD(100),
+                     std::nullopt,
+                     std::nullopt},
+                    {tfLimitLPToken,
+                     std::nullopt,
+                     USD(100),
+                     XRP(100),
+                     std::nullopt},
+                    {tfLimitLPToken,
+                     std::nullopt,
+                     std::nullopt,
+                     std::nullopt,
+                     STAmount{USD, 1, -1}}};
             for (auto const& it : invalidOptions)
             {
                 ammAlice.deposit(
                     alice,
-                    std::get<0>(it),
                     std::get<1>(it),
                     std::get<2>(it),
                     std::get<3>(it),
-                    std::nullopt,
+                    std::get<4>(it),
+                    std::get<0>(it),
                     std::nullopt,
                     std::nullopt,
                     ter(temMALFORMED));
@@ -730,6 +810,125 @@ private:
                 std::nullopt,
                 ter(tecINSUF_RESERVE_LINE));
         }
+
+        // Invalid min
+        testAMM([&](AMM& ammAlice, Env& env) {
+            // min tokens can't be <= zero
+            ammAlice.deposit(
+                carol, 0, XRP(100), tfSingleAsset, ter(temBAD_AMM_TOKENS));
+            ammAlice.deposit(
+                carol, -1, XRP(100), tfSingleAsset, ter(temBAD_AMM_TOKENS));
+            ammAlice.deposit(
+                carol,
+                0,
+                XRP(100),
+                USD(100),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(temBAD_AMM_TOKENS));
+            // min amounts can't be <= zero
+            ammAlice.deposit(
+                carol,
+                1000,
+                XRP(0),
+                USD(100),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(temBAD_AMOUNT));
+            ammAlice.deposit(
+                carol,
+                1000,
+                XRP(100),
+                USD(-1),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(temBAD_AMOUNT));
+            // min amount bad currency
+            ammAlice.deposit(
+                carol,
+                1000,
+                XRP(100),
+                BAD(100),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(temBAD_CURRENCY));
+            // min amount bad token pair
+            ammAlice.deposit(
+                carol,
+                1000,
+                XRP(100),
+                XRP(100),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(temBAD_AMM_TOKENS));
+            ammAlice.deposit(
+                carol,
+                1000,
+                XRP(100),
+                GBP(100),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(temBAD_AMM_TOKENS));
+        });
+
+        // Min deposit
+        testAMM([&](AMM& ammAlice, Env& env) {
+            // Equal deposit by tokens
+            ammAlice.deposit(
+                carol,
+                1000000,
+                XRP(1000),
+                USD(1001),
+                std::nullopt,
+                tfLPToken,
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED));
+            ammAlice.deposit(
+                carol,
+                1000000,
+                XRP(1001),
+                USD(1000),
+                std::nullopt,
+                tfLPToken,
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED));
+            // Equal deposit by asset
+            ammAlice.deposit(
+                carol,
+                100001,
+                XRP(100),
+                USD(100),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED));
+            // Single deposit by asset
+            ammAlice.deposit(
+                carol,
+                488090,
+                XRP(1000),
+                std::nullopt,
+                std::nullopt,
+                tfSingleAsset,
+                std::nullopt,
+                std::nullopt,
+                ter(tecAMM_FAILED));
+        });
     }
 
     void
@@ -913,6 +1112,66 @@ private:
                 XRP(11000),
                 STAmount{USD, UINT64_C(1199999999999998), -11},
                 IOUAmount{1148912529307605, -8}));
+        });
+
+        // Min deposit
+        testAMM([&](AMM& ammAlice, Env& env) {
+            // Equal deposit by tokens
+            ammAlice.deposit(
+                carol,
+                1000000,
+                XRP(1000),
+                USD(1000),
+                std::nullopt,
+                tfLPToken,
+                std::nullopt,
+                std::nullopt);
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(11000), USD(11000), IOUAmount{11000000, 0}));
+        });
+        testAMM([&](AMM& ammAlice, Env& env) {
+            // Equal deposit by asset
+            ammAlice.deposit(
+                carol,
+                1000000,
+                XRP(1000),
+                USD(1000),
+                std::nullopt,
+                tfTwoAsset,
+                std::nullopt,
+                std::nullopt);
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(11000), USD(11000), IOUAmount{11000000, 0}));
+        });
+        testAMM([&](AMM& ammAlice, Env& env) {
+            // Single deposit by asset
+            ammAlice.deposit(
+                carol,
+                488088,
+                XRP(1000),
+                std::nullopt,
+                std::nullopt,
+                tfSingleAsset,
+                std::nullopt,
+                std::nullopt);
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(11000), USD(10000), IOUAmount{1048808848170151, -8}));
+        });
+        testAMM([&](AMM& ammAlice, Env& env) {
+            // Single deposit by asset
+            ammAlice.deposit(
+                carol,
+                488088,
+                USD(1000),
+                std::nullopt,
+                std::nullopt,
+                tfSingleAsset,
+                std::nullopt,
+                std::nullopt);
+            BEAST_EXPECT(ammAlice.expectBalances(
+                XRP(10000),
+                STAmount{USD, UINT64_C(1099999999999999), -11},
+                IOUAmount{1048808848170151, -8}));
         });
     }
 
