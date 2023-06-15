@@ -50,7 +50,7 @@ AMMDeposit::preflight(PreflightContext const& ctx)
     auto const amount2 = ctx.tx[~sfAmount2];
     auto const ePrice = ctx.tx[~sfEPrice];
     auto const lpTokens = ctx.tx[~sfLPTokenOut];
-    // Valid options for different flags are:
+    // Valid options for the flags are:
     //   tfLPTokens: LPTokenOut, [Amount, Amount2]
     //   tfSingleAsset: Amount, [LPTokenOut]
     //   tfTwoAsset: Amount, Amount2, [LPTokenOut]
