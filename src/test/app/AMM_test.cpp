@@ -384,6 +384,8 @@ private:
             Account const gw1("gw1");
             env.fund(XRP(30'000), gw1);
             env(fclear(gw1, asfDefaultRipple));
+            env.trust(USD(30'000), gw1);
+            env(pay(gw, gw1, USD(30'000)));
             auto const USD1 = gw1["USD"];
             AMM ammGwGw1(env, gw, USD(10'000), USD1(10'000), ter(terNO_RIPPLE));
             env.trust(USD1(30'000), alice);
