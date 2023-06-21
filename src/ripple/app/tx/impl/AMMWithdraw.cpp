@@ -59,12 +59,12 @@ AMMWithdraw::preflight(PreflightContext const& ctx)
     //   Amount and Amount2
     //   Amount and LPTokens
     //   Amount and EPrice
-    if (std::bitset<32>(flags & tfWithdrawSubTx).count() != 1)
+    if (std::popcount(flags & tfWithdrawSubTx) != 1)
     {
         JLOG(ctx.j.debug()) << "AMM Withdraw: invalid flags.";
         return temMALFORMED;
     }
-    else if (flags & tfLPToken)
+    if (flags & tfLPToken)
     {
         if (!lpTokens || amount || amount2 || ePrice)
             return temMALFORMED;
