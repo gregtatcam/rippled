@@ -29,6 +29,8 @@
 #include <ripple/protocol/STAccount.h>
 #include <ripple/protocol/TxFlags.h>
 
+#include <bit>
+
 namespace ripple {
 
 NotTEC
