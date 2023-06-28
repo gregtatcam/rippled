@@ -199,6 +199,9 @@ public:
         return !(lhs == rhs);
     }
 
+    std::pair<std::optional<QualityFunction>, DebtDirection>
+    getQualityFunc(ReadView const& v, DebtDirection prevStepDir) const override;
+
 protected:
     std::string
     logStringImpl(char const* name) const
@@ -871,6 +874,26 @@ DirectStepI<TDerived>::qualityUpperBound(
     // variable.
     return {
         Quality(getRate(STAmount(iss, dstQIn), STAmount(iss, srcQOut))), dir};
+}
+
+template <class TDerived>
+std::pair<std::optional<QualityFunction>, DebtDirection>
+DirectStepI<TDerived>::getQualityFunc(
+    ReadView const& v,
+    DebtDirection prevStepDir) const
+{
+    auto const dir = this->debtDirection(v, StrandDirection::forward);
+
+    if (redeems(dir) && !prevStep_)
+    {
+        Issue const iss{currency_, src_};
+        auto const q = Quality(getRate(
+            STAmount(iss, QUALITY_ONE),
+            STAmount(iss, transferRate(v, dst_).value)));
+        return {QualityFunction{q, QualityFunction::CLOBLikeTag{}}, dir};
+    }
+
+    return Step::getQualityFunc(v, prevStepDir);
 }
 
 template <class TDerived>

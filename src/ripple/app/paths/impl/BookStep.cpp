@@ -182,9 +182,6 @@ public:
         return inactive_;
     }
 
-    bool
-    waivesTransferFee(ReadView const&) const override;
-
 protected:
     std::string
     logStringImpl(char const* name) const
@@ -197,6 +194,12 @@ protected:
              << "\noutCur: " << book_.out.currency;
         return ostr.str();
     }
+
+    // If seated then it is either AMM or CLOB quality,
+    // whichever is a better quality. The flag is true
+    // if AMM quality is better.
+    std::optional<std::pair<Quality, bool>>
+    tipOfferQuality(ReadView const& view) const;
 
 private:
     friend bool
@@ -248,11 +251,6 @@ private:
     // whichever is a better quality.
     std::optional<std::variant<Quality, AMMOffer<TIn, TOut>>>
     tip(ReadView const& view) const;
-    // If seated then it is either AMM or CLOB quality,
-    // whichever is a better quality. The flag is true
-    // if AMM quality is better.
-    std::optional<std::pair<Quality, bool>>
-    tipOfferQuality(ReadView const& view) const;
     // If seated then it is either AMM or CLOB quality function,
     // whichever is a better quality.
     std::optional<QualityFunction>
@@ -503,6 +501,16 @@ public:
         return this->logStringImpl("BookOfferCrossingStep");
     }
 
+    bool
+    waivesTransferFee(ReadView const& view) const override
+    {
+        if (std::optional<std::pair<Quality, bool>> const res =
+                this->tipOfferQuality(view))
+            // This step doesn't pay the transfer fee if AMM
+            return std::get<bool>(*res);
+        return false;
+    }
+
 private:
     bool const defaultPath_;
     Quality const qualityThreshold_;
@@ -530,6 +538,10 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
     std::optional<std::pair<Quality, bool>> const res = tipOfferQuality(v);
     if (!res)
         return {std::nullopt, dir};
+
+    // AMM - no fee adjustment
+    if (std::get<bool>(*res))
+        return {std::get<Quality>(*res), dir};
 
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
         v, std::get<Quality>(*res), prevStepDir);
@@ -852,17 +864,6 @@ BookStep<TIn, TOut, TDerived>::tipOfferQualityF(ReadView const& view) const
         return QualityFunction{*q, QualityFunction::CLOBLikeTag{}};
     else
         return std::get<AMMOffer<TIn, TOut>>(*res).getQualityFunc();
-}
-
-template <class TIn, class TOut, class TDerived>
-bool
-BookStep<TIn, TOut, TDerived>::waivesTransferFee(ReadView const& view) const
-{
-    if (std::optional<std::pair<Quality, bool>> const res =
-            tipOfferQuality(view))
-        // This step doesn't pay the transfer fee if AMM
-        return std::get<bool>(*res);
-    return false;
 }
 
 template <class TCollection>

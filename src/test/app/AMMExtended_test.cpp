@@ -1488,13 +1488,14 @@ private:
         env.fund(XRP(10'000), alice, bob, carol, gw);
         env(rate(gw, 1.1));
         env.trust(AUD(2'000), bob, carol);
-        env(pay(gw, carol, AUD(50)));
+        env(pay(gw, carol, AUD(51)));
         env.close();
-        AMM ammCarol(env, carol, XRP(40), AUD(50));
+        AMM ammCarol(env, carol, XRP(40), AUD(51));
         env(pay(alice, bob, AUD(10)), sendmax(XRP(100)), paths(XRP));
         env.close();
+        // AMM offer is 51.282052XRP/11AUD, 11AUD/1.1 = 10AUD to bob
         BEAST_EXPECT(
-            ammCarol.expectBalances(XRP(50), AUD(40), ammCarol.tokens()));
+            ammCarol.expectBalances(XRP(51), AUD(40), ammCarol.tokens()));
         BEAST_EXPECT(expectLine(env, bob, AUD(10)));
 
         auto const result =
@@ -2179,15 +2180,13 @@ private:
             env.close();
 
             AMM ammBob(env, bob, XRP(100), USD(150));
-            // bob is charged the transfer fee on AMM create
-            // 150*0.25 = 37.5
-            BEAST_EXPECT(expectLine(env, bob, USD(1000 - 150 - 150 * 0.25)));
+            // no transfer fee on create
+            BEAST_EXPECT(expectLine(env, bob, USD(1000 - 150)));
 
             env(pay(alice, carol, USD(50)), path(~USD), sendmax(XRP(50)));
             env.close();
 
-            // no other charge
-            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 150 - 150 * 0.25)));
+            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 150)));
             BEAST_EXPECT(
                 ammBob.expectBalances(XRP(150), USD(100), ammBob.tokens()));
             BEAST_EXPECT(expectLedgerEntryRoot(
@@ -2209,25 +2208,25 @@ private:
             env.close();
 
             AMM ammBob(env, bob, XRP(100), USD(140));
-            // bob is charged the transfer fee on AMM create
-            // 140*0.25 = 35
-            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140 - 140 * 0.25)));
+            // no transfer fee on create
+            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140)));
 
             env(offer(bob, USD(50), EUR(50)));
 
             env(pay(alice, carol, EUR(40)), path(~USD, ~EUR), sendmax(XRP(40)));
 
+            // alice buys 40USD for 40XRP from AMM
             BEAST_EXPECT(
                 ammBob.expectBalances(XRP(140), USD(100), ammBob.tokens()));
-            // bob is charged 25% on the takerGets USD/EUR offer
-            // 40*0.25 = 10
+            // 40USD buys 40EUR via bob's offer. 40EUR delivered to carol
+            // and bob pays 25%!!! on 40EUR, 40EUR*0.25=10EUR
             BEAST_EXPECT(expectLine(env, bob, EUR(1'000 - 40 - 40 * 0.25)));
             // bob got 40USD back from the offer
-            BEAST_EXPECT(
-                expectLine(env, bob, USD(1'000 - 140 - 140 * 0.25 + 40)));
+            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140 + 40)));
             BEAST_EXPECT(expectLedgerEntryRoot(
                 env, alice, xrpMinusFee(env, 10'000 - 40)));
             BEAST_EXPECT(expectLine(env, carol, EUR(1'040)));
+            BEAST_EXPECT(expectOffers(env, bob, 1, {{USD(10), EUR(10)}}));
         }
 
         {
@@ -2244,18 +2243,13 @@ private:
             env.close();
 
             AMM ammBobXRP_USD(env, bob, XRP(100), USD(140));
-            // bob is charged the transfer fee on AMM create
-            // 140*0.25 = 35
-            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140 - 140 * 0.25)));
+            // no transfer fee on create
+            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140)));
 
             AMM ammBobUSD_EUR(env, bob, USD(100), EUR(140));
-            // bob is charged the transfer fee on AMM create
-            // 140*0.25 = 35
-            BEAST_EXPECT(expectLine(env, bob, EUR(1'000 - 140 - 140 * 0.25)));
-            // bob is charged the transfer fee on AMM create
-            // 100*0.25 = 25
-            BEAST_EXPECT(expectLine(
-                env, bob, USD(1'000 - 140 - 100 - (140 + 100) * 0.25)));
+            // no transfer fee on create
+            BEAST_EXPECT(expectLine(env, bob, EUR(1'000 - 140)));
+            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140 - 100)));
 
             env(pay(alice, carol, EUR(40)), path(~USD, ~EUR), sendmax(XRP(40)));
 
@@ -2264,9 +2258,8 @@ private:
             BEAST_EXPECT(ammBobUSD_EUR.expectBalances(
                 USD(140), EUR(100), ammBobUSD_EUR.tokens()));
             // no other charges on bob
-            BEAST_EXPECT(expectLine(
-                env, bob, USD(1'000 - 140 - 100 - (140 + 100) * 0.25)));
-            BEAST_EXPECT(expectLine(env, bob, EUR(1'000 - 140 - 140 * 0.25)));
+            BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140 - 100)));
+            BEAST_EXPECT(expectLine(env, bob, EUR(1'000 - 140)));
             BEAST_EXPECT(expectLedgerEntryRoot(
                 env, alice, xrpMinusFee(env, 10'000 - 40)));
             BEAST_EXPECT(expectLine(env, carol, EUR(1'040)));
@@ -2288,10 +2281,8 @@ private:
             env.trust(USDA(1'000), bob);
             env.trust(USDB(1'000), gw);
             env(pay(gw, bob, USD(50)));
-            // Includes the transfer fee on AMM crete
-            env(pay(gw, dan, EUR(1'312.5)));
-            // Includes the transfer fee on AMM crete
-            env(pay(gw, dan, USD(1'250)));
+            env(pay(gw, dan, EUR(1'050)));
+            env(pay(gw, dan, USD(1'000)));
             AMM ammDan(env, dan, USD(1'000), EUR(1'050));
 
             // alice -> bob -> gw -> carol. $50 should have transfer fee;
@@ -2303,11 +2294,7 @@ private:
 
             BEAST_EXPECT(
                 ammDan.expectBalances(USD(1'050), EUR(1'000), ammDan.tokens()));
-            // Dan is charged the transfer fee on AMM create
-            // 1000*0.25
             BEAST_EXPECT(expectLine(env, dan, USD(0)));
-            // Dan is charged the transfer fee on AMM create
-            // 1050*0.25
             BEAST_EXPECT(expectLine(env, dan, EUR(0)));
             BEAST_EXPECT(expectLine(env, bob, USD(-10)));
             BEAST_EXPECT(expectLine(env, bob, USDA(60)));

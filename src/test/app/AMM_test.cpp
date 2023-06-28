@@ -65,15 +65,14 @@ private:
         // IOU to IOU + transfer fee
         {
             Env env{*this};
-            fund(env, gw, {alice}, {USD(25'000), BTC(0.625)}, Fund::All);
+            fund(env, gw, {alice}, {USD(20'000), BTC(0.5)}, Fund::All);
             env(rate(gw, 1.25));
             env.close();
+            // no transfer fee on create
             AMM ammAlice(env, alice, USD(20'000), BTC(0.5));
             BEAST_EXPECT(ammAlice.expectBalances(
                 USD(20'000), BTC(0.5), IOUAmount{100, 0}));
-            // 25,000 - 20,000(AMM) - 0.25*20,000=5,000(fee) = 0
             BEAST_EXPECT(expectLine(env, alice, USD(0)));
-            // 0.625 - 0.5(AMM) - 0.25*0.5=0.125(fee) = 0
             BEAST_EXPECT(expectLine(env, alice, BTC(0)));
         }
 
@@ -1099,7 +1098,7 @@ private:
         // IOU to IOU + transfer fee
         {
             Env env{*this};
-            fund(env, gw, {alice}, {USD(25'000), BTC(0.625)}, Fund::All);
+            fund(env, gw, {alice}, {USD(20'000), BTC(0.5)}, Fund::All);
             env(rate(gw, 1.25));
             env.close();
             AMM ammAlice(env, alice, USD(20'000), BTC(0.5));
@@ -1107,13 +1106,12 @@ private:
                 USD(20'000), BTC(0.5), IOUAmount{100, 0}));
             BEAST_EXPECT(expectLine(env, alice, USD(0)));
             BEAST_EXPECT(expectLine(env, alice, BTC(0)));
-            fund(env, gw, {carol}, {USD(2'500), BTC(0.0625)}, Fund::Acct);
+            fund(env, gw, {carol}, {USD(2'000), BTC(0.05)}, Fund::Acct);
+            // no transfer fee on deposit
             ammAlice.deposit(carol, 10);
             BEAST_EXPECT(ammAlice.expectBalances(
                 USD(22'000), BTC(0.55), IOUAmount{110, 0}));
-            // 2,500 - 2,000(AMM) - 0.25*2,000=500(fee)=0
             BEAST_EXPECT(expectLine(env, carol, USD(0)));
-            // 0.0625 - 0.05(AMM) - 0.25*0.05=0.0125(fee)=0
             BEAST_EXPECT(expectLine(env, carol, BTC(0)));
         }
 
@@ -1889,28 +1887,28 @@ private:
         // IOU to IOU + transfer fee
         {
             Env env{*this};
-            fund(env, gw, {alice}, {USD(25'000), BTC(0.625)}, Fund::All);
+            fund(env, gw, {alice}, {USD(20'000), BTC(0.5)}, Fund::All);
             env(rate(gw, 1.25));
             env.close();
+            // no transfer fee on create
             AMM ammAlice(env, alice, USD(20'000), BTC(0.5));
             BEAST_EXPECT(ammAlice.expectBalances(
                 USD(20'000), BTC(0.5), IOUAmount{100, 0}));
             BEAST_EXPECT(expectLine(env, alice, USD(0)));
             BEAST_EXPECT(expectLine(env, alice, BTC(0)));
-            fund(env, gw, {carol}, {USD(2'500), BTC(0.0625)}, Fund::Acct);
+            fund(env, gw, {carol}, {USD(2'000), BTC(0.05)}, Fund::Acct);
+            // no transfer fee on deposit
             ammAlice.deposit(carol, 10);
             BEAST_EXPECT(ammAlice.expectBalances(
                 USD(22'000), BTC(0.55), IOUAmount{110, 0}));
             BEAST_EXPECT(expectLine(env, carol, USD(0)));
             BEAST_EXPECT(expectLine(env, carol, BTC(0)));
-            // LP withdraws, AMM doesn't pay the transfer fee.
+            // no transfer fee on withdraw
             ammAlice.withdraw(carol, 10);
             BEAST_EXPECT(ammAlice.expectBalances(
                 USD(20'000), BTC(0.5), IOUAmount{100, 0}));
             BEAST_EXPECT(ammAlice.expectLPTokens(carol, IOUAmount{0, 0}));
-            // 2,500 - 0.25*2,000=500(deposit fee)=2,000
             BEAST_EXPECT(expectLine(env, carol, USD(2'000)));
-            // 0.0625 - 0.025*0.5=0.0125(deposit fee)=0.05
             BEAST_EXPECT(expectLine(env, carol, BTC(0.05)));
         }
 
@@ -3121,11 +3119,11 @@ private:
 
         // Payment and transfer fee
         // Scenario:
-        // Bob sends 125GBP to pay 100EUR to Carol
+        // Bob sends 125GBP to pay 80EUR to Carol
         // Payment execution:
         // bob's 125GBP/1.25 = 100GBP
         // 100GBP/100EUR AMM offer
-        // 100EUR/1 (no AMM tr fee) = 100EUR paid to carol
+        // 100EUR/1.25 = 80EUR paid to carol
         testAMM(
             [&](AMM& ammAlice, Env& env) {
                 fund(env, gw, {bob}, {GBP(200), EUR(200)}, Fund::Acct);
@@ -3136,6 +3134,10 @@ private:
                     sendmax(GBP(125)),
                     txflags(tfPartialPayment));
                 env.close();
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    GBP(1'100), EUR(1'000), ammAlice.tokens()));
+                BEAST_EXPECT(expectLine(env, bob, GBP(75)));
+                BEAST_EXPECT(expectLine(env, carol, EUR(30'080)));
             },
             {{GBP(1'000), EUR(1'100)}});
 
@@ -3148,8 +3150,8 @@ private:
         // Payment execution:
         // bob's 195.3125CAN/1.25 = 156.25CAN -> dan's offer
         // 156.25CAN/156.25GBP 156.25GBP/1.25 = 125GBP -> AMM's offer
-        // 125GBP/125EUR 125EUR/1 (no AMM tr fee) = 125EUR -> ed's offer
-        // 125EUR/125USD 125USD/1.25 = 100USD paid to carol
+        // 125GBP/125EUR 125EUR/1.25 = 100EUR -> ed's offer
+        // 100EUR/100USD 100USD/1.25 = 80USD paid to carol
         testAMM(
             [&](AMM& ammAlice, Env& env) {
                 Account const dan("dan");
@@ -3173,8 +3175,8 @@ private:
                 BEAST_EXPECT(expectLine(env, dan, CAN(356.25), GBP(43.75)));
                 BEAST_EXPECT(ammAlice.expectBalances(
                     GBP(10'125), EUR(10'000), ammAlice.tokens()));
-                BEAST_EXPECT(expectLine(env, ed, EUR(325), USD(75)));
-                BEAST_EXPECT(expectLine(env, carol, USD(100)));
+                BEAST_EXPECT(expectLine(env, ed, EUR(300), USD(100)));
+                BEAST_EXPECT(expectLine(env, carol, USD(80)));
             },
             {{GBP(10'000), EUR(10'125)}});
 
@@ -3854,8 +3856,8 @@ private:
                     carol,
                     1,
                     {{Amounts{
-                        STAmount{EUR, UINT64_C(5'025125628140704), -15},
-                        STAmount{USD, UINT64_C(5'025125628140704), -15}}}}));
+                        STAmount{EUR, UINT64_C(5'025125628140703), -15},
+                        STAmount{USD, UINT64_C(5'025125628140703), -15}}}}));
                 BEAST_EXPECT(ammAlice.expectBalances(
                     STAmount{USD, UINT64_C(1'004'974874371859), -12},
                     STAmount{EUR, UINT64_C(1'005'025125628141), -12},
