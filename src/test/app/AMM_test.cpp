@@ -2935,6 +2935,34 @@ private:
             },
             {{XRP(10'000), USD(10'010)}});
 
+        // Payment with limitQuality and transfer fee set.
+        testAMM(
+            [&](AMM& ammAlice, Env& env) {
+                env(rate(gw, 1.1));
+                env.close();
+                env.fund(jtx::XRP(30'000), bob);
+                env.close();
+                // Pays 10USD for 10XRP. A larger payment of ~99.11USD/100XRP
+                // would have been sent has it not been for limitQuality and
+                // the transfer fee.
+                env(pay(bob, carol, USD(100)),
+                    path(~USD),
+                    sendmax(XRP(110)),
+                    txflags(
+                        tfNoRippleDirect | tfPartialPayment | tfLimitQuality));
+                env.close();
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRP(10'010), USD(10'000), ammAlice.tokens()));
+                // 10USD - 10% transfer fee
+                BEAST_EXPECT(expectLine(
+                    env,
+                    carol,
+                    STAmount{USD, UINT64_C(30'009'09090909091), -11}));
+                BEAST_EXPECT(expectLedgerEntryRoot(
+                    env, bob, XRP(30'000) - XRP(10) - txfee(env, 1)));
+            },
+            {{XRP(10'000), USD(10'010)}});
+
         // Fail when partial payment is not set.
         testAMM(
             [&](AMM& ammAlice, Env& env) {
