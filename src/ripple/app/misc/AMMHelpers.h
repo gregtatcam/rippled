@@ -128,10 +128,12 @@ withinRelativeDistance(
  * @param dist requested relative distance
  * @return true if within dist, false otherwise
  */
+// clang-format off
 template <typename Amt>
     requires(
         std::is_same_v<Amt, STAmount> || std::is_same_v<Amt, IOUAmount> ||
-        std::is_same_v<Amt, XRPAmount>) bool
+        std::is_same_v<Amt, XRPAmount>)
+bool
 withinRelativeDistance(Amt const& calc, Amt const& req, Number const& dist)
 {
     if (calc == req)
@@ -139,6 +141,7 @@ withinRelativeDistance(Amt const& calc, Amt const& req, Number const& dist)
     auto const [min, max] = std::minmax(calc, req);
     return ((max - min) / max) < dist;
 }
+// clang-format on
 
 /** Finds takerPays (i) and takerGets (o) such that given pool composition
  * poolGets(I) and poolPays(O): (O - o) / (I + i) = quality.
