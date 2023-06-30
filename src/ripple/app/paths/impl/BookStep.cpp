@@ -194,12 +194,6 @@ protected:
         return ostr.str();
     }
 
-    // If seated then it is either AMM or CLOB quality,
-    // whichever is a better quality. The flag is true
-    // if AMM quality is better.
-    std::optional<std::pair<Quality, bool>>
-    tipOfferQuality(ReadView const& view) const;
-
 private:
     friend bool
     operator==(BookStep const& lhs, BookStep const& rhs)
@@ -250,6 +244,11 @@ private:
     // whichever is a better quality.
     std::optional<std::variant<Quality, AMMOffer<TIn, TOut>>>
     tip(ReadView const& view) const;
+    // If seated then it is either AMM or CLOB quality,
+    // whichever is a better quality. The flag is true
+    // if AMM quality is better.
+    std::optional<std::pair<Quality, bool>>
+    tipOfferQuality(ReadView const& view) const;
     // If seated then it is either AMM or CLOB quality function,
     // whichever is a better quality.
     std::optional<QualityFunction>
