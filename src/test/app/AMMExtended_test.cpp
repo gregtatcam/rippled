@@ -2208,20 +2208,20 @@ private:
             env.close();
 
             AMM ammBob(env, bob, XRP(100), USD(140));
-            // no transfer fee on create
             BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140)));
 
             env(offer(bob, USD(50), EUR(50)));
 
+            // alice buys 40EUR with 40XRP
             env(pay(alice, carol, EUR(40)), path(~USD, ~EUR), sendmax(XRP(40)));
 
-            // alice buys 40USD for 40XRP from AMM
+            // 40XRP is swapped in for 40USD
             BEAST_EXPECT(
                 ammBob.expectBalances(XRP(140), USD(100), ammBob.tokens()));
             // 40USD buys 40EUR via bob's offer. 40EUR delivered to carol
-            // and bob pays 25%!!! on 40EUR, 40EUR*0.25=10EUR
+            // and bob pays 25% on 40EUR, 40EUR*0.25=10EUR
             BEAST_EXPECT(expectLine(env, bob, EUR(1'000 - 40 - 40 * 0.25)));
-            // bob got 40USD back from the offer
+            // bob gets 40USD back from the offer
             BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140 + 40)));
             BEAST_EXPECT(expectLedgerEntryRoot(
                 env, alice, xrpMinusFee(env, 10'000 - 40)));
@@ -2243,18 +2243,19 @@ private:
             env.close();
 
             AMM ammBobXRP_USD(env, bob, XRP(100), USD(140));
-            // no transfer fee on create
             BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140)));
 
             AMM ammBobUSD_EUR(env, bob, USD(100), EUR(140));
-            // no transfer fee on create
             BEAST_EXPECT(expectLine(env, bob, EUR(1'000 - 140)));
             BEAST_EXPECT(expectLine(env, bob, USD(1'000 - 140 - 100)));
 
+            // alice buys 40EUR with 40XRP
             env(pay(alice, carol, EUR(40)), path(~USD, ~EUR), sendmax(XRP(40)));
 
+            // 40XPR is swapped in for 40USD
             BEAST_EXPECT(ammBobXRP_USD.expectBalances(
                 XRP(140), USD(100), ammBobXRP_USD.tokens()));
+            // 40USD is swapped in for 40EUR
             BEAST_EXPECT(ammBobUSD_EUR.expectBalances(
                 USD(140), EUR(100), ammBobUSD_EUR.tokens()));
             // no other charges on bob
@@ -2263,6 +2264,72 @@ private:
             BEAST_EXPECT(expectLedgerEntryRoot(
                 env, alice, xrpMinusFee(env, 10'000 - 40)));
             BEAST_EXPECT(expectLine(env, carol, EUR(1'040)));
+        }
+
+        {
+            // Payment via AMM with limit quality, deliver less
+            // than requested
+            Env env(*this, features);
+
+            fund(
+                env,
+                gw,
+                {alice, bob, carol},
+                XRP(1'000),
+                {USD(1'200), GBP(1'200)});
+            env(rate(gw, 1.25));
+            env.close();
+
+            AMM amm(env, bob, GBP(1'000), USD(1'100));
+
+            // requested quality limit is 90USD/110GBP = 0.8181
+            // trade quality is 77.2727USD/94.4444GBP = 0.8181
+            env(pay(alice, carol, USD(90)),
+                path(~USD),
+                sendmax(GBP(110)),
+                txflags(tfNoRippleDirect | tfPartialPayment | tfLimitQuality));
+            env.close();
+
+            // alice buys 77.2727USD with 75.5555GBP and pays 25% tr fee
+            // on 75.5555GBP
+            // 1,200 - 75.55555*1.25 = 1200 - 94.4444 = 1105.55555GBP
+            BEAST_EXPECT(expectLine(
+                env, alice, STAmount{GBP, UINT64_C(1'105'555555555555), -12}));
+            // 75.5555GBP is swapped in for 77.7272USD
+            BEAST_EXPECT(amm.expectBalances(
+                STAmount{GBP, UINT64_C(1'075'555555555556), -12},
+                STAmount{USD, UINT64_C(1'022'727272727272), -12},
+                amm.tokens()));
+            BEAST_EXPECT(expectLine(
+                env, carol, STAmount{USD, UINT64_C(1'277'272727272728), -12}));
+        }
+
+        {
+            // AMM offer crossing
+            Env env(*this, features);
+
+            fund(env, gw, {alice, bob}, XRP(1'000), {USD(1'200), EUR(1'200)});
+            env(rate(gw, 1.25));
+            env.close();
+
+            AMM amm(env, bob, USD(1'000), EUR(1'150));
+
+            env(offer(alice, EUR(100), USD(100)));
+            env.close();
+
+            // 95.2380USD is swapped in for 100EUR
+            BEAST_EXPECT(amm.expectBalances(
+                STAmount{USD, UINT64_C(1'095'238095238095), -12},
+                EUR(1'050),
+                amm.tokens()));
+            // alice pays 25% tr fee on 95.2380USD
+            // 1200-95.2380*1.25 = 1200 - 119.0477 = 1080.9523USD
+            BEAST_EXPECT(expectLine(
+                env,
+                alice,
+                STAmount{USD, UINT64_C(1'080'952380952381), -12},
+                EUR(1'300)));
+            BEAST_EXPECT(expectOffers(env, alice, 0));
         }
 
         {
@@ -2305,10 +2372,11 @@ private:
     void
     testTransferRateNoOwnerFee(FeatureBitset features)
     {
+        testcase("No Owner Fee");
         using namespace jtx;
 
         {
-            testcase("No Owner Fee: AMM and Pay");
+            // payment via AMM
             Env env(*this, features);
 
             fund(
@@ -2343,7 +2411,7 @@ private:
         }
 
         {
-            testcase("No Owner Fee: Offer, AMM, and Pay");
+            // Payment via offer and AMM
             Env env(*this, features);
             Account const ed("ed");
 
@@ -2387,7 +2455,7 @@ private:
                 env, carol, STAmount(USD, UINT64_C(1'070'07299270073), -11)));
         }
         {
-            testcase("No Owner Fee: AMM, AMM, and Pay");
+            // Payment via AMM, AMM
             Env env(*this, features);
             Account const ed("ed");
 
@@ -2428,7 +2496,7 @@ private:
                 env, carol, STAmount(USD, UINT64_C(1'063'157894736842), -12)));
         }
         {
-            testcase("No Owner Fee: AMM Offer Crossing");
+            // AMM offer crossing
             Env env(*this, features);
 
             fund(env, gw, {alice, bob}, XRP(1'000), {USD(1'100), EUR(1'100)});
@@ -2448,7 +2516,7 @@ private:
         }
 
         {
-            testcase("No Owner Fee: AMM and Pay with Limit Quality");
+            // Payment via AMM with limit quality
             Env env(*this, features);
 
             fund(
@@ -2485,9 +2553,8 @@ private:
             BEAST_EXPECT(expectLine(env, carol, USD(1'100)));
         }
         {
-            testcase(
-                "No Owner Fee: AMM and Pay with Limit "
-                "Quality, Deliver Less");
+            // Payment via AMM with limit quality, deliver less
+            // than requested
             Env env(*this, features);
 
             fund(
@@ -2521,9 +2588,8 @@ private:
             BEAST_EXPECT(expectLine(env, carol, USD(1'222.5)));
         }
         {
-            testcase(
-                "No Owner Fee: Offer, AMM, and Pay with Limit Quality, Deliver "
-                "Less");
+            // Payment via offer and AMM with limit quality, deliver less
+            // than requested
             Env env(*this, features);
             Account const ed("ed");
 
@@ -2579,9 +2645,8 @@ private:
                 env, carol, STAmount(USD, UINT64_C(1'459'732142857143), -12)));
         }
         {
-            testcase(
-                "No Owner Fee: AMM, Offer, and Pay with Limit Quality, Deliver "
-                "Less");
+            // Payment via AMM and offer with limit quality, deliver less
+            // than requested
             Env env(*this, features);
             Account const ed("ed");
 
@@ -2637,9 +2702,8 @@ private:
                 env, carol, STAmount(USD, UINT64_C(1'447'785714285714), -12)));
         }
         {
-            testcase(
-                "No Owner Fee: AMM, AMM, and Pay with Limit Quality, Deliver "
-                "Less");
+            // Payment via AMM, AMM  with limit quality, deliver less
+            // than requested
             Env env(*this, features);
             Account const ed("ed");
 
@@ -2684,9 +2748,8 @@ private:
                 env, carol, STAmount(USD, UINT64_C(1'466'743295019157), -12)));
         }
         {
-            testcase(
-                "No Owner Fee: AMM, AMM, and gw Pay with Limit Quality, "
-                "Deliver Less");
+            // Payment by the issuer via AMM, AMM  with limit quality,
+            // deliver less than requested
             Env env(*this, features);
 
             fund(

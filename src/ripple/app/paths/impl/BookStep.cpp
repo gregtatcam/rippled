@@ -318,7 +318,8 @@ public:
     adjustQualityWithFees(
         ReadView const& v,
         Quality const& ofrQ,
-        DebtDirection prevStepDir) const
+        DebtDirection prevStepDir,
+        bool waiveOwnerPaysFee) const
     {
         // Charge the offer owner, not the sender
         // Charge a fee even if the owner is the same as the issuer
@@ -334,7 +335,7 @@ public:
         auto const trIn =
             redeems(prevStepDir) ? rate(this->book_.in.account) : parityRate;
         // Always charge the transfer fee, even if the owner is the issuer
-        auto const trOut = this->ownerPaysTransferFee_
+        auto const trOut = this->ownerPaysTransferFee_ && !waiveOwnerPaysFee
             ? rate(this->book_.out.account)
             : parityRate;
 
@@ -481,7 +482,8 @@ public:
     adjustQualityWithFees(
         ReadView const& v,
         Quality const& ofrQ,
-        DebtDirection prevStepDir) const
+        DebtDirection prevStepDir,
+        bool waiveOwnerPaysFee) const
     {
         // Offer x-ing does not charge a transfer fee when the offer's owner
         // is the same as the strand dst. It is important that
@@ -527,7 +529,7 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
         return {std::nullopt, dir};
 
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
-        v, std::get<Quality>(*res), prevStepDir);
+        v, std::get<Quality>(*res), prevStepDir, std::get<bool>(*res));
     return {q, dir};
 }
 
@@ -549,7 +551,7 @@ BookStep<TIn, TOut, TDerived>::getQualityFunc(
         auto const qOne = Quality{STAmount::uRateOne};
         auto const q =
             static_cast<TDerived const*>(this)->adjustQualityWithFees(
-                v, qOne, prevStepDir);
+                v, qOne, prevStepDir, true);
         if (q == qOne)
             return {res, dir};
         QualityFunction qf{q, QualityFunction::CLOBLikeTag{}};
@@ -559,7 +561,7 @@ BookStep<TIn, TOut, TDerived>::getQualityFunc(
 
     // CLOB
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
-        v, *(res->quality()), prevStepDir);
+        v, *(res->quality()), prevStepDir, false);
     return {QualityFunction{q, QualityFunction::CLOBLikeTag{}}, dir};
 }
 
