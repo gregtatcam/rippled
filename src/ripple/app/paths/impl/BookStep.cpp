@@ -530,12 +530,12 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
     if (!res)
         return {std::nullopt, dir};
 
-    auto const ownerFee = (std::get<OfferType>(*res) == OfferType::AMM)
+    auto const waiveFee = (std::get<OfferType>(*res) == OfferType::AMM)
         ? WaiveTransferFee::Yes
         : WaiveTransferFee::No;
 
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
-        v, std::get<Quality>(*res), prevStepDir, ownerFee);
+        v, std::get<Quality>(*res), prevStepDir, waiveFee);
     return {q, dir};
 }
 
