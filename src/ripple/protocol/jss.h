@@ -41,70 +41,71 @@ namespace jss {
    error: Common properties of RPC error responses.
 */
 
-JSS(AL_size);              // out: GetCounts
-JSS(AL_hit_rate);          // out: GetCounts
-JSS(Account);              // in: TransactionSign; field.
-JSS(AccountDelete);        // transaction type.
-JSS(AccountRoot);          // ledger type.
-JSS(AccountSet);           // transaction type.
-JSS(AMM);                  // ledger type
-JSS(AMMBid);               // transaction type
-JSS(AMMID);                // field
-JSS(AMMCreate);            // transaction type
-JSS(AMMDeposit);           // transaction type
-JSS(AMMVote);              // transaction type
-JSS(AMMWithdraw);          // transaction type
-JSS(Amendments);           // ledger type.
-JSS(Amount);               // in: TransactionSign; field.
-JSS(Amount2);              // in/out: AMM IOU/XRP pool, deposit, withdraw amount
-JSS(Asset);                // in: AMM Asset1
-JSS(Asset2);               // in: AMM Asset2
-JSS(AuthAccount);          // in: AMM Auction Slot
-JSS(AuthAccounts);         // in: AMM Auction Slot
-JSS(Check);                // ledger type.
-JSS(CheckCancel);          // transaction type.
-JSS(CheckCash);            // transaction type.
-JSS(CheckCreate);          // transaction type.
-JSS(ClearFlag);            // field.
-JSS(DeliverMin);           // in: TransactionSign
-JSS(DepositPreauth);       // transaction and ledger type.
-JSS(Destination);          // in: TransactionSign; field.
-JSS(DirectoryNode);        // ledger type.
-JSS(EnableAmendment);      // transaction type.
-JSS(EPrice);               // in: AMM Deposit option
-JSS(Escrow);               // ledger type.
-JSS(EscrowCancel);         // transaction type.
-JSS(EscrowCreate);         // transaction type.
-JSS(EscrowFinish);         // transaction type.
-JSS(Fee);                  // in/out: TransactionSign; field.
-JSS(FeeSettings);          // ledger type.
-JSS(Flags);                // in/out: TransactionSign; field.
-JSS(incomplete_shards);    // out: OverlayImpl, PeerImp
-JSS(Invalid);              //
-JSS(LastLedgerSequence);   // in: TransactionSign; field
-JSS(LedgerHashes);         // ledger type.
-JSS(LimitAmount);          // field.
-JSS(BidMax);               // in: AMM Bid
-JSS(BidMin);               // in: AMM Bid
-JSS(NetworkID);            // field.
-JSS(NFTokenBurn);          // transaction type.
-JSS(NFTokenMint);          // transaction type.
-JSS(NFTokenOffer);         // ledger type.
-JSS(NFTokenAcceptOffer);   // transaction type.
-JSS(NFTokenCancelOffer);   // transaction type.
-JSS(NFTokenCreateOffer);   // transaction type.
-JSS(NFTokenPage);          // ledger type.
-JSS(LPTokenOut);           // in: AMM Liquidity Provider deposit tokens
-JSS(LPTokenIn);            // in: AMM Liquidity Provider withdraw tokens
-JSS(LPToken);              // out: AMM Liquidity Provider tokens info
-JSS(Offer);                // ledger type.
-JSS(OfferCancel);          // transaction type.
-JSS(OfferCreate);          // transaction type.
-JSS(OfferSequence);        // field.
-JSS(Paths);                // in/out: TransactionSign
-JSS(PayChannel);           // ledger type.
-JSS(Payment);              // transaction type.
-JSS(PaymentChannelClaim);  // transaction type.
+JSS(AL_size);                // out: GetCounts
+JSS(AL_hit_rate);            // out: GetCounts
+JSS(Account);                // in: TransactionSign; field.
+JSS(AccountDelete);          // transaction type.
+JSS(AccountRoot);            // ledger type.
+JSS(AccountSet);             // transaction type.
+JSS(AMM);                    // ledger type
+JSS(AMMBid);                 // transaction type
+JSS(AMMID);                  // field
+JSS(AMMCreate);              // transaction type
+JSS(AMMDeposit);             // transaction type
+JSS(AMMVote);                // transaction type
+JSS(AMMWithdraw);            // transaction type
+JSS(Amendments);             // ledger type.
+JSS(Amount);                 // in: TransactionSign; field.
+JSS(Amount2);                // in/out: AMM IOU/XRP pool, deposit, withdraw amount
+JSS(Asset);                  // in: AMM Asset1
+JSS(Asset2);                 // in: AMM Asset2
+JSS(AuthAccount);            // in: AMM Auction Slot
+JSS(AuthAccounts);           // in: AMM Auction Slot
+JSS(Check);                  // ledger type.
+JSS(CheckCancel);            // transaction type.
+JSS(CheckCash);              // transaction type.
+JSS(CheckCreate);            // transaction type.
+JSS(Clawback);               // transaction type.
+JSS(ClearFlag);              // field.
+JSS(DeliverMin);             // in: TransactionSign
+JSS(DepositPreauth);         // transaction and ledger type.
+JSS(Destination);            // in: TransactionSign; field.
+JSS(DirectoryNode);          // ledger type.
+JSS(EnableAmendment);        // transaction type.
+JSS(EPrice);                 // in: AMM Deposit option
+JSS(Escrow);                 // ledger type.
+JSS(EscrowCancel);           // transaction type.
+JSS(EscrowCreate);           // transaction type.
+JSS(EscrowFinish);           // transaction type.
+JSS(Fee);                    // in/out: TransactionSign; field.
+JSS(FeeSettings);            // ledger type.
+JSS(Flags);                  // in/out: TransactionSign; field.
+JSS(incomplete_shards);      // out: OverlayImpl, PeerImp
+JSS(Invalid);                //
+JSS(LastLedgerSequence);     // in: TransactionSign; field
+JSS(LedgerHashes);           // ledger type.
+JSS(LimitAmount);            // field.
+JSS(BidMax);                 // in: AMM Bid
+JSS(BidMin);                 // in: AMM Bid
+JSS(NetworkID);              // field.
+JSS(NFTokenBurn);            // transaction type.
+JSS(NFTokenMint);            // transaction type.
+JSS(NFTokenOffer);           // ledger type.
+JSS(NFTokenAcceptOffer);     // transaction type.
+JSS(NFTokenCancelOffer);     // transaction type.
+JSS(NFTokenCreateOffer);     // transaction type.
+JSS(NFTokenPage);            // ledger type.
+JSS(LPTokenOut);             // in: AMM Liquidity Provider deposit tokens
+JSS(LPTokenIn);              // in: AMM Liquidity Provider withdraw tokens
+JSS(LPToken);                // out: AMM Liquidity Provider tokens info
+JSS(Offer);                  // ledger type.
+JSS(OfferCancel);            // transaction type.
+JSS(OfferCreate);            // transaction type.
+JSS(OfferSequence);          // field.
+JSS(Paths);                  // in/out: TransactionSign
+JSS(PayChannel);             // ledger type.
+JSS(Payment);                // transaction type.
+JSS(PaymentChannelClaim);    // transaction type.
 JSS(PaymentChannelCreate);   // transaction type.
 JSS(PaymentChannelFund);     // transaction type.
 JSS(RippleState);            // ledger type.
@@ -446,6 +447,8 @@ JSS(nft_offer_index);            // out nft_buy_offers, nft_sell_offers
 JSS(nft_page);                   // in: LedgerEntry
 JSS(nft_serial);                 // out: account_nfts
 JSS(nft_taxon);                  // out: nft_info (clio)
+JSS(nftoken_id);                 // out: insertNFTokenID
+JSS(nftoken_ids);                // out: insertNFTokenID
 JSS(no_ripple);                  // out: AccountLines
 JSS(no_ripple_peer);             // out: AccountLines
 JSS(node);                       // out: LedgerEntry
@@ -466,6 +469,7 @@ JSS(node_writes_delayed);        // out::GetCounts
 JSS(obligations);                // out: GatewayBalances
 JSS(offer);                      // in: LedgerEntry
 JSS(offers);                     // out: NetworkOPs, AccountOffers, Subscribe
+JSS(offer_id);                   // out: insertNFTokenOfferID
 JSS(offline);                    // in: TransactionSign
 JSS(offset);                     // in/out: AccountTxOld
 JSS(open);                       // out: handlers/Ledger
@@ -492,14 +496,15 @@ JSS(peers);                       // out: InboundLedger, handlers/Peers, Overlay
 JSS(peer_disconnects);            // Severed peer connection counter.
 JSS(peer_disconnects_resources);  // Severed peer connections because of
                                   // excess resource consumption.
-JSS(port);                        // in: Connect
+JSS(port);                        // in: Connect, out: NetworkOPs
+JSS(ports);                       // out: NetworkOPs
 JSS(previous);                    // out: Reservations
 JSS(previous_ledger);             // out: LedgerPropose
 JSS(price);                       // out: amm_info, AuctionSlot
 JSS(proof);                       // in: BookOffers
 JSS(propose_seq);                 // out: LedgerPropose
 JSS(proposers);                   // out: NetworkOPs, LedgerConsensus
-JSS(protocol);                    // out: PeerImp
+JSS(protocol);                    // out: NetworkOPs, PeerImp
 JSS(proxied);                     // out: RPC ping
 JSS(pubkey_node);                 // out: NetworkOPs
 JSS(pubkey_publisher);            // out: ValidatorList
@@ -554,7 +559,6 @@ JSS(send_max);                  // in: PathRequest, RipplePathFind
 JSS(seq);                       // in: LedgerEntry;
                                 // out: NetworkOPs, RPCSub, AccountOffers,
                                 //      ValidatorList, ValidatorInfo, Manifest
-JSS(seqNum);                    // out: LedgerToJson
 JSS(sequence);                  // in: UNL
 JSS(sequence_count);            // out: AccountInfo
 JSS(server_domain);             // out: NetworkOPs
@@ -610,7 +614,6 @@ JSS(time_interval);           // out: AMM Auction Slot
 JSS(track);                   // out: PeerImp
 JSS(traffic);                 // out: Overlay
 JSS(total);                   // out: counters
-JSS(totalCoins);              // out: LedgerToJson
 JSS(total_bytes_recv);        // out: Peers
 JSS(total_bytes_sent);        // out: Peers
 JSS(total_coins);             // out: LedgerToJson
