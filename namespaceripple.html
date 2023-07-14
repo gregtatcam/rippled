@@ -2057,7 +2057,7 @@ Enumerations</h2></td></tr>
 <br />
 &#160;&#160;<a class="el" href="namespaceripple.html#a4a9c7b33fef9015d6406302ef80b63c5a99c52494bb88dab0264625ebc5c4206e">lsfDisallowIncomingTrustline</a>, 
 <a class="el" href="namespaceripple.html#a4a9c7b33fef9015d6406302ef80b63c5aa92bc301276504f22d869a02806c0a1f">lsfAMM</a> = 0x40000000, 
-<a class="el" href="namespaceripple.html#a4a9c7b33fef9015d6406302ef80b63c5ac08d95c566e316346e73a5b1d3fbf40e">lsfAllowClawback</a>, 
+<a class="el" href="namespaceripple.html#a4a9c7b33fef9015d6406302ef80b63c5a4dc02270bf68939f8033c9a985fb2dfb">lsfAllowTrustLineClawback</a>, 
 <a class="el" href="namespaceripple.html#a4a9c7b33fef9015d6406302ef80b63c5af5bb4ed279c86f7c4ddfe0b2ed89af00">lsfPassive</a> = 0x00010000, 
 <br />
 &#160;&#160;<a class="el" href="namespaceripple.html#a4a9c7b33fef9015d6406302ef80b63c5ab4f5e24467c127ce07228288a7b54760">lsfSell</a> = 0x00020000, 
@@ -6048,8 +6048,8 @@ Variables</h2></td></tr>
 <tr class="separator:ac12fbb1864b09bfd3fb4ead410449edd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a72b8ab4faf1078ddedabff623d95b057"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a72b8ab4faf1078ddedabff623d95b057">asfDisallowIncomingTrustline</a> = 15</td></tr>
 <tr class="separator:a72b8ab4faf1078ddedabff623d95b057"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ac502eaeebe1f069671eeb7b978a1a6"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a3ac502eaeebe1f069671eeb7b978a1a6">asfAllowClawback</a> = 16</td></tr>
-<tr class="separator:a3ac502eaeebe1f069671eeb7b978a1a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acedcd08c62e1bb941e2f6c9e289c6582"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#acedcd08c62e1bb941e2f6c9e289c6582">asfAllowTrustLineClawback</a> = 16</td></tr>
+<tr class="separator:acedcd08c62e1bb941e2f6c9e289c6582"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61d9fbb44b335fbb5e82e3211e6639a2"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a61d9fbb44b335fbb5e82e3211e6639a2">tfPassive</a> = 0x00010000</td></tr>
 <tr class="separator:a61d9fbb44b335fbb5e82e3211e6639a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6257d0a91b5b06dd7712c68af628441d"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a6257d0a91b5b06dd7712c68af628441d">tfImmediateOrCancel</a> = 0x00020000</td></tr>
@@ -6593,7 +6593,7 @@ template&lt;class T &gt; </div>
 <p>For an instance ClosedInterval c, this represents the closed interval (c.first(), c.last()). A single element interval has c.first() == c.last().</p>
 <p>This is simply a type-alias for boost interval container library interval set, so users should consult that documentation for available supporting member and free functions. </p>
 
-<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00044">44</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00045">45</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
 
 </div>
 </div>
@@ -6615,7 +6615,7 @@ template&lt;class T &gt; </div>
 <p>Represents a set of values of the domain T using the minimum number of disjoint ClosedInterval&lt;T&gt;. This is useful to represent ranges of T where a few instances are missing, e.g. the set 1-5,8-9,11-14.</p>
 <p>This is simply a type-alias for boost interval container library interval set, so users should consult that documentation for available supporting member and free functions. </p>
 
-<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00069">69</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00070">70</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
 
 </div>
 </div>
@@ -9104,7 +9104,7 @@ ledger.
 <tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5a91c443238e7e5acef466bfb2fe9f1211"></a>lsfDisallowIncomingPayChan&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5a99c52494bb88dab0264625ebc5c4206e"></a>lsfDisallowIncomingTrustline&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5aa92bc301276504f22d869a02806c0a1f"></a>lsfAMM&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5ac08d95c566e316346e73a5b1d3fbf40e"></a>lsfAllowClawback&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5a4dc02270bf68939f8033c9a985fb2dfb"></a>lsfAllowTrustLineClawback&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5af5bb4ed279c86f7c4ddfe0b2ed89af00"></a>lsfPassive&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5ab4f5e24467c127ce07228288a7b54760"></a>lsfSell&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a4a9c7b33fef9015d6406302ef80b63c5ac704b653dce116dabb7ede80b711d953"></a>lsfLowReserve&#160;</td><td class="fielddoc"></td></tr>
@@ -22024,7 +22024,7 @@ template&lt;class T &gt; </div>
 <p>Create a closed range interval. </p>
 <p>Helper function to create a closed range interval without having to qualify the template argument. </p>
 
-<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00053">53</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00054">54</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
 
 </div>
 </div>
@@ -22056,7 +22056,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The style string </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00082">82</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00083">83</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
 
 </div>
 </div>
@@ -22088,7 +22088,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The styled string </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00099">99</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00100">100</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
 
 </div>
 </div>
@@ -22131,7 +22131,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True on successfully converting styled string </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00123">123</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00124">124</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
 
 </div>
 </div>
@@ -22180,7 +22180,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The largest v such that minV &lt;= v &lt; t and !contains(rs, v) or std::nullopt if no such v exists. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00182">182</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="RangeSet_8h_source.html#l00183">183</a> of file <a class="el" href="RangeSet_8h_source.html">RangeSet.h</a>.</p>
 
 </div>
 </div>
@@ -23349,7 +23349,7 @@ template&lt;class Char , class Traits &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the number of participants which must agree </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Consensus_8h_source.html#l01350">1350</a> of file <a class="el" href="Consensus_8h_source.html">Consensus.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Consensus_8h_source.html#l01353">1353</a> of file <a class="el" href="Consensus_8h_source.html">Consensus.h</a>.</p>
 
 </div>
 </div>
@@ -26803,7 +26803,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>seated optional with feature's value if the feature is found in the header, unseated optional otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00038">38</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00040">40</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -26850,7 +26850,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the feature's value matches the specified value, false if doesn't match or the feature is not found in the header </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00054">54</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00056">56</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -26890,7 +26890,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if enabled </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00066">66</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00068">68</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -26944,7 +26944,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>X-Protocol-Ctl header value </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00074">74</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00076">76</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -27006,7 +27006,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>X-Protocol-Ctl header value </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00093">93</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00095">95</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -27059,7 +27059,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 <dl class="section return"><dt>Returns</dt><dd><code>true</code> if successful, <code>false</code> otherwise.</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This construct is non-standard. There are potential "standard" alternatives that should be considered. For a discussion, on this topic, see <a href="https://github.com/openssl/openssl/issues/5509">https://github.com/openssl/openssl/issues/5509</a> and <a href="https://github.com/ripple/rippled/issues/2413">https://github.com/ripple/rippled/issues/2413</a>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00127">127</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00129">129</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -27099,7 +27099,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A 256-bit value on success; an unseated optional otherwise. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00145">145</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00147">147</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -27155,7 +27155,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 
 <p>Insert fields headers necessary for upgrading the link to the peer protocol. </p>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00177">177</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00179">179</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -27219,7 +27219,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00226">226</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00228">228</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -27280,7 +27280,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>http request with empty body </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00365">365</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00367">367</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -27362,7 +27362,7 @@ template&lt;class Clock , class Duration , class Rep , class Period &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>http response </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00392">392</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Handshake_8cpp_source.html#l00394">394</a> of file <a class="el" href="Handshake_8cpp_source.html">Handshake.cpp</a>.</p>
 
 </div>
 </div>
@@ -59496,8 +59496,8 @@ template&lt;class Dest , class Src &gt; </div>
 
 </div>
 </div>
-<a id="a3ac502eaeebe1f069671eeb7b978a1a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ac502eaeebe1f069671eeb7b978a1a6">&#9670;&nbsp;</a></span>asfAllowClawback</h2>
+<a id="acedcd08c62e1bb941e2f6c9e289c6582"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acedcd08c62e1bb941e2f6c9e289c6582">&#9670;&nbsp;</a></span>asfAllowTrustLineClawback</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -59506,7 +59506,7 @@ template&lt;class Dest , class Src &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> ripple::asfAllowClawback = 16</td>
+          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> ripple::asfAllowTrustLineClawback = 16</td>
         </tr>
       </table>
   </td>
