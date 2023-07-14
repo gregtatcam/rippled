@@ -156,6 +156,15 @@ enum TxType : std::uint16_t
 
     /** This transaction type bids for the auction slot */
     ttAMM_BID = 39,
+	
+	   /** This transaction type creates an AMM instance */
+    ttORACLE_CREATE = 40,
+
+    /** This transaction type deposits into an AMM instance */
+    ttORACLE_MODIFY = 41,
+
+    /** This transaction type withdraws from an AMM instance */
+    ttORACLE_UPDATE = 42,
 
     /** This system-generated transaction type is used to update the status of the various amendments.
 

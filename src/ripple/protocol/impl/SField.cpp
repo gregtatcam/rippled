@@ -127,6 +127,7 @@ CONSTRUCT_TYPED_SFIELD(sfTransferRate,          "TransferRate",         UINT32, 
 CONSTRUCT_TYPED_SFIELD(sfWalletSize,            "WalletSize",           UINT32,    12);
 CONSTRUCT_TYPED_SFIELD(sfOwnerCount,            "OwnerCount",           UINT32,    13);
 CONSTRUCT_TYPED_SFIELD(sfDestinationTag,        "DestinationTag",       UINT32,    14);
+CONSTRUCT_TYPED_SFIELD(sfLastUpdateTime,        "LastUpdateTime",       UINT32,    15);
 
 // 32-bit integers (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfHighQualityIn,         "HighQualityIn",        UINT32,    16);
@@ -229,6 +230,7 @@ CONSTRUCT_TYPED_SFIELD(sfHookStateKey,          "HookStateKey",         UINT256,
 CONSTRUCT_TYPED_SFIELD(sfHookHash,              "HookHash",             UINT256,   31);
 CONSTRUCT_TYPED_SFIELD(sfHookNamespace,         "HookNamespace",        UINT256,   32);
 CONSTRUCT_TYPED_SFIELD(sfHookSetTxnID,          "HookSetTxnID",         UINT256,   33);
+CONSTRUCT_TYPED_SFIELD(sfOracleID,              "OracleID",             UINT256,   34);
 
 // currency amount (common)
 CONSTRUCT_TYPED_SFIELD(sfAmount,                "Amount",               AMOUNT,     1);
@@ -293,6 +295,10 @@ CONSTRUCT_TYPED_SFIELD(sfHookStateData,         "HookStateData",        VL,     
 CONSTRUCT_TYPED_SFIELD(sfHookReturnString,      "HookReturnString",     VL,        23);
 CONSTRUCT_TYPED_SFIELD(sfHookParameterName,     "HookParameterName",    VL,        24);
 CONSTRUCT_TYPED_SFIELD(sfHookParameterValue,    "HookParameterValue",   VL,        25);
+CONSTRUCT_TYPED_SFIELD(sfOracleAsset,           "OracleAsset",          VL,        26);
+CONSTRUCT_TYPED_SFIELD(sfValueUnit,             "ValueUnit",            VL,        27);
+CONSTRUCT_TYPED_SFIELD(sfOracleAssetClass,      "OracleAssetClass",     VL,        28);
+CONSTRUCT_TYPED_SFIELD(sfValue,                 "Value",                VL,        29);
 
 // account
 CONSTRUCT_TYPED_SFIELD(sfAccount,               "Account",              ACCOUNT,    1);
@@ -305,6 +311,7 @@ CONSTRUCT_TYPED_SFIELD(sfUnauthorize,           "Unauthorize",          ACCOUNT,
 CONSTRUCT_TYPED_SFIELD(sfRegularKey,            "RegularKey",           ACCOUNT,    8);
 CONSTRUCT_TYPED_SFIELD(sfNFTokenMinter,         "NFTokenMinter",        ACCOUNT,    9);
 CONSTRUCT_TYPED_SFIELD(sfEmitCallback,          "EmitCallback",         ACCOUNT,   10);
+CONSTRUCT_TYPED_SFIELD(sfModifier,              "Modifier",             ACCOUNT,   11);
 
 // account (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfHookAccount,           "HookAccount",          ACCOUNT,   16);
@@ -351,6 +358,8 @@ CONSTRUCT_UNTYPED_SFIELD(sfHookGrant,           "HookGrant",            OBJECT, 
 CONSTRUCT_UNTYPED_SFIELD(sfVoteEntry,           "VoteEntry",            OBJECT,    25);
 CONSTRUCT_UNTYPED_SFIELD(sfAuctionSlot,         "AuctionSlot",          OBJECT,    26);
 CONSTRUCT_UNTYPED_SFIELD(sfAuthAccount,         "AuthAccount",          OBJECT,    27);
+CONSTRUCT_UNTYPED_SFIELD(sfValueInfo,           "ValueInfo",            OBJECT,    28);
+CONSTRUCT_UNTYPED_SFIELD(sfHistoricalValue,     "HistoricalValue",      OBJECT,    29);
 
 // array of objects
 //                                                                            ARRAY/1 is reserved for end of array
@@ -365,6 +374,8 @@ CONSTRUCT_UNTYPED_SFIELD(sfMemos,               "Memos",                ARRAY,  
 CONSTRUCT_UNTYPED_SFIELD(sfNFTokens,            "NFTokens",             ARRAY,     10);
 CONSTRUCT_UNTYPED_SFIELD(sfHooks,               "Hooks",                ARRAY,     11);
 CONSTRUCT_UNTYPED_SFIELD(sfVoteSlots,           "VoteSlots",            ARRAY,     12);
+CONSTRUCT_UNTYPED_SFIELD(sfValuesInfo,          "ValuesInfo",           ARRAY,     13);
+CONSTRUCT_UNTYPED_SFIELD(sfHistorical,          "Historical",           ARRAY,     14);
 
 // array of objects (uncommon)
 CONSTRUCT_UNTYPED_SFIELD(sfMajorities,          "Majorities",           ARRAY,     16);

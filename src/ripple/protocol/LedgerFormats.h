@@ -166,6 +166,11 @@ enum LedgerEntryType : std::uint16_t
        \sa keylet::amm
     */
     ltAMM = 0x0079,
+	
+	/** A ledger object which tracks Oracle
+        \sa keylet::oracle
+     */
+    ltORACLE = 0x0080,
 
     //---------------------------------------------------------------------------
     /** A special type, matching any ledger entry type.

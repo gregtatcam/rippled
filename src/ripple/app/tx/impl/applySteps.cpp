@@ -31,10 +31,12 @@
 #include <ripple/app/tx/impl/Clawback.h>
 #include <ripple/app/tx/impl/CreateCheck.h>
 #include <ripple/app/tx/impl/CreateOffer.h>
+#include <ripple/app/tx/impl/CreateOracle.h>
 #include <ripple/app/tx/impl/CreateTicket.h>
 #include <ripple/app/tx/impl/DeleteAccount.h>
 #include <ripple/app/tx/impl/DepositPreauth.h>
 #include <ripple/app/tx/impl/Escrow.h>
+#include <ripple/app/tx/impl/ModifyOracle.h>
 #include <ripple/app/tx/impl/NFTokenAcceptOffer.h>
 #include <ripple/app/tx/impl/NFTokenBurn.h>
 #include <ripple/app/tx/impl/NFTokenCancelOffer.h>
@@ -46,6 +48,7 @@
 #include <ripple/app/tx/impl/SetRegularKey.h>
 #include <ripple/app/tx/impl/SetSignerList.h>
 #include <ripple/app/tx/impl/SetTrust.h>
+#include <ripple/app/tx/impl/UpdateOracle.h>
 
 namespace ripple {
 
@@ -165,6 +168,12 @@ invoke_preflight(PreflightContext const& ctx)
             return invoke_preflight_helper<AMMVote>(ctx);
         case ttAMM_BID:
             return invoke_preflight_helper<AMMBid>(ctx);
+        case ttORACLE_CREATE:
+            return invoke_preflight_helper<CreateOracle>(ctx);
+        case ttORACLE_MODIFY:
+            return invoke_preflight_helper<ModifyOracle>(ctx);
+        case ttORACLE_UPDATE:
+            return invoke_preflight_helper<UpdateOracle>(ctx);
         default:
             assert(false);
             return {temUNKNOWN, TxConsequences{temUNKNOWN}};
@@ -278,6 +287,12 @@ invoke_preclaim(PreclaimContext const& ctx)
             return invoke_preclaim<AMMVote>(ctx);
         case ttAMM_BID:
             return invoke_preclaim<AMMBid>(ctx);
+        case ttORACLE_CREATE:
+            return invoke_preclaim<CreateOracle>(ctx);
+        case ttORACLE_MODIFY:
+            return invoke_preclaim<ModifyOracle>(ctx);
+        case ttORACLE_UPDATE:
+            return invoke_preclaim<UpdateOracle>(ctx);
         default:
             assert(false);
             return temUNKNOWN;
@@ -353,6 +368,12 @@ invoke_calculateBaseFee(ReadView const& view, STTx const& tx)
             return AMMVote::calculateBaseFee(view, tx);
         case ttAMM_BID:
             return AMMBid::calculateBaseFee(view, tx);
+        case ttORACLE_CREATE:
+            return CreateOracle::calculateBaseFee(view, tx);
+        case ttORACLE_MODIFY:
+            return ModifyOracle::calculateBaseFee(view, tx);
+        case ttORACLE_UPDATE:
+            return UpdateOracle::calculateBaseFee(view, tx);
         default:
             assert(false);
             return XRPAmount{0};
@@ -527,6 +548,18 @@ invoke_apply(ApplyContext& ctx)
         }
         case ttAMM_BID: {
             AMMBid p(ctx);
+            return p();
+        }
+        case ttORACLE_CREATE: {
+            CreateOracle p(ctx);
+            return p();
+        }
+        case ttORACLE_MODIFY: {
+            ModifyOracle p(ctx);
+            return p();
+        }
+        case ttORACLE_UPDATE: {
+            UpdateOracle p(ctx);
             return p();
         }
         default:

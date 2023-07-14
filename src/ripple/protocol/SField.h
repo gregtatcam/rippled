@@ -368,6 +368,7 @@ extern SF_UINT32 const sfTransferRate;
 extern SF_UINT32 const sfWalletSize;
 extern SF_UINT32 const sfOwnerCount;
 extern SF_UINT32 const sfDestinationTag;
+extern SF_UINT32 const sfLastUpdateTime;
 
 // 32-bit integers (uncommon)
 extern SF_UINT32 const sfHighQualityIn;
@@ -449,6 +450,7 @@ extern SF_UINT256 const sfEmitParentTxnID;
 extern SF_UINT256 const sfEmitNonce;
 extern SF_UINT256 const sfEmitHookHash;
 extern SF_UINT256 const sfAMMID;
+extern SF_UINT256 const sfOracleID;
 
 // 256-bit (uncommon)
 extern SF_UINT256 const sfBookDirectory;
@@ -515,6 +517,10 @@ extern SF_VL const sfCreateCode;
 extern SF_VL const sfMemoType;
 extern SF_VL const sfMemoData;
 extern SF_VL const sfMemoFormat;
+extern SF_VL const sfOracleAsset;
+extern SF_VL const sfValueUnit;
+extern SF_VL const sfOracleAssetClass;
+extern SF_VL const sfValue;
 
 // variable length (uncommon)
 extern SF_VL const sfFulfillment;
@@ -538,6 +544,8 @@ extern SF_ACCOUNT const sfUnauthorize;
 extern SF_ACCOUNT const sfRegularKey;
 extern SF_ACCOUNT const sfNFTokenMinter;
 extern SF_ACCOUNT const sfEmitCallback;
+extern SF_ACCOUNT const sfOwner;
+extern SF_ACCOUNT const sfModifier;
 
 // account (uncommon)
 extern SF_ACCOUNT const sfHookAccount;
@@ -582,6 +590,8 @@ extern SField const sfHookExecution;
 extern SField const sfHookDefinition;
 extern SField const sfHookParameter;
 extern SField const sfHookGrant;
+extern SField const sfValueInfo;
+extern SField const sfHistoricalValue;
 
 // array of objects (common)
 // ARRAY/1 is reserved for end of array
@@ -597,6 +607,8 @@ extern SField const sfNFTokens;
 extern SField const sfHooks;
 extern SField const sfVoteSlots;
 extern SField const sfAuthAccounts;
+extern SField const sfValuesInfo;
+extern SField const sfHistorical;
 
 // array of objects (uncommon)
 extern SField const sfMajorities;
