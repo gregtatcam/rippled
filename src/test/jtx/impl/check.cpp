@@ -17,8 +17,6 @@
 */
 //==============================================================================
 
-#include <ripple/protocol/TxFlags.h>
-#include <ripple/protocol/jss.h>
 #include <test/jtx/check.h>
 
 namespace ripple {
@@ -26,22 +24,6 @@ namespace test {
 namespace jtx {
 
 namespace check {
-
-// Create a check.
-Json::Value
-create(
-    jtx::Account const& account,
-    jtx::Account const& dest,
-    STAmount const& sendMax)
-{
-    Json::Value jv;
-    jv[sfAccount.jsonName] = account.human();
-    jv[sfSendMax.jsonName] = sendMax.getJson(JsonOptions::none);
-    jv[sfDestination.jsonName] = dest.human();
-    jv[sfTransactionType.jsonName] = jss::CheckCreate;
-    jv[sfFlags.jsonName] = tfUniversal;
-    return jv;
-}
 
 // Cash a check requiring that a specific amount be delivered.
 Json::Value
