@@ -458,6 +458,14 @@ transferXRP(
 [[nodiscard]] TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
 
+[[nodiscard]] TER
+cleanupOnAccountDelete(
+    ApplyView& view,
+    Keylet const& ownerDirKeylet,
+    std::function<TER(LedgerEntryType, uint256 const&, std::shared_ptr<SLE>&)>
+        deleter,
+    beast::Journal j);
+
 }  // namespace ripple
 
 #endif

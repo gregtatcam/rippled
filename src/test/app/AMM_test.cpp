@@ -27,7 +27,6 @@
 #include <test/jtx.h>
 #include <test/jtx/AMM.h>
 #include <test/jtx/AMMTest.h>
-#include <test/jtx/TestHelpers.h>
 #include <test/jtx/amount.h>
 #include <test/jtx/sendmax.h>
 
@@ -1771,9 +1770,12 @@ private:
         // Withdraw all tokens.
         testAMM([&](AMM& ammAlice, Env& env) {
             env(trust(carol, STAmount{ammAlice.lptIssue(), 10000}));
+            // Can SetTrust only for AMM LP tokens
             env(trust(
-                carol,
-                STAmount{Issue{EUR.currency, ammAlice.ammAccount()}, 10000}));
+                    carol,
+                    STAmount{
+                        Issue{EUR.currency, ammAlice.ammAccount()}, 10000}),
+                ter(tecNO_PERMISSION));
             env.close();
             ammAlice.withdrawAll(alice);
             BEAST_EXPECT(!ammAlice.ammExists());
@@ -3621,9 +3623,11 @@ private:
             AMM amm(env, C, TSTA(5'000), TSTB(5'000));
             auto const ammIss = Issue(TSTA.currency, amm.ammAccount());
 
-            env.trust(STAmount{ammIss, 10'000}, D);
+            // Can SetTrust only for AMM LP tokens
+            env(trust(D, STAmount{ammIss, 10'000}), ter(tecNO_PERMISSION));
             env.close();
 
+            // The payment would fail because of above, but check just in case
             env(pay(C, D, STAmount{ammIss, 10}),
                 sendmax(TSTA(100)),
                 path(amm.ammAccount()),
