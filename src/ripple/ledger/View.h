@@ -461,7 +461,7 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
 /** Cleanup owner directory entries on account delete.
  * Used for a regular and AMM accounts deletion. Specific account deletion
  * has to provide the deleter function, which handles specifics of
- * the account deletion.
+ * the account deletion. The deleter has to handle adjustOwnerCount.
  */
 [[nodiscard]] TER
 cleanupOnAccountDelete(
