@@ -219,12 +219,7 @@ deleteAMMTrustLines(
                 return tecINTERNAL;
             }
 
-            if (auto const ter =
-                    deleteAMMTrustLine(view, sleItem, ammAccountID, j);
-                ter != tesSUCCESS)
-                return ter;
-
-            return tesSUCCESS;
+            return deleteAMMTrustLine(view, sleItem, ammAccountID, j);
         },
         j,
         maxTrustlinesToDelete);

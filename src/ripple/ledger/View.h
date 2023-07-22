@@ -464,7 +464,7 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
  * has to provide the deleter function, which handles details of
  * specific account deletion.
  * @return {tesSUCCESS, AllNodesDeleted::No} indicates maxNodesToDelete
- * were deleted and there remains more nodes to delete.
+ * are deleted and there remains more nodes to delete.
  */
 [[nodiscard]] std::pair<TER, AllNodesDeleted>
 cleanupOnAccountDelete(
@@ -479,7 +479,7 @@ cleanupOnAccountDelete(
  * call to view.peek(). Fail if neither side of the trustline is AMM or
  * if ammAccountID is seated and is not one of the trustline's side.
  */
-// [[nodiscard]] // nodiscard commented out so Transactor compile.
+// [[nodiscard]] // nodiscard commented out so Transactor compiles.
 TER
 deleteAMMTrustLine(
     ApplyView& view,

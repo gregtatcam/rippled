@@ -1886,12 +1886,12 @@ private:
 
         // Withdraw all tokens.
         testAMM([&](AMM& ammAlice, Env& env) {
-            env(trust(carol, STAmount{ammAlice.lptIssue(), 10000}));
+            env(trust(carol, STAmount{ammAlice.lptIssue(), 10'000}));
             // Can SetTrust only for AMM LP tokens
             env(trust(
                     carol,
                     STAmount{
-                        Issue{EUR.currency, ammAlice.ammAccount()}, 10000}),
+                        Issue{EUR.currency, ammAlice.ammAccount()}, 10'000}),
                 ter(tecNO_PERMISSION));
             env.close();
             ammAlice.withdrawAll(alice);
@@ -4296,7 +4296,7 @@ private:
             amm.withdrawAll(gw);
             BEAST_EXPECT(amm.ammExists());
 
-            // Bid,Vote,Deposit,Withdraw failing with
+            // Bid,Vote,Deposit,Withdraw,SetTrust failing with
             // tecAMM_EMPTY. Deposit succeeds with tfTwoAssetIfEmpty option.
             amm.bid(
                 alice,
@@ -4322,6 +4322,8 @@ private:
                 std::nullopt,
                 std::nullopt,
                 std::nullopt,
+                ter(tecAMM_EMPTY));
+            env(trust(alice, STAmount{amm.lptIssue(), 10'000}),
                 ter(tecAMM_EMPTY));
 
             // Can deposit with tfTwoAssetIfEmpty option
