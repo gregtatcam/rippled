@@ -293,32 +293,28 @@ DeleteAccount::doApply()
         return tefBAD_LEDGER;
 
     Keylet const ownerDirKeylet{keylet::ownerDir(account_)};
-    if (auto const ter = cleanupOnAccountDelete(
-            view(),
-            ownerDirKeylet,
-            [&](LedgerEntryType nodeType,
-                uint256 const& dirEntry,
-                std::shared_ptr<SLE>& sleItem) -> TER {
-                if (auto deleter = nonObligationDeleter(nodeType))
-                {
-                    TER const result{deleter(
-                        ctx_.app, view(), account_, dirEntry, sleItem, j_)};
+    auto const res = cleanupOnAccountDelete(
+        view(),
+        ownerDirKeylet,
+        [&](LedgerEntryType nodeType,
+            uint256 const& dirEntry,
+            std::shared_ptr<SLE>& sleItem) -> TER {
+            if (auto deleter = nonObligationDeleter(nodeType))
+            {
+                TER const result{
+                    deleter(ctx_.app, view(), account_, dirEntry, sleItem, j_)};
 
-                    if (!isTesSuccess(result))
-                        return result;
-                }
-                else
-                {
-                    assert(!"Undeletable entry should be found in preclaim.");
-                    JLOG(j_.error()) << "DeleteAccount undeletable item not "
-                                        "found in preclaim.";
-                    return tecHAS_OBLIGATIONS;
-                }
-                return tesSUCCESS;
-            },
-            ctx_.journal);
-        ter != tesSUCCESS)
-        return ter;
+                return result;
+            }
+
+            assert(!"Undeletable entry should be found in preclaim.");
+            JLOG(j_.error()) << "DeleteAccount undeletable item not "
+                                "found in preclaim.";
+            return tecHAS_OBLIGATIONS;
+        },
+        ctx_.journal);
+    if (std::get<TER>(res) != tesSUCCESS)
+        return std::get<TER>(res);
 
     // Transfer any XRP remaining after the fee is paid to the destination:
     (*dst)[sfBalance] = (*dst)[sfBalance] + mSourceBalance;
