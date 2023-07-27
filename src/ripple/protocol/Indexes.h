@@ -270,6 +270,9 @@ amm(Issue const& issue1, Issue const& issue2) noexcept;
 Keylet
 amm(uint256 const& amm) noexcept;
 
+Keylet
+oracle(uint256 const& amm) noexcept;
+
 }  // namespace keylet
 
 // Everything below is deprecated and should be removed in favor of keylets:

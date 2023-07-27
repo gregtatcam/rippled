@@ -380,6 +380,7 @@ LedgerEntryTypesMatch::visitEntry(
             case ltNFTOKEN_PAGE:
             case ltNFTOKEN_OFFER:
             case ltAMM:
+            case ltORACLE:
                 break;
             default:
                 invalidTypeAdded_ = true;

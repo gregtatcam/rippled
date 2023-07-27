@@ -488,8 +488,10 @@ target_sources (rippled PRIVATE
   src/ripple/app/tx/impl/Clawback.cpp
   src/ripple/app/tx/impl/CreateCheck.cpp
   src/ripple/app/tx/impl/CreateOffer.cpp
+  src/ripple/app/tx/impl/CreateOracle.cpp
   src/ripple/app/tx/impl/CreateTicket.cpp
   src/ripple/app/tx/impl/DeleteAccount.cpp
+  src/ripple/app/tx/impl/DeleteOracle.cpp
   src/ripple/app/tx/impl/DepositPreauth.cpp
   src/ripple/app/tx/impl/Escrow.cpp
   src/ripple/app/tx/impl/InvariantCheck.cpp
@@ -508,6 +510,7 @@ target_sources (rippled PRIVATE
   src/ripple/app/tx/impl/SignerEntries.cpp
   src/ripple/app/tx/impl/Taker.cpp
   src/ripple/app/tx/impl/Transactor.cpp
+  src/ripple/app/tx/impl/UpdateOracle.cpp
   src/ripple/app/tx/impl/apply.cpp
   src/ripple/app/tx/impl/applySteps.cpp
   src/ripple/app/tx/impl/details/NFTokenUtils.cpp
@@ -778,6 +781,7 @@ if (tests)
     src/test/app/NFTokenDir_test.cpp
     src/test/app/OfferStream_test.cpp
     src/test/app/Offer_test.cpp
+    src/test/app/Oracle_test.cpp
     src/test/app/OversizeMeta_test.cpp
     src/test/app/Path_test.cpp
     src/test/app/PayChan_test.cpp
@@ -901,6 +905,7 @@ if (tests)
     src/test/jtx/impl/Env.cpp
     src/test/jtx/impl/JSONRPCClient.cpp
     src/test/jtx/impl/ManualTimeKeeper.cpp
+    src/test/jtx/impl/Oracle.cpp
     src/test/jtx/impl/TestHelpers.cpp
     src/test/jtx/impl/WSClient.cpp
     src/test/jtx/impl/acctdelete.cpp

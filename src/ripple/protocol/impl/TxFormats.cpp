@@ -394,6 +394,37 @@ TxFormats::TxFormats()
             {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
+
+    add(jss::OracleCreate,
+        ttORACLE_CREATE,
+        {
+            {sfOracleID, soeREQUIRED},
+            {sfOwner, soeREQUIRED},
+            {sfSymbol, soeOPTIONAL},
+            {sfPriceUnit, soeOPTIONAL},
+            {sfSymbolClass, soeOPTIONAL},
+            {sfName, soeOPTIONAL},
+            {sfTOMLDomain, soeOPTIONAL},
+            {sfNumberHistorical, soeOPTIONAL},
+        },
+        commonFields);
+
+    add(jss::OracleDelete,
+        ttORACLE_DELETE,
+        {
+            {sfOracleID, soeREQUIRED},
+        },
+        commonFields);
+
+    add(jss::OracleUpdate,
+        ttORACLE_UPDATE,
+        {
+            {sfOracleID, soeREQUIRED},
+            {sfAmount2, soeREQUIRED},
+            {sfTradingFee, soeREQUIRED},
+            {sfTicketSequence, soeOPTIONAL},
+        },
+        commonFields);
 }
 
 TxFormats const&

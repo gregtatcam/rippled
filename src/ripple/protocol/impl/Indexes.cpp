@@ -389,6 +389,12 @@ amm(uint256 const& id) noexcept
     return {ltAMM, id};
 }
 
+Keylet
+oracle(uint256 const& id) noexcept
+{
+    return {ltORACLE, id};
+}
+
 }  // namespace keylet
 
 }  // namespace ripple

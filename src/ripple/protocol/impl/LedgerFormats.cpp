@@ -271,13 +271,21 @@ LedgerFormats::LedgerFormats()
     add(jss::AMM,
         ltAMM,
         {
-            {sfAccount, soeREQUIRED},
-            {sfTradingFee, soeDEFAULT},
-            {sfVoteSlots, soeOPTIONAL},
-            {sfAuctionSlot, soeOPTIONAL},
-            {sfLPTokenBalance, soeREQUIRED},
-            {sfAsset, soeREQUIRED},
-            {sfAsset2, soeREQUIRED}
+            {sfAccount,             soeREQUIRED},
+            {sfTradingFee,          soeDEFAULT},
+            {sfVoteSlots,           soeOPTIONAL},
+            {sfAuctionSlot,         soeOPTIONAL},
+            {sfLPTokenBalance,      soeREQUIRED},
+            {sfAsset,               soeREQUIRED},
+            {sfAsset2,              soeREQUIRED}
+        },
+        commonFields);
+
+    add(jss::Oracle,
+        ltORACLE,
+        {
+            {sfOwner,               soeREQUIRED},
+            {sfData,                soeREQUIRED},
         },
         commonFields);
 

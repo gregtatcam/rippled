@@ -77,6 +77,38 @@ InnerObjectFormats::InnerObjectFormats()
             {sfPrice, soeREQUIRED},
             {sfAuthAccounts, soeOPTIONAL},
         });
+
+    add(sfPricing.jsonName.c_str(),
+        sfPricing.getCode(),
+        {
+            {sfSymbol, soeREQUIRED},
+            {sfPriceUnit, soeREQUIRED},
+            {sfSymbolClass, soeREQUIRED},
+            {sfHistoricalPrices, soeREQUIRED},
+        });
+
+    add(sfHistoricalPrice.jsonName.c_str(),
+        sfHistoricalPrice.getCode(),
+        {
+            {sfSymbolPrice, soeREQUIRED},
+            {sfScale, soeREQUIRED},
+            {sfLastUpdateTime, soeREQUIRED},
+        });
+
+    add(sfAny.jsonName.c_str(),
+        sfAny.getCode(),
+        {
+            {sfName, soeREQUIRED},
+            {sfTOMLDomain, soeREQUIRED},
+            {sfHistoricalValues, soeREQUIRED},
+        });
+
+    add(sfHistoricalValue.jsonName.c_str(),
+        sfHistoricalValue.getCode(),
+        {
+            {sfValue, soeREQUIRED},
+            {sfLastUpdateTime, soeREQUIRED},
+        });
 }
 
 InnerObjectFormats const&

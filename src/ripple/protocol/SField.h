@@ -332,6 +332,8 @@ extern SField const sfMetadata;
 extern SF_UINT8 const sfCloseResolution;
 extern SF_UINT8 const sfMethod;
 extern SF_UINT8 const sfTransactionResult;
+extern SF_UINT8 const sfScale;
+extern SF_UINT8 const sfNumberHistorical;
 
 // 8-bit integers (uncommon)
 extern SF_UINT8 const sfTickSize;
@@ -368,6 +370,7 @@ extern SF_UINT32 const sfTransferRate;
 extern SF_UINT32 const sfWalletSize;
 extern SF_UINT32 const sfOwnerCount;
 extern SF_UINT32 const sfDestinationTag;
+extern SF_UINT32 const sfLastUpdateTime;
 
 // 32-bit integers (uncommon)
 extern SF_UINT32 const sfHighQualityIn;
@@ -418,6 +421,7 @@ extern SF_UINT64 const sfCookie;
 extern SF_UINT64 const sfServerVersion;
 extern SF_UINT64 const sfNFTokenOfferNode;
 extern SF_UINT64 const sfEmitBurden;
+extern SF_UINT64 const sfSymbolPrice;
 
 // 64-bit integers (uncommon)
 extern SF_UINT64 const sfHookOn;
@@ -449,6 +453,8 @@ extern SF_UINT256 const sfEmitParentTxnID;
 extern SF_UINT256 const sfEmitNonce;
 extern SF_UINT256 const sfEmitHookHash;
 extern SF_UINT256 const sfAMMID;
+extern SF_UINT256 const sfOracleID;
+extern SF_UINT256 const sfValue;
 
 // 256-bit (uncommon)
 extern SF_UINT256 const sfBookDirectory;
@@ -515,6 +521,11 @@ extern SF_VL const sfCreateCode;
 extern SF_VL const sfMemoType;
 extern SF_VL const sfMemoData;
 extern SF_VL const sfMemoFormat;
+extern SF_VL const sfSymbolClass;
+extern SF_VL const sfName;
+extern SF_VL const sfTOMLDomain;
+extern SF_VL const sfSymbol;
+extern SF_VL const sfPriceUnit;
 
 // variable length (uncommon)
 extern SF_VL const sfFulfillment;
@@ -538,6 +549,7 @@ extern SF_ACCOUNT const sfUnauthorize;
 extern SF_ACCOUNT const sfRegularKey;
 extern SF_ACCOUNT const sfNFTokenMinter;
 extern SF_ACCOUNT const sfEmitCallback;
+extern SF_ACCOUNT const sfOwner;
 
 // account (uncommon)
 extern SF_ACCOUNT const sfHookAccount;
@@ -573,6 +585,11 @@ extern SField const sfHook;
 extern SField const sfVoteEntry;
 extern SField const sfAuctionSlot;
 extern SField const sfAuthAccount;
+extern SField const sfData;
+extern SField const sfPricing;
+extern SField const sfAny;
+extern SField const sfHistoricalValue;
+extern SField const sfHistoricalPrice;
 
 extern SField const sfSigner;
 extern SField const sfMajority;
@@ -597,6 +614,8 @@ extern SField const sfNFTokens;
 extern SField const sfHooks;
 extern SField const sfVoteSlots;
 extern SField const sfAuthAccounts;
+extern SField const sfHistoricalValues;
+extern SField const sfHistoricalPrices;
 
 // array of objects (uncommon)
 extern SField const sfMajorities;
