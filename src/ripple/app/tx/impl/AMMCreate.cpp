@@ -184,6 +184,27 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
         return tecAMM_INVALID_TOKENS;
     }
 
+    // Disallow AMM if the issuer has clawback enabled
+    auto clawbackEnabled = [&](Issue const& issue) -> Expected<bool, TER> {
+        if (isXRP(issue))
+            return false;
+        if (auto const sle = ctx.view.read(keylet::account(issue.account));
+            !sle)
+            return Unexpected(tecINTERNAL);
+        else
+            return sle->getFlags() & lsfAllowTrustLineClawback;
+    };
+
+    if (auto const res = clawbackEnabled(amount.issue()); !res)
+        return res.error();
+    else if (*res)
+        return tecNO_PERMISSION;
+
+    if (auto const res = clawbackEnabled(amount2.issue()); !res)
+        return res.error();
+    else if (*res)
+        return tecNO_PERMISSION;
+
     return tesSUCCESS;
 }
 
