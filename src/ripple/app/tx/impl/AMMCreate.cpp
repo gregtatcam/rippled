@@ -185,27 +185,21 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     }
 
     // Disallow AMM if the issuer has clawback enabled
-    auto clawbackEnabled = [&](Issue const& issue) -> Expected<bool, TER> {
-        if (isXRP(issue))
-            return false;
-        if (auto const sle = ctx.view.read(keylet::account(issue.account));
-            !sle)
-            return Unexpected(tecINTERNAL);
-        else
-            return sle->getFlags() & lsfAllowTrustLineClawback;
+    auto clawbackDisabled = [&](Issue const& issue) -> TER {
+        if (!isXRP(issue))
+        {
+            if (auto const sle = ctx.view.read(keylet::account(issue.account));
+                !sle)
+                return tecINTERNAL;
+            else if (sle->getFlags() & lsfAllowTrustLineClawback)
+                return tecNO_PERMISSION;
+        }
+        return tesSUCCESS;
     };
 
-    if (auto const res = clawbackEnabled(amount.issue()); !res)
-        return res.error();
-    else if (*res)
-        return tecNO_PERMISSION;
-
-    if (auto const res = clawbackEnabled(amount2.issue()); !res)
-        return res.error();
-    else if (*res)
-        return tecNO_PERMISSION;
-
-    return tesSUCCESS;
+    if (auto const ter = clawbackDisabled(amount.issue()); ter != tesSUCCESS)
+        return ter;
+    return clawbackDisabled(amount2.issue());
 }
 
 static std::pair<TER, bool>

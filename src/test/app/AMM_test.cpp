@@ -406,12 +406,14 @@ private:
             Env env(*this);
             env.fund(XRP(1'000), gw);
             env(fset(gw, asfAllowTrustLineClawback));
+            fund(env, gw, {alice}, XRP(1'000), {USD(1'000)}, Fund::Acct);
             env.close();
             AMM amm(env, gw, XRP(100), USD(100), ter(tecNO_PERMISSION));
+            AMM amm1(env, alice, USD(100), XRP(100), ter(tecNO_PERMISSION));
             env(fclear(gw, asfAllowTrustLineClawback));
             env.close();
             // Can't be cleared
-            AMM amm1(env, gw, XRP(100), USD(100), ter(tecNO_PERMISSION));
+            AMM amm2(env, gw, XRP(100), USD(100), ter(tecNO_PERMISSION));
         }
     }
 
