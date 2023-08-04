@@ -324,7 +324,7 @@ AccountRootsNotDeleted::finalize(
     // AMM account root can be deleted as the result of AMM withdraw/delete
     // transaction when the total AMM LP Tokens balance goes to 0.
     // A successful AccountDelete or AMMDelete MUST delete exactly
-    // one account root
+    // one account root.
     if ((tx.getTxnType() == ttACCOUNT_DELETE ||
          tx.getTxnType() == ttAMM_DELETE) &&
         result == tesSUCCESS)
