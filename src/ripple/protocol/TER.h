@@ -125,7 +125,6 @@ enum TEMcodes : TERUnderlyingType {
     temBAD_NFTOKEN_TRANSFER_FEE,
 
     temBAD_AMM_TOKENS,
-    temBAD_HISTORICAL,
 };
 
 //------------------------------------------------------------------------------

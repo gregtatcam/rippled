@@ -17,11 +17,12 @@
 */
 //==============================================================================
 
-#include <ripple/protocol/TxFlags.h>
+#include <ripple/basics/safe_cast.h>
 #include <ripple/protocol/digest.h>
 #include <ripple/protocol/jss.h>
 #include <test/jtx/Oracle.h>
 
+#include <format>
 #include <vector>
 
 namespace ripple {
@@ -43,89 +44,47 @@ Oracle::Oracle(
     std::string const& symbol,
     std::string const& priceUnit,
     std::string const& symbolClass,
-    std::optional<std::uint8_t> numberHistorical,
+    std::string const& provider,
     std::optional<jtx::msig> const& msig,
     std::uint32_t fee,
     std::optional<ter> const& ter)
     : Oracle(env, msig, fee)
 {
-    create(
-        tfPriceOracle,
-        owner,
-        symbol,
-        priceUnit,
-        symbolClass,
-        std::nullopt,
-        std::nullopt,
-        numberHistorical,
-        std::nullopt,
-        msig,
-        fee,
-        ter);
-}
-
-Oracle::Oracle(
-    Env& env,
-    Account const& owner,
-    std::string const& name,
-    std::string const& tomlDomain,
-    std::optional<std::uint8_t> numberHistorical,
-    std::optional<jtx::msig> const& msig,
-    std::uint32_t fee,
-    std::optional<ter> const& ter)
-    : Oracle(env, msig, fee)
-{
-    create(
-        tfAnyOracle,
-        owner,
-        std::nullopt,
-        std::nullopt,
-        std::nullopt,
-        name,
-        tomlDomain,
-        numberHistorical,
-        std::nullopt,
-        msig,
-        fee,
-        ter);
+    create(owner, symbol, priceUnit, symbolClass, provider, 0, msig, fee, ter);
 }
 
 void
 Oracle::create(
-    std::uint32_t const& flags,
     AccountID const& owner,
-    std::optional<std::string> const& symbol,
-    std::optional<std::string> const& priceUnit,
-    std::optional<std::string> const& symbolClass,
-    std::optional<std::string> const& name,
-    std::optional<std::string> const& tomlDomain,
-    std::optional<std::uint8_t> numberHistorical,
-    std::optional<uint256> const& oracleID,
+    std::string const& symbol,
+    std::string const& priceUnit,
+    std::string const& symbolClass,
+    std::string const& provider,
+    std::uint32_t flags,
     std::optional<jtx::msig> const& msig,
     std::uint32_t fee,
     std::optional<ter> const& ter)
 {
     Json::Value jv;
+    oracleID_ = sha512Half(
+        oracleNameSpace_,
+        owner,
+        std::basic_string<unsigned char>(
+            reinterpret_cast<unsigned char const*>(symbol.data())),
+        std::basic_string<unsigned char>(
+            reinterpret_cast<unsigned char const*>(priceUnit.data())));
     jv[jss::TransactionType] = jss::OracleCreate;
-    jv[jss::Flags] = flags;
     jv[jss::Account] = to_string(owner);
-    jv[jss::Owner] = to_string(owner);  // do we need both?
+    if (flags != 0)
+        jv[jss::Flags] = flags;
     if (auto const f = fee != 0 ? fee : fee_)
         jv[jss::Fee] = std::to_string(f);
     else
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
-    jv[jss::OracleID] = to_string(oracleID.value_or(oracleID_));
-    if (symbol)
-        jv[jss::Symbol] = strHex(*symbol);
-    if (priceUnit)
-        jv[jss::PriceUnit] = strHex(*priceUnit);
-    if (symbolClass)
-        jv[jss::SymbolClass] = strHex(*symbolClass);
-    if (name)
-        jv[jss::Name] = strHex(*name);
-    if (tomlDomain)
-        jv[jss::TOMLDomain] = strHex(*tomlDomain);
-    jv[jss::NumberHistorical] = numberHistorical.value_or(3);
+    jv[jss::Symbol] = strHex(symbol);
+    jv[jss::PriceUnit] = strHex(priceUnit);
+    jv[jss::SymbolClass] = strHex(symbolClass);
+    jv[jss::Provider] = strHex(provider);
     submit(jv, msig, std::nullopt, ter);
 }
 
@@ -150,12 +109,11 @@ Oracle::remove(
 
 void
 Oracle::update(
-    std::uint32_t const& flags,
     AccountID const& owner,
-    std::optional<std::uint64_t> const& price,
-    std::optional<std::uint8_t> const& scale,
-    std::optional<uint256> const& value,
+    std::uint64_t const& price,
+    std::uint8_t const& scale,
     std::optional<std::uint32_t> const& lastUpdateTime,
+    std::uint32_t flags,
     std::optional<jtx::msig> const& msig,
     std::optional<uint256> const& oracleID,
     std::uint32_t fee,
@@ -163,25 +121,23 @@ Oracle::update(
 {
     using namespace std::chrono;
     Json::Value jv;
-    jv[jss::TransactionType] = jss::OracleDelete;
+    jv[jss::TransactionType] = jss::OracleUpdate;
     jv[jss::Account] = to_string(owner);
     jv[jss::OracleID] = to_string(oracleID.value_or(oracleID_));
     if (auto const f = fee != 0 ? fee : fee_)
         jv[jss::Fee] = std::to_string(f);
     else
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
-    if (price)
-        jv[jss::SymbolPrice] = std::to_string(*price);
-    if (scale)
-        jv[jss::Scale] = *scale;
+    std::stringstream str;
+    str << std::hex << price;
+    jv[jss::SymbolPrice] = str.str();
+    jv[jss::Scale] = scale;
     if (lastUpdateTime)
         jv[jss::LastUpdateTime] = *lastUpdateTime;
     else
         jv[jss::LastUpdateTime] = to_string(
             duration_cast<seconds>(env_.timeKeeper().now().time_since_epoch())
                 .count());
-    if (value)
-        jv[jss::Value] = to_string(*value);
     submit(jv, msig, std::nullopt, ter);
 }
 
@@ -225,6 +181,15 @@ Oracle::randOracleID() const
 {
     auto keys = randomKeyPair(KeyType::secp256k1);
     return sha512Half(keys.first);
+}
+
+bool
+Oracle::expectPrice(std::uint64_t price, std::uint8_t scale)
+{
+    if (auto const sle = env_.le(keylet::oracle(oracleID_)))
+        return sle->getFieldU64(sfSymbolPrice) == price &&
+            sle->getFieldU8(sfScale) == scale;
+    return false;
 }
 
 }  // namespace jtx

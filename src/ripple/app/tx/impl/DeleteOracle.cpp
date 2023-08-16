@@ -31,7 +31,7 @@ DeleteOracle::preflight(PreflightContext const& ctx)
 
     if (ctx.tx.getFlags() & tfUniversalMask)
     {
-        JLOG(ctx.j.debug()) << "AMM Instance: invalid flags.";
+        JLOG(ctx.j.debug()) << "Oracle Delete: invalid flags.";
         return temINVALID_FLAG;
     }
 

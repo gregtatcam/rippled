@@ -380,7 +380,7 @@ doLedgerEntry(RPC::JsonContext& context)
     else if (context.params.isMember(jss::oracle))
     {
         expectedType = ltORACLE;
-        if (!context.params[jss::amm].isObject())
+        if (!context.params[jss::oracle].isObject())
         {
             if (!uNodeIndex.parseHex(context.params[jss::oracle].asString()))
             {
@@ -388,7 +388,7 @@ doLedgerEntry(RPC::JsonContext& context)
                 jvResult[jss::error] = "malformedRequest";
             }
         }
-        else if (!context.params[jss::amm].isMember(jss::OracleID))
+        else if (!context.params[jss::oracle].isMember(jss::OracleID))
         {
             jvResult[jss::error] = "malformedRequest";
         }

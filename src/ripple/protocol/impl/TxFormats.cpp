@@ -398,14 +398,11 @@ TxFormats::TxFormats()
     add(jss::OracleCreate,
         ttORACLE_CREATE,
         {
-            {sfOracleID, soeREQUIRED},
-            {sfOwner, soeREQUIRED},
-            {sfSymbol, soeOPTIONAL},
-            {sfPriceUnit, soeOPTIONAL},
-            {sfSymbolClass, soeOPTIONAL},
-            {sfName, soeOPTIONAL},
-            {sfTOMLDomain, soeOPTIONAL},
-            {sfNumberHistorical, soeOPTIONAL},
+            {sfSymbol, soeREQUIRED},
+            {sfPriceUnit, soeREQUIRED},
+            {sfSymbolClass, soeREQUIRED},
+            {sfProvider, soeREQUIRED},
+            {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
 
@@ -413,6 +410,7 @@ TxFormats::TxFormats()
         ttORACLE_DELETE,
         {
             {sfOracleID, soeREQUIRED},
+            {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);
 
@@ -420,8 +418,9 @@ TxFormats::TxFormats()
         ttORACLE_UPDATE,
         {
             {sfOracleID, soeREQUIRED},
-            {sfAmount2, soeREQUIRED},
-            {sfTradingFee, soeREQUIRED},
+            {sfSymbolPrice, soeREQUIRED},
+            {sfScale, soeREQUIRED},
+            {sfLastUpdateTime, soeREQUIRED},
             {sfTicketSequence, soeOPTIONAL},
         },
         commonFields);

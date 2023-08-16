@@ -64,6 +64,7 @@ enum class LedgerNameSpace : std::uint16_t {
     NFTOKEN_BUY_OFFERS = 'h',
     NFTOKEN_SELL_OFFERS = 'i',
     AMM = 'A',
+    ORACLE = 'R',
 
     // No longer used or supported. Left here to reserve the space
     // to avoid accidental reuse.
@@ -393,6 +394,17 @@ Keylet
 oracle(uint256 const& id) noexcept
 {
     return {ltORACLE, id};
+}
+
+Keylet
+oracle(
+    AccountID const& id,
+    std::basic_string<unsigned char> const& symbol,
+    std::basic_string<unsigned char> const& priceUnit) noexcept
+{
+    auto const keylet =
+        oracle(indexHash(LedgerNameSpace::ORACLE, id, symbol, priceUnit));
+    return keylet;
 }
 
 }  // namespace keylet

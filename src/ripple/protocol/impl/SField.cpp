@@ -92,7 +92,6 @@ CONSTRUCT_TYPED_SFIELD(sfCloseResolution,       "CloseResolution",      UINT8,  
 CONSTRUCT_TYPED_SFIELD(sfMethod,                "Method",               UINT8,      2);
 CONSTRUCT_TYPED_SFIELD(sfTransactionResult,     "TransactionResult",    UINT8,      3);
 CONSTRUCT_TYPED_SFIELD(sfScale,                 "Scale",                UINT8,      4);
-CONSTRUCT_TYPED_SFIELD(sfNumberHistorical,      "NumberHistorical",     UINT8,      5);
 
 // 8-bit integers (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfTickSize,              "TickSize",             UINT8,     16);
@@ -181,13 +180,13 @@ CONSTRUCT_TYPED_SFIELD(sfCookie,                "Cookie",               UINT64, 
 CONSTRUCT_TYPED_SFIELD(sfServerVersion,         "ServerVersion",        UINT64,    11);
 CONSTRUCT_TYPED_SFIELD(sfNFTokenOfferNode,      "NFTokenOfferNode",     UINT64,    12);
 CONSTRUCT_TYPED_SFIELD(sfEmitBurden,            "EmitBurden",           UINT64,    13);
-CONSTRUCT_TYPED_SFIELD(sfSymbolPrice,           "SymbolPrice",          UINT64,    14);
 
 // 64-bit integers (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfHookOn,                "HookOn",               UINT64,    16);
 CONSTRUCT_TYPED_SFIELD(sfHookInstructionCount,  "HookInstructionCount", UINT64,    17);
 CONSTRUCT_TYPED_SFIELD(sfHookReturnCode,        "HookReturnCode",       UINT64,    18);
 CONSTRUCT_TYPED_SFIELD(sfReferenceCount,        "ReferenceCount",       UINT64,    19);
+CONSTRUCT_TYPED_SFIELD(sfSymbolPrice,           "SymbolPrice",          UINT64,   20);
 
 // 128-bit
 CONSTRUCT_TYPED_SFIELD(sfEmailHash,             "EmailHash",            UINT128,    1);
@@ -234,7 +233,6 @@ CONSTRUCT_TYPED_SFIELD(sfHookHash,              "HookHash",             UINT256,
 CONSTRUCT_TYPED_SFIELD(sfHookNamespace,         "HookNamespace",        UINT256,   32);
 CONSTRUCT_TYPED_SFIELD(sfHookSetTxnID,          "HookSetTxnID",         UINT256,   33);
 CONSTRUCT_TYPED_SFIELD(sfOracleID,              "OracleID",             UINT256,   34);
-CONSTRUCT_TYPED_SFIELD(sfValue,                 "Value",                UINT256,   35);
 
 // currency amount (common)
 CONSTRUCT_TYPED_SFIELD(sfAmount,                "Amount",               AMOUNT,     1);
@@ -300,10 +298,9 @@ CONSTRUCT_TYPED_SFIELD(sfHookReturnString,      "HookReturnString",     VL,     
 CONSTRUCT_TYPED_SFIELD(sfHookParameterName,     "HookParameterName",    VL,        24);
 CONSTRUCT_TYPED_SFIELD(sfHookParameterValue,    "HookParameterValue",   VL,        25);
 CONSTRUCT_TYPED_SFIELD(sfSymbolClass,           "SymbolClass",          VL,        26);
-CONSTRUCT_TYPED_SFIELD(sfName,                  "Name",                 VL,        27);
-CONSTRUCT_TYPED_SFIELD(sfTOMLDomain,            "TOMLDomain",           VL,        28);
-CONSTRUCT_TYPED_SFIELD(sfSymbol,                "Symbol",               VL,        29);
-CONSTRUCT_TYPED_SFIELD(sfPriceUnit,             "PriceUnit",            VL,        30);
+CONSTRUCT_TYPED_SFIELD(sfSymbol,                "Symbol",               VL,        27);
+CONSTRUCT_TYPED_SFIELD(sfPriceUnit,             "PriceUnit",            VL,        28);
+CONSTRUCT_TYPED_SFIELD(sfProvider,              "Provider",             VL,        29);
 
 // account
 CONSTRUCT_TYPED_SFIELD(sfAccount,               "Account",              ACCOUNT,    1);
@@ -362,11 +359,6 @@ CONSTRUCT_UNTYPED_SFIELD(sfHookGrant,           "HookGrant",            OBJECT, 
 CONSTRUCT_UNTYPED_SFIELD(sfVoteEntry,           "VoteEntry",            OBJECT,    25);
 CONSTRUCT_UNTYPED_SFIELD(sfAuctionSlot,         "AuctionSlot",          OBJECT,    26);
 CONSTRUCT_UNTYPED_SFIELD(sfAuthAccount,         "AuthAccount",          OBJECT,    27);
-CONSTRUCT_UNTYPED_SFIELD(sfData,                "Data",                 OBJECT,    28);
-CONSTRUCT_UNTYPED_SFIELD(sfPricing,             "Pricing",              OBJECT,    29);
-CONSTRUCT_UNTYPED_SFIELD(sfAny,                 "Any",                  OBJECT,    30);
-CONSTRUCT_UNTYPED_SFIELD(sfHistoricalPrice,     "HistoricalPrice",      OBJECT,    31);
-CONSTRUCT_UNTYPED_SFIELD(sfHistoricalValue,     "HistoricalValue",      OBJECT,    32);
 
 // array of objects
 //                                                                            ARRAY/1 is reserved for end of array
@@ -390,8 +382,6 @@ CONSTRUCT_UNTYPED_SFIELD(sfHookParameters,      "HookParameters",       ARRAY,  
 CONSTRUCT_UNTYPED_SFIELD(sfHookGrants,          "HookGrants",           ARRAY,     20);
 // 21-24 is reserved for side-chains
 CONSTRUCT_UNTYPED_SFIELD(sfAuthAccounts,        "AuthAccounts",         ARRAY,     25);
-CONSTRUCT_UNTYPED_SFIELD(sfHistoricalPrices,    "HistoricalPrices",     ARRAY,     26);
-CONSTRUCT_UNTYPED_SFIELD(sfHistoricalValues,    "HistoricalValues",     ARRAY,     27);
 
 // clang-format on
 

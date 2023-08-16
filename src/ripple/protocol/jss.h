@@ -88,7 +88,6 @@ JSS(LedgerHashes);         // ledger type.
 JSS(LimitAmount);          // field.
 JSS(BidMax);               // in: AMM Bid
 JSS(BidMin);               // in: AMM Bid
-JSS(Name);                 // field.
 JSS(NetworkID);            // field.
 JSS(NFTokenBurn);          // transaction type.
 JSS(NFTokenMint);          // transaction type.
@@ -97,7 +96,6 @@ JSS(NFTokenAcceptOffer);   // transaction type.
 JSS(NFTokenCancelOffer);   // transaction type.
 JSS(NFTokenCreateOffer);   // transaction type.
 JSS(NFTokenPage);          // ledger type.
-JSS(NumberHistorical);     // ledger type.
 JSS(LPTokenOut);           // in: AMM Liquidity Provider deposit tokens
 JSS(LPTokenIn);            // in: AMM Liquidity Provider withdraw tokens
 JSS(LPToken);              // out: AMM Liquidity Provider tokens info
@@ -118,6 +116,8 @@ JSS(PaymentChannelClaim);  // transaction type.
 JSS(PaymentChannelCreate);   // transaction type.
 JSS(PaymentChannelFund);     // transaction type.
 JSS(PriceUnit);              // field.
+JSS(Prices);                 // Oracle array of recent values.
+JSS(Provider);               // field.
 JSS(RippleState);            // ledger type.
 JSS(SLE_hit_rate);           // out: GetCounts.
 JSS(SetFee);                 // transaction type.
@@ -138,13 +138,11 @@ JSS(TakerGets);              // field.
 JSS(TakerPays);              // field.
 JSS(Ticket);                 // ledger type.
 JSS(TicketCreate);           // transaction type.
-JSS(TOMLDomain);             // field.
 JSS(TxnSignature);           // field.
 JSS(TradingFee);             // in/out: AMM trading fee
 JSS(TransactionType);        // in: TransactionSign.
 JSS(TransferRate);           // in: TransferRate.
 JSS(TrustSet);               // transaction type.
-JSS(Value);                  // field.
 JSS(VoteSlots);              // out: AMM Vote
 JSS(aborted);                // out: InboundLedger
 JSS(accepted);               // out: LedgerToJson, OwnerInfo, SubmitTransaction

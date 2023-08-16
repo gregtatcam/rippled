@@ -31,9 +31,12 @@ UpdateOracle::preflight(PreflightContext const& ctx)
 
     if (ctx.tx.getFlags() & tfUniversalMask)
     {
-        JLOG(ctx.j.debug()) << "AMM Instance: invalid flags.";
+        JLOG(ctx.j.debug()) << "Oracle Update: invalid flags.";
         return temINVALID_FLAG;
     }
+
+    if (ctx.tx.getFieldU8(sfScale) > 10)
+        return temMALFORMED;
 
     return preflight2(ctx);
 }
@@ -41,6 +44,18 @@ UpdateOracle::preflight(PreflightContext const& ctx)
 TER
 UpdateOracle::preclaim(PreclaimContext const& ctx)
 {
+    auto const sle = ctx.view.read(keylet::oracle(ctx.tx[sfOracleID]));
+    if (!sle)
+    {
+        JLOG(ctx.j.debug()) << "Oracle Delete: Oracle does not exist.";
+        return tecNO_ENTRY;
+    }
+    if (ctx.tx.getAccountID(sfAccount) != sle->getAccountID(sfOwner))
+    {
+        JLOG(ctx.j.debug()) << "Oracle Delete: invalid account.";
+        return tecNO_PERMISSION;
+    }
+    // Should check if last update time is valid
     return tesSUCCESS;
 }
 
@@ -51,6 +66,18 @@ applyUpdate(
     AccountID const& account_,
     beast::Journal j_)
 {
+    auto sle = sb.peek(keylet::oracle(ctx_.tx[sfOracleID]));
+    if (!sle)
+    {
+        JLOG(j_.error()) << "Oracle Delete: Oracle does not exist.";
+        return {tecINTERNAL, false};
+    }
+
+    sle->setFieldU64(sfSymbolPrice, ctx_.tx[sfSymbolPrice]);
+    sle->setFieldU8(sfScale, ctx_.tx[sfScale]);
+    sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
+    sb.update(sle);
+
     return {tesSUCCESS, true};
 }
 

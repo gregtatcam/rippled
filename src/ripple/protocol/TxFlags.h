@@ -181,13 +181,10 @@ constexpr std::uint32_t tfWithdrawMask = ~(tfUniversal | tfWithdrawSubTx);
 constexpr std::uint32_t tfDepositMask = ~(tfUniversal | tfDepositSubTx);
 
 // Oracle Flags:
-constexpr std::uint32_t tfPriceOracle     = 0x00010000;
-constexpr std::uint32_t tfAnyOracle       = 0x00020000;
-constexpr std::uint32_t tfSimpleAverage   = 0x00040000;
-constexpr std::uint32_t tfMedian          = 0x00080000;
-constexpr std::uint32_t tfTrimmedMean     = 0x00100000;
-constexpr std::uint32_t tfOracleMask = ~(tfUniversal | tfPriceOracle |
-    tfAnyOracle);
+constexpr std::uint32_t tfSimpleAverage   = 0x00010000;
+constexpr std::uint32_t tfMedian          = 0x00020000;
+constexpr std::uint32_t tfTrimmedMean     = 0x00040000;
+constexpr std::uint32_t tfOracleMask = ~tfUniversal;
 
 // clang-format on
 

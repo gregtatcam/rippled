@@ -33,6 +33,8 @@ private:
     uint256 oracleID_;
     std::optional<msig> const msig_;
     std::uint32_t fee_;
+    // Same as LedgerNameSpace
+    std::uint16_t static constexpr oracleNameSpace_ = 'R';
 
 private:
     void
@@ -43,6 +45,7 @@ private:
         std::optional<ter> const& ter);
 
 public:
+    using ustring = std::basic_string<unsigned char>;
     Oracle(
         Env& env,
         std::optional<jtx::msig> const& msig = std::nullopt,
@@ -54,32 +57,19 @@ public:
         std::string const& symbol,
         std::string const& priceUnit,
         std::string const& symbolClass,
-        std::optional<std::uint8_t> numberHistorical = std::nullopt,
-        std::optional<jtx::msig> const& msig = std::nullopt,
-        std::uint32_t fee = 0,
-        std::optional<ter> const& ter = std::nullopt);
-
-    Oracle(
-        Env& env,
-        Account const& owner,
-        std::string const& name,
-        std::string const& tomlDomain,
-        std::optional<std::uint8_t> numberHistorical = std::nullopt,
+        std::string const& provider,
         std::optional<jtx::msig> const& msig = std::nullopt,
         std::uint32_t fee = 0,
         std::optional<ter> const& ter = std::nullopt);
 
     void
     create(
-        std::uint32_t const& flags,
         AccountID const& owner,
-        std::optional<std::string> const& symbol = std::nullopt,
-        std::optional<std::string> const& priceUnit = std::nullopt,
-        std::optional<std::string> const& symbolClass = std::nullopt,
-        std::optional<std::string> const& name = std::nullopt,
-        std::optional<std::string> const& tomlDomain = std::nullopt,
-        std::optional<std::uint8_t> numberHistorical = std::nullopt,
-        std::optional<uint256> const& oracleID = std::nullopt,
+        std::string const& symbol,
+        std::string const& priceUnit,
+        std::string const& symbolClass,
+        std::string const& provider,
+        std::uint32_t flags = 0,
         std::optional<jtx::msig> const& msig = std::nullopt,
         std::uint32_t fee = 0,
         std::optional<ter> const& ter = std::nullopt);
@@ -94,12 +84,11 @@ public:
 
     void
     update(
-        std::uint32_t const& flags,
         AccountID const& owner,
-        std::optional<std::uint64_t> const& price,
-        std::optional<std::uint8_t> const& scale,
-        std::optional<uint256> const& value,
-        std::optional<std::uint32_t> const& lastUpdateTime,
+        std::uint64_t const& price,
+        std::uint8_t const& scale,
+        std::optional<std::uint32_t> const& lastUpdateTime = std::nullopt,
+        std::uint32_t flags = 0,
         std::optional<jtx::msig> const& msig = std::nullopt,
         std::optional<uint256> const& oracleID = std::nullopt,
         std::uint32_t fee = 0,
@@ -116,6 +105,9 @@ public:
 
     uint256
     randOracleID() const;
+
+    bool
+    expectPrice(std::uint64_t price, std::uint8_t scale);
 };
 
 }  // namespace jtx

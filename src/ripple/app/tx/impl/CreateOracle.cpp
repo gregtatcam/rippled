@@ -20,6 +20,7 @@
 #include <ripple/app/tx/impl/CreateOracle.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/protocol/TxFlags.h>
+#include <ripple/protocol/digest.h>
 
 namespace ripple {
 
@@ -35,30 +36,6 @@ CreateOracle::preflight(PreflightContext const& ctx)
         JLOG(ctx.j.debug()) << "Oracle Instance: invalid flags.";
         return temINVALID_FLAG;
     }
-    if (std::popcount(flags & tfWithdrawSubTx) != 1)
-    {
-        JLOG(ctx.j.debug()) << "Oracle Instance: invalid flags.";
-        return temMALFORMED;
-    }
-    if (flags & tfPriceOracle)
-    {
-        if (!ctx.tx[~sfSymbol] || !ctx.tx[~sfSymbolClass] ||
-            !ctx.tx[~sfPriceUnit] || ctx.tx[~sfName] || ctx.tx[~sfTOMLDomain])
-            return temMALFORMED;
-    }
-    else if (flags & tfAnyOracle)
-    {
-        if (!ctx.tx[~sfName] || !ctx.tx[~sfTOMLDomain] || ctx.tx[~sfSymbol] ||
-            ctx.tx[~sfSymbolClass] || ctx.tx[~sfPriceUnit])
-            return temMALFORMED;
-    }
-    if (auto const numHistorical = ctx.tx[~sfNumberHistorical];
-        numHistorical == 0 || numHistorical > 10)
-    {
-        JLOG(ctx.j.debug()) << "Oracle Instance: invalid number historical.";
-        return temBAD_HISTORICAL;
-    }
-    // Can validate other values?
 
     return preflight2(ctx);
 }
@@ -66,7 +43,10 @@ CreateOracle::preflight(PreflightContext const& ctx)
 TER
 CreateOracle::preclaim(PreclaimContext const& ctx)
 {
-    if (auto const sle = ctx.view.read(keylet::oracle(ctx.tx[sfOracleID])))
+    if (ctx.view.read(keylet::oracle(
+            ctx.tx.getAccountID(sfAccount),
+            ctx.tx.getFieldVL(sfSymbol).data(),
+            ctx.tx.getFieldVL(sfPriceUnit).data())))
     {
         JLOG(ctx.j.debug()) << "Oracle Instance: Oracle already exists.";
         return tecDUPLICATE;
@@ -81,35 +61,25 @@ applyCreate(
     AccountID const& account_,
     beast::Journal j_)
 {
-    if (auto const sleCreator = sb.peek(keylet::account(account_)); !sleCreator)
+    auto const sleCreator = sb.read(keylet::account(account_));
+    if (!sleCreator)
         return {tefINTERNAL, false};
-    else if (auto const reserve = sb.fees().accountReserve(
-                 sleCreator->getFieldU32(sfOwnerCount) + 1);
-             sleCreator->getFieldAmount(sfBalance) < reserve)
+    if (auto const reserve =
+            sb.fees().accountReserve(sleCreator->getFieldU32(sfOwnerCount) + 1);
+        sleCreator->getFieldAmount(sfBalance) < reserve)
     {
         JLOG(j_.debug()) << "Oracle Instance: insufficient reserve";
         return {tecINSUFFICIENT_RESERVE, false};
     }
 
-    auto sle = std::make_shared<SLE>(keylet::oracle(ctx_.tx[sfOracleID]));
-    sle->setAccountID(sfOwner, ctx_.tx[sfOwner]);
-    auto& data = sle->peekFieldObject(sfData);
-    STArray historical(ctx_.tx[~sfNumberHistorical].value_or(3));
-    if (ctx_.tx.getFlags() & tfPriceOracle)
-    {
-        auto& pricing = data.peekFieldObject(sfPricing);
-        pricing.setFieldVL(sfSymbol, ctx_.tx[sfSymbol]);
-        pricing.setFieldVL(sfPriceUnit, ctx_.tx[sfPriceUnit]);
-        pricing.setFieldVL(sfSymbolClass, ctx_.tx[sfSymbolClass]);
-        pricing.setFieldArray(sfHistoricalPrices, historical);
-    }
-    else
-    {
-        auto& any = data.peekFieldObject(sfAny);
-        any.setFieldVL(sfName, ctx_.tx[sfName]);
-        any.setFieldVL(sfTOMLDomain, ctx_.tx[sfTOMLDomain]);
-        any.setFieldArray(sfHistoricalValues, historical);
-    }
+    auto sle = std::make_shared<SLE>(keylet::oracle(
+        account_,
+        ctx_.tx.getFieldVL(sfSymbol).data(),
+        ctx_.tx.getFieldVL(sfPriceUnit).data()));
+    sle->setAccountID(sfOwner, ctx_.tx[sfAccount]);
+    sle->setFieldVL(sfSymbol, ctx_.tx[sfSymbol]);
+    sle->setFieldVL(sfPriceUnit, ctx_.tx[sfPriceUnit]);
+    sle->setFieldVL(sfSymbolClass, ctx_.tx[sfSymbolClass]);
     sb.insert(sle);
 
     adjustOwnerCount(sb, sb.peek(keylet::account(account_)), 1, j_);

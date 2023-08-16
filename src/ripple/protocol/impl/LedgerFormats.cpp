@@ -285,7 +285,14 @@ LedgerFormats::LedgerFormats()
         ltORACLE,
         {
             {sfOwner,               soeREQUIRED},
-            {sfData,                soeREQUIRED},
+            {sfSymbol,              soeREQUIRED},
+            {sfPriceUnit,           soeREQUIRED},
+            {sfSymbolClass,         soeREQUIRED},
+            {sfSymbolPrice,         soeREQUIRED},
+            {sfScale,               soeREQUIRED},
+            {sfLastUpdateTime,      soeREQUIRED},
+            {sfPreviousTxnID,       soeREQUIRED},
+            {sfPreviousTxnLgrSeq,   soeREQUIRED}
         },
         commonFields);
 
