@@ -24,6 +24,7 @@
 #include <ripple/protocol/STBase.h>
 #include <ripple/protocol/STBitString.h>
 #include <ripple/protocol/STBlob.h>
+#include <ripple/protocol/STCurrency.h>
 #include <ripple/protocol/STInteger.h>
 #include <ripple/protocol/STIssue.h>
 #include <ripple/protocol/STObject.h>
@@ -161,6 +162,9 @@ STVar::STVar(SerialIter& sit, SField const& name, int depth)
         case STI_ISSUE:
             construct<STIssue>(sit, name);
             return;
+        case STI_CURRENCY:
+            construct<STCurrency>(sit, name);
+            return;
         default:
             Throw<std::runtime_error>("Unknown object type");
     }
@@ -218,6 +222,9 @@ STVar::STVar(SerializedTypeID id, SField const& name)
             return;
         case STI_ISSUE:
             construct<STIssue>(name);
+            return;
+        case STI_CURRENCY:
+            construct<STCurrency>(name);
             return;
         default:
             Throw<std::runtime_error>("Unknown object type");

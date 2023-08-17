@@ -298,9 +298,7 @@ CONSTRUCT_TYPED_SFIELD(sfHookReturnString,      "HookReturnString",     VL,     
 CONSTRUCT_TYPED_SFIELD(sfHookParameterName,     "HookParameterName",    VL,        24);
 CONSTRUCT_TYPED_SFIELD(sfHookParameterValue,    "HookParameterValue",   VL,        25);
 CONSTRUCT_TYPED_SFIELD(sfSymbolClass,           "SymbolClass",          VL,        26);
-CONSTRUCT_TYPED_SFIELD(sfSymbol,                "Symbol",               VL,        27);
-CONSTRUCT_TYPED_SFIELD(sfPriceUnit,             "PriceUnit",            VL,        28);
-CONSTRUCT_TYPED_SFIELD(sfProvider,              "Provider",             VL,        29);
+CONSTRUCT_TYPED_SFIELD(sfProvider,              "Provider",             VL,        27);
 
 // account
 CONSTRUCT_TYPED_SFIELD(sfAccount,               "Account",              ACCOUNT,    1);
@@ -325,6 +323,10 @@ CONSTRUCT_TYPED_SFIELD(sfNFTokenOffers,         "NFTokenOffers",        VECTOR25
 
 // path set
 CONSTRUCT_UNTYPED_SFIELD(sfPaths,               "Paths",                PATHSET,    1);
+
+// currency
+CONSTRUCT_TYPED_SFIELD(sfSymbol,                "Symbol",               CURRENCY,   1);
+CONSTRUCT_TYPED_SFIELD(sfPriceUnit,             "PriceUnit",            CURRENCY,   2);
 
 // issue
 CONSTRUCT_TYPED_SFIELD(sfAsset,                 "Asset",                ISSUE,      3);

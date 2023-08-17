@@ -45,8 +45,8 @@ CreateOracle::preclaim(PreclaimContext const& ctx)
 {
     if (ctx.view.read(keylet::oracle(
             ctx.tx.getAccountID(sfAccount),
-            ctx.tx.getFieldVL(sfSymbol).data(),
-            ctx.tx.getFieldVL(sfPriceUnit).data())))
+            ctx.tx[sfSymbol],
+            ctx.tx[sfPriceUnit])))
     {
         JLOG(ctx.j.debug()) << "Oracle Instance: Oracle already exists.";
         return tecDUPLICATE;
@@ -72,13 +72,11 @@ applyCreate(
         return {tecINSUFFICIENT_RESERVE, false};
     }
 
-    auto sle = std::make_shared<SLE>(keylet::oracle(
-        account_,
-        ctx_.tx.getFieldVL(sfSymbol).data(),
-        ctx_.tx.getFieldVL(sfPriceUnit).data()));
+    auto sle = std::make_shared<SLE>(
+        keylet::oracle(account_, ctx_.tx[sfSymbol], ctx_.tx[sfPriceUnit]));
     sle->setAccountID(sfOwner, ctx_.tx[sfAccount]);
-    sle->setFieldVL(sfSymbol, ctx_.tx[sfSymbol]);
-    sle->setFieldVL(sfPriceUnit, ctx_.tx[sfPriceUnit]);
+    sle->setFieldCurrency(sfSymbol, ctx_.tx.getFieldCurrency(sfSymbol));
+    sle->setFieldCurrency(sfPriceUnit, ctx_.tx.getFieldCurrency(sfPriceUnit));
     sle->setFieldVL(sfSymbolClass, ctx_.tx[sfSymbolClass]);
     sb.insert(sle);
 

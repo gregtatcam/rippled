@@ -67,12 +67,7 @@ Oracle::create(
 {
     Json::Value jv;
     oracleID_ = sha512Half(
-        oracleNameSpace_,
-        owner,
-        std::basic_string<unsigned char>(
-            reinterpret_cast<unsigned char const*>(symbol.data())),
-        std::basic_string<unsigned char>(
-            reinterpret_cast<unsigned char const*>(priceUnit.data())));
+        oracleNameSpace_, owner, to_currency(symbol), to_currency(priceUnit));
     jv[jss::TransactionType] = jss::OracleCreate;
     jv[jss::Account] = to_string(owner);
     if (flags != 0)
@@ -81,8 +76,8 @@ Oracle::create(
         jv[jss::Fee] = std::to_string(f);
     else
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
-    jv[jss::Symbol] = strHex(symbol);
-    jv[jss::PriceUnit] = strHex(priceUnit);
+    jv[jss::Symbol] = symbol;
+    jv[jss::PriceUnit] = priceUnit;
     jv[jss::SymbolClass] = strHex(symbolClass);
     jv[jss::Provider] = strHex(provider);
     submit(jv, msig, std::nullopt, ter);

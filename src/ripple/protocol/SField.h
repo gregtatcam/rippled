@@ -50,6 +50,7 @@ class STBitString;
 template <class>
 class STInteger;
 class STVector256;
+class STCurrency;
 
 enum SerializedTypeID {
     // special types
@@ -79,6 +80,7 @@ enum SerializedTypeID {
     STI_UINT384 = 22,
     STI_UINT512 = 23,
     STI_ISSUE = 24,
+    STI_CURRENCY = 25,
 
     // high level types
     // cannot be serialized inside other types
@@ -316,6 +318,7 @@ using SF_UINT512 = TypedField<STBitString<512>>;
 using SF_ACCOUNT = TypedField<STAccount>;
 using SF_AMOUNT = TypedField<STAmount>;
 using SF_ISSUE = TypedField<STIssue>;
+using SF_CURRENCY = TypedField<STCurrency>;
 using SF_VL = TypedField<STBlob>;
 using SF_VECTOR256 = TypedField<STVector256>;
 
@@ -520,8 +523,6 @@ extern SF_VL const sfMemoType;
 extern SF_VL const sfMemoData;
 extern SF_VL const sfMemoFormat;
 extern SF_VL const sfSymbolClass;
-extern SF_VL const sfSymbol;
-extern SF_VL const sfPriceUnit;
 extern SF_VL const sfProvider;
 
 // variable length (uncommon)
@@ -552,6 +553,10 @@ extern SF_ACCOUNT const sfHookAccount;
 
 // path set
 extern SField const sfPaths;
+
+// currency
+extern SF_CURRENCY const sfSymbol;
+extern SF_CURRENCY const sfPriceUnit;
 
 // issue
 extern SF_ISSUE const sfAsset;

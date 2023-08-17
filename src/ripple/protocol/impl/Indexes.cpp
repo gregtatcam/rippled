@@ -399,8 +399,8 @@ oracle(uint256 const& id) noexcept
 Keylet
 oracle(
     AccountID const& id,
-    std::basic_string<unsigned char> const& symbol,
-    std::basic_string<unsigned char> const& priceUnit) noexcept
+    Currency const& symbol,
+    Currency const& priceUnit) noexcept
 {
     auto const keylet =
         oracle(indexHash(LedgerNameSpace::ORACLE, id, symbol, priceUnit));

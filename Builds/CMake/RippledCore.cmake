@@ -97,6 +97,7 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/STArray.cpp
   src/ripple/protocol/impl/STBase.cpp
   src/ripple/protocol/impl/STBlob.cpp
+  src/ripple/protocol/impl/STCurrency.cpp
   src/ripple/protocol/impl/STInteger.cpp
   src/ripple/protocol/impl/STLedgerEntry.cpp
   src/ripple/protocol/impl/STObject.cpp
