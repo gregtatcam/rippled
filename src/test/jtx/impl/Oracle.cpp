@@ -179,12 +179,50 @@ Oracle::randOracleID() const
 }
 
 bool
-Oracle::expectPrice(std::uint64_t price, std::uint8_t scale)
+Oracle::expectPrice(std::uint64_t price, std::uint8_t scale) const
 {
     if (auto const sle = env_.le(keylet::oracle(oracleID_)))
         return sle->getFieldU64(sfSymbolPrice) == price &&
             sle->getFieldU8(sfScale) == scale;
     return false;
+}
+
+Json::Value
+Oracle::aggregatePrice(
+    Env& env,
+    std::optional<std::string> const& symbol,
+    std::optional<std::string> const& priceUnit,
+    std::optional<std::vector<uint256>> const& oracles,
+    std::optional<std::uint8_t> const& trim,
+    std::uint32_t flags)
+{
+    Json::Value jv;
+    Json::Value jvOracles(Json::arrayValue);
+    if (oracles)
+    {
+        for (auto const& id : *oracles)
+        {
+            Json::Value oracle;
+            oracle[jss::oracle_id] = to_string(id);
+            jvOracles.append(oracle);
+        }
+        jv[jss::oracles] = jvOracles;
+    }
+    if (flags != 0)
+        jv[jss::flags] = flags;
+    if (trim)
+        jv[jss::trim] = *trim;
+    if (symbol)
+        jv[jss::symbol] = *symbol;
+    if (priceUnit)
+        jv[jss::price_unit] = *priceUnit;
+
+    auto jr = env.rpc("json", "get_aggregate_price", to_string(jv));
+
+    if (jr.isObject() && jr.isMember(jss::result) &&
+        jr[jss::result].isMember(jss::status))
+        return jr[jss::result];
+    return Json::nullValue;
 }
 
 }  // namespace jtx

@@ -662,6 +662,7 @@ target_sources (rippled PRIVATE
   src/ripple/rpc/handlers/FetchInfo.cpp
   src/ripple/rpc/handlers/GatewayBalances.cpp
   src/ripple/rpc/handlers/GetCounts.cpp
+  src/ripple/rpc/handlers/GetAggregatePrice.cpp
   src/ripple/rpc/handlers/LedgerAccept.cpp
   src/ripple/rpc/handlers/LedgerCleanerHandler.cpp
   src/ripple/rpc/handlers/LedgerClosed.cpp
@@ -1029,6 +1030,7 @@ if (tests)
     src/test/rpc/DeliveredAmount_test.cpp
     src/test/rpc/Feature_test.cpp
     src/test/rpc/GatewayBalances_test.cpp
+    src/test/rpc/GetAggregatePrice_test.cpp
     src/test/rpc/GetCounts_test.cpp
     src/test/rpc/JSONRPC_test.cpp
     src/test/rpc/KeyGeneration_test.cpp

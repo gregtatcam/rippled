@@ -19,6 +19,7 @@
 
 #include <ripple/app/tx/impl/DeleteOracle.h>
 #include <ripple/ledger/Sandbox.h>
+#include <ripple/ledger/View.h>
 #include <ripple/protocol/TxFlags.h>
 
 namespace ripple {

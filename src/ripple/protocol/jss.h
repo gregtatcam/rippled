@@ -182,6 +182,7 @@ JSS(asks);                   // out: Subscribe
 JSS(asset);                  // in: amm_info
 JSS(asset2);                 // in: amm_info
 JSS(assets);                 // out: GatewayBalances
+JSS(asset_class);            // in: get_price_oracles
 JSS(asset_frozen);           // out: amm_info
 JSS(asset2_frozen);          // out: amm_info
 JSS(auction_slot);           // out: amm_info
@@ -435,6 +436,7 @@ JSS(max_ledger);                  // in/out: LedgerCleaner
 JSS(max_queue_size);              // out: TxQ
 JSS(max_spend_drops);             // out: AccountInfo
 JSS(max_spend_drops_total);       // out: AccountInfo
+JSS(median);                      // out: get_aggregate_price
 JSS(median_fee);                  // out: TxQ
 JSS(median_level);                // out: TxQ
 JSS(message);                     // error.
@@ -491,6 +493,8 @@ JSS(open_ledger_cost);           // out: SubmitTransaction
 JSS(open_ledger_fee);            // out: TxQ
 JSS(open_ledger_level);          // out: TxQ
 JSS(oracle);                     // in: LedgerEntry
+JSS(oracles);                    // in: get_aggregate_price
+JSS(oracle_id);                  // in: get_aggregate_price
 JSS(owner);                      // in: LedgerEntry, out: NetworkOPs
 JSS(owner_funds);                // in/out: Ledger, NetworkOPs, AcceptedLedgerTx
 JSS(page_index);
@@ -516,10 +520,13 @@ JSS(ports);                       // out: NetworkOPs
 JSS(previous);                    // out: Reservations
 JSS(previous_ledger);             // out: LedgerPropose
 JSS(price);                       // out: amm_info, AuctionSlot
+JSS(price_oracles);               // out: get_price_oracles
+JSS(price_unit);                  // in: get_aggregate_price
 JSS(proof);                       // in: BookOffers
 JSS(propose_seq);                 // out: LedgerPropose
 JSS(proposers);                   // out: NetworkOPs, LedgerConsensus
 JSS(protocol);                    // out: NetworkOPs, PeerImp
+JSS(provider);                    // in: get_price_oracles
 JSS(proxied);                     // out: RPC ping
 JSS(pubkey_node);                 // out: NetworkOPs
 JSS(pubkey_publisher);            // out: ValidatorList
@@ -591,6 +598,7 @@ JSS(signing_keys);              // out: ValidatorList
 JSS(signing_time);              // out: NetworkOPs
 JSS(signer_list);               // in: AccountObjects
 JSS(signer_lists);              // in/out: AccountInfo
+JSS(simple_average);            // out: get_aggregate_price
 JSS(snapshot);                  // in: Subscribe
 JSS(source_account);            // in: PathRequest, RipplePathFind
 JSS(source_amount);             // in: PathRequest, RipplePathFind
@@ -612,6 +620,7 @@ JSS(sub_index);             // in: LedgerEntry
 JSS(subcommand);            // in: PathFind
 JSS(success);               // rpc
 JSS(supported);             // out: AmendmentTableImpl
+JSS(symbol);                // in: get_aggregate_price
 JSS(system_time_offset);    // out: NetworkOPs
 JSS(tag);                   // out: Peers
 JSS(taker);                 // in: Subscribe, BookOffers
@@ -628,6 +637,7 @@ JSS(timeouts);                // out: InboundLedger
 JSS(time_interval);           // out: AMM Auction Slot
 JSS(track);                   // out: PeerImp
 JSS(traffic);                 // out: Overlay
+JSS(trim);                    // in: get_aggregate_price
 JSS(total);                   // out: counters
 JSS(total_bytes_recv);        // out: Peers
 JSS(total_bytes_sent);        // out: Peers
@@ -643,6 +653,7 @@ JSS(transfer_rate);           // out: nft_info (clio)
 JSS(transitions);             // out: NetworkOPs
 JSS(treenode_cache_size);     // out: GetCounts
 JSS(treenode_track_size);     // out: GetCounts
+JSS(trimmed_mean);            // out: get_aggregate_price
 JSS(trusted);                 // out: UnlList
 JSS(trusted_validator_keys);  // out: ValidatorList
 JSS(tx);                      // out: STTx, AccountTx*

@@ -94,6 +94,15 @@ public:
         std::uint32_t fee = 0,
         std::optional<ter> const& ter = std::nullopt);
 
+    static Json::Value
+    aggregatePrice(
+        Env& env,
+        std::optional<std::string> const& symbol,
+        std::optional<std::string> const& priceUnit,
+        std::optional<std::vector<uint256>> const& oracles,
+        std::optional<std::uint8_t> const& trim,
+        std::uint32_t flags);
+
     uint256
     oracleID() const
     {
@@ -107,7 +116,7 @@ public:
     randOracleID() const;
 
     bool
-    expectPrice(std::uint64_t price, std::uint8_t scale);
+    expectPrice(std::uint64_t price, std::uint8_t scale) const;
 };
 
 }  // namespace jtx

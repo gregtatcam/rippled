@@ -19,6 +19,7 @@
 
 #include <ripple/app/tx/impl/CreateOracle.h>
 #include <ripple/ledger/Sandbox.h>
+#include <ripple/ledger/View.h>
 #include <ripple/protocol/TxFlags.h>
 #include <ripple/protocol/digest.h>
 
@@ -74,7 +75,7 @@ applyCreate(
 
     auto sle = std::make_shared<SLE>(
         keylet::oracle(account_, ctx_.tx[sfSymbol], ctx_.tx[sfPriceUnit]));
-    sle->setAccountID(sfOwner, ctx_.tx[sfAccount]);
+    sle->setAccountID(sfOwner, ctx_.tx.getAccountID(sfAccount));
     sle->setFieldCurrency(sfSymbol, ctx_.tx.getFieldCurrency(sfSymbol));
     sle->setFieldCurrency(sfPriceUnit, ctx_.tx.getFieldCurrency(sfPriceUnit));
     sle->setFieldVL(sfSymbolClass, ctx_.tx[sfSymbolClass]);
