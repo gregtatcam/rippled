@@ -43,6 +43,7 @@
 namespace ripple {
 
 enum class WaiveTransferFee : bool { No = false, Yes };
+enum class SkipEntry : bool { No = false, Yes };
 
 //------------------------------------------------------------------------------
 //
@@ -458,6 +459,10 @@ transferXRP(
 [[nodiscard]] TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
 
+using EntryDeleter = std::function<std::pair<TER, SkipEntry>(
+    LedgerEntryType,
+    uint256 const&,
+    std::shared_ptr<SLE>&)>;
 /** Cleanup owner directory entries on account delete.
  * Used for a regular and AMM accounts deletion. The caller
  * has to provide the deleter function, which handles details of
@@ -469,8 +474,7 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
 cleanupOnAccountDelete(
     ApplyView& view,
     Keylet const& ownerDirKeylet,
-    std::function<TER(LedgerEntryType, uint256 const&, std::shared_ptr<SLE>&)>
-        deleter,
+    EntryDeleter deleter,
     beast::Journal j,
     std::optional<std::uint16_t> maxNodesToDelete = std::nullopt);
 
