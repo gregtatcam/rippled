@@ -459,6 +459,10 @@ transferXRP(
 [[nodiscard]] TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
 
+/** Deleter function prototype. Returns the status of the entry deletion
+ * (if should not be skipped) and if the entry should be skipped. The status
+ * is always tesSUCCESS if the entry should be skipped.
+ */
 using EntryDeleter = std::function<std::pair<TER, SkipEntry>(
     LedgerEntryType,
     uint256 const&,

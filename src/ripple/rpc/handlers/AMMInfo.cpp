@@ -148,14 +148,14 @@ doAMMInfo(RPC::JsonContext& context)
             accountID, *issue1, *issue2, std::move(amm)};
     };
 
-    auto r = getValuesFromContextParams();
+    auto const r = getValuesFromContextParams();
     if (!r)
     {
         RPC::inject_error(r.error(), result);
         return result;
     }
 
-    auto& [accountID, issue1, issue2, amm] = *r;
+    auto const& [accountID, issue1, issue2, amm] = *r;
 
     auto const ammAccountID = amm->getAccountID(sfAccount);
 
