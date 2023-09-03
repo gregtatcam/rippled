@@ -79,6 +79,7 @@ doAMMInfo(RPC::JsonContext& context)
     Issue issue1;
     Issue issue2;
 
+    // invalid params
     if (!params.isMember(jss::asset) || !params.isMember(jss::asset2))
     {
         RPC::inject_error(rpcINVALID_PARAMS, result);
