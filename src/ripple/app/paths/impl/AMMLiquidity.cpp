@@ -63,7 +63,7 @@ AMMLiquidity<TIn, TOut>::generateFibSeqOffer(
 
     cur.in = toAmount<TIn>(
         getIssue(balances.in),
-        InitialFibSeqPct * initialBalances_.in,
+        initialBalances_.in * getFee(tradingFee_),
         Number::rounding_mode::upward);
     cur.out = swapAssetIn(initialBalances_, cur.in, tradingFee_);
 

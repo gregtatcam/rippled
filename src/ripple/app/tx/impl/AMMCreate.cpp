@@ -69,7 +69,8 @@ AMMCreate::preflight(PreflightContext const& ctx)
         return err;
     }
 
-    if (ctx.tx[sfTradingFee] > TRADING_FEE_THRESHOLD)
+    if (ctx.tx[sfTradingFee] == 0 ||
+        ctx.tx[sfTradingFee] > TRADING_FEE_THRESHOLD)
     {
         JLOG(ctx.j.debug()) << "AMM Instance: invalid trading fee.";
         return temBAD_FEE;

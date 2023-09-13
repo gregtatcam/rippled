@@ -111,7 +111,8 @@ AMM::create(
     jv[jss::Account] = creatorAccount_.human();
     jv[jss::Amount] = asset1_.getJson(JsonOptions::none);
     jv[jss::Amount2] = asset2_.getJson(JsonOptions::none);
-    jv[jss::TradingFee] = tfee;
+    // default 0.01%
+    jv[jss::TradingFee] = tfee ? tfee : 10;
     jv[jss::TransactionType] = jss::AMMCreate;
     if (flags)
         jv[jss::Flags] = *flags;
@@ -280,12 +281,19 @@ AMM::expectAuctionSlot(std::vector<AccountID> const& authAccounts) const
     });
 }
 
-bool
-AMM::expectTradingFee(std::uint16_t fee) const
+std::uint16_t
+AMM::getTradingFee() const
 {
     auto const amm =
         env_.current()->read(keylet::amm(asset1_.issue(), asset2_.issue()));
-    return amm && (*amm)[sfTradingFee] == fee;
+    assert(amm);
+    return (*amm)[sfTradingFee];
+}
+
+bool
+AMM::expectTradingFee(std::uint16_t fee) const
+{
+    return getTradingFee() == fee;
 }
 
 bool

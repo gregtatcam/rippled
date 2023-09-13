@@ -86,7 +86,7 @@ public:
         STAmount const& asset1,
         STAmount const& asset2,
         bool log = false,
-        std::uint16_t tfee = 0,
+        std::uint16_t tfee = 10,
         std::uint32_t fee = 0,
         std::optional<std::uint32_t> flags = std::nullopt,
         std::optional<jtx::seq> seq = std::nullopt,
@@ -272,6 +272,9 @@ public:
     IOUAmount
     getLPTokensBalance(
         std::optional<AccountID> const& account = std::nullopt) const;
+
+    std::uint16_t
+    getTradingFee() const;
 
     friend std::ostream&
     operator<<(std::ostream& s, AMM const& amm)

@@ -50,7 +50,8 @@ AMMVote::preflight(PreflightContext const& ctx)
         return temINVALID_FLAG;
     }
 
-    if (ctx.tx[sfTradingFee] > TRADING_FEE_THRESHOLD)
+    if (ctx.tx[sfTradingFee] == 0 ||
+        ctx.tx[sfTradingFee] > TRADING_FEE_THRESHOLD)
     {
         JLOG(ctx.j.debug()) << "AMM Vote: invalid trading fee.";
         return temBAD_FEE;
