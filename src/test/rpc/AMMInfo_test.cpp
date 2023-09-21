@@ -117,7 +117,7 @@ public:
             BEAST_EXPECT(ammAlice.expectAmmRpcInfo(
                 XRP(10000), USD(10000), IOUAmount{10000000, 0}));
             std::unordered_map<std::string, std::uint16_t> votes;
-            votes.insert({alice.human(), 0});
+            votes.insert({alice.human(), 10});
             for (int i = 0; i < 7; ++i)
             {
                 Account a(std::to_string(i));
@@ -126,7 +126,7 @@ public:
                 ammAlice.deposit(a, 10000000);
                 ammAlice.vote(a, 50 * (i + 1));
             }
-            BEAST_EXPECT(ammAlice.expectTradingFee(175));
+            BEAST_EXPECT(ammAlice.expectTradingFee(176));
             Account ed("ed");
             Account bill("bill");
             env.fund(XRP(1000), bob, ed, bill);
@@ -134,7 +134,7 @@ public:
             BEAST_EXPECT(ammAlice.expectAmmRpcInfo(
                 XRP(80000),
                 USD(80000),
-                IOUAmount{79994400},
+                IOUAmount{79994368},
                 std::nullopt,
                 std::nullopt,
                 ammAlice.ammAccount()));
@@ -187,7 +187,7 @@ public:
                         auctionSlot[jss::account].asString() == alice.human() &&
                         auctionSlot[jss::discounted_fee].asUInt() == 17 &&
                         auctionSlot[jss::price][jss::value].asString() ==
-                            "5600" &&
+                            "5632" &&
                         auctionSlot[jss::price][jss::currency].asString() ==
                             to_string(ammAlice.lptIssue().currency) &&
                         auctionSlot[jss::price][jss::issuer].asString() ==
