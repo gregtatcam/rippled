@@ -422,6 +422,12 @@ public:
     PrettyAmount
     balance(Account const& account, Issue const& issue) const;
 
+    /** Return the number of objects owned by an account.
+     * Returns 0 if the account does not exist.
+     */
+    std::uint32_t
+    ownerCount(Account const& account) const;
+
     /** Return an account root.
         @return empty if the account does not exist.
     */
@@ -721,13 +727,12 @@ Env::rpc(std::string const& cmd, Args&&... args)
  * an unsigned integer as its argument and returns void.
  */
 template <class T>
-concept SingleVersionedTestCallable = requires(T callable, unsigned int version)
-{
-    {
-        callable(version)
-    }
-    ->std::same_as<void>;
-};
+concept SingleVersionedTestCallable =
+    requires(T callable, unsigned int version) {
+        {
+            callable(version)
+            } -> std::same_as<void>;
+    };
 
 /**
  * The VersionedTestCallable concept checks if a set of callables all satisfy

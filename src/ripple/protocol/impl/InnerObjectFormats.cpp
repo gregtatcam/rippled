@@ -135,6 +135,19 @@ InnerObjectFormats::InnerObjectFormats()
         {
             {sfAccount, soeREQUIRED},
         });
+
+    /* should be uncommented when the object is added to pages
+    add(sfCFToken.jsonName.c_str(),
+        sfCFToken.getCode(),
+        {
+            // TODO - do we even need to store the id since it can be derived
+            // from the Amount
+            {sfCFTokenIssuanceID, soeREQUIRED},
+            {sfCFTAmount, soeREQUIRED},
+            {sfCFTLockedAmount, soeOPTIONAL},
+            {sfFlags, soeOPTIONAL},
+        });
+        */
 }
 
 InnerObjectFormats const&

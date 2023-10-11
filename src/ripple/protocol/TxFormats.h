@@ -185,6 +185,15 @@ enum TxType : std::uint16_t
     ttXCHAIN_CREATE_BRIDGE = 48,
 
 
+    /** This transaction creates a new CFTokenIssuance object. */
+    ttCFTOKEN_ISSUANCE_CREATE = 49,
+
+    /** This transaction destroys an existing CFTokenIssuance object. */
+    ttCFTOKEN_ISSUANCE_DESTROY = 50,
+
+    /** This transaction sets CFToken object. */
+    ttCFTOKEN_TRUST = 51,
+
     /** This system-generated transaction type is used to update the status of the various amendments.
 
         For details, see: https://xrpl.org/amendments.html

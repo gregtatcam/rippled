@@ -48,6 +48,7 @@ public:
             0x01,  // Rippling through an account (vs taking an offer).
         typeCurrency = 0x10,  // Currency follows.
         typeIssuer = 0x20,    // Issuer follows.
+        typeCFT = 0x40,       // CFT
         typeBoundary = 0xFF,  // Boundary between alternate paths.
         typeAll = typeAccount | typeCurrency | typeIssuer,
         // Combination of all types.
@@ -61,13 +62,15 @@ public:
     STPathElement(
         std::optional<AccountID> const& account,
         std::optional<Currency> const& currency,
-        std::optional<AccountID> const& issuer);
+        std::optional<AccountID> const& issuer,
+        bool isCFT = false);
 
     STPathElement(
         AccountID const& account,
         Currency const& currency,
         AccountID const& issuer,
-        bool forceCurrency = false);
+        bool forceCurrency = false,
+        bool isCFT = false);
 
     STPathElement(
         unsigned int uType,
@@ -80,6 +83,9 @@ public:
 
     bool
     isOffer() const;
+
+    bool
+    isCft() const;
 
     bool
     isAccount() const;
@@ -245,7 +251,8 @@ inline STPathElement::STPathElement() : mType(typeNone), is_offer_(true)
 inline STPathElement::STPathElement(
     std::optional<AccountID> const& account,
     std::optional<Currency> const& currency,
-    std::optional<AccountID> const& issuer)
+    std::optional<AccountID> const& issuer,
+    bool isCFT)
     : mType(typeNone)
 {
     if (!account)
@@ -273,6 +280,12 @@ inline STPathElement::STPathElement(
         assert(mIssuerID != noAccount());
     }
 
+    if (isCFT)
+    {
+        mType |= typeCFT;
+        assert(currency && issuer);
+    }
+
     hash_value_ = get_hash(*this);
 }
 
@@ -280,7 +293,8 @@ inline STPathElement::STPathElement(
     AccountID const& account,
     Currency const& currency,
     AccountID const& issuer,
-    bool forceCurrency)
+    bool forceCurrency,
+    bool isCFT)
     : mType(typeNone)
     , mAccountID(account)
     , mCurrencyID(currency)
@@ -295,6 +309,9 @@ inline STPathElement::STPathElement(
 
     if (!isXRP(issuer))
         mType |= typeIssuer;
+
+    if (isCFT)
+        mType |= typeCFT;
 
     hash_value_ = get_hash(*this);
 }
@@ -323,6 +340,12 @@ inline bool
 STPathElement::isOffer() const
 {
     return is_offer_;
+}
+
+inline bool
+STPathElement::isCft() const
+{
+    return mType & typeCFT;
 }
 
 inline bool

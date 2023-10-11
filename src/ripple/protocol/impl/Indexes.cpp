@@ -71,6 +71,8 @@ enum class LedgerNameSpace : std::uint16_t {
     BRIDGE = 'H',
     XCHAIN_CLAIM_ID = 'Q',
     XCHAIN_CREATE_ACCOUNT_CLAIM_ID = 'K',
+    CFTOKEN_ISSUANCE = '~',
+    CFTOKEN = 'F',
 
     // No longer used or supported. Left here to reserve the space
     // to avoid accidental reuse.
@@ -91,12 +93,23 @@ getBookBase(Book const& book)
 {
     assert(isConsistent(book));
 
-    auto const index = indexHash(
-        LedgerNameSpace::BOOK_DIR,
-        book.in.currency,
-        book.out.currency,
-        book.in.account,
-        book.out.account);
+    auto const index = [&]() {
+        if (!book.in.isCFT && !book.in.isCFT)
+            return indexHash(
+                LedgerNameSpace::BOOK_DIR,
+                book.in.currency,
+                book.out.currency,
+                book.in.account,
+                book.out.account);
+        return indexHash(
+            LedgerNameSpace::BOOK_DIR,
+            book.in.currency,
+            book.in.isCFT,
+            book.out.currency,
+            book.out.isCFT,
+            book.in.account,
+            book.out.account);
+    }();
 
     // Return with quality 0.
     auto k = keylet::quality({ltDIR_NODE, index}, 0);
@@ -382,12 +395,22 @@ Keylet
 amm(Issue const& issue1, Issue const& issue2) noexcept
 {
     auto const& [minI, maxI] = std::minmax(issue1, issue2);
+    // backward compatible
+    if (!minI.isCFT && !maxI.isCFT)
+        return amm(indexHash(
+            LedgerNameSpace::AMM,
+            minI.account,
+            minI.currency,
+            maxI.account,
+            maxI.currency));
     return amm(indexHash(
         LedgerNameSpace::AMM,
         minI.account,
         minI.currency,
+        minI.isCFT,
         maxI.account,
-        maxI.currency));
+        maxI.currency,
+        maxI.isCFT));
 }
 
 Keylet
@@ -435,6 +458,63 @@ xChainCreateAccountClaimID(STXChainBridge const& bridge, std::uint64_t seq)
             bridge.issuingChainDoor(),
             bridge.issuingChainIssue(),
             seq)};
+}
+
+Keylet
+cftIssuance(AccountID const& issuer, uint160 const& asset) noexcept
+{
+    return {
+        ltCFTOKEN_ISSUANCE,
+        indexHash(LedgerNameSpace::CFTOKEN_ISSUANCE, issuer, asset)};
+}
+
+Keylet
+cftIssuance(AccountID const& issuer, Currency const& asset) noexcept
+{
+    return {
+        ltCFTOKEN_ISSUANCE,
+        indexHash(LedgerNameSpace::CFTOKEN_ISSUANCE, issuer, asset)};
+}
+
+Keylet
+cftIssuance(STAmount const& amount)
+{
+    // TODO should this assertion be made?
+    assert(amount.isCFT());
+    return cftIssuance(amount.issue().account, amount.issue().currency);
+}
+
+Keylet
+cftPageMin(AccountID const& owner)
+{
+    std::array<std::uint8_t, 32> buf{};
+    std::memcpy(buf.data(), owner.data(), owner.size());
+    return {ltCFTOKEN_PAGE, uint256{buf}};
+}
+
+Keylet
+cftPageMax(AccountID const& owner)
+{
+    // TODO - we should move this mask somewhere more general. yes we are
+    // using the same one for cfts and nfts
+    uint256 id = nft::pageMask;
+    std::memcpy(id.data(), owner.data(), owner.size());
+    return {ltCFTOKEN_PAGE, id};
+}
+
+Keylet
+cftPage(Keylet const& k, uint256 const& cftID)
+{
+    assert(k.type == ltCFTOKEN_PAGE);
+    // TODO - we should move this mask somewhere more general. yes we are
+    // using the same one for cfts and nfts
+    return {ltCFTOKEN_PAGE, (k.key & ~nft::pageMask) + (cftID & nft::pageMask)};
+}
+
+Keylet
+cftoken(AccountID const& holder, uint256 const& cftID) noexcept
+{
+    return {ltCFTOKEN, indexHash(LedgerNameSpace::CFTOKEN, holder, cftID)};
 }
 
 }  // namespace keylet

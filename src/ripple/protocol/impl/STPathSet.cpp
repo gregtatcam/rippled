@@ -163,7 +163,8 @@ STPath::hasSeen(
     return false;
 }
 
-Json::Value STPath::getJson(JsonOptions) const
+Json::Value
+STPath::getJson(JsonOptions) const
 {
     Json::Value ret(Json::arrayValue);
 
@@ -178,7 +179,12 @@ Json::Value STPath::getJson(JsonOptions) const
             elem[jss::account] = to_string(it.getAccountID());
 
         if (iType & STPathElement::typeCurrency)
-            elem[jss::currency] = to_string(it.getCurrency());
+        {
+            if (iType & STPathElement::typeCFT)
+                elem[jss::cft_asset] = to_string(it.getCurrency());
+            else
+                elem[jss::currency] = to_string(it.getCurrency());
+        }
 
         if (iType & STPathElement::typeIssuer)
             elem[jss::issuer] = to_string(it.getIssuerID());

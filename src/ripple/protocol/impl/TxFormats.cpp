@@ -472,6 +472,32 @@ TxFormats::TxFormats()
             {sfSignatureReward, soeREQUIRED},
         },
         commonFields);
+
+    add(jss::CFTokenIssuanceCreate,
+        ttCFTOKEN_ISSUANCE_CREATE,
+        {
+            {sfAssetCode, soeREQUIRED},
+            {sfAssetScale, soeDEFAULT},
+            {sfTransferFee, soeDEFAULT},
+            {sfMaximumAmount, soeOPTIONAL},
+            {sfCFTokenMetadata, soeOPTIONAL},
+        },
+        commonFields);
+
+    add(jss::CFTokenIssuanceDestroy,
+        ttCFTOKEN_ISSUANCE_DESTROY,
+        {
+            {sfCFTokenIssuanceID, soeREQUIRED},
+        },
+        commonFields);
+
+    add(jss::CFTokenTrust,
+        ttCFTOKEN_TRUST,
+        {
+            {sfCFTokenIssuanceID, soeREQUIRED},
+            {sfCFTokenHolder, soeOPTIONAL},
+        },
+        commonFields);
 }
 
 TxFormats const&

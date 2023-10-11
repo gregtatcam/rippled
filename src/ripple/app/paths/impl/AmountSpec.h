@@ -20,6 +20,7 @@
 #ifndef RIPPLE_PATH_IMPL_AMOUNTSPEC_H_INCLUDED
 #define RIPPLE_PATH_IMPL_AMOUNTSPEC_H_INCLUDED
 
+#include <ripple/basics/CFTAmount.h>
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/XRPAmount.h>
 #include <ripple/protocol/STAmount.h>
@@ -33,8 +34,10 @@ struct AmountSpec
     explicit AmountSpec() = default;
 
     bool native;
+    bool is_cft;
     union
     {
+        CFTAmount cft;
         XRPAmount xrp;
         IOUAmount iou = {};
     };
@@ -44,7 +47,9 @@ struct AmountSpec
     friend std::ostream&
     operator<<(std::ostream& stream, AmountSpec const& amt)
     {
-        if (amt.native)
+        if (amt.is_cft)
+            stream << to_string(amt.cft);
+        else if (amt.native)
             stream << to_string(amt.xrp);
         else
             stream << to_string(amt.iou);
@@ -60,12 +65,14 @@ struct EitherAmount
 {
 #ifndef NDEBUG
     bool native = false;
+    bool is_cft = false;
 #endif
 
     union
     {
         IOUAmount iou = {};
         XRPAmount xrp;
+        CFTAmount cft;
     };
 
     EitherAmount() = default;
@@ -89,12 +96,22 @@ struct EitherAmount
 #pragma GCC diagnostic pop
 #endif
 
+    explicit EitherAmount(CFTAmount const& a) : cft(a)
+    {
+#ifndef NDEBUG
+        is_cft = true;
+#endif
+    }
+
     explicit EitherAmount(AmountSpec const& a)
     {
 #ifndef NDEBUG
         native = a.native;
+        is_cft = a.is_cft;
 #endif
-        if (a.native)
+        if (a.is_cft)
+            cft = a.cft;
+        else if (a.native)
             xrp = a.xrp;
         else
             iou = a.iou;
@@ -104,7 +121,9 @@ struct EitherAmount
     friend std::ostream&
     operator<<(std::ostream& stream, EitherAmount const& amt)
     {
-        if (amt.native)
+        if (amt.is_cft)
+            stream << to_string(amt.cft);
+        else if (amt.native)
             stream << to_string(amt.xrp);
         else
             stream << to_string(amt.iou);
@@ -125,6 +144,7 @@ template <>
 inline IOUAmount&
 get<IOUAmount>(EitherAmount& amt)
 {
+    // assert(!amt.native && !amt.cft);
     assert(!amt.native);
     return amt.iou;
 }
@@ -133,8 +153,16 @@ template <>
 inline XRPAmount&
 get<XRPAmount>(EitherAmount& amt)
 {
-    assert(amt.native);
+    assert(amt.native && !amt.cft);
     return amt.xrp;
+}
+
+template <>
+inline CFTAmount&
+get<CFTAmount>(EitherAmount& amt)
+{
+    assert(amt.cft && !amt.native);
+    return amt.cft;
 }
 
 template <class T>
@@ -149,6 +177,7 @@ template <>
 inline IOUAmount const&
 get<IOUAmount>(EitherAmount const& amt)
 {
+    // assert(!amt.native && !amt.cft);
     assert(!amt.native);
     return amt.iou;
 }
@@ -157,8 +186,16 @@ template <>
 inline XRPAmount const&
 get<XRPAmount>(EitherAmount const& amt)
 {
-    assert(amt.native);
+    assert(amt.native && !amt.is_cft);
     return amt.xrp;
+}
+
+template <>
+inline CFTAmount const&
+get<CFTAmount>(EitherAmount const& amt)
+{
+    assert(amt.is_cft && !amt.native);
+    return amt.cft;
 }
 
 inline AmountSpec
@@ -175,6 +212,12 @@ toAmountSpec(STAmount const& amt)
     {
         result.xrp = XRPAmount(sMant);
     }
+    else if (amt.isCFT())
+    {
+        result.cft = CFTAmount(sMant);
+        result.issuer = amt.issue().account;
+        result.currency = amt.issue().currency;
+    }
     else
     {
         result.iou = IOUAmount(sMant, amt.exponent());
@@ -190,6 +233,8 @@ toEitherAmount(STAmount const& amt)
 {
     if (isXRP(amt))
         return EitherAmount{amt.xrp()};
+    else if (amt.isCFT())
+        return EitherAmount{amt.cft()};
     return EitherAmount{amt.iou()};
 }
 
@@ -200,6 +245,10 @@ toAmountSpec(EitherAmount const& ea, std::optional<Currency> const& c)
     r.native = (!c || isXRP(*c));
     r.currency = c;
     assert(ea.native == r.native);
+    if (r.is_cft)
+    {
+        r.cft = ea.cft;
+    }
     if (r.native)
     {
         r.xrp = ea.xrp;

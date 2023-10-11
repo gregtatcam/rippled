@@ -31,6 +31,7 @@
 
 #include <numeric>
 #include <sstream>
+#include <variant>
 
 namespace ripple {
 
@@ -54,6 +55,31 @@ finishFlow(
 
     return result;
 };
+
+std::variant<XRPAmount, CFTAmount, IOUAmount>
+getType(Issue const& iss)
+{
+    static XRPAmount xrp{};
+    static CFTAmount cft{};
+    static IOUAmount iou{};
+    if (isXRP(iss))
+        return xrp;
+    if (iss.isCFT)
+        return cft;
+    return iou;
+}
+
+template <typename T>
+T
+getDeliverAmt(STAmount const& deliver)
+{
+    if constexpr (std::is_same_v<T, XRPAmount>)
+        return deliver.xrp();
+    if constexpr (std::is_same_v<T, CFTAmount>)
+        return deliver.cft();
+    if constexpr (std::is_same_v<T, IOUAmount>)
+        return deliver.iou();
+}
 
 path::RippleCalc::Output
 flow(
@@ -128,87 +154,33 @@ flow(
         }
     }
 
-    const bool srcIsXRP = isXRP(srcIssue.currency);
-    const bool dstIsXRP = isXRP(dstIssue.currency);
-
-    auto const asDeliver = toAmountSpec(deliver);
-
-    // The src account may send either xrp or iou. The dst account may receive
-    // either xrp or iou. Since XRP and IOU amounts are represented by different
-    // types, use templates to tell `flow` about the amount types.
-    if (srcIsXRP && dstIsXRP)
-    {
-        return finishFlow(
-            sb,
-            srcIssue,
-            dstIssue,
-            flow<XRPAmount, XRPAmount>(
+    // The src account may send either xrp,iou,cft. The dst account may receive
+    // either xrp,iou,cft. Since XRP and IOU amounts are represented by
+    // different types, use templates to tell `flow` about the amount types.
+    path::RippleCalc::Output result;
+    std::visit(
+        [&, &strands_ = strands](auto&& InAmt, auto&& OutAmt) {
+            using TIn = std::decay_t<decltype(InAmt)>;
+            using TOut = std::decay_t<decltype(OutAmt)>;
+            result = finishFlow(
                 sb,
-                strands,
-                asDeliver.xrp,
-                partialPayment,
-                offerCrossing,
-                limitQuality,
-                sendMax,
-                j,
-                ammContext,
-                flowDebugInfo));
-    }
-
-    if (srcIsXRP && !dstIsXRP)
-    {
-        return finishFlow(
-            sb,
-            srcIssue,
-            dstIssue,
-            flow<XRPAmount, IOUAmount>(
-                sb,
-                strands,
-                asDeliver.iou,
-                partialPayment,
-                offerCrossing,
-                limitQuality,
-                sendMax,
-                j,
-                ammContext,
-                flowDebugInfo));
-    }
-
-    if (!srcIsXRP && dstIsXRP)
-    {
-        return finishFlow(
-            sb,
-            srcIssue,
-            dstIssue,
-            flow<IOUAmount, XRPAmount>(
-                sb,
-                strands,
-                asDeliver.xrp,
-                partialPayment,
-                offerCrossing,
-                limitQuality,
-                sendMax,
-                j,
-                ammContext,
-                flowDebugInfo));
-    }
-
-    assert(!srcIsXRP && !dstIsXRP);
-    return finishFlow(
-        sb,
-        srcIssue,
-        dstIssue,
-        flow<IOUAmount, IOUAmount>(
-            sb,
-            strands,
-            asDeliver.iou,
-            partialPayment,
-            offerCrossing,
-            limitQuality,
-            sendMax,
-            j,
-            ammContext,
-            flowDebugInfo));
+                srcIssue,
+                dstIssue,
+                flow<TIn, TOut>(
+                    sb,
+                    strands_,
+                    getDeliverAmt<TOut>(deliver),
+                    partialPayment,
+                    offerCrossing,
+                    limitQuality,
+                    sendMax,
+                    j,
+                    ammContext,
+                    flowDebugInfo));
+        },
+        getType(srcIssue),
+        getType(dstIssue));
+    return result;
 }
 
 }  // namespace ripple

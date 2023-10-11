@@ -51,6 +51,7 @@ template <class>
 class STInteger;
 class STXChainBridge;
 class STVector256;
+class STCurrency;
 
 enum SerializedTypeID {
     // special types
@@ -81,6 +82,7 @@ enum SerializedTypeID {
     STI_UINT512 = 23,
     STI_ISSUE = 24,
     STI_XCHAIN_BRIDGE = 25,
+    STI_CURRENCY = 26,
 
     // high level types
     // cannot be serialized inside other types
@@ -318,6 +320,7 @@ using SF_UINT512 = TypedField<STBitString<512>>;
 using SF_ACCOUNT = TypedField<STAccount>;
 using SF_AMOUNT = TypedField<STAmount>;
 using SF_ISSUE = TypedField<STIssue>;
+using SF_CURRENCY = TypedField<STCurrency>;
 using SF_VL = TypedField<STBlob>;
 using SF_VECTOR256 = TypedField<STVector256>;
 using SF_XCHAIN_BRIDGE = TypedField<STXChainBridge>;
@@ -341,6 +344,9 @@ extern SF_UINT8 const sfWasLockingChainSend;
 extern SF_UINT8 const sfTickSize;
 extern SF_UINT8 const sfUNLModifyDisabling;
 extern SF_UINT8 const sfHookResult;
+extern SF_UINT8 const sfAssetScale;
+extern SF_UINT8 const sfTakerPaysCFT;
+extern SF_UINT8 const sfTakerGetsCFT;
 
 // 16-bit integers (common)
 extern SF_UINT16 const sfLedgerEntryType;
@@ -422,6 +428,8 @@ extern SF_UINT64 const sfCookie;
 extern SF_UINT64 const sfServerVersion;
 extern SF_UINT64 const sfNFTokenOfferNode;
 extern SF_UINT64 const sfEmitBurden;
+extern SF_UINT64 const sfCFTAmount;
+extern SF_UINT64 const sfCFTLockedAmount;
 
 // 64-bit integers (uncommon)
 extern SF_UINT64 const sfHookOn;
@@ -431,6 +439,9 @@ extern SF_UINT64 const sfReferenceCount;
 extern SF_UINT64 const sfXChainClaimID;
 extern SF_UINT64 const sfXChainAccountCreateCount;
 extern SF_UINT64 const sfXChainAccountClaimCount;
+extern SF_UINT64 const sfMaximumAmount;
+extern SF_UINT64 const sfOutstandingAmount;
+extern SF_UINT64 const sfLockedAmount;
 
 // 128-bit
 extern SF_UINT128 const sfEmailHash;
@@ -440,6 +451,9 @@ extern SF_UINT160 const sfTakerPaysCurrency;
 extern SF_UINT160 const sfTakerPaysIssuer;
 extern SF_UINT160 const sfTakerGetsCurrency;
 extern SF_UINT160 const sfTakerGetsIssuer;
+
+// Currency
+extern SF_CURRENCY const sfAssetCode;
 
 // 256-bit (common)
 extern SF_UINT256 const sfLedgerHash;
@@ -456,6 +470,7 @@ extern SF_UINT256 const sfEmitParentTxnID;
 extern SF_UINT256 const sfEmitNonce;
 extern SF_UINT256 const sfEmitHookHash;
 extern SF_UINT256 const sfAMMID;
+extern SF_UINT256 const sfCFTokenIssuanceID;
 
 // 256-bit (uncommon)
 extern SF_UINT256 const sfBookDirectory;
@@ -524,6 +539,7 @@ extern SF_VL const sfCreateCode;
 extern SF_VL const sfMemoType;
 extern SF_VL const sfMemoData;
 extern SF_VL const sfMemoFormat;
+extern SF_VL const sfCFTokenMetadata;
 
 // variable length (uncommon)
 extern SF_VL const sfFulfillment;
@@ -547,6 +563,7 @@ extern SF_ACCOUNT const sfUnauthorize;
 extern SF_ACCOUNT const sfRegularKey;
 extern SF_ACCOUNT const sfNFTokenMinter;
 extern SF_ACCOUNT const sfEmitCallback;
+extern SF_ACCOUNT const sfCFTokenHolder;
 
 // account (uncommon)
 extern SF_ACCOUNT const sfHookAccount;
@@ -593,6 +610,7 @@ extern SField const sfHook;
 extern SField const sfVoteEntry;
 extern SField const sfAuctionSlot;
 extern SField const sfAuthAccount;
+extern SField const sfCFToken;
 
 extern SField const sfSigner;
 extern SField const sfMajority;
@@ -621,6 +639,7 @@ extern SField const sfNFTokens;
 extern SField const sfHooks;
 extern SField const sfVoteSlots;
 extern SField const sfAuthAccounts;
+extern SField const sfCFTokens;
 
 // array of objects (uncommon)
 extern SField const sfMajorities;

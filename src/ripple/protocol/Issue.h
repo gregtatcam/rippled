@@ -37,12 +37,14 @@ class Issue
 public:
     Currency currency{};
     AccountID account{};
+    bool isCFT{};
 
-    Issue()
+    Issue() : isCFT{false}
     {
     }
 
-    Issue(Currency const& c, AccountID const& a) : currency(c), account(a)
+    Issue(Currency const& c, AccountID const& a, bool cft = false)
+        : currency(c), account(a), isCFT(cft)
     {
     }
 

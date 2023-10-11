@@ -1187,6 +1187,13 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
         sle->setFieldH160(sfTakerGetsCurrency, saTakerGets.issue().currency);
         sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
+        if (saTakerGets.issue().isCFT || saTakerPays.issue().isCFT)
+        {
+            std::uint8_t const paysCFT = saTakerPays.issue().isCFT ? 1 : 0;
+            std::uint8_t const getsCFT = saTakerGets.issue().isCFT ? 1 : 0;
+            sle->setFieldU8(sfTakerPaysCFT, paysCFT);
+            sle->setFieldU8(sfTakerGetsCFT, getsCFT);
+        }
         sle->setFieldU64(sfExchangeRate, uRate);
     });
 

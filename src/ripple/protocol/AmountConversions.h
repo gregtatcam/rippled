@@ -20,6 +20,7 @@
 #ifndef RIPPLE_PROTOCOL_AMOUNTCONVERSION_H_INCLUDED
 #define RIPPLE_PROTOCOL_AMOUNTCONVERSION_H_INCLUDED
 
+#include <ripple/basics/CFTAmount.h>
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/XRPAmount.h>
 #include <ripple/protocol/STAmount.h>
@@ -61,6 +62,29 @@ toSTAmount(XRPAmount const& xrp, Issue const& iss)
     return toSTAmount(xrp);
 }
 
+inline STAmount
+toSTAmount(CFTAmount const& cft)
+{
+    bool const isNeg = cft.signum() < 0;
+    std::uint64_t const umant = isNeg ? -cft.cft() : cft.cft();
+    return STAmount(umant, isNeg);
+}
+
+inline STAmount
+toSTAmount(CFTAmount const& cft, Issue const& iss)
+{
+    assert(iss.isCFT);
+    bool const isNeg = cft.signum() < 0;
+    std::uint64_t const umant = isNeg ? -cft.cft() : cft.cft();
+    return STAmount(
+        iss,
+        umant,
+        0,
+        /*native*/ false,
+        isNeg,
+        STAmount::unchecked());
+}
+
 template <class T>
 T
 toAmount(STAmount const& amt) = delete;
@@ -98,6 +122,19 @@ toAmount<XRPAmount>(STAmount const& amt)
     return XRPAmount(sMant);
 }
 
+template <>
+inline CFTAmount
+toAmount<CFTAmount>(STAmount const& amt)
+{
+    assert(amt.mantissa() < std::numeric_limits<std::int64_t>::max());
+    bool const isNeg = amt.negative();
+    std::int64_t const sMant =
+        isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
+
+    assert(amt.isCFT());
+    return CFTAmount(sMant);
+}
+
 template <class T>
 T
 toAmount(IOUAmount const& amt) = delete;
@@ -120,6 +157,17 @@ toAmount<XRPAmount>(XRPAmount const& amt)
     return amt;
 }
 
+template <class T>
+T
+toAmount(CFTAmount const& amt) = delete;
+
+template <>
+inline CFTAmount
+toAmount<CFTAmount>(CFTAmount const& amt)
+{
+    return amt;
+}
+
 template <typename T>
 T
 toAmount(
@@ -134,9 +182,11 @@ toAmount(
         return IOUAmount(n);
     if constexpr (std::is_same_v<XRPAmount, T>)
         return XRPAmount(static_cast<std::int64_t>(n));
+    if constexpr (std::is_same_v<CFTAmount, T>)
+        return CFTAmount(static_cast<std::int64_t>(n));
     if constexpr (std::is_same_v<STAmount, T>)
     {
-        if (isXRP(issue))
+        if (isXRP(issue) || issue.isCFT)
             return STAmount(issue, static_cast<std::int64_t>(n));
         return STAmount(issue, n.mantissa(), n.exponent());
     }
@@ -159,6 +209,8 @@ getIssue(T const& amt)
         return noIssue();
     if constexpr (std::is_same_v<XRPAmount, T>)
         return xrpIssue();
+    if constexpr (std::is_same_v<CFTAmount, T>)  // ??
+        return noIssue();
     if constexpr (std::is_same_v<STAmount, T>)
         return amt.issue();
 }
@@ -171,6 +223,8 @@ get(STAmount const& a)
         return a.iou();
     if constexpr (std::is_same_v<XRPAmount, T>)
         return a.xrp();
+    if constexpr (std::is_same_v<CFTAmount, T>)
+        return a.cft();
     if constexpr (std::is_same_v<STAmount, T>)
         return a;
 }

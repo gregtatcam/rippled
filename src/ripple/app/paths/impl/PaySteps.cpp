@@ -89,6 +89,13 @@ toStep(
     if (ctx.isLast && isXRPAccount(*e1) && e2->isAccount())
         return make_XRPEndpointStep(ctx, e2->getAccountID());
 
+    // Direct payment CFT from issuer to dest
+    if (e1->isAccount() && e1->isCft() && e2->isAccount())
+    {
+        return make_DirectStepCFT(
+            ctx, e1->getAccountID(), e2->getAccountID(), curIssue.currency);
+    }
+
     if (e1->isAccount() && e2->isAccount())
     {
         return make_DirectStepI(
@@ -164,6 +171,7 @@ toStrand(
         bool const hasAccount = t & STPathElement::typeAccount;
         bool const hasIssuer = t & STPathElement::typeIssuer;
         bool const hasCurrency = t & STPathElement::typeCurrency;
+        bool const isCFT = t & STPathElement::typeCFT;
 
         if (hasAccount && (hasIssuer || hasCurrency))
             return {temBAD_PATH, Strand{}};
@@ -183,14 +191,16 @@ toStrand(
 
         if (hasAccount && (pe.getAccountID() == noAccount()))
             return {temBAD_PATH, Strand{}};
+
+        if (isCFT && (!hasIssuer || !hasCurrency || hasAccount))
+            return {temBAD_PATH, Strand{}};
     }
 
     Issue curIssue = [&] {
-        auto const& currency =
-            sendMaxIssue ? sendMaxIssue->currency : deliver.currency;
-        if (isXRP(currency))
+        auto const& issue = sendMaxIssue ? sendMaxIssue : deliver;
+        if (isXRP(issue->currency))
             return xrpIssue();
-        return Issue{currency, src};
+        return Issue{issue->currency, src, issue->isCFT};
     }();
 
     auto hasCurrency = [](STPathElement const pe) {
@@ -202,9 +212,18 @@ toStrand(
     // sendmax and deliver.
     normPath.reserve(4 + path.size());
     {
+        // Implied step: sender of the transaction and either sendmax or deliver
+        // currency
         normPath.emplace_back(
-            STPathElement::typeAll, src, curIssue.currency, curIssue.account);
+            curIssue.isCFT ? (STPathElement::typeAll | STPathElement::typeCFT)
+                           : STPathElement::typeAll,
+            src,
+            curIssue.currency,
+            curIssue.account);
 
+        // If transaction includes sendmax with the issuer, which is not
+        // the sender then the issuer is the second implied step, unless
+        // the path starts at address, which is the issuer of sendmax
         if (sendMaxIssue && sendMaxIssue->account != src &&
             (path.empty() || !path[0].isAccount() ||
              path[0].getAccountID() != sendMaxIssue->account))

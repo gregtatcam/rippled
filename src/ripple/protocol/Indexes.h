@@ -280,6 +280,36 @@ xChainClaimID(STXChainBridge const& bridge, std::uint64_t seq);
 Keylet
 xChainCreateAccountClaimID(STXChainBridge const& bridge, std::uint64_t seq);
 
+/** CFT stuff */
+Keylet
+cftIssuance(AccountID const& issuer, uint160 const& asset) noexcept;
+
+Keylet
+cftIssuance(AccountID const& issuer, Currency const& asset) noexcept;
+
+Keylet
+cftIssuance(STAmount const& amount);
+
+inline Keylet
+cftIssuance(uint256 const& id) noexcept
+{
+    return {ltCFTOKEN_ISSUANCE, id};
+}
+
+Keylet
+cftPageMin(AccountID const& owner);
+
+Keylet
+cftPageMax(AccountID const& owner);
+
+Keylet
+cftPage(Keylet const& k, uint256 const& cftID);
+
+// this is temp
+Keylet
+cftoken(AccountID const& holder, uint256 const& cftID) noexcept;
+/** End CFT stuff */
+
 }  // namespace keylet
 
 // Everything below is deprecated and should be removed in favor of keylets:

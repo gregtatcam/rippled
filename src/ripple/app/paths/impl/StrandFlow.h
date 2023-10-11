@@ -396,6 +396,8 @@ limitOut(
             return XRPAmount{*out};
         else if constexpr (std::is_same_v<TOutAmt, IOUAmount>)
             return IOUAmount{*out};
+        else if constexpr (std::is_same_v<TOutAmt, CFTAmount>)
+            return CFTAmount{*out};
         else
             return STAmount{
                 remainingOut.issue(), out->mantissa(), out->exponent()};

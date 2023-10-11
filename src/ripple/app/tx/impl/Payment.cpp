@@ -309,7 +309,7 @@ Payment::doApply()
         maxSourceAmount = saDstAmount;
     else
         maxSourceAmount = STAmount(
-            {saDstAmount.getCurrency(), account_},
+            {saDstAmount.getCurrency(), account_, saDstAmount.isCFT()},
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);

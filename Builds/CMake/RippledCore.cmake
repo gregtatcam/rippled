@@ -98,6 +98,7 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/STArray.cpp
   src/ripple/protocol/impl/STBase.cpp
   src/ripple/protocol/impl/STBlob.cpp
+  src/ripple/protocol/impl/STCurrency.cpp
   src/ripple/protocol/impl/STInteger.cpp
   src/ripple/protocol/impl/STLedgerEntry.cpp
   src/ripple/protocol/impl/STObject.cpp
@@ -487,6 +488,7 @@ target_sources (rippled PRIVATE
   src/ripple/app/paths/impl/AMMOffer.cpp
   src/ripple/app/paths/impl/BookStep.cpp
   src/ripple/app/paths/impl/DirectStep.cpp
+  src/ripple/app/paths/impl/DirectStepCFT.cpp
   src/ripple/app/paths/impl/PaySteps.cpp
   src/ripple/app/paths/impl/XRPEndpointStep.cpp
   src/ripple/app/rdb/backend/detail/impl/Node.cpp
@@ -509,6 +511,9 @@ target_sources (rippled PRIVATE
   src/ripple/app/tx/impl/AMMWithdraw.cpp
   src/ripple/app/tx/impl/ApplyContext.cpp
   src/ripple/app/tx/impl/BookTip.cpp
+  src/ripple/app/tx/impl/CFTokenIssuanceCreate.cpp
+  src/ripple/app/tx/impl/CFTokenIssuanceDestroy.cpp
+  src/ripple/app/tx/impl/CFTokenTrust.cpp
   src/ripple/app/tx/impl/CancelCheck.cpp
   src/ripple/app/tx/impl/CancelOffer.cpp
   src/ripple/app/tx/impl/CashCheck.cpp
@@ -779,6 +784,7 @@ if (tests)
     src/test/app/AMM_test.cpp
     src/test/app/AMMCalc_test.cpp
     src/test/app/AMMExtended_test.cpp
+    src/test/app/CFToken_test.cpp
     src/test/app/Check_test.cpp
     src/test/app/Clawback_test.cpp
     src/test/app/CrossingLimits_test.cpp
@@ -925,6 +931,7 @@ if (tests)
     src/test/jtx/impl/Account.cpp
     src/test/jtx/impl/AMM.cpp
     src/test/jtx/impl/AMMTest.cpp
+    src/test/jtx/impl/cft.cpp
     src/test/jtx/impl/Env.cpp
     src/test/jtx/impl/JSONRPCClient.cpp
     src/test/jtx/impl/TestHelpers.cpp

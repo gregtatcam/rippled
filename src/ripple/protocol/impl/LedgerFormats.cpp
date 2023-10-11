@@ -66,8 +66,10 @@ LedgerFormats::LedgerFormats()
             {sfOwner,                soeOPTIONAL},  // for owner directories
             {sfTakerPaysCurrency,    soeOPTIONAL},  // order book directories
             {sfTakerPaysIssuer,      soeOPTIONAL},  // order book directories
+            {sfTakerPaysCFT,         soeOPTIONAL},  // order book directories
             {sfTakerGetsCurrency,    soeOPTIONAL},  // order book directories
             {sfTakerGetsIssuer,      soeOPTIONAL},  // order book directories
+            {sfTakerGetsCFT,         soeOPTIONAL},  // order book directories
             {sfExchangeRate,         soeOPTIONAL},  // order book directories
             {sfIndexes,              soeREQUIRED},
             {sfRootIndex,            soeREQUIRED},
@@ -324,6 +326,44 @@ LedgerFormats::LedgerFormats()
             {sfOwnerNode,                       soeREQUIRED},
             {sfPreviousTxnID,                   soeREQUIRED},
             {sfPreviousTxnLgrSeq,               soeREQUIRED}
+        },
+        commonFields);
+
+    add(jss::CFTokenIssuance,
+        ltCFTOKEN_ISSUANCE,
+        {
+            {sfIssuer,               soeREQUIRED},
+            {sfTransferFee,          soeDEFAULT},
+            {sfOwnerNode,            soeREQUIRED},
+            {sfAssetCode,            soeREQUIRED},
+            {sfAssetScale,           soeDEFAULT},
+            {sfMaximumAmount,        soeOPTIONAL},
+            {sfOutstandingAmount,    soeREQUIRED},
+            {sfLockedAmount,         soeREQUIRED},
+            {sfCFTokenMetadata,      soeOPTIONAL},
+        },
+        commonFields);
+
+    add(jss::CFTokenPage,
+        ltCFTOKEN_PAGE,
+        {
+            {sfPreviousPageMin,      soeOPTIONAL},
+            {sfNextPageMin,          soeOPTIONAL},
+            {sfCFTokens,             soeREQUIRED},
+            {sfPreviousTxnID,        soeREQUIRED},
+            {sfPreviousTxnLgrSeq,    soeREQUIRED},
+        },
+        commonFields);
+
+    add(jss::CFToken,
+        ltCFTOKEN,
+        {
+            // TODO - do we even need to store the id since it can be derived
+            // from the Amount
+            {sfCFTokenIssuanceID, soeREQUIRED},
+            {sfCFTAmount, soeREQUIRED},
+            {sfCFTLockedAmount, soeOPTIONAL},
+            {sfOwnerNode, soeREQUIRED},
         },
         commonFields);
     // clang-format on

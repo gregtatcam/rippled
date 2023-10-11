@@ -611,8 +611,11 @@ parseLeaf(
                             return ret;
                         }
 
+                        bool const isCFT = pathEl.isMember(jss::cft_asset);
+                        std::string const curName =
+                            isCFT ? "cft_asset" : "currency";
                         Json::Value const& account = pathEl["account"];
-                        Json::Value const& currency = pathEl["currency"];
+                        Json::Value const& currency = pathEl[curName];
                         Json::Value const& issuer = pathEl["issuer"];
                         bool hasCurrency = false;
                         AccountID uAccount, uIssuer;
@@ -649,8 +652,7 @@ parseLeaf(
                             // human currency
                             if (!currency.isString())
                             {
-                                error =
-                                    string_expected(element_name, "currency");
+                                error = string_expected(element_name, curName);
                                 return ret;
                             }
 
@@ -661,8 +663,7 @@ parseLeaf(
                                 if (!to_currency(
                                         uCurrency, currency.asString()))
                                 {
-                                    error =
-                                        invalid_data(element_name, "currency");
+                                    error = invalid_data(element_name, curName);
                                     return ret;
                                 }
                             }
@@ -747,11 +748,11 @@ parseLeaf(
             }
             break;
 
-        case STI_XCHAIN_BRIDGE:
+        case STI_CURRENCY:
             try
             {
-                ret = detail::make_stvar<STXChainBridge>(
-                    STXChainBridge(field, value));
+                ret = detail::make_stvar<STCurrency>(
+                    currencyFromJson(field, value));
             }
             catch (std::exception const&)
             {

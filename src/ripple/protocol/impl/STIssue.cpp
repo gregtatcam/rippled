@@ -42,7 +42,13 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
 {
     issue_.currency = sit.get160();
     if (!isXRP(issue_.currency))
+    {
         issue_.account = sit.get160();
+        if (sit.getBytesLeft() == 1)
+            issue_.isCFT = sit.get8();
+        else
+            issue_.isCFT = false;
+    }
     else
         issue_.account = xrpAccount();
 
@@ -81,7 +87,11 @@ STIssue::add(Serializer& s) const
 {
     s.addBitString(issue_.currency);
     if (!isXRP(issue_.currency))
+    {
         s.addBitString(issue_.account);
+        if (issue_.isCFT)
+            s.add8(1);
+    }
 }
 
 bool

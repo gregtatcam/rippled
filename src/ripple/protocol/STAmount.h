@@ -20,6 +20,7 @@
 #ifndef RIPPLE_PROTOCOL_STAMOUNT_H_INCLUDED
 #define RIPPLE_PROTOCOL_STAMOUNT_H_INCLUDED
 
+#include <ripple/basics/CFTAmount.h>
 #include <ripple/basics/CountedObject.h>
 #include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/LocalValue.h>
@@ -49,12 +50,13 @@ public:
     using mantissa_type = std::uint64_t;
     using exponent_type = int;
     using rep = std::pair<mantissa_type, exponent_type>;
+    enum struct Type { xrp, issued_currency, cft };
 
 private:
     Issue mIssue;
     mantissa_type mValue;
     exponent_type mOffset;
-    bool mIsNative;  // A shorthand for isXRP(mIssue).
+    Type mType;
     bool mIsNegative;
 
 public:
@@ -70,8 +72,21 @@ public:
 
     // Max native value on network.
     static const std::uint64_t cMaxNativeN = 100000000000000000ull;
-    static const std::uint64_t cNotNative = 0x8000000000000000ull;
-    static const std::uint64_t cPosNative = 0x4000000000000000ull;
+
+    // Type masks
+    static const std::uint64_t cIssuedCurrency = 0x8000000000000000ull;
+    static const std::uint64_t cCFToken = 0x2000000000000000ull;
+
+    // This mask yields the XRP/CFT value of an STAmount. It is not used for
+    // IssuedCurrency. IE - the low 57 bits of the first 64 bits of a
+    // non-IssuedCurrency STAmount is the value.
+    static const std::uint64_t cValueMask = 0x1FFFFFFFFFFFFFFull;
+
+    // This mask yields the sign of any STAmount, though note that negative
+    // values are not legal for non-IssuedCurrency types at the moment. Also
+    // note that the sign bit is <ON> for positive values and <OFF> for
+    // negative values!
+    static const std::uint64_t cSign = 0x4000000000000000ull;
 
     static std::uint64_t const uRateOne;
 
@@ -84,6 +99,14 @@ public:
     };
 
     // Do not call canonicalize
+    STAmount(
+        SField const& name,
+        Issue const& issue,
+        mantissa_type mantissa,
+        exponent_type exponent,
+        Type typ,
+        bool negative);
+
     STAmount(
         SField const& name,
         Issue const& issue,
@@ -148,6 +171,7 @@ public:
     // Legacy support for new-style amounts
     STAmount(IOUAmount const& amount, Issue const& issue);
     STAmount(XRPAmount const& amount);
+    STAmount(CFTAmount const& amount);
     operator Number() const;
 
     //--------------------------------------------------------------------------
@@ -161,6 +185,15 @@ public:
 
     bool
     native() const noexcept;
+
+    bool
+    isCFT() const noexcept;
+
+    bool
+    isIOU() const noexcept;
+
+    std::string
+    getTypeName() const noexcept;
 
     bool
     negative() const noexcept;
@@ -208,6 +241,9 @@ public:
 
     STAmount&
     operator=(XRPAmount const& amount);
+
+    STAmount&
+    operator=(CFTAmount const& amount);
 
     //--------------------------------------------------------------------------
     //
@@ -265,6 +301,8 @@ public:
     xrp() const;
     IOUAmount
     iou() const;
+    CFTAmount
+    cft() const;
 
 private:
     static std::unique_ptr<STAmount>
@@ -331,7 +369,19 @@ STAmount::exponent() const noexcept
 inline bool
 STAmount::native() const noexcept
 {
-    return mIsNative;
+    return mType == STAmount::Type::xrp;
+}
+
+inline bool
+STAmount::isCFT() const noexcept
+{
+    return mType == STAmount::Type::cft;
+}
+
+inline bool
+STAmount::isIOU() const noexcept
+{
+    return mType == STAmount::Type::issued_currency;
 }
 
 inline bool
@@ -383,12 +433,23 @@ inline STAmount::operator bool() const noexcept
 
 inline STAmount::operator Number() const
 {
-    if (mIsNative)
-        return xrp();
-    return iou();
+    switch (mType)
+    {
+        case STAmount::Type::xrp:
+            return xrp();
+
+        case STAmount::Type::issued_currency:
+            return iou();
+
+        case STAmount::Type::cft:
+            return cft();
+        default:
+            Throw<std::runtime_error>("Invalid STAmount type");
+    }
 }
 
-inline STAmount& STAmount::operator=(beast::Zero)
+inline STAmount&
+STAmount::operator=(beast::Zero)
 {
     clear();
     return *this;
@@ -396,6 +457,13 @@ inline STAmount& STAmount::operator=(beast::Zero)
 
 inline STAmount&
 STAmount::operator=(XRPAmount const& amount)
+{
+    *this = STAmount(amount);
+    return *this;
+}
+
+inline STAmount&
+STAmount::operator=(CFTAmount const& amount)
 {
     *this = STAmount(amount);
     return *this;
@@ -413,7 +481,7 @@ STAmount::clear()
 {
     // The -100 is used to allow 0 to sort less than a small positive values
     // which have a negative exponent.
-    mOffset = mIsNative ? 0 : -100;
+    mOffset = isIOU() ? -100 : 0;
     mValue = 0;
     mIsNegative = false;
 }
