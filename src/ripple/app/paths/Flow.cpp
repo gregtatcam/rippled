@@ -56,8 +56,8 @@ finishFlow(
     return result;
 };
 
-std::variant<XRPAmount, CFTAmount, IOUAmount>
-getType(Issue const& iss)
+static std::variant<XRPAmount, CFTAmount, IOUAmount>
+getTypedAmt(Issue const& iss)
 {
     static XRPAmount xrp{};
     static CFTAmount cft{};
@@ -67,18 +67,6 @@ getType(Issue const& iss)
     if (iss.isCFT)
         return cft;
     return iou;
-}
-
-template <typename T>
-T
-getDeliverAmt(STAmount const& deliver)
-{
-    if constexpr (std::is_same_v<T, XRPAmount>)
-        return deliver.xrp();
-    if constexpr (std::is_same_v<T, CFTAmount>)
-        return deliver.cft();
-    if constexpr (std::is_same_v<T, IOUAmount>)
-        return deliver.iou();
 }
 
 path::RippleCalc::Output
@@ -159,9 +147,7 @@ flow(
     // different types, use templates to tell `flow` about the amount types.
     path::RippleCalc::Output result;
     std::visit(
-        [&, &strands_ = strands](auto&& InAmt, auto&& OutAmt) {
-            using TIn = std::decay_t<decltype(InAmt)>;
-            using TOut = std::decay_t<decltype(OutAmt)>;
+        [&, &strands_ = strands]<typename TIn, typename TOut>(TIn&&, TOut&&) {
             result = finishFlow(
                 sb,
                 srcIssue,
@@ -169,7 +155,7 @@ flow(
                 flow<TIn, TOut>(
                     sb,
                     strands_,
-                    getDeliverAmt<TOut>(deliver),
+                    get<TOut>(deliver),
                     partialPayment,
                     offerCrossing,
                     limitQuality,
@@ -178,8 +164,8 @@ flow(
                     ammContext,
                     flowDebugInfo));
         },
-        getType(srcIssue),
-        getType(dstIssue));
+        getTypedAmt(srcIssue),
+        getTypedAmt(dstIssue));
     return result;
 }
 
