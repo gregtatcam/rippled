@@ -81,7 +81,7 @@ getSNValue(STAmount const& amount)
 static bool
 areComparable(STAmount const& v1, STAmount const& v2)
 {
-    return (v1.native() == v2.native() || v1.cft() == v2.cft()) &&
+    return (v1.native() == v2.native() || v1.isCFT() == v2.isCFT()) &&
         v1.issue().currency == v2.issue().currency;
 }
 

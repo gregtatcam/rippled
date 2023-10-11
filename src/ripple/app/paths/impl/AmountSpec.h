@@ -144,8 +144,7 @@ template <>
 inline IOUAmount&
 get<IOUAmount>(EitherAmount& amt)
 {
-    // assert(!amt.native && !amt.cft);
-    assert(!amt.native);
+    assert(!amt.native && !amt.is_cft);
     return amt.iou;
 }
 
@@ -153,7 +152,7 @@ template <>
 inline XRPAmount&
 get<XRPAmount>(EitherAmount& amt)
 {
-    assert(amt.native && !amt.cft);
+    assert(amt.native && !amt.is_cft);
     return amt.xrp;
 }
 
@@ -161,7 +160,7 @@ template <>
 inline CFTAmount&
 get<CFTAmount>(EitherAmount& amt)
 {
-    assert(amt.cft && !amt.native);
+    assert(amt.is_cft && !amt.native);
     return amt.cft;
 }
 
@@ -177,8 +176,7 @@ template <>
 inline IOUAmount const&
 get<IOUAmount>(EitherAmount const& amt)
 {
-    // assert(!amt.native && !amt.cft);
-    assert(!amt.native);
+    assert(!amt.native && !amt.is_cft);
     return amt.iou;
 }
 
