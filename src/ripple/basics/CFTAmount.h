@@ -60,8 +60,7 @@ public:
     {
     }
 
-    constexpr CFTAmount&
-    operator=(beast::Zero)
+    constexpr CFTAmount& operator=(beast::Zero)
     {
         cft_ = 0;
         return *this;

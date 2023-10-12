@@ -45,6 +45,7 @@ class CFToken_test : public beast::unit_test::suite
             env(trust(carol, USD(30'000)));
             env(pay(gw, carol, USD(10'000)));
             env(pay(alice, carol, USD(100)));
+            env(offer(alice, XRP(100), USD(100)));
         }
         {
             // If the CFT amendment is not enabled, you should not be able to
@@ -154,8 +155,9 @@ class CFToken_test : public beast::unit_test::suite
             // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             Account const gw("gw");
-            Account const rcv("rcv");
-            env.fund(XRP(10000), gw, rcv);
+            Account const alice("alice");
+            Account const carol("carol");
+            env.fund(XRP(10000), gw, alice);
             env.close();
 
             // TODO why not working with short codes?
@@ -170,13 +172,14 @@ class CFToken_test : public beast::unit_test::suite
             amt["value"] = "1";
             STAmount const yo = amountFromJson(sfAmount, amt);
             auto const id = keylet::cftIssuance(gw.id(), to_currency("USD"));
-            env(cft::cftrust(rcv, ripple::to_string(id.key)));
+            env(cft::cftrust(alice, ripple::to_string(id.key)));
             env.close();
-            BEAST_EXPECT(env.ownerCount(rcv) == 1);
-            env(pay(gw, rcv, yo));
+            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            env(pay(gw, alice, yo));
             env.close();
-            auto const sle = env.le(keylet::cftoken(rcv.id(), id.key));
+            auto const sle = env.le(keylet::cftoken(alice.id(), id.key));
             BEAST_EXPECT(sle->getFieldU64(sfCFTAmount) == 1);
+            env(offer(alice, XRP(100), USD(100)));
         }
     }
 
