@@ -404,8 +404,7 @@ public:
     // STAmount operator()(char const* s) const;
 
     /** Returns None-of-Issue */
-    None
-    operator()(none_t) const
+    None operator()(none_t) const
     {
         return {issue()};
     }
