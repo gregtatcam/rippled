@@ -25,42 +25,163 @@ namespace ripple {
 namespace test {
 namespace jtx {
 
-namespace cft {
-
-Json::Value
-create(jtx::Account const& account, std::string const& asset)
+CFTIssuance::CFTIssuance(Env& env)
+    : env_(env)
+    , cftID_(keylet::cftIssuance(uint256{}))
+    , issuer_(Account{})
+    , currency_(Currency{})
+    , msig_(std::nullopt)
+    , close_(true)
 {
-    auto const assetCurrency = to_currency(asset);
-    assert(assetCurrency != noCurrency());
+}
 
+CFTIssuance::CFTIssuance(
+    Env& env,
+    Account const& issuer,
+    Currency const& currency,
+    std::optional<jtx::ter> const& ter,
+    std::uint16_t tfee,
+    std::uint32_t fee,
+    std::uint32_t flags,
+    std::optional<jtx::seq> seq,
+    std::optional<jtx::msig> ms,
+    bool close)
+    : env_(env)
+    , cftID_(keylet::cftIssuance(issuer, currency))
+    , issuer_(issuer)
+    , currency_(currency)
+    , msig_(ms)
+    , close_(close)
+{
+    create(ter, tfee, fee, flags, seq);
+}
+
+void
+CFTIssuance::submit(
+    Json::Value const& jv,
+    std::optional<jtx::seq> const& seq,
+    std::optional<ter> const& ter)
+{
+    if (msig_)
+    {
+        if (seq && ter)
+            env_(jv, *msig_, *seq, *ter);
+        else if (seq)
+            env_(jv, *msig_, *seq);
+        else if (ter)
+            env_(jv, *msig_, *ter);
+        else
+            env_(jv, *msig_);
+    }
+    else if (seq && ter)
+        env_(jv, *seq, *ter);
+    else if (seq)
+        env_(jv, *seq);
+    else if (ter)
+        env_(jv, *ter);
+    else
+        env_(jv);
+    if (close_)
+        env_.close();
+}
+
+void
+CFTIssuance::create(
+    std::optional<jtx::ter> const& ter,
+    std::uint16_t tfee,
+    std::uint32_t fee,
+    std::uint32_t flags,
+    std::optional<jtx::seq> seq)
+{
     Json::Value jv;
-    jv[sfAccount.jsonName] = account.human();
-    jv[sfAssetCode.jsonName] = ripple::to_string(assetCurrency);
+    jv[sfAccount.jsonName] = issuer_.human();
+    jv[sfAssetCode.jsonName] = ripple::to_string(currency_);
     jv[sfTransactionType.jsonName] = jss::CFTokenIssuanceCreate;
-    return jv;
+    if (tfee)
+        jv[sfTransferFee.jsonName] = tfee;
+    if (fee)
+        jv[sfFee.jsonName] = tfee;
+    if (flags)
+        jv[sfFlags.jsonName] = tfee;
+    submit(jv, seq, ter);
 }
 
-Json::Value
-destroy(jtx::Account const& account, std::string const& id)
+void
+CFTIssuance::destroy(
+    std::optional<Account> const& acct,
+    std::optional<uint256> const id,
+    std::optional<jtx::ter> const& ter,
+    std::optional<jtx::seq> const& seq)
 {
     Json::Value jv;
-    jv[sfAccount.jsonName] = account.human();
-    jv[sfCFTokenIssuanceID.jsonName] = id;
+    if (acct)
+        jv[sfAccount.jsonName] = acct->human();
+    else
+        jv[sfAccount.jsonName] = issuer_.human();
+    if (id)
+        jv[sfCFTokenIssuanceID.jsonName] = to_string(*id);
+    else
+        jv[sfCFTokenIssuanceID.jsonName] = to_string(cftID_.key);
     jv[sfTransactionType.jsonName] = jss::CFTokenIssuanceDestroy;
-    return jv;
+    submit(jv, seq, ter);
+}
+
+void
+CFTIssuance::cftrust(
+    std::optional<Account> const& acct,
+    std::optional<jtx::ter> const& ter,
+    std::uint32_t flags,
+    std::optional<uint256> const id,
+    std::optional<jtx::seq> const& seq)
+{
+    Json::Value jv;
+    if (acct)
+        jv[sfAccount.jsonName] = acct->human();
+    else
+        jv[sfAccount.jsonName] = issuer_.human();
+    if (id)
+        jv[sfCFTokenIssuanceID.jsonName] = to_string(*id);
+    else
+        jv[sfCFTokenIssuanceID.jsonName] = to_string(cftID_.key);
+    if (flags != 0)
+        jv[sfFlags.jsonName] = flags;
+    jv[sfTransactionType.jsonName] = jss::CFTokenTrust;
+    submit(jv, seq, ter);
 }
 
 Json::Value
-cftrust(jtx::Account const& account, std::string const& id)
+CFTIssuance::ledgerEntry(
+    std::optional<AccountID> const& acct,
+    std::optional<uint256> const& id) const
 {
-    Json::Value jv;
-    jv[sfAccount.jsonName] = account.human();
-    jv[sfCFTokenIssuanceID.jsonName] = id;
-    jv[sfTransactionType.jsonName] = jss::CFTokenTrust;
-    return jv;
+    Json::Value jvParams;
+    jvParams[jss::ledger_index] = "current";
+    auto const cftid = [&]() {
+        auto const cftID = id ? keylet::cftIssuance(*id) : cftID_;
+        if (acct)
+            return keylet::cftoken(*acct, cftID.key).key;
+        return cftID.key;
+    }();
+    jvParams[jss::index] = to_string(cftid);
+    return env_.rpc("json", "ledger_entry", to_string(jvParams))[jss::result];
 }
 
-}  // namespace cft
+std::uint64_t
+CFTIssuance::outstandingAmount() const
+{
+    if (auto const sle = env_.current()->read(cftID_))
+        return sle->getFieldU64(sfOutstandingAmount);
+    return 0;
+}
+
+std::uint64_t
+CFTIssuance::holderAmount(Account const& acct) const
+{
+    if (auto const sle =
+            env_.current()->read(keylet::cftoken(acct.id(), cftID_.key)))
+        return sle->getFieldU64(sfCFTAmount);
+    return 0;
+}
 
 }  // namespace jtx
 }  // namespace test

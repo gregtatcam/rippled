@@ -20,7 +20,9 @@
 #ifndef RIPPLE_TEST_JTX_CFT_H_INCLUDED
 #define RIPPLE_TEST_JTX_CFT_H_INCLUDED
 
-#include <test/jtx/Account.h>
+#include <test/jtx/multisign.h>
+#include <test/jtx/seq.h>
+#include <test/jtx/ter.h>
 
 #include <ripple/protocol/UintTypes.h>
 
@@ -28,24 +30,80 @@ namespace ripple {
 namespace test {
 namespace jtx {
 
-namespace cft {
+class CFTIssuance
+{
+private:
+    Env& env_;
+    Keylet const cftID_;
+    Account const issuer_;
+    Currency const currency_;
+    std::optional<jtx::msig> const msig_;
+    bool const close_;
 
-/** Issue a CFT. */
-Json::Value
-create(jtx::Account const& account, std::string const& asset);
+public:
+    CFTIssuance(Env& env);
 
-/** Destroy a CFT. */
-Json::Value
-destroy(jtx::Account const& account, std::string const& id);
+    CFTIssuance(
+        Env& env,
+        Account const& issuer,
+        Currency const& currency,
+        std::optional<jtx::ter> const& ter = std::nullopt,
+        std::uint16_t tfee = 0,
+        std::uint32_t fee = 0,
+        std::uint32_t flags = 0,
+        std::optional<jtx::seq> seq = std::nullopt,
+        std::optional<jtx::msig> ms = std::nullopt,
+        bool close = true);
 
-/** Destroy a CFT. */
-Json::Value
-destroy(jtx::Account const& account, std::string const& id);
+    /** Destroy a CFT. */
+    void
+    destroy(
+        std::optional<Account> const& acct = std::nullopt,
+        std::optional<uint256> const id = std::nullopt,
+        std::optional<jtx::ter> const& ter = std::nullopt,
+        std::optional<jtx::seq> const& seq = std::nullopt);
 
-Json::Value
-cftrust(jtx::Account const& account, std::string const& id);
+    void
+    cftrust(
+        std::optional<Account> const& acct = std::nullopt,
+        std::optional<jtx::ter> const& ter = std::nullopt,
+        std::uint32_t flags = 0,
+        std::optional<uint256> const id = std::nullopt,
+        std::optional<jtx::seq> const& seq = std::nullopt);
 
-}  // namespace cft
+    uint256
+    cftIssuance() const
+    {
+        return cftID_.key;
+    }
+
+    Json::Value
+    ledgerEntry(
+        std::optional<AccountID> const& acct = std::nullopt,
+        std::optional<uint256> const& id = std::nullopt) const;
+
+    std::uint64_t
+    outstandingAmount() const;
+
+    std::uint64_t
+    holderAmount(Account const& acct) const;
+
+private:
+    /** Issue a CFT. */
+    void
+    create(
+        std::optional<jtx::ter> const& ter = std::nullopt,
+        std::uint16_t tfee = 0,
+        std::uint32_t fee = 0,
+        std::uint32_t flags = 0,
+        std::optional<jtx::seq> seq = std::nullopt);
+
+    void
+    submit(
+        Json::Value const& jv,
+        std::optional<jtx::seq> const& seq,
+        std::optional<jtx::ter> const& ter);
+};
 
 }  // namespace jtx
 }  // namespace test

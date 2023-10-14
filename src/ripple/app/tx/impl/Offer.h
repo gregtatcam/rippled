@@ -270,6 +270,47 @@ TOffer<XRPAmount, IOUAmount>::setFieldAmounts()
     m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, issOut_));
 }
 
+// CFT
+template <>
+inline void
+TOffer<CFTAmount, CFTAmount>::setFieldAmounts()
+{
+    m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in, issIn_));
+    m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, issOut_));
+}
+
+template <>
+inline void
+TOffer<CFTAmount, IOUAmount>::setFieldAmounts()
+{
+    m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in, issIn_));
+    m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, issOut_));
+}
+
+template <>
+inline void
+TOffer<IOUAmount, CFTAmount>::setFieldAmounts()
+{
+    m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in, issIn_));
+    m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, issOut_));
+}
+
+template <>
+inline void
+TOffer<CFTAmount, XRPAmount>::setFieldAmounts()
+{
+    m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in, issIn_));
+    m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out));
+}
+
+template <>
+inline void
+TOffer<XRPAmount, CFTAmount>::setFieldAmounts()
+{
+    m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in));
+    m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, issOut_));
+}
+
 template <class TIn, class TOut>
 Issue const&
 TOffer<TIn, TOut>::issueIn() const

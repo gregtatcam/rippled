@@ -283,7 +283,8 @@ inline STPathElement::STPathElement(
     if (isCFT)
     {
         mType |= typeCFT;
-        assert(currency && issuer);
+        // can it be CFT account?
+        // assert(currency && issuer);
     }
 
     hash_value_ = get_hash(*this);

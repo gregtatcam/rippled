@@ -684,29 +684,45 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         if (flowCross && (!isXRP(offer.issueIn().currency)) &&
             (offer.owner() != offer.issueIn().account))
         {
-            auto const& issuerID = offer.issueIn().account;
-            auto const issuer = afView.read(keylet::account(issuerID));
-            if (issuer && ((*issuer)[sfFlags] & lsfRequireAuth))
+            if (offer.issueIn().isCFT)
             {
-                // Issuer requires authorization.  See if offer owner has that.
-                auto const& ownerID = offer.owner();
-                auto const authFlag =
-                    issuerID > ownerID ? lsfHighAuth : lsfLowAuth;
-
-                auto const line = afView.read(
-                    keylet::line(ownerID, issuerID, offer.issueIn().currency));
-
-                if (!line || (((*line)[sfFlags] & authFlag) == 0))
-                {
-                    // Offer owner not authorized to hold IOU from issuer.
-                    // Remove this offer even if no crossing occurs.
-                    if (auto const key = offer.key())
-                        offers.permRmOffer(*key);
-                    if (!offerAttempted)
-                        // Change quality only if no previous offers were tried.
-                        ofrQ = std::nullopt;
-                    // Returning true causes offers.step() to delete the offer.
+                auto const cftokenID = keylet::cftoken(
+                    offer.owner(),
+                    keylet::cftIssuance(
+                        offer.issueIn().account, offer.issueIn().currency)
+                        .key);
+                if (!afView.exists(cftokenID))
                     return true;
+            }
+            else
+            {
+                auto const& issuerID = offer.issueIn().account;
+                auto const issuer = afView.read(keylet::account(issuerID));
+                if (issuer && ((*issuer)[sfFlags] & lsfRequireAuth))
+                {
+                    // Issuer requires authorization.  See if offer owner has
+                    // that.
+                    auto const& ownerID = offer.owner();
+                    auto const authFlag =
+                        issuerID > ownerID ? lsfHighAuth : lsfLowAuth;
+
+                    auto const line = afView.read(keylet::line(
+                        ownerID, issuerID, offer.issueIn().currency));
+
+                    if (!line || (((*line)[sfFlags] & authFlag) == 0))
+                    {
+                        // Offer owner not authorized to hold IOU from issuer.
+                        // Remove this offer even if no crossing occurs.
+                        if (auto const key = offer.key())
+                            offers.permRmOffer(*key);
+                        if (!offerAttempted)
+                            // Change quality only if no previous offers were
+                            // tried.
+                            ofrQ = std::nullopt;
+                        // Returning true causes offers.step() to delete the
+                        // offer.
+                        return true;
+                    }
                 }
             }
         }
@@ -1266,15 +1282,23 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
     {
         if (auto const prev = ctx.prevStep->directStepSrcAcct())
         {
-            auto const& view = ctx.view;
-            auto const& cur = book_.in.account;
+            if (book_.in.isCFT)
+            {
+                // TODO
+            }
+            else
+            {
+                auto const& view = ctx.view;
+                auto const& cur = book_.in.account;
 
-            auto sle = view.read(keylet::line(*prev, cur, book_.in.currency));
-            if (!sle)
-                return terNO_LINE;
-            if ((*sle)[sfFlags] &
-                ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple))
-                return terNO_RIPPLE;
+                auto sle =
+                    view.read(keylet::line(*prev, cur, book_.in.currency));
+                if (!sle)
+                    return terNO_LINE;
+                if ((*sle)[sfFlags] &
+                    ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple))
+                    return terNO_RIPPLE;
+            }
         }
     }
 
@@ -1368,6 +1392,37 @@ std::pair<TER, std::unique_ptr<Step>>
 make_BookStepXI(StrandContext const& ctx, Issue const& out)
 {
     return make_BookStepHelper<XRPAmount, IOUAmount>(ctx, xrpIssue(), out);
+}
+
+// CFT's
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepCC(StrandContext const& ctx, Issue const& in, Issue const& out)
+{
+    return make_BookStepHelper<CFTAmount, CFTAmount>(ctx, in, out);
+}
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepCI(StrandContext const& ctx, Issue const& in, Issue const& out)
+{
+    return make_BookStepHelper<CFTAmount, IOUAmount>(ctx, in, out);
+}
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepIC(StrandContext const& ctx, Issue const& in, Issue const& out)
+{
+    return make_BookStepHelper<IOUAmount, CFTAmount>(ctx, in, out);
+}
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepCX(StrandContext const& ctx, Issue const& in)
+{
+    return make_BookStepHelper<CFTAmount, XRPAmount>(ctx, in, xrpIssue());
+}
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepXC(StrandContext const& ctx, Issue const& out)
+{
+    return make_BookStepHelper<XRPAmount, CFTAmount>(ctx, xrpIssue(), out);
 }
 
 }  // namespace ripple

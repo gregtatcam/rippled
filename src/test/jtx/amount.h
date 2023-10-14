@@ -372,7 +372,7 @@ public:
     Issue
     issue() const
     {
-        return {currency, account.id()};
+        return {currency, account.id(), true};
     }
 
     /** Implicit conversion to Issue.

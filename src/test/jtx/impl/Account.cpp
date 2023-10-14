@@ -93,6 +93,14 @@ Account::operator[](std::string const& s) const
     return IOU(*this, currency);
 }
 
+CFT
+Account::operator()(std::string const& s) const
+{
+    auto const currency = to_currency(s);
+    assert(currency != noCurrency());
+    return CFT(*this, currency);
+}
+
 }  // namespace jtx
 }  // namespace test
 }  // namespace ripple

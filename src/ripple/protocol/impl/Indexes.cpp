@@ -94,7 +94,7 @@ getBookBase(Book const& book)
     assert(isConsistent(book));
 
     auto const index = [&]() {
-        if (!book.in.isCFT && !book.in.isCFT)
+        if (!book.in.isCFT && !book.out.isCFT)
             return indexHash(
                 LedgerNameSpace::BOOK_DIR,
                 book.in.currency,

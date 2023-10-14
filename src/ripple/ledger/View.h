@@ -120,7 +120,8 @@ accountHolds(
     Currency const& currency,
     AccountID const& issuer,
     FreezeHandling zeroIfFrozen,
-    beast::Journal j);
+    beast::Journal j,
+    bool isCFT = false);
 
 [[nodiscard]] STAmount
 accountHolds(
@@ -492,6 +493,20 @@ deleteAMMTrustLine(
     std::shared_ptr<SLE> sleState,
     std::optional<AccountID> const& ammAccountID,
     beast::Journal j);
+
+[[nodiscard]] TER
+rippleCFTCredit(
+    ApplyView& view,
+    AccountID const& uSenderID,
+    AccountID const& uReceiverID,
+    STAmount saAmount,
+    beast::Journal j);
+
+Rate
+transferRateCFT(
+    ReadView const& view,
+    AccountID const& issuer,
+    Currency const& currency);
 
 }  // namespace ripple
 

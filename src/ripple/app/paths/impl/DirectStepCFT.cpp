@@ -334,40 +334,7 @@ public:
 std::uint32_t
 DirectCFTPaymentStep::quality(ReadView const& sb, QualityDirection qDir) const
 {
-    if (src_ == dst_)
-        return QUALITY_ONE;
-
-    auto const sle = sb.read(keylet::line(dst_, src_, currency_));
-
-    if (!sle)
-        return QUALITY_ONE;
-
-    auto const& field = [this, qDir]() -> SF_UINT32 const& {
-        if (qDir == QualityDirection::in)
-        {
-            // compute dst quality in
-            if (this->dst_ < this->src_)
-                return sfLowQualityIn;
-            else
-                return sfHighQualityIn;
-        }
-        else
-        {
-            // compute src quality out
-            if (this->src_ < this->dst_)
-                return sfLowQualityOut;
-            else
-                return sfHighQualityOut;
-        }
-    }();
-
-    if (!sle->isFieldPresent(field))
-        return QUALITY_ONE;
-
-    auto const q = (*sle)[field];
-    if (!q)
-        return QUALITY_ONE;
-    return q;
+    return QUALITY_ONE;
 }
 
 std::uint32_t
@@ -501,19 +468,18 @@ std::pair<CFTAmount, DebtDirection>
 DirectStepCFT<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
     // TODO
-#if 0
     auto const srcOwed = toAmount<CFTAmount>(
-        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_));
+        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_, true));
 
     if (srcOwed.signum() > 0)
         return {srcOwed, DebtDirection::redeems};
 
+#if 0
     // srcOwed is negative or zero
     return {
         creditLimit2(sb, dst_, src_, currency_) + srcOwed,
         DebtDirection::issues};
 #endif
-    return {CFTAmount{1'000'000}, DebtDirection::issues};
 }
 
 template <class TDerived>
@@ -525,7 +491,7 @@ DirectStepCFT<TDerived>::debtDirection(ReadView const& sb, StrandDirection dir)
         return cache_->srcDebtDir;
 
     auto const srcOwed =
-        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_);
+        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_, true);
     return srcOwed.signum() > 0 ? DebtDirection::redeems
                                 : DebtDirection::issues;
 }
@@ -547,7 +513,7 @@ DirectStepCFT<TDerived>::revImp(
         qualities(sb, srcDebtDir, StrandDirection::reverse);
     assert(static_cast<TDerived const*>(this)->verifyDstQualityIn(dstQIn));
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
+    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_, true);
 
     JLOG(j_.trace()) << "DirectStepCFT::rev"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -574,53 +540,7 @@ DirectStepCFT<TDerived>::revImp(
         CFTAmount const in =
             mulRatio(srcToDst, srcQOut, QUALITY_ONE, /*roundUp*/ true);
         cache_.emplace(in, srcToDst, srcToDst, srcDebtDir);
-        // TODO
-        if (src_ != issuer_)
-        {
-            auto const cftokenID = keylet::cftoken(src_, cftID_.key);
-            if (auto sle = sb.peek(cftokenID))
-            {
-                sle->setFieldU64(
-                    sfCFTAmount,
-                    sle->getFieldU64(sfCFTAmount) - srcToDst.cft());
-                sb.update(sle);
-            }
-        }
-        else if (auto const sle = sb.peek(cftID_))
-        {
-            sle->setFieldU64(
-                sfOutstandingAmount,
-                sle->getFieldU64(sfOutstandingAmount) + srcToDst.cft());
-            sb.update(sle);
-        }
-
-        if (dst_ != issuer_)
-        {
-            auto const cftokenID = keylet::cftoken(dst_, cftID_.key);
-            if (auto sle = sb.peek(cftokenID))
-            {
-                sle->setFieldU64(
-                    sfCFTAmount,
-                    sle->getFieldU64(sfCFTAmount) + srcToDst.cft());
-                sb.update(sle);
-            }
-        }
-        else if (auto const sle = sb.peek(cftID_))
-        {
-            sle->setFieldU64(
-                sfOutstandingAmount,
-                sle->getFieldU64(sfOutstandingAmount) - srcToDst.cft());
-            sb.update(sle);
-        }
-#if 0
-        rippleCredit(
-            sb,
-            src_,
-            dst_,
-            toSTAmount(srcToDst, srcToDstIss),
-            /*checkIssuer*/ true,
-            j_);
-#endif
+        rippleCFTCredit(sb, src_, dst_, toSTAmount(srcToDst, srcToDstIss), j_);
         JLOG(j_.trace()) << "DirectStepCFT::rev: Non-limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
                          << " in: " << to_string(in)
@@ -635,51 +555,8 @@ DirectStepCFT<TDerived>::revImp(
     CFTAmount const actualOut =
         mulRatio(maxSrcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
     cache_.emplace(in, maxSrcToDst, actualOut, srcDebtDir);
-    // TODO
-    if (src_ != issuer_)
-    {
-        auto const cftokenID = keylet::cftoken(src_, cftID_.key);
-        if (auto sle = sb.peek(cftokenID))
-        {
-            sle->setFieldU64(
-                sfCFTAmount, sle->getFieldU64(sfCFTAmount) - maxSrcToDst.cft());
-            sb.update(sle);
-        }
-    }
-    else if (auto const sle = sb.peek(cftID_))
-    {
-        sle->setFieldU64(
-            sfOutstandingAmount,
-            sle->getFieldU64(sfOutstandingAmount) + maxSrcToDst.cft());
-        sb.update(sle);
-    }
 
-    if (dst_ != issuer_)
-    {
-        auto const cftokenID = keylet::cftoken(dst_, cftID_.key);
-        if (auto sle = sb.peek(cftokenID))
-        {
-            sle->setFieldU64(
-                sfCFTAmount, sle->getFieldU64(sfCFTAmount) + maxSrcToDst.cft());
-            sb.update(sle);
-        }
-    }
-    else if (auto const sle = sb.peek(cftID_))
-    {
-        sle->setFieldU64(
-            sfOutstandingAmount,
-            sle->getFieldU64(sfOutstandingAmount) - maxSrcToDst.cft());
-        sb.update(sle);
-    }
-#if 0
-    rippleCredit(
-        sb,
-        src_,
-        dst_,
-        toSTAmount(maxSrcToDst, srcToDstIss),
-        /*checkIssuer*/ true,
-        j_);
-#endif
+    rippleCFTCredit(sb, src_, dst_, toSTAmount(maxSrcToDst, srcToDstIss), j_);
     JLOG(j_.trace()) << "DirectStepCFT::rev: Limiting"
                      << " srcRedeems: " << redeems(srcDebtDir)
                      << " in: " << to_string(in)
@@ -700,18 +577,14 @@ DirectStepCFT<TDerived>::setCacheLimiting(
     CFTAmount const& fwdOut,
     DebtDirection srcDebtDir)
 {
-    // TODO
-#if 0
     if (cache_->in < fwdIn)
     {
-        CFTAmount const smallDiff(1, -9);
+        CFTAmount const smallDiff(1);
         auto const diff = fwdIn - cache_->in;
         if (diff > smallDiff)
         {
-            if (fwdIn.exponent() != cache_->in.exponent() ||
-                !cache_->in.mantissa() ||
-                (double(fwdIn.mantissa()) / double(cache_->in.mantissa())) >
-                    1.01)
+            if (!cache_->in.cft() ||
+                (double(fwdIn.cft()) / double(cache_->in.cft())) > 1.01)
             {
                 // Detect large diffs on forward pass so they may be
                 // investigated
@@ -728,7 +601,6 @@ DirectStepCFT<TDerived>::setCacheLimiting(
             }
         }
     }
-#endif
     cache_->in = fwdIn;
     if (fwdSrcToDst < cache_->srcToDst)
         cache_->srcToDst = fwdSrcToDst;
@@ -753,7 +625,7 @@ DirectStepCFT<TDerived>::fwdImp(
     auto const [srcQOut, dstQIn] =
         qualities(sb, srcDebtDir, StrandDirection::forward);
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
+    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_, true);
 
     JLOG(j_.trace()) << "DirectStepCFT::fwd"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -780,16 +652,8 @@ DirectStepCFT<TDerived>::fwdImp(
         CFTAmount const out =
             mulRatio(srcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
         setCacheLimiting(in, srcToDst, out, srcDebtDir);
-        // TODO
-#if 0
-        rippleCredit(
-            sb,
-            src_,
-            dst_,
-            toSTAmount(cache_->srcToDst, srcToDstIss),
-            /*checkIssuer*/ true,
-            j_);
-#endif
+        rippleCFTCredit(
+            sb, src_, dst_, toSTAmount(cache_->srcToDst, srcToDstIss), j_);
         JLOG(j_.trace()) << "DirectStepCFT::fwd: Non-limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
                          << " in: " << to_string(in)
@@ -804,16 +668,8 @@ DirectStepCFT<TDerived>::fwdImp(
         CFTAmount const out =
             mulRatio(maxSrcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
         setCacheLimiting(actualIn, maxSrcToDst, out, srcDebtDir);
-        // TODO
-#if 0
-        rippleCredit(
-            sb,
-            src_,
-            dst_,
-            toSTAmount(cache_->srcToDst, srcToDstIss),
-            /*checkIssuer*/ true,
-            j_);
-#endif
+        rippleCFTCredit(
+            sb, src_, dst_, toSTAmount(cache_->srcToDst, srcToDstIss), j_);
         JLOG(j_.trace()) << "DirectStepCFT::rev: Limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
                          << " in: " << to_string(actualIn)
@@ -863,8 +719,6 @@ DirectStepCFT<TDerived>::validFwd(
         return {false, EitherAmount(cache_->out)};
     }
 
-    // TODO
-#if 0
     if (!(checkNear(savCache.in, cache_->in) &&
           checkNear(savCache.out, cache_->out)))
     {
@@ -875,7 +729,6 @@ DirectStepCFT<TDerived>::validFwd(
                         << " CachedOut: " << to_string(cache_->out);
         return {false, EitherAmount(cache_->out)};
     }
-#endif
     return {true, EitherAmount(cache_->out)};
 }
 

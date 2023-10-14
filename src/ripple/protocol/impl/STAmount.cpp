@@ -78,6 +78,22 @@ getSNValue(STAmount const& amount)
     return ret;
 }
 
+static std::int64_t
+getCFTValue(STAmount const& amount)
+{
+    if (!amount.isCFT())
+        Throw<std::runtime_error>("amount is not native!");
+
+    auto ret = static_cast<std::int64_t>(amount.mantissa());
+
+    assert(static_cast<std::uint64_t>(ret) == amount.mantissa());
+
+    if (amount.negative())
+        ret = -ret;
+
+    return ret;
+}
+
 static bool
 areComparable(STAmount const& v1, STAmount const& v2)
 {
@@ -386,6 +402,7 @@ STAmount::STAmount(XRPAmount const& amount)
 STAmount::STAmount(CFTAmount const& amount)
     : mOffset(0), mType(Type::cft), mIsNegative(amount < beast::zero)
 {
+    mIssue.isCFT = true;
     if (mIsNegative)
         mValue = unsafe_cast<std::uint64_t>(-amount.cft());
     else
@@ -435,7 +452,7 @@ STAmount::xrp() const
 IOUAmount
 STAmount::iou() const
 {
-    if (native())
+    if (native() || isCFT())
         Throw<std::logic_error>("Cannot return native STAmount as IOUAmount");
 
     auto mantissa = static_cast<std::int64_t>(mValue);
@@ -514,8 +531,11 @@ operator+(STAmount const& v1, STAmount const& v2)
             v2.negative()};
     }
 
+    // TODO
     if (v1.native())
         return {v1.getFName(), getSNValue(v1) + getSNValue(v2)};
+    if (v1.isCFT())
+        return {v1.mIssue, v1.cft().cft() + v2.cft().cft()};
 
     if (getSTNumberSwitchover())
     {
@@ -580,7 +600,8 @@ void
 STAmount::setIssue(Issue const& issue)
 {
     mIssue = issue;
-    mType = isXRP(*this) ? Type::xrp : Type::issued_currency;
+    mType = isXRP(*this) ? Type::xrp
+                         : (mIssue.isCFT ? Type::cft : Type::issued_currency);
 }
 
 // Convert an offer into an index amount so they sort by rate.
@@ -1379,7 +1400,7 @@ divide(STAmount const& num, STAmount const& den, Issue const& issue)
     int numOffset = num.exponent();
     int denOffset = den.exponent();
 
-    if (num.native())
+    if (num.native() || num.isCFT())
     {
         while (numVal < STAmount::cMinValue)
         {
@@ -1389,7 +1410,7 @@ divide(STAmount const& num, STAmount const& den, Issue const& issue)
         }
     }
 
-    if (den.native())
+    if (den.native() || den.isCFT())
     {
         while (denVal < STAmount::cMinValue)
         {
@@ -1416,6 +1437,7 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
     if (v1 == beast::zero || v2 == beast::zero)
         return STAmount(issue);
 
+    // TODO
     if (v1.native() && v2.native() && isXRP(issue))
     {
         std::uint64_t const minV =
@@ -1431,6 +1453,23 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
 
         return STAmount(v1.getFName(), minV * maxV);
     }
+    if (v1.isCFT() && v2.isCFT() && issue.isCFT)
+    {
+        std::uint64_t const minV = getCFTValue(v1) < getCFTValue(v2)
+            ? getCFTValue(v1)
+            : getCFTValue(v2);
+        std::uint64_t const maxV = getCFTValue(v1) < getCFTValue(v2)
+            ? getCFTValue(v2)
+            : getCFTValue(v1);
+
+        if (minV > 3000000000ull)  // sqrt(cMaxNative)
+            Throw<std::runtime_error>("Native value overflow");
+
+        if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
+            Throw<std::runtime_error>("Native value overflow");
+
+        return STAmount(issue, minV * maxV);
+    }
 
     if (getSTNumberSwitchover())
         return {IOUAmount{Number{v1} * Number{v2}}, issue};
@@ -1440,7 +1479,8 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
     int offset1 = v1.exponent();
     int offset2 = v2.exponent();
 
-    if (v1.native())
+    // TODO
+    if (v1.native() || v1.isCFT())
     {
         while (value1 < STAmount::cMinValue)
         {
@@ -1449,7 +1489,7 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
         }
     }
 
-    if (v2.native())
+    if (v2.native() || v2.isCFT())
     {
         while (value2 < STAmount::cMinValue)
         {
@@ -1628,6 +1668,7 @@ mulRoundImpl(
 
     bool const xrp = isXRP(issue);
 
+    // TODO
     if (v1.native() && v2.native() && xrp)
     {
         std::uint64_t minV =
@@ -1643,11 +1684,29 @@ mulRoundImpl(
 
         return STAmount(v1.getFName(), minV * maxV);
     }
+    if (v1.isCFT() && v2.isCFT() && issue.isCFT)
+    {
+        std::uint64_t minV = (getCFTValue(v1) < getCFTValue(v2))
+            ? getCFTValue(v1)
+            : getCFTValue(v2);
+        std::uint64_t maxV = (getCFTValue(v1) < getCFTValue(v2))
+            ? getCFTValue(v2)
+            : getCFTValue(v1);
+
+        if (minV > 3000000000ull)  // sqrt(cMaxNative)
+            Throw<std::runtime_error>("Native value overflow");
+
+        if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
+            Throw<std::runtime_error>("Native value overflow");
+
+        return STAmount(issue, minV * maxV);
+    }
 
     std::uint64_t value1 = v1.mantissa(), value2 = v2.mantissa();
     int offset1 = v1.exponent(), offset2 = v2.exponent();
 
-    if (v1.native())
+    // TODO
+    if (v1.native() || v1.isCFT())
     {
         while (value1 < STAmount::cMinValue)
         {
@@ -1656,7 +1715,8 @@ mulRoundImpl(
         }
     }
 
-    if (v2.native())
+    // TODO
+    if (v2.native() || v2.isCFT())
     {
         while (value2 < STAmount::cMinValue)
         {
@@ -1750,7 +1810,8 @@ divRoundImpl(
     std::uint64_t numVal = num.mantissa(), denVal = den.mantissa();
     int numOffset = num.exponent(), denOffset = den.exponent();
 
-    if (num.native())
+    // TODO
+    if (num.native() || num.isCFT())
     {
         while (numVal < STAmount::cMinValue)
         {
@@ -1759,7 +1820,8 @@ divRoundImpl(
         }
     }
 
-    if (den.native())
+    // TODO
+    if (den.native() || den.isCFT())
     {
         while (denVal < STAmount::cMinValue)
         {

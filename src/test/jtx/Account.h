@@ -32,6 +32,7 @@ namespace test {
 namespace jtx {
 
 class IOU;
+class CFT;
 
 /** Immutable cryptographic account descriptor. */
 class Account
@@ -128,6 +129,8 @@ public:
     /** Returns an IOU for the specified gateway currency. */
     IOU
     operator[](std::string const& s) const;
+    CFT
+    operator()(std::string const& s) const;
 
 private:
     static std::

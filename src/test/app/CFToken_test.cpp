@@ -29,14 +29,15 @@ class CFToken_test : public beast::unit_test::suite
     testEnabled(FeatureBitset features)
     {
         testcase("Enabled");
-
         using namespace test::jtx;
+        Account const gw = Account("gw");
+        Account const alice = Account("alice");
+        Account const carol = Account("carol");
+        auto const USDCFT = gw("USD");
+        auto const USD = gw["USD"];
+
         {
             Env env(*this);
-            Account const gw = Account("gw");
-            Account const alice = Account("alice");
-            Account const carol = Account("carol");
-            auto const USD = gw["USD"];
             env.fund(XRP(1000), gw);
             env.fund(XRP(1000), alice);
             env.fund(XRP(1000), carol);
@@ -51,98 +52,29 @@ class CFToken_test : public beast::unit_test::suite
             // If the CFT amendment is not enabled, you should not be able to
             // create CFTokenIssuances
             Env env{*this, features - featureCFTokensV1};
-            Account const& master = env.master;
 
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-
-            env(cft::create(master, "USD"), ter(temDISABLED));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(master) == 0);
+            CFTIssuance cft(env, env.master, USD.currency, ter(temDISABLED));
         }
         {
             // If the CFT amendment IS enabled, you should be able to create
             // CFTokenIssuances
             Env env{*this, features | featureCFTokensV1};
-            Account const& master = env.master;
 
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-
-            env(cft::create(master, "USD"));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(master) == 1);
+            CFTIssuance cft(env, env.master, USD.currency);
         }
         {
             // If the CFT amendment is not enabled, you should not be able to
             // destroy CFTokenIssuances
             Env env{*this, features - featureCFTokensV1};
-            Account const& master = env.master;
-
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-
-            auto const id =
-                keylet::cftIssuance(master.id(), to_currency("USD"));
-            env(cft::destroy(master, ripple::to_string(id.key)),
-                ter(temDISABLED));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(master) == 0);
+            CFTIssuance cft(env);
+            cft.destroy(env.master, uint256{0}, ter(temDISABLED));
         }
         {
             // If the CFT amendment IS enabled, you should be able to destroy
             // CFTokenIssuances
             Env env{*this, features | featureCFTokensV1};
-            Account const& master = env.master;
-
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-
-            env(cft::create(master, "USD"));
-            env.close();
-            BEAST_EXPECT(env.ownerCount(master) == 1);
-
-            auto const id =
-                keylet::cftIssuance(master.id(), to_currency("USD"));
-
-            env(cft::destroy(master, ripple::to_string(id.key)));
-            env.close();
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-        }
-        {
-            // If the CFT amendment is not enabled, you should not be able to
-            // destroy CFTokenIssuances
-            Env env{*this, features - featureCFTokensV1};
-            Account const& master = env.master;
-
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-
-            // TODO why not working with short codes?
-            auto const id =
-                keylet::cftIssuance(master.id(), to_currency("USD"));
-            env(cft::destroy(master, ripple::to_string(id.key)),
-                ter(temDISABLED));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-        }
-        {
-            // If the CFT amendment IS enabled, you should be able to destroy
-            // CFTokenIssuances
-            Env env{*this, features | featureCFTokensV1};
-            Account const& master = env.master;
-
-            BEAST_EXPECT(env.ownerCount(master) == 0);
-
-            env(cft::create(master, "USD"));
-            env.close();
-            BEAST_EXPECT(env.ownerCount(master) == 1);
-
-            auto const id =
-                keylet::cftIssuance(master.id(), to_currency("USD"));
-
-            env(cft::destroy(master, ripple::to_string(id.key)));
-            env.close();
-            BEAST_EXPECT(env.ownerCount(master) == 0);
+            CFTIssuance cft(env, env.master, USD.currency);
+            cft.destroy();
         }
 
         {
@@ -154,32 +86,36 @@ class CFToken_test : public beast::unit_test::suite
             // If the CFT amendment IS enabled, you should be able to make a
             // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
-            Account const gw("gw");
-            Account const alice("alice");
-            Account const carol("carol");
-            env.fund(XRP(10000), gw, alice);
+            env.fund(XRP(10000), gw, alice, carol);
             env.close();
 
-            // TODO why not working with short codes?
-            env(cft::create(gw, "USD"));
+            CFTIssuance cft(env, gw, USD.currency);
+
+            cft.cftrust(alice);
+            env(pay(gw, alice, USDCFT(200)));
+            env.close();
+            BEAST_EXPECT(cft.holderAmount(alice) == 200);
+
+            cft.cftrust(carol);
+            env(pay(gw, carol, USDCFT(200)));
+            env.close();
+            BEAST_EXPECT(cft.holderAmount(carol) == 200);
+            BEAST_EXPECT(cft.outstandingAmount() == 400);
+
+            env(offer(alice, XRP(100), USDCFT(101)));
+            env.close();
+            BEAST_EXPECT(expectOffers(
+                env, alice, 1, {{Amounts{XRP(100), USDCFT(101)}}}));
+
+            // Offer crossing
+            env(offer(carol, USDCFT(101), XRP(100)));
             env.close();
 
-            BEAST_EXPECT(env.ownerCount(gw) == 1);
-
-            Json::Value amt;
-            amt["issuer"] = gw.human();
-            amt["cft_asset"] = "USD";
-            amt["value"] = "1";
-            STAmount const yo = amountFromJson(sfAmount, amt);
-            auto const id = keylet::cftIssuance(gw.id(), to_currency("USD"));
-            env(cft::cftrust(alice, ripple::to_string(id.key)));
-            env.close();
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
-            env(pay(gw, alice, yo));
-            env.close();
-            auto const sle = env.le(keylet::cftoken(alice.id(), id.key));
-            BEAST_EXPECT(sle->getFieldU64(sfCFTAmount) == 1);
-            env(offer(alice, XRP(100), USD(100)));
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(expectOffers(env, carol, 0));
+            BEAST_EXPECT(cft.outstandingAmount() == 400);
+            BEAST_EXPECT(cft.holderAmount(alice) == 99);
+            BEAST_EXPECT(cft.holderAmount(carol) == 301);
         }
     }
 

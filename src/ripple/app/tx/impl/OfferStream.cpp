@@ -133,6 +133,19 @@ accountFundsHelper(
         view, id, issue.currency, issue.account, freezeHandling, j));
 }
 
+static CFTAmount
+accountFundsHelper(
+    ReadView const& view,
+    AccountID const& id,
+    CFTAmount const& amtDefault,
+    Issue const& issue,
+    FreezeHandling freezeHandling,
+    beast::Journal j)
+{
+    return toAmount<CFTAmount>(accountHolds(
+        view, id, issue.currency, issue.account, freezeHandling, j, true));
+}
+
 template <class TIn, class TOut>
 template <class TTakerPays, class TTakerGets>
 bool
@@ -140,12 +153,14 @@ TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
 {
     static_assert(
         std::is_same_v<TTakerPays, IOUAmount> ||
-            std::is_same_v<TTakerPays, XRPAmount>,
+            std::is_same_v<TTakerPays, XRPAmount> ||
+            std::is_same_v<TTakerPays, CFTAmount>,
         "STAmount is not supported");
 
     static_assert(
         std::is_same_v<TTakerGets, IOUAmount> ||
-            std::is_same_v<TTakerGets, XRPAmount>,
+            std::is_same_v<TTakerGets, XRPAmount> ||
+            std::is_same_v<TTakerGets, CFTAmount>,
         "STAmount is not supported");
 
     static_assert(
@@ -175,7 +190,8 @@ TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
         toAmount<TTakerPays>(offer_.amount().in),
         toAmount<TTakerGets>(offer_.amount().out)};
 
-    if constexpr (!inIsXRP && !outIsXRP)
+    if constexpr (
+        !inIsXRP && !outIsXRP && std::is_same_v<TTakerPays, TTakerGets>)
     {
         if (ofrAmts.in >= ofrAmts.out)
             return false;
@@ -313,33 +329,82 @@ TOfferStreamBase<TIn, TOut>::step()
         bool const rmSmallIncreasedQOffer = [&] {
             bool const inIsXRP = isXRP(offer_.issueIn());
             bool const outIsXRP = isXRP(offer_.issueOut());
-            if (inIsXRP && !outIsXRP)
+            if constexpr (
+                !std::is_same_v<TIn, STAmount> &&
+                !std::is_same_v<TOut, STAmount>)
+                return shouldRmSmallIncreasedQOffer<TIn, TOut>();
+            if constexpr (
+                std::is_same_v<TIn, STAmount> &&
+                !std::is_same_v<TOut, STAmount>)
             {
-                // Without the `if constexpr`, the
-                // `shouldRmSmallIncreasedQOffer` template will be instantiated
-                // even if it is never used. This can cause compiler errors in
-                // some cases, hence the `if constexpr` guard.
-                // Note that TIn can be XRPAmount or STAmount, and TOut can be
-                // IOUAmount or STAmount.
-                if constexpr (!(std::is_same_v<TIn, IOUAmount> ||
-                                std::is_same_v<TOut, XRPAmount>))
-                    return shouldRmSmallIncreasedQOffer<XRPAmount, IOUAmount>();
-            }
-            if (!inIsXRP && outIsXRP)
-            {
-                // See comment above for `if constexpr` rationale
-                if constexpr (!(std::is_same_v<TIn, XRPAmount> ||
-                                std::is_same_v<TOut, IOUAmount>))
+                bool const inIsCFT = offer_.amount().in.isCFT();
+                if (inIsXRP)
+                    return shouldRmSmallIncreasedQOffer<XRPAmount, TOut>();
+                if (outIsXRP)
+                {
+                    if (inIsCFT)
+                        return shouldRmSmallIncreasedQOffer<
+                            CFTAmount,
+                            XRPAmount>();
                     return shouldRmSmallIncreasedQOffer<IOUAmount, XRPAmount>();
+                }
+                if (inIsCFT)
+                    return shouldRmSmallIncreasedQOffer<CFTAmount, TOut>();
+                return shouldRmSmallIncreasedQOffer<IOUAmount, TOut>();
             }
-            if (!inIsXRP && !outIsXRP)
+            if constexpr (
+                !std::is_same_v<TIn, STAmount> &&
+                std::is_same_v<TOut, STAmount>)
             {
-                // See comment above for `if constexpr` rationale
-                if constexpr (!(std::is_same_v<TIn, XRPAmount> ||
-                                std::is_same_v<TOut, XRPAmount>))
-                    return shouldRmSmallIncreasedQOffer<IOUAmount, IOUAmount>();
+                bool const outIsCFT = offer_.amount().out.isCFT();
+                if (inIsXRP)
+                {
+                    if (outIsCFT)
+                        return shouldRmSmallIncreasedQOffer<
+                            XRPAmount,
+                            CFTAmount>();
+                    return shouldRmSmallIncreasedQOffer<XRPAmount, IOUAmount>();
+                }
+                if (outIsXRP)
+                    return shouldRmSmallIncreasedQOffer<TIn, XRPAmount>();
+                if (outIsCFT)
+                    return shouldRmSmallIncreasedQOffer<TIn, CFTAmount>();
+                return shouldRmSmallIncreasedQOffer<TIn, IOUAmount>();
             }
-            assert(0);  // xrp/xrp offer!?! should never happen
+            if constexpr (
+                std::is_same_v<TIn, STAmount> && std::is_same_v<TOut, STAmount>)
+            {
+                bool const inIsCFT = offer_.amount().in.isCFT();
+                bool const outIsCFT = offer_.amount().out.isCFT();
+                if (inIsXRP)
+                {
+                    if (outIsCFT)
+                        return shouldRmSmallIncreasedQOffer<
+                            XRPAmount,
+                            CFTAmount>();
+                    return shouldRmSmallIncreasedQOffer<XRPAmount, IOUAmount>();
+                }
+                if (outIsXRP)
+                {
+                    if (inIsCFT)
+                        return shouldRmSmallIncreasedQOffer<
+                            CFTAmount,
+                            XRPAmount>();
+                    return shouldRmSmallIncreasedQOffer<IOUAmount, XRPAmount>();
+                }
+                if (inIsCFT)
+                {
+                    if (outIsCFT)
+                        return shouldRmSmallIncreasedQOffer<
+                            CFTAmount,
+                            CFTAmount>();
+                    return shouldRmSmallIncreasedQOffer<CFTAmount, IOUAmount>();
+                }
+                if (outIsCFT)
+                    return shouldRmSmallIncreasedQOffer<IOUAmount, CFTAmount>();
+                return shouldRmSmallIncreasedQOffer<IOUAmount, IOUAmount>();
+            }
+            assert(!inIsXRP && !outIsXRP);
             return false;
         }();
 
@@ -394,9 +459,19 @@ template class FlowOfferStream<STAmount, STAmount>;
 template class FlowOfferStream<IOUAmount, IOUAmount>;
 template class FlowOfferStream<XRPAmount, IOUAmount>;
 template class FlowOfferStream<IOUAmount, XRPAmount>;
+template class FlowOfferStream<CFTAmount, CFTAmount>;
+template class FlowOfferStream<CFTAmount, IOUAmount>;
+template class FlowOfferStream<IOUAmount, CFTAmount>;
+template class FlowOfferStream<XRPAmount, CFTAmount>;
+template class FlowOfferStream<CFTAmount, XRPAmount>;
 
 template class TOfferStreamBase<STAmount, STAmount>;
 template class TOfferStreamBase<IOUAmount, IOUAmount>;
 template class TOfferStreamBase<XRPAmount, IOUAmount>;
 template class TOfferStreamBase<IOUAmount, XRPAmount>;
+template class TOfferStreamBase<CFTAmount, CFTAmount>;
+template class TOfferStreamBase<IOUAmount, CFTAmount>;
+template class TOfferStreamBase<CFTAmount, IOUAmount>;
+template class TOfferStreamBase<XRPAmount, CFTAmount>;
+template class TOfferStreamBase<CFTAmount, XRPAmount>;
 }  // namespace ripple

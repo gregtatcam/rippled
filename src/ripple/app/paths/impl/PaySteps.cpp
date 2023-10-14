@@ -62,6 +62,12 @@ checkNear(XRPAmount const& expected, XRPAmount const& actual)
     return expected == actual;
 };
 
+bool
+checkNear(CFTAmount const& expected, CFTAmount const& actual)
+{
+    return expected == actual;
+};
+
 static bool
 isXRPAccount(STPathElement const& pe)
 {
@@ -130,11 +136,21 @@ toStep(
     assert(e2->isOffer());
 
     if (isXRP(outCurrency))
+    {
+        if (curIssue.isCFT)  // ??
+            return make_BookStepCX(ctx, curIssue);
         return make_BookStepIX(ctx, curIssue);
+    }
 
     if (isXRP(curIssue.currency))
+    {
+        if (e2->isCft())  // ?
+            return make_BookStepXC(ctx, {outCurrency, outIssuer, true});
         return make_BookStepXI(ctx, {outCurrency, outIssuer});
+    }
 
+    if (curIssue.isCFT)
+        return make_BookStepCC(ctx, curIssue, {outCurrency, outIssuer, true});
     return make_BookStepII(ctx, curIssue, {outCurrency, outIssuer});
 }
 
@@ -229,7 +245,10 @@ toStrand(
              path[0].getAccountID() != sendMaxIssue->account))
         {
             normPath.emplace_back(
-                sendMaxIssue->account, std::nullopt, std::nullopt);
+                sendMaxIssue->account,
+                std::nullopt,
+                std::nullopt,
+                sendMaxIssue->isCFT);
         }
 
         for (auto const& i : path)
@@ -245,7 +264,10 @@ toStrand(
                  lastCurrency.getIssuerID() != deliver.account))
             {
                 normPath.emplace_back(
-                    std::nullopt, deliver.currency, deliver.account);
+                    std::nullopt,
+                    deliver.currency,
+                    deliver.account,
+                    deliver.isCFT);
             }
         }
 
@@ -253,13 +275,15 @@ toStrand(
                normPath.back().getAccountID() == deliver.account) ||
               (dst == deliver.account)))
         {
-            normPath.emplace_back(deliver.account, std::nullopt, std::nullopt);
+            normPath.emplace_back(
+                deliver.account, std::nullopt, std::nullopt, deliver.isCFT);
         }
 
         if (!normPath.back().isAccount() ||
             normPath.back().getAccountID() != dst)
         {
-            normPath.emplace_back(dst, std::nullopt, std::nullopt);
+            normPath.emplace_back(
+                dst, std::nullopt, std::nullopt, deliver.isCFT);
         }
     }
 
@@ -323,6 +347,7 @@ toStrand(
         if (cur->hasCurrency())
         {
             curIssue.currency = cur->getCurrency();
+            curIssue.isCFT = cur->isCft();
             if (isXRP(curIssue.currency))
                 curIssue.account = xrpAccount();
         }
