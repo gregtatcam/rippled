@@ -474,6 +474,8 @@ DirectStepCFT<TDerived>::maxPaymentFlow(ReadView const& sb) const
     if (srcOwed.signum() > 0)
         return {srcOwed, DebtDirection::redeems};
 
+    return {CFTAmount{0}, DebtDirection::redeems};
+
 #if 0
     // srcOwed is negative or zero
     return {

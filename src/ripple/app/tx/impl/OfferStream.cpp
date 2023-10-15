@@ -148,26 +148,9 @@ accountFundsHelper(
 
 template <class TIn, class TOut>
 template <class TTakerPays, class TTakerGets>
-bool
+    requires ValidTaker<TTakerPays, TTakerGets> bool
 TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
 {
-    static_assert(
-        std::is_same_v<TTakerPays, IOUAmount> ||
-            std::is_same_v<TTakerPays, XRPAmount> ||
-            std::is_same_v<TTakerPays, CFTAmount>,
-        "STAmount is not supported");
-
-    static_assert(
-        std::is_same_v<TTakerGets, IOUAmount> ||
-            std::is_same_v<TTakerGets, XRPAmount> ||
-            std::is_same_v<TTakerGets, CFTAmount>,
-        "STAmount is not supported");
-
-    static_assert(
-        !std::is_same_v<TTakerPays, XRPAmount> ||
-            !std::is_same_v<TTakerGets, XRPAmount>,
-        "Cannot have XRP/XRP offers");
-
     if (!view_.rules().enabled(fixRmSmallIncreasedQOffers))
         return false;
 
@@ -326,86 +309,69 @@ TOfferStreamBase<TIn, TOut>::step()
             continue;
         }
 
+        using Var = std::variant<XRPAmount, IOUAmount, CFTAmount>;
+        auto toTypedAmt = [&]<typename T>(T const& amt) -> Var {
+            if constexpr (std::is_same_v<T, STAmount>)
+            {
+                if (isXRP(amt))
+                    return amt.xrp();
+                if (amt.isCFT())
+                    return amt.cft();
+                return amt.iou();
+            }
+            if constexpr (!std::is_same_v<T, STAmount>)
+                return amt;
+        };
+
         bool const rmSmallIncreasedQOffer = [&] {
-            bool const inIsXRP = isXRP(offer_.issueIn());
-            bool const outIsXRP = isXRP(offer_.issueOut());
+            bool ret = false;
             if constexpr (
                 !std::is_same_v<TIn, STAmount> &&
                 !std::is_same_v<TOut, STAmount>)
                 return shouldRmSmallIncreasedQOffer<TIn, TOut>();
-            if constexpr (
+            else if constexpr (
                 std::is_same_v<TIn, STAmount> &&
                 !std::is_same_v<TOut, STAmount>)
             {
-                bool const inIsCFT = offer_.amount().in.isCFT();
-                if (inIsXRP)
-                    return shouldRmSmallIncreasedQOffer<XRPAmount, TOut>();
-                if (outIsXRP)
-                {
-                    if (inIsCFT)
-                        return shouldRmSmallIncreasedQOffer<
-                            CFTAmount,
-                            XRPAmount>();
-                    return shouldRmSmallIncreasedQOffer<IOUAmount, XRPAmount>();
-                }
-                if (inIsCFT)
-                    return shouldRmSmallIncreasedQOffer<CFTAmount, TOut>();
-                return shouldRmSmallIncreasedQOffer<IOUAmount, TOut>();
+                std::visit(
+                    [&]<typename TInAmt>(TInAmt&&) {
+                        ret = shouldRmSmallIncreasedQOffer<
+                            std::decay_t<TInAmt>,
+                            TOut>();
+                    },
+                    toTypedAmt(offer_.amount().in));
+                return ret;
             }
-            if constexpr (
+            else if constexpr (
                 !std::is_same_v<TIn, STAmount> &&
                 std::is_same_v<TOut, STAmount>)
             {
-                bool const outIsCFT = offer_.amount().out.isCFT();
-                if (inIsXRP)
-                {
-                    if (outIsCFT)
-                        return shouldRmSmallIncreasedQOffer<
-                            XRPAmount,
-                            CFTAmount>();
-                    return shouldRmSmallIncreasedQOffer<XRPAmount, IOUAmount>();
-                }
-                if (outIsXRP)
-                    return shouldRmSmallIncreasedQOffer<TIn, XRPAmount>();
-                if (outIsCFT)
-                    return shouldRmSmallIncreasedQOffer<TIn, CFTAmount>();
-                return shouldRmSmallIncreasedQOffer<TIn, IOUAmount>();
+                std::visit(
+                    [&]<typename TOutAmt>(TOutAmt&&) {
+                        ret = shouldRmSmallIncreasedQOffer<
+                            TIn,
+                            std::decay_t<TOutAmt>>();
+                    },
+                    toTypedAmt(offer_.amount().out));
+                return ret;
             }
-            if constexpr (
+            else if constexpr (
                 std::is_same_v<TIn, STAmount> && std::is_same_v<TOut, STAmount>)
             {
-                bool const inIsCFT = offer_.amount().in.isCFT();
-                bool const outIsCFT = offer_.amount().out.isCFT();
-                if (inIsXRP)
-                {
-                    if (outIsCFT)
-                        return shouldRmSmallIncreasedQOffer<
-                            XRPAmount,
-                            CFTAmount>();
-                    return shouldRmSmallIncreasedQOffer<XRPAmount, IOUAmount>();
-                }
-                if (outIsXRP)
-                {
-                    if (inIsCFT)
-                        return shouldRmSmallIncreasedQOffer<
-                            CFTAmount,
-                            XRPAmount>();
-                    return shouldRmSmallIncreasedQOffer<IOUAmount, XRPAmount>();
-                }
-                if (inIsCFT)
-                {
-                    if (outIsCFT)
-                        return shouldRmSmallIncreasedQOffer<
-                            CFTAmount,
-                            CFTAmount>();
-                    return shouldRmSmallIncreasedQOffer<CFTAmount, IOUAmount>();
-                }
-                if (outIsCFT)
-                    return shouldRmSmallIncreasedQOffer<IOUAmount, CFTAmount>();
-                return shouldRmSmallIncreasedQOffer<IOUAmount, IOUAmount>();
+                std::visit(
+                    [&]<typename TInAmt, typename TOutAmt>(
+                        TInAmt&&, TOutAmt&&) {
+                        if constexpr(!std::is_same_v<TInAmt, XRPAmount> ||
+                            !std::is_same_v<TOutAmt, XRPAmount>)
+                            ret = shouldRmSmallIncreasedQOffer<
+                                TInAmt, TOutAmt>();
+                    },
+                    toTypedAmt(offer_.amount().in),
+                    toTypedAmt(offer_.amount().out));
+                return ret;
             }
-            assert(!inIsXRP && !outIsXRP);
-            return false;
+            assert(0);
+            return ret;
         }();
 
         if (rmSmallIncreasedQOffer)
