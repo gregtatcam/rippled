@@ -32,6 +32,7 @@
 
 namespace ripple {
 
+// clang-format off
 template <class TTakerPays, class TTakerGets>
 concept ValidTaker =
     ((std::is_same_v<TTakerPays, IOUAmount> ||
@@ -42,6 +43,7 @@ concept ValidTaker =
       std::is_same_v<TTakerGets, CFTAmount>) &&
      (!std::is_same_v<TTakerPays, XRPAmount> ||
       !std::is_same_v<TTakerGets, XRPAmount>));
+// clang-format on
 
 template <class TIn, class TOut>
 class TOfferStreamBase
@@ -97,7 +99,7 @@ protected:
     permRmOffer(uint256 const& offerIndex) = 0;
 
     template <class TTakerPays, class TTakerGets>
-        requires ValidTaker<TTakerPays, TTakerGets> bool
+    requires ValidTaker<TTakerPays, TTakerGets> bool
     shouldRmSmallIncreasedQOffer() const;
 
 public:
