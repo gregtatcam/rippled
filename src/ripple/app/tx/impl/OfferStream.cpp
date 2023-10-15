@@ -330,41 +330,16 @@ TOfferStreamBase<TIn, TOut>::step()
                 !std::is_same_v<TOut, STAmount>)
                 return shouldRmSmallIncreasedQOffer<TIn, TOut>();
             else if constexpr (
-                std::is_same_v<TIn, STAmount> &&
-                !std::is_same_v<TOut, STAmount>)
-            {
-                std::visit(
-                    [&]<typename TInAmt>(TInAmt&&) {
-                        ret = shouldRmSmallIncreasedQOffer<
-                            std::decay_t<TInAmt>,
-                            TOut>();
-                    },
-                    toTypedAmt(offer_.amount().in));
-                return ret;
-            }
-            else if constexpr (
-                !std::is_same_v<TIn, STAmount> &&
-                std::is_same_v<TOut, STAmount>)
-            {
-                std::visit(
-                    [&]<typename TOutAmt>(TOutAmt&&) {
-                        ret = shouldRmSmallIncreasedQOffer<
-                            TIn,
-                            std::decay_t<TOutAmt>>();
-                    },
-                    toTypedAmt(offer_.amount().out));
-                return ret;
-            }
-            else if constexpr (
                 std::is_same_v<TIn, STAmount> && std::is_same_v<TOut, STAmount>)
             {
                 std::visit(
                     [&]<typename TInAmt, typename TOutAmt>(
                         TInAmt&&, TOutAmt&&) {
-                        if constexpr(!std::is_same_v<TInAmt, XRPAmount> ||
+                        if constexpr (
+                            !std::is_same_v<TInAmt, XRPAmount> ||
                             !std::is_same_v<TOutAmt, XRPAmount>)
-                            ret = shouldRmSmallIncreasedQOffer<
-                                TInAmt, TOutAmt>();
+                            ret =
+                                shouldRmSmallIncreasedQOffer<TInAmt, TOutAmt>();
                     },
                     toTypedAmt(offer_.amount().in),
                     toTypedAmt(offer_.amount().out));
