@@ -306,6 +306,50 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(cftUsd.holderAmount(alice) == 99);
             BEAST_EXPECT(cftUsd.holderAmount(bob) == 101);
         }
+
+        // CFT/CFT cross currency payment
+        {
+            // If the CFT amendment IS enabled, you should be able to make a
+            // CFT Payment that doesn't cross
+            Env env{*this, features | featureCFTokensV1};
+            env.fund(XRP(10000), gw, alice, carol, bob);
+            env.close();
+
+            CFTIssuance cftUsd(env, gw, USD.currency);
+            CFTIssuance cftEur(env, gw, EUR.currency);
+
+            cftUsd.cftrust(alice);
+            env(pay(gw, alice, USDCFT(200)));
+            cftEur.cftrust(alice);
+            env.close();
+            BEAST_EXPECT(cftUsd.holderAmount(alice) == 200);
+
+            cftEur.cftrust(carol);
+            env(pay(gw, carol, EURCFT(200)));
+            env.close();
+            BEAST_EXPECT(cftEur.holderAmount(carol) == 200);
+            BEAST_EXPECT(cftUsd.outstandingAmount() == 200);
+
+            cftUsd.cftrust(bob);
+
+            env(offer(alice, EURCFT(100), USDCFT(101)));
+            env.close();
+            BEAST_EXPECT(expectOffers(
+                env, alice, 1, {{Amounts{EURCFT(100), USDCFT(101)}}}));
+
+            // Payment
+            env(pay(carol, bob, USDCFT(101)),
+                jtx::path(~USDCFT),
+                sendmax(EURCFT(100)),
+                txflags(tfPartialPayment));
+            env.close();
+
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(cftUsd.outstandingAmount() == 200);
+            BEAST_EXPECT(cftEur.holderAmount(alice) == 100);
+            BEAST_EXPECT(cftUsd.holderAmount(alice) == 99);
+            BEAST_EXPECT(cftUsd.holderAmount(bob) == 101);
+        }
     }
 
 public:
