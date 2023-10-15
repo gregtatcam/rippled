@@ -67,7 +67,7 @@ toSTAmount(CFTAmount const& cft)
 {
     bool const isNeg = cft.signum() < 0;
     std::uint64_t const umant = isNeg ? -cft.cft() : cft.cft();
-    return STAmount(umant, isNeg);
+    return STAmount(umant, isNeg, true);
 }
 
 inline STAmount

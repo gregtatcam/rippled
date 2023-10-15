@@ -133,12 +133,13 @@ public:
         bool native,
         bool negative);
 
-    STAmount(SField const& name, std::int64_t mantissa);
+    STAmount(SField const& name, std::int64_t mantissa, bool isCFT = false);
 
     STAmount(
         SField const& name,
         std::uint64_t mantissa = 0,
-        bool negative = false);
+        bool negative = false,
+        bool isCFT = false);
 
     STAmount(
         SField const& name,
@@ -147,7 +148,10 @@ public:
         int exponent = 0,
         bool negative = false);
 
-    explicit STAmount(std::uint64_t mantissa = 0, bool negative = false);
+    explicit STAmount(
+        std::uint64_t mantissa = 0,
+        bool negative = false,
+        bool isCFT = false);
 
     explicit STAmount(SField const& name, STAmount const& amt);
 

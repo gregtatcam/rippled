@@ -156,9 +156,13 @@ struct BookSpec
 {
     AccountID account;
     ripple::Currency currency;
+    bool cft;
 
-    BookSpec(AccountID const& account_, ripple::Currency const& currency_)
-        : account(account_), currency(currency_)
+    BookSpec(
+        AccountID const& account_,
+        ripple::Currency const& currency_,
+        bool isCFT = false)
+        : account(account_), currency(currency_), cft(isCFT)
     {
     }
 };
@@ -409,11 +413,11 @@ public:
         return {issue()};
     }
 
-    // friend BookSpec
-    // operator~(CFT const& iou)
-    // {
-    //     return BookSpec(iou.account.id(), iou.currency);
-    // }
+    friend BookSpec
+    operator~(CFT const& iou)
+    {
+        return BookSpec(iou.account.id(), iou.currency);
+    }
 };
 
 std::ostream&

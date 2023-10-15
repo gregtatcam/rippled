@@ -288,19 +288,25 @@ STAmount::STAmount(
     canonicalize();
 }
 
-STAmount::STAmount(SField const& name, std::int64_t mantissa)
-    : STBase(name), mOffset(0), mType(Type::xrp)
+STAmount::STAmount(SField const& name, std::int64_t mantissa, bool isCFT)
+    : STBase(name), mOffset(0), mType(isCFT ? Type::cft : Type::xrp)
 {
+    mIssue.isCFT = isCFT;
     set(mantissa);
 }
 
-STAmount::STAmount(SField const& name, std::uint64_t mantissa, bool negative)
+STAmount::STAmount(
+    SField const& name,
+    std::uint64_t mantissa,
+    bool negative,
+    bool isCFT)
     : STBase(name)
     , mValue(mantissa)
     , mOffset(0)
-    , mType(Type::xrp)
+    , mType(isCFT ? Type::cft : Type::xrp)
     , mIsNegative(negative)
 {
+    mIssue.isCFT = isCFT;
     assert(mValue <= std::numeric_limits<std::int64_t>::max());
 }
 
@@ -333,12 +339,13 @@ STAmount::STAmount(SField const& name, STAmount const& from)
 
 //------------------------------------------------------------------------------
 
-STAmount::STAmount(std::uint64_t mantissa, bool negative)
+STAmount::STAmount(std::uint64_t mantissa, bool negative, bool isCFT)
     : mValue(mantissa)
     , mOffset(0)
-    , mType(Type::xrp)
+    , mType(isCFT ? Type::cft : Type::xrp)
     , mIsNegative(mantissa != 0 && negative)
 {
+    mIssue.isCFT = isCFT;
     assert(mValue <= std::numeric_limits<std::int64_t>::max());
 }
 
@@ -1845,8 +1852,8 @@ divRoundImpl(
 
     int offset = numOffset - denOffset - 17;
 
-    if (resultNegative != roundUp)
-        canonicalizeRound(isXRP(issue), amount, offset, roundUp);
+    if (resultNegative != roundUp)  // TODO
+        canonicalizeRound(isXRP(issue) || issue.isCFT, amount, offset, roundUp);
 
     STAmount result = [&]() {
         // If appropriate, tell Number the rounding mode we are using.
@@ -1860,7 +1867,7 @@ divRoundImpl(
 
     if (roundUp && !resultNegative && !result)
     {
-        if (isXRP(issue))
+        if (isXRP(issue) || issue.isCFT)
         {
             // return the smallest value above zero
             amount = 1;

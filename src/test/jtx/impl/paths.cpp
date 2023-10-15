@@ -88,7 +88,10 @@ void
 path::append_one(BookSpec const& book)
 {
     auto& jv = create();
-    jv["currency"] = to_string(book.currency);
+    if (book.cft)
+        jv["cft_asset"] = to_string(book.currency);
+    else
+        jv["currency"] = to_string(book.currency);
     jv["issuer"] = toBase58(book.account);
 }
 

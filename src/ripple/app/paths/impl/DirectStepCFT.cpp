@@ -468,13 +468,26 @@ std::pair<CFTAmount, DebtDirection>
 DirectStepCFT<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
     // TODO
-    auto const srcOwed = toAmount<CFTAmount>(
-        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_, true));
+    if (src_ != issuer_)
+    {
+        auto const srcOwed = toAmount<CFTAmount>(accountHolds(
+            sb, src_, currency_, issuer_, fhIGNORE_FREEZE, j_, true));
 
-    if (srcOwed.signum() > 0)
         return {srcOwed, DebtDirection::redeems};
+    }
 
-    return {CFTAmount{0}, DebtDirection::redeems};
+    if (auto const sle = sb.read(keylet::cftIssuance(issuer_, currency_)))
+    {
+        std::int64_t const max =
+            [&]() {
+                auto const max = sle->getFieldU64(sfMaximumAmount);
+                return max > 0 ? max : STAmount::cMaxNativeN;  // TODO
+            }() -
+            sle->getFieldU64(sfOutstandingAmount);
+        return {CFTAmount{max}, DebtDirection::issues};
+    }
+
+    return {CFTAmount{0}, DebtDirection::issues};
 
 #if 0
     // srcOwed is negative or zero

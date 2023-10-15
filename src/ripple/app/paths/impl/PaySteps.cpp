@@ -149,6 +149,13 @@ toStep(
         return make_BookStepXI(ctx, {outCurrency, outIssuer});
     }
 
+    // CI or IC
+    if (curIssue.isCFT && !e2->isCft())
+        return make_BookStepCI(ctx, curIssue, {outCurrency, outIssuer});
+    if (!curIssue.isCFT && e2->isCft())
+        return make_BookStepIC(ctx, curIssue, {outCurrency, outIssuer, true});
+
+    // CC or II
     if (curIssue.isCFT)
         return make_BookStepCC(ctx, curIssue, {outCurrency, outIssuer, true});
     return make_BookStepII(ctx, curIssue, {outCurrency, outIssuer});
