@@ -157,14 +157,42 @@ enum TxType : std::uint16_t
     /** This transaction type bids for the auction slot */
     ttAMM_BID = 39,
 
+    /** This transaction type deletes AMM in the empty state */
+    ttAMM_DELETE = 40,
+
+    /** This transactions creates a crosschain sequence number */
+    ttXCHAIN_CREATE_CLAIM_ID = 41,
+
+    /** This transactions initiates a crosschain transaction */
+    ttXCHAIN_COMMIT = 42,
+
+    /** This transaction completes a crosschain transaction */
+    ttXCHAIN_CLAIM = 43,
+
+    /** This transaction initiates a crosschain account create transaction */
+    ttXCHAIN_ACCOUNT_CREATE_COMMIT = 44,
+
+    /** This transaction adds an attestation to a claimid*/
+    ttXCHAIN_ADD_CLAIM_ATTESTATION = 45,
+
+    /** This transaction adds an attestation to a claimid*/
+    ttXCHAIN_ADD_ACCOUNT_CREATE_ATTESTATION = 46,
+
+    /** This transaction modifies a sidechain */
+    ttXCHAIN_MODIFY_BRIDGE = 47,
+
+    /** This transactions creates a sidechain */
+    ttXCHAIN_CREATE_BRIDGE = 48,
+
+
     /** This transaction type creates an Oracle instance */
-    ttORACLE_CREATE = 40,
+    ttORACLE_CREATE = 49,
 
     /** This transaction type updates an Oracle instance */
-    ttORACLE_UPDATE = 41,
+    ttORACLE_UPDATE = 50,
 
     /** This transaction type deletes an Oracle instance */
-    ttORACLE_DELETE = 42,
+    ttORACLE_DELETE = 51,
 
     /** This system-generated transaction type is used to update the status of the various amendments.
 

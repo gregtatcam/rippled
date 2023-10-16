@@ -47,8 +47,8 @@ enum error_code_i {
     rpcJSON_RPC = 2,
     rpcFORBIDDEN = 3,
 
+    rpcWRONG_NETWORK = 4,
     // Misc failure
-    // unused                  4,
     // unused                  5,
     rpcNO_PERMISSION = 6,
     rpcNO_EVENTS = 7,
@@ -78,7 +78,7 @@ enum error_code_i {
     // unused                  27,
     // unused                  28,
     rpcTXN_NOT_FOUND = 29,
-    // unused                  30,
+    rpcINVALID_HOTWALLET = 30,
 
     // Malformed command
     rpcINVALID_PARAMS = 31,
