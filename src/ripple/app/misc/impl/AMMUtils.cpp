@@ -173,6 +173,17 @@ ammAccountHolds(
         if (auto const sle = view.read(keylet::account(ammAccountID)))
             return (*sle)[sfBalance];
     }
+    else if (issue.isCFT)
+    {
+        auto const cftokenID = keylet::cftoken(
+            ammAccountID,
+            keylet::cftIssuance(issue.account, issue.currency).key);
+        if (auto const sle = view.read(cftokenID))
+            return STAmount{
+                issue,
+                sle->getFieldU64(sfCFTAmount) -
+                    sle->getFieldU64(sfCFTLockedAmount)};
+    }
     else if (auto const sle = view.read(
                  keylet::line(ammAccountID, issue.account, issue.currency));
              sle &&

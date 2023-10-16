@@ -71,7 +71,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             if (iType == STPathElement::typeNone)
                 return;
         }
-        else if (iType & ~STPathElement::typeAll)
+        else if (iType & ~(STPathElement::typeAll | STPathElement::typeCFT))
         {
             JLOG(debugLog().error())
                 << "Bad path element " << iType << " in pathset";
@@ -96,7 +96,12 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             if (hasIssuer)
                 issuer = sit.get160();
 
-            path.emplace_back(account, currency, issuer, hasCurrency);
+            path.emplace_back(
+                account,
+                currency,
+                issuer,
+                hasCurrency,
+                iType & STPathElement::typeCFT);
         }
     }
 }

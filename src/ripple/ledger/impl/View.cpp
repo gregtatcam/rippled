@@ -204,9 +204,13 @@ isFrozen(
     ReadView const& view,
     AccountID const& account,
     Currency const& currency,
-    AccountID const& issuer)
+    AccountID const& issuer,
+    bool isCFT)
 {
     if (isXRP(currency))
+        return false;
+    // TODO
+    if (isCFT)
         return false;
     auto sle = view.read(keylet::account(issuer));
     if (sle && sle->isFlag(lsfGlobalFreeze))
@@ -1565,6 +1569,20 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
 {
     if (isXRP(issue) || issue.account == account)
         return tesSUCCESS;
+    if (issue.isCFT)
+    {
+        auto const cftID = keylet::cftIssuance(issue.account, issue.currency);
+        if (auto const sle = view.read(cftID);
+            sle && sle->getFieldU32(sfFlags) & lsfCFTRequireAuth)
+        {
+            auto const cftokenID = keylet::cftoken(account, cftID.key);
+            if (auto const tokSle = view.read(cftokenID))
+            {
+                // TODO no lsfAuthorized as in specs
+            }
+        }
+        return tesSUCCESS;
+    }
     if (auto const issuerAccount = view.read(keylet::account(issue.account));
         issuerAccount && (*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
@@ -1761,6 +1779,39 @@ rippleCFTCredit(
             view.update(sle);
         }
     }
+    return tesSUCCESS;
+}
+
+TER
+cftCreateTrust(
+    ApplyView& view,
+    AccountID const& account,
+    uint256 const& cftID,
+    std::uint32_t flags,
+    bool adjOwnerCount,
+    beast::Journal j)
+{
+    // for now just create CFToken and skip the page
+    auto const cftokenID = keylet::cftoken(account, cftID);
+
+    auto const ownerNode = view.dirInsert(
+        keylet::ownerDir(account), cftokenID, describeOwnerDir(account));
+
+    if (!ownerNode)
+        return tecDIR_FULL;
+
+    auto cftoken = std::make_shared<SLE>(cftokenID);
+    (*cftoken)[sfCFTokenIssuanceID] = cftID;
+    (*cftoken)[sfCFTAmount] = 0;
+    (*cftoken)[sfCFTLockedAmount] = 0;
+    (*cftoken)[sfOwnerNode] = *ownerNode;
+    (*cftoken)[sfFlags] = 0;
+
+    view.insert(cftoken);
+
+    if (adjOwnerCount)
+        adjustOwnerCount(view, view.peek(keylet::account(account)), 1, j);
+
     return tesSUCCESS;
 }
 

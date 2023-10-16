@@ -125,7 +125,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     }
 
     auto noDefaultRipple = [](ReadView const& view, Issue const& issue) {
-        if (isXRP(issue))
+        if (isXRP(issue) || issue.isCFT)
             return false;
 
         if (auto const issuerAccount =
@@ -304,6 +304,19 @@ applyCreate(
     }
 
     auto sendAndTrustSet = [&](STAmount const& amount) -> TER {
+        if (amount.isCFT())
+        {
+            auto const cftID = keylet::cftIssuance(amount);
+            if (auto const sle = sb.read(cftID); !sle)
+                return tecINTERNAL;
+            else
+            {
+                if (auto const ter = cftCreateTrust(
+                        sb, *ammAccount, cftID.key, 0, false, j_);
+                    ter != tesSUCCESS)
+                    return ter;
+            }
+        }
         if (auto const res = accountSend(
                 sb,
                 account_,
@@ -313,7 +326,7 @@ applyCreate(
                 WaiveTransferFee::Yes))
             return res;
         // Set AMM flag on AMM trustline
-        if (!isXRP(amount))
+        if (!isXRP(amount) && !amount.isCFT())
         {
             if (SLE::pointer sleRippleState =
                     sb.peek(keylet::line(*ammAccount, amount.issue()));

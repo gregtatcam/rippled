@@ -126,7 +126,7 @@ public:
         return amount_;
     }
 
-    operator STAmount const &() const
+    operator STAmount const&() const
     {
         return amount_;
     }
@@ -416,7 +416,7 @@ public:
     friend BookSpec
     operator~(CFT const& iou)
     {
-        return BookSpec(iou.account.id(), iou.currency);
+        return BookSpec(iou.account.id(), iou.currency, true);
     }
 };
 

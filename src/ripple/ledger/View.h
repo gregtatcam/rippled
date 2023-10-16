@@ -102,12 +102,13 @@ isFrozen(
     ReadView const& view,
     AccountID const& account,
     Currency const& currency,
-    AccountID const& issuer);
+    AccountID const& issuer,
+    bool isCFT = false);
 
 [[nodiscard]] inline bool
 isFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
 {
-    return isFrozen(view, account, issue.currency, issue.account);
+    return isFrozen(view, account, issue.currency, issue.account, issue.isCFT);
 }
 
 // Returns the amount an account can spend without going into debt.
@@ -507,6 +508,15 @@ transferRateCFT(
     ReadView const& view,
     AccountID const& issuer,
     Currency const& currency);
+
+TER
+cftCreateTrust(
+    ApplyView& view,
+    AccountID const& account,
+    uint256 const& cftID,
+    std::uint32_t flags,
+    bool adjOwnerCount,
+    beast::Journal j);
 
 }  // namespace ripple
 

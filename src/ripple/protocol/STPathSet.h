@@ -50,6 +50,8 @@ public:
         typeIssuer = 0x20,    // Issuer follows.
         typeCFT = 0x40,       // CFT
         typeBoundary = 0xFF,  // Boundary between alternate paths.
+        // TODO should typeCFT be added? It seems like if added then
+        // it'll make wrong decisiont in steps construction in toStrand()
         typeAll = typeAccount | typeCurrency | typeIssuer,
         // Combination of all types.
     };

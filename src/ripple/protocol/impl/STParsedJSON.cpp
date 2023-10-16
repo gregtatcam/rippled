@@ -693,7 +693,7 @@ parseLeaf(
                         }
 
                         p.emplace_back(
-                            uAccount, uCurrency, uIssuer, hasCurrency);
+                            uAccount, uCurrency, uIssuer, hasCurrency, isCFT);
                     }
 
                     tail.push_back(p);

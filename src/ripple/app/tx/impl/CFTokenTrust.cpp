@@ -54,28 +54,8 @@ CFTokenTrust::doApply()
     if (!view().exists(keylet::cftIssuance(ctx_.tx[sfCFTokenIssuanceID])))
         return tecINTERNAL;
 
-    // for now just create CFToken and skip the page
-    auto const cftokenID =
-        keylet::cftoken(account_, ctx_.tx[sfCFTokenIssuanceID]);
-
-    auto const ownerNode = view().dirInsert(
-        keylet::ownerDir(account_), cftokenID, describeOwnerDir(account_));
-
-    if (!ownerNode)
-        return tecDIR_FULL;
-
-    auto cftoken = std::make_shared<SLE>(cftokenID);
-    (*cftoken)[sfCFTokenIssuanceID] = ctx_.tx[sfCFTokenIssuanceID];
-    (*cftoken)[sfCFTAmount] = 0;
-    (*cftoken)[sfCFTLockedAmount] = 0;
-    (*cftoken)[sfOwnerNode] = *ownerNode;
-    (*cftoken)[sfFlags] = 0;
-
-    view().insert(cftoken);
-
-    adjustOwnerCount(view(), view().peek(keylet::account(account_)), 1, j_);
-
-    return tesSUCCESS;
+    return cftCreateTrust(
+        view(), account_, ctx_.tx[sfCFTokenIssuanceID], 0, true, j_);
 }
 
 }  // namespace ripple

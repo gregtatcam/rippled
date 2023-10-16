@@ -192,7 +192,10 @@ doAMMInfo(RPC::JsonContext& context)
         {
             Json::Value vote;
             vote[jss::account] = to_string(voteEntry.getAccountID(sfAccount));
-            vote[jss::trading_fee] = voteEntry[sfTradingFee];
+            // TODO crashes if CFT AMM???
+            vote[jss::trading_fee] = 0;
+            if (voteEntry.isFieldPresent(sfTradingFee))
+                vote[jss::trading_fee] = voteEntry[sfTradingFee];
             vote[jss::vote_weight] = voteEntry[sfVoteWeight];
             voteSlots.append(std::move(vote));
         }
@@ -212,7 +215,10 @@ doAMMInfo(RPC::JsonContext& context)
             auction[jss::time_interval] =
                 timeSlot ? *timeSlot : AUCTION_SLOT_TIME_INTERVALS;
             auctionSlot[sfPrice].setJson(auction[jss::price]);
-            auction[jss::discounted_fee] = auctionSlot[sfDiscountedFee];
+            // TODO crashes if CFT AMM???
+            auction[jss::discounted_fee] = 0;
+            if (auctionSlot.isFieldPresent(sfDiscountedFee))
+                auction[jss::discounted_fee] = auctionSlot[sfDiscountedFee];
             auction[jss::account] =
                 to_string(auctionSlot.getAccountID(sfAccount));
             auction[jss::expiration] = to_iso8601(NetClock::time_point{

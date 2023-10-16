@@ -20,6 +20,7 @@
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/jss.h>
 #include <test/jtx.h>
+#include <test/jtx/AMM.h>
 
 namespace ripple {
 namespace test {
@@ -349,6 +350,29 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(cftEur.holderAmount(alice) == 100);
             BEAST_EXPECT(cftUsd.holderAmount(alice) == 99);
             BEAST_EXPECT(cftUsd.holderAmount(bob) == 101);
+        }
+
+        // XRP/CFT AMM cross-currency payment
+        {
+            Env env{*this, features | featureCFTokensV1};
+            env.fund(XRP(20'000), gw, alice, carol, bob);
+            env.close();
+
+            CFTIssuance cftUsd(env, gw, USD.currency);
+            cftUsd.cftrust(alice);
+            cftUsd.cftrust(bob);
+            env(pay(gw, alice, USDCFT(10'100)));
+            env.close();
+
+            AMM amm(env, alice, XRP(10'000), USDCFT(10'100));
+            env(pay(carol, bob, USDCFT(100)),
+                jtx::path(~USDCFT),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment | tfNoRippleDirect));
+            BEAST_EXPECT(
+                amm.expectBalances(XRP(10'100), USDCFT(10'000), amm.tokens()));
+            BEAST_EXPECT(cftUsd.holderAmount(bob) == 100);
+            // env.close();
         }
     }
 
