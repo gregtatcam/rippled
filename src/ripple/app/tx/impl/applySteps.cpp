@@ -34,6 +34,7 @@
 #include <ripple/app/tx/impl/CreateOffer.h>
 #include <ripple/app/tx/impl/CreateTicket.h>
 #include <ripple/app/tx/impl/DeleteAccount.h>
+#include <ripple/app/tx/impl/DeleteOracle.h>
 #include <ripple/app/tx/impl/DepositPreauth.h>
 #include <ripple/app/tx/impl/Escrow.h>
 #include <ripple/app/tx/impl/NFTokenAcceptOffer.h>
@@ -44,6 +45,7 @@
 #include <ripple/app/tx/impl/PayChan.h>
 #include <ripple/app/tx/impl/Payment.h>
 #include <ripple/app/tx/impl/SetAccount.h>
+#include <ripple/app/tx/impl/SetOracle.h>
 #include <ripple/app/tx/impl/SetRegularKey.h>
 #include <ripple/app/tx/impl/SetSignerList.h>
 #include <ripple/app/tx/impl/SetTrust.h>
@@ -154,6 +156,10 @@ with_txn_type(TxType txnType, F&& f)
             return f.template operator()<XChainAddAccountCreateAttestation>();
         case ttXCHAIN_ACCOUNT_CREATE_COMMIT:
             return f.template operator()<XChainCreateAccountCommit>();
+        case ttORACLE_SET:
+            return f.template operator()<SetOracle>();
+        case ttORACLE_DELETE:
+            return f.template operator()<DeleteOracle>();
         default:
             throw UnknownTxnType(txnType);
     }

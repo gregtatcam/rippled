@@ -185,6 +185,12 @@ enum TxType : std::uint16_t
     ttXCHAIN_CREATE_BRIDGE = 48,
 
 
+    /** This transaction type creates an Oracle instance */
+    ttORACLE_SET = 49,
+
+    /** This transaction type deletes an Oracle instance */
+    ttORACLE_DELETE = 50,
+
     /** This system-generated transaction type is used to update the status of the various amendments.
 
         For details, see: https://xrpl.org/amendments.html

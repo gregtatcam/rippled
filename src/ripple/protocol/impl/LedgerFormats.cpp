@@ -326,6 +326,23 @@ LedgerFormats::LedgerFormats()
             {sfPreviousTxnLgrSeq,               soeREQUIRED}
         },
         commonFields);
+
+    add(jss::Oracle,
+        ltORACLE,
+        {
+            {sfOwner,               soeREQUIRED},
+            {sfSymbol,              soeREQUIRED},
+            {sfProvider,            soeREQUIRED},
+            {sfPriceDataSeries,     soeREQUIRED},
+            {sfSymbolClass,         soeREQUIRED},
+            {sfLastUpdateTime,      soeREQUIRED},
+            {sfURI,                 soeOPTIONAL},
+            {sfOwnerNode,           soeREQUIRED},
+            {sfPreviousTxnID,       soeREQUIRED},
+            {sfPreviousTxnLgrSeq,   soeREQUIRED}
+        },
+        commonFields);
+
     // clang-format on
 }
 

@@ -132,6 +132,7 @@ enum TEMcodes : TERUnderlyingType {
     temXCHAIN_BRIDGE_NONDOOR_OWNER,
     temXCHAIN_BRIDGE_BAD_MIN_ACCOUNT_CREATE_AMOUNT,
     temXCHAIN_BRIDGE_BAD_REWARD_AMOUNT,
+    temARRAY_SIZE,
 };
 
 //------------------------------------------------------------------------------

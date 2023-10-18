@@ -472,6 +472,25 @@ TxFormats::TxFormats()
             {sfSignatureReward, soeREQUIRED},
         },
         commonFields);
+
+    add(jss::OracleSet,
+        ttORACLE_SET,
+        {
+            {sfOracleID, soeREQUIRED},
+            {sfProvider, soeOPTIONAL},
+            {sfURI, soeOPTIONAL},
+            {sfSymbolClass, soeOPTIONAL},
+            {sfLastUpdateTime, soeREQUIRED},
+            {sfPriceDataSeries, soeREQUIRED},
+        },
+        commonFields);
+
+    add(jss::OracleDelete,
+        ttORACLE_DELETE,
+        {
+            {sfOracleID, soeREQUIRED},
+        },
+        commonFields);
 }
 
 TxFormats const&

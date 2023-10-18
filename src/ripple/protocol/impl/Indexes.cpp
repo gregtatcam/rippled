@@ -71,6 +71,7 @@ enum class LedgerNameSpace : std::uint16_t {
     BRIDGE = 'H',
     XCHAIN_CLAIM_ID = 'Q',
     XCHAIN_CREATE_ACCOUNT_CLAIM_ID = 'K',
+    ORACLE = 'R',
 
     // No longer used or supported. Left here to reserve the space
     // to avoid accidental reuse.
@@ -435,6 +436,12 @@ xChainCreateAccountClaimID(STXChainBridge const& bridge, std::uint64_t seq)
             bridge.issuingChainDoor(),
             bridge.issuingChainIssue(),
             seq)};
+}
+
+Keylet
+oracle(uint256 const& id) noexcept
+{
+    return {ltORACLE, indexHash(LedgerNameSpace::ORACLE, id)};
 }
 
 }  // namespace keylet

@@ -588,6 +588,42 @@ doLedgerEntry(RPC::JsonContext& context)
                 }
             }
         }
+        else if (context.params.isMember(jss::oracle))
+        {
+            expectedType = ltORACLE;
+            if (!context.params[jss::oracle].isObject())
+            {
+                if (!uNodeIndex.parseHex(
+                        context.params[jss::oracle].asString()))
+                {
+                    uNodeIndex = beast::zero;
+                    jvResult[jss::error] = "malformedRequest";
+                }
+            }
+            else if (!context.params[jss::oracle].isMember(jss::OracleID))
+            {
+                jvResult[jss::error] = "malformedRequest";
+            }
+            else
+            {
+                try
+                {
+                    uint256 oracleID;
+                    if (!oracleID.parseHex(
+                            context.params[jss::oracle][jss::OracleID]
+                                .asCString()))
+                    {
+                        uNodeIndex = beast::zero;
+                        jvResult[jss::error] = "malformedRequest";
+                    }
+                    uNodeIndex = keylet::oracle(oracleID).key;
+                }
+                catch (std::runtime_error const&)
+                {
+                    jvResult[jss::error] = "malformedRequest";
+                }
+            }
+        }
         else
         {
             if (context.params.isMember("params") &&

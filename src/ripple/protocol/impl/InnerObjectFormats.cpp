@@ -135,6 +135,15 @@ InnerObjectFormats::InnerObjectFormats()
         {
             {sfAccount, soeREQUIRED},
         });
+
+    add(sfPriceData.jsonName.c_str(),
+        sfPriceData.getCode(),
+        {
+            {sfSymbol, soeREQUIRED},
+            {sfPriceUnit, soeREQUIRED},
+            {sfSymbolPrice, soeREQUIRED},
+            {sfScale, soeREQUIRED},
+        });
 }
 
 InnerObjectFormats const&
