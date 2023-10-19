@@ -4818,61 +4818,9 @@ private:
     }
 
     void
-    testBlocked()
-    {
-        testcase("blocked");
-        using namespace jtx;
-        Env env(*this, supported_amendments() - fixReducedOffersV1);
-        Account const ed("ed");
-        Account const john("john");
-
-        env.fund(XRP(10'000'000), gw, alice, bob, ed, john);
-        env.close();
-
-        env(trust(alice, USD(10'000'000)));
-        env(trust(bob, USD(10'000'000)));
-        env(trust(ed, USD(10'000'000)));
-        env(trust(john, USD(10'000'000)));
-        env.close();
-
-        env(pay(gw, bob, USD(10'000'000)));
-        env(pay(gw, john, USD(10'000'000)));
-        env.close();
-
-        env(offer(alice, STAmount{USD, 9999989, -7}, XRPAmount{999999}));
-        env.close();
-        env(offer(bob, XRP(1), USD(1)), txflags(tfSell), fee(drops(10)));
-        env.close();
-        BEAST_EXPECT(expectOffers(env, alice, 0));
-        BEAST_EXPECT(expectOffers(
-            env, bob, 1, {{Amounts{XRPAmount{2}, STAmount{USD, 11, -7}}}}));
-        env(offer(john, XRP(1), USD(1)));
-        env.close();
-        env(offer(alice, USD(1), XRP(1)));
-        std::cout << "alice " << getAccountOffers(env, alice).toStyledString();
-        std::cout << "bob " << getAccountOffers(env, bob).toStyledString();
-        std::cout << "john " << getAccountOffers(env, john).toStyledString();
-
-        AMM amm(env, gw, XRP(10), USD(6));
-
-        env(pay(alice, ed, USD(3)),
-            sendmax(XRPAmount(5'454'454)),
-            txflags(tfPartialPayment | tfLimitQuality));
-        env.close();
-        std::cout << "payment from alice to ed\n";
-
-        std::cout << amm;
-        std::cout << "alice " << getAccountOffers(env, alice).toStyledString();
-        std::cout << "bob " << getAccountOffers(env, bob).toStyledString();
-        std::cout << "john " << getAccountOffers(env, john).toStyledString();
-        std::cout << " ed " << getAccountLines(env, ed, USD).toStyledString();
-    }
-
-    void
     run() override
     {
-        // testCore();
-        testBlocked();
+        testCore();
     }
 };
 
