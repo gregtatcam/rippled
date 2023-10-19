@@ -43,25 +43,25 @@ SetOracle::preflight(PreflightContext const& ctx)
         return temINVALID_FLAG;
     }
 
-    if (ctx.tx.getFieldArray(sfPriceDataSeries).size() > 10)
+    if (ctx.tx.getFieldArray(sfPriceDataSeries).size() > maxOracleDataSeries)
     {
         JLOG(ctx.j.debug()) << "Oracle Set: price data series too large";
         return temARRAY_SIZE;
     }
 
-    if (ctx.tx.getFieldVL(sfProvider).size() > 256)
+    if (ctx.tx.getFieldVL(sfProvider).size() > maxOracleProvider)
     {
         JLOG(ctx.j.debug()) << "Oracle Set: provider too large";
         return temMALFORMED;
     }
 
-    if (ctx.tx.getFieldVL(sfURI).size() > 256)
+    if (ctx.tx.getFieldVL(sfURI).size() > maxOracleURI)
     {
         JLOG(ctx.j.debug()) << "Oracle Set: URI too large";
         return temMALFORMED;
     }
 
-    if (ctx.tx.getFieldVL(sfSymbolClass).size() > 12)
+    if (ctx.tx.getFieldVL(sfSymbolClass).size() > maxOracleSymbolClass)
     {
         JLOG(ctx.j.debug()) << "Oracle Set: symbol class too large";
         return temMALFORMED;
@@ -84,7 +84,8 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         pairs.emplace(hash);
     }
 
-    if (auto const sle = ctx.view.read(keylet::oracle(ctx.tx[sfOracleID])))
+    if (auto const sle = ctx.view.read(keylet::oracle(
+            ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleSequence])))
     {
         if (ctx.tx[sfAccount] != sle->getAccountID(sfOwner))
             return tecNO_PERMISSION;
@@ -137,7 +138,7 @@ applySet(
     AccountID const& account_,
     beast::Journal j_)
 {
-    auto const oracleID = keylet::oracle(ctx_.tx[sfOracleID]);
+    auto const oracleID = keylet::oracle(account_, ctx_.tx[sfOracleSequence]);
 
     if (auto sle = sb.peek(oracleID))
     {
@@ -203,7 +204,7 @@ applySet(
     {
         // create new Oracle
 
-        sle = std::make_shared<SLE>(keylet::oracle(ctx_.tx[sfOracleID]));
+        sle = std::make_shared<SLE>(oracleID);
         sle->setAccountID(sfOwner, ctx_.tx.getAccountID(sfAccount));
         sle->setFieldVL(sfProvider, ctx_.tx[sfProvider]);
         if (ctx_.tx.isFieldPresent(sfURI))

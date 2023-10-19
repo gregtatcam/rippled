@@ -27,10 +27,14 @@ struct Oracle_test : public beast::unit_test::suite
 {
 private:
     static auto
-    ledgerEntryOracle(jtx::Env& env, uint256 const& id)
+    ledgerEntryOracle(
+        jtx::Env& env,
+        AccountID const& account,
+        std::uint32_t const& sequence)
     {
         Json::Value jvParams;
-        jvParams[jss::oracle][jss::OracleID] = to_string(id);
+        jvParams[jss::oracle][jss::account] = to_string(account);
+        jvParams[jss::oracle][jss::oracle_sequence] = sequence;
         return env.rpc(
             "json", "ledger_entry", to_string(jvParams))[jss::result];
     }
@@ -50,6 +54,7 @@ private:
             Oracle oracle(
                 env,
                 owner,
+                1,
                 {{"XRP", "USD", 740, 1}},
                 ter(tecINSUFFICIENT_RESERVE));
         }
@@ -63,6 +68,7 @@ private:
             oracle.create(
                 owner,
                 {{"XRP", "USD", 740, 1}},
+                std::nullopt,
                 "currency",
                 "provider",
                 "URI",
@@ -78,6 +84,7 @@ private:
             oracle.create(
                 owner,
                 {{"XRP", "USD", 740, 1}, {"XRP", "USD", 750, 1}},
+                std::nullopt,
                 "currency",
                 "provider",
                 "URI",
@@ -101,6 +108,7 @@ private:
                  {"XRP", "US9", 740, 1},
                  {"XRP", "U10", 750, 1},
                  {"XRP", "U11", 740, 1}},
+                std::nullopt,
                 "currency",
                 "provider",
                 "URI",
@@ -112,6 +120,7 @@ private:
             oracle.create(
                 owner,
                 {},
+                std::nullopt,
                 "currency",
                 "provider",
                 "URI",
@@ -128,7 +137,7 @@ private:
             env.fund(XRP(1'000), owner);
 
             Oracle oracle(
-                env, owner, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+                env, owner, 1, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
             oracle.update(
                 owner,
                 {
@@ -162,6 +171,7 @@ private:
                 owner,
                 {{"XRP", "USD", 740, 1}},
                 std::nullopt,
+                std::nullopt,
                 "provider",
                 "URI",
                 std::nullopt,
@@ -172,6 +182,7 @@ private:
             oracle.create(
                 owner,
                 {{"XRP", "USD", 740, 1}},
+                std::nullopt,
                 "currency",
                 std::nullopt,
                 "URI",
@@ -252,13 +263,14 @@ private:
         }
 
         {
-            // invalid owner
+            // Different owner creates a new object and fails because
+            // of missing fields
             Env env(*this);
             Account const some("some");
             env.fund(XRP(1'000), owner);
             env.fund(XRP(1'000), some);
             Oracle oracle(
-                env, owner, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+                env, owner, 1, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
             oracle.update(
                 some,
                 {{"XRP", "USD", 740, 1}},
@@ -268,7 +280,7 @@ private:
                 std::nullopt,
                 std::nullopt,
                 0,
-                ter(tecNO_PERMISSION));
+                ter(temMALFORMED));
         }
     }
 
@@ -277,12 +289,29 @@ private:
     {
         testcase("Create");
         using namespace jtx;
-
-        Env env(*this);
         Account const owner("owner");
-        env.fund(XRP(1'000), owner);
-        Oracle oracle(env, owner, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
-        BEAST_EXPECT(oracle.exists());
+
+        {
+            Env env(*this);
+            env.fund(XRP(1'000), owner);
+            Oracle oracle(
+                env, owner, 1, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+            BEAST_EXPECT(oracle.exists());
+        }
+
+        {
+            // Different owner creates a new object
+            Env env(*this);
+            Account const some("some");
+            env.fund(XRP(1'000), owner);
+            env.fund(XRP(1'000), some);
+            Oracle oracle(
+                env, owner, 1, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+            BEAST_EXPECT(oracle.exists());
+            oracle.set(
+                some, {{"XRP", "USD", 740, 1}}, "currency", "provider", "URI");
+            BEAST_EXPECT(Oracle::exists(env, some, oracle.oracleSequence()));
+        }
     }
 
     void
@@ -294,18 +323,16 @@ private:
         Env env(*this);
         Account const owner("owner");
         env.fund(XRP(1'000), owner);
-        Oracle oracle(env, owner, {{"USD", "XRP", 740, 1}}, ter(tesSUCCESS));
+        Oracle oracle(env, owner, 1, {{"USD", "XRP", 740, 1}}, ter(tesSUCCESS));
         BEAST_EXPECT(oracle.exists());
 
         // Invalid OracleID
-        oracle.remove(
-            owner, std::nullopt, oracle.randOracleID(), 0, ter(tecNO_ENTRY));
+        oracle.remove(owner, std::nullopt, 2, 0, ter(tecNO_ENTRY));
 
         // Invalid owner
         Account const invalid("invalid");
         env.fund(XRP(1'000), invalid);
-        oracle.remove(
-            invalid, std::nullopt, std::nullopt, 0, ter(tecNO_PERMISSION));
+        oracle.remove(invalid, std::nullopt, std::nullopt, 0, ter(tecNO_ENTRY));
     }
 
     void
@@ -317,7 +344,7 @@ private:
         Env env(*this);
         Account const owner("owner");
         env.fund(XRP(1'000), owner);
-        Oracle oracle(env, owner, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+        Oracle oracle(env, owner, 1, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
         BEAST_EXPECT(oracle.exists());
         oracle.remove(owner);
         BEAST_EXPECT(!oracle.exists());
@@ -332,7 +359,7 @@ private:
 
         Env env(*this);
         env.fund(XRP(1'000), owner);
-        Oracle oracle(env, owner, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+        Oracle oracle(env, owner, 1, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
         BEAST_EXPECT(oracle.exists());
 
         // update existing pair
@@ -377,6 +404,7 @@ private:
         oracle.create(
             alice,
             {{"XRP", "USD", 740, 1}},
+            1,
             "currency",
             "provider",
             "URI",
@@ -388,6 +416,7 @@ private:
         oracle.create(
             alice,
             {{"XRP", "USD", 740, 1}},
+            1,
             "currency",
             "provider",
             "URI",
@@ -399,6 +428,7 @@ private:
         oracle.create(
             alice,
             {{"XRP", "USD", 740, 1}},
+            1,
             "currency",
             "provider",
             "URI",
@@ -494,7 +524,7 @@ private:
         env.fund(XRP(1'000), owner);
         {
             Oracle oracle(
-                env, owner, {{"XRP", "USD", 740, 1}}, ter(temDISABLED));
+                env, owner, 1, {{"XRP", "USD", 740, 1}}, ter(temDISABLED));
         }
         {
             Oracle oracle(env);
@@ -524,25 +554,25 @@ private:
 
         Env env(*this);
         std::vector<AccountID> accounts;
-        std::vector<uint256> oracles;
+        std::vector<std::uint32_t> oracles;
         for (int i = 0; i < 10; ++i)
         {
             Account const owner(std::string("owner") + std::to_string(i));
             env.fund(XRP(1'000), owner);
             // different accounts can have the same asset pair
             Oracle oracle(
-                env, owner, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+                env, owner, i, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
             accounts.push_back(owner.id());
-            oracles.push_back(oracle.oracleID());
+            oracles.push_back(oracle.oracleSequence());
             // same account can have different asset pair
             Oracle oracle1(
-                env, owner, {{"XRP", "EUR", 740, 1}}, ter(tesSUCCESS));
+                env, owner, i + 10, {{"XRP", "EUR", 740, 1}}, ter(tesSUCCESS));
             accounts.push_back(owner.id());
-            oracles.push_back(oracle1.oracleID());
+            oracles.push_back(oracle1.oracleSequence());
         }
         for (int i = 0; i < accounts.size(); ++i)
         {
-            auto const jv = ledgerEntryOracle(env, oracles[i]);
+            auto const jv = ledgerEntryOracle(env, accounts[i], oracles[i]);
             try
             {
                 BEAST_EXPECT(

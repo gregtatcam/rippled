@@ -33,13 +33,18 @@ Oracle::Oracle(
     Env& env,
     std::optional<jtx::msig> const& msig,
     std::uint32_t fee)
-    : env_(env), oracleID_(randOracleID()), msig_(msig), fee_(fee)
+    : env_(env)
+    , owner_{}
+    , oracleSequence_(time(nullptr))
+    , msig_(msig)
+    , fee_(fee)
 {
 }
 
 Oracle::Oracle(
     Env& env,
     Account const& owner,
+    std::uint32_t sequence,
     DataSeries const& series,
     std::string const& symbolClass,
     std::string const& provider,
@@ -49,13 +54,15 @@ Oracle::Oracle(
     std::uint32_t fee,
     std::optional<ter> const& ter)
     : env_(env)
-    , oracleID_(sha512Half(owner, Oracle::id_++))
+    , owner_(owner)
+    , oracleSequence_(sequence)
     , msig_(msig)
     , fee_(fee)
 {
     create(
         owner,
         series,
+        sequence,
         symbolClass,
         provider,
         URI,
@@ -69,11 +76,13 @@ Oracle::Oracle(
 Oracle::Oracle(
     Env& env,
     Account const& owner,
+    std::uint32_t sequence,
     DataSeries const& series,
     std::optional<ter> const& ter)
     : Oracle(
           env,
           owner,
+          sequence,
           series,
           "currency",
           "provider",
@@ -89,6 +98,7 @@ void
 Oracle::create(
     AccountID const& owner,
     DataSeries const& series,
+    std::optional<std::uint32_t> const& sequence,
     std::optional<std::string> const& symbolClass,
     std::optional<std::string> const& provider,
     std::optional<std::string> const& URI,
@@ -98,6 +108,9 @@ Oracle::create(
     std::uint32_t fee,
     std::optional<ter> const& ter)
 {
+    owner_ = owner;
+    if (sequence)
+        oracleSequence_ = *sequence;
     set(owner,
         series,
         symbolClass,
@@ -106,7 +119,7 @@ Oracle::create(
         lastUpdateTime,
         flags,
         msig,
-        std::nullopt,
+        sequence,
         fee,
         ter);
 }
@@ -115,14 +128,14 @@ void
 Oracle::remove(
     AccountID const& owner,
     std::optional<jtx::msig> const& msig,
-    std::optional<uint256> const& oracleID,
+    std::optional<std::uint32_t> const& oracleSequence,
     std::uint32_t fee,
     std::optional<ter> const& ter)
 {
     Json::Value jv;
     jv[jss::TransactionType] = jss::OracleDelete;
     jv[jss::Account] = to_string(owner);
-    jv[jss::OracleID] = to_string(oracleID.value_or(oracleID_));
+    jv[jss::OracleSequence] = oracleSequence.value_or(oracleSequence_);
     if (auto const f = fee != 0 ? fee : fee_)
         jv[jss::Fee] = std::to_string(f);
     else
@@ -138,7 +151,7 @@ Oracle::update(
     std::optional<std::uint32_t> const& lastUpdateTime,
     std::uint32_t flags,
     std::optional<jtx::msig> const& msig,
-    std::optional<uint256> const& oracleID,
+    std::optional<std::uint32_t> const& oracleSequence,
     std::uint32_t fee,
     std::optional<ter> const& ter)
 {
@@ -150,7 +163,7 @@ Oracle::update(
         lastUpdateTime,
         flags,
         msig,
-        oracleID,
+        oracleSequence,
         fee,
         ter);
 }
@@ -185,22 +198,16 @@ Oracle::submit(
 }
 
 bool
-Oracle::exists() const
+Oracle::exists(Env& env, AccountID const& account, std::uint32_t sequence)
 {
-    return env_.le(keylet::oracle(oracleID_)) != nullptr;
-}
-
-uint256
-Oracle::randOracleID() const
-{
-    auto keys = randomKeyPair(KeyType::secp256k1);
-    return sha512Half(keys.first);
+    assert(account.isNonZero());
+    return env.le(keylet::oracle(account, sequence)) != nullptr;
 }
 
 bool
 Oracle::expectPrice(DataSeries const& series) const
 {
-    if (auto const sle = env_.le(keylet::oracle(oracleID_)))
+    if (auto const sle = env_.le(keylet::oracle(owner_, oracleSequence_)))
     {
         auto const leSeries = sle->getFieldArray(sfPriceDataSeries);
         if (leSeries.size() != series.size())
@@ -232,9 +239,10 @@ Oracle::aggregatePrice(
     Env& env,
     std::optional<std::string> const& symbol,
     std::optional<std::string> const& priceUnit,
-    std::optional<std::vector<uint256>> const& oracles,
+    std::optional<std::vector<std::pair<AccountID, std::uint32_t>>> const&
+        oracles,
     std::optional<std::uint8_t> const& trim,
-    std::uint32_t flags)
+    std::optional<std::uint8_t> const& timeThreshold)
 {
     Json::Value jv;
     Json::Value jvOracles(Json::arrayValue);
@@ -243,19 +251,20 @@ Oracle::aggregatePrice(
         for (auto const& id : *oracles)
         {
             Json::Value oracle;
-            oracle[jss::oracle_id] = to_string(id);
+            oracle[jss::account] = to_string(id.first);
+            oracle[jss::oracle_sequence] = id.second;
             jvOracles.append(oracle);
         }
         jv[jss::oracles] = jvOracles;
     }
-    if (flags != 0)
-        jv[jss::flags] = flags;
     if (trim)
         jv[jss::trim] = *trim;
     if (symbol)
         jv[jss::symbol] = *symbol;
     if (priceUnit)
         jv[jss::price_unit] = *priceUnit;
+    if (timeThreshold)
+        jv[jss::time_interval] = *timeThreshold;
 
     auto jr = env.rpc("json", "get_aggregate_price", to_string(jv));
 
@@ -275,18 +284,16 @@ Oracle::set(
     std::optional<std::uint32_t> const& lastUpdateTime,
     std::uint32_t flags,
     std::optional<jtx::msig> const& msig,
-    std::optional<uint256> const& oracleID,
+    std::optional<std::uint32_t> const& oracleSequence,
     std::uint32_t fee,
     std::optional<ter> const& ter)
 {
     using namespace std::chrono;
     Json::Value jv;
     jv[jss::TransactionType] = jss::OracleSet;
-    if (oracleID)
-        jv[jss::OracleID] = to_string(*oracleID);
-    else
-        jv[jss::OracleID] = to_string(oracleID_);
     jv[jss::Account] = to_string(owner);
+    jv[jss::OracleSequence] =
+        to_string(oracleSequence.value_or(oracleSequence_));
     if (symbolClass)
         jv[jss::SymbolClass] = strHex(*symbolClass);
     if (provider)

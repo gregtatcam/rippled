@@ -107,7 +107,7 @@ JSS(OfferCreate);          // transaction type.
 JSS(OfferSequence);        // field.
 JSS(Oracle);               // ledger type.
 JSS(OracleDelete);         // transaction type.
-JSS(OracleID);             // field
+JSS(OracleSequence);       // field
 JSS(OracleSet);            // transaction type.
 JSS(Owner);                // field
 JSS(Paths);                // in/out: TransactionSign
@@ -514,7 +514,6 @@ JSS(open_ledger_fee);            // out: TxQ
 JSS(open_ledger_level);          // out: TxQ
 JSS(oracle);                     // in: LedgerEntry
 JSS(oracles);                    // in: get_aggregate_price
-JSS(oracle_id);                  // in: get_aggregate_price
 JSS(oracle_sequence);            // in: get_aggregate_price
 JSS(owner);                      // in: LedgerEntry, out: NetworkOPs
 JSS(owner_funds);                // in/out: Ledger, NetworkOPs, AcceptedLedgerTx
@@ -618,12 +617,14 @@ JSS(signing_time);              // out: NetworkOPs
 JSS(signer_list);               // in: AccountObjects
 JSS(signer_lists);              // in/out: AccountInfo
 JSS(simple_average);            // out: get_aggregate_price
+JSS(size);                      // out: get_aggregate_price
 JSS(snapshot);                  // in: Subscribe
 JSS(source_account);            // in: PathRequest, RipplePathFind
 JSS(source_amount);             // in: PathRequest, RipplePathFind
 JSS(source_currencies);         // in: PathRequest, RipplePathFind
 JSS(source_tag);                // out: AccountChannels
 JSS(stand_alone);               // out: NetworkOPs
+JSS(standard_deviation);        // out: get_aggregate_price
 JSS(start);                     // in: TxHistory
 JSS(started);
 JSS(state);                 // out: Logic.h, ServerState, LedgerData
@@ -654,6 +655,7 @@ JSS(ticket_count);          // out: AccountInfo
 JSS(ticket_seq);            // in: LedgerEntry
 JSS(time);
 JSS(timeouts);                // out: InboundLedger
+JSS(time_threshold);          // in/out: Oracle aggregate
 JSS(time_interval);           // out: AMM Auction Slot
 JSS(track);                   // out: PeerImp
 JSS(traffic);                 // out: Overlay

@@ -476,7 +476,7 @@ TxFormats::TxFormats()
     add(jss::OracleSet,
         ttORACLE_SET,
         {
-            {sfOracleID, soeREQUIRED},
+            {sfOracleSequence, soeREQUIRED},
             {sfProvider, soeOPTIONAL},
             {sfURI, soeOPTIONAL},
             {sfSymbolClass, soeOPTIONAL},
@@ -488,7 +488,7 @@ TxFormats::TxFormats()
     add(jss::OracleDelete,
         ttORACLE_DELETE,
         {
-            {sfOracleID, soeREQUIRED},
+            {sfOracleSequence, soeREQUIRED},
         },
         commonFields);
 }

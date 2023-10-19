@@ -35,11 +35,10 @@ class Oracle
 private:
     static inline std::uint32_t id_ = 0;
     Env& env_;
-    uint256 oracleID_;
+    AccountID owner_;
+    std::uint32_t oracleSequence_;
     std::optional<msig> const msig_;
     std::uint32_t fee_;
-    // Same as LedgerNameSpace
-    std::uint16_t static constexpr oracleNameSpace_ = 'R';
 
 private:
     void
@@ -59,6 +58,7 @@ public:
     Oracle(
         Env& env,
         Account const& owner,
+        std::uint32_t sequence,
         DataSeries const& series,
         std::string const& symbolClass = "currency",
         std::string const& provider = "provider",
@@ -71,6 +71,7 @@ public:
     Oracle(
         Env& env,
         Account const& owner,
+        std::uint32_t sequence,
         DataSeries const& series,
         std::optional<ter> const& ter);
 
@@ -78,6 +79,7 @@ public:
     create(
         AccountID const& owner,
         DataSeries const& series,
+        std::optional<std::uint32_t> const& sequence = std::nullopt,
         std::optional<std::string> const& symbolClass = std::nullopt,
         std::optional<std::string> const& provider = std::nullopt,
         std::optional<std::string> const& URI = std::nullopt,
@@ -91,7 +93,7 @@ public:
     remove(
         AccountID const& owner,
         std::optional<jtx::msig> const& msig = std::nullopt,
-        std::optional<uint256> const& oracleID = std::nullopt,
+        std::optional<std::uint32_t> const& oracleSequence = std::nullopt,
         std::uint32_t fee = 0,
         std::optional<ter> const& ter = std::nullopt);
 
@@ -103,7 +105,7 @@ public:
         std::optional<std::uint32_t> const& lastUpdateTime = std::nullopt,
         std::uint32_t flags = 0,
         std::optional<jtx::msig> const& msig = std::nullopt,
-        std::optional<uint256> const& oracleID = std::nullopt,
+        std::optional<std::uint32_t> const& oracleSequence = std::nullopt,
         std::uint32_t fee = 0,
         std::optional<ter> const& ter = std::nullopt);
 
@@ -112,21 +114,25 @@ public:
         Env& env,
         std::optional<std::string> const& symbol,
         std::optional<std::string> const& priceUnit,
-        std::optional<std::vector<uint256>> const& oracles,
-        std::optional<std::uint8_t> const& trim,
-        std::uint32_t flags);
+        std::optional<std::vector<std::pair<AccountID, std::uint32_t>>> const&
+            oracles = std::nullopt,
+        std::optional<std::uint8_t> const& trim = std::nullopt,
+        std::optional<std::uint8_t> const& timeTreshold = std::nullopt);
 
-    uint256
-    oracleID() const
+    std::uint32_t
+    oracleSequence() const
     {
-        return oracleID_;
+        return oracleSequence_;
     }
 
     bool
-    exists() const;
+    exists() const
+    {
+        return exists(env_, owner_, oracleSequence_);
+    }
 
-    uint256
-    randOracleID() const;
+    static bool
+    exists(Env& env, AccountID const& account, std::uint32_t sequence);
 
     bool
     expectPrice(DataSeries const& pricess) const;
@@ -140,7 +146,7 @@ public:
         std::optional<std::uint32_t> const& lastUpdateTime = std::nullopt,
         std::uint32_t flags = 0,
         std::optional<jtx::msig> const& msig = std::nullopt,
-        std::optional<uint256> const& oracleID = std::nullopt,
+        std::optional<std::uint32_t> const& oracleSequence = std::nullopt,
         std::uint32_t fee = 0,
         std::optional<ter> const& ter = std::nullopt);
 

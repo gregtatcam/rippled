@@ -60,27 +60,9 @@ doGetAggregatePrice(RPC::JsonContext& context)
     if (!params.isMember(jss::price_unit))
         return RPC::missing_field_error(jss::price_unit);
 
-    if (!params.isMember(jss::flags))
-        return RPC::missing_field_error(jss::flags);
-
-    auto const flags = params[jss::flags].asUInt();
-    auto constexpr fSimpleAverage = 0x01;
-    auto constexpr fMedian = 0x02;
-    auto constexpr fTrimmedMean = 0x04;
-    if (!(flags & (fSimpleAverage | fMedian | fTrimmedMean)))
-    {
-        RPC::inject_error(rpcINVALID_PARAMS, result);
-        return result;
-    }
     std::optional<std::uint8_t> trim = params.isMember(jss::trim)
-        ? std::optional<std::uint8_t>(params[jss::trim].asUInt())
+        ? std::make_optional(params[jss::trim].asUInt())
         : std::nullopt;
-    if (((flags & fTrimmedMean) && !trim) ||
-        (!(flags & fTrimmedMean) && trim) || trim == 0 || trim > 25)
-    {
-        RPC::inject_error(rpcINVALID_PARAMS, result);
-        return result;
-    }
 
     auto const symbol = params[jss::symbol];
     auto const priceUnit = params[jss::price_unit];
@@ -91,18 +73,24 @@ doGetAggregatePrice(RPC::JsonContext& context)
     STAmount avg{someIssue, 0, 0};
     for (auto const& oracle : params[jss::oracles])
     {
-        if (!oracle.isMember(jss::oracle_id))
+        if (!oracle.isMember(jss::oracle_sequence) ||
+            !oracle.isMember(jss::account))
         {
             RPC::inject_error(rpcORACLE_MALFORMED, result);
             return result;
         }
-        uint256 hash;
-        if (!hash.parseHex(oracle[jss::oracle_id].asString()))
+        auto const sequence = oracle[jss::oracle_sequence].isConvertibleTo(
+                                  Json::ValueType::uintValue)
+            ? std::make_optional(oracle[jss::oracle_sequence].asUInt())
+            : std::nullopt;
+        auto const account =
+            parseBase58<AccountID>(oracle[jss::account].asString());
+        if (!account || account->isZero() || !sequence)
         {
             RPC::inject_error(rpcINVALID_PARAMS, result);
             return result;
         }
-        if (auto const sle = ledger->read(keylet::oracle(hash)))
+        if (auto const sle = ledger->read(keylet::oracle(*account, *sequence)))
         {
             auto const series = sle->getFieldArray(sfPriceDataSeries);
             if (auto iter = std::find_if(
@@ -138,57 +126,57 @@ doGetAggregatePrice(RPC::JsonContext& context)
         RPC::inject_error(rpcORACLE_MALFORMED, result);
         return result;
     }
-    if (flags & fSimpleAverage)
+    avg = divide(
+        avg,
+        STAmount{someIssue, static_cast<std::uint64_t>(prices.size()), 0},
+        someIssue);
+    result[jss::simple_average] = avg.getText();
+    result[jss::size] = static_cast<std::uint32_t>(prices.size());
+    auto sd = STAmount{someIssue, 0};
+    result[jss::standard_deviation] = "0";
+    if (prices.size() > 1)
     {
+        for (auto const& price : prices)
+            sd += multiply(price - avg, price - avg, someIssue);
+        result[jss::standard_deviation] = to_string(root2(sd));
+    }
+
+    std::stable_sort(prices.begin(), prices.end());
+    auto const median = [&]() {
+        if (prices.size() % 2 == 0)
+        {
+            // Even number of elements
+            size_t middle = prices.size() / 2;
+            return divide(
+                prices[middle - 1] + prices[middle],
+                STAmount{someIssue, 2, 0},
+                someIssue);
+        }
+        else
+        {
+            // Odd number of elements
+            return divide(
+                prices[prices.size()], STAmount{someIssue, 2, 0}, someIssue);
+        }
+    }();
+    result[jss::median] = median.getText();
+
+    if (trim)
+    {
+        auto const trimCount = prices.size() * *trim / 100;
+        size_t start = trimCount;
+        size_t end = prices.size() - trimCount;
+
+        avg = std::accumulate(
+            prices.begin() + trimCount,
+            prices.begin() + end,
+            STAmount{someIssue, 0, 0});
+
         avg = divide(
             avg,
-            STAmount{someIssue, static_cast<std::uint64_t>(prices.size()), 0},
+            STAmount{someIssue, static_cast<std::uint64_t>(end - start), 0},
             someIssue);
-        result[jss::simple_average] = avg.getText();
-    }
-    if (flags & (fMedian | fTrimmedMean))
-    {
-        std::stable_sort(prices.begin(), prices.end());
-        if (flags & fMedian)
-        {
-            auto const median = [&]() {
-                if (prices.size() % 2 == 0)
-                {
-                    // Even number of elements
-                    size_t middle = prices.size() / 2;
-                    return divide(
-                        prices[middle - 1] + prices[middle],
-                        STAmount{someIssue, 2, 0},
-                        someIssue);
-                }
-                else
-                {
-                    // Odd number of elements
-                    return divide(
-                        prices[prices.size()],
-                        STAmount{someIssue, 2, 0},
-                        someIssue);
-                }
-            }();
-            result[jss::median] = median.getText();
-        }
-        if (flags & fTrimmedMean)
-        {
-            auto const trimCount = prices.size() * *trim / 100;
-            size_t start = trimCount;
-            size_t end = prices.size() - trimCount;
-
-            avg = std::accumulate(
-                prices.begin() + trimCount,
-                prices.begin() + end,
-                STAmount{someIssue, 0, 0});
-
-            avg = divide(
-                avg,
-                STAmount{someIssue, static_cast<std::uint64_t>(end - start), 0},
-                someIssue);
-            result[jss::trimmed_mean] = avg.getText();
-        }
+        result[jss::trimmed_mean] = avg.getText();
     }
 
     return result;

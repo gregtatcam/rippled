@@ -100,6 +100,18 @@ using TxID = uint256;
  */
 std::uint16_t constexpr maxDeletableAMMTrustLines = 512;
 
+/** The maximum length of a URI inside an Oracle */
+std::size_t constexpr maxOracleURI = 256;
+
+/** The maximum length of a Provider inside an Oracle */
+std::size_t constexpr maxOracleProvider = 256;
+
+/** The maximum size of a data series array inside an Oracle */
+std::size_t constexpr maxOracleDataSeries = 10;
+
+/** The maximum length of a SymbolClass inside an Oracle */
+std::size_t constexpr maxOracleSymbolClass = 12;
+
 }  // namespace ripple
 
 #endif

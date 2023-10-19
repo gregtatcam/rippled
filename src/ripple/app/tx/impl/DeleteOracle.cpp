@@ -47,7 +47,8 @@ DeleteOracle::preflight(PreflightContext const& ctx)
 TER
 DeleteOracle::preclaim(PreclaimContext const& ctx)
 {
-    if (auto const sle = ctx.view.read(keylet::oracle(ctx.tx[sfOracleID]));
+    if (auto const sle = ctx.view.read(keylet::oracle(
+            ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleSequence]));
         !sle)
     {
         JLOG(ctx.j.debug()) << "Oracle Delete: Oracle does not exist.";
@@ -68,15 +69,31 @@ DeleteOracle::doApply()
     // as we go on processing transactions.
     Sandbox sb(&ctx_.view());
 
-    if (auto sle = sb.peek(keylet::oracle(ctx_.tx[sfOracleID])); !sle)
+    if (auto sle = sb.peek(keylet::oracle(account_, ctx_.tx[sfOracleSequence]));
+        !sle)
         return tecINTERNAL;
     else
     {
+        if (!sb.dirRemove(
+                keylet::ownerDir(account_),
+                (*sle)[sfOwnerNode],
+                sle->key(),
+                true))
+        {
+            JLOG(j_.fatal()) << "Unable to delete Oracle from owner.";
+            return tefBAD_LEDGER;
+        }
+
+        auto const sleOwner = sb.peek(keylet::account(account_));
+        if (!sleOwner)
+            return tecINTERNAL;
+
+        adjustOwnerCount(sb, sleOwner, -1, j_);
+        sb.update(sleOwner);
+
         sb.erase(sle);
         sb.apply(ctx_.rawView());
     }
-
-    adjustOwnerCount(sb, sb.peek(keylet::account(account_)), -1, j_);
 
     return tesSUCCESS;
 }

@@ -600,7 +600,9 @@ doLedgerEntry(RPC::JsonContext& context)
                     jvResult[jss::error] = "malformedRequest";
                 }
             }
-            else if (!context.params[jss::oracle].isMember(jss::OracleID))
+            else if (
+                !context.params[jss::oracle].isMember(jss::oracle_sequence) ||
+                !context.params[jss::oracle].isMember(jss::account))
             {
                 jvResult[jss::error] = "malformedRequest";
             }
@@ -608,15 +610,22 @@ doLedgerEntry(RPC::JsonContext& context)
             {
                 try
                 {
-                    uint256 oracleID;
-                    if (!oracleID.parseHex(
-                            context.params[jss::oracle][jss::OracleID]
-                                .asCString()))
-                    {
-                        uNodeIndex = beast::zero;
-                        jvResult[jss::error] = "malformedRequest";
-                    }
-                    uNodeIndex = keylet::oracle(oracleID).key;
+                    uNodeIndex = beast::zero;
+                    auto const& oracle = context.params[jss::oracle];
+                    auto const sequence =
+                        oracle[jss::oracle_sequence].isConvertibleTo(
+                            Json::ValueType::uintValue)
+                        ? std::make_optional(
+                              oracle[jss::oracle_sequence].asUInt())
+                        : std::nullopt;
+                    auto const account =
+                        parseBase58<AccountID>(oracle[jss::account].asString());
+                    if (!account || account->isZero())
+                        jvResult[jss::error] = "malformedAddress";
+                    else if (!sequence)
+                        jvResult[jss::error] = "malformedSequence";
+                    else
+                        uNodeIndex = keylet::oracle(*account, *sequence).key;
                 }
                 catch (std::runtime_error const&)
                 {

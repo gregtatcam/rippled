@@ -439,9 +439,9 @@ xChainCreateAccountClaimID(STXChainBridge const& bridge, std::uint64_t seq)
 }
 
 Keylet
-oracle(uint256 const& id) noexcept
+oracle(AccountID const& account, std::uint32_t const& seq) noexcept
 {
-    return {ltORACLE, indexHash(LedgerNameSpace::ORACLE, id)};
+    return {ltORACLE, indexHash(LedgerNameSpace::ORACLE, account, seq)};
 }
 
 }  // namespace keylet
