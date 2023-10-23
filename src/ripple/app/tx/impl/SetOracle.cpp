@@ -43,10 +43,16 @@ SetOracle::preflight(PreflightContext const& ctx)
         return temINVALID_FLAG;
     }
 
-    if (ctx.tx.getFieldArray(sfPriceDataSeries).size() > maxOracleDataSeries)
+    auto const dataSeries = ctx.tx.getFieldArray(sfPriceDataSeries);
+    if (dataSeries.size() == 0 || dataSeries.size() > maxOracleDataSeries)
     {
-        JLOG(ctx.j.debug()) << "Oracle Set: price data series too large";
+        JLOG(ctx.j.debug()) << "Oracle Set: invalid price data series size";
         return temARRAY_SIZE;
+    }
+    for (auto const& entry : dataSeries)
+    {
+        if (!entry.isFieldPresent(sfSymbolPrice))
+            return temMALFORMED;
     }
 
     if (ctx.tx.getFieldVL(sfProvider).size() > maxOracleProvider)
@@ -84,6 +90,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         pairs.emplace(hash);
     }
 
+    // update
     if (auto const sle = ctx.view.read(keylet::oracle(
             ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleSequence])))
     {
@@ -103,6 +110,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
                 pairs.emplace(hash);
         }
     }
+    // create
     else
     {
         if (!ctx.tx.isFieldPresent(sfProvider) ||
@@ -110,7 +118,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
             return temMALFORMED;
     }
 
-    if (pairs.size() == 0 || pairs.size() > 10)
+    if (pairs.size() > maxOracleDataSeries)
         return temARRAY_SIZE;
 
     auto const sleSetter =
@@ -140,10 +148,9 @@ applySet(
 {
     auto const oracleID = keylet::oracle(account_, ctx_.tx[sfOracleSequence]);
 
+    // update
     if (auto sle = sb.peek(oracleID))
     {
-        // update Oracle
-
         hash_map<uint256, STObject> pairs;
         // collect current pairs
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))
@@ -153,8 +160,6 @@ applySet(
                 sfSymbol, entry.getFieldCurrency(sfSymbol));
             priceData.setFieldCurrency(
                 sfPriceUnit, entry.getFieldCurrency(sfPriceUnit));
-            priceData.setFieldU64(sfSymbolPrice, 0);
-            priceData.setFieldU8(sfScale, 0);
             pairs.emplace(
                 sha512Half(
                     entry.getFieldCurrency(sfSymbol).currency(),
@@ -171,7 +176,8 @@ applySet(
             {
                 iter->second.setFieldU64(
                     sfSymbolPrice, entry.getFieldU64(sfSymbolPrice));
-                iter->second.setFieldU8(sfScale, entry.getFieldU8(sfScale));
+                if (entry.isFieldPresent(sfScale))
+                    iter->second.setFieldU8(sfScale, entry.getFieldU8(sfScale));
             }
             else
             {
@@ -182,7 +188,8 @@ applySet(
                     sfPriceUnit, entry.getFieldCurrency(sfPriceUnit));
                 priceData.setFieldU64(
                     sfSymbolPrice, entry.getFieldU64(sfSymbolPrice));
-                priceData.setFieldU8(sfScale, entry.getFieldU8(sfScale));
+                if (entry.isFieldPresent(sfScale))
+                    priceData.setFieldU8(sfScale, entry.getFieldU8(sfScale));
                 pairs.emplace(
                     sha512Half(
                         entry.getFieldCurrency(sfSymbol).currency(),
@@ -200,10 +207,9 @@ applySet(
 
         sb.update(sle);
     }
+    // create
     else
     {
-        // create new Oracle
-
         sle = std::make_shared<SLE>(oracleID);
         sle->setAccountID(sfOwner, ctx_.tx.getAccountID(sfAccount));
         sle->setFieldVL(sfProvider, ctx_.tx[sfProvider]);

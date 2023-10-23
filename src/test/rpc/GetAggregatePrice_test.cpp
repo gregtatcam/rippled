@@ -17,6 +17,7 @@
 */
 //==============================================================================
 
+#include <ripple/app/ledger/LedgerMaster.h>
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/jss.h>
 #include <test/jtx.h>
@@ -33,52 +34,68 @@ public:
     {
         testcase("Errors");
         using namespace jtx;
-        Env env(*this);
         Account const owner{"owner"};
         Account const some{"some"};
-        static std::vector<std::pair<AccountID, std::uint32_t>> oracles = {
+        static std::vector<std::pair<Account, std::uint32_t>> oracles = {
             {owner, 1}};
 
-        // missing symbol
-        auto ret = Oracle::aggregatePrice(env, std::nullopt, "USD", oracles);
-        BEAST_EXPECT(
-            ret[jss::error_message].asString() == "Missing field 'symbol'.");
+        {
+            Env env(*this);
+            // missing symbol
+            auto ret =
+                Oracle::aggregatePrice(env, std::nullopt, "USD", oracles);
+            BEAST_EXPECT(
+                ret[jss::error_message].asString() ==
+                "Missing field 'symbol'.");
 
-        // missing price_unit
-        ret = Oracle::aggregatePrice(env, "XRP", std::nullopt, oracles);
-        BEAST_EXPECT(
-            ret[jss::error_message].asString() ==
-            "Missing field 'price_unit'.");
+            // missing price_unit
+            ret = Oracle::aggregatePrice(env, "XRP", std::nullopt, oracles);
+            BEAST_EXPECT(
+                ret[jss::error_message].asString() ==
+                "Missing field 'price_unit'.");
 
-        // missing oracles array
-        ret = Oracle::aggregatePrice(env, "XRP", "USD");
-        BEAST_EXPECT(
-            ret[jss::error_message].asString() == "Missing field 'oracles'.");
+            // missing oracles array
+            ret = Oracle::aggregatePrice(env, "XRP", "USD");
+            BEAST_EXPECT(
+                ret[jss::error_message].asString() ==
+                "Missing field 'oracles'.");
 
-        // empty oracles array
-        ret = Oracle::aggregatePrice(env, "XRP", "USD", {{}});
-        BEAST_EXPECT(ret[jss::error].asString() == "oracleMalformed");
+            // empty oracles array
+            ret = Oracle::aggregatePrice(env, "XRP", "USD", {{}});
+            BEAST_EXPECT(ret[jss::error].asString() == "oracleMalformed");
 
-        // invalid oracle sequence
-        ret = Oracle::aggregatePrice(env, "XRP", "USD", {{{owner, 2}}});
-        BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
+            // invalid oracle sequence
+            ret = Oracle::aggregatePrice(env, "XRP", "USD", {{{owner, 2}}});
+            BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
 
-        // invalid owner
-        ret = Oracle::aggregatePrice(env, "XRP", "USD", {{{some, 1}}});
-        BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
+            // invalid owner
+            ret = Oracle::aggregatePrice(env, "XRP", "USD", {{{some, 1}}});
+            BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
 
-        // oracles have wrong asset pair
-        env.fund(XRP(1'000), owner);
-        Oracle oracle(env, owner, 1, {{"XRP", "EUR", 740, 1}}, ter(tesSUCCESS));
-        Oracle oracle1(
-            env, owner, 2, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
-        ret = Oracle::aggregatePrice(
-            env,
-            "XRP",
-            "USD",
-            {{{owner, oracle.oracleSequence()},
-              {owner, oracle1.oracleSequence()}}});
-        BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
+            // oracles have wrong asset pair
+            env.fund(XRP(1'000), owner);
+            Oracle oracle(
+                env, owner, 1, {{"XRP", "EUR", 740, 1}}, ter(tesSUCCESS));
+            ret = Oracle::aggregatePrice(
+                env, "XRP", "USD", {{{owner, oracle.oracleSequence()}}});
+            BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
+        }
+
+        // too many oracles
+        {
+            Env env(*this);
+            std::vector<std::pair<Account, std::uint32_t>> oracles;
+            for (int i = 0; i < 201; ++i)
+            {
+                Account const owner(std::to_string(i));
+                env.fund(XRP(1'000), owner);
+                Oracle oracle(
+                    env, owner, i, {{"XRP", "USD", 740, 1}}, ter(tesSUCCESS));
+                oracles.emplace_back(owner, oracle.oracleSequence());
+            }
+            auto const ret = Oracle::aggregatePrice(env, "XRP", "USD", oracles);
+            BEAST_EXPECT(ret[jss::error].asString() == "oracleMalformed");
+        }
     }
 
     void
@@ -87,9 +104,7 @@ public:
         testcase("RPC");
         using namespace jtx;
 
-        {
-            Env env(*this);
-            std::vector<std::pair<AccountID, std::uint32_t>> oracles;
+        auto prep = [&](Env& env, auto& oracles) {
             oracles.reserve(10);
             for (int i = 0; i < 10; ++i)
             {
@@ -99,19 +114,98 @@ public:
                     env,
                     owner,
                     rand(),
-                    {{"XRP", "USD", 740 + i, 1}},
+                    {{"XRP", "USD", 740 + i, 1}, {"XRP", "EUR", 740, 1}},
                     ter(tesSUCCESS));
-                oracles.emplace_back(owner.id(), oracle.oracleSequence());
+                oracles.emplace_back(owner, oracle.oracleSequence());
             }
-            // simple average
-            auto ret = Oracle::aggregatePrice(env, "XRP", "USD", oracles, 20);
-            BEAST_EXPECT(ret[jss::simple_average] == "74.45");
+        };
+
+        // can find price data for all price oracle instances
+        {
+            Env env(*this);
+            std::vector<std::pair<Account, std::uint32_t>> oracles;
+            prep(env, oracles);
+            // entire and trimmed stats
+            auto ret =
+                Oracle::aggregatePrice(env, "XRP", "USD", oracles, 20, 100);
+            BEAST_EXPECT(ret[jss::entire_set][jss::average] == "74.45");
+            BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 10);
+            BEAST_EXPECT(
+                ret[jss::entire_set][jss::standard_deviation] ==
+                "0.3027650354097492");
             BEAST_EXPECT(ret[jss::median] == "74.45");
-            BEAST_EXPECT(ret[jss::trimmed_mean] == "74.45");
-            BEAST_EXPECT(ret[jss::size].asUInt() == 10);
-            BEAST_EXPECT(ret[jss::standard_deviation] == "0.9082951062292475");
+            BEAST_EXPECT(ret[jss::trimmed_set][jss::average] == "74.45");
+            BEAST_EXPECT(ret[jss::trimmed_set][jss::size].asUInt() == 6);
+            BEAST_EXPECT(
+                ret[jss::trimmed_set][jss::standard_deviation] ==
+                "0.187082869338697");
         }
-        BEAST_EXPECT(true);
+
+        // reduced data set as some price oracles have the price data
+        // beyond three updated ledgers
+        {
+            Env env(*this);
+            std::vector<std::pair<Account, std::uint32_t>> oracles;
+            prep(env, oracles);
+            for (int i = 0; i < 3; ++i)
+            {
+                Oracle oracle(env, oracles[i].first, oracles[i].second);
+                // push XRP/USD farther than three ledger, so this price
+                // oracle is not included in the dataset
+                oracle.update(oracles[i].first, {{"XRP", "EUR", 740, 1}});
+                oracle.update(oracles[i].first, {{"XRP", "EUR", 740, 1}});
+                oracle.update(oracles[i].first, {{"XRP", "EUR", 740, 1}});
+            }
+            for (int i = 3; i < 6; ++i)
+            {
+                Oracle oracle(env, oracles[i].first, oracles[i].second);
+                // push XRP/USD by two ledgers, so this price
+                // is included in the dataset
+                oracle.update(oracles[i].first, {{"XRP", "EUR", 740, 1}});
+                oracle.update(oracles[i].first, {{"XRP", "EUR", 740, 1}});
+            }
+
+            // entire and trimmed stats
+            auto ret =
+                Oracle::aggregatePrice(env, "XRP", "USD", oracles, 20, 200);
+            BEAST_EXPECT(ret[jss::entire_set][jss::average] == "74.6");
+            BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 7);
+            BEAST_EXPECT(
+                ret[jss::entire_set][jss::standard_deviation] ==
+                "0.2160246899469287");
+            BEAST_EXPECT(ret[jss::median] == "74.6");
+            BEAST_EXPECT(ret[jss::trimmed_set][jss::average] == "74.6");
+            BEAST_EXPECT(ret[jss::trimmed_set][jss::size].asUInt() == 5);
+            BEAST_EXPECT(
+                ret[jss::trimmed_set][jss::standard_deviation] ==
+                "0.158113883008419");
+        }
+
+        // reduced data set because of the time threshold
+        {
+            Env env(*this);
+            std::vector<std::pair<Account, std::uint32_t>> oracles;
+            prep(env, oracles);
+            for (int i = 0; i < oracles.size(); ++i)
+            {
+                Oracle oracle(env, oracles[i].first, oracles[i].second);
+                // push XRP/USD by two ledgers, so this price
+                // is included in the dataset
+                oracle.update(
+                    oracles[i].first,
+                    {{"XRP", "USD", 740, 1}},
+                    "URI",
+                    1'000 + i);
+            }
+
+            // entire stats only, limit lastUpdateTime to 1,009-1,002
+            auto ret = Oracle::aggregatePrice(
+                env, "XRP", "USD", oracles, std::nullopt, 7);
+            BEAST_EXPECT(ret[jss::entire_set][jss::average] == "74");
+            BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 8);
+            BEAST_EXPECT(ret[jss::entire_set][jss::standard_deviation] == "0");
+            BEAST_EXPECT(ret[jss::median] == "74");
+        }
     }
 
     void

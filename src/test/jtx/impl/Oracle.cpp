@@ -22,6 +22,8 @@
 #include <ripple/protocol/jss.h>
 #include <test/jtx/Oracle.h>
 
+#include <boost/lexical_cast/try_lexical_convert.hpp>
+
 #include <format>
 #include <vector>
 
@@ -91,6 +93,15 @@ Oracle::Oracle(
           std::nullopt,
           0,
           ter)
+{
+}
+
+Oracle::Oracle(Env& env, Account const& owner, std::uint32_t sequence)
+    : env_(env)
+    , owner_(owner)
+    , oracleSequence_(sequence)
+    , msig_(std::nullopt)
+    , fee_(0)
 {
 }
 
@@ -239,7 +250,7 @@ Oracle::aggregatePrice(
     Env& env,
     std::optional<std::string> const& symbol,
     std::optional<std::string> const& priceUnit,
-    std::optional<std::vector<std::pair<AccountID, std::uint32_t>>> const&
+    std::optional<std::vector<std::pair<Account, std::uint32_t>>> const&
         oracles,
     std::optional<std::uint8_t> const& trim,
     std::optional<std::uint8_t> const& timeThreshold)
@@ -251,7 +262,7 @@ Oracle::aggregatePrice(
         for (auto const& id : *oracles)
         {
             Json::Value oracle;
-            oracle[jss::account] = to_string(id.first);
+            oracle[jss::account] = to_string(id.first.id());
             oracle[jss::oracle_sequence] = id.second;
             jvOracles.append(oracle);
         }
@@ -264,7 +275,7 @@ Oracle::aggregatePrice(
     if (priceUnit)
         jv[jss::price_unit] = *priceUnit;
     if (timeThreshold)
-        jv[jss::time_interval] = *timeThreshold;
+        jv[jss::time_threshold] = *timeThreshold;
 
     auto jr = env.rpc("json", "get_aggregate_price", to_string(jv));
 
@@ -309,9 +320,10 @@ Oracle::set(
     if (lastUpdateTime)
         jv[jss::LastUpdateTime] = *lastUpdateTime;
     else
-        jv[jss::LastUpdateTime] = to_string(
-            duration_cast<seconds>(env_.timeKeeper().now().time_since_epoch())
-                .count());
+        jv[jss::LastUpdateTime] =
+            to_string(duration_cast<seconds>(
+                          env_.current()->info().closeTime.time_since_epoch())
+                          .count());
     Json::Value dataSeries(Json::arrayValue);
     for (auto const& data : series)
     {
@@ -328,6 +340,23 @@ Oracle::set(
     }
     jv[jss::PriceDataSeries] = dataSeries;
     submit(jv, msig, std::nullopt, ter);
+}
+
+Json::Value
+Oracle::ledgerEntry(std::optional<std::string> const& index) const
+{
+    Json::Value jvParams;
+    jvParams[jss::oracle][jss::account] = to_string(owner_);
+    jvParams[jss::oracle][jss::oracle_sequence] = oracleSequence_;
+    if (index)
+    {
+        std::uint32_t i;
+        if (boost::conversion::try_lexical_convert(*index, i))
+            jvParams[jss::oracle][jss::ledger_index] = i;
+        else
+            jvParams[jss::oracle][jss::ledger_index] = *index;
+    }
+    return env_.rpc("json", "ledger_entry", to_string(jvParams))[jss::result];
 }
 
 }  // namespace jtx

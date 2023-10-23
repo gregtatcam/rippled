@@ -141,8 +141,8 @@ InnerObjectFormats::InnerObjectFormats()
         {
             {sfSymbol, soeREQUIRED},
             {sfPriceUnit, soeREQUIRED},
-            {sfSymbolPrice, soeREQUIRED},
-            {sfScale, soeREQUIRED},
+            {sfSymbolPrice, soeOPTIONAL},
+            {sfScale, soeDEFAULT},
         });
 }
 

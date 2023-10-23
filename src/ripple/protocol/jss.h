@@ -208,6 +208,7 @@ JSS(auth_accounts);               // out: amm_info
 JSS(auth_change);                 // out: AccountInfo
 JSS(auth_change_queued);          // out: AccountInfo
 JSS(available);                   // out: ValidatorList
+JSS(average);                     // out: get_aggregate_price
 JSS(avg_bps_recv);                // out: Peers
 JSS(avg_bps_sent);                // out: Peers
 JSS(balance);                     // out: AccountLines
@@ -307,6 +308,7 @@ JSS(enabled);                 // out: AmendmentTable
 JSS(engine_result);           // out: NetworkOPs, TransactionSign, Submit
 JSS(engine_result_code);      // out: NetworkOPs, TransactionSign, Submit
 JSS(engine_result_message);   // out: NetworkOPs, TransactionSign, Submit
+JSS(entire_set);              // out: get_aggregate_price
 JSS(ephemeral_key);           // out: ValidatorInfo
                               // in/out: Manifest
 JSS(error);                   // out: error
@@ -616,7 +618,6 @@ JSS(signing_keys);              // out: ValidatorList
 JSS(signing_time);              // out: NetworkOPs
 JSS(signer_list);               // in: AccountObjects
 JSS(signer_lists);              // in/out: AccountInfo
-JSS(simple_average);            // out: get_aggregate_price
 JSS(size);                      // out: get_aggregate_price
 JSS(snapshot);                  // in: Subscribe
 JSS(source_account);            // in: PathRequest, RipplePathFind
@@ -660,6 +661,7 @@ JSS(time_interval);           // out: AMM Auction Slot
 JSS(track);                   // out: PeerImp
 JSS(traffic);                 // out: Overlay
 JSS(trim);                    // in: get_aggregate_price
+JSS(trimmed_set);             // out: get_aggregate_price
 JSS(total);                   // out: counters
 JSS(total_bytes_recv);        // out: Peers
 JSS(total_bytes_sent);        // out: Peers

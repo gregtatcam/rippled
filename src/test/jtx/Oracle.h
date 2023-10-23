@@ -75,6 +75,8 @@ public:
         DataSeries const& series,
         std::optional<ter> const& ter);
 
+    Oracle(Env& env, Account const& owner, std::uint32_t sequence);
+
     void
     create(
         AccountID const& owner,
@@ -114,7 +116,7 @@ public:
         Env& env,
         std::optional<std::string> const& symbol,
         std::optional<std::string> const& priceUnit,
-        std::optional<std::vector<std::pair<AccountID, std::uint32_t>>> const&
+        std::optional<std::vector<std::pair<Account, std::uint32_t>>> const&
             oracles = std::nullopt,
         std::optional<std::uint8_t> const& trim = std::nullopt,
         std::optional<std::uint8_t> const& timeTreshold = std::nullopt);
@@ -149,6 +151,9 @@ public:
         std::optional<std::uint32_t> const& oracleSequence = std::nullopt,
         std::uint32_t fee = 0,
         std::optional<ter> const& ter = std::nullopt);
+
+    Json::Value
+    ledgerEntry(std::optional<std::string> const& index = std::nullopt) const;
 
 private:
 };
