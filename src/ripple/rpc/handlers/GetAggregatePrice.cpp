@@ -314,6 +314,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
         return result;
     }
 
+    result[jss::time] = latestTime;
     // calculate stats
     auto const [avg, sd, size] =
         getStats(prices.right.begin(), prices.right.end());
