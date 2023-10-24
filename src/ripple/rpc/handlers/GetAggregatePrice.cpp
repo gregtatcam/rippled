@@ -30,7 +30,6 @@
 
 namespace ripple {
 
-namespace {
 struct CompareDescending
 {
     bool
@@ -45,130 +44,81 @@ using Prices =
     bimap<multiset_of<std::uint32_t, CompareDescending>, multiset_of<STAmount>>;
 using PriceData = std::pair<std::uint32_t, STAmount>;
 
-enum class Status { tokenPairNotFound, missingPrice };
-}  // namespace
-
-/** find updateTime/price in PriceDataSeries for the given token pair.
- * Return updateTime/price if found, error otherwise.
- */
-static std::variant<Status, PriceData>
-findPriceData(
-    STObject const& node,
-    std::string const& symbol,
-    std::string const& priceUnit)
+class PriceDataIterator
 {
-    auto const& series = node.getFieldArray(sfPriceDataSeries);
-    // find the token pair entry
-    if (auto iter = std::find_if(
-            series.begin(),
-            series.end(),
-            [&](STObject const& o) -> bool {
-                return o.getFieldCurrency(sfSymbol).getText() == symbol &&
-                    o.getFieldCurrency(sfPriceUnit).getText() == priceUnit;
-            });
-        iter != series.end())
+private:
+    RPC::JsonContext& context_;
+    STObject const* sle_;
+
+public:
+    PriceDataIterator(RPC::JsonContext& context, STObject const* sle)
+        : context_(context), sle_(sle)
     {
-        if (iter->isFieldPresent(sfSymbolPrice))
-        {
-            auto const price = iter->getFieldU64(sfSymbolPrice);
-            auto const scale = iter->isFieldPresent(sfScale)
-                ? -static_cast<int>(iter->getFieldU8(sfScale))
-                : 0;
-            // found the price
-            return std::make_pair(
-                node.getFieldU32(sfLastUpdateTime),
-                STAmount{noIssue(), price, scale});
-        }
-        return Status::missingPrice;
     }
-    return Status::tokenPairNotFound;
-}
 
-/** Get historical price by traversing at most three previous ledgers with
- * the oracle update transaction. Return updateTime/price if found, nullopt
- * otherwise.
- */
-static std::optional<PriceData>
-getHistoricalPriceData(
-    RPC::JsonContext& context,
-    STObject const& node,
-    std::string const& symbol,
-    std::string const& priceUnit)
-{
-    constexpr std::uint8_t maxHistory = 3;
-    std::uint8_t cnt = 0;
-    uint256 prevTx = node.getFieldH256(sfPreviousTxnID);
-    std::optional<std::uint32_t> prevSeq =
-        node.getFieldU32(sfPreviousTxnLgrSeq);
+    void
+    foreach(std::function<bool(STObject const&)>&& f)
+    {
+        constexpr std::uint8_t maxHistory = 3;
 
-    auto getMeta = [&]() -> std::shared_ptr<STObject const> {
-        if (prevSeq && ++cnt <= maxHistory)
-        {
+        if (!sle_)
+            return;
+
+        if (f(*sle_))
+            return;
+
+        uint256 prevTx = sle_->getFieldH256(sfPreviousTxnID);
+        std::uint32_t prevSeq = sle_->getFieldU32(sfPreviousTxnLgrSeq);
+        std::uint8_t history = 0;
+
+        auto getMeta = [&]() -> std::shared_ptr<STObject const> {
             if (auto const ledger =
-                    context.ledgerMaster.getLedgerBySeq(*prevSeq))
-            {
-                prevSeq = std::nullopt;
+                    context_.ledgerMaster.getLedgerBySeq(prevSeq))
                 return ledger->txRead(prevTx).second;
-            }
-        }
-        return nullptr;
-    };
+            return nullptr;
+        };
 
-    while (auto const& meta = getMeta())
-    {
-        for (STObject const& node : meta->getFieldArray(sfAffectedNodes))
+        while (++history <= maxHistory)
         {
-            if (node.getFieldU16(sfLedgerEntryType) == ltORACLE)
+            if (auto const meta = getMeta())
             {
-                bool const isUpdate = node.isFieldPresent(sfFinalFields);
-                auto const& fields = isUpdate
-                    ? static_cast<STObject const&>(
-                          node.peekAtField(sfFinalFields))
-                    : static_cast<STObject const&>(
-                          node.peekAtField(sfNewFields));
-                auto const& v = findPriceData(fields, symbol, priceUnit);
-                // found the price
-                if (std::holds_alternative<PriceData>(v))
-                    return std::get<PriceData>(v);
-
-                // if missing price then try again
-                if (isUpdate && std::get<Status>(v) == Status::missingPrice)
+                for (STObject const& node :
+                     meta->getFieldArray(sfAffectedNodes))
                 {
-                    prevTx = node.getFieldH256(sfPreviousTxnID);
-                    prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
+                    if (node.getFieldU16(sfLedgerEntryType) == ltORACLE)
+                    {
+                        bool const isNew = node.isFieldPresent(sfNewFields);
+                        // if a meta is for the new and this is the first
+                        // look-up then it's the meta for the tx that
+                        // created the current object; i.e. there is no
+                        // historical data
+                        if (isNew && history == 1)
+                            return;
+
+                        auto const& n = isNew
+                            ? static_cast<const STObject&>(
+                                  node.peekAtField(sfNewFields))
+                            : static_cast<const STObject&>(
+                                  node.peekAtField(sfFinalFields));
+
+                        if (f(n))
+                            return;
+
+                        if (!isNew)
+                        {
+                            prevTx = node.getFieldH256(sfPreviousTxnID);
+                            prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
+                        }
+                        else
+                            return;
+
+                        break;
+                    }
                 }
-                // found the previous price oracle, but not necessarily the
-                // price
-                break;
             }
         }
     }
-    return std::nullopt;
-}
-
-/** Get lastUpdateTime/price from the price oracle identified
- * by account/sequence. Go back up to three previous tx ledgers if the price
- * is not included in the price oracle. Missing price indicates that the price
- * for the token pair is not updated in the price oracle object.
- */
-static std::optional<std::pair<std::uint32_t, STAmount>>
-getPriceData(
-    RPC::JsonContext& context,
-    STObject const& oracleSle,
-    std::string const& symbol,
-    std::string const& priceUnit)
-{
-    auto const v = findPriceData(oracleSle, symbol, priceUnit);
-    // found the price
-    if (std::holds_alternative<PriceData>(v))
-        return std::get<PriceData>(v);
-
-    // failed to find, try historical data
-    if (std::get<Status>(v) == Status::missingPrice)
-        return getHistoricalPriceData(context, oracleSle, symbol, priceUnit);
-    // the token pair is missing
-    return std::nullopt;
-}
+};
 
 // Return avg, sd, data set size
 static std::tuple<STAmount, Number, std::uint16_t>
@@ -281,14 +231,37 @@ doGetAggregatePrice(RPC::JsonContext& context)
             RPC::inject_error(rpcINVALID_PARAMS, result);
             return result;
         }
-        if (auto const sle = ledger->read(keylet::oracle(*account, *sequence)))
-        {
-            if (auto const data = getPriceData(
-                    context, *sle, symbol.asString(), priceUnit.asString()))
+
+        auto const sle = ledger->read(keylet::oracle(*account, *sequence));
+        PriceDataIterator it(context, sle ? sle.get() : nullptr);
+        it.foreach([&](STObject const& node) {
+            auto const& series = node.getFieldArray(sfPriceDataSeries);
+            // find the token pair entry
+            if (auto iter = std::find_if(
+                    series.begin(),
+                    series.end(),
+                    [&](STObject const& o) -> bool {
+                        return o.getFieldCurrency(sfSymbol).getText() ==
+                            symbol &&
+                            o.getFieldCurrency(sfPriceUnit).getText() ==
+                            priceUnit;
+                    });
+                iter != series.end())
             {
-                prices.insert(Prices::value_type(data->first, data->second));
+                if (iter->isFieldPresent(sfSymbolPrice))
+                {
+                    auto const price = iter->getFieldU64(sfSymbolPrice);
+                    auto const scale = iter->isFieldPresent(sfScale)
+                        ? -static_cast<int>(iter->getFieldU8(sfScale))
+                        : 0;
+                    prices.insert(Prices::value_type(
+                        node.getFieldU32(sfLastUpdateTime),
+                        STAmount{noIssue(), price, scale}));
+                    return true;
+                }
             }
-        }
+            return false;
+        });
     }
 
     if (prices.empty())
