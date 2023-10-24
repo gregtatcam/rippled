@@ -192,10 +192,10 @@ enum TxType : std::uint16_t
 
 
     /** This transaction type creates an Oracle instance */
-    ttORACLE_SET = 49,
+    ttORACLE_SET = 51,
 
     /** This transaction type deletes an Oracle instance */
-    ttORACLE_DELETE = 50,
+    ttORACLE_DELETE = 52,
 
     /** This system-generated transaction type is used to update the status of the various amendments.
 
