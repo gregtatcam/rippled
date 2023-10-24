@@ -327,6 +327,19 @@ LedgerFormats::LedgerFormats()
         },
         commonFields);
 
+    add(jss::DID,
+        ltDID,
+        {
+            {sfAccount,              soeREQUIRED},
+            {sfDIDDocument,          soeOPTIONAL},
+            {sfURI,                  soeOPTIONAL},
+            {sfData,          soeOPTIONAL},
+            {sfOwnerNode,            soeREQUIRED},
+            {sfPreviousTxnID,        soeREQUIRED},
+            {sfPreviousTxnLgrSeq,    soeREQUIRED}
+        },
+        commonFields);
+
     add(jss::Oracle,
         ltORACLE,
         {

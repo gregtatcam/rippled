@@ -281,6 +281,9 @@ Keylet
 xChainCreateAccountClaimID(STXChainBridge const& bridge, std::uint64_t seq);
 
 Keylet
+did(AccountID const& account) noexcept;
+
+Keylet
 oracle(AccountID const& account, std::uint32_t const& seq) noexcept;
 
 }  // namespace keylet

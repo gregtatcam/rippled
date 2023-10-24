@@ -473,6 +473,17 @@ TxFormats::TxFormats()
         },
         commonFields);
 
+    add(jss::DIDSet,
+        ttDID_SET,
+        {
+            {sfDIDDocument, soeOPTIONAL},
+            {sfURI, soeOPTIONAL},
+            {sfData, soeOPTIONAL},
+        },
+        commonFields);
+
+    add(jss::DIDDelete, ttDID_DELETE, {}, commonFields);
+
     add(jss::OracleSet,
         ttORACLE_SET,
         {
