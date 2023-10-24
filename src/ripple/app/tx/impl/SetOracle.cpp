@@ -87,13 +87,15 @@ SetOracle::preclaim(PreclaimContext const& ctx)
             entry.getFieldCurrency(sfPriceUnit).currency());
         if (pairs.contains(hash))
             return tecDUPLICATE;
+        if (!entry.isFieldPresent(sfSymbolPrice))
+            return temMALFORMED;
         pairs.emplace(hash);
     }
 
-    // update
     if (auto const sle = ctx.view.read(keylet::oracle(
             ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleSequence])))
     {
+        // update
         if (ctx.tx[sfAccount] != sle->getAccountID(sfOwner))
             return tecNO_PERMISSION;
 
@@ -110,9 +112,9 @@ SetOracle::preclaim(PreclaimContext const& ctx)
                 pairs.emplace(hash);
         }
     }
-    // create
     else
     {
+        // create
         if (!ctx.tx.isFieldPresent(sfProvider) ||
             !ctx.tx.isFieldPresent(sfSymbolClass))
             return temMALFORMED;
@@ -148,9 +150,9 @@ applySet(
 {
     auto const oracleID = keylet::oracle(account_, ctx_.tx[sfOracleSequence]);
 
-    // update
     if (auto sle = sb.peek(oracleID))
     {
+        // update
         hash_map<uint256, STObject> pairs;
         // collect current pairs
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))
@@ -174,6 +176,7 @@ applySet(
                 entry.getFieldCurrency(sfPriceUnit).currency());
             if (auto iter = pairs.find(hash); iter != pairs.end())
             {
+                // update the price
                 iter->second.setFieldU64(
                     sfSymbolPrice, entry.getFieldU64(sfSymbolPrice));
                 if (entry.isFieldPresent(sfScale))
@@ -181,6 +184,7 @@ applySet(
             }
             else
             {
+                // add a token pair with the price
                 STObject priceData{sfPriceData};
                 priceData.setFieldCurrency(
                     sfSymbol, entry.getFieldCurrency(sfSymbol));
@@ -207,9 +211,9 @@ applySet(
 
         sb.update(sle);
     }
-    // create
     else
     {
+        // create
         sle = std::make_shared<SLE>(oracleID);
         sle->setAccountID(sfOwner, ctx_.tx.getAccountID(sfAccount));
         sle->setFieldVL(sfProvider, ctx_.tx[sfProvider]);

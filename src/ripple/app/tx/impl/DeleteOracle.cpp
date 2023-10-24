@@ -56,8 +56,9 @@ DeleteOracle::preclaim(PreclaimContext const& ctx)
     }
     else if (ctx.tx.getAccountID(sfAccount) != sle->getAccountID(sfOwner))
     {
+        // this can't happen because of the above check
         JLOG(ctx.j.debug()) << "Oracle Delete: invalid account.";
-        return tecNO_PERMISSION;
+        return tecINTERNAL;
     }
     return tesSUCCESS;
 }

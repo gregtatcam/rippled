@@ -331,10 +331,10 @@ Oracle::set(
         Json::Value price;
         price[jss::Symbol] = std::get<0>(data);
         price[jss::PriceUnit] = std::get<1>(data);
-        // std::stringstream str;
-        // str << std::hex << std::get<3>(data);
-        price[jss::SymbolPrice] = std::get<2>(data);
-        price[jss::Scale] = std::get<3>(data);
+        if (std::get<2>(data))
+            price[jss::SymbolPrice] = *std::get<2>(data);
+        if (std::get<3>(data))
+            price[jss::Scale] = *std::get<3>(data);
         priceData[jss::PriceData] = price;
         dataSeries.append(priceData);
     }

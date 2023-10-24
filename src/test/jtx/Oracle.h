@@ -29,8 +29,11 @@ namespace jtx {
 class Oracle
 {
     // symbol, price unit, price, scale
-    using DataSeries = std::vector<
-        std::tuple<std::string, std::string, std::uint32_t, std::uint8_t>>;
+    using DataSeries = std::vector<std::tuple<
+        std::string,
+        std::string,
+        std::optional<std::uint32_t>,
+        std::optional<std::uint8_t>>>;
 
 private:
     static inline std::uint32_t id_ = 0;

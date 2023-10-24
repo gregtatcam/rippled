@@ -94,6 +94,20 @@ private:
                 0,
                 ter(tecDUPLICATE));
 
+            // Price is not included
+            oracle.create(
+                owner,
+                {{"XRP", "USD", 740, 1}, {"XRP", "USD", std::nullopt, 1}},
+                std::nullopt,
+                "currency",
+                "provider",
+                "URI",
+                std::nullopt,
+                0,
+                std::nullopt,
+                0,
+                ter(temMALFORMED));
+
             // Array of token pair is 0 or exceeds 10
             oracle.create(
                 owner,
