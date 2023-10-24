@@ -42,7 +42,6 @@ struct CompareDescending
 using namespace boost::bimaps;
 using Prices =
     bimap<multiset_of<std::uint32_t, CompareDescending>, multiset_of<STAmount>>;
-using PriceData = std::pair<std::uint32_t, STAmount>;
 
 class PriceDataIterator
 {
@@ -56,6 +55,9 @@ public:
     {
     }
 
+    /** Calls callback f on the ledger-object and up to three previous
+     * metadata objects. Returns if the callback returns true.
+     */
     void
     foreach(std::function<bool(STObject const&)>&& f)
     {
@@ -101,17 +103,11 @@ public:
                             : static_cast<const STObject&>(
                                   node.peekAtField(sfFinalFields));
 
-                        if (f(n))
+                        if (f(n) || isNew)
                             return;
 
-                        if (!isNew)
-                        {
-                            prevTx = node.getFieldH256(sfPreviousTxnID);
-                            prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
-                        }
-                        else
-                            return;
-
+                        prevTx = node.getFieldH256(sfPreviousTxnID);
+                        prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
                         break;
                     }
                 }
@@ -197,7 +193,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
         return result;
     }
 
-    constexpr std::uint32_t defaultTimeThreshold = 4;
+    constexpr std::uint32_t defaultTimeThreshold = 4;  // seconds
     auto const timeThreshold =
         getField(jss::time_threshold, defaultTimeThreshold);
     if (std::holds_alternative<error_code_i>(timeThreshold))
@@ -236,7 +232,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
         PriceDataIterator it(context, sle ? sle.get() : nullptr);
         it.foreach([&](STObject const& node) {
             auto const& series = node.getFieldArray(sfPriceDataSeries);
-            // find the token pair entry
+            // find the token pair entry with the price
             if (auto iter = std::find_if(
                     series.begin(),
                     series.end(),
@@ -244,21 +240,19 @@ doGetAggregatePrice(RPC::JsonContext& context)
                         return o.getFieldCurrency(sfSymbol).getText() ==
                             symbol &&
                             o.getFieldCurrency(sfPriceUnit).getText() ==
-                            priceUnit;
+                            priceUnit &&
+                            o.isFieldPresent(sfSymbolPrice);
                     });
                 iter != series.end())
             {
-                if (iter->isFieldPresent(sfSymbolPrice))
-                {
-                    auto const price = iter->getFieldU64(sfSymbolPrice);
-                    auto const scale = iter->isFieldPresent(sfScale)
-                        ? -static_cast<int>(iter->getFieldU8(sfScale))
-                        : 0;
-                    prices.insert(Prices::value_type(
-                        node.getFieldU32(sfLastUpdateTime),
-                        STAmount{noIssue(), price, scale}));
-                    return true;
-                }
+                auto const price = iter->getFieldU64(sfSymbolPrice);
+                auto const scale = iter->isFieldPresent(sfScale)
+                    ? -static_cast<int>(iter->getFieldU8(sfScale))
+                    : 0;
+                prices.insert(Prices::value_type(
+                    node.getFieldU32(sfLastUpdateTime),
+                    STAmount{noIssue(), price, scale}));
+                return true;
             }
             return false;
         });
@@ -295,7 +289,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
     result[jss::entire_set][jss::size] = size;
     result[jss::entire_set][jss::standard_deviation] = to_string(sd);
 
-    auto advRight = [&](auto begin, std::size_t by) {
+    auto advRight = [&](auto begin, int by) {
         auto it = begin;
         std::advance(it, by);
         return it;
@@ -306,8 +300,8 @@ doGetAggregatePrice(RPC::JsonContext& context)
         if ((size % 2) == 0)
         {
             static STAmount two{noIssue(), 2, 0};
-            auto const sum = advRight(prices.right.begin(), middle - 1)->first +
-                advRight(prices.right.begin(), middle)->first;
+            auto it = advRight(prices.right.begin(), middle - 1);
+            auto const sum = it->first + (++it)->first;
             return divide(sum, two, noIssue());
         }
         return advRight(prices.right.begin(), middle)->first;
@@ -318,12 +312,10 @@ doGetAggregatePrice(RPC::JsonContext& context)
     {
         auto const trimCount =
             prices.size() * std::get<std::uint32_t>(trim) / 100;
-        size_t start = trimCount;
-        size_t end = prices.size() - trimCount;
 
         auto const [avg, sd, size] = getStats(
-            advRight(prices.right.begin(), start),
-            advRight(prices.right.begin(), end));
+            advRight(prices.right.begin(), trimCount),
+            advRight(prices.right.end(), -trimCount));
         result[jss::trimmed_set][jss::average] = avg.getText();
         result[jss::trimmed_set][jss::size] = size;
         result[jss::trimmed_set][jss::standard_deviation] = to_string(sd);
