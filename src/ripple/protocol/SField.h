@@ -86,7 +86,7 @@ class STCurrency;
     STYPE(STI_UINT512, 23)                        \
     STYPE(STI_ISSUE, 24)                          \
     STYPE(STI_XCHAIN_BRIDGE, 25)                  \
-    STYPE(STI_CURRENCY, 26)                  \
+    STYPE(STI_CURRENCY, 26)                       \
                                                   \
     /* high-level types */                        \
     /* cannot be serialized inside other types */ \
