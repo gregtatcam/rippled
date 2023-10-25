@@ -43,78 +43,63 @@ using namespace boost::bimaps;
 using Prices =
     bimap<multiset_of<std::uint32_t, CompareDescending>, multiset_of<STAmount>>;
 
-class PriceDataIterator
+/** Calls callback f on the ledger-object sle and up to three previous
+ * metadata objects. Returns if the callback returns true.
+ */
+static void
+iteratePriceData(
+    RPC::JsonContext& context,
+    std::shared_ptr<SLE const> const& sle,
+    std::function<bool(STObject const&)>&& f)
 {
-private:
-    RPC::JsonContext& context_;
-    STObject const* sle_;
+    constexpr std::uint8_t maxHistory = 3;
 
-public:
-    PriceDataIterator(RPC::JsonContext& context, STObject const* sle)
-        : context_(context), sle_(sle)
+    if (!sle || f(*sle))
+        return;
+
+    uint256 prevTx = sle->getFieldH256(sfPreviousTxnID);
+    std::uint32_t prevSeq = sle->getFieldU32(sfPreviousTxnLgrSeq);
+    std::uint8_t history = 0;
+
+    auto getMeta = [&]() -> std::shared_ptr<STObject const> {
+        if (auto const ledger = context.ledgerMaster.getLedgerBySeq(prevSeq))
+            return ledger->txRead(prevTx).second;
+        return nullptr;
+    };
+
+    while (++history <= maxHistory)
     {
-    }
-
-    /** Calls callback f on the ledger-object and up to three previous
-     * metadata objects. Returns if the callback returns true.
-     */
-    void
-    foreach(std::function<bool(STObject const&)>&& f)
-    {
-        constexpr std::uint8_t maxHistory = 3;
-
-        if (!sle_)
-            return;
-
-        if (f(*sle_))
-            return;
-
-        uint256 prevTx = sle_->getFieldH256(sfPreviousTxnID);
-        std::uint32_t prevSeq = sle_->getFieldU32(sfPreviousTxnLgrSeq);
-        std::uint8_t history = 0;
-
-        auto getMeta = [&]() -> std::shared_ptr<STObject const> {
-            if (auto const ledger =
-                    context_.ledgerMaster.getLedgerBySeq(prevSeq))
-                return ledger->txRead(prevTx).second;
-            return nullptr;
-        };
-
-        while (++history <= maxHistory)
+        if (auto const meta = getMeta())
         {
-            if (auto const meta = getMeta())
+            for (STObject const& node : meta->getFieldArray(sfAffectedNodes))
             {
-                for (STObject const& node :
-                     meta->getFieldArray(sfAffectedNodes))
+                if (node.getFieldU16(sfLedgerEntryType) == ltORACLE)
                 {
-                    if (node.getFieldU16(sfLedgerEntryType) == ltORACLE)
-                    {
-                        bool const isNew = node.isFieldPresent(sfNewFields);
-                        // if a meta is for the new and this is the first
-                        // look-up then it's the meta for the tx that
-                        // created the current object; i.e. there is no
-                        // historical data
-                        if (isNew && history == 1)
-                            return;
+                    bool const isNew = node.isFieldPresent(sfNewFields);
+                    // if a meta is for the new and this is the first
+                    // look-up then it's the meta for the tx that
+                    // created the current object; i.e. there is no
+                    // historical data
+                    if (isNew && history == 1)
+                        return;
 
-                        auto const& n = isNew
-                            ? static_cast<const STObject&>(
-                                  node.peekAtField(sfNewFields))
-                            : static_cast<const STObject&>(
-                                  node.peekAtField(sfFinalFields));
+                    auto const& n = isNew
+                        ? static_cast<const STObject&>(
+                              node.peekAtField(sfNewFields))
+                        : static_cast<const STObject&>(
+                              node.peekAtField(sfFinalFields));
 
-                        if (f(n) || isNew)
-                            return;
+                    if (f(n) || isNew)
+                        return;
 
-                        prevTx = node.getFieldH256(sfPreviousTxnID);
-                        prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
-                        break;
-                    }
+                    prevTx = node.getFieldH256(sfPreviousTxnID);
+                    prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
+                    break;
                 }
             }
         }
     }
-};
+}
 
 // Return avg, sd, data set size
 static std::tuple<STAmount, Number, std::uint16_t>
@@ -229,8 +214,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
         }
 
         auto const sle = ledger->read(keylet::oracle(*account, *sequence));
-        PriceDataIterator it(context, sle ? sle.get() : nullptr);
-        it.foreach([&](STObject const& node) {
+        iteratePriceData(context, sle, [&](STObject const& node) {
             auto const& series = node.getFieldArray(sfPriceDataSeries);
             // find the token pair entry with the price
             if (auto iter = std::find_if(

@@ -52,7 +52,6 @@ private:
         std::optional<ter> const& ter);
 
 public:
-    using ustring = std::basic_string<unsigned char>;
     Oracle(
         Env& env,
         std::optional<jtx::msig> const& msig = std::nullopt,
