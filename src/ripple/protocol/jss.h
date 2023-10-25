@@ -699,7 +699,6 @@ JSS(transfer_rate);           // out: nft_info (clio)
 JSS(transitions);             // out: NetworkOPs
 JSS(treenode_cache_size);     // out: GetCounts
 JSS(treenode_track_size);     // out: GetCounts
-JSS(trimmed_mean);            // out: get_aggregate_price
 JSS(trusted);                 // out: UnlList
 JSS(trusted_validator_keys);  // out: ValidatorList
 JSS(tx);                      // out: STTx, AccountTx*

@@ -185,12 +185,6 @@ constexpr std::uint32_t tfDepositMask = ~(tfUniversal | tfDepositSubTx);
 constexpr std::uint32_t tfClearAccountCreateAmount     = 0x00010000;
 constexpr std::uint32_t tfBridgeModifyMask = ~(tfUniversal | tfClearAccountCreateAmount);
 
-// Oracle Flags:
-constexpr std::uint32_t tfSimpleAverage   = 0x00010000;
-constexpr std::uint32_t tfMedian          = 0x00020000;
-constexpr std::uint32_t tfTrimmedMean     = 0x00040000;
-constexpr std::uint32_t tfOracleMask = ~tfUniversal;
-
 // clang-format on
 
 }  // namespace ripple

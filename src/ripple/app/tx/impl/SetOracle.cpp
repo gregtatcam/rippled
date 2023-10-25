@@ -36,8 +36,7 @@ SetOracle::preflight(PreflightContext const& ctx)
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
 
-    auto const flags = ctx.tx.getFlags();
-    if (flags & tfOracleMask)
+    if (ctx.tx.getFlags() & tfUniversalMask)
     {
         JLOG(ctx.j.debug()) << "Oracle Set: invalid flags.";
         return temINVALID_FLAG;
