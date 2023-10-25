@@ -89,6 +89,7 @@ JSS(Flags);                // in/out: TransactionSign; field.
 JSS(incomplete_shards);    // out: OverlayImpl, PeerImp
 JSS(Invalid);              //
 JSS(LastLedgerSequence);   // in: TransactionSign; field
+JSS(LastUpdateTime);       // field.
 JSS(LedgerHashes);         // ledger type.
 JSS(LimitAmount);          // field.
 JSS(BidMax);               // in: AMM Bid
@@ -108,16 +109,26 @@ JSS(Offer);                // ledger type.
 JSS(OfferCancel);          // transaction type.
 JSS(OfferCreate);          // transaction type.
 JSS(OfferSequence);        // field.
+JSS(Oracle);               // ledger type.
+JSS(OracleDelete);         // transaction type.
+JSS(OracleSequence);       // field
+JSS(OracleSet);            // transaction type.
+JSS(Owner);                // field
 JSS(Paths);                // in/out: TransactionSign
 JSS(PayChannel);           // ledger type.
 JSS(Payment);              // transaction type.
 JSS(PaymentChannelClaim);  // transaction type.
 JSS(PaymentChannelCreate);               // transaction type.
 JSS(PaymentChannelFund);                 // transaction type.
+JSS(PriceDataSeries);                    // field.
+JSS(PriceData);                          // field.
+JSS(PriceUnit);                          // field.
+JSS(Provider);                           // field.
 JSS(RippleState);                        // ledger type.
 JSS(SLE_hit_rate);                       // out: GetCounts.
 JSS(SetFee);                             // transaction type.
 JSS(UNLModify);                          // transaction type.
+JSS(Scale);                              // field.
 JSS(SettleDelay);                        // in: TransactionSign
 JSS(SendMax);                            // in: TransactionSign
 JSS(Sequence);                           // in/out: TransactionSign; field.
@@ -126,6 +137,9 @@ JSS(SetRegularKey);                      // transaction type.
 JSS(SignerList);                         // ledger type.
 JSS(SignerListSet);                      // transaction type.
 JSS(SigningPubKey);                      // field.
+JSS(Symbol);                             // field.
+JSS(SymbolClass);                        // field.
+JSS(SymbolPrice);                        // field.
 JSS(TakerGets);                          // field.
 JSS(TakerPays);                          // field.
 JSS(Ticket);                             // ledger type.
@@ -135,6 +149,7 @@ JSS(TradingFee);                         // in/out: AMM trading fee
 JSS(TransactionType);                    // in: TransactionSign.
 JSS(TransferRate);                       // in: TransferRate.
 JSS(TrustSet);                           // transaction type.
+JSS(URI);                                // field.
 JSS(VoteSlots);                          // out: AMM Vote
 JSS(XChainAddAccountCreateAttestation);  // transaction type.
 JSS(XChainAddClaimAttestation);          // transaction type.
@@ -197,6 +212,7 @@ JSS(auth_accounts);               // out: amm_info
 JSS(auth_change);                 // out: AccountInfo
 JSS(auth_change_queued);          // out: AccountInfo
 JSS(available);                   // out: ValidatorList
+JSS(average);                     // out: get_aggregate_price
 JSS(avg_bps_recv);                // out: Peers
 JSS(avg_bps_sent);                // out: Peers
 JSS(balance);                     // out: AccountLines
@@ -297,6 +313,7 @@ JSS(enabled);                 // out: AmendmentTable
 JSS(engine_result);           // out: NetworkOPs, TransactionSign, Submit
 JSS(engine_result_code);      // out: NetworkOPs, TransactionSign, Submit
 JSS(engine_result_message);   // out: NetworkOPs, TransactionSign, Submit
+JSS(entire_set);              // out: get_aggregate_price
 JSS(ephemeral_key);           // out: ValidatorInfo
                               // in/out: Manifest
 JSS(error);                   // out: error
@@ -456,6 +473,7 @@ JSS(max_ledger);                  // in/out: LedgerCleaner
 JSS(max_queue_size);              // out: TxQ
 JSS(max_spend_drops);             // out: AccountInfo
 JSS(max_spend_drops_total);       // out: AccountInfo
+JSS(median);                      // out: get_aggregate_price
 JSS(median_fee);                  // out: TxQ
 JSS(median_level);                // out: TxQ
 JSS(message);                     // error.
@@ -512,6 +530,9 @@ JSS(open);                       // out: handlers/Ledger
 JSS(open_ledger_cost);           // out: SubmitTransaction
 JSS(open_ledger_fee);            // out: TxQ
 JSS(open_ledger_level);          // out: TxQ
+JSS(oracle);                     // in: LedgerEntry
+JSS(oracles);                    // in: get_aggregate_price
+JSS(oracle_sequence);            // in: get_aggregate_price
 JSS(owner);                      // in: LedgerEntry, out: NetworkOPs
 JSS(owner_funds);                // in/out: Ledger, NetworkOPs, AcceptedLedgerTx
 JSS(page_index);
@@ -537,6 +558,7 @@ JSS(ports);                       // out: NetworkOPs
 JSS(previous);                    // out: Reservations
 JSS(previous_ledger);             // out: LedgerPropose
 JSS(price);                       // out: amm_info, AuctionSlot
+JSS(price_unit);                  // in: get_aggregate_price
 JSS(proof);                       // in: BookOffers
 JSS(propose_seq);                 // out: LedgerPropose
 JSS(proposers);                   // out: NetworkOPs, LedgerConsensus
@@ -612,12 +634,14 @@ JSS(signing_keys);              // out: ValidatorList
 JSS(signing_time);              // out: NetworkOPs
 JSS(signer_list);               // in: AccountObjects
 JSS(signer_lists);              // in/out: AccountInfo
+JSS(size);                      // out: get_aggregate_price
 JSS(snapshot);                  // in: Subscribe
 JSS(source_account);            // in: PathRequest, RipplePathFind
 JSS(source_amount);             // in: PathRequest, RipplePathFind
 JSS(source_currencies);         // in: PathRequest, RipplePathFind
 JSS(source_tag);                // out: AccountChannels
 JSS(stand_alone);               // out: NetworkOPs
+JSS(standard_deviation);        // out: get_aggregate_price
 JSS(start);                     // in: TxHistory
 JSS(started);
 JSS(state);                 // out: Logic.h, ServerState, LedgerData
@@ -633,6 +657,7 @@ JSS(sub_index);             // in: LedgerEntry
 JSS(subcommand);            // in: PathFind
 JSS(success);               // rpc
 JSS(supported);             // out: AmendmentTableImpl
+JSS(symbol);                // in: get_aggregate_price
 JSS(sync_mode);             // in: Submit
 JSS(system_time_offset);    // out: NetworkOPs
 JSS(tag);                   // out: Peers
@@ -647,9 +672,12 @@ JSS(ticket_count);          // out: AccountInfo
 JSS(ticket_seq);            // in: LedgerEntry
 JSS(time);
 JSS(timeouts);                // out: InboundLedger
+JSS(time_threshold);          // in/out: Oracle aggregate
 JSS(time_interval);           // out: AMM Auction Slot
 JSS(track);                   // out: PeerImp
 JSS(traffic);                 // out: Overlay
+JSS(trim);                    // in: get_aggregate_price
+JSS(trimmed_set);             // out: get_aggregate_price
 JSS(total);                   // out: counters
 JSS(total_bytes_recv);        // out: Peers
 JSS(total_bytes_sent);        // out: Peers

@@ -111,6 +111,7 @@ transResults()
         MAKE_ERROR(tecXCHAIN_BAD_PUBLIC_KEY_ACCOUNT_PAIR, "Bad public key account pair in an xchain transaction."),
         MAKE_ERROR(tecXCHAIN_CREATE_ACCOUNT_DISABLED, "This bridge does not support account creation."),
         MAKE_ERROR(tecEMPTY_DID,                     "The DID object did not have a URI or DIDDocument field."),
+        MAKE_ERROR(tecINVALID_UPDATE_TIME,           "The Oracle object has invalid LastUpdateTime field."),
 
         MAKE_ERROR(tefALREADY,                     "The exact transaction was already in this ledger."),
         MAKE_ERROR(tefBAD_ADD_AUTH,                "Not authorized to add account."),
@@ -197,6 +198,7 @@ transResults()
         MAKE_ERROR(temXCHAIN_BRIDGE_NONDOOR_OWNER,   "Malformed: Bridge owner must be one of the door accounts."),
         MAKE_ERROR(temXCHAIN_BRIDGE_BAD_MIN_ACCOUNT_CREATE_AMOUNT,   "Malformed: Bad min account create amount."),
         MAKE_ERROR(temXCHAIN_BRIDGE_BAD_REWARD_AMOUNT, "Malformed: Bad reward amount."),
+        MAKE_ERROR(temARRAY_SIZE,                "Malformed: Invalid array size."),
 
         MAKE_ERROR(terRETRY,                  "Retry transaction."),
         MAKE_ERROR(terFUNDS_SPENT,            "DEPRECATED."),

@@ -598,6 +598,51 @@ doLedgerEntry(RPC::JsonContext& context)
             else
                 uNodeIndex = keylet::did(*account).key;
         }
+        else if (context.params.isMember(jss::oracle))
+        {
+            expectedType = ltORACLE;
+            if (!context.params[jss::oracle].isObject())
+            {
+                if (!uNodeIndex.parseHex(
+                        context.params[jss::oracle].asString()))
+                {
+                    uNodeIndex = beast::zero;
+                    jvResult[jss::error] = "malformedRequest";
+                }
+            }
+            else if (
+                !context.params[jss::oracle].isMember(jss::oracle_sequence) ||
+                !context.params[jss::oracle].isMember(jss::account))
+            {
+                jvResult[jss::error] = "malformedRequest";
+            }
+            else
+            {
+                try
+                {
+                    uNodeIndex = beast::zero;
+                    auto const& oracle = context.params[jss::oracle];
+                    auto const sequence =
+                        oracle[jss::oracle_sequence].isConvertibleTo(
+                            Json::ValueType::uintValue)
+                        ? std::make_optional(
+                              oracle[jss::oracle_sequence].asUInt())
+                        : std::nullopt;
+                    auto const account =
+                        parseBase58<AccountID>(oracle[jss::account].asString());
+                    if (!account || account->isZero())
+                        jvResult[jss::error] = "malformedAddress";
+                    else if (!sequence)
+                        jvResult[jss::error] = "malformedSequence";
+                    else
+                        uNodeIndex = keylet::oracle(*account, *sequence).key;
+                }
+                catch (std::runtime_error const&)
+                {
+                    jvResult[jss::error] = "malformedRequest";
+                }
+            }
+        }
         else
         {
             if (context.params.isMember("params") &&

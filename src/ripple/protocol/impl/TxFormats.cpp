@@ -483,6 +483,25 @@ TxFormats::TxFormats()
         commonFields);
 
     add(jss::DIDDelete, ttDID_DELETE, {}, commonFields);
+
+    add(jss::OracleSet,
+        ttORACLE_SET,
+        {
+            {sfOracleSequence, soeREQUIRED},
+            {sfProvider, soeOPTIONAL},
+            {sfURI, soeOPTIONAL},
+            {sfSymbolClass, soeOPTIONAL},
+            {sfLastUpdateTime, soeREQUIRED},
+            {sfPriceDataSeries, soeREQUIRED},
+        },
+        commonFields);
+
+    add(jss::OracleDelete,
+        ttORACLE_DELETE,
+        {
+            {sfOracleSequence, soeREQUIRED},
+        },
+        commonFields);
 }
 
 TxFormats const&
