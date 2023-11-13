@@ -155,12 +155,12 @@ private:
             oracle.set(CreateArg{});
             BEAST_EXPECT(oracle.exists());
             oracle.set(UpdateArg{
-                .provider = "provider",
                 .series = {{"XRP", "USD", 740, 1}},
+                .provider = "provider",
                 .ter = ter(temMALFORMED)});
             oracle.set(UpdateArg{
-                .symbolClass = "currency",
                 .series = {{"XRP", "USD", 740, 1}},
+                .symbolClass = "currency",
                 .ter = ter(temMALFORMED)});
         }
 
@@ -360,12 +360,12 @@ private:
 
         // Update
         oracle.set(UpdateArg{
-            .msig = msig(becky),
             .series = {{"XRP", "USD", 740, 1}},
+            .msig = msig(becky),
             .ter = ter(tefBAD_QUORUM)});
         oracle.set(UpdateArg{
-            .msig = msig(zelda),
             .series = {{"XRP", "USD", 740, 1}},
+            .msig = msig(zelda),
             .ter = ter(tefBAD_SIGNATURE)});
         oracle.set(UpdateArg{
             .series = {{"XRP", "USD", 741, 1}}, .msig = msig(becky, bogie)});
@@ -379,8 +379,8 @@ private:
         env.close();
         // old list fails
         oracle.set(UpdateArg{
-            .msig = msig(becky, bogie),
             .series = {{"XRP", "USD", 740, 1}},
+            .msig = msig(becky, bogie),
             .ter = ter(tefBAD_SIGNATURE)});
         // updated list succeeds
         oracle.set(UpdateArg{
