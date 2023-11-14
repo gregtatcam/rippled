@@ -139,9 +139,9 @@ InnerObjectFormats::InnerObjectFormats()
     add(sfPriceData.jsonName.c_str(),
         sfPriceData.getCode(),
         {
-            {sfSymbol, soeREQUIRED},
-            {sfPriceUnit, soeREQUIRED},
-            {sfSymbolPrice, soeOPTIONAL},
+            {sfBaseAsset, soeREQUIRED},
+            {sfQuoteAsset, soeREQUIRED},
+            {sfAssetPrice, soeOPTIONAL},
             {sfScale, soeDEFAULT},
         });
 }

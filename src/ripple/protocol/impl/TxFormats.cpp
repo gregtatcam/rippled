@@ -490,7 +490,7 @@ TxFormats::TxFormats()
             {sfOracleSequence, soeREQUIRED},
             {sfProvider, soeOPTIONAL},
             {sfURI, soeOPTIONAL},
-            {sfSymbolClass, soeOPTIONAL},
+            {sfAssetClass, soeOPTIONAL},
             {sfLastUpdateTime, soeREQUIRED},
             {sfPriceDataSeries, soeREQUIRED},
         },

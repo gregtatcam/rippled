@@ -41,18 +41,18 @@ public:
 
         {
             Env env(*this);
-            // missing symbol
+            // missing base_asset
             auto ret =
                 Oracle::aggregatePrice(env, std::nullopt, "USD", oracles);
             BEAST_EXPECT(
                 ret[jss::error_message].asString() ==
-                "Missing field 'symbol'.");
+                "Missing field 'base_asset'.");
 
-            // missing price_unit
+            // missing quote_asset
             ret = Oracle::aggregatePrice(env, "XRP", std::nullopt, oracles);
             BEAST_EXPECT(
                 ret[jss::error_message].asString() ==
-                "Missing field 'price_unit'.");
+                "Missing field 'quote_asset'.");
 
             // missing oracles array
             ret = Oracle::aggregatePrice(env, "XRP", "USD");

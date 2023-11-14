@@ -26,7 +26,7 @@ namespace ripple {
 namespace test {
 namespace jtx {
 
-// symbol, price unit, price, scale
+// base asset, quote asset, price, scale
 using DataSeries = std::vector<std::tuple<
     std::string,
     std::string,
@@ -39,7 +39,7 @@ struct CreateArg
     std::optional<AccountID> owner = std::nullopt;
     std::optional<std::uint32_t> sequence = 1;
     DataSeries series = {{"XRP", "USD", 740, 1}};
-    std::optional<std::string> symbolClass = "currency";
+    std::optional<std::string> assetClass = "currency";
     std::optional<std::string> provider = "provider";
     std::optional<std::string> uri = "URI";
     std::optional<std::uint32_t> lastUpdateTime = std::nullopt;
@@ -56,7 +56,7 @@ struct UpdateArg
     std::optional<AccountID> owner = std::nullopt;
     std::optional<std::uint32_t> sequence = std::nullopt;
     DataSeries series = {};
-    std::optional<std::string> symbolClass = std::nullopt;
+    std::optional<std::string> assetClass = std::nullopt;
     std::optional<std::string> provider = std::nullopt;
     std::optional<std::string> uri = "URI";
     std::optional<std::uint32_t> lastUpdateTime = std::nullopt;
@@ -112,8 +112,8 @@ public:
     static Json::Value
     aggregatePrice(
         Env& env,
-        std::optional<std::string> const& symbol,
-        std::optional<std::string> const& priceUnit,
+        std::optional<std::string> const& baseAsset,
+        std::optional<std::string> const& quoteAsset,
         std::optional<std::vector<std::pair<Account, std::uint32_t>>> const&
             oracles = std::nullopt,
         std::optional<std::uint8_t> const& trim = std::nullopt,

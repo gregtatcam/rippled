@@ -106,12 +106,13 @@ Oracle::expectPrice(DataSeries const& series) const
                     leSeries.begin(),
                     leSeries.end(),
                     [&](STObject const& o) -> bool {
-                        auto const& symbol = o.getFieldCurrency(sfSymbol);
-                        auto const& priceUnit = o.getFieldCurrency(sfPriceUnit);
-                        auto const& price = o.getFieldU64(sfSymbolPrice);
+                        auto const& baseAsset = o.getFieldCurrency(sfBaseAsset);
+                        auto const& quoteAsset =
+                            o.getFieldCurrency(sfQuoteAsset);
+                        auto const& price = o.getFieldU64(sfAssetPrice);
                         auto const& scale = o.getFieldU8(sfScale);
-                        return symbol.getText() == std::get<0>(data) &&
-                            priceUnit.getText() == std::get<1>(data) &&
+                        return baseAsset.getText() == std::get<0>(data) &&
+                            quoteAsset.getText() == std::get<1>(data) &&
                             price == std::get<2>(data) &&
                             scale == std::get<3>(data);
                     }) == leSeries.end())
@@ -132,8 +133,8 @@ Oracle::expectLastUpdateTime(std::uint32_t lastUpdateTime) const
 Json::Value
 Oracle::aggregatePrice(
     Env& env,
-    std::optional<std::string> const& symbol,
-    std::optional<std::string> const& priceUnit,
+    std::optional<std::string> const& baseAsset,
+    std::optional<std::string> const& quoteAsset,
     std::optional<std::vector<std::pair<Account, std::uint32_t>>> const&
         oracles,
     std::optional<std::uint8_t> const& trim,
@@ -154,10 +155,10 @@ Oracle::aggregatePrice(
     }
     if (trim)
         jv[jss::trim] = *trim;
-    if (symbol)
-        jv[jss::symbol] = *symbol;
-    if (priceUnit)
-        jv[jss::price_unit] = *priceUnit;
+    if (baseAsset)
+        jv[jss::base_asset] = *baseAsset;
+    if (quoteAsset)
+        jv[jss::quote_asset] = *quoteAsset;
     if (timeThreshold)
         jv[jss::time_threshold] = *timeThreshold;
 
@@ -181,8 +182,8 @@ Oracle::set(UpdateArg const& arg)
     jv[jss::TransactionType] = jss::OracleSet;
     jv[jss::Account] = to_string(owner_);
     jv[jss::OracleSequence] = sequence_;
-    if (arg.symbolClass)
-        jv[jss::SymbolClass] = strHex(*arg.symbolClass);
+    if (arg.assetClass)
+        jv[jss::AssetClass] = strHex(*arg.assetClass);
     if (arg.provider)
         jv[jss::Provider] = strHex(*arg.provider);
     if (arg.uri)
@@ -217,10 +218,10 @@ Oracle::set(UpdateArg const& arg)
     {
         Json::Value priceData;
         Json::Value price;
-        price[jss::Symbol] = assetToStr(std::get<0>(data));
-        price[jss::PriceUnit] = assetToStr(std::get<1>(data));
+        price[jss::BaseAsset] = assetToStr(std::get<0>(data));
+        price[jss::QuoteAsset] = assetToStr(std::get<1>(data));
         if (std::get<2>(data))
-            price[jss::SymbolPrice] = *std::get<2>(data);
+            price[jss::AssetPrice] = *std::get<2>(data);
         if (std::get<3>(data))
             price[jss::Scale] = *std::get<3>(data);
         priceData[jss::PriceData] = price;
@@ -237,7 +238,7 @@ Oracle::set(CreateArg const& arg)
         .owner = arg.owner,
         .sequence = arg.sequence,
         .series = arg.series,
-        .symbolClass = arg.symbolClass,
+        .assetClass = arg.assetClass,
         .provider = arg.provider,
         .uri = arg.uri,
         .lastUpdateTime = arg.lastUpdateTime,

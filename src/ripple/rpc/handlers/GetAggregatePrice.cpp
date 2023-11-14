@@ -41,7 +41,7 @@ struct CompareDescending
 };
 
 using namespace boost::bimaps;
-// sorted descending by lastUpdateTime, ascending by SymbolPrice
+// sorted descending by lastUpdateTime, ascending by AssetPrice
 using Prices =
     bimap<multiset_of<std::uint32_t, CompareDescending>, multiset_of<STAmount>>;
 
@@ -134,8 +134,8 @@ getStats(
 
 /**
  * oracles: array of {account, oracle_sequence}
- * symbol: is the symbol to be priced
- * priceUnit: is the denomination in which the prices are expressed
+ * base_asset: is the asset to be priced
+ * quote_asset: is the denomination in which the prices are expressed
  * trim : percentage of outliers to trim [optional]
  * time_threshold : defines a range of prices to include based on the timestamp
  *   range - {most recent, most recent - time_threshold} [optional]
@@ -159,11 +159,11 @@ doGetAggregatePrice(RPC::JsonContext& context)
         return result;
     }
 
-    if (!params.isMember(jss::symbol))
-        return RPC::missing_field_error(jss::symbol);
+    if (!params.isMember(jss::base_asset))
+        return RPC::missing_field_error(jss::base_asset);
 
-    if (!params.isMember(jss::price_unit))
-        return RPC::missing_field_error(jss::price_unit);
+    if (!params.isMember(jss::quote_asset))
+        return RPC::missing_field_error(jss::quote_asset);
 
     auto getField = [&](Json::StaticString const& field,
                         unsigned int def =
@@ -191,8 +191,8 @@ doGetAggregatePrice(RPC::JsonContext& context)
         return result;
     }
 
-    auto const& symbol = params[jss::symbol];
-    auto const& priceUnit = params[jss::price_unit];
+    auto const& baseAsset = params[jss::base_asset];
+    auto const& quoteAsset = params[jss::quote_asset];
 
     // Collect the dataset into bimap keyed by lastUpdateTime and
     // STAmount (Number is int64 and price is uint64)
@@ -225,15 +225,15 @@ doGetAggregatePrice(RPC::JsonContext& context)
                     series.begin(),
                     series.end(),
                     [&](STObject const& o) -> bool {
-                        return o.getFieldCurrency(sfSymbol).getText() ==
-                            symbol &&
-                            o.getFieldCurrency(sfPriceUnit).getText() ==
-                            priceUnit &&
-                            o.isFieldPresent(sfSymbolPrice);
+                        return o.getFieldCurrency(sfBaseAsset).getText() ==
+                            baseAsset &&
+                            o.getFieldCurrency(sfQuoteAsset).getText() ==
+                            quoteAsset &&
+                            o.isFieldPresent(sfAssetPrice);
                     });
                 iter != series.end())
             {
-                auto const price = iter->getFieldU64(sfSymbolPrice);
+                auto const price = iter->getFieldU64(sfAssetPrice);
                 auto const scale = iter->isFieldPresent(sfScale)
                     ? -static_cast<int>(iter->getFieldU8(sfScale))
                     : 0;

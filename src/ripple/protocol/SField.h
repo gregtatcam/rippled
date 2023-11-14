@@ -465,7 +465,7 @@ extern SF_UINT64 const sfReferenceCount;
 extern SF_UINT64 const sfXChainClaimID;
 extern SF_UINT64 const sfXChainAccountCreateCount;
 extern SF_UINT64 const sfXChainAccountClaimCount;
-extern SF_UINT64 const sfSymbolPrice;
+extern SF_UINT64 const sfAssetPrice;
 
 // 128-bit
 extern SF_UINT128 const sfEmailHash;
@@ -561,7 +561,7 @@ extern SF_VL const sfMemoData;
 extern SF_VL const sfMemoFormat;
 extern SF_VL const sfDIDDocument;
 extern SF_VL const sfData;
-extern SF_VL const sfSymbolClass;
+extern SF_VL const sfAssetClass;
 extern SF_VL const sfProvider;
 
 // variable length (uncommon)
@@ -600,8 +600,8 @@ extern SF_ACCOUNT const sfIssuingChainDoor;
 extern SField const sfPaths;
 
 // currency
-extern SF_CURRENCY const sfSymbol;
-extern SF_CURRENCY const sfPriceUnit;
+extern SF_CURRENCY const sfBaseAsset;
+extern SF_CURRENCY const sfQuoteAsset;
 
 // issue
 extern SF_ISSUE const sfAsset;

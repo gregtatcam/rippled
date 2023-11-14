@@ -191,7 +191,7 @@ CONSTRUCT_TYPED_SFIELD(sfReferenceCount,           "ReferenceCount",           U
 CONSTRUCT_TYPED_SFIELD(sfXChainClaimID,            "XChainClaimID",            UINT64, 20);
 CONSTRUCT_TYPED_SFIELD(sfXChainAccountCreateCount, "XChainAccountCreateCount", UINT64, 21);
 CONSTRUCT_TYPED_SFIELD(sfXChainAccountClaimCount,  "XChainAccountClaimCount",  UINT64, 22);
-CONSTRUCT_TYPED_SFIELD(sfSymbolPrice,              "SymbolPrice",              UINT64, 23);
+CONSTRUCT_TYPED_SFIELD(sfAssetPrice,               "AssetPrice",               UINT64, 23);
 
 // 128-bit
 CONSTRUCT_TYPED_SFIELD(sfEmailHash,             "EmailHash",            UINT128,    1);
@@ -304,7 +304,7 @@ CONSTRUCT_TYPED_SFIELD(sfHookParameterName,     "HookParameterName",    VL,     
 CONSTRUCT_TYPED_SFIELD(sfHookParameterValue,    "HookParameterValue",   VL,        25);
 CONSTRUCT_TYPED_SFIELD(sfDIDDocument,           "DIDDocument",          VL,        26);
 CONSTRUCT_TYPED_SFIELD(sfData,                  "Data",                 VL,        27);
-CONSTRUCT_TYPED_SFIELD(sfSymbolClass,           "SymbolClass",          VL,        28);
+CONSTRUCT_TYPED_SFIELD(sfAssetClass,            "AssetClass",           VL,        28);
 CONSTRUCT_TYPED_SFIELD(sfProvider,              "Provider",             VL,        29);
 
 // account
@@ -338,8 +338,8 @@ CONSTRUCT_TYPED_SFIELD(sfNFTokenOffers,         "NFTokenOffers",        VECTOR25
 CONSTRUCT_UNTYPED_SFIELD(sfPaths,               "Paths",                PATHSET,    1);
 
 // currency
-CONSTRUCT_TYPED_SFIELD(sfSymbol,                "Symbol",               CURRENCY,   1);
-CONSTRUCT_TYPED_SFIELD(sfPriceUnit,             "PriceUnit",            CURRENCY,   2);
+CONSTRUCT_TYPED_SFIELD(sfBaseAsset,             "BaseAsset",            CURRENCY,   1);
+CONSTRUCT_TYPED_SFIELD(sfQuoteAsset,            "QuoteAsset",           CURRENCY,   2);
 
 // issue
 CONSTRUCT_TYPED_SFIELD(sfLockingChainIssue,     "LockingChainIssue",    ISSUE,      1);

@@ -346,7 +346,7 @@ LedgerFormats::LedgerFormats()
             {sfOwner,               soeREQUIRED},
             {sfProvider,            soeREQUIRED},
             {sfPriceDataSeries,     soeREQUIRED},
-            {sfSymbolClass,         soeREQUIRED},
+            {sfAssetClass,          soeREQUIRED},
             {sfLastUpdateTime,      soeREQUIRED},
             {sfURI,                 soeOPTIONAL},
             {sfOwnerNode,           soeREQUIRED},

@@ -31,8 +31,8 @@ static inline uint256
 tokenPairHash(STObject const& pair)
 {
     return sha512Half(
-        pair.getFieldCurrency(sfSymbol).currency(),
-        pair.getFieldCurrency(sfPriceUnit).currency());
+        pair.getFieldCurrency(sfBaseAsset).currency(),
+        pair.getFieldCurrency(sfQuoteAsset).currency());
 }
 
 NotTEC
@@ -58,7 +58,7 @@ SetOracle::preflight(PreflightContext const& ctx)
 
     if (invalidLength(sfProvider, maxOracleProvider) ||
         invalidLength(sfURI, maxOracleURI) ||
-        invalidLength(sfSymbolClass, maxOracleSymbolClass))
+        invalidLength(sfAssetClass, maxOracleSymbolClass))
         return temMALFORMED;
 
     return preflight2(ctx);
@@ -85,7 +85,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     hash_set<uint256> pairs;
     for (auto const& entry : ctx.tx.getFieldArray(sfPriceDataSeries))
     {
-        if (!entry.isFieldPresent(sfSymbolPrice))
+        if (!entry.isFieldPresent(sfAssetPrice))
             return temMALFORMED;
         auto const hash = tokenPairHash(entry);
         if (pairs.contains(hash))
@@ -106,7 +106,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
             return tecNO_PERMISSION;
 
         if (ctx.tx.isFieldPresent(sfProvider) ||
-            ctx.tx.isFieldPresent(sfSymbolClass))
+            ctx.tx.isFieldPresent(sfAssetClass))
             return temMALFORMED;
 
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))
@@ -121,7 +121,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         // create
 
         if (!ctx.tx.isFieldPresent(sfProvider) ||
-            !ctx.tx.isFieldPresent(sfSymbolClass))
+            !ctx.tx.isFieldPresent(sfAssetClass))
             return temMALFORMED;
     }
 
@@ -169,9 +169,9 @@ SetOracle::doApply()
         {
             STObject priceData{sfPriceData};
             priceData.setFieldCurrency(
-                sfSymbol, entry.getFieldCurrency(sfSymbol));
+                sfBaseAsset, entry.getFieldCurrency(sfBaseAsset));
             priceData.setFieldCurrency(
-                sfPriceUnit, entry.getFieldCurrency(sfPriceUnit));
+                sfQuoteAsset, entry.getFieldCurrency(sfQuoteAsset));
             pairs.emplace(tokenPairHash(entry), std::move(priceData));
         }
         auto const oldCount = pairs.size() > 5 ? 2 : 1;
@@ -183,7 +183,7 @@ SetOracle::doApply()
             {
                 // update the price
                 iter->second.setFieldU64(
-                    sfSymbolPrice, entry.getFieldU64(sfSymbolPrice));
+                    sfAssetPrice, entry.getFieldU64(sfAssetPrice));
                 if (entry.isFieldPresent(sfScale))
                     iter->second.setFieldU8(sfScale, entry.getFieldU8(sfScale));
             }
@@ -192,11 +192,11 @@ SetOracle::doApply()
                 // add a token pair with the price
                 STObject priceData{sfPriceData};
                 priceData.setFieldCurrency(
-                    sfSymbol, entry.getFieldCurrency(sfSymbol));
+                    sfBaseAsset, entry.getFieldCurrency(sfBaseAsset));
                 priceData.setFieldCurrency(
-                    sfPriceUnit, entry.getFieldCurrency(sfPriceUnit));
+                    sfQuoteAsset, entry.getFieldCurrency(sfQuoteAsset));
                 priceData.setFieldU64(
-                    sfSymbolPrice, entry.getFieldU64(sfSymbolPrice));
+                    sfAssetPrice, entry.getFieldU64(sfAssetPrice));
                 if (entry.isFieldPresent(sfScale))
                     priceData.setFieldU8(sfScale, entry.getFieldU8(sfScale));
                 pairs.emplace(hash, std::move(priceData));
@@ -227,7 +227,7 @@ SetOracle::doApply()
             sle->setFieldVL(sfURI, ctx_.tx[sfURI]);
         auto const& series = ctx_.tx.getFieldArray(sfPriceDataSeries);
         sle->setFieldArray(sfPriceDataSeries, series);
-        sle->setFieldVL(sfSymbolClass, ctx_.tx[sfSymbolClass]);
+        sle->setFieldVL(sfAssetClass, ctx_.tx[sfAssetClass]);
         sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
 
         auto page = ctx_.view().dirInsert(

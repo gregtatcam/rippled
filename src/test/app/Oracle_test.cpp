@@ -152,11 +152,11 @@ private:
 
             // Symbol class or provider not included on create
             oracle.set(CreateArg{
-                .symbolClass = std::nullopt,
+                .assetClass = std::nullopt,
                 .provider = "provider",
                 .ter = ter(temMALFORMED)});
             oracle.set(CreateArg{
-                .symbolClass = "currency",
+                .assetClass = "currency",
                 .provider = std::nullopt,
                 .uri = "URI",
                 .ter = ter(temMALFORMED)});
@@ -170,7 +170,7 @@ private:
                 .ter = ter(temMALFORMED)});
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .symbolClass = "currency",
+                .assetClass = "currency",
                 .ter = ter(temMALFORMED)});
         }
 
@@ -181,9 +181,9 @@ private:
 
             // Fields too long
             // Symbol class
-            std::string symbolClass(13, '0');
-            oracle.set(CreateArg{
-                .symbolClass = symbolClass, .ter = ter(temMALFORMED)});
+            std::string assetClass(17, '0');
+            oracle.set(
+                CreateArg{.assetClass = assetClass, .ter = ter(temMALFORMED)});
             // provider
             std::string const large(257, '0');
             oracle.set(CreateArg{.provider = large, .ter = ter(temMALFORMED)});
