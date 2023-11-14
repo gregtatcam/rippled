@@ -69,16 +69,13 @@ DeleteOracle::preclaim(PreclaimContext const& ctx)
 TER
 DeleteOracle::doApply()
 {
-    // This is the ledger view that we work against. Transactions are applied
-    // as we go on processing transactions.
-    Sandbox sb(&ctx_.view());
-
-    if (auto sle = sb.peek(keylet::oracle(account_, ctx_.tx[sfOracleSequence]));
+    if (auto sle = ctx_.view().peek(
+            keylet::oracle(account_, ctx_.tx[sfOracleSequence]));
         !sle)
         return tecINTERNAL;
     else
     {
-        if (!sb.dirRemove(
+        if (!ctx_.view().dirRemove(
                 keylet::ownerDir(account_),
                 (*sle)[sfOwnerNode],
                 sle->key(),
@@ -88,15 +85,16 @@ DeleteOracle::doApply()
             return tefBAD_LEDGER;
         }
 
-        auto const sleOwner = sb.peek(keylet::account(account_));
+        auto const sleOwner = ctx_.view().peek(keylet::account(account_));
         if (!sleOwner)
             return tecINTERNAL;
 
-        adjustOwnerCount(sb, sleOwner, -1, j_);
-        sb.update(sleOwner);
+        auto const count =
+            sle->getFieldArray(sfPriceDataSeries).size() > 5 ? -2 : -1;
 
-        sb.erase(sle);
-        sb.apply(ctx_.rawView());
+        adjustOwnerCount(ctx_.view(), sleOwner, count, j_);
+
+        ctx_.view().erase(sle);
     }
 
     return tesSUCCESS;

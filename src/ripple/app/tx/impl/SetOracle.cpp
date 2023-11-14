@@ -49,7 +49,7 @@ SetOracle::preflight(PreflightContext const& ctx)
 
     auto const& dataSeries = ctx.tx.getFieldArray(sfPriceDataSeries);
     if (dataSeries.size() == 0 || dataSeries.size() > maxOracleDataSeries)
-        return temARRAY_SIZE;
+        return temBAD_ARRAY_SIZE;
 
     auto invalidLength = [&](auto const& sField, std::size_t length) {
         return ctx.tx.isFieldPresent(sField) &&
@@ -70,7 +70,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     auto const sleSetter =
         ctx.view.read(keylet::account(ctx.tx.getAccountID(sfAccount)));
     if (!sleSetter)
-        return {terNO_ACCOUNT};
+        return terNO_ACCOUNT;
 
     // lastUpdateTime must be within 30 seconds of the last closed ledger
     using namespace std::chrono;
@@ -126,9 +126,9 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     }
 
     if (pairs.size() > maxOracleDataSeries)
-        return temARRAY_SIZE;
+        return temBAD_ARRAY_SIZE;
 
-    auto const add = pairs.size() <= 5 ? 1 : 2;
+    auto const add = pairs.size() > 5 ? 2 : 1;
     auto const reserve = ctx.view.fees().accountReserve(
         sleSetter->getFieldU32(sfOwnerCount) + add);
     auto const& balance = sleSetter->getFieldAmount(sfBalance);
@@ -139,16 +139,25 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     return tesSUCCESS;
 }
 
-static std::pair<TER, bool>
-applySet(
-    ApplyContext& ctx_,
-    Sandbox& sb,
-    AccountID const& account_,
-    beast::Journal j_)
+static bool
+adjustOwnerCount(ApplyContext& ctx, std::uint16_t count)
+{
+    if (auto const sleAccount =
+            ctx.view().peek(keylet::account(ctx.tx[sfAccount])))
+    {
+        adjustOwnerCount(ctx.view(), sleAccount, count, ctx.journal);
+        return true;
+    }
+
+    return false;
+}
+
+TER
+SetOracle::doApply()
 {
     auto const oracleID = keylet::oracle(account_, ctx_.tx[sfOracleSequence]);
 
-    if (auto sle = sb.peek(oracleID))
+    if (auto sle = ctx_.view().peek(oracleID))
     {
         // update
         // the token pair that doesn't have their price updated will not
@@ -165,6 +174,7 @@ applySet(
                 sfPriceUnit, entry.getFieldCurrency(sfPriceUnit));
             pairs.emplace(tokenPairHash(entry), std::move(priceData));
         }
+        auto const oldCount = pairs.size() > 5 ? 2 : 1;
         // update/add pairs
         for (auto const& entry : ctx_.tx.getFieldArray(sfPriceDataSeries))
         {
@@ -200,53 +210,41 @@ applySet(
             sle->setFieldVL(sfURI, ctx_.tx[sfURI]);
         sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
 
-        sb.update(sle);
+        auto const newCount = pairs.size() > 5 ? 2 : 1;
+        if (newCount > oldCount && !adjustOwnerCount(ctx_, 1))
+            return tefINTERNAL;
+
+        ctx_.view().update(sle);
     }
     else
     {
         // create
-
-        auto const sleAccount = sb.peek(keylet::account(account_));
-        if (!sleAccount)
-            return {tefINTERNAL, false};
 
         sle = std::make_shared<SLE>(oracleID);
         sle->setAccountID(sfOwner, ctx_.tx.getAccountID(sfAccount));
         sle->setFieldVL(sfProvider, ctx_.tx[sfProvider]);
         if (ctx_.tx.isFieldPresent(sfURI))
             sle->setFieldVL(sfURI, ctx_.tx[sfURI]);
-        sle->setFieldArray(
-            sfPriceDataSeries, ctx_.tx.getFieldArray(sfPriceDataSeries));
+        auto const& series = ctx_.tx.getFieldArray(sfPriceDataSeries);
+        sle->setFieldArray(sfPriceDataSeries, series);
         sle->setFieldVL(sfSymbolClass, ctx_.tx[sfSymbolClass]);
         sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
 
-        auto page = sb.dirInsert(
+        auto page = ctx_.view().dirInsert(
             keylet::ownerDir(account_), sle->key(), describeOwnerDir(account_));
         if (!page)
-            return {tecDIR_FULL, false};
+            return tecDIR_FULL;
 
         (*sle)[sfOwnerNode] = *page;
 
-        adjustOwnerCount(sb, sleAccount, 1, j_);
+        auto const count = series.size() > 5 ? 2 : 1;
+        if (!adjustOwnerCount(ctx_, count))
+            return tefINTERNAL;
 
-        sb.insert(sle);
+        ctx_.view().insert(sle);
     }
 
-    return {tesSUCCESS, true};
-}
-
-TER
-SetOracle::doApply()
-{
-    // This is the ledger view that we work against. Transactions are applied
-    // as we go on processing transactions.
-    Sandbox sb(&ctx_.view());
-
-    auto const result = applySet(ctx_, sb, account_, j_);
-    if (result.second)
-        sb.apply(ctx_.rawView());
-
-    return result.first;
+    return tesSUCCESS;
 }
 
 }  // namespace ripple

@@ -136,7 +136,7 @@ enum TEMcodes : TERUnderlyingType {
 
     temEMPTY_DID,
 
-    temARRAY_SIZE,
+    temBAD_ARRAY_SIZE,
 };
 
 //------------------------------------------------------------------------------

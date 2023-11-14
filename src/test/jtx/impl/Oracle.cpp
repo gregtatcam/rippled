@@ -204,12 +204,21 @@ Oracle::set(UpdateArg const& arg)
                 .count() +
             10);
     Json::Value dataSeries(Json::arrayValue);
+    auto assetToStr = [](std::string const& s) {
+        // assume standard currency
+        if (s.size() == 3)
+            return s;
+        assert(s.size() <= 20);
+        // anything else must be 160-bit hex string
+        std::string h = strHex(s);
+        return strHex(s).append(40 - s.size() * 2, '0');
+    };
     for (auto const& data : arg.series)
     {
         Json::Value priceData;
         Json::Value price;
-        price[jss::Symbol] = std::get<0>(data);
-        price[jss::PriceUnit] = std::get<1>(data);
+        price[jss::Symbol] = assetToStr(std::get<0>(data));
+        price[jss::PriceUnit] = assetToStr(std::get<1>(data));
         if (std::get<2>(data))
             price[jss::SymbolPrice] = *std::get<2>(data);
         if (std::get<3>(data))

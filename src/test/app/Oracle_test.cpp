@@ -26,10 +26,20 @@ namespace test {
 struct Oracle_test : public beast::unit_test::suite
 {
 private:
+    // Helper function that returns the owner count of an account root.
+    static std::uint32_t
+    ownerCount(jtx::Env const& env, jtx::Account const& acct)
+    {
+        std::uint32_t ret{0};
+        if (auto const sleAcct = env.le(acct))
+            ret = sleAcct->at(sfOwnerCount);
+        return ret;
+    }
+
     void
     testInvalidSet()
     {
-        testcase("Invalid Create");
+        testcase("Invalid Set");
 
         using namespace jtx;
         Account const owner("owner");
@@ -105,8 +115,8 @@ private:
                      {"XRP", "US9", 740, 1},
                      {"XRP", "U10", 750, 1},
                      {"XRP", "U11", 740, 1}},
-                .ter = ter(temARRAY_SIZE)});
-            oracle.set(CreateArg{.series = {}, .ter = ter(temARRAY_SIZE)});
+                .ter = ter(temBAD_ARRAY_SIZE)});
+            oracle.set(CreateArg{.series = {}, .ter = ter(temBAD_ARRAY_SIZE)});
         }
 
         // Array of token pair exceeds 10 after update
@@ -132,7 +142,7 @@ private:
                         {"XRP", "US9", 740, 1},
                         {"XRP", "U10", 750, 1},
                     },
-                .ter = ter(temARRAY_SIZE)});
+                .ter = ter(temBAD_ARRAY_SIZE)});
         }
 
         {
@@ -230,11 +240,32 @@ private:
         using namespace jtx;
         Account const owner("owner");
 
-        {
-            Env env(*this);
+        auto test = [&](Env& env, DataSeries const& series, std::uint16_t adj) {
             env.fund(XRP(1'000), owner);
-            Oracle oracle(env, {.owner = owner});
+            auto const count = ownerCount(env, owner);
+            Oracle oracle(env, {.owner = owner, .series = series});
             BEAST_EXPECT(oracle.exists());
+            BEAST_EXPECT(ownerCount(env, owner) == (count + adj));
+        };
+
+        {
+            // owner count is adjusted by 1
+            Env env(*this);
+            test(env, {{"XRP", "USD", 740, 1}}, 1);
+        }
+
+        {
+            // owner count is adjusted by 2
+            Env env(*this);
+            test(
+                env,
+                {{"XRP", "USD", 740, 1},
+                 {"BTC", "USD", 740, 1},
+                 {"ETH", "USD", 740, 1},
+                 {"CAN", "USD", 740, 1},
+                 {"YAN", "USD", 740, 1},
+                 {"GBP", "USD", 740, 1}},
+                2);
         }
 
         {
@@ -245,7 +276,8 @@ private:
             env.fund(XRP(1'000), some);
             Oracle oracle(env, {.owner = owner});
             BEAST_EXPECT(oracle.exists());
-            oracle.set(CreateArg{.owner = some});
+            oracle.set(CreateArg{
+                .owner = some, .series = {{"912810RR9", "USD", 740, 1}}});
             BEAST_EXPECT(Oracle::exists(env, some, oracle.sequence()));
         }
     }
@@ -284,14 +316,39 @@ private:
     {
         testcase("Delete");
         using namespace jtx;
-
-        Env env(*this);
         Account const owner("owner");
-        env.fund(XRP(1'000), owner);
-        Oracle oracle(env, {.owner = owner});
-        BEAST_EXPECT(oracle.exists());
-        oracle.remove({});
-        BEAST_EXPECT(!oracle.exists());
+
+        auto test = [&](Env& env, DataSeries const& series, std::uint16_t adj) {
+            env.fund(XRP(1'000), owner);
+            Oracle oracle(env, {.owner = owner, .series = series});
+            auto const count = ownerCount(env, owner);
+            BEAST_EXPECT(oracle.exists());
+            oracle.remove({});
+            BEAST_EXPECT(!oracle.exists());
+            BEAST_EXPECT(ownerCount(env, owner) == (count - adj));
+        };
+
+        {
+            // owner count is adjusted by 1
+            Env env(*this);
+            test(env, {{"XRP", "USD", 740, 1}}, 1);
+        }
+
+        {
+            // owner count is adjusted by 2
+            Env env(*this);
+            test(
+                env,
+                {
+                    {"XRP", "USD", 740, 1},
+                    {"BTC", "USD", 740, 1},
+                    {"ETH", "USD", 740, 1},
+                    {"CAN", "USD", 740, 1},
+                    {"YAN", "USD", 740, 1},
+                    {"GBP", "USD", 740, 1},
+                },
+                2);
+        }
     }
 
     void
@@ -303,12 +360,15 @@ private:
 
         Env env(*this);
         env.fund(XRP(1'000), owner);
+        auto const count = ownerCount(env, owner);
         Oracle oracle(env, {.owner = owner});
         BEAST_EXPECT(oracle.exists());
 
         // update existing pair
         oracle.set(UpdateArg{.series = {{"XRP", "USD", 740, 2}}});
         BEAST_EXPECT(oracle.expectPrice({{"XRP", "USD", 740, 2}}));
+        // owner count is adjusted by 1
+        BEAST_EXPECT(ownerCount(env, owner) == (count + 1));
 
         // add new pairs, not-included pair is reset
         oracle.set(UpdateArg{.series = {{"XRP", "EUR", 700, 2}}});
@@ -320,6 +380,16 @@ private:
             .series = {{"XRP", "USD", 741, 2}, {"XRP", "EUR", 710, 2}}});
         BEAST_EXPECT(oracle.expectPrice(
             {{"XRP", "USD", 741, 2}, {"XRP", "EUR", 710, 2}}));
+
+        // owner count is adjusted by 2
+        oracle.set(UpdateArg{
+            .series = {
+                {"BTC", "USD", 741, 2},
+                {"ETH", "EUR", 710, 2},
+                {"YAN", "EUR", 710, 2},
+                {"CAN", "EUR", 710, 2},
+            }});
+        BEAST_EXPECT(ownerCount(env, owner) == (count + 2));
     }
 
     void
