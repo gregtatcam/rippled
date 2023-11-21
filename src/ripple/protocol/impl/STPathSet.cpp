@@ -189,7 +189,7 @@ Json::Value STPath::getJson(JsonOptions) const
         if (iType & STPathElement::typeAccount)
             elem[jss::account] = to_string(it.getAccountID());
 
-        assert(iType & (STPathElement::typeCurrency | STPathElement::typeCFT));
+        assert(!(iType & STPathElement::typeCurrency && iType & STPathElement::typeCFT));
         if (iType & STPathElement::typeCurrency)
             elem[jss::currency] = to_string(it.getAsset());
 
@@ -242,7 +242,7 @@ STPathSet::add(Serializer& s) const
             if (iType & STPathElement::typeAccount)
                 s.addBitString(speElement.getAccountID());
 
-            if (iType & (STPathElement::typeCurrency | STPathElement::typeCFT))
+            if (iType & STPathElement::typeAsset)
             {
                 if (speElement.getAsset().isCFT())
                     s.addBitString((uint256)speElement.getAsset());
