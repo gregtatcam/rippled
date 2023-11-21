@@ -110,15 +110,15 @@ public:
 
     template <typename T>
     requires(std::is_same_v<T, Currency> || std::is_same_v<T, uint256>)
-    T const* get() const
+        T const* get() const
     {
         checkInit();
         return std::get_if<T>(asset_);
     }
 
     template <typename T>
-    requires(std::is_same_v<T, Currency> || std::is_same_v<T, uint256>)
-    explicit operator T const&() const
+    requires(std::is_same_v<T, Currency> || std::is_same_v<T, uint256>) explicit
+    operator T const&() const
     {
         checkInit();
         assert(std::holds_alternative<T>(asset_));
