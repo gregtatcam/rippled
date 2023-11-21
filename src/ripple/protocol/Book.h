@@ -94,13 +94,15 @@ namespace std {
 template <>
 struct hash<ripple::Issue>
     : private boost::base_from_member<std::hash<ripple::Currency>, 0>,
-      private boost::base_from_member<std::hash<ripple::AccountID>, 1>
+      private boost::base_from_member<beast::uhash<>, 1>,
+      private boost::base_from_member<std::hash<ripple::AccountID>, 2>
 {
 private:
     using currency_hash_type =
         boost::base_from_member<std::hash<ripple::Currency>, 0>;
+    using cft_hash_type = boost::base_from_member<beast::uhash<>, 1>;
     using issuer_hash_type =
-        boost::base_from_member<std::hash<ripple::AccountID>, 1>;
+        boost::base_from_member<std::hash<ripple::AccountID>, 2>;
 
 public:
     explicit hash() = default;
@@ -111,8 +113,11 @@ public:
     value_type
     operator()(argument_type const& value) const
     {
-        value_type result(currency_hash_type::member(value.currency));
-        if (!isXRP(value.currency))
+        value_type result(
+            value.asset.isCurrency()
+                ? currency_hash_type::member((ripple::Currency)value.asset)
+                : cft_hash_type::member((ripple::uint256)value.asset));
+        if (!isXRP(value.asset))
             boost::hash_combine(
                 result, issuer_hash_type::member(value.account));
         return result;

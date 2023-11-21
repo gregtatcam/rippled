@@ -33,9 +33,13 @@ checkFreeze(
     ReadView const& view,
     AccountID const& src,
     AccountID const& dst,
-    Currency const& currency)
+    Asset const& asset)
 {
     assert(src != dst);
+
+    // TODO
+    if (asset.isCFT())
+        return tesSUCCESS;
 
     // check freeze
     if (auto sle = view.read(keylet::account(dst)))
@@ -46,7 +50,7 @@ checkFreeze(
         }
     }
 
-    if (auto sle = view.read(keylet::line(src, dst, currency)))
+    if (auto sle = view.read(keylet::line(src, dst, (Currency)asset)))
     {
         if (sle->isFlag((dst > src) ? lsfHighFreeze : lsfLowFreeze))
         {
@@ -64,12 +68,14 @@ checkNoRipple(
     AccountID const& cur,
     // This is the account whose constraints we are checking
     AccountID const& next,
-    Currency const& currency,
+    Asset const& asset,
     beast::Journal j)
 {
+    if (asset.isCFT())
+        return tesSUCCESS;
     // fetch the ripple lines into and out of this node
-    auto sleIn = view.read(keylet::line(prev, cur, currency));
-    auto sleOut = view.read(keylet::line(cur, next, currency));
+    auto sleIn = view.read(keylet::line(prev, cur, (Currency)asset));
+    auto sleOut = view.read(keylet::line(cur, next, (Currency)asset));
 
     if (!sleIn || !sleOut)
         return terNO_LINE;

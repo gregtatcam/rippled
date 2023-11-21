@@ -28,7 +28,7 @@ format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    txt += to_string(amount.issue().asset);
     return txt;
 }
 

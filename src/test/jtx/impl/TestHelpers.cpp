@@ -77,7 +77,7 @@ IPE(Issue const& iss)
     return STPathElement(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         xrpAccount(),
-        iss.currency,
+        iss.asset,
         iss.account);
 }
 
@@ -379,7 +379,7 @@ allpe(AccountID const& a, Issue const& iss)
         STPathElement::typeAccount | STPathElement::typeCurrency |
             STPathElement::typeIssuer,
         a,
-        iss.currency,
+        iss.asset,
         iss.account);
 };
 

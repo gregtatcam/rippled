@@ -180,10 +180,10 @@ doGatewayBalances(RPC::JsonContext& context)
                 else
                 {
                     // normal negative balance, obligation to customer
-                    auto& bal = sums[rs->getBalance().getCurrency()];
+                    auto& bal = sums[(Currency)rs->getBalance().getAsset()];
                     if (bal == beast::zero)
                     {
-                        // This is needed to set the currency code correctly
+                        // This is needed to set the asset code correctly
                         bal = -rs->getBalance();
                     }
                     else
@@ -231,8 +231,7 @@ doGatewayBalances(RPC::JsonContext& context)
                     for (auto const& balance : accBalances)
                     {
                         Json::Value entry;
-                        entry[jss::currency] =
-                            to_string(balance.issue().currency);
+                        entry[jss::currency] = to_string(balance.issue().asset);
                         entry[jss::value] = balance.getText();
                         balanceArray.append(std::move(entry));
                     }

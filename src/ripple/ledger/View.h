@@ -85,7 +85,7 @@ isGlobalFrozen(ReadView const& view, AccountID const& issuer);
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
-    Currency const& currency,
+    Currency const& currency,  // TODO CFT?
     AccountID const& issuer);
 
 [[nodiscard]] inline bool
@@ -94,35 +94,34 @@ isIndividualFrozen(
     AccountID const& account,
     Issue const& issue)
 {
-    return isIndividualFrozen(view, account, issue.currency, issue.account);
+    return isIndividualFrozen(
+        view, account, (Currency)issue.asset, issue.account);
 }
 
 [[nodiscard]] bool
 isFrozen(
     ReadView const& view,
     AccountID const& account,
-    Currency const& currency,
-    AccountID const& issuer,
-    bool isCFT = false);
+    Asset const& asset,
+    AccountID const& issuer);
 
 [[nodiscard]] inline bool
 isFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
 {
-    return isFrozen(view, account, issue.currency, issue.account, issue.isCFT);
+    return isFrozen(view, account, issue.asset, issue.account);
 }
 
 // Returns the amount an account can spend without going into debt.
 //
-// <-- saAmount: amount of currency held by account. May be negative.
+// <-- saAmount: amount of asset held by account. May be negative.
 [[nodiscard]] STAmount
 accountHolds(
     ReadView const& view,
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer,
     FreezeHandling zeroIfFrozen,
-    beast::Journal j,
-    bool isCFT = false);
+    beast::Journal j);
 
 [[nodiscard]] STAmount
 accountHolds(
@@ -132,11 +131,11 @@ accountHolds(
     FreezeHandling zeroIfFrozen,
     beast::Journal j);
 
-// Returns the amount an account can spend of the currency type saDefault, or
-// returns saDefault if this account is the issuer of the currency in
+// Returns the amount an account can spend of the asset type saDefault, or
+// returns saDefault if this account is the issuer of the asset in
 // question. Should be used in favor of accountHolds when questioning how much
-// an account can spend while also allowing currency issuers to spend
-// unlimited amounts of their own currency (since they can always issue more).
+// an account can spend while also allowing asset issuers to spend
+// unlimited amounts of their own asset (since they can always issue more).
 [[nodiscard]] STAmount
 accountFunds(
     ReadView const& view,
@@ -504,10 +503,7 @@ rippleCFTCredit(
     beast::Journal j);
 
 Rate
-transferRateCFT(
-    ReadView const& view,
-    AccountID const& issuer,
-    Currency const& currency);
+transferRateCFT(ReadView const& view, uint256 const& id);
 
 TER
 cftCreateTrust(

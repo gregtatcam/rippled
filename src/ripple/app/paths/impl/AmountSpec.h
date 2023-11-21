@@ -42,7 +42,7 @@ struct AmountSpec
         IOUAmount iou = {};
     };
     std::optional<AccountID> issuer;
-    std::optional<Currency> currency;
+    std::optional<Asset> asset;
 
     friend std::ostream&
     operator<<(std::ostream& stream, AmountSpec const& amt)
@@ -53,8 +53,8 @@ struct AmountSpec
             stream << to_string(amt.xrp);
         else
             stream << to_string(amt.iou);
-        if (amt.currency)
-            stream << "/(" << *amt.currency << ")";
+        if (amt.asset)
+            stream << "/(" << *amt.asset << ")";
         if (amt.issuer)
             stream << "/" << *amt.issuer << "";
         return stream;
@@ -214,13 +214,13 @@ toAmountSpec(STAmount const& amt)
     {
         result.cft = CFTAmount(sMant);
         result.issuer = amt.issue().account;
-        result.currency = amt.issue().currency;
+        result.asset = amt.issue().asset;
     }
     else
     {
         result.iou = IOUAmount(sMant, amt.exponent());
         result.issuer = amt.issue().account;
-        result.currency = amt.issue().currency;
+        result.asset = amt.issue().asset;
     }
 
     return result;
@@ -237,11 +237,11 @@ toEitherAmount(STAmount const& amt)
 }
 
 inline AmountSpec
-toAmountSpec(EitherAmount const& ea, std::optional<Currency> const& c)
+toAmountSpec(EitherAmount const& ea, std::optional<Asset> const& a)
 {
     AmountSpec r;
-    r.native = (!c || isXRP(*c));
-    r.currency = c;
+    r.native = (!a || isXRP(*a));
+    r.asset = a;
     assert(ea.native == r.native);
     if (r.is_cft)
     {

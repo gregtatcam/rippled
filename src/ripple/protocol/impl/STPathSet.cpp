@@ -40,8 +40,15 @@ STPathElement::get_hash(STPathElement const& element)
     for (auto const x : element.getAccountID())
         hash_account += (hash_account * 257) ^ x;
 
-    for (auto const x : element.getCurrency())
-        hash_currency += (hash_currency * 509) ^ x;
+    if (element.isCft())
+    {
+        hash_currency += beast::uhash<>{}((uint256)element.getAsset());
+    }
+    else
+    {
+        for (auto const x : (Currency)element.getAsset())
+            hash_currency += (hash_currency * 509) ^ x;
+    }
 
     for (auto const x : element.getIssuerID())
         hash_issuer += (hash_issuer * 911) ^ x;
@@ -71,7 +78,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             if (iType == STPathElement::typeNone)
                 return;
         }
-        else if (iType & ~(STPathElement::typeAll | STPathElement::typeCFT))
+        else if (iType & ~STPathElement::typeAll)
         {
             JLOG(debugLog().error())
                 << "Bad path element " << iType << " in pathset";
@@ -82,26 +89,26 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             auto hasAccount = iType & STPathElement::typeAccount;
             auto hasCurrency = iType & STPathElement::typeCurrency;
             auto hasIssuer = iType & STPathElement::typeIssuer;
+            auto hasCFT = iType & STPathElement::typeCFT;
 
             AccountID account;
-            Currency currency;
+            Asset currency;
             AccountID issuer;
 
             if (hasAccount)
                 account = sit.get160();
 
+            assert(!(hasCurrency && hasCFT));
             if (hasCurrency)
-                currency = sit.get160();
+                currency = static_cast<Currency>(sit.get160());
+
+            if (hasCFT)
+                currency = sit.get256();
 
             if (hasIssuer)
                 issuer = sit.get160();
 
-            path.emplace_back(
-                account,
-                currency,
-                issuer,
-                hasCurrency,
-                iType & STPathElement::typeCFT);
+            path.emplace_back(account, currency, issuer, hasCurrency);
         }
     }
 }
@@ -155,12 +162,12 @@ STPathSet::isDefault() const
 bool
 STPath::hasSeen(
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer) const
 {
     for (auto& p : mPath)
     {
-        if (p.getAccountID() == account && p.getCurrency() == currency &&
+        if (p.getAccountID() == account && p.getAsset() == asset &&
             p.getIssuerID() == issuer)
             return true;
     }
@@ -168,7 +175,8 @@ STPath::hasSeen(
     return false;
 }
 
-Json::Value STPath::getJson(JsonOptions) const
+Json::Value
+STPath::getJson(JsonOptions) const
 {
     Json::Value ret(Json::arrayValue);
 
@@ -182,13 +190,12 @@ Json::Value STPath::getJson(JsonOptions) const
         if (iType & STPathElement::typeAccount)
             elem[jss::account] = to_string(it.getAccountID());
 
+        assert(iType & (STPathElement::typeCurrency | STPathElement::typeCFT));
         if (iType & STPathElement::typeCurrency)
-        {
-            if (iType & STPathElement::typeCFT)
-                elem[jss::cft_asset] = to_string(it.getCurrency());
-            else
-                elem[jss::currency] = to_string(it.getCurrency());
-        }
+            elem[jss::currency] = to_string(it.getAsset());
+
+        if (iType & STPathElement::typeCFT)
+            elem[jss::cft_asset] = to_string(it.getAsset());
 
         if (iType & STPathElement::typeIssuer)
             elem[jss::issuer] = to_string(it.getIssuerID());
@@ -236,8 +243,13 @@ STPathSet::add(Serializer& s) const
             if (iType & STPathElement::typeAccount)
                 s.addBitString(speElement.getAccountID());
 
-            if (iType & STPathElement::typeCurrency)
-                s.addBitString(speElement.getCurrency());
+            if (iType & (STPathElement::typeCurrency | STPathElement::typeCFT))
+            {
+                if (speElement.getAsset().isCFT())
+                    s.addBitString((uint256)speElement.getAsset());
+                else
+                    s.addBitString((Currency)speElement.getAsset());
+            }
 
             if (iType & STPathElement::typeIssuer)
                 s.addBitString(speElement.getIssuerID());

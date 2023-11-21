@@ -103,8 +103,8 @@ ammHolds(
 STAmount
 ammLPHolds(
     ReadView const& view,
-    Currency const& cur1,
-    Currency const& cur2,
+    Asset const& cur1,
+    Asset const& cur2,
     AccountID const& ammAccount,
     AccountID const& lpAccount,
     beast::Journal const j)
@@ -125,10 +125,11 @@ ammLPHolds(
     AccountID const& lpAccount,
     beast::Journal const j)
 {
+    // TODO CFT CFT CFT
     return ammLPHolds(
         view,
-        ammSle[sfAsset].currency,
-        ammSle[sfAsset2].currency,
+        ammSle[sfAsset].asset,
+        ammSle[sfAsset2].asset,
         ammSle[sfAccount],
         lpAccount,
         j);
@@ -173,21 +174,19 @@ ammAccountHolds(
         if (auto const sle = view.read(keylet::account(ammAccountID)))
             return (*sle)[sfBalance];
     }
-    else if (issue.isCFT)
+    else if (issue.isCFT())
     {
         auto const cftokenID = keylet::cftoken(
-            ammAccountID,
-            keylet::cftIssuance(issue.account, issue.currency).key);
+            ammAccountID, keylet::cftIssuance((uint256)issue.asset).key);
         if (auto const sle = view.read(cftokenID))
             return STAmount{
                 issue,
                 sle->getFieldU64(sfCFTAmount) -
                     sle->getFieldU64(sfCFTLockedAmount)};
     }
-    else if (auto const sle = view.read(
-                 keylet::line(ammAccountID, issue.account, issue.currency));
-             sle &&
-             !isFrozen(view, ammAccountID, issue.currency, issue.account))
+    else if (auto const sle = view.read(keylet::line(
+                 ammAccountID, issue.account, (Currency)issue.asset));
+             sle && !isFrozen(view, ammAccountID, issue.asset, issue.account))
     {
         auto amount = (*sle)[sfBalance];
         if (ammAccountID > issue.account)

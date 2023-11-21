@@ -46,7 +46,6 @@ SetTrust::preflight(PreflightContext const& ctx)
     }
 
     STAmount const saLimitAmount(tx.getFieldAmount(sfLimitAmount));
-
     if (!isLegalNet(saLimitAmount))
         return temBAD_AMOUNT;
 
@@ -57,9 +56,14 @@ SetTrust::preflight(PreflightContext const& ctx)
         return temBAD_LIMIT;
     }
 
-    if (badCurrency() == saLimitAmount.getCurrency())
+    if (badCurrency() == saLimitAmount.getAsset())
     {
         JLOG(j.trace()) << "Malformed transaction: specifies XRP as IOU";
+        return temBAD_CURRENCY;
+    }
+    if (isCFT(saLimitAmount))
+    {
+        JLOG(j.trace()) << "Malformed transaction: specifies CFT as IOU";
         return temBAD_CURRENCY;
     }
 
@@ -102,7 +106,7 @@ SetTrust::preclaim(PreclaimContext const& ctx)
 
     auto const saLimitAmount = ctx.tx[sfLimitAmount];
 
-    auto const currency = saLimitAmount.getCurrency();
+    auto const asset = saLimitAmount.getAsset();
     auto const uDstAccountID = saLimitAmount.getIssuer();
 
     if (ctx.view.rules().enabled(fixTrustLinesToSelf))
@@ -118,7 +122,7 @@ SetTrust::preclaim(PreclaimContext const& ctx)
             // unless one has somehow already been created
             // (in which case doApply will clean it up).
             auto const sleDelete =
-                ctx.view.read(keylet::line(id, uDstAccountID, currency));
+                ctx.view.read(keylet::line(id, uDstAccountID, (Currency)asset));
 
             if (!sleDelete)
             {
@@ -147,7 +151,8 @@ SetTrust::preclaim(PreclaimContext const& ctx)
             //   o The trust line already exists
             // Then allow the TrustSet.
             if (ctx.view.rules().enabled(fixDisallowIncomingV1) &&
-                ctx.view.exists(keylet::line(id, uDstAccountID, currency)))
+                ctx.view.exists(
+                    keylet::line(id, uDstAccountID, (Currency)asset)))
             {
                 // pass
             }
@@ -165,7 +170,7 @@ SetTrust::preclaim(PreclaimContext const& ctx)
             return tecNO_DST;
 
         if (sleDst->isFieldPresent(sfAMMID) &&
-            !ctx.view.read(keylet::line(id, uDstAccountID, currency)))
+            !ctx.view.read(keylet::line(id, uDstAccountID, (Currency)asset)))
         {
             if (auto const ammSle =
                     ctx.view.read({ltAMM, sleDst->getFieldH256(sfAMMID)}))
@@ -174,7 +179,7 @@ SetTrust::preclaim(PreclaimContext const& ctx)
                         ammSle->getFieldAmount(sfLPTokenBalance);
                     lpTokens == beast::zero)
                     return tecAMM_EMPTY;
-                else if (lpTokens.getCurrency() != saLimitAmount.getCurrency())
+                else if (lpTokens.getAsset() != saLimitAmount.getAsset())
                     return tecNO_PERMISSION;
             }
             else
@@ -194,7 +199,7 @@ SetTrust::doApply()
     bool const bQualityIn(ctx_.tx.isFieldPresent(sfQualityIn));
     bool const bQualityOut(ctx_.tx.isFieldPresent(sfQualityOut));
 
-    Currency const currency(saLimitAmount.getCurrency());
+    Currency const currency(saLimitAmount.getAsset());
     AccountID uDstAccountID(saLimitAmount.getIssuer());
 
     // true, iff current is high account.

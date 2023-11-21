@@ -40,27 +40,29 @@ STIssue::STIssue(SField const& name) : STBase{name}
 
 STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
 {
-    issue_.currency = sit.get160();
-    if (!isXRP(issue_.currency))
+    // cftID + account
+    // TODO CFT make backward compatible
+    std::uint8_t m = sit.get8();
+    if (m)
+        issue_.asset = sit.get256();
+    else
+        issue_.asset = static_cast<Currency>(sit.get160());
+    if (!isXRP(issue_.asset))
     {
         issue_.account = sit.get160();
-        if (sit.getBytesLeft() == 1)
-            issue_.isCFT = sit.get8();
-        else
-            issue_.isCFT = false;
     }
     else
         issue_.account = xrpAccount();
 
-    if (isXRP(issue_.currency) != isXRP(issue_.account))
+    if (isXRP(issue_.asset) != isXRP(issue_.account))
         Throw<std::runtime_error>(
-            "invalid issue: currency and account native mismatch");
+            "invalid issue: asset and account native mismatch");
 }
 
 STIssue::STIssue(SField const& name, Issue const& issue)
     : STBase{name}, issue_{issue}
 {
-    if (isXRP(issue_.currency) != isXRP(issue_.account))
+    if (isXRP(issue_.asset) != isXRP(issue_.account))
         Throw<std::runtime_error>(
             "invalid issue: currency and account native mismatch");
 }
@@ -85,12 +87,22 @@ Json::Value STIssue::getJson(JsonOptions) const
 void
 STIssue::add(Serializer& s) const
 {
-    s.addBitString(issue_.currency);
-    if (!isXRP(issue_.currency))
+    // TODO CFT make backward compatible
+    std::uint8_t m = 0;
+    if (issue_.isCFT())
+    {
+        m = 1;
+        s.add8(m);
+        s.addBitString((uint256)issue_.asset);
+    }
+    else
+    {
+        s.add8(m);
+        s.addBitString((Currency)issue_.asset);
+    }
+    if (!isXRP(issue_.asset))
     {
         s.addBitString(issue_.account);
-        if (issue_.isCFT)
-            s.add8(1);
     }
 }
 

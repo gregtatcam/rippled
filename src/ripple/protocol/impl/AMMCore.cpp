@@ -39,12 +39,16 @@ ammAccountID(
 }
 
 Currency
-ammLPTCurrency(Currency const& cur1, Currency const& cur2)
+ammLPTCurrency(Asset const& a1, Asset const& a2)
 {
     // AMM LPToken is 0x03 plus 19 bytes of the hash
     std::int32_t constexpr AMMCurrencyCode = 0x03;
-    auto const [minC, maxC] = std::minmax(cur1, cur2);
-    auto const hash = sha512Half(minC, maxC);
+    auto const [minA, maxA] = std::minmax(a1, a2);
+    uint256 hash;
+    std::visit(
+        [&](auto&& arg1, auto&& arg2) { hash = sha512Half(arg1, arg2); },
+        minA.asset(),
+        maxA.asset());
     Currency currency;
     *currency.begin() = AMMCurrencyCode;
     std::copy(
@@ -53,12 +57,9 @@ ammLPTCurrency(Currency const& cur1, Currency const& cur2)
 }
 
 Issue
-ammLPTIssue(
-    Currency const& cur1,
-    Currency const& cur2,
-    AccountID const& ammAccountID)
+ammLPTIssue(Asset const& a1, Asset const& a2, AccountID const& ammAccountID)
 {
-    return Issue(ammLPTCurrency(cur1, cur2), ammAccountID);
+    return Issue(ammLPTCurrency(a1, a2), ammAccountID);
 }
 
 NotTEC
@@ -66,7 +67,7 @@ invalidAMMAsset(
     Issue const& issue,
     std::optional<std::pair<Issue, Issue>> const& pair)
 {
-    if (badCurrency() == issue.currency)
+    if (badCurrency() == issue.asset)
         return temBAD_CURRENCY;
     if (isXRP(issue) && issue.account.isNonZero())
         return temBAD_ISSUER;

@@ -21,6 +21,7 @@
 #define RIPPLE_PROTOCOL_ISSUE_H_INCLUDED
 
 #include <ripple/json/json_value.h>
+#include <ripple/protocol/Asset.h>
 #include <ripple/protocol/UintTypes.h>
 
 #include <cassert>
@@ -29,27 +30,45 @@
 
 namespace ripple {
 
-/** A currency issued by an account.
+/** An asset issued by an account.
     @see Currency, AccountID, Issue, Book
 */
 class Issue
 {
 public:
-    Currency currency{};
+    Asset asset{};
     AccountID account{};
-    bool isCFT{};
 
-    Issue() : isCFT{false}
+    Issue()
     {
     }
 
-    Issue(Currency const& c, AccountID const& a, bool cft = false)
-        : currency(c), account(a), isCFT(cft)
+    Issue(Asset const& asst, AccountID const& a) : asset(asst), account(a)
+    {
+    }
+
+    Issue(Currency const& c, AccountID const& a) : asset(c), account(a)
+    {
+    }
+
+    Issue(uint256 const& u, AccountID const& a) : asset(u), account(a)
     {
     }
 
     std::string
     getText() const;
+
+    bool
+    isCFT() const
+    {
+        return asset.isCFT();
+    }
+
+    friend bool
+    isCFT(Issue const& i)
+    {
+        return i.isCFT();
+    }
 };
 
 bool
@@ -72,7 +91,10 @@ void
 hash_append(Hasher& h, Issue const& r)
 {
     using beast::hash_append;
-    hash_append(h, r.currency, r.account);
+    if (r.asset.isCFT())
+        hash_append(h, (uint256)r.asset, r.account);
+    else
+        hash_append(h, (Currency)r.asset, r.account);
 }
 
 /** Equality comparison. */
@@ -80,8 +102,8 @@ hash_append(Hasher& h, Issue const& r)
 [[nodiscard]] inline constexpr bool
 operator==(Issue const& lhs, Issue const& rhs)
 {
-    return (lhs.currency == rhs.currency) &&
-        (isXRP(lhs.currency) || lhs.account == rhs.account);
+    return (lhs.asset == rhs.asset) &&
+        (isXRP(lhs.asset) || lhs.account == rhs.account);
 }
 /** @} */
 
@@ -90,10 +112,10 @@ operator==(Issue const& lhs, Issue const& rhs)
 [[nodiscard]] inline constexpr std::weak_ordering
 operator<=>(Issue const& lhs, Issue const& rhs)
 {
-    if (auto const c{lhs.currency <=> rhs.currency}; c != 0)
+    if (auto const c{lhs.asset.asset() <=> rhs.asset.asset()}; c != 0)
         return c;
 
-    if (isXRP(lhs.currency))
+    if (isXRP(lhs.asset))
         return std::weak_ordering::equivalent;
 
     return (lhs.account <=> rhs.account);

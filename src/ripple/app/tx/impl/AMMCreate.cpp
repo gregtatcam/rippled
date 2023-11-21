@@ -53,7 +53,7 @@ AMMCreate::preflight(PreflightContext const& ctx)
     if (amount.issue() == amount2.issue())
     {
         JLOG(ctx.j.debug())
-            << "AMM Instance: tokens can not have the same currency/issuer.";
+            << "AMM Instance: tokens can not have the same asset/issuer.";
         return temBAD_AMM_TOKENS;
     }
 
@@ -125,7 +125,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     }
 
     auto noDefaultRipple = [](ReadView const& view, Issue const& issue) {
-        if (isXRP(issue) || issue.isCFT)
+        if (isXRP(issue) || issue.isCFT())
             return false;
 
         if (auto const issuerAccount =
@@ -234,8 +234,8 @@ applyCreate(
     }
 
     // LP Token already exists. (should not happen)
-    auto const lptIss = ammLPTIssue(
-        amount.issue().currency, amount2.issue().currency, *ammAccount);
+    auto const lptIss =
+        ammLPTIssue(amount.issue().asset, amount2.issue().asset, *ammAccount);
     if (sb.read(keylet::line(*ammAccount, lptIss)))
     {
         JLOG(j_.error()) << "AMM Instance: LP Token already exists.";

@@ -192,8 +192,8 @@ protected:
         ostr << name << ": "
              << "\ninIss: " << book_.in.account
              << "\noutIss: " << book_.out.account
-             << "\ninCur: " << book_.in.currency
-             << "\noutCur: " << book_.out.currency;
+             << "\ninCur: " << book_.in.asset
+             << "\noutCur: " << book_.out.asset;
         return ostr.str();
     }
 
@@ -681,16 +681,14 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 
         // Make sure offer owner has authorization to own IOUs from issuer.
         // An account can always own XRP or their own IOUs.
-        if (flowCross && (!isXRP(offer.issueIn().currency)) &&
+        if (flowCross && (!isXRP(offer.issueIn().asset)) &&
             (offer.owner() != offer.issueIn().account))
         {
-            if (offer.issueIn().isCFT)
+            if (offer.issueIn().isCFT())
             {
                 auto const cftokenID = keylet::cftoken(
                     offer.owner(),
-                    keylet::cftIssuance(
-                        offer.issueIn().account, offer.issueIn().currency)
-                        .key);
+                    keylet::cftIssuance((uint256)offer.issueIn().asset).key);
                 if (!afView.exists(cftokenID))
                     return true;
             }
@@ -707,7 +705,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                         issuerID > ownerID ? lsfHighAuth : lsfLowAuth;
 
                     auto const line = afView.read(keylet::line(
-                        ownerID, issuerID, offer.issueIn().currency));
+                        ownerID, issuerID, (Currency)offer.issueIn().asset));
 
                     if (!line || (((*line)[sfFlags] & authFlag) == 0))
                     {
@@ -1282,7 +1280,7 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
     {
         if (auto const prev = ctx.prevStep->directStepSrcAcct())
         {
-            if (book_.in.isCFT)
+            if (book_.in.isCFT())
             {
                 // TODO
             }
@@ -1291,8 +1289,8 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
                 auto const& view = ctx.view;
                 auto const& cur = book_.in.account;
 
-                auto sle =
-                    view.read(keylet::line(*prev, cur, book_.in.currency));
+                auto sle = view.read(
+                    keylet::line(*prev, cur, (Currency)book_.in.asset));
                 if (!sle)
                     return terNO_LINE;
                 if ((*sle)[sfFlags] &
@@ -1322,8 +1320,8 @@ equalHelper(Step const& step, ripple::Book const& book)
 bool
 bookStepEqual(Step const& step, ripple::Book const& book)
 {
-    bool const inXRP = isXRP(book.in.currency);
-    bool const outXRP = isXRP(book.out.currency);
+    bool const inXRP = isXRP(book.in.asset);
+    bool const outXRP = isXRP(book.out.asset);
     if (inXRP && outXRP)
     {
         assert(0);

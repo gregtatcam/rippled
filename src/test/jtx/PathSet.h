@@ -135,7 +135,7 @@ Path::push_back(Issue const& iss)
     path.emplace_back(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         beast::zero,
-        iss.currency,
+        iss.asset,
         iss.account);
     return *this;
 }
@@ -143,7 +143,7 @@ Path::push_back(Issue const& iss)
 inline Path&
 Path::push_back(jtx::Account const& account)
 {
-    path.emplace_back(account.id(), beast::zero, beast::zero);
+    path.emplace_back(account.id(), uint256{beast::zero}, beast::zero);
     return *this;
 }
 

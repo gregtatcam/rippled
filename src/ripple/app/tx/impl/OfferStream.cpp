@@ -116,8 +116,8 @@ accountFundsHelper(
         // self funded
         return amtDefault;
 
-    return toAmount<IOUAmount>(accountHolds(
-        view, id, issue.currency, issue.account, freezeHandling, j));
+    return toAmount<IOUAmount>(
+        accountHolds(view, id, issue.asset, issue.account, freezeHandling, j));
 }
 
 static XRPAmount
@@ -129,8 +129,8 @@ accountFundsHelper(
     FreezeHandling freezeHandling,
     beast::Journal j)
 {
-    return toAmount<XRPAmount>(accountHolds(
-        view, id, issue.currency, issue.account, freezeHandling, j));
+    return toAmount<XRPAmount>(
+        accountHolds(view, id, issue.asset, issue.account, freezeHandling, j));
 }
 
 static CFTAmount
@@ -142,13 +142,13 @@ accountFundsHelper(
     FreezeHandling freezeHandling,
     beast::Journal j)
 {
-    return toAmount<CFTAmount>(accountHolds(
-        view, id, issue.currency, issue.account, freezeHandling, j, true));
+    return toAmount<CFTAmount>(
+        accountHolds(view, id, issue.asset, issue.account, freezeHandling, j));
 }
 
 template <class TIn, class TOut>
 template <class TTakerPays, class TTakerGets>
-requires ValidTaker<TTakerPays, TTakerGets> bool
+    requires ValidTaker<TTakerPays, TTakerGets> bool
 TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
 {
     if (!view_.rules().enabled(fixRmSmallIncreasedQOffers))
@@ -309,15 +309,18 @@ TOfferStreamBase<TIn, TOut>::step()
             continue;
         }
 
-        using Var = std::variant<XRPAmount, IOUAmount, CFTAmount>;
+        using Var = std::variant<XRPAmount*, IOUAmount*, CFTAmount*>;
         auto toTypedAmt = [&]<typename T>(T const& amt) -> Var {
+            static auto xrp = XRPAmount{};
+            static auto cft = CFTAmount{};
+            static auto iou = IOUAmount{};
             if constexpr (std::is_same_v<T, STAmount>)
             {
                 if (isXRP(amt))
-                    return amt.xrp();
+                    return &xrp;
                 if (amt.isCFT())
-                    return amt.cft();
-                return amt.iou();
+                    return &cft;
+                return &iou;
             }
             if constexpr (!std::is_same_v<T, STAmount>)
                 return amt;
@@ -334,7 +337,7 @@ TOfferStreamBase<TIn, TOut>::step()
             {
                 std::visit(
                     [&]<typename TInAmt, typename TOutAmt>(
-                        TInAmt&&, TOutAmt&&) {
+                        TInAmt const*&&, TOutAmt const*&&) {
                         if constexpr (
                             !std::is_same_v<TInAmt, XRPAmount> ||
                             !std::is_same_v<TOutAmt, XRPAmount>)

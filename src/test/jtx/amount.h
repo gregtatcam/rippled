@@ -47,7 +47,7 @@ tricky code leading to overload resolution ambiguities.
 
 struct AnyAmount;
 
-// Represents "no amount" of a currency
+// Represents "no amount" of an asset
 // This is distinct from zero or a balance.
 // For example, no USD means the trust line
 // doesn't even exist. Using this in an
@@ -155,14 +155,10 @@ operator<<(std::ostream& os, PrettyAmount const& amount);
 struct BookSpec
 {
     AccountID account;
-    ripple::Currency currency;
-    bool cft;
+    ripple::Asset asset;
 
-    BookSpec(
-        AccountID const& account_,
-        ripple::Currency const& currency_,
-        bool isCFT = false)
-        : account(account_), currency(currency_), cft(isCFT)
+    BookSpec(AccountID const& account_, ripple::Asset const& asset_)
+        : account(account_), asset(asset_)
     {
     }
 };
@@ -215,7 +211,8 @@ struct XRP_t
     /** @} */
 
     /** Returns None-of-XRP */
-    None operator()(none_t) const
+    None
+    operator()(none_t) const
     {
         return {xrpIssue()};
     }
@@ -338,7 +335,8 @@ public:
     // STAmount operator()(char const* s) const;
 
     /** Returns None-of-Issue */
-    None operator()(none_t) const
+    None
+    operator()(none_t) const
     {
         return {issue()};
     }
@@ -366,17 +364,17 @@ class CFT
 {
 public:
     Account account;
-    ripple::Currency currency;
+    ripple::uint256 asset;
 
-    CFT(Account const& account_, ripple::Currency const& currency_)
-        : account(account_), currency(currency_)
+    CFT(Account const& account_, ripple::uint256 const& asset_)
+        : account(account_), asset(asset_)
     {
     }
 
     Issue
     issue() const
     {
-        return {currency, account.id(), true};
+        return {asset, account.id()};
     }
 
     /** Implicit conversion to Issue.
@@ -408,7 +406,8 @@ public:
     // STAmount operator()(char const* s) const;
 
     /** Returns None-of-Issue */
-    None operator()(none_t) const
+    None
+    operator()(none_t) const
     {
         return {issue()};
     }
@@ -416,7 +415,7 @@ public:
     friend BookSpec
     operator~(CFT const& iou)
     {
-        return BookSpec(iou.account.id(), iou.currency, true);
+        return BookSpec(iou.account.id(), iou.asset);
     }
 };
 

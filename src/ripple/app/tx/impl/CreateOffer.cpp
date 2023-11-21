@@ -98,10 +98,10 @@ CreateOffer::preflight(PreflightContext const& ctx)
     }
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
+    auto const& uPaysCurrency = saTakerPays.getAsset();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
-    auto const& uGetsCurrency = saTakerGets.getCurrency();
+    auto const& uGetsCurrency = saTakerGets.getAsset();
 
     if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
     {
@@ -134,7 +134,7 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     auto saTakerGets = ctx.tx[sfTakerGets];
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
+    auto const& uPaysCurrency = saTakerPays.getAsset();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
 
@@ -210,7 +210,7 @@ CreateOffer::checkAcceptAsset(
     Issue const& issue)
 {
     // Only valid for custom currencies
-    assert(!isXRP(issue.currency));
+    assert(!isXRP(issue.asset));
 
     auto const issuerAccount = view.read(keylet::account(issue.account));
 
@@ -233,7 +233,7 @@ CreateOffer::checkAcceptAsset(
     if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
         auto const trustLine =
-            view.read(keylet::line(id, issue.account, issue.currency));
+            view.read(keylet::line(id, issue.account, (Currency)issue.asset));
 
         if (!trustLine)
         {
@@ -892,7 +892,7 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    txt += to_string(amount.issue().asset);
     return txt;
 }
 
@@ -1183,17 +1183,20 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        sle->setFieldH160(sfTakerPaysCurrency, saTakerPays.issue().currency);
+        if (saTakerPays.isCFT())
+            sle->setFieldH256(
+                sfTakerPaysCFTID, (uint256)saTakerPays.issue().asset);
+        else
+            sle->setFieldH160(
+                sfTakerPaysCurrency, (Currency)saTakerPays.issue().asset);
         sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
-        sle->setFieldH160(sfTakerGetsCurrency, saTakerGets.issue().currency);
+        if (saTakerGets.isCFT())
+            sle->setFieldH256(
+                sfTakerGetsCFTID, (uint256)saTakerGets.issue().asset);
+        else
+            sle->setFieldH160(
+                sfTakerGetsCurrency, (Currency)saTakerGets.issue().asset);
         sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
-        if (saTakerGets.issue().isCFT || saTakerPays.issue().isCFT)
-        {
-            std::uint8_t const paysCFT = saTakerPays.issue().isCFT ? 1 : 0;
-            std::uint8_t const getsCFT = saTakerGets.issue().isCFT ? 1 : 0;
-            sle->setFieldU8(sfTakerPaysCFT, paysCFT);
-            sle->setFieldU8(sfTakerGetsCFT, getsCFT);
-        }
         sle->setFieldU64(sfExchangeRate, uRate);
     });
 

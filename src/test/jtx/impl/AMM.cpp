@@ -42,8 +42,8 @@ static IOUAmount
 initialTokens(STAmount const& asset1, STAmount const& asset2)
 {
     auto const product = number(asset1) * number(asset2);
-    return (IOUAmount)(
-        product.mantissa() >= 0 ? root2(product) : root2(-product));
+    return (
+        IOUAmount)(product.mantissa() >= 0 ? root2(product) : root2(-product));
 }
 
 AMM::AMM(
@@ -73,8 +73,8 @@ AMM::AMM(
     , fee_(fee)
     , ammAccount_(create(tfee, flags, seq, ter))
     , lptIssue_(ripple::ammLPTIssue(
-          asset1_.issue().currency,
-          asset2_.issue().currency,
+          asset1_.issue().asset,
+          asset2_.issue().asset,
           ammAccount_))
 {
 }

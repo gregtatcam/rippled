@@ -58,31 +58,22 @@ toSTAmount(XRPAmount const& xrp)
 inline STAmount
 toSTAmount(XRPAmount const& xrp, Issue const& iss)
 {
-    assert(isXRP(iss.account) && isXRP(iss.currency));
+    assert(isXRP(iss.account) && isXRP(iss.asset));
     return toSTAmount(xrp);
 }
 
 inline STAmount
 toSTAmount(CFTAmount const& cft)
 {
-    bool const isNeg = cft.signum() < 0;
-    std::uint64_t const umant = isNeg ? -cft.cft() : cft.cft();
-    return STAmount(umant, isNeg, true);
+    // TODO CFT, this creates a dummy CFT, should add noCFT() ?
+    return STAmount(cft, {uint256{1}, AccountID{1}});
 }
 
 inline STAmount
 toSTAmount(CFTAmount const& cft, Issue const& iss)
 {
-    assert(iss.isCFT);
-    bool const isNeg = cft.signum() < 0;
-    std::uint64_t const umant = isNeg ? -cft.cft() : cft.cft();
-    return STAmount(
-        iss,
-        umant,
-        0,
-        /*native*/ false,
-        isNeg,
-        STAmount::unchecked());
+    assert(iss.isCFT());
+    return STAmount(cft, iss);
 }
 
 template <class T>
@@ -186,7 +177,7 @@ toAmount(
         return CFTAmount(static_cast<std::int64_t>(n));
     if constexpr (std::is_same_v<STAmount, T>)
     {
-        if (isXRP(issue) || issue.isCFT)
+        if (isXRP(issue) || issue.isCFT())
             return STAmount(issue, static_cast<std::int64_t>(n));
         return STAmount(issue, n.mantissa(), n.exponent());
     }

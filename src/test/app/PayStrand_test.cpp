@@ -151,7 +151,7 @@ ipe(Issue const& iss)
     return STPathElement(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         xrpAccount(),
-        iss.currency,
+        iss.asset,
         iss.account);
 };
 

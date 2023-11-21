@@ -602,7 +602,7 @@ make_DirectStepCFT(
     StrandContext const& ctx,
     AccountID const& src,
     AccountID const& dst,
-    Currency const& c);
+    uint256 const& a);
 
 std::pair<TER, std::unique_ptr<Step>>
 make_BookStepII(StrandContext const& ctx, Issue const& in, Issue const& out);

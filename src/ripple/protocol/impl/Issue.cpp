@@ -32,9 +32,9 @@ Issue::getText() const
     std::string ret;
 
     ret.reserve(64);
-    ret = to_string(currency);
+    ret = to_string(asset);
 
-    if (!isXRP(currency))
+    if (!isXRP(asset))
     {
         ret += "/";
 
@@ -44,12 +44,6 @@ Issue::getText() const
             ret += "1";
         else
             ret += to_string(account);
-
-        ret += "/";
-        if (isCFT)
-            ret += "1";
-        else
-            ret += "0";
     }
 
     return ret;
@@ -58,28 +52,27 @@ Issue::getText() const
 bool
 isConsistent(Issue const& ac)
 {
-    return isXRP(ac.currency) == isXRP(ac.account);
+    return isXRP(ac.asset) == isXRP(ac.account);
 }
 
 std::string
 to_string(Issue const& ac)
 {
     if (isXRP(ac.account))
-        return to_string(ac.currency);
+        return to_string(ac.asset);
 
-    return to_string(ac.account) + "/" + to_string(ac.currency) + "/" +
-        to_string(ac.isCFT);
+    return to_string(ac.account) + "/" + to_string(ac.asset);
 }
 
 Json::Value
 to_json(Issue const& is)
 {
     Json::Value jv;
-    if (is.isCFT)
-        jv[jss::cft_asset] = to_string(is.currency);
+    if (is.asset.isCFT())
+        jv[jss::cft_asset] = to_string(is.asset);
     else
-        jv[jss::currency] = to_string(is.currency);
-    if (!isXRP(is.currency))
+        jv[jss::currency] = to_string(is.asset);
+    if (!isXRP(is.asset))
         jv[jss::issuer] = toBase58(is.account);
     return jv;
 }
@@ -95,22 +88,21 @@ issueFromJson(Json::Value const& v)
 
     bool const isCFT = v.isMember(jss::cft_asset);
 
-    Json::Value const curStr = isCFT ? v[jss::cft_asset] : v[jss::currency];
+    Json::Value const assetStr = isCFT ? v[jss::cft_asset] : v[jss::currency];
     Json::Value const issStr = v[jss::issuer];
 
-    if (!curStr.isString())
+    if (!assetStr.isString())
     {
-        Throw<Json::error>(
-            "issueFromJson currency must be a string Json value");
+        Throw<Json::error>("issueFromJson asset must be a string Json value");
     }
 
-    auto const currency = to_currency(curStr.asString());
-    if (currency == badCurrency() || currency == noCurrency())
+    Asset asset = to_currency(assetStr.asString());
+    if (asset == badCurrency() || asset == noCurrency())
     {
         Throw<Json::error>("issueFromJson currency must be a valid currency");
     }
 
-    if (isXRP(currency))
+    if (asset.isXRP())
     {
         if (!issStr.isNull())
         {
@@ -130,7 +122,7 @@ issueFromJson(Json::Value const& v)
         Throw<Json::error>("issueFromJson issuer must be a valid account");
     }
 
-    return Issue{currency, *issuer, isCFT};
+    return Issue{asset, *issuer};
 }
 
 std::ostream&

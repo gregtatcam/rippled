@@ -115,16 +115,18 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
             {
                 Book book;
 
-                book.in.currency = sle->getFieldH160(sfTakerPaysCurrency);
+                if (sle->isFieldPresent(sfTakerPaysCurrency))
+                    book.in.asset = static_cast<Currency>(
+                        sle->getFieldH160(sfTakerPaysCurrency));
+                else
+                    book.in.asset = sle->getFieldH256(sfTakerPaysCFTID);
                 book.in.account = sle->getFieldH160(sfTakerPaysIssuer);
-                book.in.isCFT = sle->isFieldPresent(sfTakerPaysCFT)
-                    ? sle->getFieldU8(sfTakerPaysCFT)
-                    : false;
-                book.out.currency = sle->getFieldH160(sfTakerGetsCurrency);
+                if (sle->isFieldPresent(sfTakerGetsCurrency))
+                    book.out.asset = static_cast<Currency>(
+                        sle->getFieldH160(sfTakerGetsCurrency));
+                else
+                    book.out.asset = sle->getFieldH256(sfTakerGetsCFTID);
                 book.out.account = sle->getFieldH160(sfTakerGetsIssuer);
-                book.out.isCFT = sle->isFieldPresent(sfTakerGetsCFT)
-                    ? sle->getFieldU8(sfTakerGetsCFT)
-                    : false;
 
                 allBooks[book.in].insert(book.out);
 

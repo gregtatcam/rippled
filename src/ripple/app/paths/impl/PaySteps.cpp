@@ -86,8 +86,9 @@ toStep(
     auto& j = ctx.j;
 
     if (ctx.isFirst && e1->isAccount() &&
-        (e1->getNodeType() & STPathElement::typeCurrency) &&
-        isXRP(e1->getCurrency()))
+        (e1->getNodeType() &
+         (STPathElement::typeCurrency | STPathElement::typeCFT)) &&
+        isXRP(e1->getAsset()))
     {
         return make_XRPEndpointStep(ctx, e1->getAccountID());
     }
@@ -95,18 +96,28 @@ toStep(
     if (ctx.isLast && isXRPAccount(*e1) && e2->isAccount())
         return make_XRPEndpointStep(ctx, e2->getAccountID());
 
-    // Direct payment CFT from issuer to dest
-    if (e1->isAccount() && e1->isCft() && e2->isAccount())
+    if (e1->isAccount() && e2->isAccount())
     {
-        return make_DirectStepCFT(
-            ctx, e1->getAccountID(), e2->getAccountID(), curIssue.currency);
+        if (curIssue.asset.isCFT())
+            return make_DirectStepCFT(
+                ctx,
+                e1->getAccountID(),
+                e2->getAccountID(),
+                (uint256)curIssue.asset);
+        return make_DirectStepI(
+            ctx,
+            e1->getAccountID(),
+            e2->getAccountID(),
+            (Currency)curIssue.asset);
     }
 
+#if 0
     if (e1->isAccount() && e2->isAccount())
     {
         return make_DirectStepI(
-            ctx, e1->getAccountID(), e2->getAccountID(), curIssue.currency);
+            ctx, e1->getAccountID(), e2->getAccountID(), curIssue.asset);
     }
+#endif
 
     if (e1->isOffer() && e2->isAccount())
     {
@@ -118,16 +129,18 @@ toStep(
     }
 
     assert(
-        (e2->getNodeType() & STPathElement::typeCurrency) ||
+        (e2->getNodeType() &
+         (STPathElement::typeCurrency | STPathElement::typeCFT)) ||
         (e2->getNodeType() & STPathElement::typeIssuer));
-    auto const outCurrency = e2->getNodeType() & STPathElement::typeCurrency
-        ? e2->getCurrency()
-        : curIssue.currency;
+    auto const outCurrency = e2->getNodeType() &
+            (STPathElement::typeCurrency | STPathElement::typeCFT)
+        ? e2->getAsset()
+        : curIssue.asset;
     auto const outIssuer = e2->getNodeType() & STPathElement::typeIssuer
         ? e2->getIssuerID()
         : curIssue.account;
 
-    if (isXRP(curIssue.currency) && isXRP(outCurrency))
+    if (isXRP(curIssue.asset) && isXRP(outCurrency))
     {
         JLOG(j.info()) << "Found xrp/xrp offer payment step";
         return {temBAD_PATH, std::unique_ptr<Step>{}};
@@ -137,27 +150,29 @@ toStep(
 
     if (isXRP(outCurrency))
     {
-        if (curIssue.isCFT)  // ??
+        if (curIssue.isCFT())  // ??
             return make_BookStepCX(ctx, curIssue);
         return make_BookStepIX(ctx, curIssue);
     }
 
-    if (isXRP(curIssue.currency))
+    if (isXRP(curIssue.asset))
     {
-        if (e2->isCft())  // ?
-            return make_BookStepXC(ctx, {outCurrency, outIssuer, true});
+        if (e2->isCft())                                            // ?
+            return make_BookStepXC(ctx, {outCurrency, outIssuer});  // TODO
         return make_BookStepXI(ctx, {outCurrency, outIssuer});
     }
 
     // CI or IC
-    if (curIssue.isCFT && !e2->isCft())
+    if (curIssue.isCFT() && !e2->isCft())
         return make_BookStepCI(ctx, curIssue, {outCurrency, outIssuer});
-    if (!curIssue.isCFT && e2->isCft())
-        return make_BookStepIC(ctx, curIssue, {outCurrency, outIssuer, true});
+    if (!curIssue.isCFT() && e2->isCft())
+        return make_BookStepIC(
+            ctx, curIssue, {outCurrency, outIssuer});  // TODO
 
     // CC or II
-    if (curIssue.isCFT)
-        return make_BookStepCC(ctx, curIssue, {outCurrency, outIssuer, true});
+    if (curIssue.isCFT())
+        return make_BookStepCC(
+            ctx, curIssue, {outCurrency, outIssuer});  // TODO
     return make_BookStepII(ctx, curIssue, {outCurrency, outIssuer});
 }
 
@@ -188,7 +203,7 @@ toStrand(
     {
         auto const t = pe.getNodeType();
 
-        if ((t & ~(STPathElement::typeAll | STPathElement::typeCFT)) || !t)
+        if ((t & ~STPathElement::typeAll) || !t)
             return {temBAD_PATH, Strand{}};
 
         bool const hasAccount = t & STPathElement::typeAccount;
@@ -206,7 +221,7 @@ toStrand(
             return {temBAD_PATH, Strand{}};
 
         if (hasCurrency && hasIssuer &&
-            isXRP(pe.getCurrency()) != isXRP(pe.getIssuerID()))
+            isXRP(pe.getAsset()) != isXRP(pe.getIssuerID()))
             return {temBAD_PATH, Strand{}};
 
         if (hasIssuer && (pe.getIssuerID() == noAccount()))
@@ -215,19 +230,20 @@ toStrand(
         if (hasAccount && (pe.getAccountID() == noAccount()))
             return {temBAD_PATH, Strand{}};
 
-        if (isCFT && (!hasIssuer || !hasCurrency || hasAccount))
+        if (isCFT && (!hasIssuer || hasCurrency || hasAccount))
             return {temBAD_PATH, Strand{}};
     }
 
     Issue curIssue = [&] {
         auto const& issue = sendMaxIssue ? sendMaxIssue : deliver;
-        if (isXRP(issue->currency))
+        if (isXRP(issue->asset))
             return xrpIssue();
-        return Issue{issue->currency, src, issue->isCFT};
+        return Issue{issue->asset, src};  // TODO
     }();
 
     auto hasCurrency = [](STPathElement const pe) {
-        return pe.getNodeType() & STPathElement::typeCurrency;
+        return pe.getNodeType() &
+            (STPathElement::typeCurrency | STPathElement::typeCFT);
     };
 
     std::vector<STPathElement> normPath;
@@ -236,13 +252,9 @@ toStrand(
     normPath.reserve(4 + path.size());
     {
         // Implied step: sender of the transaction and either sendmax or deliver
-        // currency
+        // asset
         normPath.emplace_back(
-            curIssue.isCFT ? (STPathElement::typeAll | STPathElement::typeCFT)
-                           : STPathElement::typeAll,
-            src,
-            curIssue.currency,
-            curIssue.account);
+            STPathElement::typeAll, src, curIssue.asset, curIssue.account);
 
         // If transaction includes sendmax with the issuer, which is not
         // the sender then the issuer is the second implied step, unless
@@ -254,8 +266,7 @@ toStrand(
             normPath.emplace_back(
                 sendMaxIssue->account,
                 std::nullopt,
-                std::nullopt,
-                sendMaxIssue->isCFT);
+                std::nullopt);  // TODO CFT
         }
 
         for (auto const& i : path)
@@ -266,15 +277,14 @@ toStrand(
             // even if all that is changing is the Issue.account.
             STPathElement const& lastCurrency =
                 *std::find_if(normPath.rbegin(), normPath.rend(), hasCurrency);
-            if ((lastCurrency.getCurrency() != deliver.currency) ||
+            if ((lastCurrency.getAsset() != deliver.asset) ||
                 (offerCrossing &&
                  lastCurrency.getIssuerID() != deliver.account))
             {
                 normPath.emplace_back(
                     std::nullopt,
-                    deliver.currency,
-                    deliver.account,
-                    deliver.isCFT);
+                    deliver.asset,
+                    deliver.account);  // TODO CFT
             }
         }
 
@@ -283,14 +293,13 @@ toStrand(
               (dst == deliver.account)))
         {
             normPath.emplace_back(
-                deliver.account, std::nullopt, std::nullopt, deliver.isCFT);
+                deliver.account, std::nullopt, std::nullopt);  // TODO CFT
         }
 
         if (!normPath.back().isAccount() ||
             normPath.back().getAccountID() != dst)
         {
-            normPath.emplace_back(
-                dst, std::nullopt, std::nullopt, deliver.isCFT);
+            normPath.emplace_back(dst, std::nullopt, std::nullopt);  // TODO CFT
         }
     }
 
@@ -351,26 +360,30 @@ toStrand(
         else if (cur->hasIssuer())
             curIssue.account = cur->getIssuerID();
 
-        if (cur->hasCurrency())
+        if (cur->hasCurrency() || cur->isCft())
         {
-            curIssue.currency = cur->getCurrency();
-            curIssue.isCFT = cur->isCft();
-            if (isXRP(curIssue.currency))
+            curIssue.asset = cur->getAsset();
+            if (isXRP(curIssue.asset))
                 curIssue.account = xrpAccount();
         }
 
+        auto getImplied = [&](auto const& pe, auto const& iss) {
+            if (iss.isCFT())
+                return make_DirectStepCFT(
+                    ctx(), pe->getAccountID(), iss.account, (uint256)iss.asset);
+            return make_DirectStepI(
+                ctx(), pe->getAccountID(), iss.account, (Currency)iss.asset);
+        };
+
         if (cur->isAccount() && next->isAccount())
         {
-            if (!isXRP(curIssue.currency) &&
+            // TODO CFT
+            if (!isXRP(curIssue.asset) &&
                 curIssue.account != cur->getAccountID() &&
                 curIssue.account != next->getAccountID())
             {
                 JLOG(j.trace()) << "Inserting implied account";
-                auto msr = make_DirectStepI(
-                    ctx(),
-                    cur->getAccountID(),
-                    curIssue.account,
-                    curIssue.currency);
+                auto msr = getImplied(cur, curIssue);
                 if (msr.first != tesSUCCESS)
                     return {msr.first, Strand{}};
                 result.push_back(std::move(msr.second));
@@ -384,14 +397,11 @@ toStrand(
         }
         else if (cur->isAccount() && next->isOffer())
         {
+            // TODO CFT
             if (curIssue.account != cur->getAccountID())
             {
                 JLOG(j.trace()) << "Inserting implied account before offer";
-                auto msr = make_DirectStepI(
-                    ctx(),
-                    cur->getAccountID(),
-                    curIssue.account,
-                    curIssue.currency);
+                auto msr = getImplied(cur, curIssue);
                 if (msr.first != tesSUCCESS)
                     return {msr.first, Strand{}};
                 result.push_back(std::move(msr.second));
@@ -405,6 +415,7 @@ toStrand(
         }
         else if (cur->isOffer() && next->isAccount())
         {
+            // TODO CFT
             if (curIssue.account != next->getAccountID() &&
                 !isXRP(next->getAccountID()))
             {
@@ -425,11 +436,7 @@ toStrand(
                 else
                 {
                     JLOG(j.trace()) << "Inserting implied account after offer";
-                    auto msr = make_DirectStepI(
-                        ctx(),
-                        curIssue.account,
-                        next->getAccountID(),
-                        curIssue.currency);
+                    auto msr = getImplied(next, curIssue);
                     if (msr.first != tesSUCCESS)
                         return {msr.first, Strand{}};
                     result.push_back(std::move(msr.second));
@@ -438,8 +445,8 @@ toStrand(
             continue;
         }
 
-        if (!next->isOffer() && next->hasCurrency() &&
-            next->getCurrency() != curIssue.currency)
+        if (!next->isOffer() && (next->hasCurrency() || next->isCft()) &&
+            next->getAsset() != curIssue.asset)
         {
             // Should never happen
             assert(0);
@@ -470,8 +477,7 @@ toStrand(
 
         auto curAcc = src;
         auto curIss = [&] {
-            auto& currency =
-                sendMaxIssue ? sendMaxIssue->currency : deliver.currency;
+            auto& currency = sendMaxIssue ? sendMaxIssue->asset : deliver.asset;
             if (isXRP(currency))
                 return xrpIssue();
             return Issue{currency, src};
@@ -498,7 +504,7 @@ toStrand(
         }
         if (curAcc != dst)
             return false;
-        if (curIss.currency != deliver.currency)
+        if (curIss.asset != deliver.asset)
             return false;
         if (curIss.account != deliver.account && curIss.account != dst)
             return false;

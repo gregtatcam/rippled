@@ -191,8 +191,15 @@ Env::balance(Account const& account) const
 PrettyAmount
 Env::balance(Account const& account, Issue const& issue) const
 {
-    if (isXRP(issue.currency))
+    if (isXRP(issue.asset))
         return balance(account);
+    if (issue.isCFT())
+    {
+        auto const cftokenID = keylet::cftoken(account, (uint256)issue.asset);
+        if (auto sle = le(cftokenID))
+            return sle->getFieldU64(sfCFTAmount);
+        return {STAmount(issue, 0), account.name()};
+    }
     auto const sle = le(keylet::line(account.id(), issue));
     if (!sle)
         return {STAmount(issue, 0), account.name()};
@@ -460,8 +467,9 @@ Env::st(JTx const& jt)
     {
         return sterilize(STTx{std::move(*obj)});
     }
-    catch (std::exception const&)
+    catch (std::exception const& e)
     {
+        std::cout << "sterilize exception " << e.what() << std::endl;
     }
     return nullptr;
 }

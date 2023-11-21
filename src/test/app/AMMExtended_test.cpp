@@ -1522,7 +1522,7 @@ private:
                 auto const& pathElem = st[0][0];
                 BEAST_EXPECT(
                     pathElem.isOffer() && pathElem.getIssuerID() == gw.id() &&
-                    pathElem.getCurrency() == USD.currency);
+                    pathElem.getAsset() == USD.currency);
             }
         }
         {
@@ -1541,7 +1541,7 @@ private:
                 BEAST_EXPECT(
                     pathElem.isOffer() &&
                     pathElem.getIssuerID() == xrpAccount() &&
-                    pathElem.getCurrency() == xrpCurrency());
+                    pathElem.getAsset() == xrpCurrency());
             }
         }
     }
@@ -2082,7 +2082,7 @@ private:
                     return STPathElement(
                         STPathElement::typeCurrency | STPathElement::typeIssuer,
                         xrpAccount(),
-                        iss.currency,
+                        iss.asset,
                         iss.account);
                 };
                 {

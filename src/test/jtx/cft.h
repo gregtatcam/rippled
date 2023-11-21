@@ -88,6 +88,21 @@ public:
     std::uint64_t
     holderAmount(Account const& acct) const;
 
+    CFT
+    cft()
+    {
+        return CFT(issuer_, cftID_.key);
+    }
+
+    template <class T>
+        requires(sizeof(T) >= sizeof(int) && std::is_arithmetic_v<T>)
+    PrettyAmount cft(T v) const
+    {
+        return {
+            amountFromString({cftID_.key, issuer_}, std::to_string(v)),
+            issuer_.human()};
+    }
+
 private:
     /** Issue a CFT. */
     void

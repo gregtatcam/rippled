@@ -250,13 +250,14 @@ doSubscribe(RPC::JsonContext& context)
             Json::Value taker_gets = j[jss::taker_gets];
 
             // Parse mandatory currency.
+            Currency c;
             if (!taker_pays.isMember(jss::currency) ||
-                !to_currency(
-                    book.in.currency, taker_pays[jss::currency].asString()))
+                !to_currency(c, taker_pays[jss::currency].asString()))
             {
                 JLOG(context.j.info()) << "Bad taker_pays currency.";
                 return rpcError(rpcSRC_CUR_MALFORMED);
             }
+            book.in.asset = c;
 
             // Parse optional issuer.
             if (((taker_pays.isMember(jss::issuer)) &&
@@ -264,7 +265,7 @@ doSubscribe(RPC::JsonContext& context)
                   !to_issuer(
                       book.in.account, taker_pays[jss::issuer].asString())))
                 // Don't allow illegal issuers.
-                || (!book.in.currency != !book.in.account) ||
+                || (!isXRP(book.in.asset) != !book.in.account) ||
                 noAccount() == book.in.account)
             {
                 JLOG(context.j.info()) << "Bad taker_pays issuer.";
@@ -273,12 +274,12 @@ doSubscribe(RPC::JsonContext& context)
 
             // Parse mandatory currency.
             if (!taker_gets.isMember(jss::currency) ||
-                !to_currency(
-                    book.out.currency, taker_gets[jss::currency].asString()))
+                !to_currency(c, taker_gets[jss::currency].asString()))
             {
                 JLOG(context.j.info()) << "Bad taker_gets currency.";
                 return rpcError(rpcDST_AMT_MALFORMED);
             }
+            book.out.asset = c;
 
             // Parse optional issuer.
             if (((taker_gets.isMember(jss::issuer)) &&
@@ -286,14 +287,14 @@ doSubscribe(RPC::JsonContext& context)
                   !to_issuer(
                       book.out.account, taker_gets[jss::issuer].asString())))
                 // Don't allow illegal issuers.
-                || (!book.out.currency != !book.out.account) ||
+                || (!isXRP(book.out.asset) != !book.out.account) ||
                 noAccount() == book.out.account)
             {
                 JLOG(context.j.info()) << "Bad taker_gets issuer.";
                 return rpcError(rpcDST_ISR_MALFORMED);
             }
 
-            if (book.in.currency == book.out.currency &&
+            if (book.in.asset == book.out.asset &&
                 book.in.account == book.out.account)
             {
                 JLOG(context.j.info()) << "taker_gets same as taker_pays.";

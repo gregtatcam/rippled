@@ -63,7 +63,7 @@ CFTokenIssuanceCreate::preclaim(PreclaimContext const& ctx)
 {
     // if already a CFT with this asset code - error
     if (ctx.view.exists(
-            keylet::cftIssuance(ctx.tx[sfAccount], ctx.tx[sfAssetCode])))
+            keylet::cftIssuance(ctx.tx[sfAccount], ctx.tx[sfSequence])))
         return tecDUPLICATE;
 
     return tesSUCCESS;
@@ -76,7 +76,7 @@ CFTokenIssuanceCreate::doApply()
         mPriorBalance < view().fees().accountReserve((*acct)[sfOwnerCount] + 1))
         return tecINSUFFICIENT_RESERVE;
 
-    auto const cftID = keylet::cftIssuance(account_, ctx_.tx[sfAssetCode]);
+    auto const cftID = keylet::cftIssuance(account_, ctx_.tx[sfSequence]);
 
     // create the CFT
     {

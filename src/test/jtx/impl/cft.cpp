@@ -47,7 +47,7 @@ CFTIssuance::CFTIssuance(
     std::optional<jtx::msig> ms,
     bool close)
     : env_(env)
-    , cftID_(keylet::cftIssuance(issuer, currency))
+    , cftID_(keylet::cftIssuance(issuer, env.seq(issuer)))
     , issuer_(issuer)
     , currency_(currency)
     , msig_(ms)

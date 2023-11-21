@@ -130,7 +130,7 @@ public:
     IOU
     operator[](std::string const& s) const;
     CFT
-    operator()(std::string const& s) const;
+    operator()(uint256 const& u) const;
 
 private:
     static std::

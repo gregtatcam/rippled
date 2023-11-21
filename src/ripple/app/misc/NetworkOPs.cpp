@@ -4343,7 +4343,7 @@ NetworkOPsImp::getBookPage(
                         saOwnerFunds = accountHolds(
                             view,
                             uOfferOwnerID,
-                            book.out.currency,
+                            book.out.asset,
                             book.out.account,
                             fhZERO_IF_FROZEN,
                             viewJ);
@@ -4494,7 +4494,7 @@ NetworkOPsImp::getBookPage(
 
                     saOwnerFunds = lesActive.accountHolds(
                         uOfferOwnerID,
-                        book.out.currency,
+                        book.out.asset,
                         book.out.account,
                         fhZERO_IF_FROZEN);
 

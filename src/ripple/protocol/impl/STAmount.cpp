@@ -98,139 +98,90 @@ static bool
 areComparable(STAmount const& v1, STAmount const& v2)
 {
     return (v1.native() == v2.native() || v1.isCFT() == v2.isCFT()) &&
-        v1.issue().currency == v2.issue().currency;
-}
-
-std::string
-STAmount::getTypeName() const noexcept
-{
-    switch (mType)
-    {
-        case STAmount::Type::xrp:
-            return "xrp";
-        case STAmount::Type::issued_currency:
-            return "issued_currency";
-        case STAmount::Type::cft:
-            return "cft";
-        default:
-            return "";
-    }
+        v1.issue().asset == v2.issue().asset;
 }
 
 STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
 {
+    // TODO CFT make sure backward compatible
+
     std::uint64_t value = sit.get64();
+    bool isCFT = value & cCFToken;
 
-    if ((value & cIssuedCurrency) == cIssuedCurrency)
+    // native
+    if ((value & cNotNative) == 0 || isCFT)
     {
-        mType = Type::issued_currency;
-
-        // 10 bits for the offset, sign and "is IOU" flag
-        int offset = static_cast<int>(value >> (64 - 10));
-
-        auto const pValue = value & ~(1023ull << (64 - 10));
-
-        if (pValue)
+        if (isCFT)
         {
-            offset = (offset & 255) - 97;  // center the range
-
-            if (pValue < cMinValue || pValue > cMaxValue ||
-                offset < cMinOffset || offset > cMaxOffset)
-                Throw<std::runtime_error>("invalid currency value");
-
-            mValue = pValue;
-            mOffset = offset;
-            mIsNegative = (value & cSign) == 0;
+            mIssue.asset = sit.get256();
+            mIssue.account = sit.get160();
         }
-        else if (offset != 512)
+        else
+            mIssue = xrpIssue();
+        // positive
+        if ((value & cPositive) != 0)
+        {
+            mValue = value & cValueMask;
+            mOffset = 0;
+            mIsNative = !isCFT;
+            mIsNegative = false;
+            return;
+        }
+
+        // negative
+        if (value == 0)
+            Throw<std::runtime_error>("negative zero is not canonical");
+
+        mValue = value & cValueMask;
+        mOffset = 0;
+        mIsNative = !isCFT;
+        mIsNegative = true;
+        return;
+    }
+
+    Issue issue;
+    issue.asset = static_cast<Currency>(sit.get160());
+
+    if (isXRP(issue.asset))
+        Throw<std::runtime_error>("invalid native currency");
+
+    issue.account = sit.get160();
+
+    if (isXRP(issue.account))
+        Throw<std::runtime_error>("invalid native account");
+
+    // 10 bits for the offset, sign and "not native" flag
+    int offset = static_cast<int>(value >> (64 - 10));
+
+    value &= ~(1023ull << (64 - 10));
+
+    if (value)
+    {
+        bool isNegative = (offset & 256) == 0;
+        offset = (offset & 255) - 97;  // center the range
+
+        if (value < cMinValue || value > cMaxValue || offset < cMinOffset ||
+            offset > cMaxOffset)
         {
             Throw<std::runtime_error>("invalid currency value");
         }
-        else
-        {
-            mValue = 0;
-            mOffset = 0;
-            mIsNegative = false;
-        }
-
-        Issue issue;
-        issue.currency = sit.get160();
-
-        if (isXRP(issue.currency))
-            Throw<std::runtime_error>("invalid native currency");
-
-        issue.account = sit.get160();
 
         mIssue = issue;
-        // TODO....
+        mValue = value;
+        mOffset = offset;
+        mIsNegative = isNegative;
         canonicalize();
         return;
     }
 
-    if ((value & cCFToken) == cCFToken)
-    {
-        mType = Type::cft;
+    if (offset != 512)
+        Throw<std::runtime_error>("invalid currency value");
 
-        // We're supporting this deserialization, but negative CFT values are
-        // not currently supported by any application logic
-        mIsNegative = (value & cSign) != cSign;
-        mValue = value & cValueMask;
-        mOffset = 0;
-
-        if (mIsNegative && mValue == 0)
-            Throw<std::runtime_error>("Negative zero CFT amounts are illegal");
-
-        Issue issue;
-        issue.currency = sit.get160();
-        issue.isCFT = true;
-
-        if (isXRP(issue.currency))
-            Throw<std::runtime_error>("invalid native currency");
-
-        issue.account = sit.get160();
-
-        mIssue = issue;
-        // TODO....
-        // canonicalize();
-        return;
-    }
-
-    // else it must be native
-    mType = Type::xrp;
-
-    // positive
-    if (value & cSign)
-    {
-        mValue = value & cValueMask;
-        mOffset = 0;
-        mType = Type::xrp;
-        mIsNegative = false;
-        return;
-    }
-
-    // negative
-    if (value == 0)
-        Throw<std::runtime_error>("negative zero is not canonical");
-
-    mValue = value;
+    mIssue = issue;
+    mValue = 0;
     mOffset = 0;
-    mIsNegative = true;
-}
-
-STAmount::STAmount(
-    SField const& name,
-    Issue const& issue,
-    mantissa_type mantissa,
-    exponent_type exponent,
-    STAmount::Type typ,
-    bool negative)
-    : STBase(name)
-    , mIssue(issue)
-    , mValue(mantissa)
-    , mOffset(exponent)
-    , mType(typ)
-    , mIsNegative(negative)
-{
+    mIsNegative = false;
+    canonicalize();
 }
 
 STAmount::STAmount(
@@ -242,12 +193,10 @@ STAmount::STAmount(
     bool negative,
     unchecked)
     : STBase(name)
-    , mIssue(issue)
+    , mIssue(native ? xrpIssue() : issue)
     , mValue(mantissa)
     , mOffset(exponent)
-    , mType(
-          native ? Type::xrp
-                 : (issue.isCFT ? Type::cft : Type::issued_currency))
+    , mIsNative(native)
     , mIsNegative(negative)
 {
 }
@@ -259,12 +208,10 @@ STAmount::STAmount(
     bool native,
     bool negative,
     unchecked)
-    : mIssue(issue)
+    : mIssue(native ? xrpIssue() : issue)
     , mValue(mantissa)
     , mOffset(exponent)
-    , mType(
-          native ? Type::xrp
-                 : (issue.isCFT ? Type::cft : Type::issued_currency))
+    , mIsNative(native)
     , mIsNegative(negative)
 {
 }
@@ -277,36 +224,29 @@ STAmount::STAmount(
     bool native,
     bool negative)
     : STBase(name)
-    , mIssue(issue)
+    , mIssue(native ? xrpIssue() : issue)
     , mValue(mantissa)
     , mOffset(exponent)
-    , mType(
-          native ? Type::xrp
-                 : (issue.isCFT ? Type::cft : Type::issued_currency))
+    , mIsNative(native)
     , mIsNegative(negative)
 {
     canonicalize();
 }
 
-STAmount::STAmount(SField const& name, std::int64_t mantissa, bool isCFT)
-    : STBase(name), mOffset(0), mType(isCFT ? Type::cft : Type::xrp)
+STAmount::STAmount(SField const& name, std::int64_t mantissa)
+    : STBase(name), mIssue(xrpIssue()), mOffset(0), mIsNative(true)
 {
-    mIssue.isCFT = isCFT;
     set(mantissa);
 }
 
-STAmount::STAmount(
-    SField const& name,
-    std::uint64_t mantissa,
-    bool negative,
-    bool isCFT)
+STAmount::STAmount(SField const& name, std::uint64_t mantissa, bool negative)
     : STBase(name)
+    , mIssue(xrpIssue())
     , mValue(mantissa)
     , mOffset(0)
-    , mType(isCFT ? Type::cft : Type::xrp)
+    , mIsNative(true)
     , mIsNegative(negative)
 {
-    mIssue.isCFT = isCFT;
     assert(mValue <= std::numeric_limits<std::int64_t>::max());
 }
 
@@ -339,13 +279,13 @@ STAmount::STAmount(SField const& name, STAmount const& from)
 
 //------------------------------------------------------------------------------
 
-STAmount::STAmount(std::uint64_t mantissa, bool negative, bool isCFT)
-    : mValue(mantissa)
+STAmount::STAmount(std::uint64_t mantissa, bool negative)
+    : mIssue(xrpIssue())
+    , mValue(mantissa)
     , mOffset(0)
-    , mType(isCFT ? Type::cft : Type::xrp)
+    , mIsNative(true)
     , mIsNegative(mantissa != 0 && negative)
 {
-    mIssue.isCFT = isCFT;
     assert(mValue <= std::numeric_limits<std::int64_t>::max());
 }
 
@@ -384,7 +324,7 @@ STAmount::STAmount(Issue const& issue, int mantissa, int exponent)
 STAmount::STAmount(IOUAmount const& amount, Issue const& issue)
     : mIssue(issue)
     , mOffset(amount.exponent())
-    , mType(Type::issued_currency)
+    , mIsNative(false)
     , mIsNegative(amount < beast::zero)
 {
     if (mIsNegative)
@@ -396,7 +336,10 @@ STAmount::STAmount(IOUAmount const& amount, Issue const& issue)
 }
 
 STAmount::STAmount(XRPAmount const& amount)
-    : mOffset(0), mType(Type::xrp), mIsNegative(amount < beast::zero)
+    : mIssue(xrpIssue())
+    , mOffset(0)
+    , mIsNative(true)
+    , mIsNegative(amount < beast::zero)
 {
     if (mIsNegative)
         mValue = unsafe_cast<std::uint64_t>(-amount.drops());
@@ -406,10 +349,12 @@ STAmount::STAmount(XRPAmount const& amount)
     canonicalize();
 }
 
-STAmount::STAmount(CFTAmount const& amount)
-    : mOffset(0), mType(Type::cft), mIsNegative(amount < beast::zero)
+STAmount::STAmount(CFTAmount const& amount, Issue const& issue)
+    : mIssue(issue)
+    , mOffset(0)
+    , mIsNative(false)
+    , mIsNegative(amount < beast::zero)
 {
-    mIssue.isCFT = true;
     if (mIsNegative)
         mValue = unsafe_cast<std::uint64_t>(-amount.cft());
     else
@@ -444,7 +389,7 @@ STAmount::move(std::size_t n, void* buf)
 XRPAmount
 STAmount::xrp() const
 {
-    if (!native())
+    if (!mIsNative)
         Throw<std::logic_error>(
             "Cannot return non-native STAmount as XRPAmount");
 
@@ -459,7 +404,7 @@ STAmount::xrp() const
 IOUAmount
 STAmount::iou() const
 {
-    if (native() || isCFT())
+    if (mIsNative || isCFT())
         Throw<std::logic_error>("Cannot return native STAmount as IOUAmount");
 
     auto mantissa = static_cast<std::int64_t>(mValue);
@@ -488,7 +433,7 @@ STAmount::cft() const
 STAmount&
 STAmount::operator=(IOUAmount const& iou)
 {
-    assert(!native());
+    assert(mIsNative == false);
     mOffset = iou.exponent();
     mIsNegative = iou < beast::zero;
     if (mIsNegative)
@@ -607,8 +552,7 @@ void
 STAmount::setIssue(Issue const& issue)
 {
     mIssue = issue;
-    mType = isXRP(*this) ? Type::xrp
-                         : (mIssue.isCFT ? Type::cft : Type::issued_currency);
+    mIsNative = isXRP(*this);
 }
 
 // Convert an offer into an index amount so they sort by rate.
@@ -647,25 +591,20 @@ STAmount::setJson(Json::Value& elem) const
 {
     elem = Json::objectValue;
 
-    // It is an error for currency or issuer not to be specified for valid
-    // json, unless XRP
-    switch (mType)
+    if (!mIsNative)
     {
-        case Type::xrp:
-            elem = getText();
-            break;
-        case Type::issued_currency:
-            elem[jss::value] = getText();
-            elem[jss::currency] = to_string(mIssue.currency);
-            elem[jss::issuer] = to_string(mIssue.account);
-            break;
-        case Type::cft:
-            elem[jss::value] = getText();
-            elem[jss::cft_asset] = to_string(mIssue.currency);
-            elem[jss::issuer] = to_string(mIssue.account);
-            break;
-        default:
-            Throw<std::runtime_error>("Invalid currency type");
+        // It is an error for currency or issuer not to be specified for valid
+        // json.
+        elem[jss::value] = getText();
+        if (mIssue.isCFT())
+            elem[jss::cft_asset] = to_string(mIssue.asset);
+        else
+            elem[jss::currency] = to_string(mIssue.asset);
+        elem[jss::issuer] = to_string(mIssue.account);
+    }
+    else
+    {
+        elem = getText();
     }
 }
 
@@ -687,20 +626,7 @@ STAmount::getFullText() const
     std::string ret;
 
     ret.reserve(64);
-    ret = getText() + "/" + to_string(mIssue.currency);
-
-    if (!native())
-    {
-        ret += "/";
-
-        if (isXRP(*this))
-            ret += "0";
-        else if (mIssue.account == noAccount())
-            ret += "1";
-        else
-            ret += to_string(mIssue.account);
-    }
-
+    ret = getText() + "/" + mIssue.getText();
     return ret;
 }
 
@@ -720,7 +646,7 @@ STAmount::getText() const
     bool const scientific(
         (mOffset != 0) && ((mOffset < -25) || (mOffset > -5)));
 
-    if (native() || mType == Type::cft || scientific)
+    if (mIsNative || mIssue.isCFT() || scientific)
     {
         ret.append(raw_value);
 
@@ -789,7 +715,8 @@ STAmount::getText() const
     return ret;
 }
 
-Json::Value STAmount::getJson(JsonOptions) const
+Json::Value
+STAmount::getJson(JsonOptions) const
 {
     Json::Value elem;
     setJson(elem);
@@ -799,85 +726,42 @@ Json::Value STAmount::getJson(JsonOptions) const
 void
 STAmount::add(Serializer& s) const
 {
-    switch (mType)
+    // TODO CFT make sure backward compatible
+    if (mIsNative)
     {
-        case STAmount::Type::xrp:
-            /*
-             * Serialized format:
-             *
-             * Value encoding (first 64 bits):
-             *  0 [sign bit] 0 [4 unused bits, set to 0] [57 bits for value]
-             */
-            // TODO why?
-            assert(mOffset == 0);
-            // Ensure that value is no greater than 57 bits
-            assert(mValue == (mValue & cValueMask));
+        assert(mOffset == 0);
 
-            if (mIsNegative)
-                s.add64(mValue);
-            else
-                s.add64(mValue | cSign);
-            break;
+        if (!mIsNegative)
+            s.add64(mValue | cPositive);
+        else
+            s.add64(mValue);
+    }
+    else if (mIssue.isCFT())
+    {
+        if (!mIsNegative)
+            s.add64(mValue | cCFToken | cPositive);
+        else
+            s.add64(mValue | cCFToken);
 
-        case STAmount::Type::cft:
-            /*
-             * Serialized format:
-             *
-             * Value encoding (first 64 bits):
-             * TODO should we use 64 bits for value? do we need to?
-             *  0 [sign bit] 1 [4 unused bits, set to 0] [57 bits for value]
-             *
-             * CFT ID
-             * Currency encoding (next 160 bits)
-             *
-             * Issuer encoding (next 160 bits)
-             */
-            // Ensure that value is no greater than 57 bits
-            assert(mValue == (mValue & cValueMask));
+        s.addBitString((uint256)mIssue.asset);
+        s.addBitString(mIssue.account);
+    }
+    else
+    {
+        if (*this == beast::zero)
+            s.add64(cNotNative);
+        else if (mIsNegative)  // 512 = not native
+            s.add64(
+                mValue |
+                (static_cast<std::uint64_t>(mOffset + 512 + 97) << (64 - 10)));
+        else  // 256 = positive
+            s.add64(
+                mValue |
+                (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
+                 << (64 - 10)));
 
-            if (mIsNegative)
-                s.add64(mValue | cCFToken);
-            else
-                s.add64(mValue | cCFToken | cSign);
-
-            s.addBitString(mIssue.currency);
-            s.addBitString(mIssue.account);
-            break;
-
-        case STAmount::Type::issued_currency:
-            /*
-             * Serialized format:
-             *
-             * Value encoding (first 64 bits):
-             *  1 [sign bit] [8 bits for (exponent + 97)] [54 bits for mantissa]
-             * Special case for 0 value:
-             *  1 [63 bits of 0]
-             *
-             *
-             * Currency encoding (next 160 bits)
-             *
-             * Issuer encoding (next 160 bits)
-             */
-            if (*this == beast::zero)
-                s.add64(cIssuedCurrency);
-            else if (mIsNegative)  // 512 = not native
-                s.add64(
-                    mValue |
-                    (static_cast<std::uint64_t>(mOffset + 512 + 97)
-                     << (64 - 10)));
-            else  // 256 = positive
-                s.add64(
-                    mValue |
-                    (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
-                     << (64 - 10)));
-
-            s.addBitString(mIssue.currency);
-            s.addBitString(mIssue.account);
-            break;
-
-        default:
-            Throw<std::runtime_error>(
-                "Invalid STAmount type for serialization");
+        s.addBitString((Currency)mIssue.asset);
+        s.addBitString(mIssue.account);
     }
 }
 
@@ -891,7 +775,7 @@ STAmount::isEquivalent(const STBase& t) const
 bool
 STAmount::isDefault() const
 {
-    return (mValue == 0) && native();
+    return (mValue == 0) && mIsNative;
 }
 
 //------------------------------------------------------------------------------
@@ -900,24 +784,14 @@ STAmount::isDefault() const
 // Representation range is 10^80 - 10^(-80).
 //
 // On the wire:
-// - high bit is 1 for issued currency, 0 for XRP/CFT
+// - high bit is 0 for XRP, 1 for issued currency
 // - next bit is 1 for positive, 0 for negative (except 0 issued currency, which
-//    is a special case of 0x8000000000000000)
-// - for issued currencies:
-//     - the next 8 bits are (mOffset+97).
-//       The +97 is so that this value is always positive.
-//     - The remaining 54 bits are significant digits (mantissa)
-// - for XRP:
-//     - the next bit is 0 (indicates XRP)
-//     - the next four bits are 0 (reserved, but must remain 0 because they
-//       might be used for future additional amount types).
-//     - the next 57 bits are for the value of drops.
-// - for CFT:
-//     - the next bit is 1 (indicates CFT)
-//     - the next four bits are 0 (reserved, but must remain 0 because they
-//       might be used for future additional amount types).
-//     - the next 57 bits are for the value of CFT at the lowest AssetScale.
-//
+//      is a special case of 0x8000000000000000
+// - for issued currencies, the next 8 bits are (mOffset+97).
+//   The +97 is so that this value is always positive.
+// - The remaining bits are significant digits (mantissa)
+//   That's 54 bits for issued currency and 62 bits for native
+//   (but XRP only needs 57 bits for the max value of 10^17 drops)
 //
 // mValue is zero if the amount is zero, otherwise it's within the range
 //    10^15 to (10^16 - 1) inclusive.
@@ -925,10 +799,10 @@ STAmount::isDefault() const
 void
 STAmount::canonicalize()
 {
-    if (isXRP(*this) || mIssue.isCFT)
+    if (isXRP(*this) || mIssue.isCFT())
     {
         // native currency amounts should always have an offset of zero
-        mType = mIssue.isCFT ? Type::cft : Type::xrp;
+        mIsNative = isXRP(*this);
 
         // log(2^64,10) ~ 19.2
         if (mValue == 0 || mOffset <= -20)
@@ -951,7 +825,7 @@ STAmount::canonicalize()
         {
             Number num(
                 mIsNegative ? -mValue : mValue, mOffset, Number::unchecked{});
-            if (isXRP(*this))
+            if (mIsNative)
             {
                 XRPAmount xrp{num};
                 mIsNegative = xrp.drops() < 0;
@@ -994,7 +868,7 @@ STAmount::canonicalize()
         return;
     }
 
-    mType = Type::issued_currency;
+    mIsNative = false;
 
     if (getSTNumberSwitchover())
     {
@@ -1142,11 +1016,11 @@ amountFromJson(SField const& name, Json::Value const& v)
     STAmount::exponent_type exponent = 0;
     bool negative = false;
     Issue issue;
-    STAmount::Type typ;
 
     Json::Value value;
-    Json::Value currency;
+    Json::Value asset;
     Json::Value issuer;
+    bool isCFT = false;
 
     if (v.isNull())
     {
@@ -1155,29 +1029,23 @@ amountFromJson(SField const& name, Json::Value const& v)
     }
     else if (v.isObject())
     {
+        value = v[jss::value];
         if (v.isMember(jss::cft_asset))
         {
-            typ = STAmount::Type::cft;
-            currency = v[jss::cft_asset];
-            issue.isCFT = true;
+            isCFT = true;
+            asset = v[jss::cft_asset];
         }
         else
         {
-            typ = STAmount::Type::issued_currency;
-            currency = v[jss::currency];
-            issue.isCFT = false;
+            asset = v[jss::currency];
         }
-
-        value = v[jss::value];
         issuer = v[jss::issuer];
     }
     else if (v.isArray())
     {
         value = v.get(Json::UInt(0), 0);
-        currency = v.get(Json::UInt(1), Json::nullValue);
+        asset = v.get(Json::UInt(1), Json::nullValue);
         issuer = v.get(Json::UInt(2), Json::nullValue);
-        // TODO -.... when does this happen
-        typ = STAmount::Type::issued_currency;
     }
     else if (v.isString())
     {
@@ -1191,40 +1059,46 @@ amountFromJson(SField const& name, Json::Value const& v)
         value = elements[0];
 
         if (elements.size() > 1)
-            currency = elements[1];
+            asset = elements[1];
 
         if (elements.size() > 2)
-        {
             issuer = elements[2];
-            // TODO -.... when does this happen
-            typ = STAmount::Type::issued_currency;
-        }
     }
     else
     {
         value = v;
     }
 
-    bool const native = !currency.isString() || currency.asString().empty() ||
-        (currency.asString() == systemCurrencyCode());
+    bool const native = !asset.isString() || asset.asString().empty() ||
+        (asset.asString() == systemCurrencyCode());
 
     if (native)
     {
         if (v.isObjectOrNull())
             Throw<std::runtime_error>("XRP may not be specified as an object");
         issue = xrpIssue();
-        typ = STAmount::Type::xrp;
     }
     else
     {
         // non-XRP
-        if (!to_currency(issue.currency, currency.asString()))
-            Throw<std::runtime_error>("invalid currency");
+        issue.asset = [&]() -> Asset {
+            if (isCFT)
+            {
+                uint256 u;
+                if (!u.parseHex(asset.asString()))
+                    Throw<std::runtime_error>("invalid CFTokenIssuanceID");
+                return u;
+            }
+            Currency c;
+            if (!to_currency(c, asset.asString()))
+                Throw<std::runtime_error>("invalid currency");
+            return c;
+        }();
 
         if (!issuer.isString() || !to_issuer(issue.account, issuer.asString()))
             Throw<std::runtime_error>("invalid issuer");
 
-        if (isXRP(issue.currency))
+        if (isXRP(issue.asset))
             Throw<std::runtime_error>("invalid issuer");
     }
 
@@ -1256,9 +1130,8 @@ amountFromJson(SField const& name, Json::Value const& v)
     {
         Throw<std::runtime_error>("invalid amount type");
     }
-    // TODO need to do something to validate no mantissa/exp/neg for cft
 
-    return {name, issue, mantissa, exponent, typ, negative};
+    return {name, issue, mantissa, exponent, native, negative};
 }
 
 bool
@@ -1444,7 +1317,6 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
     if (v1 == beast::zero || v2 == beast::zero)
         return STAmount(issue);
 
-    // TODO
     if (v1.native() && v2.native() && isXRP(issue))
     {
         std::uint64_t const minV =
@@ -1460,7 +1332,7 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
 
         return STAmount(v1.getFName(), minV * maxV);
     }
-    if (v1.isCFT() && v2.isCFT() && issue.isCFT)
+    if (v1.isCFT() && v2.isCFT() && issue.isCFT())
     {
         std::uint64_t const minV = getCFTValue(v1) < getCFTValue(v2)
             ? getCFTValue(v1)
@@ -1470,10 +1342,10 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
             : getCFTValue(v1);
 
         if (minV > 3000000000ull)  // sqrt(cMaxNative)
-            Throw<std::runtime_error>("Native value overflow");
+            Throw<std::runtime_error>("Asset value overflow");
 
         if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
-            Throw<std::runtime_error>("Native value overflow");
+            Throw<std::runtime_error>("Asset value overflow");
 
         return STAmount(issue, minV * maxV);
     }
@@ -1486,7 +1358,7 @@ multiply(STAmount const& v1, STAmount const& v2, Issue const& issue)
     int offset1 = v1.exponent();
     int offset2 = v2.exponent();
 
-    // TODO
+    // TODO CFT
     if (v1.native() || v1.isCFT())
     {
         while (value1 < STAmount::cMinValue)
@@ -1675,7 +1547,7 @@ mulRoundImpl(
 
     bool const xrp = isXRP(issue);
 
-    // TODO
+    // TODO CFT
     if (v1.native() && v2.native() && xrp)
     {
         std::uint64_t minV =
@@ -1691,7 +1563,7 @@ mulRoundImpl(
 
         return STAmount(v1.getFName(), minV * maxV);
     }
-    if (v1.isCFT() && v2.isCFT() && issue.isCFT)
+    if (v1.isCFT() && v2.isCFT() && issue.isCFT())
     {
         std::uint64_t minV = (getCFTValue(v1) < getCFTValue(v2))
             ? getCFTValue(v1)
@@ -1701,10 +1573,10 @@ mulRoundImpl(
             : getCFTValue(v1);
 
         if (minV > 3000000000ull)  // sqrt(cMaxNative)
-            Throw<std::runtime_error>("Native value overflow");
+            Throw<std::runtime_error>("Asset value overflow");
 
         if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
-            Throw<std::runtime_error>("Native value overflow");
+            Throw<std::runtime_error>("Asset value overflow");
 
         return STAmount(issue, minV * maxV);
     }
@@ -1712,7 +1584,7 @@ mulRoundImpl(
     std::uint64_t value1 = v1.mantissa(), value2 = v2.mantissa();
     int offset1 = v1.exponent(), offset2 = v2.exponent();
 
-    // TODO
+    // TODO CFT
     if (v1.native() || v1.isCFT())
     {
         while (value1 < STAmount::cMinValue)
@@ -1722,7 +1594,7 @@ mulRoundImpl(
         }
     }
 
-    // TODO
+    // TODO CFT
     if (v2.native() || v2.isCFT())
     {
         while (value2 < STAmount::cMinValue)
@@ -1817,7 +1689,7 @@ divRoundImpl(
     std::uint64_t numVal = num.mantissa(), denVal = den.mantissa();
     int numOffset = num.exponent(), denOffset = den.exponent();
 
-    // TODO
+    // TODO CFT
     if (num.native() || num.isCFT())
     {
         while (numVal < STAmount::cMinValue)
@@ -1827,7 +1699,7 @@ divRoundImpl(
         }
     }
 
-    // TODO
+    // TODO CFT
     if (den.native() || den.isCFT())
     {
         while (denVal < STAmount::cMinValue)
@@ -1852,8 +1724,9 @@ divRoundImpl(
 
     int offset = numOffset - denOffset - 17;
 
-    if (resultNegative != roundUp)  // TODO
-        canonicalizeRound(isXRP(issue) || issue.isCFT, amount, offset, roundUp);
+    if (resultNegative != roundUp)
+        canonicalizeRound(
+            isXRP(issue) || issue.isCFT(), amount, offset, roundUp);
 
     STAmount result = [&]() {
         // If appropriate, tell Number the rounding mode we are using.
@@ -1867,7 +1740,7 @@ divRoundImpl(
 
     if (roundUp && !resultNegative && !result)
     {
-        if (isXRP(issue) || issue.isCFT)
+        if (isXRP(issue) || issue.isCFT())
         {
             // return the smallest value above zero
             amount = 1;

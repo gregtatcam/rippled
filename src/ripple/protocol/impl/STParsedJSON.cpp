@@ -601,7 +601,7 @@ parseLeaf(
                             json_name + "." + ss.str());
 
                         // each element in this path has some combination of
-                        // account, currency, or issuer
+                        // account, asset, or issuer
 
                         Json::Value pathEl = value[i][j];
 
@@ -612,14 +612,14 @@ parseLeaf(
                         }
 
                         bool const isCFT = pathEl.isMember(jss::cft_asset);
-                        std::string const curName =
-                            isCFT ? "cft_asset" : "currency";
+                        std::string const assetName =
+                            isCFT ? "cft_asset" : "asset";
                         Json::Value const& account = pathEl["account"];
-                        Json::Value const& currency = pathEl[curName];
+                        Json::Value const& asset = pathEl[assetName];
                         Json::Value const& issuer = pathEl["issuer"];
                         bool hasCurrency = false;
                         AccountID uAccount, uIssuer;
-                        Currency uCurrency;
+                        Asset uAsset;
 
                         if (account)
                         {
@@ -647,25 +647,43 @@ parseLeaf(
                             }
                         }
 
-                        if (currency)
+                        if (asset)
                         {
-                            // human currency
-                            if (!currency.isString())
+                            // human asset
+                            if (!asset.isString())
                             {
-                                error = string_expected(element_name, curName);
+                                error =
+                                    string_expected(element_name, assetName);
                                 return ret;
                             }
 
                             hasCurrency = true;
 
-                            if (!uCurrency.parseHex(currency.asString()))
+                            if (isCFT)
                             {
-                                if (!to_currency(
-                                        uCurrency, currency.asString()))
+                                uint256 u;
+                                if (!u.parseHex(asset.asString()))
                                 {
-                                    error = invalid_data(element_name, curName);
+                                    error =
+                                        invalid_data(element_name, assetName);
                                     return ret;
                                 }
+                                uAsset = u;
+                            }
+                            else
+                            {
+                                Currency currency;
+                                if (!currency.parseHex(asset.asString()))
+                                {
+                                    if (!to_currency(
+                                            currency, asset.asString()))
+                                    {
+                                        error = invalid_data(
+                                            element_name, assetName);
+                                        return ret;
+                                    }
+                                }
+                                uAsset = currency;
                             }
                         }
 
@@ -692,8 +710,7 @@ parseLeaf(
                             }
                         }
 
-                        p.emplace_back(
-                            uAccount, uCurrency, uIssuer, hasCurrency, isCFT);
+                        p.emplace_back(uAccount, uAsset, uIssuer, hasCurrency);
                     }
 
                     tail.push_back(p);

@@ -94,11 +94,9 @@ Account::operator[](std::string const& s) const
 }
 
 CFT
-Account::operator()(std::string const& s) const
+Account::operator()(uint256 const& u) const
 {
-    auto const currency = to_currency(s);
-    assert(currency != noCurrency());
-    return CFT(*this, currency);
+    return CFT(*this, u);
 }
 
 }  // namespace jtx

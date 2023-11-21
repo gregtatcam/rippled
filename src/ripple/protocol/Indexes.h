@@ -118,7 +118,7 @@ line(
 inline Keylet
 line(AccountID const& id, Issue const& issue) noexcept
 {
-    return line(id, issue.account, issue.currency);
+    return line(id, issue.account, (Currency)issue.asset);
 }
 /** @} */
 
@@ -282,10 +282,7 @@ xChainCreateAccountClaimID(STXChainBridge const& bridge, std::uint64_t seq);
 
 /** CFT stuff */
 Keylet
-cftIssuance(AccountID const& issuer, uint160 const& asset) noexcept;
-
-Keylet
-cftIssuance(AccountID const& issuer, Currency const& asset) noexcept;
+cftIssuance(AccountID const& issuer, std::uint32_t seq) noexcept;
 
 Keylet
 cftIssuance(STAmount const& amount);
@@ -295,15 +292,6 @@ cftIssuance(uint256 const& id) noexcept
 {
     return {ltCFTOKEN_ISSUANCE, id};
 }
-
-Keylet
-cftPageMin(AccountID const& owner);
-
-Keylet
-cftPageMax(AccountID const& owner);
-
-Keylet
-cftPage(Keylet const& k, uint256 const& cftID);
 
 // this is temp
 Keylet

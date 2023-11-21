@@ -56,17 +56,17 @@ finishFlow(
     return result;
 };
 
-static std::variant<XRPAmount, CFTAmount, IOUAmount>
+static std::variant<XRPAmount*, CFTAmount*, IOUAmount*>
 getTypedAmt(Issue const& iss)
 {
-    static XRPAmount xrp{};
-    static CFTAmount cft{};
-    static IOUAmount iou{};
+    static auto xrp = XRPAmount{};
+    static auto cft = CFTAmount{};
+    static auto iou = IOUAmount{};
     if (isXRP(iss))
-        return xrp;
-    if (iss.isCFT)
-        return cft;
-    return iou;
+        return &xrp;
+    if (iss.isCFT())
+        return &cft;
+    return &iou;
 }
 
 path::RippleCalc::Output
@@ -88,8 +88,8 @@ flow(
     Issue const srcIssue = [&] {
         if (sendMax)
             return sendMax->issue();
-        if (!isXRP(deliver.issue().currency))
-            return Issue(deliver.issue().currency, src);
+        if (!isXRP(deliver.issue().asset))
+            return Issue(deliver.issue().asset, src);
         return xrpIssue();
     }();
 
@@ -147,7 +147,8 @@ flow(
     // different types, use templates to tell `flow` about the amount types.
     path::RippleCalc::Output result;
     std::visit(
-        [&, &strands_ = strands]<typename TIn, typename TOut>(TIn&&, TOut&&) {
+        [&, &strands_ = strands]<typename TIn, typename TOut>(
+            TIn const*&&, TOut const*&&) {
             result = finishFlow(
                 sb,
                 srcIssue,

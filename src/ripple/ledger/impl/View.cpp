@@ -203,14 +203,10 @@ bool
 isFrozen(
     ReadView const& view,
     AccountID const& account,
-    Currency const& currency,
-    AccountID const& issuer,
-    bool isCFT)
+    Asset const& asset,
+    AccountID const& issuer)
 {
-    if (isXRP(currency))
-        return false;
-    // TODO
-    if (isCFT)
+    if (isXRP(asset) || asset.isCFT())
         return false;
     auto sle = view.read(keylet::account(issuer));
     if (sle && sle->isFlag(lsfGlobalFreeze))
@@ -218,7 +214,7 @@ isFrozen(
     if (issuer != account)
     {
         // Check if the issuer froze the line
-        sle = view.read(keylet::line(account, issuer, currency));
+        sle = view.read(keylet::line(account, issuer, (Currency)asset));
         if (sle &&
             sle->isFlag((issuer > account) ? lsfHighFreeze : lsfLowFreeze))
             return true;
@@ -230,23 +226,22 @@ STAmount
 accountHolds(
     ReadView const& view,
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer,
     FreezeHandling zeroIfFrozen,
-    beast::Journal j,
-    bool isCFT)
+    beast::Journal j)
 {
     STAmount amount;
-    if (isXRP(currency))
+    if (isXRP(asset))
     {
         return {xrpLiquid(view, account, 0, j)};
     }
 
-    if (isCFT)
+    if (asset.isCFT())
     {
-        Issue iss{currency, issuer, true};
+        Issue iss{asset, issuer};
         if (auto const sle = view.read(keylet::cftoken(
-                account, keylet::cftIssuance(issuer, currency).key)))
+                account, keylet::cftIssuance((uint256)asset).key)))
             return STAmount{
                 iss,
                 sle->getFieldU64(sfCFTAmount) -
@@ -255,16 +250,16 @@ accountHolds(
     }
 
     // IOU: Return balance on trust line modulo freeze
-    auto const sle = view.read(keylet::line(account, issuer, currency));
+    auto const sle = view.read(keylet::line(account, issuer, (Currency)asset));
     if (!sle)
     {
-        amount.clear({currency, issuer});
+        amount.clear({asset, issuer});
     }
     else if (
         (zeroIfFrozen == fhZERO_IF_FROZEN) &&
-        isFrozen(view, account, currency, issuer))
+        isFrozen(view, account, asset, issuer))
     {
-        amount.clear(Issue(currency, issuer));
+        amount.clear(Issue(asset, issuer));
     }
     else
     {
@@ -292,13 +287,7 @@ accountHolds(
     beast::Journal j)
 {
     return accountHolds(
-        view,
-        account,
-        issue.currency,
-        issue.account,
-        zeroIfFrozen,
-        j,
-        issue.isCFT);
+        view, account, issue.asset, issue.account, zeroIfFrozen, j);
 }
 
 STAmount
@@ -315,11 +304,10 @@ accountFunds(
     return accountHolds(
         view,
         id,
-        saDefault.getCurrency(),
+        saDefault.getAsset(),
         saDefault.getIssuer(),
         freezeHandling,
-        j,
-        saDefault.isCFT());
+        j);
 }
 
 // Prevent ownerCount from wrapping under error conditions.
@@ -509,12 +497,9 @@ forEachItemAfter(
 }
 
 Rate
-transferRateCFT(
-    ReadView const& view,
-    AccountID const& issuer,
-    Currency const& currency)
+transferRateCFT(ReadView const& view, uint256 const& id)
 {
-    auto const sle = view.read(keylet::cftIssuance(issuer, currency));
+    auto const sle = view.read(keylet::cftIssuance(id));
 
     // fee is 0-50,000 (0-50%), rate is 1,000,000,000-2,000,000,000
     if (sle && sle->isFieldPresent(sfTransferFee))
@@ -860,8 +845,7 @@ trustCreate(
     sleRippleState->setFieldAmount(
         bSetHigh ? sfLowLimit : sfHighLimit,
         STAmount(
-            {saBalance.getCurrency(),
-             bSetDst ? uSrcAccountID : uDstAccountID}));
+            {saBalance.getAsset(), bSetDst ? uSrcAccountID : uDstAccountID}));
 
     if (uQualityIn)
         sleRippleState->setFieldU32(
@@ -995,7 +979,7 @@ rippleCredit(
     beast::Journal j)
 {
     AccountID const& issuer = saAmount.getIssuer();
-    Currency const& currency = saAmount.getCurrency();
+    Currency const& currency = (Currency)saAmount.getAsset();
 
     // Make sure issuer is involved.
     assert(!bCheckIssuer || uSenderID == issuer || uReceiverID == issuer);
@@ -1170,7 +1154,7 @@ rippleSend(
                 ? saAmount
                 : multiply(
                       saAmount,
-                      transferRateCFT(view, issuer, saAmount.getCurrency()));
+                      transferRateCFT(view, (uint256)saAmount.getAsset()));
             return rippleCFTCredit(view, uSenderID, uReceiverID, saActual, j);
         }
         return tecINTERNAL;
@@ -1377,7 +1361,8 @@ issueIOU(
 
     bool bSenderHigh = issue.account > account;
 
-    auto const index = keylet::line(issue.account, account, issue.currency);
+    auto const index =
+        keylet::line(issue.account, account, (Currency)issue.asset);
 
     if (auto state = view.peek(index))
     {
@@ -1424,7 +1409,7 @@ issueIOU(
     // NIKB TODO: The limit uses the receiver's account as the issuer and
     // this is unnecessarily inefficient as copying which could be avoided
     // is now required. Consider available options.
-    STAmount const limit({issue.currency, account});
+    STAmount const limit({issue.asset, account});
     STAmount final_balance = amount;
 
     final_balance.setIssuer(noAccount());
@@ -1473,8 +1458,8 @@ redeemIOU(
 
     bool bSenderHigh = account > issue.account;
 
-    if (auto state =
-            view.peek(keylet::line(account, issue.account, issue.currency)))
+    if (auto state = view.peek(
+            keylet::line(account, issue.account, (Currency)issue.asset)))
     {
         STAmount final_balance = state->getFieldAmount(sfBalance);
 
@@ -1569,9 +1554,9 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
 {
     if (isXRP(issue) || issue.account == account)
         return tesSUCCESS;
-    if (issue.isCFT)
+    if (issue.isCFT())
     {
-        auto const cftID = keylet::cftIssuance(issue.account, issue.currency);
+        auto const cftID = keylet::cftIssuance((uint256)issue.asset);
         if (auto const sle = view.read(cftID);
             sle && sle->getFieldU32(sfFlags) & lsfCFTRequireAuth)
         {
@@ -1586,8 +1571,8 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
     if (auto const issuerAccount = view.read(keylet::account(issue.account));
         issuerAccount && (*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
-        if (auto const trustLine =
-                view.read(keylet::line(account, issue.account, issue.currency)))
+        if (auto const trustLine = view.read(
+                keylet::line(account, issue.account, (Currency)issue.asset)))
             return ((*trustLine)[sfFlags] &
                     ((account > issue.account) ? lsfLowAuth : lsfHighAuth))
                 ? tesSUCCESS

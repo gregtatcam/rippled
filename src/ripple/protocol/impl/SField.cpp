@@ -91,8 +91,6 @@ CONSTRUCT_UNTYPED_SFIELD(sfMetadata,            "Metadata",             METADATA
 CONSTRUCT_TYPED_SFIELD(sfCloseResolution,       "CloseResolution",      UINT8,      1);
 CONSTRUCT_TYPED_SFIELD(sfMethod,                "Method",               UINT8,      2);
 CONSTRUCT_TYPED_SFIELD(sfTransactionResult,     "TransactionResult",    UINT8,      3);
-CONSTRUCT_TYPED_SFIELD(sfTakerPaysCFT,          "TakerPaysCFT",         UINT8,      4);
-CONSTRUCT_TYPED_SFIELD(sfTakerGetsCFT,          "TakerGetsCFT",         UINT8,      5);
 
 // 8-bit integers (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfTickSize,              "TickSize",             UINT8,     16);
@@ -245,6 +243,8 @@ CONSTRUCT_TYPED_SFIELD(sfHookStateKey,          "HookStateKey",         UINT256,
 CONSTRUCT_TYPED_SFIELD(sfHookHash,              "HookHash",             UINT256,   31);
 CONSTRUCT_TYPED_SFIELD(sfHookNamespace,         "HookNamespace",        UINT256,   32);
 CONSTRUCT_TYPED_SFIELD(sfHookSetTxnID,          "HookSetTxnID",         UINT256,   33);
+CONSTRUCT_TYPED_SFIELD(sfTakerPaysCFTID,        "TakerPaysCFTID",       UINT256,   34);
+CONSTRUCT_TYPED_SFIELD(sfTakerGetsCFTID,        "TakerGetsCFTID",       UINT256,   35);
 
 // currency amount (common)
 CONSTRUCT_TYPED_SFIELD(sfAmount,                "Amount",               AMOUNT,     1);

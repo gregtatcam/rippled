@@ -345,8 +345,6 @@ extern SF_UINT8 const sfTickSize;
 extern SF_UINT8 const sfUNLModifyDisabling;
 extern SF_UINT8 const sfHookResult;
 extern SF_UINT8 const sfAssetScale;
-extern SF_UINT8 const sfTakerPaysCFT;
-extern SF_UINT8 const sfTakerGetsCFT;
 
 // 16-bit integers (common)
 extern SF_UINT16 const sfLedgerEntryType;
@@ -490,6 +488,8 @@ extern SF_UINT256 const sfHookStateKey;
 extern SF_UINT256 const sfHookHash;
 extern SF_UINT256 const sfHookNamespace;
 extern SF_UINT256 const sfHookSetTxnID;
+extern SF_UINT256 const sfTakerPaysCFTID;
+extern SF_UINT256 const sfTakerGetsCFTID;
 
 // currency amount (common)
 extern SF_AMOUNT const sfAmount;

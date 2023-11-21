@@ -41,7 +41,7 @@ protected:
     AccountID src_;
     AccountID dst_;
     AccountID issuer_;
-    Currency currency_;
+    uint256 asset_;
     Keylet cftID_;
 
     // Charge transfer fees when the prev step redeems
@@ -96,12 +96,12 @@ public:
         StrandContext const& ctx,
         AccountID const& src,
         AccountID const& dst,
-        Currency const& c)
+        uint256 const& a)
         : src_(src)
         , dst_(dst)
         , issuer_(ctx.strandDeliver.account)
-        , currency_(c)
-        , cftID_(keylet::cftIssuance(issuer_, currency_))
+        , asset_(a)
+        , cftID_(keylet::cftIssuance(asset_))
         , prevStep_(ctx.prevStep)
         , isLast_(ctx.isLast)
         , j_(ctx.j)
@@ -118,10 +118,10 @@ public:
     {
         return dst_;
     }
-    Currency const&
-    currency() const
+    uint256 const&
+    asset() const
     {
-        return currency_;
+        return asset_;
     }
 
     std::optional<EitherAmount>
@@ -195,7 +195,7 @@ public:
     operator==(DirectStepCFT const& lhs, DirectStepCFT const& rhs)
     {
         return lhs.src_ == rhs.src_ && lhs.dst_ == rhs.dst_ &&
-            lhs.currency_ == rhs.currency_;
+            lhs.asset_ == rhs.asset_;
     }
 
     friend bool
@@ -241,7 +241,8 @@ public:
     using DirectStepCFT<DirectCFTPaymentStep>::DirectStepCFT;
     using DirectStepCFT<DirectCFTPaymentStep>::check;
 
-    bool verifyPrevStepDebtDirection(DebtDirection) const
+    bool
+    verifyPrevStepDebtDirection(DebtDirection) const
     {
         // A payment doesn't care whether or not prevStepRedeems.
         return true;
@@ -401,7 +402,7 @@ DirectCFTPaymentStep::check(
     // Since this is a payment a trust line must be present.  Perform all
     // trust line related checks.
     {
-        auto const sleLine = ctx.view.read(keylet::line(src_, dst_, currency_));
+        auto const sleLine = ctx.view.read(keylet::line(src_, dst_, asset_));
         if (!sleLine)
         {
             JLOG(j_.trace()) << "DirectStepCFT: No credit line. " << *this;
@@ -434,10 +435,10 @@ DirectCFTPaymentStep::check(
     }
 
     {
-        auto const owed = creditBalance(ctx.view, dst_, src_, currency_);
+        auto const owed = creditBalance(ctx.view, dst_, src_, asset_);
         if (owed <= beast::zero)
         {
-            auto const limit = creditLimit(ctx.view, dst_, src_, currency_);
+            auto const limit = creditLimit(ctx.view, dst_, src_, asset_);
             if (-owed >= limit)
             {
                 JLOG(j_.debug()) << "DirectStepCFT: dry: owed: " << owed
@@ -470,13 +471,13 @@ DirectStepCFT<TDerived>::maxPaymentFlow(ReadView const& sb) const
     // TODO
     if (src_ != issuer_)
     {
-        auto const srcOwed = toAmount<CFTAmount>(accountHolds(
-            sb, src_, currency_, issuer_, fhIGNORE_FREEZE, j_, true));
+        auto const srcOwed = toAmount<CFTAmount>(
+            accountHolds(sb, src_, asset_, issuer_, fhIGNORE_FREEZE, j_));
 
         return {srcOwed, DebtDirection::redeems};
     }
 
-    if (auto const sle = sb.read(keylet::cftIssuance(issuer_, currency_)))
+    if (auto const sle = sb.read(keylet::cftIssuance(asset_)))
     {
         std::int64_t const max =
             [&]() {
@@ -492,7 +493,7 @@ DirectStepCFT<TDerived>::maxPaymentFlow(ReadView const& sb) const
 #if 0
     // srcOwed is negative or zero
     return {
-        creditLimit2(sb, dst_, src_, currency_) + srcOwed,
+        creditLimit2(sb, dst_, src_, asset_) + srcOwed,
         DebtDirection::issues};
 #endif
 }
@@ -506,7 +507,7 @@ DirectStepCFT<TDerived>::debtDirection(ReadView const& sb, StrandDirection dir)
         return cache_->srcDebtDir;
 
     auto const srcOwed =
-        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_, true);
+        accountHolds(sb, src_, asset_, dst_, fhIGNORE_FREEZE, j_);
     return srcOwed.signum() > 0 ? DebtDirection::redeems
                                 : DebtDirection::issues;
 }
@@ -528,7 +529,7 @@ DirectStepCFT<TDerived>::revImp(
         qualities(sb, srcDebtDir, StrandDirection::reverse);
     assert(static_cast<TDerived const*>(this)->verifyDstQualityIn(dstQIn));
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_, true);
+    Issue const srcToDstIss(asset_, redeems(srcDebtDir) ? dst_ : src_);
 
     JLOG(j_.trace()) << "DirectStepCFT::rev"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -640,7 +641,7 @@ DirectStepCFT<TDerived>::fwdImp(
     auto const [srcQOut, dstQIn] =
         qualities(sb, srcDebtDir, StrandDirection::forward);
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_, true);
+    Issue const srcToDstIss(asset_, redeems(srcDebtDir) ? dst_ : src_);
 
     JLOG(j_.trace()) << "DirectStepCFT::fwd"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -838,7 +839,7 @@ DirectStepCFT<TDerived>::qualityUpperBound(
 
         if (isLast_ && dstQIn > QUALITY_ONE)
             dstQIn = QUALITY_ONE;
-        Issue const iss{currency_, src_};
+        Issue const iss{asset_, src_};
         return {
             Quality(getRate(STAmount(iss, srcQOut), STAmount(iss, dstQIn))),
             dir};
@@ -848,7 +849,7 @@ DirectStepCFT<TDerived>::qualityUpperBound(
         ? qualitiesSrcRedeems(v)
         : qualitiesSrcIssues(v, prevStepDir);
 
-    Issue const iss{currency_, src_};
+    Issue const iss{asset_, src_};
     // Be careful not to switch the parameters to `getRate`. The
     // `getRate(offerOut, offerIn)` function is usually used for offers. It
     // returns offerIn/offerOut. For a direct step, the rate is srcQOut/dstQIn
@@ -888,7 +889,7 @@ DirectStepCFT<TDerived>::check(StrandContext const& ctx) const
     // pure issue/redeem can't be frozen
     if (!(ctx.isLast && ctx.isFirst))
     {
-        auto const ter = checkFreeze(ctx.view, src_, dst_, currency_);
+        auto const ter = checkFreeze(ctx.view, src_, dst_, asset_);
         if (ter != tesSUCCESS)
             return ter;
     }
@@ -900,14 +901,14 @@ DirectStepCFT<TDerived>::check(StrandContext const& ctx) const
         if (auto prevSrc = ctx.prevStep->directStepSrcAcct())
         {
             auto const ter =
-                checkNoRipple(ctx.view, *prevSrc, src_, dst_, currency_, j_);
+                checkNoRipple(ctx.view, *prevSrc, src_, dst_, asset_, j_);
             if (ter != tesSUCCESS)
                 return ter;
         }
     }
     {
-        Issue const srcIssue{currency_, src_};
-        Issue const dstIssue{currency_, dst_};
+        Issue const srcIssue{asset_, src_};
+        Issue const dstIssue{asset_, dst_};
 
         if (ctx.seenBookOuts.count(srcIssue))
         {
@@ -946,21 +947,21 @@ make_DirectStepCFT(
     StrandContext const& ctx,
     AccountID const& src,
     AccountID const& dst,
-    Currency const& c)
+    uint256 const& a)
 {
     TER ter = tefINTERNAL;
     std::unique_ptr<Step> r;
     if (ctx.offerCrossing)
     {
         auto offerCrossingStep =
-            std::make_unique<DirectCFTOfferCrossingStep>(ctx, src, dst, c);
+            std::make_unique<DirectCFTOfferCrossingStep>(ctx, src, dst, a);
         ter = offerCrossingStep->check(ctx);
         r = std::move(offerCrossingStep);
     }
     else  // payment
     {
         auto paymentStep =
-            std::make_unique<DirectCFTPaymentStep>(ctx, src, dst, c);
+            std::make_unique<DirectCFTPaymentStep>(ctx, src, dst, a);
         ter = paymentStep->check(ctx);
         r = std::move(paymentStep);
     }

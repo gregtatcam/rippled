@@ -35,7 +35,8 @@ class STPathElement final : public CountedObject<STPathElement>
 {
     unsigned int mType;
     AccountID mAccountID;
-    Currency mCurrencyID;
+    Asset mAssetID{
+        noCurrency()};  // default is all 0 and the hash is calculated
     AccountID mIssuerID;
 
     bool is_offer_;
@@ -52,7 +53,7 @@ public:
         typeBoundary = 0xFF,  // Boundary between alternate paths.
         // TODO should typeCFT be added? It seems like if added then
         // it'll make wrong decisiont in steps construction in toStrand()
-        typeAll = typeAccount | typeCurrency | typeIssuer,
+        typeAll = typeAccount | typeCurrency | typeIssuer | typeCFT,
         // Combination of all types.
     };
 
@@ -63,21 +64,19 @@ public:
 
     STPathElement(
         std::optional<AccountID> const& account,
-        std::optional<Currency> const& currency,
-        std::optional<AccountID> const& issuer,
-        bool isCFT = false);
+        std::optional<Asset> const& asset,
+        std::optional<AccountID> const& issuer);
 
     STPathElement(
         AccountID const& account,
-        Currency const& currency,
+        Asset const& asset,
         AccountID const& issuer,
-        bool forceCurrency = false,
-        bool isCFT = false);
+        bool forceCurrency = false);
 
     STPathElement(
         unsigned int uType,
         AccountID const& account,
-        Currency const& currency,
+        Asset const& asset,
         AccountID const& issuer);
 
     auto
@@ -106,8 +105,8 @@ public:
     AccountID const&
     getAccountID() const;
 
-    Currency const&
-    getCurrency() const;
+    Asset const&
+    getAsset() const;
 
     AccountID const&
     getIssuerID() const;
@@ -148,7 +147,7 @@ public:
     bool
     hasSeen(
         AccountID const& account,
-        Currency const& currency,
+        Asset const& currency,
         AccountID const& issuer) const;
 
     Json::Value getJson(JsonOptions) const;
@@ -252,9 +251,8 @@ inline STPathElement::STPathElement() : mType(typeNone), is_offer_(true)
 
 inline STPathElement::STPathElement(
     std::optional<AccountID> const& account,
-    std::optional<Currency> const& currency,
-    std::optional<AccountID> const& issuer,
-    bool isCFT)
+    std::optional<Asset> const& asset,
+    std::optional<AccountID> const& issuer)
     : mType(typeNone)
 {
     if (!account)
@@ -269,10 +267,10 @@ inline STPathElement::STPathElement(
         assert(mAccountID != noAccount());
     }
 
-    if (currency)
+    if (asset)
     {
-        mCurrencyID = *currency;
-        mType |= typeCurrency;
+        mAssetID = *asset;
+        mType |= asset->isCurrency() ? typeCurrency : typeCFT;
     }
 
     if (issuer)
@@ -282,38 +280,30 @@ inline STPathElement::STPathElement(
         assert(mIssuerID != noAccount());
     }
 
-    if (isCFT)
-    {
-        mType |= typeCFT;
-        // can it be CFT account?
-        // assert(currency && issuer);
-    }
-
     hash_value_ = get_hash(*this);
 }
 
 inline STPathElement::STPathElement(
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer,
-    bool forceCurrency,
-    bool isCFT)
+    bool forceCurrency)
     : mType(typeNone)
     , mAccountID(account)
-    , mCurrencyID(currency)
+    , mAssetID(asset)
     , mIssuerID(issuer)
     , is_offer_(isXRP(mAccountID))
 {
     if (!is_offer_)
         mType |= typeAccount;
 
-    if (forceCurrency || !isXRP(currency))
+    if (!asset.isCFT() && (forceCurrency || !isXRP(asset)))
         mType |= typeCurrency;
 
     if (!isXRP(issuer))
         mType |= typeIssuer;
 
-    if (isCFT)
+    if (asset.isCFT())
         mType |= typeCFT;
 
     hash_value_ = get_hash(*this);
@@ -322,14 +312,18 @@ inline STPathElement::STPathElement(
 inline STPathElement::STPathElement(
     unsigned int uType,
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer)
     : mType(uType)
     , mAccountID(account)
-    , mCurrencyID(currency)
+    , mAssetID(asset)
     , mIssuerID(issuer)
     , is_offer_(isXRP(mAccountID))
 {
+    if (!asset.isCFT())
+        mType = mType & (~Type::typeCFT);
+    else if (asset.isXRP())
+        mType = mType & (~Type::typeCurrency);
     hash_value_ = get_hash(*this);
 }
 
@@ -383,10 +377,10 @@ STPathElement::getAccountID() const
     return mAccountID;
 }
 
-inline Currency const&
-STPathElement::getCurrency() const
+inline Asset const&
+STPathElement::getAsset() const
 {
-    return mCurrencyID;
+    return mAssetID;
 }
 
 inline AccountID const&
@@ -400,7 +394,7 @@ STPathElement::operator==(const STPathElement& t) const
 {
     return (mType & typeAccount) == (t.mType & typeAccount) &&
         hash_value_ == t.hash_value_ && mAccountID == t.mAccountID &&
-        mCurrencyID == t.mCurrencyID && mIssuerID == t.mIssuerID;
+        mAssetID == t.mAssetID && mIssuerID == t.mIssuerID;
 }
 
 inline bool

@@ -37,7 +37,7 @@ paths::operator()(Env& env, JTx& jt) const
             env.current(), env.app().journal("RippleLineCache")),
         from,
         to,
-        in_.currency,
+        (Currency)in_.asset,  // TODO CFT
         in_.account,
         amount,
         std::nullopt,
@@ -80,7 +80,7 @@ void
 path::append_one(IOU const& iou)
 {
     auto& jv = create();
-    jv["currency"] = to_string(iou.issue().currency);
+    jv["currency"] = to_string(iou.issue().asset);
     jv["account"] = toBase58(iou.issue().account);
 }
 
@@ -88,10 +88,10 @@ void
 path::append_one(BookSpec const& book)
 {
     auto& jv = create();
-    if (book.cft)
-        jv["cft_asset"] = to_string(book.currency);
+    if (book.asset.isCFT())
+        jv["cft_asset"] = to_string(book.asset);
     else
-        jv["currency"] = to_string(book.currency);
+        jv["currency"] = to_string(book.asset);
     jv["issuer"] = toBase58(book.account);
 }
 

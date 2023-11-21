@@ -179,9 +179,9 @@ doUnsubscribe(RPC::JsonContext& context)
             Book book;
 
             // Parse mandatory currency.
+            Currency c;
             if (!taker_pays.isMember(jss::currency) ||
-                !to_currency(
-                    book.in.currency, taker_pays[jss::currency].asString()))
+                !to_currency(c, taker_pays[jss::currency].asString()))
             {
                 JLOG(context.j.info()) << "Bad taker_pays currency.";
                 return rpcError(rpcSRC_CUR_MALFORMED);
@@ -199,11 +199,11 @@ doUnsubscribe(RPC::JsonContext& context)
 
                 return rpcError(rpcSRC_ISR_MALFORMED);
             }
+            book.in.asset = c;
 
             // Parse mandatory currency.
             if (!taker_gets.isMember(jss::currency) ||
-                !to_currency(
-                    book.out.currency, taker_gets[jss::currency].asString()))
+                !to_currency(c, taker_gets[jss::currency].asString()))
             {
                 JLOG(context.j.info()) << "Bad taker_gets currency.";
 
@@ -222,6 +222,7 @@ doUnsubscribe(RPC::JsonContext& context)
 
                 return rpcError(rpcDST_ISR_MALFORMED);
             }
+            book.out.asset = c;
 
             if (book.in == book.out)
             {

@@ -50,13 +50,12 @@ public:
     using mantissa_type = std::uint64_t;
     using exponent_type = int;
     using rep = std::pair<mantissa_type, exponent_type>;
-    enum struct Type { xrp, issued_currency, cft };
 
 private:
     Issue mIssue;
     mantissa_type mValue;
     exponent_type mOffset;
-    Type mType;
+    bool mIsNative;  // A shorthand for isXRP(mIssue).
     bool mIsNegative;
 
 public:
@@ -72,21 +71,10 @@ public:
 
     // Max native value on network.
     static const std::uint64_t cMaxNativeN = 100000000000000000ull;
-
-    // Type masks
-    static const std::uint64_t cIssuedCurrency = 0x8000000000000000ull;
+    static const std::uint64_t cNotNative = 0x8000000000000000ull;
+    static const std::uint64_t cPositive = 0x4000000000000000ull;
     static const std::uint64_t cCFToken = 0x2000000000000000ull;
-
-    // This mask yields the XRP/CFT value of an STAmount. It is not used for
-    // IssuedCurrency. IE - the low 57 bits of the first 64 bits of a
-    // non-IssuedCurrency STAmount is the value.
-    static const std::uint64_t cValueMask = 0x1FFFFFFFFFFFFFFull;
-
-    // This mask yields the sign of any STAmount, though note that negative
-    // values are not legal for non-IssuedCurrency types at the moment. Also
-    // note that the sign bit is <ON> for positive values and <OFF> for
-    // negative values!
-    static const std::uint64_t cSign = 0x4000000000000000ull;
+    static const std::uint64_t cValueMask = ~(cPositive | cCFToken);
 
     static std::uint64_t const uRateOne;
 
@@ -99,14 +87,6 @@ public:
     };
 
     // Do not call canonicalize
-    STAmount(
-        SField const& name,
-        Issue const& issue,
-        mantissa_type mantissa,
-        exponent_type exponent,
-        Type typ,
-        bool negative);
-
     STAmount(
         SField const& name,
         Issue const& issue,
@@ -133,13 +113,12 @@ public:
         bool native,
         bool negative);
 
-    STAmount(SField const& name, std::int64_t mantissa, bool isCFT = false);
+    STAmount(SField const& name, std::int64_t mantissa);
 
     STAmount(
         SField const& name,
         std::uint64_t mantissa = 0,
-        bool negative = false,
-        bool isCFT = false);
+        bool negative = false);
 
     STAmount(
         SField const& name,
@@ -148,10 +127,7 @@ public:
         int exponent = 0,
         bool negative = false);
 
-    explicit STAmount(
-        std::uint64_t mantissa = 0,
-        bool negative = false,
-        bool isCFT = false);
+    explicit STAmount(std::uint64_t mantissa = 0, bool negative = false);
 
     explicit STAmount(SField const& name, STAmount const& amt);
 
@@ -175,7 +151,7 @@ public:
     // Legacy support for new-style amounts
     STAmount(IOUAmount const& amount, Issue const& issue);
     STAmount(XRPAmount const& amount);
-    STAmount(CFTAmount const& amount);
+    STAmount(CFTAmount const& amount, Issue const& issue);
     operator Number() const;
 
     //--------------------------------------------------------------------------
@@ -209,8 +185,8 @@ public:
     issue() const;
 
     // These three are deprecated
-    Currency const&
-    getCurrency() const;
+    Asset const&
+    getAsset() const;
 
     AccountID const&
     getIssuer() const;
@@ -245,9 +221,6 @@ public:
 
     STAmount&
     operator=(XRPAmount const& amount);
-
-    STAmount&
-    operator=(CFTAmount const& amount);
 
     //--------------------------------------------------------------------------
     //
@@ -373,19 +346,19 @@ STAmount::exponent() const noexcept
 inline bool
 STAmount::native() const noexcept
 {
-    return mType == STAmount::Type::xrp;
+    return mIsNative;
 }
 
 inline bool
 STAmount::isCFT() const noexcept
 {
-    return mType == STAmount::Type::cft;
+    return !mIsNative && mIssue.isCFT();
 }
 
 inline bool
 STAmount::isIOU() const noexcept
 {
-    return mType == STAmount::Type::issued_currency;
+    return !mIsNative && !mIssue.isCFT();
 }
 
 inline bool
@@ -406,10 +379,10 @@ STAmount::issue() const
     return mIssue;
 }
 
-inline Currency const&
-STAmount::getCurrency() const
+inline Asset const&
+STAmount::getAsset() const
 {
-    return mIssue.currency;
+    return mIssue.asset;
 }
 
 inline AccountID const&
@@ -437,22 +410,15 @@ inline STAmount::operator bool() const noexcept
 
 inline STAmount::operator Number() const
 {
-    switch (mType)
-    {
-        case STAmount::Type::xrp:
-            return xrp();
-
-        case STAmount::Type::issued_currency:
-            return iou();
-
-        case STAmount::Type::cft:
-            return cft();
-        default:
-            Throw<std::runtime_error>("Invalid STAmount type");
-    }
+    if (mIsNative)
+        return xrp();
+    if (mIssue.isCFT())
+        return cft();
+    return iou();
 }
 
-inline STAmount& STAmount::operator=(beast::Zero)
+inline STAmount&
+STAmount::operator=(beast::Zero)
 {
     clear();
     return *this;
@@ -460,13 +426,6 @@ inline STAmount& STAmount::operator=(beast::Zero)
 
 inline STAmount&
 STAmount::operator=(XRPAmount const& amount)
-{
-    *this = STAmount(amount);
-    return *this;
-}
-
-inline STAmount&
-STAmount::operator=(CFTAmount const& amount)
 {
     *this = STAmount(amount);
     return *this;
@@ -484,7 +443,7 @@ STAmount::clear()
 {
     // The -100 is used to allow 0 to sort less than a small positive values
     // which have a negative exponent.
-    mOffset = isIOU() ? -100 : 0;
+    mOffset = mIsNative ? 0 : -100;
     mValue = 0;
     mIsNegative = false;
 }
@@ -620,7 +579,13 @@ getRate(STAmount const& offerOut, STAmount const& offerIn);
 inline bool
 isXRP(STAmount const& amount)
 {
-    return isXRP(amount.issue().currency);
+    return isXRP(amount.issue().asset);
+}
+
+inline bool
+isCFT(STAmount const& amount)
+{
+    return isCFT(amount.issue());
 }
 
 // Since `canonicalize` does not have access to a ledger, this is needed to put

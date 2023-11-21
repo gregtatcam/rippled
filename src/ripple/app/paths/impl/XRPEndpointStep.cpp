@@ -202,7 +202,10 @@ private:
     static std::int32_t
     computeReserveReduction(StrandContext const& ctx, AccountID const& acc)
     {
-        if (ctx.isFirst && !ctx.view.read(keylet::line(acc, ctx.strandDeliver)))
+        // TODO CFT
+        if (ctx.isFirst &&
+            (ctx.strandDeliver.isCFT() ||
+             !ctx.view.read(keylet::line(acc, ctx.strandDeliver))))
             return -1;
         return 0;
     }

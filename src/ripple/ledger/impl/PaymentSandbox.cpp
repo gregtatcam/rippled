@@ -52,7 +52,7 @@ DeferredCredits::credit(
     assert(sender != receiver);
     assert(!amount.negative());
 
-    auto const k = makeKey(sender, receiver, amount.getCurrency());
+    auto const k = makeKey(sender, receiver, (Currency)amount.getAsset());
     auto i = credits_.find(k);
     if (i == credits_.end())
     {
@@ -180,24 +180,28 @@ PaymentSandbox::balanceHook(
     algorithm remembers the original balance, and subtracts the debits. The
     post-switchover algorithm should be more numerically stable. Consider a
     large credit with a small initial balance. The pre-switchover algorithm
-    computes (B+C)-C (where B+C will the the amount passed in). The
+    computes (B+C)-C (where B+C will the amount passed in). The
     post-switchover algorithm returns B. When B and C differ by large
     magnitudes, (B+C)-C may not equal B.
     */
 
-    auto const currency = amount.getCurrency();
+    auto const currency = amount.getAsset();
 
     auto delta = amount.zeroed();
     auto lastBal = amount;
     auto minBal = amount;
-    for (auto curSB = this; curSB; curSB = curSB->ps_)
+    if (currency.isCurrency())  // TODO CFT
     {
-        if (auto adj = curSB->tab_.adjustments(account, issuer, currency))
+        for (auto curSB = this; curSB; curSB = curSB->ps_)
         {
-            delta += adj->debits;
-            lastBal = adj->origBalance;
-            if (lastBal < minBal)
-                minBal = lastBal;
+            if (auto adj = curSB->tab_.adjustments(
+                    account, issuer, (Currency)currency))
+            {
+                delta += adj->debits;
+                lastBal = adj->origBalance;
+                if (lastBal < minBal)
+                    minBal = lastBal;
+            }
         }
     }
 
@@ -368,9 +372,11 @@ PaymentSandbox::balanceChanges(ReadView const& view) const
         }
         // The following are now set, put them in the map
         auto delta = newBalance - oldBalance;
-        auto const cur = newBalance.getCurrency();
-        result[std::make_tuple(lowID, highID, cur)] = delta;
-        auto r = result.emplace(std::make_tuple(lowID, lowID, cur), delta);
+        auto const cur = newBalance.getAsset();
+        result[std::make_tuple(lowID, highID, (Currency)cur)] =
+            delta;  // TODO CFT
+        auto r =
+            result.emplace(std::make_tuple(lowID, lowID, (Currency)cur), delta);
         if (r.second)
         {
             r.first->second += delta;
