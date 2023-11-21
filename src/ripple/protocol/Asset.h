@@ -109,7 +109,7 @@ public:
     }
 
     template <typename T>
-        requires(std::is_same_v<T, Currency> || std::is_same_v<T, uint256>)
+    requires(std::is_same_v<T, Currency> || std::is_same_v<T, uint256>)
     T const* get() const
     {
         checkInit();
@@ -117,7 +117,7 @@ public:
     }
 
     template <typename T>
-        requires(std::is_same_v<T, Currency> || std::is_same_v<T, uint256>)
+    requires(std::is_same_v<T, Currency> || std::is_same_v<T, uint256>)
     explicit operator T const&() const
     {
         checkInit();
