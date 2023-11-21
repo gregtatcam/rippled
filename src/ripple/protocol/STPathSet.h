@@ -296,13 +296,13 @@ inline STPathElement::STPathElement(
     if (!is_offer_)
         mType |= typeAccount;
 
-    if (!asset.isCFT() && (forceCurrency || !isXRP(asset)))
+    if ((asset.empty() || !asset.isCFT()) && (forceCurrency || !isXRP(asset)))
         mType |= typeCurrency;
 
     if (!isXRP(issuer))
         mType |= typeIssuer;
 
-    if (asset.isCFT())
+    if (!asset.empty() && asset.isCFT())
         mType |= typeCFT;
 
     hash_value_ = get_hash(*this);
@@ -319,9 +319,9 @@ inline STPathElement::STPathElement(
     , mIssuerID(issuer)
     , is_offer_(isXRP(mAccountID))
 {
-    if (!asset.isCFT())
+    if (!asset.empty() && !asset.isCFT())
         mType = mType & (~Type::typeCFT);
-    else if (asset.isXRP())
+    else if (!asset.empty() && asset.isXRP())
         mType = mType & (~Type::typeCurrency);
     hash_value_ = get_hash(*this);
 }

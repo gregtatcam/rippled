@@ -189,7 +189,9 @@ Json::Value STPath::getJson(JsonOptions) const
         if (iType & STPathElement::typeAccount)
             elem[jss::account] = to_string(it.getAccountID());
 
-        assert(!(iType & STPathElement::typeCurrency && iType & STPathElement::typeCFT));
+        assert(
+            !(iType & STPathElement::typeCurrency &&
+              iType & STPathElement::typeCFT));
         if (iType & STPathElement::typeCurrency)
             elem[jss::currency] = to_string(it.getAsset());
 

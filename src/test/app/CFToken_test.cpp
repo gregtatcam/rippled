@@ -307,6 +307,53 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(cftUsd.holderAmount(bob) == 101);
         }
 
+        // IOU/CFT cross asset payment
+        {
+            // If the CFT amendment IS enabled, you should be able to make a
+            // CFT Payment that doesn't cross
+            Env env{*this, features | featureCFTokensV1};
+            env.fund(XRP(10'000), gw);
+            env.fund(XRP(10'000), alice);
+            env.fund(XRP(10'000), carol);
+            env.fund(XRP(10'000), bob);
+            env(trust(alice, EUR(30'000)), txflags(tfClearNoRipple));
+            env(pay(gw, alice, EUR(10'000)));
+            env(trust(bob, EUR(30'000)), txflags(tfClearNoRipple));
+            env.close();
+
+            CFTIssuance cftUsd(env, gw, USD.currency);
+
+            cftUsd.cftrust(alice);
+            env(pay(gw, alice, cftUsd.cft(200)));
+            env.close();
+            BEAST_EXPECT(cftUsd.holderAmount(alice) == 200);
+
+            cftUsd.cftrust(carol);
+            env(pay(gw, carol, cftUsd.cft(200)));
+            env.close();
+            BEAST_EXPECT(cftUsd.holderAmount(carol) == 200);
+            BEAST_EXPECT(cftUsd.outstandingAmount() == 400);
+
+            env(offer(alice, cftUsd.cft(101), EUR(100)));
+            env.close();
+            BEAST_EXPECT(expectOffers(
+                env, alice, 1, {{Amounts{cftUsd.cft(101), EUR(100)}}}));
+
+            // Payment
+            env(pay(carol, bob, EUR(100)),
+                jtx::path(~EUR),
+                sendmax(cftUsd.cft(101)),
+                txflags(tfPartialPayment | tfNoRippleDirect));
+            env.close();
+
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(env.balance(alice, EUR) == EUR(9900));
+            BEAST_EXPECT(cftUsd.holderAmount(alice) == 301);
+            BEAST_EXPECT(cftUsd.outstandingAmount() == 400);
+            BEAST_EXPECT(cftUsd.holderAmount(carol) == 99);
+            BEAST_EXPECT(env.balance(bob, EUR) == EUR(100));
+        }
+
         // CFT/CFT cross asset payment
         {
             // If the CFT amendment IS enabled, you should be able to make a

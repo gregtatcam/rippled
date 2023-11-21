@@ -613,13 +613,13 @@ parseLeaf(
 
                         bool const isCFT = pathEl.isMember(jss::cft_asset);
                         std::string const assetName =
-                            isCFT ? "cft_asset" : "asset";
+                            isCFT ? "cft_asset" : "currency";
                         Json::Value const& account = pathEl["account"];
                         Json::Value const& asset = pathEl[assetName];
                         Json::Value const& issuer = pathEl["issuer"];
                         bool hasCurrency = false;
                         AccountID uAccount, uIssuer;
-                        Asset uAsset;
+                        Asset uAsset{noCurrency()};
 
                         if (account)
                         {

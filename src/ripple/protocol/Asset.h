@@ -100,6 +100,13 @@ public:
         std::visit([&](auto&& a) { s.addBitString(a); }, asset_);
     }
 
+    bool
+    empty() const
+    {
+        return std::holds_alternative<uint256>(asset_) &&
+            std::get<uint256>(asset_) == none;
+    }
+
     template <typename Hasher>
     friend void
     hash_append(Hasher& h, Asset const& a)
@@ -185,7 +192,7 @@ public:
     friend bool
     isXRP(Asset const& a)
     {
-        return a.isXRP();
+        return !a.empty() && a.isXRP();
     }
     friend std::ostream&
     operator<<(std::ostream& stream, Asset const& a)
