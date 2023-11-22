@@ -478,6 +478,69 @@ class CFToken_test : public beast::unit_test::suite
                 cftEur.cft(10'100), cftUsd.cft(10'000), amm.tokens()));
             BEAST_EXPECT(cftUsd.holderAmount(bob) == 100);
         }
+
+        // Multi-steps with AMM
+        // IOU/CFT CFT/CFT CFT/IOU IOU/IOU AMM:IOU/CFT CFT/IOU
+        {
+            Env env{*this, features | featureCFTokensV1};
+            auto const GBP = gw["GBP"];
+            auto const CAN = gw["CAN"];
+            auto const CRN = gw["CRN"];
+            auto const YAN = gw["YAN"];
+            env.fund(XRP(20'000), gw);
+            env.fund(XRP(20'000), alice);
+            env.fund(XRP(20'000), carol);
+            env.fund(XRP(20'000), bob);
+            env.close();
+
+            auto createCft = [&](IOU const& iou) -> CFTIssuance {
+                CFTIssuance cft(env, gw, iou.currency);
+                cft.cftrust(alice);
+                env(pay(gw, alice, cft.cft(20'000)));
+                env.close();
+                return cft;
+            };
+            auto fundIou = [&env, &gw](IOU const& iou, Account const& acct) {
+                env(trust(acct, iou(30'000)), txflags(tfClearNoRipple));
+                env(pay(gw, acct, iou(20'000)));
+                env.close();
+            };
+
+            auto cftUsd = createCft(USD);
+            fundIou(USD, alice);
+            auto cftEur = createCft(EUR);
+            fundIou(EUR, alice);
+            auto cftCrn = createCft(CRN);
+            fundIou(CRN, alice);
+            fundIou(YAN, alice);
+
+            env(offer(alice, EUR(100), cftEur.cft(101)));
+            env(offer(alice, cftEur.cft(101), cftUsd.cft(102)));
+            env(offer(alice, cftUsd.cft(102), USD(103)));
+            env(offer(alice, USD(103), CRN(104)));
+            env.close();
+            AMM amm(env, alice, CRN(10'000), cftCrn.cft(10'104));
+            env(offer(alice, cftCrn.cft(104), YAN(100)));
+
+            fundIou(EUR, carol);
+            env(trust(bob, YAN(30'000)), txflags(tfClearNoRipple));
+
+            env(pay(carol, bob, YAN(100)),
+                jtx::path(
+                    ~cftEur.cft(),
+                    ~cftUsd.cft(),
+                    ~USD,
+                    ~CRN,
+                    ~cftCrn.cft(),
+                    ~YAN),
+                sendmax(EUR(100)),
+                txflags(tfPartialPayment | tfNoRippleDirect));
+            env.close();
+
+            BEAST_EXPECT(env.balance(bob, YAN) == YAN(100));
+            BEAST_EXPECT(amm.expectBalances(
+                CRN(10'104), cftCrn.cft(10'000), amm.tokens()));
+        }
     }
 
 public:
