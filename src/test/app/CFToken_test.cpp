@@ -28,9 +28,9 @@ namespace test {
 class CFToken_test : public beast::unit_test::suite
 {
     void
-    testEnabled(FeatureBitset features)
+    testBasic(FeatureBitset features)
     {
-        testcase("Enabled");
+        testcase("Basic");
         using namespace jtx;
         Account const gw = Account("gw");
         Account const alice = Account("alice");
@@ -40,25 +40,13 @@ class CFToken_test : public beast::unit_test::suite
         auto const EUR = gw["EUR"];
 
         {
-            Env env(*this);
-            env.fund(XRP(1000), gw);
-            env.fund(XRP(1000), alice);
-            env.fund(XRP(1000), carol);
-            env(trust(alice, USD(30'000)));
-            env(pay(gw, alice, USD(10'000)));
-            env(trust(carol, USD(30'000)));
-            env(pay(gw, carol, USD(10'000)));
-            env(pay(alice, carol, USD(100)));
-            env(offer(alice, XRP(100), USD(100)));
-            env(offer(carol, USD(100), XRP(100)));
-        }
-        {
             // If the CFT amendment is not enabled, you should not be able to
             // create CFTokenIssuances
             Env env{*this, features - featureCFTokensV1};
 
             CFTIssuance cft(env, env.master, USD.currency, ter(temDISABLED));
         }
+
         {
             // If the CFT amendment IS enabled, you should be able to create
             // CFTokenIssuances
@@ -66,6 +54,7 @@ class CFToken_test : public beast::unit_test::suite
 
             CFTIssuance cft(env, env.master, USD.currency);
         }
+
         {
             // If the CFT amendment is not enabled, you should not be able to
             // destroy CFTokenIssuances
@@ -73,6 +62,7 @@ class CFToken_test : public beast::unit_test::suite
             CFTIssuance cft(env);
             cft.destroy(env.master, uint256{0}, ter(temDISABLED));
         }
+
         {
             // If the CFT amendment IS enabled, you should be able to destroy
             // CFTokenIssuances
@@ -80,16 +70,22 @@ class CFToken_test : public beast::unit_test::suite
             CFTIssuance cft(env, env.master, USD.currency);
             cft.destroy();
         }
+    }
 
-        {
-            // If the CFT amendment is not enabled, you should not be able to
-            // specify an amount for a Payment using CFT amount notation
-        }
+    void
+    testOfferCrossing(FeatureBitset features)
+    {
+        testcase("Offer Crossing");
+        using namespace jtx;
+        Account const gw = Account("gw");
+        Account const alice = Account("alice");
+        Account const carol = Account("carol");
+        Account const bob = Account("bob");
+        auto const USD = gw["USD"];
+        auto const EUR = gw["EUR"];
 
-        // XRP/CFT offer and offer crossing
+        // XRP/CFT offer crossing
         {
-            // If the CFT amendment IS enabled, you should be able to make a
-            // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             env.fund(XRP(10000), gw, alice, carol);
             env.close();
@@ -123,10 +119,8 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(cft.holderAmount(carol) == 301);
         }
 
-        // USD/CFT offer and offer crossing
+        // USD/CFT offer crossing
         {
-            // If the CFT amendment IS enabled, you should be able to make a
-            // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             env.fund(XRP(10000), gw, alice, carol);
             env.close();
@@ -158,7 +152,6 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(expectOffers(
                 env, alice, 1, {{Amounts{EUR(100), cftUsd.cft(101)}}}));
 
-            // Offer crossing
             env(offer(carol, cftUsd.cft(101), EUR(100)));
             env.close();
 
@@ -170,10 +163,9 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(cftUsd.holderAmount(alice) == 99);
             BEAST_EXPECT(cftUsd.holderAmount(carol) == 301);
         }
-        // CFT/CFT offer and offer crossing
+
+        // CFT/CFT offer crossing
         {
-            // If the CFT amendment IS enabled, you should be able to make a
-            // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             env.fund(XRP(10000), gw, alice, carol);
             env.close();
@@ -204,7 +196,6 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(expectOffers(
                 env, alice, 1, {{Amounts{cftEur.cft(100), cftUsd.cft(101)}}}));
 
-            // Offer crossing
             env(offer(carol, cftUsd.cft(101), cftEur.cft(100)));
             env.close();
 
@@ -217,11 +208,22 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(cftEur.holderAmount(alice) == 300);
             BEAST_EXPECT(cftEur.holderAmount(carol) == 100);
         }
+    }
+
+    void
+    testPayments(FeatureBitset features)
+    {
+        testcase("Payments");
+        using namespace jtx;
+        Account const gw = Account("gw");
+        Account const alice = Account("alice");
+        Account const carol = Account("carol");
+        Account const bob = Account("bob");
+        auto const USD = gw["USD"];
+        auto const EUR = gw["EUR"];
 
         // CFT/XRP cross asset payment
         {
-            // If the CFT amendment IS enabled, you should be able to make a
-            // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             env.fund(XRP(10000), gw, alice, carol, bob);
             env.close();
@@ -246,7 +248,6 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(expectOffers(
                 env, alice, 1, {{Amounts{XRP(100), cftUsd.cft(101)}}}));
 
-            // Payment
             env(pay(carol, bob, cftUsd.cft(101)),
                 jtx::path(~cftUsd.cft()),
                 sendmax(XRP(100)),
@@ -261,8 +262,6 @@ class CFToken_test : public beast::unit_test::suite
 
         // CFT/IOU cross asset payment
         {
-            // If the CFT amendment IS enabled, you should be able to make a
-            // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             env.fund(XRP(10000), gw, alice, carol, bob);
             env(trust(alice, EUR(30'000)));
@@ -293,7 +292,6 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(expectOffers(
                 env, alice, 1, {{Amounts{EUR(100), cftUsd.cft(101)}}}));
 
-            // Payment
             env(pay(carol, bob, cftUsd.cft(101)),
                 jtx::path(~cftUsd.cft()),
                 sendmax(EUR(100)),
@@ -309,8 +307,6 @@ class CFToken_test : public beast::unit_test::suite
 
         // IOU/CFT cross asset payment
         {
-            // If the CFT amendment IS enabled, you should be able to make a
-            // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             env.fund(XRP(10'000), gw);
             env.fund(XRP(10'000), alice);
@@ -339,7 +335,6 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(expectOffers(
                 env, alice, 1, {{Amounts{cftUsd.cft(101), EUR(100)}}}));
 
-            // Payment
             env(pay(carol, bob, EUR(100)),
                 jtx::path(~EUR),
                 sendmax(cftUsd.cft(101)),
@@ -356,8 +351,6 @@ class CFToken_test : public beast::unit_test::suite
 
         // CFT/CFT cross asset payment
         {
-            // If the CFT amendment IS enabled, you should be able to make a
-            // CFT Payment that doesn't cross
             Env env{*this, features | featureCFTokensV1};
             env.fund(XRP(10000), gw, alice, carol, bob);
             env.close();
@@ -384,7 +377,6 @@ class CFToken_test : public beast::unit_test::suite
             BEAST_EXPECT(expectOffers(
                 env, alice, 1, {{Amounts{cftEur.cft(100), cftUsd.cft(101)}}}));
 
-            // Payment
             env(pay(carol, bob, cftUsd.cft(101)),
                 jtx::path(~cftUsd.cft()),
                 sendmax(cftEur.cft(100)),
@@ -411,11 +403,13 @@ class CFToken_test : public beast::unit_test::suite
             env.close();
 
             AMM amm(env, alice, XRP(10'000), cftUsd.cft(10'100));
+
             env(pay(carol, bob, cftUsd.cft(100)),
                 jtx::path(~cftUsd.cft()),
                 sendmax(XRP(100)),
                 txflags(tfPartialPayment | tfNoRippleDirect));
             env.close();
+
             BEAST_EXPECT(amm.expectBalances(
                 XRP(10'100), cftUsd.cft(10'000), amm.tokens()));
             BEAST_EXPECT(cftUsd.holderAmount(bob) == 100);
@@ -440,11 +434,13 @@ class CFToken_test : public beast::unit_test::suite
             env.close();
 
             AMM amm(env, alice, EUR(10'000), cftUsd.cft(10'100));
+
             env(pay(carol, bob, cftUsd.cft(100)),
                 jtx::path(~cftUsd.cft()),
                 sendmax(EUR(100)),
                 txflags(tfPartialPayment | tfNoRippleDirect));
             env.close();
+
             BEAST_EXPECT(amm.expectBalances(
                 EUR(10'100), cftUsd.cft(10'000), amm.tokens()));
             BEAST_EXPECT(cftUsd.holderAmount(bob) == 100);
@@ -471,11 +467,13 @@ class CFToken_test : public beast::unit_test::suite
             env.close();
 
             AMM amm(env, alice, cftEur.cft(10'000), cftUsd.cft(10'100));
+
             env(pay(carol, bob, cftUsd.cft(100)),
                 jtx::path(~cftUsd.cft()),
                 sendmax(cftEur.cft(100)),
                 txflags(tfPartialPayment | tfNoRippleDirect));
             env.close();
+
             BEAST_EXPECT(amm.expectBalances(
                 cftEur.cft(10'100), cftUsd.cft(10'000), amm.tokens()));
             BEAST_EXPECT(cftUsd.holderAmount(bob) == 100);
@@ -489,7 +487,9 @@ public:
         using namespace test::jtx;
         FeatureBitset const all{supported_amendments()};
 
-        testEnabled(all);
+        testBasic(all);
+        testOfferCrossing(all);
+        testPayments(all);
     }
 };
 
