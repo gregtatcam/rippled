@@ -278,7 +278,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
     // calculate stats
     auto const [avg, sd, size] =
         getStats(prices.right.begin(), prices.right.end());
-    result[jss::entire_set][jss::average] = avg.getText();
+    result[jss::entire_set][jss::mean] = avg.getText();
     result[jss::entire_set][jss::size] = size;
     result[jss::entire_set][jss::standard_deviation] = to_string(sd);
 
@@ -308,7 +308,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
         auto const [avg, sd, size] = getStats(
             itAdvance(prices.right.begin(), trimCount),
             itAdvance(prices.right.end(), -trimCount));
-        result[jss::trimmed_set][jss::average] = avg.getText();
+        result[jss::trimmed_set][jss::mean] = avg.getText();
         result[jss::trimmed_set][jss::size] = size;
         result[jss::trimmed_set][jss::standard_deviation] = to_string(sd);
     }

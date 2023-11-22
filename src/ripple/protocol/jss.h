@@ -212,7 +212,6 @@ JSS(auth_accounts);               // out: amm_info
 JSS(auth_change);                 // out: AccountInfo
 JSS(auth_change_queued);          // out: AccountInfo
 JSS(available);                   // out: ValidatorList
-JSS(average);                     // out: get_aggregate_price
 JSS(avg_bps_recv);                // out: Peers
 JSS(avg_bps_sent);                // out: Peers
 JSS(balance);                     // out: AccountLines
@@ -476,6 +475,7 @@ JSS(max_ledger);                  // in/out: LedgerCleaner
 JSS(max_queue_size);              // out: TxQ
 JSS(max_spend_drops);             // out: AccountInfo
 JSS(max_spend_drops_total);       // out: AccountInfo
+JSS(mean);                        // out: get_aggregate_price
 JSS(median);                      // out: get_aggregate_price
 JSS(median_fee);                  // out: TxQ
 JSS(median_level);                // out: TxQ

@@ -72,14 +72,19 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     if (!sleSetter)
         return terNO_ACCOUNT;
 
-    // lastUpdateTime must be within 30 seconds of the last closed ledger
+    // lastUpdateTime must be within maxLastUpdateTimeDelta seconds
+    // of the last closed ledger
     using namespace std::chrono;
     std::size_t const closeTime =
         duration_cast<seconds>(ctx.view.info().closeTime.time_since_epoch())
             .count();
     std::size_t const lastUpdateTime = ctx.tx[sfLastUpdateTime];
-    if (lastUpdateTime < closeTime ||
-        lastUpdateTime > (closeTime + maxLastUpdateTimeDelta))
+    if (lastUpdateTime <= epoch_offset.count())
+        return tecINVALID_UPDATE_TIME;
+    std::size_t const lastUpdateTimeEpoch =
+        lastUpdateTime - epoch_offset.count();
+    if (lastUpdateTimeEpoch < closeTime ||
+        lastUpdateTimeEpoch > (closeTime + maxLastUpdateTimeDelta))
         return tecINVALID_UPDATE_TIME;
 
     hash_set<uint256> pairs;

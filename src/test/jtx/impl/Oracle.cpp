@@ -197,13 +197,14 @@ Oracle::set(UpdateArg const& arg)
     else
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
     if (arg.lastUpdateTime)
-        jv[jss::LastUpdateTime] = *arg.lastUpdateTime;
+        jv[jss::LastUpdateTime] = *arg.lastUpdateTime +
+            static_cast<std::uint32_t>(epoch_offset.count());
     else
         jv[jss::LastUpdateTime] = to_string(
             duration_cast<seconds>(
                 env_.current()->info().closeTime.time_since_epoch())
                 .count() +
-            10);
+            10 + epoch_offset.count());
     Json::Value dataSeries(Json::arrayValue);
     auto assetToStr = [](std::string const& s) {
         // assume standard currency

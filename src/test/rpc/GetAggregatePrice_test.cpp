@@ -127,13 +127,13 @@ public:
             prep(env, oracles);
             // entire and trimmed stats
             auto ret = Oracle::aggregatePrice(env, "XRP", "USD", oracles);
-            BEAST_EXPECT(ret[jss::entire_set][jss::average] == "74.45");
+            BEAST_EXPECT(ret[jss::entire_set][jss::mean] == "74.45");
             BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 10);
             BEAST_EXPECT(
                 ret[jss::entire_set][jss::standard_deviation] ==
                 "0.3027650354097492");
             BEAST_EXPECT(ret[jss::median] == "74.45");
-            BEAST_EXPECT(ret[jss::time] == 100);
+            BEAST_EXPECT(ret[jss::time] == 946684900);
         }
 
         // Aggregate data set includes all price oracle instances
@@ -144,18 +144,18 @@ public:
             // entire and trimmed stats
             auto ret =
                 Oracle::aggregatePrice(env, "XRP", "USD", oracles, 20, 100);
-            BEAST_EXPECT(ret[jss::entire_set][jss::average] == "74.45");
+            BEAST_EXPECT(ret[jss::entire_set][jss::mean] == "74.45");
             BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 10);
             BEAST_EXPECT(
                 ret[jss::entire_set][jss::standard_deviation] ==
                 "0.3027650354097492");
             BEAST_EXPECT(ret[jss::median] == "74.45");
-            BEAST_EXPECT(ret[jss::trimmed_set][jss::average] == "74.45");
+            BEAST_EXPECT(ret[jss::trimmed_set][jss::mean] == "74.45");
             BEAST_EXPECT(ret[jss::trimmed_set][jss::size].asUInt() == 6);
             BEAST_EXPECT(
                 ret[jss::trimmed_set][jss::standard_deviation] ==
                 "0.187082869338697");
-            BEAST_EXPECT(ret[jss::time] == 100);
+            BEAST_EXPECT(ret[jss::time] == 946684900);
         }
 
         // A reduced dataset, as some price oracles have data beyond three
@@ -191,18 +191,18 @@ public:
             // entire and trimmed stats
             auto ret =
                 Oracle::aggregatePrice(env, "XRP", "USD", oracles, 20, 200);
-            BEAST_EXPECT(ret[jss::entire_set][jss::average] == "74.6");
+            BEAST_EXPECT(ret[jss::entire_set][jss::mean] == "74.6");
             BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 7);
             BEAST_EXPECT(
                 ret[jss::entire_set][jss::standard_deviation] ==
                 "0.2160246899469287");
             BEAST_EXPECT(ret[jss::median] == "74.6");
-            BEAST_EXPECT(ret[jss::trimmed_set][jss::average] == "74.6");
+            BEAST_EXPECT(ret[jss::trimmed_set][jss::mean] == "74.6");
             BEAST_EXPECT(ret[jss::trimmed_set][jss::size].asUInt() == 5);
             BEAST_EXPECT(
                 ret[jss::trimmed_set][jss::standard_deviation] ==
                 "0.158113883008419");
-            BEAST_EXPECT(ret[jss::time] == 100);
+            BEAST_EXPECT(ret[jss::time] == 946684900);
         }
 
         // Reduced data set because of the time threshold
@@ -224,11 +224,11 @@ public:
             // entire stats only, limit lastUpdateTime to {200, 125}
             auto ret = Oracle::aggregatePrice(
                 env, "XRP", "USD", oracles, std::nullopt, 75);
-            BEAST_EXPECT(ret[jss::entire_set][jss::average] == "74");
+            BEAST_EXPECT(ret[jss::entire_set][jss::mean] == "74");
             BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 8);
             BEAST_EXPECT(ret[jss::entire_set][jss::standard_deviation] == "0");
             BEAST_EXPECT(ret[jss::median] == "74");
-            BEAST_EXPECT(ret[jss::time] == 200);
+            BEAST_EXPECT(ret[jss::time] == 946685000);
         }
     }
 
