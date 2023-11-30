@@ -99,7 +99,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     }
 
     if (auto const sle = ctx.view.read(keylet::oracle(
-            ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleSequence])))
+            ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleDocumentID])))
     {
         // update
 
@@ -160,7 +160,7 @@ adjustOwnerCount(ApplyContext& ctx, std::uint16_t count)
 TER
 SetOracle::doApply()
 {
-    auto const oracleID = keylet::oracle(account_, ctx_.tx[sfOracleSequence]);
+    auto const oracleID = keylet::oracle(account_, ctx_.tx[sfOracleDocumentID]);
 
     if (auto sle = ctx_.view().peek(oracleID))
     {
@@ -213,7 +213,9 @@ SetOracle::doApply()
         sle->setFieldArray(sfPriceDataSeries, updatedSeries);
         if (ctx_.tx.isFieldPresent(sfURI))
             sle->setFieldVL(sfURI, ctx_.tx[sfURI]);
-        sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
+        // LastUpdateTime is Unix time, store internally as Ripple Epoch
+        sle->setFieldU32(
+            sfLastUpdateTime, ctx_.tx[sfLastUpdateTime] - epoch_offset.count());
 
         auto const newCount = pairs.size() > 5 ? 2 : 1;
         if (newCount > oldCount && !adjustOwnerCount(ctx_, 1))
@@ -233,7 +235,9 @@ SetOracle::doApply()
         auto const& series = ctx_.tx.getFieldArray(sfPriceDataSeries);
         sle->setFieldArray(sfPriceDataSeries, series);
         sle->setFieldVL(sfAssetClass, ctx_.tx[sfAssetClass]);
-        sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
+        // LastUpdateTime is Unix time, store internally as Ripple Epoch
+        sle->setFieldU32(
+            sfLastUpdateTime, ctx_.tx[sfLastUpdateTime] - epoch_offset.count());
 
         auto page = ctx_.view().dirInsert(
             keylet::ownerDir(account_), sle->key(), describeOwnerDir(account_));

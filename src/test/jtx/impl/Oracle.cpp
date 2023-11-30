@@ -46,7 +46,7 @@ Oracle::remove(RemoveArg const& arg)
     Json::Value jv;
     jv[jss::TransactionType] = jss::OracleDelete;
     jv[jss::Account] = to_string(arg.owner.value_or(owner_));
-    jv[jss::OracleSequence] = arg.sequence.value_or(sequence_);
+    jv[jss::OracleDocumentID] = arg.sequence.value_or(sequence_);
     if (Oracle::fee != 0)
         jv[jss::Fee] = std::to_string(Oracle::fee);
     else if (arg.fee != 0)
@@ -181,7 +181,7 @@ Oracle::set(UpdateArg const& arg)
         sequence_ = *arg.sequence;
     jv[jss::TransactionType] = jss::OracleSet;
     jv[jss::Account] = to_string(owner_);
-    jv[jss::OracleSequence] = sequence_;
+    jv[jss::OracleDocumentID] = sequence_;
     if (arg.assetClass)
         jv[jss::AssetClass] = strHex(*arg.assetClass);
     if (arg.provider)

@@ -114,7 +114,7 @@ JSS(OfferCreate);          // transaction type.
 JSS(OfferSequence);        // field.
 JSS(Oracle);               // ledger type.
 JSS(OracleDelete);         // transaction type.
-JSS(OracleSequence);       // field
+JSS(OracleDocumentID);     // field
 JSS(OracleSet);            // transaction type.
 JSS(Owner);                // field
 JSS(Paths);                // in/out: TransactionSign

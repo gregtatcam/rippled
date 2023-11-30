@@ -224,7 +224,7 @@ private:
                 .lastUpdateTime = 500,
                 .ter = ter(tecINVALID_UPDATE_TIME)});
             oracle.set(UpdateArg{.series = {{"XRP", "USD", 740, 1}}});
-            BEAST_EXPECT(oracle.expectLastUpdateTime(946684950));
+            BEAST_EXPECT(oracle.expectLastUpdateTime(150));
             // Less than the previous lastUpdateTime
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},

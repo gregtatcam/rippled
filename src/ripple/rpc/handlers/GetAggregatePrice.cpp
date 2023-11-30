@@ -273,7 +273,9 @@ doGetAggregatePrice(RPC::JsonContext& context)
             return result;
         }
     }
-    result[jss::time] = latestTime;
+    // convert from Ripple Epoch to Unix time
+    result[jss::time] =
+        latestTime + static_cast<std::uint32_t>(epoch_offset.count());
 
     // calculate stats
     auto const [avg, sd, size] =
