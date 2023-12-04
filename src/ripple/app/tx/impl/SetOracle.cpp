@@ -51,14 +51,14 @@ SetOracle::preflight(PreflightContext const& ctx)
     if (dataSeries.size() == 0 || dataSeries.size() > maxOracleDataSeries)
         return temBAD_ARRAY_SIZE;
 
-    auto invalidLength = [&](auto const& sField, std::size_t length) {
+    auto isInvalidLength = [&](auto const& sField, std::size_t length) {
         return ctx.tx.isFieldPresent(sField) &&
             ctx.tx[sField].length() > length;
     };
 
-    if (invalidLength(sfProvider, maxOracleProvider) ||
-        invalidLength(sfURI, maxOracleURI) ||
-        invalidLength(sfAssetClass, maxOracleSymbolClass))
+    if (isInvalidLength(sfProvider, maxOracleProvider) ||
+        isInvalidLength(sfURI, maxOracleURI) ||
+        isInvalidLength(sfAssetClass, maxOracleSymbolClass))
         return temMALFORMED;
 
     return preflight2(ctx);
