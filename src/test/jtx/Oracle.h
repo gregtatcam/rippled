@@ -125,19 +125,19 @@ public:
         return sequence_;
     }
 
-    bool
+    [[nodiscard]] bool
     exists() const
     {
         return exists(env_, owner_, sequence_);
     }
 
-    static bool
+    [[nodiscard]] static bool
     exists(Env& env, AccountID const& account, std::uint32_t sequence);
 
-    bool
+    [[nodiscard]] bool
     expectPrice(DataSeries const& pricess) const;
 
-    bool
+    [[nodiscard]] bool
     expectLastUpdateTime(std::uint32_t lastUpdateTime) const;
 
     static Json::Value
