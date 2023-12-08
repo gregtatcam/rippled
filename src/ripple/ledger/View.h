@@ -493,6 +493,13 @@ deleteAMMTrustLine(
     std::optional<AccountID> const& ammAccountID,
     beast::Journal j);
 
+[[nodiscard]] TER
+oracleDelete(
+    ApplyView& view,
+    std::shared_ptr<SLE> const& sle,
+    AccountID const& account,
+    beast::Journal j);
+
 }  // namespace ripple
 
 #endif

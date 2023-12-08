@@ -98,20 +98,22 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         pairs.emplace(hash);
     }
 
+    auto isConsistent = [&ctx](auto const& field, auto const& sle) {
+        auto const v = ctx.tx[~field];
+        return !v || *v == (*sle)[field];
+    };
+
     if (auto const sle = ctx.view.read(keylet::oracle(
             ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleDocumentID])))
     {
         // update
+        // Account is the Owner since we can get sle
 
         // lastUpdateTime must be more recent than the previous one
         if (ctx.tx[sfLastUpdateTime] <= (*sle)[sfLastUpdateTime])
             return tecINVALID_UPDATE_TIME;
 
-        if (ctx.tx[sfAccount] != sle->getAccountID(sfOwner))
-            return tecNO_PERMISSION;
-
-        if (ctx.tx.isFieldPresent(sfProvider) ||
-            ctx.tx.isFieldPresent(sfAssetClass))
+        if (!isConsistent(sfProvider, sle) || !isConsistent(sfAssetClass, sle))
             return temMALFORMED;
 
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))

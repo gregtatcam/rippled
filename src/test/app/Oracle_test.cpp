@@ -162,15 +162,16 @@ private:
                 .ter = ter(temMALFORMED)});
 
             // Symbol class or provider are included on update
+            // and don't match the current values
             oracle.set(CreateArg{});
             BEAST_EXPECT(oracle.exists());
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .provider = "provider",
+                .provider = "provider1",
                 .ter = ter(temMALFORMED)});
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .assetClass = "currency",
+                .assetClass = "currency1",
                 .ter = ter(temMALFORMED)});
         }
 
@@ -348,6 +349,48 @@ private:
                     {"GBP", "USD", 740, 1},
                 },
                 2);
+        }
+
+        {
+            // deleting the account deletes the oracles
+            Env env(*this);
+            auto const alice = Account("alice");
+            auto const acctDelFee{drops(env.current()->fees().increment)};
+            env.fund(XRP(1'000), owner);
+            env.fund(XRP(1'000), alice);
+            Oracle oracle(
+                env, {.owner = owner, .series = {{"XRP", "USD", 740, 1}}});
+            Oracle oracle1(
+                env,
+                {.owner = owner,
+                 .sequence = 2,
+                 .series = {{"XRP", "EUR", 740, 1}}});
+            BEAST_EXPECT(ownerCount(env, owner) == 2);
+            BEAST_EXPECT(oracle.exists());
+            BEAST_EXPECT(oracle1.exists());
+            auto const index = env.closed()->seq();
+            auto const hash = env.closed()->info().hash;
+            for (int i = 0; i < 256; ++i)
+                env.close();
+            env(acctdelete(owner, alice), fee(acctDelFee));
+            env.close();
+            BEAST_EXPECT(!oracle.exists());
+            BEAST_EXPECT(!oracle1.exists());
+
+            // can still get the oracles via the ledger index or hash
+            auto verifyLedgerData = [&](auto const& field, auto const& value) {
+                Json::Value jvParams;
+                jvParams[field] = value;
+                jvParams[jss::binary] = false;
+                jvParams[jss::type] = jss::oracle;
+                Json::Value jrr = env.rpc(
+                    "json",
+                    "ledger_data",
+                    boost::lexical_cast<std::string>(jvParams));
+                BEAST_EXPECT(jrr[jss::result][jss::state].size() == 2);
+            };
+            verifyLedgerData(jss::ledger_index, index);
+            verifyLedgerData(jss::ledger_hash, to_string(hash));
         }
     }
 

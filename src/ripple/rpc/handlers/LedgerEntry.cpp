@@ -618,29 +618,21 @@ doLedgerEntry(RPC::JsonContext& context)
             }
             else
             {
-                try
-                {
-                    uNodeIndex = beast::zero;
-                    auto const& oracle = context.params[jss::oracle];
-                    auto const sequence =
-                        oracle[jss::oracle_sequence].isConvertibleTo(
-                            Json::ValueType::uintValue)
-                        ? std::make_optional(
-                              oracle[jss::oracle_sequence].asUInt())
-                        : std::nullopt;
-                    auto const account =
-                        parseBase58<AccountID>(oracle[jss::account].asString());
-                    if (!account || account->isZero())
-                        jvResult[jss::error] = "malformedAddress";
-                    else if (!sequence)
-                        jvResult[jss::error] = "malformedSequence";
-                    else
-                        uNodeIndex = keylet::oracle(*account, *sequence).key;
-                }
-                catch (std::runtime_error const&)
-                {
-                    jvResult[jss::error] = "malformedRequest";
-                }
+                uNodeIndex = beast::zero;
+                auto const& oracle = context.params[jss::oracle];
+                auto const sequence =
+                    oracle[jss::oracle_sequence].isConvertibleTo(
+                        Json::ValueType::uintValue)
+                    ? std::make_optional(oracle[jss::oracle_sequence].asUInt())
+                    : std::nullopt;
+                auto const account =
+                    parseBase58<AccountID>(oracle[jss::account].asString());
+                if (!account || account->isZero())
+                    jvResult[jss::error] = "malformedAddress";
+                else if (!sequence)
+                    jvResult[jss::error] = "malformedSequence";
+                else
+                    uNodeIndex = keylet::oracle(*account, *sequence).key;
             }
         }
         else

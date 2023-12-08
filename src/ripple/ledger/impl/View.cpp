@@ -1652,4 +1652,35 @@ deleteAMMTrustLine(
     return tesSUCCESS;
 }
 
+TER
+oracleDelete(
+    ApplyView& view,
+    std::shared_ptr<SLE> const& sle,
+    AccountID const& account,
+    beast::Journal j)
+{
+    if (!sle)
+        return tesSUCCESS;
+
+    if (!view.dirRemove(
+            keylet::ownerDir(account), (*sle)[sfOwnerNode], sle->key(), true))
+    {
+        JLOG(j.fatal()) << "Unable to delete Oracle from owner.";
+        return tefBAD_LEDGER;
+    }
+
+    auto const sleOwner = view.peek(keylet::account(account));
+    if (!sleOwner)
+        return tecINTERNAL;
+
+    auto const count =
+        sle->getFieldArray(sfPriceDataSeries).size() > 5 ? -2 : -1;
+
+    adjustOwnerCount(view, sleOwner, count, j);
+
+    view.erase(sle);
+
+    return tesSUCCESS;
+}
+
 }  // namespace ripple

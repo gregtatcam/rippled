@@ -70,34 +70,10 @@ TER
 DeleteOracle::doApply()
 {
     if (auto sle = ctx_.view().peek(
-            keylet::oracle(account_, ctx_.tx[sfOracleDocumentID]));
-        !sle)
-        return tecINTERNAL;
-    else
-    {
-        if (!ctx_.view().dirRemove(
-                keylet::ownerDir(account_),
-                (*sle)[sfOwnerNode],
-                sle->key(),
-                true))
-        {
-            JLOG(j_.fatal()) << "Unable to delete Oracle from owner.";
-            return tefBAD_LEDGER;
-        }
+            keylet::oracle(account_, ctx_.tx[sfOracleDocumentID])))
+        return oracleDelete(ctx_.view(), sle, account_, j_);
 
-        auto const sleOwner = ctx_.view().peek(keylet::account(account_));
-        if (!sleOwner)
-            return tecINTERNAL;
-
-        auto const count =
-            sle->getFieldArray(sfPriceDataSeries).size() > 5 ? -2 : -1;
-
-        adjustOwnerCount(ctx_.view(), sleOwner, count, j_);
-
-        ctx_.view().erase(sle);
-    }
-
-    return tesSUCCESS;
+    return tecINTERNAL;
 }
 
 }  // namespace ripple
