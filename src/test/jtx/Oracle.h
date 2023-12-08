@@ -158,6 +158,13 @@ public:
     {
         fee = f;
     }
+
+    friend std::ostream&
+    operator<<(std::ostream& strm, Oracle const& oracle)
+    {
+        strm << oracle.ledgerEntry().toStyledString();
+        return strm;
+    }
 };
 
 }  // namespace jtx

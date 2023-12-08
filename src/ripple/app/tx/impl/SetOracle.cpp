@@ -87,15 +87,22 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         lastUpdateTimeEpoch > (closeTime + maxLastUpdateTimeDelta))
         return tecINVALID_UPDATE_TIME;
 
+    auto const sle = ctx.view.read(keylet::oracle(
+        ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleDocumentID]));
+
     hash_set<uint256> pairs;
+    hash_set<uint256> pairsDel;
     for (auto const& entry : ctx.tx.getFieldArray(sfPriceDataSeries))
     {
-        if (!entry.isFieldPresent(sfAssetPrice))
-            return temMALFORMED;
         auto const hash = tokenPairHash(entry);
         if (pairs.contains(hash))
             return tecDUPLICATE;
-        pairs.emplace(hash);
+        if (entry.isFieldPresent(sfAssetPrice))
+            pairs.emplace(hash);
+        else if (sle)
+            pairsDel.emplace(hash);
+        else
+            return temMALFORMED;
     }
 
     auto isConsistent = [&ctx](auto const& field, auto const& sle) {
@@ -103,8 +110,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         return !v || *v == (*sle)[field];
     };
 
-    if (auto const sle = ctx.view.read(keylet::oracle(
-            ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleDocumentID])))
+    if (sle)
     {
         // update
         // Account is the Owner since we can get sle
@@ -120,8 +126,15 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         {
             auto const hash = tokenPairHash(entry);
             if (!pairs.contains(hash))
-                pairs.emplace(hash);
+            {
+                if (pairsDel.contains(hash))
+                    pairsDel.erase(hash);
+                else
+                    pairs.emplace(hash);
+            }
         }
+        if (!pairsDel.empty())
+            return tecOBJECT_NOT_FOUND;
     }
     else
     {
@@ -132,7 +145,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
             return temMALFORMED;
     }
 
-    if (pairs.size() > maxOracleDataSeries)
+    if (pairs.empty() || pairs.size() > maxOracleDataSeries)
         return temBAD_ARRAY_SIZE;
 
     auto const add = pairs.size() > 5 ? 2 : 1;
@@ -147,7 +160,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
 }
 
 static bool
-adjustOwnerCount(ApplyContext& ctx, std::uint16_t count)
+adjustOwnerCount(ApplyContext& ctx, int count)
 {
     if (auto const sleAccount =
             ctx.view().peek(keylet::account(ctx.tx[sfAccount])))
@@ -182,11 +195,16 @@ SetOracle::doApply()
             pairs.emplace(tokenPairHash(entry), std::move(priceData));
         }
         auto const oldCount = pairs.size() > 5 ? 2 : 1;
-        // update/add pairs
+        // update/add/delete pairs
         for (auto const& entry : ctx_.tx.getFieldArray(sfPriceDataSeries))
         {
             auto const hash = tokenPairHash(entry);
-            if (auto iter = pairs.find(hash); iter != pairs.end())
+            if (!entry.isFieldPresent(sfAssetPrice))
+            {
+                // delete token pair
+                pairs.erase(hash);
+            }
+            else if (auto iter = pairs.find(hash); iter != pairs.end())
             {
                 // update the price
                 iter->second.setFieldU64(
@@ -220,7 +238,8 @@ SetOracle::doApply()
             sfLastUpdateTime, ctx_.tx[sfLastUpdateTime] - epoch_offset.count());
 
         auto const newCount = pairs.size() > 5 ? 2 : 1;
-        if (newCount > oldCount && !adjustOwnerCount(ctx_, 1))
+        auto const adjust = newCount - oldCount;
+        if (adjust != 0 && !adjustOwnerCount(ctx_, adjust))
             return tefINTERNAL;
 
         ctx_.view().update(sle);
