@@ -115,8 +115,9 @@ private:
                      {"XRP", "US9", 740, 1},
                      {"XRP", "U10", 750, 1},
                      {"XRP", "U11", 740, 1}},
-                .ter = ter(temBAD_ARRAY_SIZE)});
-            oracle.set(CreateArg{.series = {}, .ter = ter(temBAD_ARRAY_SIZE)});
+                .ter = ter(temBAD_ARRAY_SIZE_TOO_LARGE)});
+            oracle.set(
+                CreateArg{.series = {}, .ter = ter(temBAD_ARRAY_SIZE_ZERO)});
         }
 
         // Array of token pair exceeds 10 after update
@@ -142,7 +143,7 @@ private:
                         {"XRP", "US9", 740, 1},
                         {"XRP", "U10", 750, 1},
                     },
-                .ter = ter(temBAD_ARRAY_SIZE)});
+                .ter = ter(temBAD_ARRAY_SIZE_TOO_LARGE)});
         }
 
         {
@@ -245,7 +246,7 @@ private:
             // delete all token pairs
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", std::nullopt, std::nullopt}},
-                .ter = ter(temBAD_ARRAY_SIZE)});
+                .ter = ter(temBAD_ARRAY_SIZE_ZERO)});
         }
     }
 

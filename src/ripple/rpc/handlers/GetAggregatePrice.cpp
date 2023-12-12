@@ -31,22 +31,14 @@
 
 namespace ripple {
 
-struct CompareDescending
-{
-    bool
-    operator()(std::uint32_t const& a, std::uint32_t const& b) const
-    {
-        return a > b;  // Sort lastUpdateTime in descending order
-    }
-};
-
 using namespace boost::bimaps;
 // sorted descending by lastUpdateTime, ascending by AssetPrice
-using Prices =
-    bimap<multiset_of<std::uint32_t, CompareDescending>, multiset_of<STAmount>>;
+using Prices = bimap<
+    multiset_of<std::uint32_t, std::greater<std::uint32_t>>,
+    multiset_of<STAmount>>;
 
 /** Calls callback "f" on the ledger-object sle and up to three previous
- * metadata objects. Returns if the callback returns true.
+ * metadata objects. Stops early if the callback returns true.
  */
 static void
 iteratePriceData(
