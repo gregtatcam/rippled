@@ -54,12 +54,14 @@ iteratePriceData(
 
     uint256 prevTx = sle->getFieldH256(sfPreviousTxnID);
     std::uint32_t prevSeq = sle->getFieldU32(sfPreviousTxnLgrSeq);
+    // sanity check in case CreatedNode/ModifiedNode is not found
+    std::optional<std::uint32_t> lastPrevSeq = std::nullopt;
     std::uint8_t history = 0;
 
     // return tx meta-data for prevSeq/prevTx if the history
     // does not exceed the max
     auto getMeta = [&](std::uint32_t prevSeq, uint256 const& prevTx) -> Meta {
-        if (++history <= maxHistory)
+        if (++history <= maxHistory && (!lastPrevSeq || prevSeq != lastPrevSeq))
         {
             if (auto const ledger =
                     context.ledgerMaster.getLedgerBySeq(prevSeq))
@@ -91,6 +93,7 @@ iteratePriceData(
                 if (f(n) || isNew)
                     return;
 
+                lastPrevSeq = prevSeq;
                 prevTx = node.getFieldH256(sfPreviousTxnID);
                 prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
                 break;
