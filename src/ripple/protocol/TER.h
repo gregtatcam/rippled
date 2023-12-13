@@ -136,8 +136,8 @@ enum TEMcodes : TERUnderlyingType {
 
     temEMPTY_DID,
 
-    temBAD_ARRAY_SIZE_ZERO,
-    temBAD_ARRAY_SIZE_TOO_LARGE,
+    temARRAY_EMPTY,
+    temARRAY_TOO_LARGE,
 };
 
 //------------------------------------------------------------------------------

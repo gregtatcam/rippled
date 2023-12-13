@@ -49,9 +49,9 @@ SetOracle::preflight(PreflightContext const& ctx)
 
     auto const& dataSeries = ctx.tx.getFieldArray(sfPriceDataSeries);
     if (dataSeries.empty())
-        return temBAD_ARRAY_SIZE_ZERO;
+        return temARRAY_EMPTY;
     if (dataSeries.size() > maxOracleDataSeries)
-        return temBAD_ARRAY_SIZE_TOO_LARGE;
+        return temARRAY_TOO_LARGE;
 
     auto isInvalidLength = [&](auto const& sField, std::size_t length) {
         return ctx.tx.isFieldPresent(sField) &&
@@ -148,9 +148,9 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     }
 
     if (pairs.empty())
-        return temBAD_ARRAY_SIZE_ZERO;
+        return temARRAY_EMPTY;
     if (pairs.size() > maxOracleDataSeries)
-        return temBAD_ARRAY_SIZE_TOO_LARGE;
+        return temARRAY_TOO_LARGE;
 
     auto const add = pairs.size() > 5 ? 2 : 1;
     auto const reserve = ctx.view.fees().accountReserve(
