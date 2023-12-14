@@ -67,11 +67,42 @@ DeleteOracle::preclaim(PreclaimContext const& ctx)
 }
 
 TER
+DeleteOracle::deleteOracle(
+    ApplyView& view,
+    std::shared_ptr<SLE> const& sle,
+    AccountID const& account,
+    beast::Journal j)
+{
+    if (!sle)
+        return tesSUCCESS;
+
+    if (!view.dirRemove(
+            keylet::ownerDir(account), (*sle)[sfOwnerNode], sle->key(), true))
+    {
+        JLOG(j.fatal()) << "Unable to delete Oracle from owner.";
+        return tefBAD_LEDGER;
+    }
+
+    auto const sleOwner = view.peek(keylet::account(account));
+    if (!sleOwner)
+        return tecINTERNAL;
+
+    auto const count =
+        sle->getFieldArray(sfPriceDataSeries).size() > 5 ? -2 : -1;
+
+    adjustOwnerCount(view, sleOwner, count, j);
+
+    view.erase(sle);
+
+    return tesSUCCESS;
+}
+
+TER
 DeleteOracle::doApply()
 {
     if (auto sle = ctx_.view().peek(
             keylet::oracle(account_, ctx_.tx[sfOracleDocumentID])))
-        return oracleDelete(ctx_.view(), sle, account_, j_);
+        return deleteOracle(ctx_.view(), sle, account_, j_);
 
     return tecINTERNAL;
 }

@@ -50,6 +50,13 @@ public:
 
     TER
     doApply() override;
+
+    static TER
+    deleteOracle(
+        ApplyView& view,
+        std::shared_ptr<SLE> const& sle,
+        AccountID const& account,
+        beast::Journal j);
 };
 
 }  // namespace ripple

@@ -19,6 +19,7 @@
 
 #include <ripple/app/tx/impl/DID.h>
 #include <ripple/app/tx/impl/DeleteAccount.h>
+#include <ripple/app/tx/impl/DeleteOracle.h>
 #include <ripple/app/tx/impl/DepositPreauth.h>
 #include <ripple/app/tx/impl/SetSignerList.h>
 #include <ripple/app/tx/impl/details/NFTokenUtils.h>
@@ -155,7 +156,7 @@ removeOracleFromLedger(
     std::shared_ptr<SLE> const& sleDel,
     beast::Journal j)
 {
-    return oracleDelete(view, sleDel, account, j);
+    return DeleteOracle::deleteOracle(view, sleDel, account, j);
 }
 
 // Return nullptr if the LedgerEntryType represents an obligation that can't
