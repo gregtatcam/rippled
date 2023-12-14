@@ -48,56 +48,69 @@ iteratePriceData(
 {
     using Meta = std::shared_ptr<STObject const>;
     constexpr std::uint8_t maxHistory = 3;
-
-    if (!sle || f(*sle))
-        return;
-
-    uint256 prevTx = sle->getFieldH256(sfPreviousTxnID);
-    std::uint32_t prevSeq = sle->getFieldU32(sfPreviousTxnLgrSeq);
-    // sanity check in case CreatedNode/ModifiedNode is not found
-    std::optional<std::uint32_t> lastPrevSeq = std::nullopt;
+    bool isNew = false;
     std::uint8_t history = 0;
 
-    // return tx meta-data for prevSeq/prevTx if the history
-    // does not exceed the max
-    auto getMeta = [&](std::uint32_t prevSeq, uint256 const& prevTx) -> Meta {
-        if (++history <= maxHistory && (!lastPrevSeq || prevSeq != lastPrevSeq))
-        {
-            if (auto const ledger =
-                    context.ledgerMaster.getLedgerBySeq(prevSeq))
-                return ledger->txRead(prevTx).second;
-        }
-        return nullptr;
-    };
+    // `oracle` points to an object that has an `sfPriceDataSeries` field.
+    // When this function is called, that is a `PriceOracle` ledger object,
+    // but after one iteration of the loop below, it is an `sfNewFields`
+    // / `sfFinalFields` object in a `CreatedNode` / `ModifiedNode` object in
+    // a transaction's metadata.
 
-    while (Meta const& meta = getMeta(prevSeq, prevTx))
+    // `chain` points to an object that has `sfPreviousTxnID` and
+    // `sfPreviousTxnLgrSeq` fields. When this function is called,
+    // that is the `PriceOracle` ledger object pointed to by `oracle`,
+    // but after one iteration of the loop below, then it is a `ModifiedNode`
+    // / `CreatedNode` object in a transaction's metadata.
+    STObject const* oracle = sle.get();
+    STObject const* chain = oracle;
+    // Use to test an unlikely scenario when CreatedNode / ModifiedNode
+    // for the Oracle is not found in the inner loop
+    STObject const* prevChain = nullptr;
+
+    Meta meta = nullptr;
+    while (true)
     {
+        if (prevChain == chain)
+            return;
+
+        if (!oracle || f(*oracle) || isNew)
+            return;
+
+        if (++history > maxHistory)
+            return;
+
+        uint256 prevTx = chain->getFieldH256(sfPreviousTxnID);
+        std::uint32_t prevSeq = chain->getFieldU32(sfPreviousTxnLgrSeq);
+
+        auto const ledger = context.ledgerMaster.getLedgerBySeq(prevSeq);
+        if (!ledger)
+            return;
+
+        meta = ledger->txRead(prevTx).second;
+
         for (STObject const& node : meta->getFieldArray(sfAffectedNodes))
         {
-            if (node.getFieldU16(sfLedgerEntryType) == ltORACLE)
+            if (node.getFieldU16(sfLedgerEntryType) != ltORACLE)
             {
-                bool const isNew = node.isFieldPresent(sfNewFields);
-                // if a meta is for the new and this is the first
-                // look-up then it's the meta for the tx that
-                // created the current object; i.e. there is no
-                // historical data
-                if (isNew && history == 1)
-                    return;
-
-                auto const& n = isNew ? static_cast<const STObject&>(
-                                            node.peekAtField(sfNewFields))
-                                      : static_cast<const STObject&>(
-                                            node.peekAtField(sfFinalFields));
-
-                // there is no previous seq/tx if new
-                if (f(n) || isNew)
-                    return;
-
-                lastPrevSeq = prevSeq;
-                prevTx = node.getFieldH256(sfPreviousTxnID);
-                prevSeq = node.getFieldU32(sfPreviousTxnLgrSeq);
-                break;
+                continue;
             }
+
+            prevChain = chain;
+            chain = &node;
+            isNew = node.isFieldPresent(sfNewFields);
+            // if a meta is for the new and this is the first
+            // look-up then it's the meta for the tx that
+            // created the current object; i.e. there is no
+            // historical data
+            if (isNew && history == 1)
+                return;
+
+            oracle = isNew
+                ? &static_cast<const STObject&>(node.peekAtField(sfNewFields))
+                : &static_cast<const STObject&>(
+                      node.peekAtField(sfFinalFields));
+            break;
         }
     }
 }
