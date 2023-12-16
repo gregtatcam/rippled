@@ -446,9 +446,9 @@ did(AccountID const& account) noexcept
 }
 
 Keylet
-oracle(AccountID const& account, std::uint32_t const& seq) noexcept
+oracle(AccountID const& account, std::uint32_t const& documentID) noexcept
 {
-    return {ltORACLE, indexHash(LedgerNameSpace::ORACLE, account, seq)};
+    return {ltORACLE, indexHash(LedgerNameSpace::ORACLE, account, documentID)};
 }
 
 }  // namespace keylet

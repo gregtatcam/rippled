@@ -284,7 +284,7 @@ Keylet
 did(AccountID const& account) noexcept;
 
 Keylet
-oracle(AccountID const& account, std::uint32_t const& seq) noexcept;
+oracle(AccountID const& account, std::uint32_t const& documentID) noexcept;
 
 }  // namespace keylet
 
