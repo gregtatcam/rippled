@@ -107,7 +107,10 @@ SetOracle::preclaim(PreclaimContext const& ctx)
             return temMALFORMED;
     }
 
-    auto isConsistent = [&ctx](auto const& field, auto const& sle) {
+    // Lambda is used to check if the value of a field, passed
+    // in the transaction, is equal to the value of that field
+    // in the on-ledger object.
+    auto isConsistent = [&ctx, &sle](auto const& field) {
         auto const v = ctx.tx[~field];
         return !v || *v == (*sle)[field];
     };
@@ -121,7 +124,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         if (ctx.tx[sfLastUpdateTime] <= (*sle)[sfLastUpdateTime])
             return tecINVALID_UPDATE_TIME;
 
-        if (!isConsistent(sfProvider, sle) || !isConsistent(sfAssetClass, sle))
+        if (!isConsistent(sfProvider) || !isConsistent(sfAssetClass))
             return temMALFORMED;
 
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))
