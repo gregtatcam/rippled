@@ -37,7 +37,7 @@ using DataSeries = std::vector<std::tuple<
 struct CreateArg
 {
     std::optional<AccountID> owner = std::nullopt;
-    std::optional<std::uint32_t> sequence = 1;
+    std::optional<std::uint32_t> documentID = 1;
     DataSeries series = {{"XRP", "USD", 740, 1}};
     std::optional<std::string> assetClass = "currency";
     std::optional<std::string> provider = "provider";
@@ -54,7 +54,7 @@ struct CreateArg
 struct UpdateArg
 {
     std::optional<AccountID> owner = std::nullopt;
-    std::optional<std::uint32_t> sequence = std::nullopt;
+    std::optional<std::uint32_t> documentID = std::nullopt;
     DataSeries series = {};
     std::optional<std::string> assetClass = std::nullopt;
     std::optional<std::string> provider = std::nullopt;
@@ -70,7 +70,7 @@ struct UpdateArg
 struct RemoveArg
 {
     std::optional<AccountID> const& owner = std::nullopt;
-    std::optional<std::uint32_t> const& sequence = std::nullopt;
+    std::optional<std::uint32_t> const& documentID = std::nullopt;
     std::optional<jtx::msig> const& msig = std::nullopt;
     std::optional<jtx::seq> seq = std::nullopt;
     std::uint32_t fee = 10;
@@ -88,7 +88,7 @@ private:
     static inline std::uint32_t fee = 0;
     Env& env_;
     AccountID owner_;
-    std::uint32_t sequence_;
+    std::uint32_t documentID_;
 
 private:
     void
@@ -120,19 +120,19 @@ public:
         std::optional<std::uint8_t> const& timeTreshold = std::nullopt);
 
     std::uint32_t
-    sequence() const
+    documentID() const
     {
-        return sequence_;
+        return documentID_;
     }
 
     [[nodiscard]] bool
     exists() const
     {
-        return exists(env_, owner_, sequence_);
+        return exists(env_, owner_, documentID_);
     }
 
     [[nodiscard]] static bool
-    exists(Env& env, AccountID const& account, std::uint32_t sequence);
+    exists(Env& env, AccountID const& account, std::uint32_t documentID);
 
     [[nodiscard]] bool
     expectPrice(DataSeries const& pricess) const;
@@ -144,13 +144,13 @@ public:
     ledgerEntry(
         Env& env,
         AccountID const& account,
-        std::uint32_t sequence,
+        std::uint32_t documentID,
         std::optional<std::string> const& index = std::nullopt);
 
     Json::Value
     ledgerEntry(std::optional<std::string> const& index = std::nullopt) const
     {
-        return Oracle::ledgerEntry(env_, owner_, sequence_, index);
+        return Oracle::ledgerEntry(env_, owner_, documentID_, index);
     }
 
     static void

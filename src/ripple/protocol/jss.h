@@ -536,7 +536,7 @@ JSS(open_ledger_fee);            // out: TxQ
 JSS(open_ledger_level);          // out: TxQ
 JSS(oracle);                     // in: LedgerEntry
 JSS(oracles);                    // in: get_aggregate_price
-JSS(oracle_sequence);            // in: get_aggregate_price
+JSS(oracle_document_id);         // in: get_aggregate_price
 JSS(owner);                      // in: LedgerEntry, out: NetworkOPs
 JSS(owner_funds);                // in/out: Ledger, NetworkOPs, AcceptedLedgerTx
 JSS(page_index);

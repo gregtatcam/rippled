@@ -141,7 +141,7 @@ getStats(
 };
 
 /**
- * oracles: array of {account, oracle_sequence}
+ * oracles: array of {account, oracle_document_id}
  * base_asset: is the asset to be priced
  * quote_asset: is the denomination in which the prices are expressed
  * trim : percentage of outliers to trim [optional]
@@ -151,11 +151,8 @@ getStats(
 Json::Value
 doGetAggregatePrice(RPC::JsonContext& context)
 {
+    Json::Value result;
     auto const& params(context.params);
-    std::shared_ptr<ReadView const> ledger;
-    auto result = RPC::lookupLedger(ledger, context);
-    if (!ledger)
-        return result;
 
     constexpr std::uint16_t maxOracles = 200;
     if (!params.isMember(jss::oracles))
@@ -207,15 +204,15 @@ doGetAggregatePrice(RPC::JsonContext& context)
     Prices prices;
     for (auto const& oracle : params[jss::oracles])
     {
-        if (!oracle.isMember(jss::oracle_sequence) ||
+        if (!oracle.isMember(jss::oracle_document_id) ||
             !oracle.isMember(jss::account))
         {
             RPC::inject_error(rpcORACLE_MALFORMED, result);
             return result;
         }
-        auto const sequence = oracle[jss::oracle_sequence].isConvertibleTo(
+        auto const sequence = oracle[jss::oracle_document_id].isConvertibleTo(
                                   Json::ValueType::uintValue)
-            ? std::make_optional(oracle[jss::oracle_sequence].asUInt())
+            ? std::make_optional(oracle[jss::oracle_document_id].asUInt())
             : std::nullopt;
         auto const account =
             parseBase58<AccountID>(oracle[jss::account].asString());
@@ -224,6 +221,11 @@ doGetAggregatePrice(RPC::JsonContext& context)
             RPC::inject_error(rpcINVALID_PARAMS, result);
             return result;
         }
+
+        std::shared_ptr<ReadView const> ledger;
+        result = RPC::lookupLedger(ledger, context);
+        if (!ledger)
+            return result;
 
         auto const sle = ledger->read(keylet::oracle(*account, *sequence));
         iteratePriceData(context, sle, [&](STObject const& node) {

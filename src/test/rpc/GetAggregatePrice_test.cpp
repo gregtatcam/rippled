@@ -64,7 +64,7 @@ public:
             ret = Oracle::aggregatePrice(env, "XRP", "USD", {{}});
             BEAST_EXPECT(ret[jss::error].asString() == "oracleMalformed");
 
-            // invalid oracle sequence
+            // invalid oracle document id
             ret = Oracle::aggregatePrice(env, "XRP", "USD", {{{owner, 2}}});
             BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
 
@@ -77,7 +77,7 @@ public:
             Oracle oracle(
                 env, {.owner = owner, .series = {{"XRP", "EUR", 740, 1}}});
             ret = Oracle::aggregatePrice(
-                env, "XRP", "USD", {{{owner, oracle.sequence()}}});
+                env, "XRP", "USD", {{{owner, oracle.documentID()}}});
             BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
         }
 
@@ -89,8 +89,8 @@ public:
             {
                 Account const owner(std::to_string(i));
                 env.fund(XRP(1'000), owner);
-                Oracle oracle(env, {.owner = owner, .sequence = i});
-                oracles.emplace_back(owner, oracle.sequence());
+                Oracle oracle(env, {.owner = owner, .documentID = i});
+                oracles.emplace_back(owner, oracle.documentID());
             }
             auto const ret = Oracle::aggregatePrice(env, "XRP", "USD", oracles);
             BEAST_EXPECT(ret[jss::error].asString() == "oracleMalformed");
@@ -112,10 +112,10 @@ public:
                 Oracle oracle(
                     env,
                     {.owner = owner,
-                     .sequence = rand(),
+                     .documentID = rand(),
                      .series = {
                          {"XRP", "USD", 740 + i, 1}, {"XRP", "EUR", 740, 1}}});
-                oracles.emplace_back(owner, oracle.sequence());
+                oracles.emplace_back(owner, oracle.documentID());
             }
         };
 
@@ -168,7 +168,8 @@ public:
             {
                 Oracle oracle(
                     env,
-                    {.owner = oracles[i].first, .sequence = oracles[i].second},
+                    {.owner = oracles[i].first,
+                     .documentID = oracles[i].second},
                     false);
                 // push XRP/USD by more than three ledgers, so this price
                 // oracle is not included in the dataset
@@ -180,7 +181,8 @@ public:
             {
                 Oracle oracle(
                     env,
-                    {.owner = oracles[i].first, .sequence = oracles[i].second},
+                    {.owner = oracles[i].first,
+                     .documentID = oracles[i].second},
                     false);
                 // push XRP/USD by two ledgers, so this price
                 // is included in the dataset
@@ -214,7 +216,8 @@ public:
             {
                 Oracle oracle(
                     env,
-                    {.owner = oracles[i].first, .sequence = oracles[i].second},
+                    {.owner = oracles[i].first,
+                     .documentID = oracles[i].second},
                     false);
                 // push XRP/USD by two ledgers, so this price
                 // is included in the dataset

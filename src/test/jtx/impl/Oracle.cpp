@@ -30,12 +30,12 @@ namespace test {
 namespace jtx {
 
 Oracle::Oracle(Env& env, CreateArg const& arg, bool submit)
-    : env_(env), owner_{}, sequence_{}
+    : env_(env), owner_{}, documentID_{}
 {
     if (arg.owner)
         owner_ = *arg.owner;
-    if (arg.sequence)
-        sequence_ = *arg.sequence;
+    if (arg.documentID)
+        documentID_ = *arg.documentID;
     if (submit)
         set(arg);
 }
@@ -46,7 +46,7 @@ Oracle::remove(RemoveArg const& arg)
     Json::Value jv;
     jv[jss::TransactionType] = jss::OracleDelete;
     jv[jss::Account] = to_string(arg.owner.value_or(owner_));
-    jv[jss::OracleDocumentID] = arg.sequence.value_or(sequence_);
+    jv[jss::OracleDocumentID] = arg.documentID.value_or(documentID_);
     if (Oracle::fee != 0)
         jv[jss::Fee] = std::to_string(Oracle::fee);
     else if (arg.fee != 0)
@@ -86,16 +86,16 @@ Oracle::submit(
 }
 
 bool
-Oracle::exists(Env& env, AccountID const& account, std::uint32_t sequence)
+Oracle::exists(Env& env, AccountID const& account, std::uint32_t documentID)
 {
     assert(account.isNonZero());
-    return env.le(keylet::oracle(account, sequence)) != nullptr;
+    return env.le(keylet::oracle(account, documentID)) != nullptr;
 }
 
 bool
 Oracle::expectPrice(DataSeries const& series) const
 {
-    if (auto const sle = env_.le(keylet::oracle(owner_, sequence_)))
+    if (auto const sle = env_.le(keylet::oracle(owner_, documentID_)))
     {
         auto const& leSeries = sle->getFieldArray(sfPriceDataSeries);
         if (leSeries.size() == 0 || leSeries.size() != series.size())
@@ -126,7 +126,7 @@ Oracle::expectPrice(DataSeries const& series) const
 bool
 Oracle::expectLastUpdateTime(std::uint32_t lastUpdateTime) const
 {
-    auto const sle = env_.le(keylet::oracle(owner_, sequence_));
+    auto const sle = env_.le(keylet::oracle(owner_, documentID_));
     return sle && (*sle)[sfLastUpdateTime] == lastUpdateTime;
 }
 
@@ -148,7 +148,7 @@ Oracle::aggregatePrice(
         {
             Json::Value oracle;
             oracle[jss::account] = to_string(id.first.id());
-            oracle[jss::oracle_sequence] = id.second;
+            oracle[jss::oracle_document_id] = id.second;
             jvOracles.append(oracle);
         }
         jv[jss::oracles] = jvOracles;
@@ -177,11 +177,11 @@ Oracle::set(UpdateArg const& arg)
     Json::Value jv;
     if (arg.owner)
         owner_ = *arg.owner;
-    if (arg.sequence)
-        sequence_ = *arg.sequence;
+    if (arg.documentID)
+        documentID_ = *arg.documentID;
     jv[jss::TransactionType] = jss::OracleSet;
     jv[jss::Account] = to_string(owner_);
-    jv[jss::OracleDocumentID] = sequence_;
+    jv[jss::OracleDocumentID] = documentID_;
     if (arg.assetClass)
         jv[jss::AssetClass] = strHex(*arg.assetClass);
     if (arg.provider)
@@ -237,7 +237,7 @@ Oracle::set(CreateArg const& arg)
 {
     set(UpdateArg{
         .owner = arg.owner,
-        .sequence = arg.sequence,
+        .documentID = arg.documentID,
         .series = arg.series,
         .assetClass = arg.assetClass,
         .provider = arg.provider,
@@ -254,12 +254,12 @@ Json::Value
 Oracle::ledgerEntry(
     Env& env,
     AccountID const& account,
-    std::uint32_t sequence,
+    std::uint32_t documentID,
     std::optional<std::string> const& index)
 {
     Json::Value jvParams;
     jvParams[jss::oracle][jss::account] = to_string(account);
-    jvParams[jss::oracle][jss::oracle_sequence] = sequence;
+    jvParams[jss::oracle][jss::oracle_document_id] = documentID;
     if (index)
     {
         std::uint32_t i;

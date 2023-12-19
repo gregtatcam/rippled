@@ -93,12 +93,23 @@ private:
             // Duplicate token pair
             oracle.set(CreateArg{
                 .series = {{"XRP", "USD", 740, 1}, {"XRP", "USD", 750, 1}},
-                .ter = ter(tecDUPLICATE)});
+                .ter = ter(temMALFORMED)});
 
             // Price is not included
             oracle.set(CreateArg{
                 .series =
                     {{"XRP", "USD", 740, 1}, {"XRP", "EUR", std::nullopt, 1}},
+                .ter = ter(temMALFORMED)});
+
+            // Token pair is in update and delete
+            oracle.set(CreateArg{
+                .series =
+                    {{"XRP", "USD", 740, 1}, {"XRP", "USD", std::nullopt, 1}},
+                .ter = ter(temMALFORMED)});
+            // Token pair is in add and delete
+            oracle.set(CreateArg{
+                .series =
+                    {{"XRP", "EUR", 740, 1}, {"XRP", "EUR", std::nullopt, 1}},
                 .ter = ter(temMALFORMED)});
 
             // Array of token pair is 0 or exceeds 10
@@ -294,7 +305,7 @@ private:
             BEAST_EXPECT(oracle.exists());
             oracle.set(CreateArg{
                 .owner = some, .series = {{"912810RR9", "USD", 740, 1}}});
-            BEAST_EXPECT(Oracle::exists(env, some, oracle.sequence()));
+            BEAST_EXPECT(Oracle::exists(env, some, oracle.documentID()));
         }
     }
 
@@ -319,7 +330,7 @@ private:
         }
 
         // Invalid Sequence
-        oracle.remove({.sequence = 2, .ter = ter(tecNO_ENTRY)});
+        oracle.remove({.documentID = 2, .ter = ter(tecNO_ENTRY)});
 
         // Invalid owner
         Account const invalid("invalid");
@@ -378,7 +389,7 @@ private:
             Oracle oracle1(
                 env,
                 {.owner = owner,
-                 .sequence = 2,
+                 .documentID = 2,
                  .series = {{"XRP", "EUR", 740, 1}}});
             BEAST_EXPECT(ownerCount(env, owner) == 2);
             BEAST_EXPECT(oracle.exists());
@@ -583,13 +594,13 @@ private:
             Account const owner(std::string("owner") + std::to_string(i));
             env.fund(XRP(1'000), owner);
             // different accounts can have the same asset pair
-            Oracle oracle(env, {.owner = owner, .sequence = i});
+            Oracle oracle(env, {.owner = owner, .documentID = i});
             accounts.push_back(owner.id());
-            oracles.push_back(oracle.sequence());
+            oracles.push_back(oracle.documentID());
             // same account can have different asset pair
-            Oracle oracle1(env, {.owner = owner, .sequence = i + 10});
+            Oracle oracle1(env, {.owner = owner, .documentID = i + 10});
             accounts.push_back(owner.id());
-            oracles.push_back(oracle1.sequence());
+            oracles.push_back(oracle1.documentID());
         }
         for (int i = 0; i < accounts.size(); ++i)
         {

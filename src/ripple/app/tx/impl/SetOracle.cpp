@@ -27,10 +27,10 @@
 
 namespace ripple {
 
-static inline uint256
-tokenPairHash(STObject const& pair)
+static inline std::pair<Currency, Currency>
+tokenPairKey(STObject const& pair)
 {
-    return sha512Half(
+    return std::make_pair(
         pair.getFieldCurrency(sfBaseAsset).currency(),
         pair.getFieldCurrency(sfQuoteAsset).currency());
 }
@@ -92,17 +92,20 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     auto const sle = ctx.view.read(keylet::oracle(
         ctx.tx.getAccountID(sfAccount), ctx.tx[sfOracleDocumentID]));
 
-    hash_set<uint256> pairs;
-    hash_set<uint256> pairsDel;
+    // token pairs to add/update
+    hash_set<std::pair<Currency, Currency>> pairs;
+    // token pairs to delete. if a token pair doesn't include
+    // the price then this pair should be deleted from the object.
+    hash_set<std::pair<Currency, Currency>> pairsDel;
     for (auto const& entry : ctx.tx.getFieldArray(sfPriceDataSeries))
     {
-        auto const hash = tokenPairHash(entry);
-        if (pairs.contains(hash))
-            return tecDUPLICATE;
+        auto const key = tokenPairKey(entry);
+        if (pairs.contains(key) || pairsDel.contains(key))
+            return temMALFORMED;
         if (entry.isFieldPresent(sfAssetPrice))
-            pairs.emplace(hash);
+            pairs.emplace(key);
         else if (sle)
-            pairsDel.emplace(hash);
+            pairsDel.emplace(key);
         else
             return temMALFORMED;
     }
@@ -129,13 +132,13 @@ SetOracle::preclaim(PreclaimContext const& ctx)
 
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))
         {
-            auto const hash = tokenPairHash(entry);
-            if (!pairs.contains(hash))
+            auto const key = tokenPairKey(entry);
+            if (!pairs.contains(key))
             {
-                if (pairsDel.contains(hash))
-                    pairsDel.erase(hash);
+                if (pairsDel.contains(key))
+                    pairsDel.erase(key);
                 else
-                    pairs.emplace(hash);
+                    pairs.emplace(key);
             }
         }
         if (!pairsDel.empty())
@@ -190,7 +193,7 @@ SetOracle::doApply()
         // the token pair that doesn't have their price updated will not
         // include neither price nor scale in the updated PriceDataSeries
 
-        hash_map<uint256, STObject> pairs;
+        hash_map<std::pair<Currency, Currency>, STObject> pairs;
         // collect current token pairs
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))
         {
@@ -199,19 +202,19 @@ SetOracle::doApply()
                 sfBaseAsset, entry.getFieldCurrency(sfBaseAsset));
             priceData.setFieldCurrency(
                 sfQuoteAsset, entry.getFieldCurrency(sfQuoteAsset));
-            pairs.emplace(tokenPairHash(entry), std::move(priceData));
+            pairs.emplace(tokenPairKey(entry), std::move(priceData));
         }
         auto const oldCount = pairs.size() > 5 ? 2 : 1;
         // update/add/delete pairs
         for (auto const& entry : ctx_.tx.getFieldArray(sfPriceDataSeries))
         {
-            auto const hash = tokenPairHash(entry);
+            auto const key = tokenPairKey(entry);
             if (!entry.isFieldPresent(sfAssetPrice))
             {
                 // delete token pair
-                pairs.erase(hash);
+                pairs.erase(key);
             }
-            else if (auto iter = pairs.find(hash); iter != pairs.end())
+            else if (auto iter = pairs.find(key); iter != pairs.end())
             {
                 // update the price
                 iter->second.setFieldU64(
@@ -231,7 +234,7 @@ SetOracle::doApply()
                     sfAssetPrice, entry.getFieldU64(sfAssetPrice));
                 if (entry.isFieldPresent(sfScale))
                     priceData.setFieldU8(sfScale, entry.getFieldU8(sfScale));
-                pairs.emplace(hash, std::move(priceData));
+                pairs.emplace(key, std::move(priceData));
             }
         }
         STArray updatedSeries;
