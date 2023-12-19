@@ -153,7 +153,7 @@ private:
                         {"XRP", "US9", 740, 1},
                         {"XRP", "U10", 750, 1},
                     },
-                .ter = ter(temARRAY_TOO_LARGE)});
+                .ter = ter(tecARRAY_TOO_LARGE)});
         }
 
         {
@@ -252,11 +252,11 @@ private:
             BEAST_EXPECT(oracle.exists());
             oracle.set(UpdateArg{
                 .series = {{"XRP", "EUR", std::nullopt, std::nullopt}},
-                .ter = ter(tecOBJECT_NOT_FOUND)});
+                .ter = ter(tecTOKEN_PAIR_NOT_FOUND)});
             // delete all token pairs
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", std::nullopt, std::nullopt}},
-                .ter = ter(temARRAY_EMPTY)});
+                .ter = ter(tecARRAY_EMPTY)});
         }
     }
 

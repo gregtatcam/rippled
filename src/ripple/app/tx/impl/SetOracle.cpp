@@ -55,7 +55,7 @@ SetOracle::preflight(PreflightContext const& ctx)
 
     auto isInvalidLength = [&](auto const& sField, std::size_t length) {
         return ctx.tx.isFieldPresent(sField) &&
-            ctx.tx[sField].length() > length;
+            (ctx.tx[sField].length() == 0 || ctx.tx[sField].length() > length);
     };
 
     if (isInvalidLength(sfProvider, maxOracleProvider) ||
@@ -142,7 +142,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
             }
         }
         if (!pairsDel.empty())
-            return tecOBJECT_NOT_FOUND;
+            return tecTOKEN_PAIR_NOT_FOUND;
     }
     else
     {
@@ -154,9 +154,9 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     }
 
     if (pairs.empty())
-        return temARRAY_EMPTY;
+        return tecARRAY_EMPTY;
     if (pairs.size() > maxOracleDataSeries)
-        return temARRAY_TOO_LARGE;
+        return tecARRAY_TOO_LARGE;
 
     auto const add = pairs.size() > 5 ? 2 : 1;
     auto const reserve = ctx.view.fees().accountReserve(

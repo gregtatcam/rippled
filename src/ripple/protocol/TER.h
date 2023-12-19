@@ -335,7 +335,10 @@ enum TECcodes : TERUnderlyingType {
     tecXCHAIN_BAD_PUBLIC_KEY_ACCOUNT_PAIR = 185,
     tecXCHAIN_CREATE_ACCOUNT_DISABLED = 186,
     tecEMPTY_DID = 187,
-    tecINVALID_UPDATE_TIME = 188
+    tecINVALID_UPDATE_TIME = 188,
+    tecTOKEN_PAIR_NOT_FOUND = 189,
+    tecARRAY_EMPTY = 190,
+    tecARRAY_TOO_LARGE = 191
 };
 
 //------------------------------------------------------------------------------
