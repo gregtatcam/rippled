@@ -308,8 +308,9 @@ doGetAggregatePrice(RPC::JsonContext& context)
         {
             static STAmount two{noIssue(), 2, 0};
             auto it = itAdvance(prices.right.begin(), middle - 1);
-            auto const sum = it->first + (++it)->first;
-            return divide(sum, two, noIssue());
+            auto const& a1 = it->first;
+            auto const& a2 = (++it)->first;
+            return divide(a1 + a2, two, noIssue());
         }
         return itAdvance(prices.right.begin(), middle)->first;
     }();
