@@ -47,7 +47,7 @@ struct CreateArg
     std::optional<jtx::msig> msig = std::nullopt;
     std::optional<jtx::seq> seq = std::nullopt;
     std::uint32_t fee = 10;
-    std::optional<ter> ter = std::nullopt;
+    std::optional<ter> err = std::nullopt;
 };
 
 // Typical defaults for Update
@@ -64,7 +64,7 @@ struct UpdateArg
     std::optional<jtx::msig> msig = std::nullopt;
     std::optional<jtx::seq> seq = std::nullopt;
     std::uint32_t fee = 10;
-    std::optional<ter> ter = std::nullopt;
+    std::optional<ter> err = std::nullopt;
 };
 
 struct RemoveArg
@@ -74,7 +74,7 @@ struct RemoveArg
     std::optional<jtx::msig> const& msig = std::nullopt;
     std::optional<jtx::seq> seq = std::nullopt;
     std::uint32_t fee = 10;
-    std::optional<ter> const& ter = std::nullopt;
+    std::optional<ter> const& err = std::nullopt;
 };
 
 /** Oracle class facilitates unit-testing of the Price Oracle feature.
@@ -96,7 +96,7 @@ private:
         Json::Value const& jv,
         std::optional<jtx::msig> const& msig,
         std::optional<jtx::seq> const& seq,
-        std::optional<ter> const& ter);
+        std::optional<ter> const& err);
 
 public:
     Oracle(Env& env, CreateArg const& arg, bool submit = true);

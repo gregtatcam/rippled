@@ -123,7 +123,7 @@ getStats(
 {
     STAmount avg{noIssue(), 0, 0};
     Number sd{0};
-    std::uint16_t size = std::distance(begin, end);
+    std::uint16_t const size = std::distance(begin, end);
     avg = std::accumulate(
         begin, end, avg, [&](STAmount const& acc, auto const& it) {
             return acc + it.first;
@@ -302,9 +302,9 @@ doGetAggregatePrice(RPC::JsonContext& context)
         return it;
     };
 
-    auto const median = [&]() {
-        size_t const middle = size / 2;
-        if ((size % 2) == 0)
+    auto const median = [&prices, &itAdvance, &size_ = size]() {
+        auto const middle = size_ / 2;
+        if ((size_ % 2) == 0)
         {
             static STAmount two{noIssue(), 2, 0};
             auto it = itAdvance(prices.right.begin(), middle - 1);

@@ -53,7 +53,7 @@ Oracle::remove(RemoveArg const& arg)
         jv[jss::Fee] = std::to_string(arg.fee);
     else
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
-    submit(jv, arg.msig, arg.seq, arg.ter);
+    submit(jv, arg.msig, arg.seq, arg.err);
 }
 
 void
@@ -61,25 +61,25 @@ Oracle::submit(
     Json::Value const& jv,
     std::optional<jtx::msig> const& msig,
     std::optional<jtx::seq> const& seq,
-    std::optional<ter> const& ter)
+    std::optional<ter> const& err)
 {
     if (msig)
     {
-        if (seq && ter)
-            env_(jv, *msig, *seq, *ter);
+        if (seq && err)
+            env_(jv, *msig, *seq, *err);
         else if (seq)
             env_(jv, *msig, *seq);
-        else if (ter)
-            env_(jv, *msig, *ter);
+        else if (err)
+            env_(jv, *msig, *err);
         else
             env_(jv, *msig);
     }
-    else if (seq && ter)
-        env_(jv, *seq, *ter);
+    else if (seq && err)
+        env_(jv, *seq, *err);
     else if (seq)
         env_(jv, *seq);
-    else if (ter)
-        env_(jv, *ter);
+    else if (err)
+        env_(jv, *err);
     else
         env_(jv);
     env_.close();
@@ -229,7 +229,7 @@ Oracle::set(UpdateArg const& arg)
         dataSeries.append(priceData);
     }
     jv[jss::PriceDataSeries] = dataSeries;
-    submit(jv, arg.msig, arg.seq, arg.ter);
+    submit(jv, arg.msig, arg.seq, arg.err);
 }
 
 void
@@ -247,7 +247,7 @@ Oracle::set(CreateArg const& arg)
         .msig = arg.msig,
         .seq = arg.seq,
         .fee = arg.fee,
-        .ter = arg.ter});
+        .err = arg.err});
 }
 
 Json::Value
