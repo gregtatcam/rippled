@@ -170,7 +170,10 @@ doGetAggregatePrice(RPC::JsonContext& context)
     if (!params.isMember(jss::quote_asset))
         return RPC::missing_field_error(jss::quote_asset);
 
-    auto getField = [&](Json::StaticString const& field,
+    // Lambda to get `trim` and `time_threshold` fields. If the field
+    // is not included in the input then a default value is returned.
+    auto getField = [&params](
+                        Json::StaticString const& field,
                         unsigned int def =
                             0) -> std::variant<std::uint32_t, error_code_i> {
         if (params.isMember(field))
@@ -210,13 +213,13 @@ doGetAggregatePrice(RPC::JsonContext& context)
             RPC::inject_error(rpcORACLE_MALFORMED, result);
             return result;
         }
-        auto const sequence = oracle[jss::oracle_document_id].isConvertibleTo(
-                                  Json::ValueType::uintValue)
+        auto const documentID = oracle[jss::oracle_document_id].isConvertibleTo(
+                                    Json::ValueType::uintValue)
             ? std::make_optional(oracle[jss::oracle_document_id].asUInt())
             : std::nullopt;
         auto const account =
             parseBase58<AccountID>(oracle[jss::account].asString());
-        if (!account || account->isZero() || !sequence)
+        if (!account || account->isZero() || !documentID)
         {
             RPC::inject_error(rpcINVALID_PARAMS, result);
             return result;
@@ -227,7 +230,7 @@ doGetAggregatePrice(RPC::JsonContext& context)
         if (!ledger)
             return result;
 
-        auto const sle = ledger->read(keylet::oracle(*account, *sequence));
+        auto const sle = ledger->read(keylet::oracle(*account, *documentID));
         iteratePriceData(context, sle, [&](STObject const& node) {
             auto const& series = node.getFieldArray(sfPriceDataSeries);
             // find the token pair entry with the price

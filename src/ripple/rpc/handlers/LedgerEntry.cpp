@@ -621,7 +621,7 @@ doLedgerEntry(RPC::JsonContext& context)
             {
                 uNodeIndex = beast::zero;
                 auto const& oracle = context.params[jss::oracle];
-                auto const sequence =
+                auto const documentID =
                     oracle[jss::oracle_document_id].isConvertibleTo(
                         Json::ValueType::uintValue)
                     ? std::make_optional(
@@ -631,10 +631,10 @@ doLedgerEntry(RPC::JsonContext& context)
                     parseBase58<AccountID>(oracle[jss::account].asString());
                 if (!account || account->isZero())
                     jvResult[jss::error] = "malformedAddress";
-                else if (!sequence)
+                else if (!documentID)
                     jvResult[jss::error] = "malformedSequence";
                 else
-                    uNodeIndex = keylet::oracle(*account, *sequence).key;
+                    uNodeIndex = keylet::oracle(*account, *documentID).key;
             }
         }
         else
