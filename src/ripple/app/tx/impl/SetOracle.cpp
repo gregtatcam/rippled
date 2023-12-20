@@ -18,6 +18,7 @@
 //==============================================================================
 
 #include <ripple/app/tx/impl/SetOracle.h>
+#include <ripple/basics/UnorderedContainers.h>
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/ledger/View.h>
 #include <ripple/protocol/Feature.h>
