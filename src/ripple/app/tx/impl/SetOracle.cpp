@@ -244,9 +244,7 @@ SetOracle::doApply()
         sle->setFieldArray(sfPriceDataSeries, updatedSeries);
         if (ctx_.tx.isFieldPresent(sfURI))
             sle->setFieldVL(sfURI, ctx_.tx[sfURI]);
-        // LastUpdateTime is Unix time, store internally as Ripple Epoch
-        sle->setFieldU32(
-            sfLastUpdateTime, ctx_.tx[sfLastUpdateTime] - epoch_offset.count());
+        sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
 
         auto const newCount = pairs.size() > 5 ? 2 : 1;
         auto const adjust = newCount - oldCount;
@@ -267,9 +265,7 @@ SetOracle::doApply()
         auto const& series = ctx_.tx.getFieldArray(sfPriceDataSeries);
         sle->setFieldArray(sfPriceDataSeries, series);
         sle->setFieldVL(sfAssetClass, ctx_.tx[sfAssetClass]);
-        // LastUpdateTime is Unix time, store internally as Ripple Epoch
-        sle->setFieldU32(
-            sfLastUpdateTime, ctx_.tx[sfLastUpdateTime] - epoch_offset.count());
+        sle->setFieldU32(sfLastUpdateTime, ctx_.tx[sfLastUpdateTime]);
 
         auto page = ctx_.view().dirInsert(
             keylet::ownerDir(account_), sle->key(), describeOwnerDir(account_));

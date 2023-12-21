@@ -236,7 +236,7 @@ private:
                 .lastUpdateTime = 500,
                 .err = ter(tecINVALID_UPDATE_TIME)});
             oracle.set(UpdateArg{.series = {{"XRP", "USD", 740, 1}}});
-            BEAST_EXPECT(oracle.expectLastUpdateTime(150));
+            BEAST_EXPECT(oracle.expectLastUpdateTime(946684950));
             // Less than the previous lastUpdateTime
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
@@ -273,6 +273,7 @@ private:
             Oracle oracle(env, {.owner = owner, .series = series});
             BEAST_EXPECT(oracle.exists());
             BEAST_EXPECT(ownerCount(env, owner) == (count + adj));
+            BEAST_EXPECT(oracle.expectLastUpdateTime(946684810));
         };
 
         {
