@@ -975,8 +975,7 @@ Pathfinder::addLink(
             {
                 bool const bRequireAuth(
                     sleEnd->getFieldU32(sfFlags) & lsfRequireAuth);
-                bool const bIsEndCurrency(
-                    uEndAsset == mDstAmount.getAsset());
+                bool const bIsEndCurrency(uEndAsset == mDstAmount.getAsset());
                 bool const bIsNoRippleOut(isNoRippleOut(currentPath));
                 bool const bDestOnly(addFlags & afAC_LAST);
 
