@@ -177,8 +177,7 @@ STPath::hasSeen(
     return false;
 }
 
-Json::Value
-STPath::getJson(JsonOptions) const
+Json::Value STPath::getJson(JsonOptions) const
 {
     Json::Value ret(Json::arrayValue);
 

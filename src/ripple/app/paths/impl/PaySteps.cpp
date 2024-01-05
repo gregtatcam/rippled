@@ -279,8 +279,7 @@ toStrand(
             STPathElement const& lastAsset =
                 *std::find_if(normPath.rbegin(), normPath.rend(), hasAsset);
             if ((lastAsset.getAsset() != deliver.asset()) ||
-                (offerCrossing &&
-                 lastAsset.getIssuerID() != deliver.account()))
+                (offerCrossing && lastAsset.getIssuerID() != deliver.account()))
             {
                 normPath.emplace_back(
                     std::nullopt, deliver.asset(), deliver.account());
