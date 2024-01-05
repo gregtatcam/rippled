@@ -40,8 +40,16 @@ STPathElement::get_hash(STPathElement const& element)
     for (auto const x : element.getAccountID())
         hash_account += (hash_account * 257) ^ x;
 
-    for (auto const x : element.getCurrency())
-        hash_currency += (hash_currency * 509) ^ x;
+    if (element.hasMPT())
+    {
+        hash_currency +=
+            beast::uhash<>{}(std::get<MPT>(element.getAsset().asset()).second);
+    }
+    else
+    {
+        for (auto const x : static_cast<Currency>(element.getAsset()))
+            hash_currency += (hash_currency * 509) ^ x;
+    }
 
     for (auto const x : element.getIssuerID())
         hash_issuer += (hash_issuer * 911) ^ x;
@@ -82,21 +90,26 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             auto hasAccount = iType & STPathElement::typeAccount;
             auto hasCurrency = iType & STPathElement::typeCurrency;
             auto hasIssuer = iType & STPathElement::typeIssuer;
+            auto hasMPT = iType & STPathElement::typeMPT;
 
             AccountID account;
-            Currency currency;
+            Asset asset{Currency{beast::zero}};
             AccountID issuer;
 
             if (hasAccount)
                 account = sit.get160();
 
+            assert(!(hasCurrency && hasMPT));
             if (hasCurrency)
-                currency = sit.get160();
+                asset = static_cast<Currency>(sit.get160());
+
+            if (hasMPT)
+                asset = std::make_pair(sit.get32(), static_cast<AccountID>(sit.get160()));
 
             if (hasIssuer)
                 issuer = sit.get160();
 
-            path.emplace_back(account, currency, issuer, hasCurrency);
+            path.emplace_back(account, asset, issuer, hasCurrency);
         }
     }
 }
@@ -150,12 +163,12 @@ STPathSet::isDefault() const
 bool
 STPath::hasSeen(
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer) const
 {
     for (auto& p : mPath)
     {
-        if (p.getAccountID() == account && p.getCurrency() == currency &&
+        if (p.getAccountID() == account && p.getAsset() == asset &&
             p.getIssuerID() == issuer)
             return true;
     }
@@ -177,8 +190,14 @@ Json::Value STPath::getJson(JsonOptions) const
         if (iType & STPathElement::typeAccount)
             elem[jss::account] = to_string(it.getAccountID());
 
+        assert(
+            !(iType & STPathElement::typeCurrency &&
+              iType & STPathElement::typeMPT));
         if (iType & STPathElement::typeCurrency)
-            elem[jss::currency] = to_string(it.getCurrency());
+            elem[jss::currency] = to_string(it.getAsset());
+
+        if (iType & STPathElement::typeMPT)
+            elem[jss::mpt_issuance_id] = to_string(it.getAsset());
 
         if (iType & STPathElement::typeIssuer)
             elem[jss::issuer] = to_string(it.getIssuerID());
@@ -226,8 +245,8 @@ STPathSet::add(Serializer& s) const
             if (iType & STPathElement::typeAccount)
                 s.addBitString(speElement.getAccountID());
 
-            if (iType & STPathElement::typeCurrency)
-                s.addBitString(speElement.getCurrency());
+            if (iType & STPathElement::typeAsset)
+                speElement.getAsset().addBitString(s);
 
             if (iType & STPathElement::typeIssuer)
                 s.addBitString(speElement.getIssuerID());

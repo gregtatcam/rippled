@@ -1522,7 +1522,7 @@ private:
                 auto const& pathElem = st[0][0];
                 BEAST_EXPECT(
                     pathElem.isOffer() && pathElem.getIssuerID() == gw.id() &&
-                    pathElem.getCurrency() == USD.currency);
+                    pathElem.getAsset() == USD.currency);
             }
         }
         {
@@ -1541,7 +1541,7 @@ private:
                 BEAST_EXPECT(
                     pathElem.isOffer() &&
                     pathElem.getIssuerID() == xrpAccount() &&
-                    pathElem.getCurrency() == xrpCurrency());
+                    pathElem.getAsset() == xrpCurrency());
             }
         }
     }
@@ -3730,7 +3730,7 @@ private:
             env(pay(alice, carol, XRP(100)),
                 path(~USD, ~XRP),
                 txflags(tfNoRippleDirect),
-                ter(temBAD_SEND_XRP_PATHS));
+                ter(temBAD_SEND_PATHS));
         }
 
         {
@@ -3745,7 +3745,7 @@ private:
                 path(~USD, ~XRP),
                 sendmax(XRP(200)),
                 txflags(tfNoRippleDirect),
-                ter(temBAD_SEND_XRP_MAX));
+                ter(temBAD_SEND_MAX));
         }
     }
 

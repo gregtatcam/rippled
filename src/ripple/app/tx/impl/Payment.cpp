@@ -88,12 +88,12 @@ Payment::preflight(PreflightContext const& ctx)
             saDstAmount < beast::zero);
     }
 
-    auto const& uSrcCurrency = maxSourceAmount.getAsset();
-    auto const& uDstCurrency = saDstAmount.getAsset();
+    auto const& uSrcAsset = maxSourceAmount.getAsset();
+    auto const& uDstAsset = saDstAmount.getAsset();
 
     // isZero() is XRP.  FIX!
-    bool const bXRPDirect = uSrcCurrency.isXRP() && uDstCurrency.isXRP();
-    bool const bMPTDirect = uSrcCurrency.isMPT() && uDstCurrency.isMPT();
+    bool const bXRPDirect = uSrcAsset.isXRP() && uDstAsset.isXRP();
+    bool const bMPTDirect = uSrcAsset.isMPT() && uDstAsset.isMPT();
     bool const bDirect = bXRPDirect || bMPTDirect;
 
     if (!isLegalNet(saDstAmount) || !isLegalNet(maxSourceAmount))
@@ -119,20 +119,20 @@ Payment::preflight(PreflightContext const& ctx)
                         << "bad dst amount: " << saDstAmount.getFullText();
         return temBAD_AMOUNT;
     }
-    if (badCurrency() == uSrcCurrency || badCurrency() == uDstCurrency)
+    if (badCurrency() == uSrcAsset || badCurrency() == uDstAsset)
     {
         JLOG(j.trace()) << "Malformed transaction: "
                         << "Bad currency.";
         return temBAD_CURRENCY;
     }
-    if (account == uDstAccountID && uSrcCurrency == uDstCurrency && !bPaths)
+    if (account == uDstAccountID && uSrcAsset == uDstAsset && !bPaths)
     {
         // You're signing yourself a payment.
         // If bPaths is true, you might be trying some arbitrage.
         JLOG(j.trace()) << "Malformed transaction: "
                         << "Redundant payment from " << to_string(account)
                         << " to self without path for "
-                        << to_string(uDstCurrency);
+                        << to_string(uDstAsset);
         return temREDUNDANT;
     }
     if (bDirect && bMax)
@@ -140,14 +140,14 @@ Payment::preflight(PreflightContext const& ctx)
         // Consistent but redundant transaction.
         JLOG(j.trace()) << "Malformed transaction: "
                         << "SendMax specified for XRP to XRP or MPT to MPT.";
-        return temBAD_SEND_XRP_MAX;  // TODO new err code here and below
+        return temBAD_SEND_MAX;  // TODO MPT new err code here and below
     }
     if (bDirect && bPaths)
     {
-        // XRP is sent without paths.
+        // XRP and MPT are sent without paths.
         JLOG(j.trace()) << "Malformed transaction: "
                         << "Paths specified for XRP to XRP or MPT to MPT.";
-        return temBAD_SEND_XRP_PATHS;
+        return temBAD_SEND_PATHS;
     }
     if (bDirect && partialPaymentAllowed)
     {
@@ -155,7 +155,7 @@ Payment::preflight(PreflightContext const& ctx)
         JLOG(j.trace())
             << "Malformed transaction: "
             << "Partial payment specified for XRP to XRP or MPT to MPT.";
-        return temBAD_SEND_XRP_PARTIAL;
+        return temBAD_SEND_PARTIAL;
     }
     if (bDirect && limitQuality)
     {
@@ -163,7 +163,7 @@ Payment::preflight(PreflightContext const& ctx)
         JLOG(j.trace())
             << "Malformed transaction: "
             << "Limit quality specified for XRP to XRP or MPT to MPT.";
-        return temBAD_SEND_XRP_LIMIT;
+        return temBAD_SEND_LIMIT;
     }
     if (bDirect && !defaultPathsAllowed)
     {
@@ -171,7 +171,12 @@ Payment::preflight(PreflightContext const& ctx)
         JLOG(j.trace())
             << "Malformed transaction: "
             << "No ripple direct specified for XRP to XRP or MPT to MPT.";
-        return temBAD_SEND_XRP_NO_DIRECT;
+        return temBAD_SEND_NO_DIRECT;
+    }
+    if (bMPTDirect && uSrcAsset != uDstAsset)
+    {
+        JLOG(j.trace()) << "Malformed transaction: Invalid MPT payment";
+        return temBAD_AMOUNT;
     }
 
     auto const deliverMin = tx[~sfDeliverMin];
@@ -362,8 +367,7 @@ Payment::doApply()
 
     bool const depositPreauth = view().rules().enabled(featureDepositPreauth);
 
-    bool const bRipple =
-        paths || sendMax || !(saDstAmount.native() || saDstAmount.isMPT());
+    bool const bRipple = paths || sendMax || !saDstAmount.native();
 
     // If the destination has lsfDepositAuth set, then only direct XRP
     // payments (no intermediate steps) are allowed to the destination.
@@ -434,14 +438,6 @@ Payment::doApply()
         if (isTerRetry(terResult))
             terResult = tecPATH_DRY;
         return terResult;
-    }
-    else if (saDstAmount.isMPT())
-    {
-        PaymentSandbox pv(&view());
-        auto const res =
-            rippleMPTCredit(pv, account_, uDstAccountID, saDstAmount, j_);
-        pv.apply(ctx_.rawView());
-        return res;
     }
 
     assert(saDstAmount.native());

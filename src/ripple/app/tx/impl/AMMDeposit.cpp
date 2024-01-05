@@ -259,11 +259,11 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
                     << amount->issue();
                 return ter;
             }
-            // AMM account or currency frozen
+            // AMM account or asset frozen
             if (isFrozen(ctx.view, ammAccountID, amount->issue()))
             {
                 JLOG(ctx.j.debug())
-                    << "AMM Deposit: AMM account or currency is frozen, "
+                    << "AMM Deposit: AMM account or asset is frozen, "
                     << to_string(accountID);
                 return tecFROZEN;
             }

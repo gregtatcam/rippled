@@ -35,7 +35,7 @@ class STPathElement final : public CountedObject<STPathElement>
 {
     unsigned int mType;
     AccountID mAccountID;
-    Currency mCurrencyID;
+    Asset mAssetID;
     AccountID mIssuerID;
 
     bool is_offer_;
@@ -48,8 +48,10 @@ public:
             0x01,  // Rippling through an account (vs taking an offer).
         typeCurrency = 0x10,  // Currency follows.
         typeIssuer = 0x20,    // Issuer follows.
+        typeMPT = 0x40,       // MPT
         typeBoundary = 0xFF,  // Boundary between alternate paths.
-        typeAll = typeAccount | typeCurrency | typeIssuer,
+        typeAsset = typeCurrency | typeMPT,
+        typeAll = typeAccount | typeCurrency | typeIssuer | typeMPT,
         // Combination of all types.
     };
 
@@ -60,19 +62,19 @@ public:
 
     STPathElement(
         std::optional<AccountID> const& account,
-        std::optional<Currency> const& currency,
+        std::optional<Asset> const& asset,
         std::optional<AccountID> const& issuer);
 
     STPathElement(
         AccountID const& account,
-        Currency const& currency,
+        Asset const& asset,
         AccountID const& issuer,
         bool forceCurrency = false);
 
     STPathElement(
         unsigned int uType,
         AccountID const& account,
-        Currency const& currency,
+        Asset const& asset,
         AccountID const& issuer);
 
     auto
@@ -91,6 +93,9 @@ public:
     hasCurrency() const;
 
     bool
+    hasMPT() const;
+
+    bool
     isNone() const;
 
     // Nodes are either an account ID or a offer prefix. Offer prefixs denote a
@@ -98,8 +103,8 @@ public:
     AccountID const&
     getAccountID() const;
 
-    Currency const&
-    getCurrency() const;
+    Asset const&
+    getAsset() const;
 
     AccountID const&
     getIssuerID() const;
@@ -140,7 +145,7 @@ public:
     bool
     hasSeen(
         AccountID const& account,
-        Currency const& currency,
+        Asset const& currency,
         AccountID const& issuer) const;
 
     Json::Value getJson(JsonOptions) const;
@@ -244,7 +249,7 @@ inline STPathElement::STPathElement() : mType(typeNone), is_offer_(true)
 
 inline STPathElement::STPathElement(
     std::optional<AccountID> const& account,
-    std::optional<Currency> const& currency,
+    std::optional<Asset> const& asset,
     std::optional<AccountID> const& issuer)
     : mType(typeNone)
 {
@@ -260,10 +265,10 @@ inline STPathElement::STPathElement(
         assert(mAccountID != noAccount());
     }
 
-    if (currency)
+    if (asset)
     {
-        mCurrencyID = *currency;
-        mType |= typeCurrency;
+        mAssetID = *asset;
+        mType |= asset->isCurrency() ? typeCurrency : typeMPT;
     }
 
     if (issuer)
@@ -278,23 +283,26 @@ inline STPathElement::STPathElement(
 
 inline STPathElement::STPathElement(
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer,
     bool forceCurrency)
     : mType(typeNone)
     , mAccountID(account)
-    , mCurrencyID(currency)
+    , mAssetID(asset)
     , mIssuerID(issuer)
     , is_offer_(isXRP(mAccountID))
 {
     if (!is_offer_)
         mType |= typeAccount;
 
-    if (forceCurrency || !isXRP(currency))
+    if ((asset.empty() || !asset.isMPT()) && (forceCurrency || !isXRP(asset)))
         mType |= typeCurrency;
 
     if (!isXRP(issuer))
         mType |= typeIssuer;
+
+    if (!asset.empty() && asset.isMPT())
+        mType |= typeMPT;
 
     hash_value_ = get_hash(*this);
 }
@@ -302,11 +310,11 @@ inline STPathElement::STPathElement(
 inline STPathElement::STPathElement(
     unsigned int uType,
     AccountID const& account,
-    Currency const& currency,
+    Asset const& asset,
     AccountID const& issuer)
     : mType(uType)
     , mAccountID(account)
-    , mCurrencyID(currency)
+    , mAssetID(asset)
     , mIssuerID(issuer)
     , is_offer_(isXRP(mAccountID))
 {
@@ -344,6 +352,12 @@ STPathElement::hasCurrency() const
 }
 
 inline bool
+STPathElement::hasMPT() const
+{
+    return getNodeType() & STPathElement::typeMPT;
+}
+
+inline bool
 STPathElement::isNone() const
 {
     return getNodeType() == STPathElement::typeNone;
@@ -357,10 +371,10 @@ STPathElement::getAccountID() const
     return mAccountID;
 }
 
-inline Currency const&
-STPathElement::getCurrency() const
+inline Asset const&
+STPathElement::getAsset() const
 {
-    return mCurrencyID;
+    return mAssetID;
 }
 
 inline AccountID const&
@@ -374,7 +388,7 @@ STPathElement::operator==(const STPathElement& t) const
 {
     return (mType & typeAccount) == (t.mType & typeAccount) &&
         hash_value_ == t.hash_value_ && mAccountID == t.mAccountID &&
-        mCurrencyID == t.mCurrencyID && mIssuerID == t.mIssuerID;
+        mAssetID == t.mAssetID && mIssuerID == t.mIssuerID;
 }
 
 inline bool

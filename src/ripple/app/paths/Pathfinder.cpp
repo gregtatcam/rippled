@@ -916,7 +916,7 @@ Pathfinder::isNoRippleOut(STPath const& currentPath)
         ? mSrcAccount
         : (currentPath.end() - 2)->getAccountID();
     auto const& toAccount = endElement.getAccountID();
-    return isNoRipple(fromAccount, toAccount, endElement.getCurrency());
+    return isNoRipple(fromAccount, toAccount, endElement.getAsset());
 }
 
 void
@@ -940,10 +940,10 @@ Pathfinder::addLink(
     std::function<bool(void)> const& continueCallback)
 {
     auto const& pathEnd = currentPath.empty() ? mSource : currentPath.back();
-    auto const& uEndCurrency = pathEnd.getCurrency();
+    auto const& uEndAsset = pathEnd.getAsset();
     auto const& uEndIssuer = pathEnd.getIssuerID();
     auto const& uEndAccount = pathEnd.getAccountID();
-    bool const bOnXRP = isXRP(uEndCurrency);
+    bool const bOnXRP = isXRP(uEndAsset);
 
     // Does pathfinding really need to get this to
     // a gateway (the issuer of the destination amount)
@@ -976,7 +976,7 @@ Pathfinder::addLink(
                 bool const bRequireAuth(
                     sleEnd->getFieldU32(sfFlags) & lsfRequireAuth);
                 bool const bIsEndCurrency(
-                    uEndCurrency == mDstAmount.getAsset());
+                    uEndAsset == mDstAmount.getAsset());
                 bool const bIsNoRippleOut(isNoRippleOut(currentPath));
                 bool const bDestOnly(addFlags & afAC_LAST);
 
@@ -1010,8 +1010,8 @@ Pathfinder::addLink(
                             continue;
                         }
 
-                        if ((uEndCurrency == rs.getLimit().getAsset()) &&
-                            !currentPath.hasSeen(acct, uEndCurrency, acct))
+                        if ((uEndAsset == rs.getLimit().getAsset()) &&
+                            !currentPath.hasSeen(acct, uEndAsset, acct))
                         {
                             // path is for correct currency and has not been
                             // seen
@@ -1029,7 +1029,7 @@ Pathfinder::addLink(
                             else if (bToDestination)
                             {
                                 // destination is always worth trying
-                                if (uEndCurrency == mDstAmount.getAsset())
+                                if (uEndAsset == mDstAmount.getAsset())
                                 {
                                     // this is a complete path
                                     if (!currentPath.empty())
@@ -1057,7 +1057,7 @@ Pathfinder::addLink(
                             {
                                 // save this candidate
                                 int out = getPathsOut(
-                                    uEndCurrency,
+                                    uEndAsset,
                                     acct,
                                     direction,
                                     bIsEndCurrency,
@@ -1096,7 +1096,7 @@ Pathfinder::addLink(
                             STPathElement pathElement(
                                 STPathElement::typeAccount,
                                 it->account,
-                                uEndCurrency,
+                                uEndAsset,
                                 it->account);
                             incompletePaths.assembleAdd(
                                 currentPath, pathElement);
@@ -1118,7 +1118,7 @@ Pathfinder::addLink(
         {
             // to XRP only
             if (!bOnXRP &&
-                app_.getOrderBookDB().isBookToXRP({uEndCurrency, uEndIssuer}))
+                app_.getOrderBookDB().isBookToXRP({uEndAsset, uEndIssuer}))
             {
                 STPathElement pathElement(
                     STPathElement::typeCurrency,
@@ -1132,7 +1132,7 @@ Pathfinder::addLink(
         {
             bool bDestOnly = (addFlags & afOB_LAST) != 0;
             auto books = app_.getOrderBookDB().getBooksByTakerPays(
-                {uEndCurrency, uEndIssuer});
+                {uEndAsset, uEndIssuer});
             JLOG(j_.trace())
                 << books.size() << " books found from this currency/issuer";
 

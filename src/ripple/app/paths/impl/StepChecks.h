@@ -33,9 +33,12 @@ checkFreeze(
     ReadView const& view,
     AccountID const& src,
     AccountID const& dst,
-    Currency const& currency)
+    Asset const& asset)
 {
     assert(src != dst);
+
+    if (asset.isMPT())  // TODO MPT
+        return tesSUCCESS;
 
     // check freeze
     if (auto sle = view.read(keylet::account(dst)))
@@ -46,7 +49,7 @@ checkFreeze(
         }
     }
 
-    if (auto sle = view.read(keylet::line(src, dst, currency)))
+    if (auto sle = view.read(keylet::line(src, dst, asset)))
     {
         if (sle->isFlag((dst > src) ? lsfHighFreeze : lsfLowFreeze))
         {

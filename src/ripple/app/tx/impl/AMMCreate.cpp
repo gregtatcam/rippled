@@ -53,7 +53,7 @@ AMMCreate::preflight(PreflightContext const& ctx)
     if (amount.issue() == amount2.issue())
     {
         JLOG(ctx.j.debug())
-            << "AMM Instance: tokens can not have the same currency/issuer.";
+            << "AMM Instance: tokens can not have the same asset.";
         return temBAD_AMM_TOKENS;
     }
 

@@ -194,6 +194,25 @@ flow(
     }
 
     assert(!srcIsXRP && !dstIsXRP);
+    if (srcIssue.asset().isMPT())
+    {
+        assert(dstIssue.asset().isMPT());
+        return finishFlow(
+            sb,
+            srcIssue,
+            dstIssue,
+            flow<MPTAmount, MPTAmount>(
+                sb,
+                strands,
+                asDeliver.mpt,
+                partialPayment,
+                offerCrossing,
+                limitQuality,
+                sendMax,
+                j,
+                ammContext,
+                flowDebugInfo));
+    }
     return finishFlow(
         sb,
         srcIssue,

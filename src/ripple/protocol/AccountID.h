@@ -86,7 +86,7 @@ noAccount();
 bool
 to_issuer(AccountID&, std::string const&);
 
-// DEPRECATED Should be checking the currency or native flag
+// DEPRECATED Should be checking the asset or native flag
 inline bool
 isXRP(AccountID const& c)
 {

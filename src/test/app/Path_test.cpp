@@ -1253,7 +1253,7 @@ public:
                 auto const& pathElem = st[0][0];
                 BEAST_EXPECT(
                     pathElem.isOffer() && pathElem.getIssuerID() == gw.id() &&
-                    pathElem.getCurrency() == USD.currency);
+                    pathElem.getAsset() == USD.currency);
             }
         }
         {
@@ -1277,7 +1277,7 @@ public:
                 BEAST_EXPECT(
                     pathElem.isOffer() &&
                     pathElem.getIssuerID() == xrpAccount() &&
-                    pathElem.getCurrency() == xrpCurrency());
+                    pathElem.getAsset() == xrpCurrency());
             }
         }
     }

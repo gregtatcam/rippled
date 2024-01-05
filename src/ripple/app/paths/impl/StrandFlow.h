@@ -47,8 +47,8 @@ template <class TInAmt, class TOutAmt>
 struct StrandResult
 {
     bool success;                                  ///< Strand succeeded
-    TInAmt in = beast::zero;                       ///< Currency amount in
-    TOutAmt out = beast::zero;                     ///< Currency amount out
+    TInAmt in = beast::zero;                       ///< Asset amount in
+    TOutAmt out = beast::zero;                     ///< Asset amount out
     std::optional<PaymentSandbox> sandbox;         ///< Resulting Sandbox state
     boost::container::flat_set<uint256> ofrsToRm;  ///< Offers to remove
     // Num offers consumed or partially consumed (includes expired and unfunded
@@ -360,6 +360,15 @@ qualityUpperBound(ReadView const& v, Strand const& strand)
  * increases quality of AMM steps, increasing the strand's composite
  * quality as the result.
  */
+inline MPTAmount
+limitOut(
+    ReadView const& v,
+    Strand const& strand,
+    MPTAmount const& remainingOut,
+    Quality const& limitQuality)
+{
+    return remainingOut;
+}
 template <typename TOutAmt>
 inline TOutAmt
 limitOut(
