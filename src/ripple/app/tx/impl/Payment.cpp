@@ -131,8 +131,7 @@ Payment::preflight(PreflightContext const& ctx)
         // If bPaths is true, you might be trying some arbitrage.
         JLOG(j.trace()) << "Malformed transaction: "
                         << "Redundant payment from " << to_string(account)
-                        << " to self without path for "
-                        << to_string(uDstAsset);
+                        << " to self without path for " << to_string(uDstAsset);
         return temREDUNDANT;
     }
     if (bDirect && bMax)

@@ -86,8 +86,7 @@ toStep(
     auto& j = ctx.j;
 
     if (ctx.isFirst && e1->isAccount() &&
-        (e1->getNodeType() & STPathElement::typeAsset) &&
-        isXRP(e1->getAsset()))
+        (e1->getNodeType() & STPathElement::typeAsset) && isXRP(e1->getAsset()))
     {
         return make_XRPEndpointStep(ctx, e1->getAccountID());
     }

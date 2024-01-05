@@ -104,7 +104,8 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
                 asset = static_cast<Currency>(sit.get160());
 
             if (hasMPT)
-                asset = std::make_pair(sit.get32(), static_cast<AccountID>(sit.get160()));
+                asset = std::make_pair(
+                    sit.get32(), static_cast<AccountID>(sit.get160()));
 
             if (hasIssuer)
                 issuer = sit.get160();
@@ -176,7 +177,8 @@ STPath::hasSeen(
     return false;
 }
 
-Json::Value STPath::getJson(JsonOptions) const
+Json::Value
+STPath::getJson(JsonOptions) const
 {
     Json::Value ret(Json::arrayValue);
 
