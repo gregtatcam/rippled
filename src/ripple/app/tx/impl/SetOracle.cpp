@@ -82,11 +82,12 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         duration_cast<seconds>(ctx.view.info().closeTime.time_since_epoch())
             .count();
     std::size_t const lastUpdateTime = ctx.tx[sfLastUpdateTime];
-    if (lastUpdateTime <= epoch_offset.count())
+    if (lastUpdateTime < epoch_offset.count())
         return tecINVALID_UPDATE_TIME;
     std::size_t const lastUpdateTimeEpoch =
         lastUpdateTime - epoch_offset.count();
-    if (lastUpdateTimeEpoch < closeTime ||
+    if (lastUpdateTimeEpoch <
+            closeTime - std::min(closeTime, maxLastUpdateTimeDelta) ||
         lastUpdateTimeEpoch > (closeTime + maxLastUpdateTimeDelta))
         return tecINVALID_UPDATE_TIME;
 

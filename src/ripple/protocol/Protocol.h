@@ -124,7 +124,7 @@ std::size_t constexpr maxOracleSymbolClass = 16;
 /** The maximum allowed time difference between lastUpdateTime and the time
     of the last closed ledger
 */
-std::size_t constexpr maxLastUpdateTimeDelta = 30;
+std::size_t constexpr maxLastUpdateTimeDelta = 300;
 
 }  // namespace ripple
 

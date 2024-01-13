@@ -204,7 +204,7 @@ Oracle::set(UpdateArg const& arg)
             duration_cast<seconds>(
                 env_.current()->info().closeTime.time_since_epoch())
                 .count() +
-            10 + epoch_offset.count());
+            epoch_offset.count());
     Json::Value dataSeries(Json::arrayValue);
     auto assetToStr = [](std::string const& s) {
         // assume standard currency

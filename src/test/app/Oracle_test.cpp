@@ -224,23 +224,23 @@ private:
             env.fund(XRP(1'000), owner);
             Oracle oracle(env, {.owner = owner});
             BEAST_EXPECT(oracle.exists());
-            env.close(std::chrono::seconds(100));
-            // Less than the last close time
+            env.close(std::chrono::seconds(400));
+            // Less than the last close time - 300s
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
                 .lastUpdateTime = 60,
                 .err = ter(tecINVALID_UPDATE_TIME)});
-            // Greater than last close time + 30 sec
+            // Greater than last close time + 300s
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .lastUpdateTime = 500,
+                .lastUpdateTime = 800,
                 .err = ter(tecINVALID_UPDATE_TIME)});
             oracle.set(UpdateArg{.series = {{"XRP", "USD", 740, 1}}});
-            BEAST_EXPECT(oracle.expectLastUpdateTime(946684950));
+            BEAST_EXPECT(oracle.expectLastUpdateTime(946685240));
             // Less than the previous lastUpdateTime
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .lastUpdateTime = 149,
+                .lastUpdateTime = 439,
                 .err = ter(tecINVALID_UPDATE_TIME)});
         }
 
@@ -273,7 +273,7 @@ private:
             Oracle oracle(env, {.owner = owner, .series = series});
             BEAST_EXPECT(oracle.exists());
             BEAST_EXPECT(ownerCount(env, owner) == (count + adj));
-            BEAST_EXPECT(oracle.expectLastUpdateTime(946684810));
+            BEAST_EXPECT(oracle.expectLastUpdateTime(946684800));
         };
 
         {
