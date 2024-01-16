@@ -20,6 +20,7 @@
 #ifndef RIPPLE_TEST_JTX_ORACLE_H_INCLUDED
 #define RIPPLE_TEST_JTX_ORACLE_H_INCLUDED
 
+#include <date/date.h>
 #include <test/jtx.h>
 
 namespace ripple {
@@ -48,6 +49,7 @@ struct CreateArg
     std::optional<jtx::seq> seq = std::nullopt;
     std::uint32_t fee = 10;
     std::optional<ter> err = std::nullopt;
+    bool close = false;
 };
 
 // Typical defaults for Update
@@ -76,6 +78,14 @@ struct RemoveArg
     std::uint32_t fee = 10;
     std::optional<ter> const& err = std::nullopt;
 };
+
+// Simulate testStartTime as 10'000s from Ripple epoch time to make
+// LastUpdateTime validation to work and to make unit-test consistent.
+// The value doesn't matter much, it has to be greater
+// than maxLastUpdateTimeDelta in order to pass LastUpdateTime
+// validation {close-maxLastUpdateTimeDelta,close+maxLastUpdateTimeDelta}.
+constexpr static std::chrono::seconds testStartTime =
+    epoch_offset + std::chrono::seconds(10'000);
 
 /** Oracle class facilitates unit-testing of the Price Oracle feature.
  * It defines functions to create, update, and delete the Oracle object,

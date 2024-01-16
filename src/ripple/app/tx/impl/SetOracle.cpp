@@ -86,8 +86,10 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         return tecINVALID_UPDATE_TIME;
     std::size_t const lastUpdateTimeEpoch =
         lastUpdateTime - epoch_offset.count();
-    if (lastUpdateTimeEpoch <
-            closeTime - std::min(closeTime, maxLastUpdateTimeDelta) ||
+    if (closeTime < maxLastUpdateTimeDelta)
+        Throw<std::runtime_error>(
+            "Oracle: close time is less than maxLastUpdateTimeDelta");
+    if (lastUpdateTimeEpoch < (closeTime - maxLastUpdateTimeDelta) ||
         lastUpdateTimeEpoch > (closeTime + maxLastUpdateTimeDelta))
         return tecINVALID_UPDATE_TIME;
 

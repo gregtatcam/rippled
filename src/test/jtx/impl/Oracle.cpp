@@ -32,6 +32,14 @@ namespace jtx {
 Oracle::Oracle(Env& env, CreateArg const& arg, bool submit)
     : env_(env), owner_{}, documentID_{}
 {
+    // LastUpdateTime is checked to be in range
+    // {close-maxLastUpdateTimeDelta, close+maxLastUpdateTimeDelta}.
+    // To make the validation work and to make the clock consistent
+    // for tests running at different time, simulate Unix time starting
+    // on testStartTime since Ripple epoch.
+    auto const now = env_.timeKeeper().now();
+    if (now.time_since_epoch().count() == 0 || arg.close)
+        env_.close(now + testStartTime - epoch_offset);
     if (arg.owner)
         owner_ = *arg.owner;
     if (arg.documentID)
@@ -196,9 +204,10 @@ Oracle::set(UpdateArg const& arg)
         jv[jss::Fee] = std::to_string(arg.fee);
     else
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
+    // lastUpdateTime if provided is offset from testStartTime
     if (arg.lastUpdateTime)
-        jv[jss::LastUpdateTime] = *arg.lastUpdateTime +
-            static_cast<std::uint32_t>(epoch_offset.count());
+        jv[jss::LastUpdateTime] =
+            to_string(testStartTime.count() + *arg.lastUpdateTime);
     else
         jv[jss::LastUpdateTime] = to_string(
             duration_cast<seconds>(

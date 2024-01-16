@@ -132,7 +132,7 @@ public:
                 ret[jss::entire_set][jss::standard_deviation] ==
                 "0.3027650354097492");
             BEAST_EXPECT(ret[jss::median] == "74.45");
-            BEAST_EXPECT(ret[jss::time] == 946684890);
+            BEAST_EXPECT(ret[jss::time] == 946694900);
         }
 
         // Aggregate data set includes all price oracle instances
@@ -154,7 +154,7 @@ public:
             BEAST_EXPECT(
                 ret[jss::trimmed_set][jss::standard_deviation] ==
                 "0.187082869338697");
-            BEAST_EXPECT(ret[jss::time] == 946684890);
+            BEAST_EXPECT(ret[jss::time] == 946694900);
         }
 
         // A reduced dataset, as some price oracles have data beyond three
@@ -203,7 +203,7 @@ public:
             BEAST_EXPECT(
                 ret[jss::trimmed_set][jss::standard_deviation] ==
                 "0.158113883008419");
-            BEAST_EXPECT(ret[jss::time] == 946684890);
+            BEAST_EXPECT(ret[jss::time] == 946694900);
         }
 
         // Reduced data set because of the time threshold
@@ -230,7 +230,7 @@ public:
             BEAST_EXPECT(ret[jss::entire_set][jss::size].asUInt() == 8);
             BEAST_EXPECT(ret[jss::entire_set][jss::standard_deviation] == "0");
             BEAST_EXPECT(ret[jss::median] == "74");
-            BEAST_EXPECT(ret[jss::time] == 946684990);
+            BEAST_EXPECT(ret[jss::time] == 946695000);
         }
     }
 

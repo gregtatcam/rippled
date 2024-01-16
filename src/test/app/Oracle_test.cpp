@@ -220,27 +220,29 @@ private:
 
         {
             // Invalid update time
+            using namespace std::chrono;
             Env env(*this);
             env.fund(XRP(1'000), owner);
             Oracle oracle(env, {.owner = owner});
             BEAST_EXPECT(oracle.exists());
-            env.close(std::chrono::seconds(400));
+            env.close(seconds(400));
             // Less than the last close time - 300s
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .lastUpdateTime = 60,
+                .lastUpdateTime = testStartTime.count() + 400 - 301,
                 .err = ter(tecINVALID_UPDATE_TIME)});
             // Greater than last close time + 300s
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .lastUpdateTime = 800,
+                .lastUpdateTime = testStartTime.count() + 400 + 301,
                 .err = ter(tecINVALID_UPDATE_TIME)});
             oracle.set(UpdateArg{.series = {{"XRP", "USD", 740, 1}}});
-            BEAST_EXPECT(oracle.expectLastUpdateTime(946685240));
+            BEAST_EXPECT(
+                oracle.expectLastUpdateTime(testStartTime.count() + 450));
             // Less than the previous lastUpdateTime
             oracle.set(UpdateArg{
                 .series = {{"XRP", "USD", 740, 1}},
-                .lastUpdateTime = 439,
+                .lastUpdateTime = testStartTime.count() + 449,
                 .err = ter(tecINVALID_UPDATE_TIME)});
         }
 
@@ -273,7 +275,7 @@ private:
             Oracle oracle(env, {.owner = owner, .series = series});
             BEAST_EXPECT(oracle.exists());
             BEAST_EXPECT(ownerCount(env, owner) == (count + adj));
-            BEAST_EXPECT(oracle.expectLastUpdateTime(946684800));
+            BEAST_EXPECT(oracle.expectLastUpdateTime(946694810));
         };
 
         {
@@ -514,7 +516,9 @@ private:
         env.require(owners(alice, signerListOwners));
 
         // Create
-        Oracle oracle(env, CreateArg{.owner = alice}, false);
+        // Force close (true) and time advancement because the close time
+        // is no longer 0.
+        Oracle oracle(env, CreateArg{.owner = alice, .close = true}, false);
         oracle.set(CreateArg{.msig = msig(becky), .err = ter(tefBAD_QUORUM)});
         oracle.set(
             CreateArg{.msig = msig(zelda), .err = ter(tefBAD_SIGNATURE)});
