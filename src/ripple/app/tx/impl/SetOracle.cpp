@@ -103,6 +103,8 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     hash_set<std::pair<Currency, Currency>> pairsDel;
     for (auto const& entry : ctx.tx.getFieldArray(sfPriceDataSeries))
     {
+        if (entry[sfBaseAsset] == entry[sfQuoteAsset])
+            return temMALFORMED;
         auto const key = tokenPairKey(entry);
         if (pairs.contains(key) || pairsDel.contains(key))
             return temMALFORMED;
@@ -122,6 +124,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         return !v || *v == (*sle)[field];
     };
 
+    std::uint32_t adjustReserve = 0;
     if (sle)
     {
         // update
@@ -147,6 +150,11 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         }
         if (!pairsDel.empty())
             return tecTOKEN_PAIR_NOT_FOUND;
+
+        auto const oldCount =
+            sle->getFieldArray(sfPriceDataSeries).size() > 5 ? 2 : 1;
+        auto const newCount = pairs.size() > 5 ? 2 : 1;
+        adjustReserve = newCount - oldCount;
     }
     else
     {
@@ -155,6 +163,7 @@ SetOracle::preclaim(PreclaimContext const& ctx)
         if (!ctx.tx.isFieldPresent(sfProvider) ||
             !ctx.tx.isFieldPresent(sfAssetClass))
             return temMALFORMED;
+        adjustReserve = pairs.size() > 5 ? 2 : 1;
     }
 
     if (pairs.empty())
@@ -162,9 +171,8 @@ SetOracle::preclaim(PreclaimContext const& ctx)
     if (pairs.size() > maxOracleDataSeries)
         return tecARRAY_TOO_LARGE;
 
-    auto const add = pairs.size() > 5 ? 2 : 1;
     auto const reserve = ctx.view.fees().accountReserve(
-        sleSetter->getFieldU32(sfOwnerCount) + add);
+        sleSetter->getFieldU32(sfOwnerCount) + adjustReserve);
     auto const& balance = sleSetter->getFieldAmount(sfBalance);
 
     if (balance < reserve)

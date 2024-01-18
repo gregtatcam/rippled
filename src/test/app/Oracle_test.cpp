@@ -260,6 +260,17 @@ private:
                 .series = {{"XRP", "USD", std::nullopt, std::nullopt}},
                 .err = ter(tecARRAY_EMPTY)});
         }
+
+        {
+            // same BaseAsset and QuoteAsset
+            Env env(*this);
+            env.fund(XRP(1'000), owner);
+            Oracle oracle(
+                env,
+                {.owner = owner,
+                 .series = {{"USD", "USD", 740, 1}},
+                 .err = ter(temMALFORMED)});
+        }
     }
 
     void
@@ -430,61 +441,74 @@ private:
         using namespace jtx;
         Account const owner("owner");
 
-        Env env(*this);
-        env.fund(XRP(1'000), owner);
-        auto count = ownerCount(env, owner);
-        Oracle oracle(env, {.owner = owner});
-        BEAST_EXPECT(oracle.exists());
+        {
+            Env env(*this);
+            env.fund(XRP(1'000), owner);
+            auto count = ownerCount(env, owner);
+            Oracle oracle(env, {.owner = owner});
+            BEAST_EXPECT(oracle.exists());
 
-        // update existing pair
-        oracle.set(UpdateArg{.series = {{"XRP", "USD", 740, 2}}});
-        BEAST_EXPECT(oracle.expectPrice({{"XRP", "USD", 740, 2}}));
-        // owner count is increased by 1 since the oracle object is added
-        // with one token pair
-        count += 1;
-        BEAST_EXPECT(ownerCount(env, owner) == count);
+            // update existing pair
+            oracle.set(UpdateArg{.series = {{"XRP", "USD", 740, 2}}});
+            BEAST_EXPECT(oracle.expectPrice({{"XRP", "USD", 740, 2}}));
+            // owner count is increased by 1 since the oracle object is added
+            // with one token pair
+            count += 1;
+            BEAST_EXPECT(ownerCount(env, owner) == count);
 
-        // add new pairs, not-included pair is reset
-        oracle.set(UpdateArg{.series = {{"XRP", "EUR", 700, 2}}});
-        BEAST_EXPECT(
-            oracle.expectPrice({{"XRP", "USD", 0, 0}, {"XRP", "EUR", 700, 2}}));
-        // owner count is not changed since the number of pairs is 2
-        BEAST_EXPECT(ownerCount(env, owner) == count);
+            // add new pairs, not-included pair is reset
+            oracle.set(UpdateArg{.series = {{"XRP", "EUR", 700, 2}}});
+            BEAST_EXPECT(oracle.expectPrice(
+                {{"XRP", "USD", 0, 0}, {"XRP", "EUR", 700, 2}}));
+            // owner count is not changed since the number of pairs is 2
+            BEAST_EXPECT(ownerCount(env, owner) == count);
 
-        // update both pairs
-        oracle.set(UpdateArg{
-            .series = {{"XRP", "USD", 741, 2}, {"XRP", "EUR", 710, 2}}});
-        BEAST_EXPECT(oracle.expectPrice(
-            {{"XRP", "USD", 741, 2}, {"XRP", "EUR", 710, 2}}));
-        // owner count is not changed since the number of pairs is 2
-        BEAST_EXPECT(ownerCount(env, owner) == count);
+            // update both pairs
+            oracle.set(UpdateArg{
+                .series = {{"XRP", "USD", 741, 2}, {"XRP", "EUR", 710, 2}}});
+            BEAST_EXPECT(oracle.expectPrice(
+                {{"XRP", "USD", 741, 2}, {"XRP", "EUR", 710, 2}}));
+            // owner count is not changed since the number of pairs is 2
+            BEAST_EXPECT(ownerCount(env, owner) == count);
 
-        // owner count is increased by 1 since the number of pairs is 6
-        oracle.set(UpdateArg{
-            .series = {
-                {"BTC", "USD", 741, 2},
-                {"ETH", "EUR", 710, 2},
-                {"YAN", "EUR", 710, 2},
-                {"CAN", "EUR", 710, 2},
-            }});
-        count += 1;
-        BEAST_EXPECT(ownerCount(env, owner) == count);
+            // owner count is increased by 1 since the number of pairs is 6
+            oracle.set(UpdateArg{
+                .series = {
+                    {"BTC", "USD", 741, 2},
+                    {"ETH", "EUR", 710, 2},
+                    {"YAN", "EUR", 710, 2},
+                    {"CAN", "EUR", 710, 2},
+                }});
+            count += 1;
+            BEAST_EXPECT(ownerCount(env, owner) == count);
 
-        // update two pairs and delete four
-        oracle.set(
-            UpdateArg{.series = {{"BTC", "USD", std::nullopt, std::nullopt}}});
-        oracle.set(UpdateArg{
-            .series = {
-                {"XRP", "USD", 742, 2},
-                {"XRP", "EUR", 711, 2},
-                {"ETH", "EUR", std::nullopt, std::nullopt},
-                {"YAN", "EUR", std::nullopt, std::nullopt},
-                {"CAN", "EUR", std::nullopt, std::nullopt}}});
-        BEAST_EXPECT(oracle.expectPrice(
-            {{"XRP", "USD", 742, 2}, {"XRP", "EUR", 711, 2}}));
-        // owner count is decreased by 1 since the number of pairs is 2
-        count -= 1;
-        BEAST_EXPECT(ownerCount(env, owner) == count);
+            // update two pairs and delete four
+            oracle.set(UpdateArg{
+                .series = {{"BTC", "USD", std::nullopt, std::nullopt}}});
+            oracle.set(UpdateArg{
+                .series = {
+                    {"XRP", "USD", 742, 2},
+                    {"XRP", "EUR", 711, 2},
+                    {"ETH", "EUR", std::nullopt, std::nullopt},
+                    {"YAN", "EUR", std::nullopt, std::nullopt},
+                    {"CAN", "EUR", std::nullopt, std::nullopt}}});
+            BEAST_EXPECT(oracle.expectPrice(
+                {{"XRP", "USD", 742, 2}, {"XRP", "EUR", 711, 2}}));
+            // owner count is decreased by 1 since the number of pairs is 2
+            count -= 1;
+            BEAST_EXPECT(ownerCount(env, owner) == count);
+        }
+
+        // Min reserve to create and update
+        {
+            Env env(*this);
+            env.fund(
+                env.current()->fees().accountReserve(1) +
+                    env.current()->fees().base * 2,
+                owner);
+            Oracle oracle(env, {.owner = owner});
+            oracle.set(UpdateArg{.series = {{"XRP", "USD", 742, 2}}});
+        }
     }
 
     void
