@@ -50,11 +50,10 @@ STCurrency::getText() const
     return to_string(currency_);
 }
 
-Json::Value STCurrency::getJson(JsonOptions) const
+Json::Value
+STCurrency::getJson(JsonOptions) const
 {
-    Json::Value jv;
-    jv[jss::currency] = to_string(currency_);
-    return jv;
+    return to_string(currency_);
 }
 
 void

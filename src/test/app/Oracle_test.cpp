@@ -271,6 +271,17 @@ private:
                  .series = {{"USD", "USD", 740, 1}},
                  .err = ter(temMALFORMED)});
         }
+
+        {
+            // Scale is greater than maxPriceScale
+            Env env(*this);
+            env.fund(XRP(1'000), owner);
+            Oracle oracle(
+                env,
+                {.owner = owner,
+                 .series = {{"USD", "BTC", 740, maxPriceScale + 1}},
+                 .err = ter(temMALFORMED)});
+        }
     }
 
     void
