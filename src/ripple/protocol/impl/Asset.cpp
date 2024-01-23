@@ -33,7 +33,7 @@ Asset::addBitString(ripple::Serializer& s) const
     }
 }
 
-Asset::operator Currency const &() const
+Asset::operator Currency const&() const
 {
     assert(std::holds_alternative<Currency>(asset_));
     if (!std::holds_alternative<Currency>(asset_))
@@ -41,12 +41,24 @@ Asset::operator Currency const &() const
     return std::get<Currency>(asset_);
 }
 
-Asset::operator MPT const &() const
+Currency const&
+Asset::getCurrency() const
+{
+    return operator const Currency&();
+}
+
+Asset::operator MPT const&() const
 {
     assert(std::holds_alternative<MPT>(asset_));
     if (!std::holds_alternative<MPT>(asset_))
         Throw<std::logic_error>("Invalid MPT cast");
     return std::get<MPT>(asset_);
+}
+
+MPT const&
+Asset::getMPT() const
+{
+    return operator const MPT&();
 }
 
 constexpr std::weak_ordering

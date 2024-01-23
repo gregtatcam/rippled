@@ -37,7 +37,7 @@ paths::operator()(Env& env, JTx& jt) const
             env.current(), env.app().journal("RippleLineCache")),
         from,
         to,
-        in_.asset(),
+        in_.getCurrency(),
         in_.account(),
         amount,
         std::nullopt,
@@ -80,7 +80,7 @@ void
 path::append_one(IOU const& iou)
 {
     auto& jv = create();
-    jv["currency"] = to_string(iou.issue().asset());
+    jv["currency"] = to_string(iou.issue().getCurrency());
     jv["account"] = toBase58(iou.issue().account());
 }
 

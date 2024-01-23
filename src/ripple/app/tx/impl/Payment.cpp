@@ -80,7 +80,8 @@ Payment::preflight(PreflightContext const& ctx)
     else
     {
         auto const& asset = saDstAmount.getAsset();
-        auto const iss = asset.isMPT() ? Issue{asset} : Issue{asset, account};
+        auto const iss = asset.isMPT() ? Issue{asset.getMPT()}
+                                       : Issue{asset.getCurrency(), account};
         maxSourceAmount = STAmount(
             iss,
             saDstAmount.mantissa(),
@@ -319,7 +320,8 @@ Payment::doApply()
     else
     {
         auto const& asset = saDstAmount.getAsset();
-        auto const iss = asset.isMPT() ? Issue{asset} : Issue{asset, account_};
+        auto const iss = asset.isMPT() ? Issue{asset.getMPT()}
+                                       : Issue{asset.getCurrency(), account_};
         maxSourceAmount = STAmount(
             iss,
             saDstAmount.mantissa(),

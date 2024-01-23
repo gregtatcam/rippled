@@ -126,7 +126,8 @@ NFTokenCreateOffer::preclaim(PreclaimContext const& ctx)
         if (!ctx.view.exists(keylet::line(issuer, amount.issue())))
             return tecNO_LINE;
 
-        if (isFrozen(ctx.view, issuer, amount.getAsset(), amount.getIssuer()))
+        if (isFrozen(
+                ctx.view, issuer, amount.getCurrency(), amount.getIssuer()))
             return tecFROZEN;
     }
 
@@ -141,7 +142,10 @@ NFTokenCreateOffer::preclaim(PreclaimContext const& ctx)
     }
 
     if (isFrozen(
-            ctx.view, ctx.tx[sfAccount], amount.getAsset(), amount.getIssuer()))
+            ctx.view,
+            ctx.tx[sfAccount],
+            amount.getCurrency(),
+            amount.getIssuer()))
         return tecFROZEN;
 
     // If this is an offer to buy the token, the account must have the
@@ -166,7 +170,7 @@ NFTokenCreateOffer::preclaim(PreclaimContext const& ctx)
             accountHolds(
                 ctx.view,
                 ctx.tx[sfAccount],
-                amount.getAsset(),
+                amount.getCurrency(),
                 amount.getIssuer(),
                 FreezeHandling::fhZERO_IF_FROZEN,
                 ctx.j)

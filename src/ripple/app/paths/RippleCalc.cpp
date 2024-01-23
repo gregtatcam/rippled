@@ -84,7 +84,7 @@ RippleCalc::rippleCalculate(
 
         auto const sendMax = [&]() -> std::optional<STAmount> {
             if (saMaxAmountReq >= beast::zero ||
-                saMaxAmountReq.getAsset() != saDstAmountReq.getAsset() ||
+                saMaxAmountReq.getCurrency() != saDstAmountReq.getCurrency() ||
                 saMaxAmountReq.getIssuer() != uSrcAccountID)
             {
                 return saMaxAmountReq;

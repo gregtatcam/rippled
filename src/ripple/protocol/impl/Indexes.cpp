@@ -97,8 +97,8 @@ getBookBase(Book const& book)
 
     auto const index = indexHash(
         LedgerNameSpace::BOOK_DIR,
-        book.in.asset(),
-        book.out.asset(),
+        book.in.getCurrency(),
+        book.out.getCurrency(),
         book.in.account(),
         book.out.account());
 
@@ -399,9 +399,9 @@ amm(Issue const& issue1, Issue const& issue2) noexcept
     return amm(indexHash(
         LedgerNameSpace::AMM,
         minI.account(),
-        minI.asset(),
-        maxI.account(),
-        maxI.asset()));
+        minI.getCurrency(),
+        maxI.getCurrency(),
+        maxI.getCurrency()));
 }
 
 Keylet
@@ -420,7 +420,9 @@ bridge(STXChainBridge const& bridge, STXChainBridge::ChainType chainType)
     return {
         ltBRIDGE,
         indexHash(
-            LedgerNameSpace::BRIDGE, bridge.door(chainType), issue.asset())};
+            LedgerNameSpace::BRIDGE,
+            bridge.door(chainType),
+            issue.getCurrency())};
 }
 
 Keylet

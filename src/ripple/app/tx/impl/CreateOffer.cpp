@@ -98,10 +98,10 @@ CreateOffer::preflight(PreflightContext const& ctx)
     }
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getAsset();
+    auto const& uPaysCurrency = saTakerPays.getCurrency();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
-    auto const& uGetsCurrency = saTakerGets.getAsset();
+    auto const& uGetsCurrency = saTakerGets.getCurrency();
 
     if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
     {
@@ -134,7 +134,7 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     auto saTakerGets = ctx.tx[sfTakerGets];
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getAsset();
+    auto const& uPaysCurrency = saTakerPays.getCurrency();
 
     auto const cancelSequence = ctx.tx[~sfOfferSequence];
 
@@ -208,7 +208,7 @@ CreateOffer::checkAcceptAsset(
     Issue const& issue)
 {
     // Only valid for custom currencies
-    assert(!isXRP(issue.asset()));
+    assert(!isXRP(issue.getCurrency()));
 
     auto const issuerAccount = view.read(keylet::account(issue.account()));
 
@@ -231,7 +231,7 @@ CreateOffer::checkAcceptAsset(
     if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
         auto const trustLine =
-            view.read(keylet::line(id, issue.account(), issue.asset()));
+            view.read(keylet::line(id, issue.account(), issue.getCurrency()));
 
         if (!trustLine)
         {
@@ -892,7 +892,7 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().asset());
+    txt += to_string(amount.issue().getCurrency());
     return txt;
 }
 
@@ -1185,11 +1185,11 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
         sle->setFieldH160(
             sfTakerPaysCurrency,
-            static_cast<Currency>(saTakerPays.issue().asset()));
+            static_cast<Currency>(saTakerPays.issue().getCurrency()));
         sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account());
         sle->setFieldH160(
             sfTakerGetsCurrency,
-            static_cast<Currency>(saTakerGets.issue().asset()));
+            static_cast<Currency>(saTakerGets.issue().getCurrency()));
         sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account());
         sle->setFieldU64(sfExchangeRate, uRate);
     });

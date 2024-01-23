@@ -118,7 +118,7 @@ accountFundsHelper(
         return amtDefault;
 
     return toAmount<IOUAmount>(accountHolds(
-        view, id, issue.asset(), issue.account(), freezeHandling, j));
+        view, id, issue.getCurrency(), issue.account(), freezeHandling, j));
 }
 
 static XRPAmount
@@ -131,7 +131,7 @@ accountFundsHelper(
     beast::Journal j)
 {
     return toAmount<XRPAmount>(accountHolds(
-        view, id, issue.asset(), issue.account(), freezeHandling, j));
+        view, id, issue.getCurrency(), issue.account(), freezeHandling, j));
 }
 
 template <class TIn, class TOut>

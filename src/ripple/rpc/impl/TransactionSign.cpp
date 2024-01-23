@@ -244,7 +244,7 @@ checkPayment(
                         ledger, app.journal("RippleLineCache")),
                     srcAddressID,
                     *dstAccountID,
-                    sendMax.issue().asset(),
+                    sendMax.issue().getCurrency(),
                     sendMax.issue().account(),
                     amount,
                     std::nullopt,

@@ -62,9 +62,11 @@ class Offer0_test : public beast::unit_test::suite
     {
         Json::Value jvbp;
         jvbp[jss::ledger_index] = "current";
-        jvbp[jss::taker_pays][jss::currency] = to_string(taker_pays.asset());
+        jvbp[jss::taker_pays][jss::currency] =
+            to_string(taker_pays.getCurrency());
         jvbp[jss::taker_pays][jss::issuer] = to_string(taker_pays.account());
-        jvbp[jss::taker_gets][jss::currency] = to_string(taker_gets.asset());
+        jvbp[jss::taker_gets][jss::currency] =
+            to_string(taker_gets.getCurrency());
         jvbp[jss::taker_gets][jss::issuer] = to_string(taker_gets.account());
         return env.rpc("json", "book_offers", to_string(jvbp))[jss::result];
     }

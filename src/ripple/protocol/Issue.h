@@ -125,6 +125,18 @@ public:
         return asset_.isMPT();
     }
 
+    Currency const&
+    getCurrency() const
+    {
+        return asset_.getCurrency();
+    }
+
+    MPT const&
+    getMPT() const
+    {
+        return asset_.getMPT();
+    }
+
     friend bool
     isMPT(Issue const& i)
     {

@@ -235,7 +235,9 @@ applyCreate(
 
     // LP Token already exists. (should not happen)
     auto const lptIss = ammLPTIssue(
-        amount.issue().asset(), amount2.issue().asset(), *ammAccount);
+        amount.issue().getCurrency(),
+        amount2.issue().getCurrency(),
+        *ammAccount);
     if (sb.read(keylet::line(*ammAccount, lptIss)))
     {
         JLOG(j_.error()) << "AMM Instance: LP Token already exists.";

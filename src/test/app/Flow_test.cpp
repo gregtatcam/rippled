@@ -452,7 +452,7 @@ struct Flow_test : public beast::unit_test::suite
                     return STPathElement(
                         STPathElement::typeCurrency | STPathElement::typeIssuer,
                         xrpAccount(),
-                        iss.asset(),
+                        iss.getCurrency(),
                         iss.account());
                 };
                 {

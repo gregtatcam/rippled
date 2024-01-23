@@ -192,8 +192,8 @@ protected:
         ostr << name << ": "
              << "\ninIss: " << book_.in.account()
              << "\noutIss: " << book_.out.account()
-             << "\ninCur: " << book_.in.asset()
-             << "\noutCur: " << book_.out.asset();
+             << "\ninCur: " << book_.in.getCurrency()
+             << "\noutCur: " << book_.out.getCurrency();
         return ostr.str();
     }
 
@@ -681,7 +681,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 
         // Make sure offer owner has authorization to own IOUs from issuer.
         // An account can always own XRP or their own IOUs.
-        if (flowCross && (!isXRP(offer.issueIn().asset())) &&
+        if (flowCross && (!isXRP(offer.issueIn().getCurrency())) &&
             (offer.owner() != offer.issueIn().account()))
         {
             auto const& issuerID = offer.issueIn().account();
@@ -693,8 +693,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 auto const authFlag =
                     issuerID > ownerID ? lsfHighAuth : lsfLowAuth;
 
-                auto const line = afView.read(
-                    keylet::line(ownerID, issuerID, offer.issueIn().asset()));
+                auto const line = afView.read(keylet::line(
+                    ownerID, issuerID, offer.issueIn().getCurrency()));
 
                 if (!line || (((*line)[sfFlags] & authFlag) == 0))
                 {
@@ -1270,7 +1270,8 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
             auto const& view = ctx.view;
             auto const& cur = book_.in.account();
 
-            auto sle = view.read(keylet::line(*prev, cur, book_.in.asset()));
+            auto sle =
+                view.read(keylet::line(*prev, cur, book_.in.getCurrency()));
             if (!sle)
                 return terNO_LINE;
             if ((*sle)[sfFlags] &
@@ -1299,8 +1300,8 @@ equalHelper(Step const& step, ripple::Book const& book)
 bool
 bookStepEqual(Step const& step, ripple::Book const& book)
 {
-    bool const inXRP = isXRP(book.in.asset());
-    bool const outXRP = isXRP(book.out.asset());
+    bool const inXRP = isXRP(book.in.getCurrency());
+    bool const outXRP = isXRP(book.out.getCurrency());
     if (inXRP && outXRP)
     {
         assert(0);

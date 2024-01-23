@@ -127,8 +127,8 @@ ammLPHolds(
 {
     return ammLPHolds(
         view,
-        ammSle[sfAsset].asset(),
-        ammSle[sfAsset2].asset(),
+        ammSle[sfAsset].getCurrency(),
+        ammSle[sfAsset2].getCurrency(),
         ammSle[sfAccount],
         lpAccount,
         j);
@@ -173,10 +173,11 @@ ammAccountHolds(
         if (auto const sle = view.read(keylet::account(ammAccountID)))
             return (*sle)[sfBalance];
     }
-    else if (auto const sle = view.read(
-                 keylet::line(ammAccountID, issue.account(), issue.asset()));
+    else if (auto const sle = view.read(keylet::line(
+                 ammAccountID, issue.account(), issue.getCurrency()));
              sle &&
-             !isFrozen(view, ammAccountID, issue.asset(), issue.account()))
+             !isFrozen(
+                 view, ammAccountID, issue.getCurrency(), issue.account()))
     {
         auto amount = (*sle)[sfBalance];
         if (ammAccountID > issue.account())

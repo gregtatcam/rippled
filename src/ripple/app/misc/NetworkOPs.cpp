@@ -4420,7 +4420,7 @@ NetworkOPsImp::getBookPage(
                         saOwnerFunds = accountHolds(
                             view,
                             uOfferOwnerID,
-                            book.out.asset(),
+                            book.out.getCurrency(),
                             book.out.account(),
                             fhZERO_IF_FROZEN,
                             viewJ);
