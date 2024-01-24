@@ -20,6 +20,7 @@
 #include <ripple/app/main/Application.h>
 #include <ripple/basics/StringUtilities.h>
 #include <ripple/basics/strHex.h>
+#include <ripple/beast/core/LexicalCast.h>
 #include <ripple/json/json_errors.h>
 #include <ripple/ledger/ReadView.h>
 #include <ripple/net/RPCErr.h>
@@ -621,18 +622,24 @@ doLedgerEntry(RPC::JsonContext& context)
             {
                 uNodeIndex = beast::zero;
                 auto const& oracle = context.params[jss::oracle];
-                auto const documentID =
-                    oracle[jss::oracle_document_id].isConvertibleTo(
-                        Json::ValueType::uintValue)
-                    ? std::make_optional(
-                          oracle[jss::oracle_document_id].asUInt())
-                    : std::nullopt;
+                auto const documentID = [&]() -> std::optional<std::uint32_t> {
+                    auto const& id = oracle[jss::oracle_document_id];
+                    if (id.isConvertibleTo(Json::ValueType::uintValue))
+                        return std::make_optional(id.asUInt());
+                    else if (id.isString())
+                    {
+                        std::uint32_t v;
+                        if (beast::lexicalCastChecked(v, id.asString()))
+                            return std::make_optional(v);
+                    }
+                    return std::nullopt;
+                }();
                 auto const account =
                     parseBase58<AccountID>(oracle[jss::account].asString());
                 if (!account || account->isZero())
                     jvResult[jss::error] = "malformedAddress";
                 else if (!documentID)
-                    jvResult[jss::error] = "malformedSequence";
+                    jvResult[jss::error] = "malformedDocumentID";
                 else
                     uNodeIndex = keylet::oracle(*account, *documentID).key;
             }
