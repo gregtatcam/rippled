@@ -196,6 +196,15 @@ adjustOwnerCount(ApplyContext& ctx, int count)
     return false;
 }
 
+static void
+setPriceDataInnerObjTemplate(STObject& obj)
+{
+    if (SOTemplate const* elements =
+            InnerObjectFormats::getInstance().findSOTemplateBySField(
+                sfPriceData))
+        obj.set(*elements);
+}
+
 TER
 SetOracle::doApply()
 {
@@ -212,6 +221,7 @@ SetOracle::doApply()
         for (auto const& entry : sle->getFieldArray(sfPriceDataSeries))
         {
             STObject priceData{sfPriceData};
+            setPriceDataInnerObjTemplate(priceData);
             priceData.setFieldCurrency(
                 sfBaseAsset, entry.getFieldCurrency(sfBaseAsset));
             priceData.setFieldCurrency(
@@ -240,6 +250,7 @@ SetOracle::doApply()
             {
                 // add a token pair with the price
                 STObject priceData{sfPriceData};
+                setPriceDataInnerObjTemplate(priceData);
                 priceData.setFieldCurrency(
                     sfBaseAsset, entry.getFieldCurrency(sfBaseAsset));
                 priceData.setFieldCurrency(
