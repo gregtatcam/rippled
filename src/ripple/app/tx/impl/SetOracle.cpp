@@ -22,6 +22,7 @@
 #include <ripple/ledger/Sandbox.h>
 #include <ripple/ledger/View.h>
 #include <ripple/protocol/Feature.h>
+#include <ripple/protocol/InnerObjectFormats.h>
 #include <ripple/protocol/Rules.h>
 #include <ripple/protocol/TxFlags.h>
 #include <ripple/protocol/digest.h>
