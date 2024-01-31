@@ -191,7 +191,7 @@ Env::balance(Account const& account) const
 PrettyAmount
 Env::balance(Account const& account, Issue const& issue) const
 {
-    if (isXRP(issue.asset()))
+    if (isXRP(issue.currency()))
         return balance(account);
     auto const sle = le(keylet::line(account.id(), issue));
     if (!sle)

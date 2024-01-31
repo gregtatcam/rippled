@@ -92,7 +92,7 @@ toStep(
     if (e1->isAccount() && e2->isAccount())
     {
         return make_DirectStepI(
-            ctx, e1->getAccountID(), e2->getAccountID(), curIssue.asset());
+            ctx, e1->getAccountID(), e2->getAccountID(), curIssue.currency());
     }
 
     if (e1->isOffer() && e2->isAccount())
@@ -109,12 +109,12 @@ toStep(
         (e2->getNodeType() & STPathElement::typeIssuer));
     auto const outCurrency = e2->getNodeType() & STPathElement::typeCurrency
         ? e2->getCurrency()
-        : static_cast<Currency>(curIssue.asset());
+        : static_cast<Currency>(curIssue.currency());
     auto const outIssuer = e2->getNodeType() & STPathElement::typeIssuer
         ? e2->getIssuerID()
         : curIssue.account();
 
-    if (isXRP(curIssue.asset()) && isXRP(outCurrency))
+    if (isXRP(curIssue.currency()) && isXRP(outCurrency))
     {
         JLOG(j.info()) << "Found xrp/xrp offer payment step";
         return {temBAD_PATH, std::unique_ptr<Step>{}};
@@ -125,7 +125,7 @@ toStep(
     if (isXRP(outCurrency))
         return make_BookStepIX(ctx, curIssue);
 
-    if (isXRP(curIssue.asset()))
+    if (isXRP(curIssue.currency()))
         return make_BookStepXI(ctx, {outCurrency, outIssuer});
 
     return make_BookStepII(ctx, curIssue, {outCurrency, outIssuer});
@@ -187,7 +187,7 @@ toStrand(
 
     Issue curIssue = [&] {
         auto const& currency = static_cast<Currency>(
-            sendMaxIssue ? sendMaxIssue->asset() : deliver.asset());
+            sendMaxIssue ? sendMaxIssue->currency() : deliver.currency());
         if (isXRP(currency))
             return xrpIssue();
         return Issue{currency, src};
@@ -203,7 +203,10 @@ toStrand(
     normPath.reserve(4 + path.size());
     {
         normPath.emplace_back(
-            STPathElement::typeAll, src, curIssue.asset(), curIssue.account());
+            STPathElement::typeAll,
+            src,
+            curIssue.currency(),
+            curIssue.account());
 
         if (sendMaxIssue && sendMaxIssue->account() != src &&
             (path.empty() || !path[0].isAccount() ||
@@ -221,12 +224,12 @@ toStrand(
             // even if all that is changing is the Issue.account.
             STPathElement const& lastCurrency =
                 *std::find_if(normPath.rbegin(), normPath.rend(), hasCurrency);
-            if ((lastCurrency.getCurrency() != deliver.asset()) ||
+            if ((lastCurrency.getCurrency() != deliver.currency()) ||
                 (offerCrossing &&
                  lastCurrency.getIssuerID() != deliver.account()))
             {
                 normPath.emplace_back(
-                    std::nullopt, deliver.asset(), deliver.account());
+                    std::nullopt, deliver.currency(), deliver.account());
             }
         }
 
@@ -312,7 +315,7 @@ toStrand(
 
         if (cur->isAccount() && next->isAccount())
         {
-            if (!isXRP(curIssue.asset()) &&
+            if (!isXRP(curIssue.currency()) &&
                 curIssue.account() != cur->getAccountID() &&
                 curIssue.account() != next->getAccountID())
             {
@@ -321,7 +324,7 @@ toStrand(
                     ctx(),
                     cur->getAccountID(),
                     curIssue.account(),
-                    curIssue.asset());
+                    curIssue.currency());
                 if (msr.first != tesSUCCESS)
                     return {msr.first, Strand{}};
                 result.push_back(std::move(msr.second));
@@ -342,7 +345,7 @@ toStrand(
                     ctx(),
                     cur->getAccountID(),
                     curIssue.account(),
-                    curIssue.asset());
+                    curIssue.currency());
                 if (msr.first != tesSUCCESS)
                     return {msr.first, Strand{}};
                 result.push_back(std::move(msr.second));
@@ -380,7 +383,7 @@ toStrand(
                         ctx(),
                         curIssue.account(),
                         next->getAccountID(),
-                        curIssue.asset());
+                        curIssue.currency());
                     if (msr.first != tesSUCCESS)
                         return {msr.first, Strand{}};
                     result.push_back(std::move(msr.second));
@@ -390,7 +393,7 @@ toStrand(
         }
 
         if (!next->isOffer() && next->hasCurrency() &&
-            next->getCurrency() != curIssue.asset())
+            next->getCurrency() != curIssue.currency())
         {
             // Should never happen
             assert(0);
@@ -422,7 +425,7 @@ toStrand(
         auto curAcc = src;
         auto curIss = [&] {
             auto const& currency = static_cast<Currency>(
-                sendMaxIssue ? sendMaxIssue->asset() : deliver.asset());
+                sendMaxIssue ? sendMaxIssue->currency() : deliver.currency());
             if (isXRP(currency))
                 return xrpIssue();
             return Issue{currency, src};
@@ -449,7 +452,7 @@ toStrand(
         }
         if (curAcc != dst)
             return false;
-        if (curIss.asset() != deliver.asset())
+        if (curIss.currency() != deliver.currency())
             return false;
         if (curIss.account() != deliver.account() && curIss.account() != dst)
             return false;

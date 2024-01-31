@@ -294,7 +294,7 @@ doSubscribe(RPC::JsonContext& context)
             }
             book.out = std::make_pair(outCurrency, outAccount);
 
-            if (book.in.asset() == book.out.asset() &&
+            if (book.in.currency() == book.out.currency() &&
                 book.in.account() == book.out.account())
             {
                 JLOG(context.j.info()) << "taker_gets same as taker_pays.";

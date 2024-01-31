@@ -182,7 +182,7 @@ private:
     {
         std::string txt = amount.getText();
         txt += "/";
-        txt += to_string(amount.issue().asset());
+        txt += to_string(amount.issue().currency());
         return txt;
     }
 

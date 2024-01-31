@@ -188,7 +188,9 @@ Pathfinder::Pathfinder(
     , app_(app)
     , j_(app.journal("Pathfinder"))
 {
-    assert(!uSrcIssuer || isXRP(uSrcCurrency) == isXRP(uSrcIssuer.value()));
+    assert(
+        !uSrcIssuer || isXRP(uSrcCurrency) == isXRP(uSrcIssuer.value()) ||
+        !saDstAmount.isMPT() || (srcAmount && !srcAmount->isMPT()));
 }
 
 bool
@@ -209,7 +211,7 @@ Pathfinder::findPaths(
     }
 
     if (mSrcAccount == mDstAccount && mDstAccount == mEffectiveDst &&
-        mSrcCurrency == mDstAmount.getAsset())
+        mSrcCurrency == mDstAmount.getCurrency())
     {
         // No need to send to same account with same currency.
         JLOG(j_.debug()) << "Tried to send to same issuer";
@@ -217,7 +219,8 @@ Pathfinder::findPaths(
         return false;
     }
 
-    if (mSrcAccount == mEffectiveDst && mSrcCurrency == mDstAmount.getAsset())
+    if (mSrcAccount == mEffectiveDst &&
+        mSrcCurrency == mDstAmount.getCurrency())
     {
         // Default path might work, but any path would loop
         return true;
@@ -246,7 +249,7 @@ Pathfinder::findPaths(
     }
 
     bool bSrcXrp = isXRP(mSrcCurrency);
-    bool bDstXrp = isXRP(mDstAmount.getAsset());
+    bool bDstXrp = isXRP(mDstAmount.getCurrency());
 
     if (!mLedger->exists(keylet::account(mSrcAccount)))
     {
@@ -303,7 +306,7 @@ Pathfinder::findPaths(
         JLOG(j_.debug()) << "non-XRP to XRP payment";
         paymentType = pt_nonXRP_to_XRP;
     }
-    else if (mSrcCurrency == mDstAmount.getAsset())
+    else if (mSrcCurrency == mDstAmount.getCurrency())
     {
         // non-XRP -> non-XRP - Same currency
         JLOG(j_.debug()) << "non-XRP to non-XRP - same currency";
@@ -695,8 +698,8 @@ Pathfinder::getBestPaths(
 bool
 Pathfinder::issueMatchesOrigin(Issue const& issue)
 {
-    bool matchingCurrency = (issue.asset() == mSrcCurrency);
-    bool matchingAccount = isXRP(issue.asset()) ||
+    bool matchingCurrency = (issue.currency() == mSrcCurrency);
+    bool matchingAccount = isXRP(issue.currency()) ||
         (mSrcIssuer && issue.account() == mSrcIssuer) ||
         issue.account() == mSrcAccount;
 
@@ -739,7 +742,7 @@ Pathfinder::getPathsOut(
         {
             for (auto const& rspEntry : *lines)
             {
-                if (currency != rspEntry.getLimit().getAsset())
+                if (currency != rspEntry.getLimit().getCurrency())
                 {
                 }
                 else if (
@@ -976,7 +979,7 @@ Pathfinder::addLink(
                 bool const bRequireAuth(
                     sleEnd->getFieldU32(sfFlags) & lsfRequireAuth);
                 bool const bIsEndCurrency(
-                    uEndCurrency == mDstAmount.getAsset());
+                    uEndCurrency == mDstAmount.getCurrency());
                 bool const bIsNoRippleOut(isNoRippleOut(currentPath));
                 bool const bDestOnly(addFlags & afAC_LAST);
 
@@ -1010,7 +1013,7 @@ Pathfinder::addLink(
                             continue;
                         }
 
-                        if ((uEndCurrency == rs.getLimit().getAsset()) &&
+                        if ((uEndCurrency == rs.getLimit().getCurrency()) &&
                             !currentPath.hasSeen(acct, uEndCurrency, acct))
                         {
                             // path is for correct currency and has not been
@@ -1029,7 +1032,7 @@ Pathfinder::addLink(
                             else if (bToDestination)
                             {
                                 // destination is always worth trying
-                                if (uEndCurrency == mDstAmount.getAsset())
+                                if (uEndCurrency == mDstAmount.getCurrency())
                                 {
                                     // this is a complete path
                                     if (!currentPath.empty())
@@ -1141,13 +1144,16 @@ Pathfinder::addLink(
                 if (continueCallback && !continueCallback())
                     return;
                 if (!currentPath.hasSeen(
-                        xrpAccount(), book.out.asset(), book.out.account()) &&
+                        xrpAccount(),
+                        book.out.currency(),
+                        book.out.account()) &&
                     !issueMatchesOrigin(book.out) &&
-                    (!bDestOnly || (book.out.asset() == mDstAmount.getAsset())))
+                    (!bDestOnly ||
+                     (book.out.currency() == mDstAmount.getCurrency())))
                 {
                     STPath newPath(currentPath);
 
-                    if (book.out.asset().isXRP())
+                    if (isXRP(book.out.currency()))
                     {  // to XRP
 
                         // add the order book itself
@@ -1157,7 +1163,7 @@ Pathfinder::addLink(
                             xrpCurrency(),
                             xrpAccount());
 
-                        if (mDstAmount.getAsset().isXRP())
+                        if (isXRP(mDstAmount.getCurrency()))
                         {
                             // destination is XRP, add account and path is
                             // complete
@@ -1171,7 +1177,7 @@ Pathfinder::addLink(
                     }
                     else if (!currentPath.hasSeen(
                                  book.out.account(),
-                                 book.out.asset(),
+                                 book.out.currency(),
                                  book.out.account()))
                     {
                         // Don't want the book if we've already seen the issuer
@@ -1185,7 +1191,7 @@ Pathfinder::addLink(
                                 STPathElement::typeCurrency |
                                     STPathElement::typeIssuer,
                                 xrpAccount(),
-                                book.out.asset(),
+                                book.out.currency(),
                                 book.out.account());
                         }
                         else
@@ -1195,19 +1201,19 @@ Pathfinder::addLink(
                                 STPathElement::typeCurrency |
                                     STPathElement::typeIssuer,
                                 xrpAccount(),
-                                book.out.asset(),
+                                book.out.currency(),
                                 book.out.account());
                         }
 
                         if (hasEffectiveDestination &&
                             book.out.account() == mDstAccount &&
-                            book.out.asset() == mDstAmount.getAsset())
+                            book.out.currency() == mDstAmount.getCurrency())
                         {
                             // We skipped a required issuer
                         }
                         else if (
                             book.out.account() == mEffectiveDst &&
-                            book.out.asset() == mDstAmount.getAsset())
+                            book.out.currency() == mDstAmount.getCurrency())
                         {  // with the destination account, this path is
                            // complete
                             JLOG(j_.trace())
@@ -1223,7 +1229,7 @@ Pathfinder::addLink(
                                 STPathElement(
                                     STPathElement::typeAccount,
                                     book.out.account(),
-                                    book.out.asset(),
+                                    book.out.currency(),
                                     book.out.account()));
                         }
                     }

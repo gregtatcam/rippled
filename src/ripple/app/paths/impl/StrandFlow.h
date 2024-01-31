@@ -101,8 +101,9 @@ struct StrandResult
            and payment sandbox
  */
 template <class TInAmt, class TOutAmt>
-StrandResult<TInAmt, TOutAmt>
-flow(
+    requires(
+        !std::is_same_v<TInAmt, STAmount> && !std::is_same_v<TOutAmt, STAmount>)
+StrandResult<TInAmt, TOutAmt> flow(
     PaymentSandbox const& baseView,
     Strand const& strand,
     std::optional<TInAmt> const& maxIn,
@@ -551,8 +552,9 @@ public:
    sandbox
 */
 template <class TInAmt, class TOutAmt>
-FlowResult<TInAmt, TOutAmt>
-flow(
+    requires(
+        !std::is_same_v<TInAmt, STAmount> && !std::is_same_v<TOutAmt, STAmount>)
+FlowResult<TInAmt, TOutAmt> flow(
     PaymentSandbox const& baseView,
     std::vector<Strand> const& strands,
     TOutAmt const& outReq,

@@ -99,6 +99,16 @@ public:
     {
         return asset_;
     }
+    Currency constexpr const&
+    currency() const
+    {
+        return asset_.currency();
+    }
+    MPT constexpr const&
+    mpt() const
+    {
+        return asset_.mpt();
+    }
     AccountID const&
     account() const
     {

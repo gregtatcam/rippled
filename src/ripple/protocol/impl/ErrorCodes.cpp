@@ -50,6 +50,7 @@ constexpr static ErrorInfo unorderedErrorInfos[]{
     {rpcALREADY_MULTISIG,       "alreadyMultisig",      "Already multisigned."},
     {rpcALREADY_SINGLE_SIG,     "alreadySingleSig",     "Already single-signed."},
     {rpcAMENDMENT_BLOCKED,      "amendmentBlocked",     "Amendment blocked, need upgrade.", 503},
+    {rpcAMOUNT_CAN_NOT_BE_MPT,  "amountCanNotBeMPT",    "Amount can not be MPT.", 400},
     {rpcEXPIRED_VALIDATOR_LIST, "unlBlocked",           "Validator list expired.", 503},
     {rpcATX_DEPRECATED,         "deprecated",           "Use the new API or specify a ledger range.", 400},
     {rpcBAD_KEY_TYPE,           "badKeyType",           "Bad key type.", 400},

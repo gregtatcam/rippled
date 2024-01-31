@@ -53,6 +53,13 @@ CashCheck::preflight(PreflightContext const& ctx)
     auto const optAmount = ctx.tx[~sfAmount];
     auto const optDeliverMin = ctx.tx[~sfDeliverMin];
 
+    if ((optAmount && optAmount->isMPT()) ||
+        (optDeliverMin && optDeliverMin->isMPT()))
+    {
+        JLOG(ctx.j.warn()) << "Malformed transaction: amount can not be MPT.";
+        return temAMOUNT_CAN_NOT_BE_MPT;
+    }
+
     if (static_cast<bool>(optAmount) == static_cast<bool>(optDeliverMin))
     {
         JLOG(ctx.j.warn())
@@ -70,7 +77,7 @@ CashCheck::preflight(PreflightContext const& ctx)
         return temBAD_AMOUNT;
     }
 
-    if (badCurrency() == value.getAsset())
+    if (badCurrency() == value.getCurrency())
     {
         JLOG(ctx.j.warn()) << "Malformed transaction: Bad currency.";
         return temBAD_CURRENCY;
@@ -141,8 +148,8 @@ CashCheck::preclaim(PreclaimContext const& ctx)
         }(ctx.tx)};
 
         STAmount const sendMax = sleCheck->at(sfSendMax);
-        Currency const currency{value.getAsset()};
-        if (currency != sendMax.getAsset())
+        Currency const currency{value.getCurrency()};
+        if (currency != sendMax.getCurrency())
         {
             JLOG(ctx.j.warn()) << "Check cash does not match check currency.";
             return temMALFORMED;
@@ -377,7 +384,7 @@ CashCheck::doApply()
                     return tecNO_LINE_INSUF_RESERVE;
                 }
 
-                Currency const currency = flowDeliver.getAsset();
+                Currency const currency = flowDeliver.getCurrency();
                 STAmount initialBalance(flowDeliver.issue());
                 initialBalance.setIssuer(noAccount());
 

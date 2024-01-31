@@ -66,7 +66,7 @@ invalidAMMAsset(
     Issue const& issue,
     std::optional<std::pair<Issue, Issue>> const& pair)
 {
-    if (badCurrency() == issue.asset())
+    if (badCurrency() == issue.currency())
         return temBAD_CURRENCY;
     if (isXRP(issue) && issue.account().isNonZero())
         return temBAD_ISSUER;

@@ -52,6 +52,12 @@ AMMWithdraw::preflight(PreflightContext const& ctx)
     auto const amount2 = ctx.tx[~sfAmount2];
     auto const ePrice = ctx.tx[~sfEPrice];
     auto const lpTokens = ctx.tx[~sfLPTokenIn];
+
+    if ((amount && amount->isMPT()) || (amount2 && amount2->isMPT()))
+    {
+        JLOG(ctx.j.debug()) << "AMM Withdraw: amount can not be MPT.";
+        return temAMOUNT_CAN_NOT_BE_MPT;
+    }
     // Valid combinations are:
     //   LPTokens
     //   tfWithdrawAll
@@ -238,7 +244,7 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
             {
                 JLOG(ctx.j.debug()) << "AMM Withdraw: account is frozen, "
                                     << to_string(accountID) << " "
-                                    << to_string(amount->issue().asset());
+                                    << to_string(amount->issue().currency());
                 return tecFROZEN;
             }
         }

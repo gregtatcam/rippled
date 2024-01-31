@@ -718,7 +718,8 @@ STAmount::getText() const
     return ret;
 }
 
-Json::Value STAmount::getJson(JsonOptions) const
+Json::Value
+STAmount::getJson(JsonOptions) const
 {
     Json::Value elem;
     setJson(elem);
@@ -746,7 +747,7 @@ STAmount::add(Serializer& s) const
                 s.add64(mValue | cMPToken);
             else
                 s.add64(mValue | cMPToken | cPositive);
-            s.add32(std::get<MPT>(mIssue.asset().asset()).first);
+            s.add32(mIssue.mpt().first);
         }
         else
         {
@@ -762,7 +763,7 @@ STAmount::add(Serializer& s) const
                     mValue |
                     (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
                      << (64 - 10)));
-            s.addBitString(std::get<Currency>(mIssue.asset().asset()));
+            s.addBitString(mIssue.currency());
         }
         s.addBitString(mIssue.account());
     }

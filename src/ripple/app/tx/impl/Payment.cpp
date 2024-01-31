@@ -68,6 +68,10 @@ Payment::preflight(PreflightContext const& ctx)
     bool const bPaths = tx.isFieldPresent(sfPaths);
     bool const bMax = tx.isFieldPresent(sfSendMax);
 
+    if ((bMax && tx[sfSendMax].isMPT()) ||
+        (tx.isFieldPresent(sfDeliverMin) && tx[sfDeliverMin].isMPT()))
+        return temAMOUNT_CAN_NOT_BE_MPT;
+
     STAmount const saDstAmount(tx.getFieldAmount(sfAmount));
 
     STAmount maxSourceAmount;

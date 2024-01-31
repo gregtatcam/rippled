@@ -101,9 +101,21 @@ public:
         return std::get_if<T>(asset_);
     }
 
-    operator Currency const &() const;
+    Currency const&
+    currency() const
+    {
+        return operator const Currency&();
+    }
 
-    operator MPT const &() const;
+    MPT const&
+    mpt() const
+    {
+        return operator const MPT&();
+    }
+
+    operator Currency const&() const;
+
+    operator MPT const&() const;
 
     friend constexpr bool
     comparable(Asset const& a1, Asset const& a2)

@@ -42,6 +42,9 @@ Clawback::preflight(PreflightContext const& ctx)
     AccountID const issuer = ctx.tx[sfAccount];
     STAmount const clawAmount = ctx.tx[sfAmount];
 
+    if (clawAmount.isMPT())
+        return temAMOUNT_CAN_NOT_BE_MPT;
+
     // The issuer field is used for the token holder instead
     AccountID const& holder = clawAmount.getIssuer();
 
@@ -75,7 +78,7 @@ Clawback::preclaim(PreclaimContext const& ctx)
         return tecNO_PERMISSION;
 
     auto const sleRippleState =
-        ctx.view.read(keylet::line(holder, issuer, clawAmount.getAsset()));
+        ctx.view.read(keylet::line(holder, issuer, clawAmount.getCurrency()));
     if (!sleRippleState)
         return tecNO_LINE;
 
@@ -101,7 +104,7 @@ Clawback::preclaim(PreclaimContext const& ctx)
     if (accountHolds(
             ctx.view,
             holder,
-            clawAmount.getAsset(),
+            clawAmount.getCurrency(),
             issuer,
             fhIGNORE_FREEZE,
             ctx.j) <= beast::zero)
@@ -126,7 +129,7 @@ Clawback::doApply()
     STAmount const spendableAmount = accountHolds(
         view(),
         holder,
-        clawAmount.getAsset(),
+        clawAmount.getCurrency(),
         clawAmount.getIssuer(),
         fhIGNORE_FREEZE,
         j_);

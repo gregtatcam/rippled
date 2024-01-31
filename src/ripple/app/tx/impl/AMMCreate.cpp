@@ -50,6 +50,12 @@ AMMCreate::preflight(PreflightContext const& ctx)
     auto const amount = ctx.tx[sfAmount];
     auto const amount2 = ctx.tx[sfAmount2];
 
+    if (amount.isMPT() || amount2.isMPT())
+    {
+        JLOG(ctx.j.debug()) << "AMM Instance: amount can not be MPT";
+        return temAMOUNT_CAN_NOT_BE_MPT;
+    }
+
     if (amount.issue() == amount2.issue())
     {
         JLOG(ctx.j.debug())
@@ -235,7 +241,7 @@ applyCreate(
 
     // LP Token already exists. (should not happen)
     auto const lptIss = ammLPTIssue(
-        amount.issue().asset(), amount2.issue().asset(), *ammAccount);
+        amount.issue().currency(), amount2.issue().currency(), *ammAccount);
     if (sb.read(keylet::line(*ammAccount, lptIss)))
     {
         JLOG(j_.error()) << "AMM Instance: LP Token already exists.";

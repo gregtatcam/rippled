@@ -174,7 +174,7 @@ isGlobalFrozen(ReadView const& view, Issue const& issue)
         return false;
     if (issue.isMPT())
     {
-        if (auto const sle = view.read(keylet::mptIssuance(issue.asset())))
+        if (auto const sle = view.read(keylet::mptIssuance(issue.mpt())))
             return sle->getFlags() & lsfMPTLocked;
     }
     else if (auto const sle = view.read(keylet::account(issue.account())))
@@ -196,13 +196,13 @@ isIndividualFrozen(
         if (issue.isMPT())
         {
             if (auto const sle =
-                    view.read(keylet::mptoken(issue.asset(), account)))
+                    view.read(keylet::mptoken(issue.mpt(), account)))
                 return sle->getFlags() & lsfMPTLocked;
         }
         // Check if the issuer froze the line
         else if (
             auto const sle = view.read(
-                keylet::line(account, issue.account(), issue.asset())))
+                keylet::line(account, issue.account(), issue.currency())))
         {
             return sle->isFlag(
                 (issue.account() > account) ? lsfHighFreeze : lsfLowFreeze);
@@ -855,7 +855,8 @@ trustCreate(
     sleRippleState->setFieldAmount(
         bSetHigh ? sfLowLimit : sfHighLimit,
         STAmount(
-            {saBalance.getAsset(), bSetDst ? uSrcAccountID : uDstAccountID}));
+            {saBalance.getCurrency(),
+             bSetDst ? uSrcAccountID : uDstAccountID}));
 
     if (uQualityIn)
         sleRippleState->setFieldU32(
@@ -989,7 +990,7 @@ rippleCredit(
     beast::Journal j)
 {
     AccountID const& issuer = saAmount.getIssuer();
-    Currency const& currency = saAmount.getAsset();
+    Currency const& currency = saAmount.getCurrency();
 
     // Make sure issuer is involved.
     assert(!bCheckIssuer || uSenderID == issuer || uReceiverID == issuer);
@@ -1158,15 +1159,11 @@ rippleSend(
     // Sending 3rd party IOUs: transit.
     if (saAmount.isMPT())
     {
-        if (auto const sle =
-                view.read(keylet::mptIssuance(saAmount.getAsset())))
+        if (auto const sle = view.read(keylet::mptIssuance(saAmount.getMPT())))
         {
             saActual = (waiveFee == WaiveTransferFee::Yes)
                 ? saAmount
-                : multiply(
-                      saAmount,
-                      transferRateMPT(
-                          view, static_cast<MPT>(saAmount.getAsset())));
+                : multiply(saAmount, transferRateMPT(view, saAmount.getMPT()));
 
             JLOG(j.debug()) << "rippleSend> " << to_string(uSenderID) << " - > "
                             << to_string(uReceiverID)
@@ -1385,7 +1382,7 @@ issueIOU(
 
     bool bSenderHigh = issue.account() > account;
 
-    auto const index = keylet::line(issue.account(), account, issue.asset());
+    auto const index = keylet::line(issue.account(), account, issue.currency());
 
     if (auto state = view.peek(index))
     {
@@ -1432,7 +1429,7 @@ issueIOU(
     // NIKB TODO: The limit uses the receiver's account as the issuer and
     // this is unnecessarily inefficient as copying which could be avoided
     // is now required. Consider available options.
-    STAmount const limit({issue.asset(), account});
+    STAmount const limit({issue.currency(), account});
     STAmount final_balance = amount;
 
     final_balance.setIssuer(noAccount());
@@ -1482,7 +1479,7 @@ redeemIOU(
     bool bSenderHigh = account > issue.account();
 
     if (auto state =
-            view.peek(keylet::line(account, issue.account(), issue.asset())))
+            view.peek(keylet::line(account, issue.account(), issue.currency())))
     {
         STAmount final_balance = state->getFieldAmount(sfBalance);
 
@@ -1579,7 +1576,7 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
         return tesSUCCESS;
     if (issue.isMPT())
     {
-        auto const mptID = keylet::mptIssuance(issue.asset());
+        auto const mptID = keylet::mptIssuance(issue.mpt());
         if (auto const sle = view.read(mptID);
             sle && sle->getFieldU32(sfFlags) & lsfMPTRequireAuth)
         {
@@ -1595,7 +1592,7 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
         issuerAccount && (*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
         if (auto const trustLine = view.read(
-                keylet::line(account, issue.account(), issue.asset())))
+                keylet::line(account, issue.account(), issue.currency())))
             return ((*trustLine)[sfFlags] &
                     ((account > issue.account()) ? lsfLowAuth : lsfHighAuth))
                 ? tesSUCCESS
@@ -1739,7 +1736,7 @@ rippleMPTCredit(
     STAmount saAmount,
     beast::Journal j)
 {
-    auto const mptID = keylet::mptIssuance(saAmount.getAsset());
+    auto const mptID = keylet::mptIssuance(saAmount.getMPT());
     if (uSenderID == saAmount.getIssuer())
     {
         if (auto sle = view.peek(mptID))

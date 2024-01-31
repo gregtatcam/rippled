@@ -53,6 +53,12 @@ AMMDeposit::preflight(PreflightContext const& ctx)
     auto const ePrice = ctx.tx[~sfEPrice];
     auto const lpTokens = ctx.tx[~sfLPTokenOut];
     auto const tradingFee = ctx.tx[~sfTradingFee];
+
+    if ((amount && amount->isMPT()) || (amount2 && amount2->isMPT()))
+    {
+        JLOG(ctx.j.debug()) << "AMM Deposit: amount can not be MPT";
+        return temAMOUNT_CAN_NOT_BE_MPT;
+    }
     // Valid options for the flags are:
     //   tfLPTokens: LPTokenOut, [Amount, Amount2]
     //   tfSingleAsset: Amount, [LPTokenOut]
@@ -222,7 +228,7 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
             auto const lpIssue = (*ammSle)[sfLPTokenBalance].issue();
             // Adjust the reserve if LP doesn't have LPToken trustline
             auto const sle = ctx.view.read(
-                keylet::line(accountID, lpIssue.account(), lpIssue.asset()));
+                keylet::line(accountID, lpIssue.account(), lpIssue.currency()));
             if (xrpLiquid(ctx.view, accountID, !sle, ctx.j) >= deposit)
                 return TER(tesSUCCESS);
             if (sle)
@@ -272,7 +278,7 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
             {
                 JLOG(ctx.j.debug()) << "AMM Deposit: account is frozen, "
                                     << to_string(accountID) << " "
-                                    << to_string(amount->issue().asset());
+                                    << to_string(amount->issue().currency());
                 return tecFROZEN;
             }
             if (checkBalance)
@@ -479,7 +485,7 @@ AMMDeposit::deposit(
             auto const& lpIssue = lpTokensDeposit.issue();
             // Adjust the reserve if LP doesn't have LPToken trustline
             auto const sle = view.read(
-                keylet::line(account_, lpIssue.account(), lpIssue.asset()));
+                keylet::line(account_, lpIssue.account(), lpIssue.currency()));
             if (xrpLiquid(view, account_, !sle, j_) >= depositAmount)
                 return tesSUCCESS;
         }

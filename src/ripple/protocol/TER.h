@@ -136,6 +136,8 @@ enum TEMcodes : TERUnderlyingType {
     temXCHAIN_BRIDGE_BAD_REWARD_AMOUNT,
 
     temEMPTY_DID,
+
+    temAMOUNT_CAN_NOT_BE_MPT,
 };
 
 //------------------------------------------------------------------------------

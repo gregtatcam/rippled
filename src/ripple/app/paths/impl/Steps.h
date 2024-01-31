@@ -445,6 +445,7 @@ toStrands(
 
 /// @cond INTERNAL
 template <class TIn, class TOut, class TDerived>
+    requires(!std::is_same_v<TIn, STAmount> && !std::is_same_v<TOut, STAmount>)
 struct StepImp : public Step
 {
     explicit StepImp() = default;

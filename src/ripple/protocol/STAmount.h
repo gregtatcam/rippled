@@ -184,10 +184,16 @@ public:
     Issue const&
     issue() const;
 
-    // These three are deprecated
     Asset const&
     getAsset() const;
 
+    Currency const&
+    getCurrency() const;
+
+    MPT const&
+    getMPT() const;
+
+    // These three are deprecated
     AccountID const&
     getIssuer() const;
 
@@ -385,6 +391,18 @@ STAmount::getAsset() const
     return mIssue.asset();
 }
 
+inline Currency const&
+STAmount::getCurrency() const
+{
+    return mIssue.asset();
+}
+
+inline MPT const&
+STAmount::getMPT() const
+{
+    return mIssue.mpt();
+}
+
 inline AccountID const&
 STAmount::getIssuer() const
 {
@@ -417,7 +435,8 @@ inline STAmount::operator Number() const
     return iou();
 }
 
-inline STAmount& STAmount::operator=(beast::Zero)
+inline STAmount&
+STAmount::operator=(beast::Zero)
 {
     clear();
     return *this;

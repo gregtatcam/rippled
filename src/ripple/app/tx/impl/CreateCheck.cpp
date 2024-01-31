@@ -53,6 +53,15 @@ CreateCheck::preflight(PreflightContext const& ctx)
 
     {
         STAmount const sendMax{ctx.tx.getFieldAmount(sfSendMax)};
+
+        if (sendMax.isMPT())
+        {
+            JLOG(ctx.j.warn())
+                << "Malformed transaction: sendMax amount can not be MPT: "
+                << sendMax.getFullText();
+            return temAMOUNT_CAN_NOT_BE_MPT;
+        }
+
         if (!isLegalNet(sendMax) || sendMax.signum() <= 0)
         {
             JLOG(ctx.j.warn()) << "Malformed transaction: bad sendMax amount: "
@@ -60,7 +69,7 @@ CreateCheck::preflight(PreflightContext const& ctx)
             return temBAD_AMOUNT;
         }
 
-        if (badCurrency() == sendMax.getAsset())
+        if (badCurrency() == sendMax.getCurrency())
         {
             JLOG(ctx.j.warn()) << "Malformed transaction: Bad currency.";
             return temBAD_CURRENCY;
@@ -130,7 +139,7 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
             {
                 // Check if the issuer froze the line
                 auto const sleTrust = ctx.view.read(
-                    keylet::line(srcId, issuerId, sendMax.getAsset()));
+                    keylet::line(srcId, issuerId, sendMax.getCurrency()));
                 if (sleTrust &&
                     sleTrust->isFlag(
                         (issuerId > srcId) ? lsfHighFreeze : lsfLowFreeze))
@@ -144,7 +153,7 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
             {
                 // Check if dst froze the line.
                 auto const sleTrust = ctx.view.read(
-                    keylet::line(issuerId, dstId, sendMax.getAsset()));
+                    keylet::line(issuerId, dstId, sendMax.getCurrency()));
                 if (sleTrust &&
                     sleTrust->isFlag(
                         (dstId > issuerId) ? lsfHighFreeze : lsfLowFreeze))

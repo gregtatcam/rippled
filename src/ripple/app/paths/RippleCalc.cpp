@@ -68,6 +68,14 @@ RippleCalc::rippleCalculate(
                "this is a replay and running with the new rules.";
     }
 
+    if (saMaxAmountReq.isMPT() || saDstAmountReq.isMPT())
+    {
+        JLOG(j.error()) << "Amount can not be MPT.";
+        path::RippleCalc::Output res;
+        res.setResult(temAMOUNT_CAN_NOT_BE_MPT);
+        return res;
+    }
+
     {
         bool const defaultPaths =
             !pInputs ? true : pInputs->defaultPathsAllowed;
@@ -84,7 +92,7 @@ RippleCalc::rippleCalculate(
 
         auto const sendMax = [&]() -> std::optional<STAmount> {
             if (saMaxAmountReq >= beast::zero ||
-                saMaxAmountReq.getAsset() != saDstAmountReq.getAsset() ||
+                saMaxAmountReq.getCurrency() != saDstAmountReq.getCurrency() ||
                 saMaxAmountReq.getIssuer() != uSrcAccountID)
             {
                 return saMaxAmountReq;

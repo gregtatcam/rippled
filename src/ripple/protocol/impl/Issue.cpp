@@ -77,7 +77,7 @@ to_json(Issue const& is)
     if (is.asset().isMPT())
         jv[jss::mpt_issuance_id] = to_string(is.asset());
     else
-        jv[jss::currency] = to_string(is.asset());
+        jv[jss::currency] = to_string(is.currency());
     if (!isXRP(is.asset()) && !is.asset().isMPT())
         jv[jss::issuer] = toBase58(is.account());
     return jv;
