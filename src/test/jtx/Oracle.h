@@ -154,7 +154,7 @@ public:
     ledgerEntry(
         Env& env,
         AccountID const& account,
-        std::uint32_t documentID,
+        std::variant<std::uint32_t, std::string> const& documentID,
         std::optional<std::string> const& index = std::nullopt);
 
     Json::Value

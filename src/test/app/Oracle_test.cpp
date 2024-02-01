@@ -644,7 +644,14 @@ private:
         }
         for (int i = 0; i < accounts.size(); ++i)
         {
-            auto const jv = Oracle::ledgerEntry(env, accounts[i], oracles[i]);
+            auto const jv = [&]() {
+                // document id is uint32
+                if (i % 2)
+                    return Oracle::ledgerEntry(env, accounts[i], oracles[i]);
+                // document id is string
+                return Oracle::ledgerEntry(
+                    env, accounts[i], std::to_string(oracles[i]));
+            }();
             try
             {
                 BEAST_EXPECT(

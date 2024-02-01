@@ -263,12 +263,17 @@ Json::Value
 Oracle::ledgerEntry(
     Env& env,
     AccountID const& account,
-    std::uint32_t documentID,
+    std::variant<std::uint32_t, std::string> const& documentID,
     std::optional<std::string> const& index)
 {
     Json::Value jvParams;
     jvParams[jss::oracle][jss::account] = to_string(account);
-    jvParams[jss::oracle][jss::oracle_document_id] = documentID;
+    if (std::holds_alternative<std::uint32_t>(documentID))
+        jvParams[jss::oracle][jss::oracle_document_id] =
+            std::get<std::uint32_t>(documentID);
+    else
+        jvParams[jss::oracle][jss::oracle_document_id] =
+            std::get<std::string>(documentID);
     if (index)
     {
         std::uint32_t i;
