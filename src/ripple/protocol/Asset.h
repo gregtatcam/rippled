@@ -96,7 +96,7 @@ public:
 
     template <typename T>
     requires(std::is_same_v<T, Currency> || std::is_same_v<T, MPT>)
-    T const* get() const
+        T const* get() const
     {
         return std::get_if<T>(asset_);
     }
