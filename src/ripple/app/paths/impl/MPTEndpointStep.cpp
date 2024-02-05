@@ -239,8 +239,7 @@ public:
     using MPTEndpointStep<DirectMPTPaymentStep>::MPTEndpointStep;
     using MPTEndpointStep<DirectMPTPaymentStep>::check;
 
-    bool
-    verifyPrevStepDebtDirection(DebtDirection) const
+    bool verifyPrevStepDebtDirection(DebtDirection) const
     {
         // A payment doesn't care whether or not prevStepRedeems.
         return true;

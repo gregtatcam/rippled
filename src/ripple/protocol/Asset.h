@@ -95,15 +95,15 @@ public:
     }
 
     template <typename T>
-        requires(std::is_same_v<T, Currency> || std::is_same_v<T, MPT>)
+    requires(std::is_same_v<T, Currency> || std::is_same_v<T, MPT>)
     T const* get() const
     {
         return std::get_if<T>(asset_);
     }
 
-    operator Currency const&() const;
+    operator Currency const &() const;
 
-    operator MPT const&() const;
+    operator MPT const &() const;
 
     friend constexpr bool
     comparable(Asset const& a1, Asset const& a2)

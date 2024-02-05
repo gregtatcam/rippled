@@ -150,9 +150,8 @@ Payment::preflight(PreflightContext const& ctx)
     if (bXRPDirect && partialPaymentAllowed)
     {
         // Consistent but redundant transaction.
-        JLOG(j.trace())
-            << "Malformed transaction: "
-            << "Partial payment specified for XRP to XRP.";
+        JLOG(j.trace()) << "Malformed transaction: "
+                        << "Partial payment specified for XRP to XRP.";
         return temBAD_SEND_PARTIAL;
     }
     if (bDirect && limitQuality)
