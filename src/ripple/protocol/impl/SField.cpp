@@ -180,7 +180,6 @@ CONSTRUCT_TYPED_SFIELD(sfCookie,                "Cookie",               UINT64, 
 CONSTRUCT_TYPED_SFIELD(sfServerVersion,         "ServerVersion",        UINT64,    11);
 CONSTRUCT_TYPED_SFIELD(sfNFTokenOfferNode,      "NFTokenOfferNode",     UINT64,    12);
 CONSTRUCT_TYPED_SFIELD(sfEmitBurden,            "EmitBurden",           UINT64,    13);
-CONSTRUCT_TYPED_SFIELD(sfMPTokenNode,           "MPTokenNode",          UINT64,    14);
 
 // 64-bit integers (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfHookOn,                   "HookOn",                   UINT64, 16);

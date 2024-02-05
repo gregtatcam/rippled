@@ -79,23 +79,13 @@ hasExpired(ReadView const& view, std::optional<std::uint32_t> const& exp);
 enum FreezeHandling { fhIGNORE_FREEZE, fhZERO_IF_FROZEN };
 
 [[nodiscard]] bool
-isGlobalFrozen(ReadView const& view, AccountID const& issuer);
+isGlobalFrozen(ReadView const& view, Issue const& issue);
 
 [[nodiscard]] bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
-    Currency const& currency,
-    AccountID const& issuer);
-
-[[nodiscard]] inline bool
-isIndividualFrozen(
-    ReadView const& view,
-    AccountID const& account,
-    Issue const& issue)
-{
-    return isIndividualFrozen(view, account, issue.asset(), issue.account());
-}
+    Issue const& issue);
 
 [[nodiscard]] bool
 isFrozen(

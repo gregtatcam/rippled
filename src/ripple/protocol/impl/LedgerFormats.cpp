@@ -74,7 +74,6 @@ LedgerFormats::LedgerFormats()
             {sfIndexNext,            soeOPTIONAL},
             {sfIndexPrevious,        soeOPTIONAL},
             {sfNFTokenID,            soeOPTIONAL},
-            {sfMPTokenIssuanceID,    soeOPTIONAL},
         },
         commonFields);
 
@@ -366,7 +365,6 @@ LedgerFormats::LedgerFormats()
             {sfMPTAmount, soeDEFAULT},
             {sfLockedAmount, soeDEFAULT},
             {sfOwnerNode,            soeREQUIRED},
-            {sfMPTokenNode,            soeREQUIRED},
             {sfPreviousTxnID,        soeREQUIRED},
             {sfPreviousTxnLgrSeq,    soeREQUIRED}
         },

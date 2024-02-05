@@ -485,7 +485,7 @@ toStrand(
 
         auto curAcc = src;
         auto curIss = [&] {
-            auto& asset =
+            auto const& asset =
                 sendMaxIssue ? sendMaxIssue->asset() : deliver.asset();
             if (isXRP(asset))
                 return xrpIssue();

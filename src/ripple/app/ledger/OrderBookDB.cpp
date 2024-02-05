@@ -114,15 +114,12 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
                 sle->getFieldH256(sfRootIndex) == sle->key())
             {
                 Book book;
-                // TODO update for MPT once supported in the offers
                 Currency currency;
                 AccountID account;
-                currency = static_cast<Currency>(
-                    sle->getFieldH160(sfTakerPaysCurrency));
+                currency = sle->getFieldH160(sfTakerPaysCurrency);
                 account = sle->getFieldH160(sfTakerPaysIssuer);
                 book.in = std::make_pair(currency, account);
-                currency = static_cast<Currency>(
-                    sle->getFieldH160(sfTakerGetsCurrency));
+                currency = sle->getFieldH160(sfTakerGetsCurrency);
                 account = sle->getFieldH160(sfTakerGetsIssuer);
                 book.out = std::make_pair(currency, account);
 

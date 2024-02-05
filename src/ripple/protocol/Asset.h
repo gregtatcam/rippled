@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2023 Ripple Labs Inc.
+    Copyright (c) 2024 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -78,16 +78,7 @@ public:
     }
 
     void
-    addBitString(Serializer& s) const
-    {
-        if (isCurrency())
-            s.addBitString(std::get<Currency>(asset_));
-        else
-        {
-            s.add32(std::get<MPT>(asset_).first);
-            s.addBitString(std::get<MPT>(asset_).second);
-        }
-    }
+    addBitString(Serializer& s) const;
 
     bool
     empty() const
@@ -104,105 +95,68 @@ public:
     }
 
     template <typename T>
-    requires(std::is_same_v<T, Currency> || std::is_same_v<T, MPT>)
-        T const* get() const
+        requires(std::is_same_v<T, Currency> || std::is_same_v<T, MPT>)
+    T const* get() const
     {
         return std::get_if<T>(asset_);
     }
 
-    operator Currency const &() const
-    {
-        assert(std::holds_alternative<Currency>(asset_));
-        if (!std::holds_alternative<Currency>(asset_))
-            Throw<std::logic_error>("Invalid Currency cast");
-        return std::get<Currency>(asset_);
-    }
+    operator Currency const&() const;
 
-    operator MPT const &() const
-    {
-        assert(std::holds_alternative<MPT>(asset_));
-        if (!std::holds_alternative<MPT>(asset_))
-            Throw<std::logic_error>("Invalid MPT cast");
-        return std::get<MPT>(asset_);
-    }
+    operator MPT const&() const;
 
-    friend bool
+    friend constexpr bool
     comparable(Asset const& a1, Asset const& a2)
     {
         return std::holds_alternative<Currency>(a1.asset_) ==
             std::holds_alternative<Currency>(a2.asset_);
     }
-    friend bool
+    friend constexpr bool
     operator==(Currency const& c, Asset const& a) noexcept
     {
         return a.isCurrency() && c == (Currency&)a;
     }
-    friend bool
+    friend constexpr bool
     operator==(Asset const& a, Currency const& c) noexcept
     {
         return c == a;
     }
-    friend bool
+    friend constexpr bool
     operator==(Asset const& a1, Asset const& a2) noexcept
     {
         return comparable(a1, a2) && a1.asset_ == a2.asset_;
     }
-    friend bool
+    friend constexpr bool
     operator!=(Asset const& a1, Asset const& a2) noexcept
     {
         return !(a1 == a2);
     }
-    friend bool
+    friend constexpr bool
     operator<(Asset const& a1, Asset const& a2) noexcept
     {
         return comparable(a1, a2) && a1.asset_ < a2.asset_;
     }
-    friend bool
+    friend constexpr bool
     operator>(Asset const& a1, Asset const& a2) noexcept
     {
         return a2 < a1;
     }
-    friend bool
+    friend constexpr bool
     operator<=(Asset const& a1, Asset const& a2) noexcept
     {
         return !(a2 < a1);
     }
-    friend bool
+    friend constexpr bool
     operator>=(Asset const& a1, Asset const& a2) noexcept
     {
         return !(a1 < a2);
     }
-    friend inline constexpr std::weak_ordering
-    operator<=>(Asset const& lhs, Asset const& rhs)
-    {
-        assert(lhs.isCurrency() == rhs.isCurrency());
-        if (lhs.isCurrency() != rhs.isCurrency())
-            Throw<std::logic_error>("Invalid Asset comparison");
-        if (lhs.isCurrency())
-            return std::get<Currency>(lhs.asset_) <=>
-                std::get<Currency>(rhs.asset_);
-        if (auto const c{
-                std::get<MPT>(lhs.asset_).second <=>
-                std::get<MPT>(rhs.asset_).second};
-            c != 0)
-            return c;
-        return std::get<MPT>(lhs.asset_).first <=>
-            std::get<MPT>(rhs.asset_).first;
-    }
+    friend constexpr std::weak_ordering
+    operator<=>(Asset const& lhs, Asset const& rhs);
+
     friend std::string
-    to_string(Asset const& a)
-    {
-        if (a.isCurrency())
-            return to_string((Currency&)a);
-        // TODO, common getMptID()
-        uint192 u;
-        auto const sequence =
-            boost::endian::native_to_big(std::get<MPT>(a.asset_).first);
-        auto const& account = std::get<MPT>(a.asset_).second;
-        memcpy(u.data(), &sequence, sizeof(sequence));
-        memcpy(u.data() + sizeof(sequence), account.data(), sizeof(account));
-        return to_string(u);
-    }
+    to_string(Asset const& a);
+
     friend bool
     isXRP(Asset const& a)
     {

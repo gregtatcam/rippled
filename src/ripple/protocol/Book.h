@@ -67,7 +67,7 @@ reversed(Book const& book);
 
 /** Equality comparison. */
 /** @{ */
-[[nodiscard]] inline bool
+[[nodiscard]] inline constexpr bool
 operator==(Book const& lhs, Book const& rhs)
 {
     return (lhs.in == rhs.in) && (lhs.out == rhs.out);

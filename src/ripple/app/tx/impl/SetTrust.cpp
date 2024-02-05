@@ -102,7 +102,7 @@ SetTrust::preclaim(PreclaimContext const& ctx)
 
     auto const saLimitAmount = ctx.tx[sfLimitAmount];
 
-    auto const currency = saLimitAmount.getAsset();
+    auto const currency = static_cast<Currency>(saLimitAmount.getAsset());
     auto const uDstAccountID = saLimitAmount.getIssuer();
 
     if (ctx.view.rules().enabled(fixTrustLinesToSelf))

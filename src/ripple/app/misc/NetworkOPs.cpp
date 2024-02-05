@@ -4332,8 +4332,8 @@ NetworkOPsImp::getBookPage(
 
     ReadView const& view = *lpLedger;
 
-    bool const bGlobalFreeze = isGlobalFrozen(view, book.out.account()) ||
-        isGlobalFrozen(view, book.in.account());
+    bool const bGlobalFreeze =
+        isGlobalFrozen(view, book.out) || isGlobalFrozen(view, book.in);
 
     bool bDone = false;
     bool bDirectAdvance = true;
@@ -4530,8 +4530,8 @@ NetworkOPsImp::getBookPage(
 
     auto const rate = transferRate(lesActive, book.out.account);
 
-    const bool bGlobalFreeze = lesActive.isGlobalFrozen(book.out.account) ||
-        lesActive.isGlobalFrozen(book.in.account);
+    const bool bGlobalFreeze =
+        lesActive.isGlobalFrozen(book.out) || lesActive.isGlobalFrozen(book.in);
 
     while (iLimit-- > 0 && obIterator.nextOffer())
     {

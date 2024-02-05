@@ -42,7 +42,7 @@ struct AmountSpec
         IOUAmount iou = {};
     };
     std::optional<AccountID> issuer;
-    std::optional<Asset> currency;
+    std::optional<Asset> asset;
 
     friend std::ostream&
     operator<<(std::ostream& stream, AmountSpec const& amt)
@@ -53,8 +53,8 @@ struct AmountSpec
             stream << to_string(amt.xrp);
         else
             stream << to_string(amt.iou);
-        if (amt.currency)
-            stream << "/(" << *amt.currency << ")";
+        if (amt.asset)
+            stream << "/(" << *amt.asset << ")";
         if (amt.issuer)
             stream << "/" << *amt.issuer << "";
         return stream;
@@ -217,7 +217,7 @@ toAmountSpec(STAmount const& amt)
         else
             result.iou = IOUAmount(sMant, amt.exponent());
         result.issuer = amt.issue().account();
-        result.currency = amt.issue().asset();
+        result.asset = amt.issue().asset();
     }
 
     return result;
@@ -238,7 +238,7 @@ toAmountSpec(EitherAmount const& ea, std::optional<Asset> const& a)
 {
     AmountSpec r;
     r.native = (!a || isXRP(*a));
-    r.currency = a;
+    r.asset = a;
     assert(ea.native == r.native);
     if (r.is_mpt)
     {

@@ -36,8 +36,6 @@ namespace ripple {
 class Issue
 {
 private:
-    // using IOU = std::pair<Currency, AccountID>;
-    // std::variant<MPT, IOU> issue_;
     Asset asset_{};
     std::optional<AccountID> account_{std::nullopt};
 
@@ -157,14 +155,15 @@ void
 hash_append(Hasher& h, Issue const& r)
 {
     using beast::hash_append;
-    std::visit(
-        [&](auto&& arg) { hash_append(h, arg, r.account()); },
-        r.asset().asset());
+    if (r.isMPT())
+        hash_append(h, std::get<MPT>(r.asset().asset()));
+    else
+        hash_append(h, std::get<Currency>(r.asset().asset()), r.account());
 }
 
 /** Equality comparison. */
 /** @{ */
-[[nodiscard]] inline bool
+[[nodiscard]] inline constexpr bool
 operator==(Issue const& lhs, Issue const& rhs)
 {
     return (lhs.asset() == rhs.asset()) &&

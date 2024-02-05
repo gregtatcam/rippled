@@ -904,14 +904,14 @@ public:
         }
         {
             // alice creates MPToken that is going to be used by gw
-            auto const issuanceID = getMptID(alice, env.seq(alice));
-            env(mpt::create(alice));
-            env.close();
+            MPTTester mptAlice(env, alice, {.fund = false});
+            mptAlice.create();
 
             // gw creates a MPToken that we can look for in the ledger.
             Json::Value jvMPToken;
             jvMPToken[jss::TransactionType] = jss::MPTokenAuthorize;
-            jvMPToken[jss::MPTokenIssuanceID] = to_string(issuanceID);
+            jvMPToken[jss::MPTokenIssuanceID] =
+                to_string(mptAlice.issuanceID());
             jvMPToken[jss::Account] = gw.human();
             env(jvMPToken);
             env.close();
@@ -921,7 +921,8 @@ public:
             BEAST_EXPECT(acct_objs_is_size(resp, 1));
             auto const& mptoken = resp[jss::result][jss::account_objects][0u];
             BEAST_EXPECT(
-                mptoken[sfMPTokenIssuanceID.jsonName] == to_string(issuanceID));
+                mptoken[sfMPTokenIssuanceID.jsonName] ==
+                to_string(mptAlice.issuanceID()));
             BEAST_EXPECT(mptoken[sfAccount.jsonName] == gw.human());
         }
         // Make gw multisigning by adding a signerList.

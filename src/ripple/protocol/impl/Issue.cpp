@@ -94,22 +94,26 @@ issueFromJson(Json::Value const& v)
 
     bool const isMPT = v.isMember(jss::mpt_issuance_id);
 
-    Json::Value const assetStr =
-        isMPT ? v[jss::mpt_issuance_id] : v[jss::currency];
+    assert(!isMPT);
+    if (isMPT)
+        Throw<std::runtime_error>("issueFromJson MPT is not supported");
+
+    Json::Value const curStr = v[jss::currency];
     Json::Value const issStr = v[jss::issuer];
 
-    if (!assetStr.isString())
+    if (!curStr.isString())
     {
-        Throw<Json::error>("issueFromJson asset must be a string Json value");
+        Throw<Json::error>(
+            "issueFromJson currency must be a string Json value");
     }
 
-    Asset asset = to_currency(assetStr.asString());
-    if (asset == badCurrency() || asset == noCurrency())
+    auto const currency = to_currency(curStr.asString());
+    if (currency == badCurrency() || currency == noCurrency())
     {
         Throw<Json::error>("issueFromJson currency must be a valid currency");
     }
 
-    if (asset.isXRP())
+    if (isXRP(currency))
     {
         if (!issStr.isNull())
         {
@@ -129,7 +133,7 @@ issueFromJson(Json::Value const& v)
         Throw<Json::error>("issueFromJson issuer must be a valid account");
     }
 
-    return Issue{asset, *issuer};
+    return Issue{currency, *issuer};
 }
 
 std::ostream&

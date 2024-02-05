@@ -75,6 +75,7 @@ target_sources (xrpl_core PRIVATE
   #]===============================]
   src/ripple/protocol/impl/AccountID.cpp
   src/ripple/protocol/impl/AMMCore.cpp
+  src/ripple/protocol/impl/Asset.cpp
   src/ripple/protocol/impl/Book.cpp
   src/ripple/protocol/impl/BuildInfo.cpp
   src/ripple/protocol/impl/ErrorCodes.cpp
@@ -682,7 +683,6 @@ target_sources (rippled PRIVATE
   src/ripple/rpc/handlers/BlackList.cpp
   src/ripple/rpc/handlers/BookOffers.cpp
   src/ripple/rpc/handlers/CanDelete.cpp
-  src/ripple/rpc/handlers/MPTHolders.cpp
   src/ripple/rpc/handlers/Connect.cpp
   src/ripple/rpc/handlers/ConsensusInfo.cpp
   src/ripple/rpc/handlers/CrawlShards.cpp

@@ -25,104 +25,70 @@ namespace ripple {
 
 class MPToken_test : public beast::unit_test::suite
 {
-    [[nodiscard]] bool
-    checkMPTokenAmount(
-        test::jtx::Env const& env,
-        ripple::uint256 const mptIssuanceid,
-        test::jtx::Account const& holder,
-        std::uint64_t expectedAmount)
-    {
-        auto const sleMpt = env.le(keylet::mptoken(mptIssuanceid, holder));
-        if (!sleMpt)
-            return false;
-
-        std::uint64_t const amount = (*sleMpt)[sfMPTAmount];
-        return amount == expectedAmount;
-    }
-
-    [[nodiscard]] bool
-    checkMPTokenOutstandingAmount(
-        test::jtx::Env const& env,
-        ripple::uint256 const mptIssuanceid,
-        std::uint64_t expectedAmount)
-    {
-        auto const sleMpt = env.le(keylet::mptIssuance(mptIssuanceid));
-        if (!sleMpt)
-            return false;
-
-        std::uint64_t const amount = (*sleMpt)[sfOutstandingAmount];
-        return amount == expectedAmount;
-    }
-
-    [[nodiscard]] bool
-    checkMPTokenIssuanceFlags(
-        test::jtx::Env const& env,
-        ripple::uint256 const mptIssuanceid,
-        uint32_t const expectedFlags)
-    {
-        auto const sleMptIssuance = env.le(keylet::mptIssuance(mptIssuanceid));
-        if (!sleMptIssuance)
-            return false;
-
-        uint32_t const mptIssuanceFlags = sleMptIssuance->getFlags();
-        return expectedFlags == mptIssuanceFlags;
-    }
-
-    [[nodiscard]] bool
-    checkMPTokenFlags(
-        test::jtx::Env const& env,
-        ripple::uint256 const mptIssuanceid,
-        test::jtx::Account const& holder,
-        uint32_t const expectedFlags)
-    {
-        auto const sleMpt = env.le(keylet::mptoken(mptIssuanceid, holder));
-        if (!sleMpt)
-            return false;
-        uint32_t const mptFlags = sleMpt->getFlags();
-        return mptFlags == expectedFlags;
-    }
-
     void
     testCreateValidation(FeatureBitset features)
     {
         testcase("Create Validate");
         using namespace test::jtx;
+        Account const alice("alice");
 
         // test preflight of MPTokenIssuanceCreate
         {
             // If the MPT amendment is not enabled, you should not be able to
             // create MPTokenIssuances
             Env env{*this, features - featureMPTokensV1};
-            Account const alice("alice");  // issuer
+            MPTTester mptAlice(env, alice);
 
-            env.fund(XRP(10000), alice);
-            env.close();
+            mptAlice.create({.ownerCount = 0, .err = temDISABLED});
+        }
 
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
+        // test preflight of MPTokenIssuanceCreate
+        {
+            Env env{*this, features};
+            MPTTester mptAlice(env, alice);
 
-            env(mpt::create(alice), ter(temDISABLED));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            env.enableFeature(featureMPTokensV1);
-
-            env(mpt::create(alice), txflags(0x00000001), ter(temINVALID_FLAG));
-            env.close();
+            mptAlice.create({.flags = 0x00000001, .err = temINVALID_FLAG});
 
             // tries to set a txfee while not enabling in the flag
-            env(mpt::create(alice, 100, 0, 1, "test"), ter(temMALFORMED));
-            env.close();
+            mptAlice.create(
+                {.maxAmt = 100,
+                 .assetScale = 0,
+                 .transferFee = 1,
+                 .metadata = "test",
+                 .err = temMALFORMED});
 
             // tries to set a txfee while not enabling transfer
-            env(mpt::create(alice, 100, 0, maxTransferFee + 1, "test"),
-                txflags(tfMPTCanTransfer),
-                ter(temBAD_MPTOKEN_TRANSFER_FEE));
-            env.close();
+            mptAlice.create(
+                {.maxAmt = 100,
+                 .assetScale = 0,
+                 .transferFee = maxTransferFee + 1,
+                 .metadata = "test",
+                 .flags = tfMPTCanTransfer,
+                 .err = temBAD_MPTOKEN_TRANSFER_FEE});
 
             // empty metadata returns error
-            env(mpt::create(alice, 100, 0, 0, ""), ter(temMALFORMED));
-            env.close();
+            mptAlice.create(
+                {.maxAmt = 100,
+                 .assetScale = 0,
+                 .transferFee = 0,
+                 .metadata = "",
+                 .err = temMALFORMED});
+
+            // MaximumAmout of 0 returns error
+            mptAlice.create(
+                {.maxAmt = 0,
+                 .assetScale = 1,
+                 .transferFee = 1,
+                 .metadata = "test",
+                 .err = temMALFORMED});
+
+            // MaximumAmount larger than 63 bit returns error
+            mptAlice.create(
+                {.maxAmt = 0xFFFFFFFFFFFFFFF0ull,
+                 .assetScale = 0,
+                 .transferFee = 0,
+                 .metadata = "test",
+                 .err = temMALFORMED});
         }
     }
 
@@ -132,32 +98,21 @@ class MPToken_test : public beast::unit_test::suite
         testcase("Create Enabled");
 
         using namespace test::jtx;
+        Account const alice("alice");
 
         {
             // If the MPT amendment IS enabled, you should be able to create
             // MPTokenIssuances
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-
-            env.fund(XRP(10000), alice);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice, env.seq(alice));
-            env(mpt::create(alice, 100, 1, 10, "123"),
-                txflags(
-                    tfMPTCanLock | tfMPTRequireAuth | tfMPTCanEscrow |
-                    tfMPTCanTrade | tfMPTCanTransfer | tfMPTCanClawback));
-            env.close();
-
-            BEAST_EXPECT(checkMPTokenIssuanceFlags(
-                env,
-                keylet::mptIssuance(id).key,
-                lsfMPTCanLock | lsfMPTRequireAuth | lsfMPTCanEscrow |
-                    lsfMPTCanTrade | lsfMPTCanTransfer | lsfMPTCanClawback));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            MPTTester mptAlice(env, alice);
+            mptAlice.create(
+                {.maxAmt = 0x7FFFFFFFFFFFFFFF,
+                 .assetScale = 1,
+                 .transferFee = 10,
+                 .metadata = "123",
+                 .ownerCount = 1,
+                 .flags = tfMPTCanLock | tfMPTRequireAuth | tfMPTCanEscrow |
+                     tfMPTCanTrade | tfMPTCanTransfer | tfMPTCanClawback});
         }
     }
 
@@ -167,59 +122,47 @@ class MPToken_test : public beast::unit_test::suite
         testcase("Destroy Validate");
 
         using namespace test::jtx;
+        Account const alice("alice");
+        Account const bob("bob");
         // MPTokenIssuanceDestroy (preflight)
         {
             Env env{*this, features - featureMPTokensV1};
-            Account const alice("alice");  // issuer
-
-            env.fund(XRP(10000), alice);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            env(mpt::destroy(alice, id), ter(temDISABLED));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
+            MPTTester mptAlice(env, alice);
+            auto const id = getMptID(alice, env.seq(alice));
+            mptAlice.destroy({.id = id, .ownerCount = 0, .err = temDISABLED});
 
             env.enableFeature(featureMPTokensV1);
 
-            env(mpt::destroy(alice, id),
-                txflags(0x00000001),
-                ter(temINVALID_FLAG));
-            env.close();
+            mptAlice.destroy(
+                {.id = id, .flags = 0x00000001, .err = temINVALID_FLAG});
         }
 
         // MPTokenIssuanceDestroy (preclaim)
         {
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
+            mptAlice.destroy(
+                {.id = getMptID(alice.id(), env.seq(alice)),
+                 .ownerCount = 0,
+                 .err = tecOBJECT_NOT_FOUND});
 
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const fakeID = getMptID(alice.id(), env.seq(alice));
-
-            env(mpt::destroy(alice, fakeID), ter(tecOBJECT_NOT_FOUND));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            env(mpt::create(alice));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            mptAlice.create({.ownerCount = 1});
 
             // a non-issuer tries to destroy a mptissuance they didn't issue
-            env(mpt::destroy(bob, id), ter(tecNO_PERMISSION));
-            env.close();
+            mptAlice.destroy({.issuer = &bob, .err = tecNO_PERMISSION});
 
-            // TODO: add test when OutstandingAmount is non zero
+            // Make sure that issuer can't delete issuance when it still has
+            // outstanding balance
+            {
+                // bob now holds a mptoken object
+                mptAlice.authorize({.account = &bob, .holderCount = 1});
+
+                // alice pays bob 100 tokens
+                mptAlice.pay(alice, bob, 100);
+
+                mptAlice.destroy({.err = tecHAS_OBLIGATIONS});
+            }
         }
     }
 
@@ -229,26 +172,16 @@ class MPToken_test : public beast::unit_test::suite
         testcase("Destroy Enabled");
 
         using namespace test::jtx;
+        Account const alice("alice");
 
         // If the MPT amendment IS enabled, you should be able to destroy
         // MPTokenIssuances
         Env env{*this, features};
-        Account const alice("alice");  // issuer
+        MPTTester mptAlice(env, alice);
 
-        env.fund(XRP(10000), alice);
-        env.close();
+        mptAlice.create({.ownerCount = 1});
 
-        BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-        auto const id = getMptID(alice.id(), env.seq(alice));
-        env(mpt::create(alice));
-        env.close();
-
-        BEAST_EXPECT(env.ownerCount(alice) == 1);
-
-        env(mpt::destroy(alice, id));
-        env.close();
-        BEAST_EXPECT(env.ownerCount(alice) == 0);
+        mptAlice.destroy({.ownerCount = 0});
     }
 
     void
@@ -257,194 +190,146 @@ class MPToken_test : public beast::unit_test::suite
         testcase("Validate authorize transaction");
 
         using namespace test::jtx;
-        // Validate fields in MPTokenAuthorize (preflight)
+        Account const alice("alice");
+        Account const bob("bob");
+        Account const cindy("cindy");
+        // Validate amendment enable in MPTokenAuthorize (preflight)
         {
             Env env{*this, features - featureMPTokensV1};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-
-            env(mpt::authorize(bob, id, std::nullopt), ter(temDISABLED));
-            env.close();
-
-            env.enableFeature(featureMPTokensV1);
-
-            env(mpt::create(alice));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
-
-            env(mpt::authorize(bob, id, std::nullopt),
-                txflags(0x00000002),
-                ter(temINVALID_FLAG));
-            env.close();
-
-            env(mpt::authorize(bob, id, bob), ter(temMALFORMED));
-            env.close();
-
-            env(mpt::authorize(alice, id, alice), ter(temMALFORMED));
-            env.close();
+            mptAlice.authorize(
+                {.account = &bob,
+                 .id = getMptID(alice, env.seq(alice)),
+                 .err = temDISABLED});
         }
 
-        // Try authorizing when MPTokenIssuance doesnt exist in MPTokenAuthorize
-        // (preclaim)
+        // Validate fields in MPTokenAuthorize (preflight)
         {
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
+            mptAlice.create({.ownerCount = 1});
 
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
+            mptAlice.authorize(
+                {.account = &bob, .flags = 0x00000002, .err = temINVALID_FLAG});
 
-            auto const id = getMptID(alice.id(), env.seq(alice));
+            mptAlice.authorize(
+                {.account = &bob, .holder = &bob, .err = temMALFORMED});
 
-            env(mpt::authorize(alice, id, bob), ter(tecOBJECT_NOT_FOUND));
-            env.close();
+            mptAlice.authorize({.holder = &alice, .err = temMALFORMED});
+        }
 
-            env(mpt::authorize(bob, id, std::nullopt),
-                ter(tecOBJECT_NOT_FOUND));
-            env.close();
+        // Try authorizing when MPTokenIssuance doesn't exist in
+        // MPTokenAuthorize (preclaim)
+        {
+            Env env{*this, features};
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
+            auto const id = getMptID(alice, env.seq(alice));
+
+            mptAlice.authorize(
+                {.holder = &bob, .id = id, .err = tecOBJECT_NOT_FOUND});
+
+            mptAlice.authorize(
+                {.account = &bob, .id = id, .err = tecOBJECT_NOT_FOUND});
         }
 
         // Test bad scenarios without allowlisting in MPTokenAuthorize
         // (preclaim)
         {
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            env(mpt::create(alice));
-            env.close();
-
-            BEAST_EXPECT(
-                checkMPTokenIssuanceFlags(env, keylet::mptIssuance(id).key, 0));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            mptAlice.create({.ownerCount = 1});
 
             // bob submits a tx with a holder field
-            env(mpt::authorize(bob, id, alice), ter(temMALFORMED));
-            env.close();
+            mptAlice.authorize(
+                {.account = &bob, .holder = &alice, .err = temMALFORMED});
 
-            env(mpt::authorize(bob, id, bob), ter(temMALFORMED));
-            env.close();
+            mptAlice.authorize(
+                {.account = &bob, .holder = &bob, .err = temMALFORMED});
 
-            env(mpt::authorize(alice, id, alice), ter(temMALFORMED));
-            env.close();
+            // alice tries to hold onto her own token
+            mptAlice.authorize({.account = &alice, .err = temMALFORMED});
+
+            // alice tries to authorize herself
+            mptAlice.authorize({.holder = &alice, .err = temMALFORMED});
 
             // the mpt does not enable allowlisting
-            env(mpt::authorize(alice, id, bob), ter(tecNO_AUTH));
-            env.close();
+            mptAlice.authorize({.holder = &bob, .err = tecNO_AUTH});
 
             // bob now holds a mptoken object
-            env(mpt::authorize(bob, id, std::nullopt));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 1);
+            mptAlice.authorize({.account = &bob, .holderCount = 1});
 
             // bob cannot create the mptoken the second time
-            env(mpt::authorize(bob, id, std::nullopt), ter(tecMPTOKEN_EXISTS));
-            env.close();
+            mptAlice.authorize({.account = &bob, .err = tecMPTOKEN_EXISTS});
 
-            // TODO: check where mptoken balance is nonzero
+            // Check that bob cannot delete MPToken when his balance is
+            // non-zero
+            {
+                // alice pays bob 100 tokens
+                mptAlice.pay(alice, bob, 100);
 
-            env(mpt::authorize(bob, id, std::nullopt),
-                txflags(tfMPTUnauthorize));
-            env.close();
+                // bob tries to delete his MPToken, but fails since he still
+                // holds tokens
+                mptAlice.authorize(
+                    {.account = &bob,
+                     .flags = tfMPTUnauthorize,
+                     .err = tecHAS_OBLIGATIONS});
 
-            env(mpt::authorize(bob, id, std::nullopt),
-                txflags(tfMPTUnauthorize),
-                ter(tecNO_ENTRY));
-            env.close();
+                // bob pays back alice 100 tokens
+                mptAlice.pay(bob, alice, 100);
+            }
 
-            BEAST_EXPECT(env.ownerCount(bob) == 0);
+            // bob deletes/unauthorizes his MPToken
+            mptAlice.authorize({.account = &bob, .flags = tfMPTUnauthorize});
+
+            // bob receives error when he tries to delete his MPToken that has
+            // already been deleted
+            mptAlice.authorize(
+                {.account = &bob,
+                 .holderCount = 0,
+                 .flags = tfMPTUnauthorize,
+                 .err = tecOBJECT_NOT_FOUND});
         }
 
         // Test bad scenarios with allow-listing in MPTokenAuthorize (preclaim)
         {
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
-            Account const cindy("cindy");
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            auto const mptIssuance = keylet::mptIssuance(id);
-            env(mpt::create(alice), txflags(tfMPTRequireAuth));
-            env.close();
-
-            BEAST_EXPECT(checkMPTokenIssuanceFlags(
-                env, mptIssuance.key, lsfMPTRequireAuth));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            mptAlice.create({.ownerCount = 1, .flags = tfMPTRequireAuth});
 
             // alice submits a tx without specifying a holder's account
-            env(mpt::authorize(alice, id, std::nullopt), ter(temMALFORMED));
-            env.close();
+            mptAlice.authorize({.err = temMALFORMED});
 
-            // alice submits a tx to authorize a holder that hasn't created a
-            // mptoken yet
-            env(mpt::authorize(alice, id, bob), ter(tecNO_ENTRY));
-            env.close();
+            // alice submits a tx to authorize a holder that hasn't created
+            // a mptoken yet
+            mptAlice.authorize({.holder = &bob, .err = tecOBJECT_NOT_FOUND});
 
             // alice specifys a holder acct that doesn't exist
-            env(mpt::authorize(alice, id, cindy), ter(tecNO_DST));
-            env.close();
+            mptAlice.authorize({.holder = &cindy, .err = tecNO_DST});
 
             // bob now holds a mptoken object
-            env(mpt::authorize(bob, id, std::nullopt));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 1);
-
-            BEAST_EXPECT(
-                checkMPTokenFlags(env, keylet::mptIssuance(id).key, bob, 0));
+            mptAlice.authorize({.account = &bob, .holderCount = 1});
 
             // alice tries to unauthorize bob.
             // although tx is successful,
             // but nothing happens because bob hasn't been authorized yet
-            env(mpt::authorize(alice, id, bob), txflags(tfMPTUnauthorize));
-            env.close();
-            BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
+            mptAlice.authorize({.holder = &bob, .flags = tfMPTUnauthorize});
 
             // alice authorizes bob
             // make sure bob's mptoken has set lsfMPTAuthorized
-            env(mpt::authorize(alice, id, bob));
-            env.close();
-            BEAST_EXPECT(
-                checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTAuthorized));
+            mptAlice.authorize({.holder = &bob});
 
             // alice tries authorizes bob again.
             // tx is successful, but bob is already authorized,
             // so no changes
-            env(mpt::authorize(alice, id, bob));
-            env.close();
-            BEAST_EXPECT(
-                checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTAuthorized));
+            mptAlice.authorize({.holder = &bob});
 
             // bob deletes his mptoken
-            env(mpt::authorize(bob, id, std::nullopt),
-                txflags(tfMPTUnauthorize));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 0);
+            mptAlice.authorize(
+                {.account = &bob, .holderCount = 0, .flags = tfMPTUnauthorize});
         }
 
         // Test mptoken reserve requirement - first two mpts free (doApply)
@@ -453,52 +338,33 @@ class MPToken_test : public beast::unit_test::suite
             auto const acctReserve = env.current()->fees().accountReserve(0);
             auto const incReserve = env.current()->fees().increment;
 
-            Account const alice("alice");
-            Account const bob("bob");
+            MPTTester mptAlice1(
+                env,
+                alice,
+                {.holders = {&bob},
+                 .xrpHolders = acctReserve + XRP(1).value().xrp()});
+            mptAlice1.create();
 
-            env.fund(XRP(10000), alice);
-            env.fund(acctReserve + XRP(1), bob);
-            env.close();
+            MPTTester mptAlice2(env, alice, {.fund = false});
+            mptAlice2.create();
 
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id1 = getMptID(alice.id(), env.seq(alice));
-            env(mpt::create(alice));
-            env.close();
-
-            auto const id2 = getMptID(alice.id(), env.seq(alice));
-            env(mpt::create(alice));
-            env.close();
-
-            auto const id3 = getMptID(alice.id(), env.seq(alice));
-            env(mpt::create(alice));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 3);
+            MPTTester mptAlice3(env, alice, {.fund = false});
+            mptAlice3.create({.ownerCount = 3});
 
             // first mpt for free
-            env(mpt::authorize(bob, id1, std::nullopt));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 1);
+            mptAlice1.authorize({.account = &bob, .holderCount = 1});
 
             // second mpt free
-            env(mpt::authorize(bob, id2, std::nullopt));
-            env.close();
-            BEAST_EXPECT(env.ownerCount(bob) == 2);
+            mptAlice2.authorize({.account = &bob, .holderCount = 2});
 
-            env(mpt::authorize(bob, id3, std::nullopt),
-                ter(tecINSUFFICIENT_RESERVE));
-            env.close();
+            mptAlice3.authorize(
+                {.account = &bob, .err = tecINSUFFICIENT_RESERVE});
 
             env(pay(
                 env.master, bob, drops(incReserve + incReserve + incReserve)));
             env.close();
 
-            env(mpt::authorize(bob, id3, std::nullopt));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 3);
+            mptAlice3.authorize({.account = &bob, .holderCount = 3});
         }
     }
 
@@ -508,101 +374,70 @@ class MPToken_test : public beast::unit_test::suite
         testcase("Authorize Enabled");
 
         using namespace test::jtx;
+        Account const alice("alice");
+        Account const bob("bob");
         // Basic authorization without allowlisting
         {
             Env env{*this, features};
-            Account const alice("alice");
-            Account const bob("bob");
-
-            env.fund(XRP(10000), alice, bob);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
 
             // alice create mptissuance without allowisting
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            auto const mptIssuance = keylet::mptIssuance(id);
-            env(mpt::create(alice));
-            env.close();
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            BEAST_EXPECT(checkMPTokenIssuanceFlags(env, mptIssuance.key, 0));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            mptAlice.create({.ownerCount = 1});
 
             // bob creates a mptoken
-            env(mpt::authorize(bob, id, std::nullopt));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 1);
-
-            BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
-            BEAST_EXPECT(checkMPTokenAmount(env, mptIssuance.key, bob, 0));
+            mptAlice.authorize({.account = &bob, .holderCount = 1});
 
             // bob deletes his mptoken
-            env(mpt::authorize(bob, id, std::nullopt),
-                txflags(tfMPTUnauthorize));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 0);
+            mptAlice.authorize(
+                {.account = &bob, .holderCount = 0, .flags = tfMPTUnauthorize});
         }
 
         // With allowlisting
         {
             Env env{*this, features};
-            Account const alice("alice");
-            Account const bob("bob");
-
-            env.fund(XRP(10000), alice, bob);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
 
             // alice creates a mptokenissuance that requires authorization
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            auto const mptIssuance = keylet::mptIssuance(id);
-            env(mpt::create(alice), txflags(tfMPTRequireAuth));
-            env.close();
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            BEAST_EXPECT(checkMPTokenIssuanceFlags(
-                env, mptIssuance.key, lsfMPTRequireAuth));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            mptAlice.create({.ownerCount = 1, .flags = tfMPTRequireAuth});
 
             // bob creates a mptoken
-            env(mpt::authorize(bob, id, std::nullopt));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 1);
-
-            BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
-            BEAST_EXPECT(checkMPTokenAmount(env, mptIssuance.key, bob, 0));
+            mptAlice.authorize({.account = &bob, .holderCount = 1});
 
             // alice authorizes bob
-            env(mpt::authorize(alice, id, bob));
-            env.close();
-
-            // make sure bob's mptoken has lsfMPTAuthorized set
-            BEAST_EXPECT(
-                checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTAuthorized));
+            mptAlice.authorize({.account = &alice, .holder = &bob});
 
             // Unauthorize bob's mptoken
-            env(mpt::authorize(alice, id, bob), txflags(tfMPTUnauthorize));
-            env.close();
+            mptAlice.authorize(
+                {.account = &alice,
+                 .holder = &bob,
+                 .holderCount = 1,
+                 .flags = tfMPTUnauthorize});
 
-            // ensure bob's mptoken no longer has lsfMPTAuthorized set
-            BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
-
-            BEAST_EXPECT(env.ownerCount(bob) == 1);
-
-            env(mpt::authorize(bob, id, std::nullopt),
-                txflags(tfMPTUnauthorize));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 0);
+            mptAlice.authorize(
+                {.account = &bob, .holderCount = 0, .flags = tfMPTUnauthorize});
         }
 
-        // TODO: test allowlisting cases where bob tries to send tokens
-        //       without being authorized.
+        // Holder can have dangling MPToken even if issuance has been destroyed.
+        // Make sure they can still delete/unauthorize the MPToken
+        {
+            Env env{*this, features};
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
+
+            mptAlice.create({.ownerCount = 1});
+
+            // bob creates a mptoken
+            mptAlice.authorize({.account = &bob, .holderCount = 1});
+
+            // alice deletes her issuance
+            mptAlice.destroy({.ownerCount = 0});
+
+            // bob can delete his mptoken even though issuance is no longer
+            // existent
+            mptAlice.authorize(
+                {.account = &bob, .holderCount = 0, .flags = tfMPTUnauthorize});
+        }
     }
 
     void
@@ -611,154 +446,113 @@ class MPToken_test : public beast::unit_test::suite
         testcase("Validate set transaction");
 
         using namespace test::jtx;
+        Account const alice("alice");  // issuer
+        Account const bob("bob");      // holder
+        Account const cindy("cindy");
         // Validate fields in MPTokenIssuanceSet (preflight)
         {
             Env env{*this, features - featureMPTokensV1};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            auto const mptIssuance = keylet::mptIssuance(id);
-
-            env(mpt::set(bob, id, std::nullopt), ter(temDISABLED));
-            env.close();
+            mptAlice.set(
+                {.account = &bob,
+                 .id = getMptID(alice, env.seq(alice)),
+                 .err = temDISABLED});
 
             env.enableFeature(featureMPTokensV1);
 
-            env(mpt::create(alice));
-            env.close();
+            mptAlice.create({.ownerCount = 1, .holderCount = 0});
 
-            BEAST_EXPECT(checkMPTokenIssuanceFlags(env, mptIssuance.key, 0));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
-            BEAST_EXPECT(env.ownerCount(bob) == 0);
-
-            env(mpt::authorize(bob, id, std::nullopt));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(bob) == 1);
+            mptAlice.authorize({.account = &bob, .holderCount = 1});
 
             // test invalid flag
-            env(mpt::set(alice, id, std::nullopt),
-                txflags(0x00000008),
-                ter(temINVALID_FLAG));
-            env.close();
+            mptAlice.set(
+                {.account = &alice,
+                 .flags = 0x00000008,
+                 .err = temINVALID_FLAG});
 
             // set both lock and unlock flags at the same time will fail
-            env(mpt::set(alice, id, std::nullopt),
-                txflags(tfMPTLock | tfMPTUnlock),
-                ter(temINVALID_FLAG));
-            env.close();
+            mptAlice.set(
+                {.account = &alice,
+                 .flags = tfMPTLock | tfMPTUnlock,
+                 .err = temINVALID_FLAG});
 
-            // if the holder is the same as the acct that submitted the tx, tx
-            // fails
-            env(mpt::set(alice, id, alice),
-                txflags(tfMPTLock),
-                ter(temMALFORMED));
-            env.close();
+            // if the holder is the same as the acct that submitted the tx,
+            // tx fails
+            mptAlice.set(
+                {.account = &alice,
+                 .holder = &alice,
+                 .flags = tfMPTLock,
+                 .err = temMALFORMED});
         }
 
         // Validate fields in MPTokenIssuanceSet (preclaim)
         // test when a mptokenissuance has disabled locking
         {
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
-            Account const cindy("cindy");
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            auto const mptIssuance = keylet::mptIssuance(id);
-
-            env(mpt::create(alice));  // no locking
-            env.close();
-
-            BEAST_EXPECT(checkMPTokenIssuanceFlags(env, mptIssuance.key, 0));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            mptAlice.create({.ownerCount = 1});
 
             // alice tries to lock a mptissuance that has disabled locking
-            env(mpt::set(alice, id, std::nullopt),
-                txflags(tfMPTLock),
-                ter(tecNO_PERMISSION));
-            env.close();
+            mptAlice.set(
+                {.account = &alice,
+                 .flags = tfMPTLock,
+                 .err = tecNO_PERMISSION});
 
             // alice tries to unlock mptissuance that has disabled locking
-            env(mpt::set(alice, id, std::nullopt),
-                txflags(tfMPTUnlock),
-                ter(tecNO_PERMISSION));
-            env.close();
+            mptAlice.set(
+                {.account = &alice,
+                 .flags = tfMPTUnlock,
+                 .err = tecNO_PERMISSION});
 
-            // issuer tries to lock a bob's mptoken that has disabled locking
-            env(mpt::set(alice, id, bob),
-                txflags(tfMPTLock),
-                ter(tecNO_PERMISSION));
-            env.close();
+            // issuer tries to lock a bob's mptoken that has disabled
+            // locking
+            mptAlice.set(
+                {.account = &alice,
+                 .holder = &bob,
+                 .flags = tfMPTLock,
+                 .err = tecNO_PERMISSION});
 
-            // issuer tries to unlock a bob's mptoken that has disabled locking
-            env(mpt::set(alice, id, bob),
-                txflags(tfMPTUnlock),
-                ter(tecNO_PERMISSION));
-            env.close();
+            // issuer tries to unlock a bob's mptoken that has disabled
+            // locking
+            mptAlice.set(
+                {.account = &alice,
+                 .holder = &bob,
+                 .flags = tfMPTUnlock,
+                 .err = tecNO_PERMISSION});
         }
 
         // Validate fields in MPTokenIssuanceSet (preclaim)
         // test when mptokenissuance has enabled locking
         {
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
-            Account const cindy("cindy");
 
-            env.fund(XRP(10000), alice, bob);
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const badID = getMptID(alice.id(), env.seq(alice));
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
             // alice trying to set when the mptissuance doesn't exist yet
-            env(mpt::set(alice, badID, std::nullopt),
-                txflags(tfMPTLock),
-                ter(tecOBJECT_NOT_FOUND));
-            env.close();
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-            auto const mptIssuance = keylet::mptIssuance(id);
+            mptAlice.set(
+                {.id = getMptID(alice.id(), env.seq(alice)),
+                 .flags = tfMPTLock,
+                 .err = tecOBJECT_NOT_FOUND});
 
             // create a mptokenissuance with locking
-            env(mpt::create(alice), txflags(tfMPTCanLock));
-            env.close();
-
-            BEAST_EXPECT(
-                checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
+            mptAlice.create({.ownerCount = 1, .flags = tfMPTCanLock});
 
             // a non-issuer acct tries to set the mptissuance
-            env(mpt::set(bob, id, std::nullopt),
-                txflags(tfMPTLock),
-                ter(tecNO_PERMISSION));
-            env.close();
+            mptAlice.set(
+                {.account = &bob, .flags = tfMPTLock, .err = tecNO_PERMISSION});
 
             // trying to set a holder who doesn't have a mptoken
-            env(mpt::set(alice, id, bob),
-                txflags(tfMPTLock),
-                ter(tecOBJECT_NOT_FOUND));
-            env.close();
+            mptAlice.set(
+                {.holder = &bob,
+                 .flags = tfMPTLock,
+                 .err = tecOBJECT_NOT_FOUND});
 
             // trying to set a holder who doesn't exist
-            env(mpt::set(alice, id, cindy), txflags(tfMPTLock), ter(tecNO_DST));
-            env.close();
+            mptAlice.set(
+                {.holder = &cindy, .flags = tfMPTLock, .err = tecNO_DST});
         }
     }
 
@@ -774,128 +568,46 @@ class MPToken_test : public beast::unit_test::suite
         Account const alice("alice");  // issuer
         Account const bob("bob");      // holder
 
-        env.fund(XRP(10000), alice, bob);
-        env.close();
-
-        BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-        auto const id = getMptID(alice.id(), env.seq(alice));
-        auto const mptIssuance = keylet::mptIssuance(id);
+        MPTTester mptAlice(env, alice, {.holders = {&bob}});
 
         // create a mptokenissuance with locking
-        env(mpt::create(alice), txflags(tfMPTCanLock));
-        env.close();
+        mptAlice.create(
+            {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanLock});
 
-        BEAST_EXPECT(
-            checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-
-        BEAST_EXPECT(env.ownerCount(alice) == 1);
-        BEAST_EXPECT(env.ownerCount(bob) == 0);
-
-        env(mpt::authorize(bob, id, std::nullopt));
-        env.close();
-
-        BEAST_EXPECT(env.ownerCount(bob) == 1);
-        env.close();
-
-        // both the mptissuance and mptoken are not locked
-        BEAST_EXPECT(
-            checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-        BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
+        mptAlice.authorize({.account = &bob, .holderCount = 1});
 
         // locks bob's mptoken
-        env(mpt::set(alice, id, bob), txflags(tfMPTLock));
-        env.close();
-
-        BEAST_EXPECT(
-            checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-        BEAST_EXPECT(
-            checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTLocked));
+        mptAlice.set({.account = &alice, .holder = &bob, .flags = tfMPTLock});
 
         // trying to lock bob's mptoken again will still succeed
         // but no changes to the objects
-        env(mpt::set(alice, id, bob), txflags(tfMPTLock));
-        env.close();
-
-        // no changes to the objects
-        BEAST_EXPECT(
-            checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-        BEAST_EXPECT(
-            checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTLocked));
+        mptAlice.set({.account = &alice, .holder = &bob, .flags = tfMPTLock});
 
         // alice locks the mptissuance
-        env(mpt::set(alice, id, std::nullopt), txflags(tfMPTLock));
-        env.close();
-
-        // now both the mptissuance and mptoken are locked up
-        BEAST_EXPECT(checkMPTokenIssuanceFlags(
-            env, mptIssuance.key, lsfMPTCanLock | lsfMPTLocked));
-        BEAST_EXPECT(
-            checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTLocked));
+        mptAlice.set({.account = &alice, .flags = tfMPTLock});
 
         // alice tries to lock up both mptissuance and mptoken again
         // it will not change the flags and both will remain locked.
-        env(mpt::set(alice, id, std::nullopt), txflags(tfMPTLock));
-        env.close();
-        env(mpt::set(alice, id, bob), txflags(tfMPTLock));
-        env.close();
-
-        // now both the mptissuance and mptoken remain locked up
-        BEAST_EXPECT(checkMPTokenIssuanceFlags(
-            env, mptIssuance.key, lsfMPTCanLock | lsfMPTLocked));
-        BEAST_EXPECT(
-            checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTLocked));
+        mptAlice.set({.account = &alice, .flags = tfMPTLock});
+        mptAlice.set({.account = &alice, .holder = &bob, .flags = tfMPTLock});
 
         // alice unlocks bob's mptoken
-        env(mpt::set(alice, id, bob), txflags(tfMPTUnlock));
-        env.close();
-
-        // only mptissuance is locked
-        BEAST_EXPECT(checkMPTokenIssuanceFlags(
-            env, mptIssuance.key, lsfMPTCanLock | lsfMPTLocked));
-        BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
+        mptAlice.set({.account = &alice, .holder = &bob, .flags = tfMPTUnlock});
 
         // locks up bob's mptoken again
-        env(mpt::set(alice, id, bob), txflags(tfMPTLock));
-        env.close();
-
-        // now both the mptissuance and mptokens are locked up
-        BEAST_EXPECT(checkMPTokenIssuanceFlags(
-            env, mptIssuance.key, lsfMPTCanLock | lsfMPTLocked));
-        BEAST_EXPECT(
-            checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTLocked));
+        mptAlice.set({.account = &alice, .holder = &bob, .flags = tfMPTLock});
 
         // alice unlocks mptissuance
-        env(mpt::set(alice, id, std::nullopt), txflags(tfMPTUnlock));
-        env.close();
-
-        // now mptissuance is unlocked
-        BEAST_EXPECT(
-            checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-        BEAST_EXPECT(
-            checkMPTokenFlags(env, mptIssuance.key, bob, lsfMPTLocked));
+        mptAlice.set({.account = &alice, .flags = tfMPTUnlock});
 
         // alice unlocks bob's mptoken
-        env(mpt::set(alice, id, bob), txflags(tfMPTUnlock));
-        env.close();
-
-        // both mptissuance and bob's mptoken are unlocked
-        BEAST_EXPECT(
-            checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-        BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
+        mptAlice.set({.account = &alice, .holder = &bob, .flags = tfMPTUnlock});
 
         // alice unlocks mptissuance and bob's mptoken again despite that
         // they are already unlocked. Make sure this will not change the
         // flags
-        env(mpt::set(alice, id, bob), txflags(tfMPTUnlock));
-        env.close();
-        env(mpt::set(alice, id, std::nullopt), txflags(tfMPTUnlock));
-        env.close();
-
-        // both mptissuance and bob's mptoken remain unlocked
-        BEAST_EXPECT(
-            checkMPTokenIssuanceFlags(env, mptIssuance.key, lsfMPTCanLock));
-        BEAST_EXPECT(checkMPTokenFlags(env, mptIssuance.key, bob, 0));
+        mptAlice.set({.account = &alice, .holder = &bob, .flags = tfMPTUnlock});
+        mptAlice.set({.account = &alice, .flags = tfMPTUnlock});
     }
 
     void
@@ -904,64 +616,201 @@ class MPToken_test : public beast::unit_test::suite
         testcase("Payment");
 
         using namespace test::jtx;
+        Account const alice("alice");  // issuer
+        Account const bob("bob");      // holder
+        Account const carol("carol");  // holder
         {
             Env env{*this, features};
-            Account const alice("alice");  // issuer
-            Account const bob("bob");      // holder
-            Account const carol("carol");  // holder
 
-            env.fund(XRP(10000), alice, bob, carol);
-            env.close();
+            MPTTester mptAlice(env, alice, {.holders = {&bob, &carol}});
 
-            BEAST_EXPECT(env.ownerCount(alice) == 0);
-
-            auto const seq = env.seq(alice);
-            auto const id = getMptID(alice.id(), seq);
-            auto const mpt = ripple::MPT(seq, alice.id());
-
-            env(mpt::create(alice));
-            env.close();
-
-            BEAST_EXPECT(env.ownerCount(alice) == 1);
-            BEAST_EXPECT(env.ownerCount(bob) == 0);
-            BEAST_EXPECT(env.ownerCount(carol) == 0);
+            mptAlice.create({.ownerCount = 1, .holderCount = 0});
 
             // env(mpt::authorize(alice, id.key, std::nullopt));
             // env.close();
 
-            env(mpt::authorize(bob, id, std::nullopt));
-            env.close();
-            env(mpt::authorize(carol, id, std::nullopt));
-            env.close();
+            mptAlice.authorize({.account = &bob});
+            mptAlice.authorize({.account = &carol});
 
             // issuer to holder
-            env(pay(
-                alice, bob, ripple::test::jtx::MPT(alice.name(), mpt)(100)));
-            env.close();
-            BEAST_EXPECT(
-                checkMPTokenAmount(env, keylet::mptIssuance(id).key, bob, 100));
-            BEAST_EXPECT(checkMPTokenOutstandingAmount(
-                env, keylet::mptIssuance(id).key, 100));
+            mptAlice.pay(alice, bob, 100);
 
             // holder to issuer
-            env(pay(bob, alice, ripple::test::jtx::MPT(bob.name(), mpt)(100)));
-            env.close();
-            BEAST_EXPECT(
-                checkMPTokenAmount(env, keylet::mptIssuance(id).key, bob, 0));
-            BEAST_EXPECT(checkMPTokenOutstandingAmount(
-                env, keylet::mptIssuance(id).key, 0));
+            mptAlice.pay(bob, alice, 100);
 
             // holder to holder
-            env(pay(
-                alice, bob, ripple::test::jtx::MPT(alice.name(), mpt)(100)));
-            env(pay(bob, carol, ripple::test::jtx::MPT(alice.name(), mpt)(50)));
-            env.close();
-            BEAST_EXPECT(
-                checkMPTokenAmount(env, keylet::mptIssuance(id).key, bob, 50));
-            BEAST_EXPECT(checkMPTokenAmount(
-                env, keylet::mptIssuance(id).key, carol, 50));
-            BEAST_EXPECT(checkMPTokenOutstandingAmount(
-                env, keylet::mptIssuance(id).key, 100));
+            mptAlice.pay(alice, bob, 100);
+            mptAlice.pay(bob, carol, 50);
+        }
+
+        // If allowlisting is enabled, Payment fails if the receiver is not
+        // authorized
+        {
+            Env env{*this, features};
+
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
+
+            mptAlice.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTRequireAuth});
+
+            mptAlice.authorize({.account = &bob});
+
+            mptAlice.pay(alice, bob, 100, tecNO_AUTH);
+        }
+
+        // If allowlisting is enabled, Payment fails if the sender is not
+        // authorized
+        {
+            Env env{*this, features};
+
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
+
+            mptAlice.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTRequireAuth});
+
+            // bob creates an empty MPToken
+            mptAlice.authorize({.account = &bob});
+
+            // alice authorizes bob to hold funds
+            mptAlice.authorize({.account = &alice, .holder = &bob});
+
+            // alice sends 100 MPT to bob
+            mptAlice.pay(alice, bob, 100);
+
+            // alice UNAUTHORIZES bob
+            mptAlice.authorize(
+                {.account = &alice, .holder = &bob, .flags = tfMPTUnauthorize});
+
+            // bob fails to send back to alice because he is no longer
+            // authorize to move his funds!
+            mptAlice.pay(bob, alice, 100, tecNO_AUTH);
+        }
+
+        // Payer doesn't have enough funds
+        {
+            Env env{*this, features};
+
+            MPTTester mptAlice(env, alice, {.holders = {&bob, &carol}});
+
+            mptAlice.create({.ownerCount = 1});
+
+            mptAlice.authorize({.account = &bob});
+            mptAlice.authorize({.account = &carol});
+
+            mptAlice.pay(alice, bob, 100);
+
+            // Pay to another holder
+            mptAlice.pay(bob, carol, 101, tecPATH_PARTIAL);
+
+            // Pay to the issuer
+            mptAlice.pay(bob, alice, 101, tecPATH_PARTIAL);
+        }
+
+        // MPT is locked
+        {
+            Env env{*this, features};
+
+            MPTTester mptAlice(env, alice, {.holders = {&bob, &carol}});
+
+            mptAlice.create({.ownerCount = 1, .flags = tfMPTCanLock});
+
+            mptAlice.authorize({.account = &bob});
+            mptAlice.authorize({.account = &carol});
+
+            mptAlice.pay(alice, bob, 100);
+            mptAlice.pay(alice, carol, 100);
+
+            // Global lock
+            mptAlice.set({.account = &alice, .flags = tfMPTLock});
+            // Can't send between holders
+            mptAlice.pay(bob, carol, 1, tecMPT_LOCKED);
+            mptAlice.pay(carol, bob, 2, tecMPT_LOCKED);
+            // Issuer can send
+            mptAlice.pay(alice, bob, 3);
+            // Holder can send back to issuer
+            mptAlice.pay(bob, alice, 4);
+
+            // Global unlock
+            mptAlice.set({.account = &alice, .flags = tfMPTUnlock});
+            // Individual lock
+            mptAlice.set(
+                {.account = &alice, .holder = &bob, .flags = tfMPTLock});
+            // Can't send between holders
+            mptAlice.pay(bob, carol, 5, tecMPT_LOCKED);
+            mptAlice.pay(carol, bob, 6, tecMPT_LOCKED);
+            // Issuer can send
+            mptAlice.pay(alice, bob, 7);
+            // Holder can send back to issuer
+            mptAlice.pay(bob, alice, 8);
+        }
+
+        // Issuer fails trying to send more than the maximum amount allowed
+        {
+            Env env{*this, features};
+
+            MPTTester mptAlice(env, alice, {.holders = {&bob}});
+
+            mptAlice.create({.maxAmt = 100, .ownerCount = 1, .holderCount = 0});
+
+            mptAlice.authorize({.account = &bob});
+
+            // issuer sends holder the max amount allowed
+            mptAlice.pay(alice, bob, 100);
+
+            // issuer tries to exceed max amount
+            // TODO MPT: should it be tecMPT_MAX_AMOUNT_EXCEEDED?
+            mptAlice.pay(alice, bob, 1, tecPATH_PARTIAL);
+        }
+
+        // TODO: This test is currently failing! Modify the STAmount to change
+        // the range
+        // Issuer fails trying to send more than the default maximum
+        // amount allowed
+        // {
+        //     Env env{*this, features};
+
+        //     MPTTester mptAlice(env, alice, {.holders = {&bob}});
+
+        //     mptAlice.create({.ownerCount = 1, .holderCount = 0});
+
+        //     mptAlice.authorize({.account = &bob});
+
+        //     // issuer sends holder the default max amount allowed
+        //     mptAlice.pay(alice, bob, maxMPTokenAmount);
+
+        //     // issuer tries to exceed max amount
+        //     mptAlice.pay(alice, bob, 1, tecMPT_MAX_AMOUNT_EXCEEDED);
+        // }
+
+        // Transfer fee
+        {
+            Env env{*this, features};
+
+            MPTTester mptAlice(env, alice, {.holders = {&bob, &carol}});
+
+            // Transfer fee is 10%
+            mptAlice.create(
+                {.transferFee = 10'000,
+                 .ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer});
+
+            // Holders create MPToken
+            mptAlice.authorize({.account = &bob});
+            mptAlice.authorize({.account = &carol});
+
+            // Payment between the issuer and the holder, no transfer fee.
+            mptAlice.pay(alice, bob, 2'000);
+
+            // Payment between the holder and the issuer, no transfer fee.
+            mptAlice.pay(bob, alice, 1'000);
+
+            // Payment between the holders. The sender doesn't have
+            // enough funds to cover the transfer fee.
+            mptAlice.pay(bob, carol, 1'000, tecPATH_PARTIAL);
+
+            // Payment between the holders. The sender pays 10% transfer fee.
+            env(pay(bob, carol, mptAlice.mpt(100)), sendmax(mptAlice.mpt(125)));
         }
     }
 
@@ -973,19 +822,11 @@ class MPToken_test : public beast::unit_test::suite
         Env env{*this, features};
         Account const alice("alice");  // issuer
 
-        env.fund(XRP(10000), alice);
-        env.close();
+        MPTTester mptAlice(env, alice);
 
-        auto const mpt = ripple::MPT(env.seq(alice), alice.id());
+        mptAlice.create();
 
-        env(mpt::create(alice));
-        env.close();
-
-        env(offer(
-                alice,
-                ripple::test::jtx::MPT(alice.name(), mpt)(100),
-                XRP(100)),
-            ter(temINVALID));
+        env(offer(alice, mptAlice.mpt(100), XRP(100)), ter(temINVALID));
         env.close();
 
         BEAST_EXPECT(expectOffers(env, alice, 0));
@@ -1003,13 +844,9 @@ class MPToken_test : public beast::unit_test::suite
         Account const alice{"alice"};
 
         Env env{*this, features};
-        env.fund(XRP(10000), alice);
-        env.close();
+        MPTTester mptAlice(env, alice);
 
-        auto const id = getMptID(alice.id(), env.seq(alice));
-
-        env(mpt::create(alice));
-        env.close();
+        mptAlice.create();
 
         std::string const txHash{
             env.tx()->getJson(JsonOptions::none)[jss::hash].asString()};
@@ -1018,179 +855,8 @@ class MPToken_test : public beast::unit_test::suite
 
         // Expect mpt_issuance_id field
         BEAST_EXPECT(meta.isMember(jss::mpt_issuance_id));
-        BEAST_EXPECT(meta[jss::mpt_issuance_id] == to_string(id));
-    }
-
-    void
-    testMPTHoldersAPI(FeatureBitset features)
-    {
-        testcase("MPT Holders");
-        using namespace test::jtx;
-
-        // a lambda that checks API correctness given different numbers of
-        // MPToken
-        auto checkMPTokens = [&](int expectCount,
-                                 int expectMarkerCount,
-                                 int line) {
-            Env env{*this, features};
-            Account const alice("alice");  // issuer
-
-            env.fund(XRP(10000), alice);
-            env.close();
-
-            auto const id = getMptID(alice.id(), env.seq(alice));
-
-            env(mpt::create(alice));
-            env.close();
-
-            // create accounts that will create MPTokens
-            for (auto i = 0; i < expectCount; i++)
-            {
-                Account const bob{std::string("bob") + std::to_string(i)};
-                env.fund(XRP(1000), bob);
-                env.close();
-
-                // a holder creates a mptoken
-                env(mpt::authorize(bob, id, std::nullopt));
-                env.close();
-            }
-
-            // Checks mpt_holder query responses
-            {
-                int markerCount = 0;
-                Json::Value allHolders(Json::arrayValue);
-                std::string marker;
-
-                // The do/while collects results until no marker is returned.
-                do
-                {
-                    Json::Value mptHolders = [&env, &id, &marker]() {
-                        Json::Value params;
-                        params[jss::mpt_issuance_id] = to_string(id);
-
-                        if (!marker.empty())
-                            params[jss::marker] = marker;
-                        return env.rpc(
-                            "json", "mpt_holders", to_string(params));
-                    }();
-
-                    // If there are mptokens we get an error
-                    if (expectCount == 0)
-                    {
-                        if (expect(
-                                mptHolders.isMember(jss::result),
-                                "expected \"result\"",
-                                __FILE__,
-                                line))
-                        {
-                            if (expect(
-                                    mptHolders[jss::result].isMember(
-                                        jss::error),
-                                    "expected \"error\"",
-                                    __FILE__,
-                                    line))
-                            {
-                                expect(
-                                    mptHolders[jss::result][jss::error]
-                                            .asString() == "objectNotFound",
-                                    "expected \"objectNotFound\"",
-                                    __FILE__,
-                                    line);
-                            }
-                        }
-                        break;
-                    }
-
-                    marker.clear();
-                    if (expect(
-                            mptHolders.isMember(jss::result),
-                            "expected \"result\"",
-                            __FILE__,
-                            line))
-                    {
-                        Json::Value& result = mptHolders[jss::result];
-
-                        if (result.isMember(jss::marker))
-                        {
-                            ++markerCount;
-                            marker = result[jss::marker].asString();
-                        }
-
-                        if (expect(
-                                result.isMember(jss::holders),
-                                "expected \"holders\"",
-                                __FILE__,
-                                line))
-                        {
-                            Json::Value& someHolders = result[jss::holders];
-                            for (std::size_t i = 0; i < someHolders.size(); ++i)
-                                allHolders.append(someHolders[i]);
-                        }
-                    }
-                } while (!marker.empty());
-
-                // Verify the contents of allHolders makes sense.
-                expect(
-                    allHolders.size() == expectCount,
-                    "Unexpected returned offer count",
-                    __FILE__,
-                    line);
-                expect(
-                    markerCount == expectMarkerCount,
-                    "Unexpected marker count",
-                    __FILE__,
-                    line);
-                std::optional<int> globalFlags;
-                std::set<std::string> mptIndexes;
-                std::set<std::string> holderAddresses;
-                for (Json::Value const& holder : allHolders)
-                {
-                    // The flags on all found offers should be the same.
-                    if (!globalFlags)
-                        globalFlags = holder[jss::flags].asInt();
-
-                    expect(
-                        *globalFlags == holder[jss::flags].asInt(),
-                        "Inconsistent flags returned",
-                        __FILE__,
-                        line);
-
-                    // The test conditions should produce unique indexes and
-                    // amounts for all holders.
-                    mptIndexes.insert(holder[jss::mptoken_index].asString());
-                    holderAddresses.insert(holder[jss::account].asString());
-                }
-
-                expect(
-                    mptIndexes.size() == expectCount,
-                    "Duplicate indexes returned?",
-                    __FILE__,
-                    line);
-                expect(
-                    holderAddresses.size() == expectCount,
-                    "Duplicate addresses returned?",
-                    __FILE__,
-                    line);
-            }
-        };
-
-        // Test 1 MPToken
-        checkMPTokens(1, 0, __LINE__);
-
-        // Test 10 MPTokens
-        checkMPTokens(10, 0, __LINE__);
-
-        // Test 200 MPTokens
-        checkMPTokens(200, 0, __LINE__);
-
-        // Test 201 MPTokens
-        checkMPTokens(201, 1, __LINE__);
-
-        // Test 400 MPTokens
-        checkMPTokens(400, 1, __LINE__);
-
-        // Test 401 MPTokesn
-        checkMPTokens(401, 2, __LINE__);
+        BEAST_EXPECT(
+            meta[jss::mpt_issuance_id] == to_string(mptAlice.issuanceID()));
     }
 
 public:
@@ -1223,14 +889,12 @@ public:
         testMPTInvalidInTx(all);
 
         // Test parsed MPTokenIssuanceID in API response metadata
-        // TODO: This test exercises the parsing logic of mptID in `tx`, but,
+        // TODO: This test exercises the parsing logic of mptID in `tx`,
+        // but,
         //       mptID is also parsed in different places like `account_tx`,
         //       `subscribe`, `ledger`. We should create test for these
         //       occurances (lower prioirity).
         testTxJsonMetaFields(all);
-
-        // Test mpt_holders
-        testMPTHoldersAPI(all);
     }
 };
 

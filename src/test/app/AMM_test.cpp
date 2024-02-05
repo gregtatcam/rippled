@@ -4820,7 +4820,17 @@ private:
     void
     run() override
     {
-        testCore();
+        //testCore();
+        using namespace jtx;
+        Env env(*this);
+        fund(env, gw, {alice, bob}, {USD(1'000)}, Fund::All);
+        env(rate(gw, 1.25));
+        env.close();
+        env(pay(alice, bob, USD(100)), sendmax(USD(125)), txflags(tfPartialPayment));
+        env.close();
+        std::cout << env.balance(gw, USD) << std::endl;
+        std::cout << env.balance(alice, USD) << std::endl;
+        std::cout << env.balance(bob, USD) << std::endl;
     }
 };
 

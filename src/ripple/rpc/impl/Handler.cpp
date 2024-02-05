@@ -95,7 +95,7 @@ Handler const handlerArray[]{
     {"book_changes", byRef(&doBookChanges), Role::USER, NO_CONDITION},
     {"book_offers", byRef(&doBookOffers), Role::USER, NO_CONDITION},
     {"can_delete", byRef(&doCanDelete), Role::ADMIN, NO_CONDITION},
-    {"mpt_holders", byRef(&doMPTHolders), Role::USER, NO_CONDITION},
+    //{"mpt_holders", byRef(&doMPTHolders), Role::ADMIN, NO_CONDITION},
     {"channel_authorize", byRef(&doChannelAuthorize), Role::USER, NO_CONDITION},
     {"channel_verify", byRef(&doChannelVerify), Role::USER, NO_CONDITION},
     {"connect", byRef(&doConnect), Role::ADMIN, NO_CONDITION},

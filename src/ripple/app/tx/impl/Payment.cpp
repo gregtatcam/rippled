@@ -91,7 +91,6 @@ Payment::preflight(PreflightContext const& ctx)
     auto const& uSrcAsset = maxSourceAmount.getAsset();
     auto const& uDstAsset = saDstAmount.getAsset();
 
-    // isZero() is XRP.  FIX!
     bool const bXRPDirect = uSrcAsset.isXRP() && uDstAsset.isXRP();
     bool const bMPTDirect = uSrcAsset.isMPT() && uDstAsset.isMPT();
     bool const bDirect = bXRPDirect || bMPTDirect;
@@ -134,12 +133,12 @@ Payment::preflight(PreflightContext const& ctx)
                         << " to self without path for " << to_string(uDstAsset);
         return temREDUNDANT;
     }
-    if (bDirect && bMax)
+    if (bXRPDirect && bMax)
     {
         // Consistent but redundant transaction.
         JLOG(j.trace()) << "Malformed transaction: "
-                        << "SendMax specified for XRP to XRP or MPT to MPT.";
-        return temBAD_SEND_MAX;  // TODO MPT new err code here and below
+                        << "SendMax specified for XRP to XRP.";
+        return temBAD_SEND_MAX;
     }
     if (bDirect && bPaths)
     {
@@ -148,12 +147,12 @@ Payment::preflight(PreflightContext const& ctx)
                         << "Paths specified for XRP to XRP or MPT to MPT.";
         return temBAD_SEND_PATHS;
     }
-    if (bDirect && partialPaymentAllowed)
+    if (bXRPDirect && partialPaymentAllowed)
     {
         // Consistent but redundant transaction.
         JLOG(j.trace())
             << "Malformed transaction: "
-            << "Partial payment specified for XRP to XRP or MPT to MPT.";
+            << "Partial payment specified for XRP to XRP.";
         return temBAD_SEND_PARTIAL;
     }
     if (bDirect && limitQuality)
@@ -437,6 +436,34 @@ Payment::doApply()
         if (isTerRetry(terResult))
             terResult = tecPATH_DRY;
         return terResult;
+    }
+    else if (saDstAmount.isMPT())
+    {
+        if (auto const ter = requireAuth(view(), saDstAmount.issue(), account_);
+            ter != tesSUCCESS)
+            return ter;
+
+        if (auto const ter =
+                requireAuth(view(), saDstAmount.issue(), uDstAccountID);
+            ter != tesSUCCESS)
+            return ter;
+
+        auto const& issue = saDstAmount.issue();
+        auto const& issuer = issue.account();
+        // If globally/individually locked then
+        //   can't send between holders
+        //   holder can send back to issuer
+        //   issuer can send to holder
+        if (account_ != issuer && uDstAccountID != issuer &&
+            (isFrozen(view(), account_, issue) ||
+             isFrozen(view(), uDstAccountID, issue)))
+            return tecMPT_LOCKED;
+
+        PaymentSandbox pv(&view());
+        auto const res =
+            accountSend(pv, account_, uDstAccountID, saDstAmount, j_);
+        pv.apply(ctx_.rawView());
+        return res;
     }
 
     assert(saDstAmount.native());

@@ -451,7 +451,6 @@ extern SF_UINT64 const sfCookie;
 extern SF_UINT64 const sfServerVersion;
 extern SF_UINT64 const sfNFTokenOfferNode;
 extern SF_UINT64 const sfEmitBurden;
-extern SF_UINT64 const sfMPTokenNode;
 
 // 64-bit integers (uncommon)
 extern SF_UINT64 const sfHookOn;

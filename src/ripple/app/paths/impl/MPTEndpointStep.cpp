@@ -98,7 +98,7 @@ public:
         MPT const& asset)
         : src_(src)
         , dst_(dst)
-        , issuer_(ctx.strandDeliver.account())
+        , issuer_(asset.second)
         , mptID_(asset)
         , prevStep_(ctx.prevStep)
         , isLast_(ctx.isLast)
@@ -239,7 +239,8 @@ public:
     using MPTEndpointStep<DirectMPTPaymentStep>::MPTEndpointStep;
     using MPTEndpointStep<DirectMPTPaymentStep>::check;
 
-    bool verifyPrevStepDebtDirection(DebtDirection) const
+    bool
+    verifyPrevStepDebtDirection(DebtDirection) const
     {
         // A payment doesn't care whether or not prevStepRedeems.
         return true;
@@ -388,63 +389,33 @@ DirectMPTPaymentStep::check(
         auto const mptokenID = keylet::mptoken(mptID_, src_);
         if (!ctx.view.exists(mptokenID))
             return tecOBJECT_NOT_FOUND;
+
+        if (auto const ter = requireAuth(ctx.view, mptID_, src_);
+            ter != tesSUCCESS)
+            return ter;
     }
+
     if (dst_ != issuer_)
     {
         auto const mptokenID = keylet::mptoken(mptID_, dst_);
         if (!ctx.view.exists(mptokenID))
             return tecOBJECT_NOT_FOUND;
+
+        if (auto const ter = requireAuth(ctx.view, mptID_, dst_);
+            ter != tesSUCCESS)
+            return ter;
     }
-#if 0
-        // Since this is a payment a trust line must be present.  Perform all
-    // trust line related checks.
+
+    // Direct MPT payment between holders
+    if (ctx.isFirst && ctx.strandDeliver.isMPT() &&
+        mptID_ == static_cast<MPT>(ctx.strandDeliver.asset()) &&
+        dst_ != ctx.strandDst)
     {
-        auto const sleLine = ctx.view.read(keylet::line(src_, dst_, asset_));
-        if (!sleLine)
-        {
-            JLOG(j_.trace()) << "MPTEndpointStep: No credit line. " << *this;
-            return terNO_LINE;
-        }
-
-        auto const authField = (src_ > dst_) ? lsfHighAuth : lsfLowAuth;
-
-        if (((*sleSrc)[sfFlags] & lsfRequireAuth) &&
-            !((*sleLine)[sfFlags] & authField) &&
-            (*sleLine)[sfBalance] == beast::zero)
-        {
-            JLOG(j_.warn())
-                << "MPTEndpointStep: can't receive IOUs from issuer without auth."
-                << " src: " << src_;
-            return terNO_AUTH;
-        }
-
-        if (ctx.prevStep)
-        {
-            if (ctx.prevStep->bookStepBook())
-            {
-                auto const noRippleSrcToDst =
-                    ((*sleLine)[sfFlags] &
-                     ((src_ > dst_) ? lsfHighNoRipple : lsfLowNoRipple));
-                if (noRippleSrcToDst)
-                    return terNO_RIPPLE;
-            }
-        }
+        if (isFrozen(ctx.view, src_, mptID_) ||
+            isFrozen(ctx.view, ctx.strandDst, mptID_))
+            return tecMPT_LOCKED;
     }
 
-    {
-        auto const owed = creditBalance(ctx.view, dst_, src_, mptID_);
-        if (owed <= beast::zero)
-        {
-            auto const limit = creditLimit(ctx.view, dst_, src_, mptID_);
-            if (-owed >= limit)
-            {
-                JLOG(j_.debug()) << "MPTEndpointStep: dry: owed: " << owed
-                                 << " limit: " << limit;
-                return tecPATH_DRY;
-            }
-        }
-    }
-#endif
     return tesSUCCESS;
 }
 
@@ -453,9 +424,6 @@ DirectMPTOfferCrossingStep::check(
     StrandContext const&,
     std::shared_ptr<const SLE> const&) const
 {
-    // The standard checks are all we can do because any remaining checks
-    // require the existence of a trust line.  Offer crossing does not
-    // require a pre-existing trust line.
     return tesSUCCESS;
 }
 
@@ -554,8 +522,8 @@ MPTEndpointStep<TDerived>::revImp(
         MPTAmount const in =
             mulRatio(srcToDst, srcQOut, QUALITY_ONE, /*roundUp*/ true);
         cache_.emplace(in, srcToDst, srcToDst, srcDebtDir);
-        auto const ter = rippleMPTCredit(
-            sb, src_, dst_, toSTAmount(srcToDst, srcToDstIss), j_);
+        auto const ter =
+            accountSend(sb, src_, dst_, toSTAmount(srcToDst, srcToDstIss), j_);
         (void)ter;
         JLOG(j_.trace()) << "MPTEndpointStep::rev: Non-limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
@@ -572,8 +540,8 @@ MPTEndpointStep<TDerived>::revImp(
         mulRatio(maxSrcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
     cache_.emplace(in, maxSrcToDst, actualOut, srcDebtDir);
 
-    auto const ter = rippleMPTCredit(
-        sb, src_, dst_, toSTAmount(maxSrcToDst, srcToDstIss), j_);
+    auto const ter =
+        accountSend(sb, src_, dst_, toSTAmount(maxSrcToDst, srcToDstIss), j_);
     (void)ter;
     JLOG(j_.trace()) << "MPTEndpointStep::rev: Limiting"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -782,7 +750,7 @@ MPTEndpointStep<TDerived>::qualitiesSrcIssues(
         prevStepDebtDirection));
 
     std::uint32_t const srcQOut = redeems(prevStepDebtDirection)
-        ? transferRate(sb, src_).value
+        ? transferRateMPT(sb, mptID_).value
         : QUALITY_ONE;
     auto dstQIn =
         static_cast<TDerived const*>(this)->quality(sb, QualityDirection::in);

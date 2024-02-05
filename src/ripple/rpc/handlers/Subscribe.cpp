@@ -250,7 +250,6 @@ doSubscribe(RPC::JsonContext& context)
             Json::Value taker_pays = j[jss::taker_pays];
             Json::Value taker_gets = j[jss::taker_gets];
 
-            // TODO Add MPT once supported in OFFERS
             // Parse mandatory currency.
             Currency inCurrency;
             if (!taker_pays.isMember(jss::currency) ||

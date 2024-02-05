@@ -136,8 +136,6 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
     auto const& uPaysCurrency = saTakerPays.getAsset();
 
-    auto const& uGetsIssuerID = saTakerGets.getIssuer();
-
     auto const cancelSequence = ctx.tx[~sfOfferSequence];
 
     auto const sleCreator = ctx.view.read(keylet::account(id));
@@ -148,8 +146,8 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
 
     auto viewJ = ctx.app.journal("View");
 
-    if (isGlobalFrozen(ctx.view, uPaysIssuerID) ||
-        isGlobalFrozen(ctx.view, uGetsIssuerID))
+    if (isGlobalFrozen(ctx.view, saTakerPays.issue()) ||
+        isGlobalFrozen(ctx.view, saTakerGets.issue()))
     {
         JLOG(ctx.j.debug()) << "Offer involves frozen asset";
         return tecFROZEN;
@@ -1185,7 +1183,6 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        // TODO add MPT once offers are supported for MPT
         sle->setFieldH160(
             sfTakerPaysCurrency,
             static_cast<Currency>(saTakerPays.issue().asset()));
