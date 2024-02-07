@@ -517,6 +517,8 @@ bool
 checkNear(IOUAmount const& expected, IOUAmount const& actual);
 bool
 checkNear(XRPAmount const& expected, XRPAmount const& actual);
+bool
+checkNear(MPTAmount const& expected, MPTAmount const& actual);
 /// @endcond
 
 /**
@@ -626,6 +628,12 @@ make_BookStepMX(StrandContext const& ctx, Issue const& in);
 
 std::pair<TER, std::unique_ptr<Step>>
 make_BookStepXM(StrandContext const& ctx, Issue const& out);
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepMI(StrandContext const& ctx, Issue const& in, Issue const& out);
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepIM(StrandContext const& ctx, Issue const& in, Issue const& out);
 
 template <class InAmt, class OutAmt>
 bool

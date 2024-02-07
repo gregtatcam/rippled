@@ -22,6 +22,7 @@
 
 #include <ripple/basics/CountedObject.h>
 #include <ripple/json/json_value.h>
+#include <ripple/protocol/Asset.h>
 #include <ripple/protocol/SField.h>
 #include <ripple/protocol/STBase.h>
 #include <ripple/protocol/UintTypes.h>

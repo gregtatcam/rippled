@@ -19,6 +19,8 @@
 
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/jss.h>
+#include <test/jtx/AMM.h>
+#include <test/jtx/AMMTest.h>
 #include <test/jtx.h>
 
 namespace ripple {
