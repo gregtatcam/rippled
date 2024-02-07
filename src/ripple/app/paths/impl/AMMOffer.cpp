@@ -139,5 +139,10 @@ template class AMMOffer<STAmount, STAmount>;
 template class AMMOffer<IOUAmount, IOUAmount>;
 template class AMMOffer<XRPAmount, IOUAmount>;
 template class AMMOffer<IOUAmount, XRPAmount>;
+template class AMMOffer<MPTAmount, MPTAmount>;
+template class AMMOffer<MPTAmount, IOUAmount>;
+template class AMMOffer<IOUAmount, MPTAmount>;
+template class AMMOffer<MPTAmount, XRPAmount>;
+template class AMMOffer<XRPAmount, MPTAmount>;
 
 }  // namespace ripple

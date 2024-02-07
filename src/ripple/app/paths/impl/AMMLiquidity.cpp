@@ -221,5 +221,10 @@ template class AMMLiquidity<STAmount, STAmount>;
 template class AMMLiquidity<IOUAmount, IOUAmount>;
 template class AMMLiquidity<XRPAmount, IOUAmount>;
 template class AMMLiquidity<IOUAmount, XRPAmount>;
+template class AMMLiquidity<MPTAmount, MPTAmount>;
+template class AMMLiquidity<IOUAmount, MPTAmount>;
+template class AMMLiquidity<MPTAmount, IOUAmount>;
+template class AMMLiquidity<MPTAmount, XRPAmount>;
+template class AMMLiquidity<XRPAmount, MPTAmount>;
 
 }  // namespace ripple

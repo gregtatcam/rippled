@@ -688,5 +688,13 @@ template bool
 isDirectXrpToXrp<IOUAmount, IOUAmount>(Strand const& strand);
 template bool
 isDirectXrpToXrp<MPTAmount, MPTAmount>(Strand const& strand);
+template bool
+isDirectXrpToXrp<IOUAmount, MPTAmount>(Strand const& strand);
+template bool
+isDirectXrpToXrp<MPTAmount, IOUAmount>(Strand const& strand);
+template bool
+isDirectXrpToXrp<XRPAmount, MPTAmount>(Strand const& strand);
+template bool
+isDirectXrpToXrp<MPTAmount, XRPAmount>(Strand const& strand);
 
 }  // namespace ripple
