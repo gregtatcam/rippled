@@ -499,6 +499,35 @@ public:
     }
 
     void
+    testSyntheticMptID()
+    {
+        testcase("Synthetic MPT ID");
+
+        using namespace test::jtx;
+        Account const alice("alice");  // issuer
+
+        Env env{*this, envconfig(validator, "")};
+
+        MPTTester mptAlice(env, alice);
+
+        mptAlice.create({.ownerCount = 1});
+        Json::Value jvParams;
+        jvParams[jss::ledger_index] = "current";
+        jvParams[jss::type] = jss::mpt_issuance;
+        auto const jrr = env.rpc(
+            "json",
+            "ledger_data",
+            boost::lexical_cast<std::string>(jvParams))[jss::result];
+
+        for (auto const& j : jrr[jss::state])
+        {
+            BEAST_EXPECT(j["LedgerEntryType"] == jss::MPTokenIssuance);
+            BEAST_EXPECT(
+                j[jss::mpt_issuance_id] == to_string(mptAlice.issuanceID()));
+        }
+    }
+
+    void
     run() override
     {
         testCurrentLedgerToLimits(true);
@@ -508,6 +537,7 @@ public:
         testMarkerFollow();
         testLedgerHeader();
         testLedgerType();
+        testSyntheticMptID();
     }
 };
 
