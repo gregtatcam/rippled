@@ -186,12 +186,10 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     // Make sure that we are authorized to hold what the taker will pay us.
     if (!saTakerPays.native())
     {
-        auto result = checkAcceptAsset(
-            ctx.view,
-            ctx.flags,
-            id,
-            ctx.j,
-            Issue(uPaysCurrency, uPaysIssuerID));
+        auto const iss = saTakerPays.isMPT()
+            ? Issue{uPaysCurrency}
+            : Issue{uPaysCurrency, uPaysIssuerID};
+        auto result = checkAcceptAsset(ctx.view, ctx.flags, id, ctx.j, iss);
         if (result != tesSUCCESS)
             return result;
     }
@@ -215,7 +213,7 @@ CreateOffer::checkAcceptAsset(
     if (!issuerAccount)
     {
         JLOG(j.debug())
-            << "delay: can't receive IOUs from non-existent issuer: "
+            << "delay: can't receive IOUs/MPTs from non-existent issuer: "
             << to_string(issue.account());
 
         return (flags & tapRETRY) ? TER{terNO_ACCOUNT} : TER{tecNO_ISSUER};
@@ -227,6 +225,13 @@ CreateOffer::checkAcceptAsset(
     if (view.rules().enabled(featureDepositPreauth) && (issue.account() == id))
         // An account can always accept its own issuance.
         return tesSUCCESS;
+
+    if (issue.isMPT())
+    {
+        if (requireAuth(view, issue, id) != tesSUCCESS)
+            return (flags & tapRETRY) ? TER{terNO_AUTH} : TER{tecNO_AUTH};
+        return tesSUCCESS;
+    }
 
     if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
@@ -1183,13 +1188,23 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        sle->setFieldH160(
-            sfTakerPaysCurrency,
-            static_cast<Currency>(saTakerPays.issue().asset()));
+        if (saTakerPays.isMPT())
+            sle->setFieldH192(
+                sfTakerPaysMPTID,
+                getMptID(static_cast<MPT>(saTakerPays.issue().asset())));
+        else
+            sle->setFieldH160(
+                sfTakerPaysCurrency,
+                static_cast<Currency>(saTakerPays.issue().asset()));
         sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account());
-        sle->setFieldH160(
-            sfTakerGetsCurrency,
-            static_cast<Currency>(saTakerGets.issue().asset()));
+        if (saTakerGets.isMPT())
+            sle->setFieldH192(
+                sfTakerGetsMPTID,
+                getMptID(static_cast<MPT>(saTakerGets.issue().asset())));
+        else
+            sle->setFieldH160(
+                sfTakerGetsCurrency,
+                static_cast<Currency>(saTakerGets.issue().asset()));
         sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account());
         sle->setFieldU64(sfExchangeRate, uRate);
     });

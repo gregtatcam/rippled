@@ -29,16 +29,13 @@ namespace ripple {
 
 class Asset
 {
-    inline static MPT none = noMPT();
     using asset_type = std::variant<Currency, MPT>;
 
 private:
     asset_type asset_;
 
 public:
-    Asset() : asset_(Currency{beast::zero})
-    {
-    }
+    Asset() = default;
     Asset(Currency const& c) : asset_(c)
     {
     }
@@ -55,6 +52,18 @@ public:
     operator=(MPT const& u)
     {
         asset_ = u;
+        return *this;
+    }
+    Asset&
+    operator=(uint192 const& u)
+    {
+        std::uint32_t sequence;
+        std::memcpy(&sequence, u.data(), sizeof(sequence));
+        sequence = boost::endian::big_to_native(sequence);
+        AccountID account;
+        std::memcpy(
+            account.begin(), u.begin() + sizeof(sequence), sizeof(account));
+        asset_ = std::make_pair(sequence, account);
         return *this;
     }
 
@@ -79,13 +88,6 @@ public:
 
     void
     addBitString(Serializer& s) const;
-
-    bool
-    empty() const
-    {
-        return std::holds_alternative<MPT>(asset_) &&
-            std::get<MPT>(asset_) == none;
-    }
 
     template <typename Hasher>
     friend void
@@ -160,7 +162,7 @@ public:
     friend bool
     isXRP(Asset const& a)
     {
-        return !a.empty() && a.isXRP();
+        return a.isXRP();
     }
     friend std::ostream&
     operator<<(std::ostream& stream, Asset const& a)
@@ -169,6 +171,23 @@ public:
         return stream;
     }
 };
+
+inline constexpr std::weak_ordering
+operator<=>(Asset const& lhs, Asset const& rhs)
+{
+    //assert(lhs.isCurrency() == rhs.isCurrency());
+    if (lhs.isCurrency() != rhs.isCurrency())
+        Throw<std::logic_error>("Invalid Asset comparison");
+    if (lhs.isCurrency())
+        return std::get<Currency>(lhs.asset_) <=>
+            std::get<Currency>(rhs.asset_);
+    if (auto const c{
+            std::get<MPT>(lhs.asset_).second <=>
+            std::get<MPT>(rhs.asset_).second};
+        c != 0)
+        return c;
+    return std::get<MPT>(lhs.asset_).first <=> std::get<MPT>(rhs.asset_).first;
+}
 
 }  // namespace ripple
 

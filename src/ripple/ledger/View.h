@@ -494,6 +494,16 @@ rippleMPTCredit(
 Rate
 transferRateMPT(ReadView const& view, MPT const& id);
 
+// TODO MPT
+[[nodiscard]] TER
+mptAuthorize(
+    ApplyView& view,
+    AccountID const& account,
+    MPT const& mptIssuanceID,
+    std::uint32_t flags,
+    XRPAmount const& priorBalance,
+    beast::Journal j);
+
 }  // namespace ripple
 
 #endif

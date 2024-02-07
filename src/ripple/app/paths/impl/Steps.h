@@ -618,6 +618,15 @@ make_BookStepXI(StrandContext const& ctx, Issue const& out);
 std::pair<TER, std::unique_ptr<Step>>
 make_XRPEndpointStep(StrandContext const& ctx, AccountID const& acc);
 
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepMM(StrandContext const& ctx, Issue const& in, Issue const& out);
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepMX(StrandContext const& ctx, Issue const& in);
+
+std::pair<TER, std::unique_ptr<Step>>
+make_BookStepXM(StrandContext const& ctx, Issue const& out);
+
 template <class InAmt, class OutAmt>
 bool
 isDirectXrpToXrp(Strand const& strand);

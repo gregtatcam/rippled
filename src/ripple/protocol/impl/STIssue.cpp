@@ -51,7 +51,34 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
     if (isXRP(currency) != isXRP(account))
         Throw<std::runtime_error>(
             "invalid issue: currency and account native mismatch");
-    issue_ = std::make_pair(currency, account);
+
+    auto getSequence = [](auto const& u) -> std::uint32_t {
+        std::uint32_t s;
+        std::memcpy(&s, u.data(), sizeof(s));
+        return boost::endian::big_to_native(s);
+    };
+    // check if MPT
+    static size_t constexpr seqSize = sizeof(MPT::first_type);
+    static size_t constexpr truncAcctSize = sizeof(MPT::second_type) - seqSize;
+    if (isXRP(currency))
+        issue_ = std::make_pair(currency, account);
+    else if (auto const sequence = getSequence(currency);
+        sequence == getSequence(account) &&
+        memcmp(
+            currency.data() + seqSize,
+            account.data() + 2 * seqSize,
+            truncAcctSize - seqSize) == 0)
+    {
+        AccountID account1;
+        memcpy(account1.data(), currency.data(), truncAcctSize);
+        memcpy(
+            account1.data() + truncAcctSize,
+            account.data() + truncAcctSize,
+            seqSize);
+        issue_ = std::make_pair(sequence, account1);
+    }
+    else
+        issue_ = std::make_pair(currency, account);
 }
 
 STIssue::STIssue(SField const& name, Issue const& issue)
@@ -82,13 +109,34 @@ Json::Value STIssue::getJson(JsonOptions) const
 void
 STIssue::add(Serializer& s) const
 {
-    // TODO add BACKWARDS compatible serialization once MPT is supported
-    assert(!issue_.isMPT());
+    // serialize mpt as currency/2 x sequence
+    // where currency = currency (32 bits) + account (first 128 bits)
+    // and account = currency (32 bits) + account (last 128 bits).
+    // when decoding, check first 32 bits of each 160 bits for MPT and verify
+    // 96 bits of the account
     if (issue_.isMPT())
-        Throw<std::logic_error>("MPT is not supported in STIssue");
-    s.addBitString(static_cast<Currency>(issue_.asset()));
-    if (!isXRP(issue_.asset()))
-        s.addBitString(issue_.account());
+    {
+        uint160 c{beast::zero};
+        uint160 a{beast::zero};
+        auto const mpt = static_cast<MPT>(issue_.asset());
+        auto const& account = mpt.second;
+        auto const sequence = boost::endian::native_to_big(mpt.first);
+        static size_t constexpr seqSize = sizeof(MPT::first_type);
+        static size_t constexpr truncAcctSize =
+            sizeof(MPT::second_type) - seqSize;
+        memcpy(c.data(), &sequence, seqSize);
+        memcpy(c.data() + seqSize, account.data(), truncAcctSize);
+        memcpy(a.data(), &sequence, seqSize);
+        memcpy(a.data(), account.data() + seqSize, truncAcctSize);
+        s.addBitString(c);
+        s.addBitString(a);
+    }
+    else
+    {
+        s.addBitString(static_cast<Currency>(issue_.asset()));
+        if (!isXRP(issue_.asset()))
+            s.addBitString(issue_.account());
+    }
 }
 
 bool

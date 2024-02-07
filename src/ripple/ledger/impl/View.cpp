@@ -269,8 +269,6 @@ accountHolds(
             auto const locked = sle->getFieldU64(sfLockedAmount);
             if (amt > locked)
                 amount = STAmount{Issue{asset}, amt - locked};
-            // TODO MPT balanceHook
-            return amount;
         }
         else
         {
@@ -287,6 +285,9 @@ accountHolds(
                     << " account=" << to_string(account)
                     << " amount=" << amount.getFullText();
 
+    // TODO MPT does this apply to MPT?
+    if (amount.isMPT())
+        return amount;
     return view.balanceHook(account, issuer, amount);
 }
 
@@ -1807,6 +1808,49 @@ rippleMPTCredit(
             view.update(sle);
         }
     }
+    return tesSUCCESS;
+}
+
+TER
+mptAuthorize(
+    ApplyView& view,
+    AccountID const& account,
+    MPT const& mptIssuanceID,
+    std::uint32_t flags,
+    XRPAmount const& priorBalance,
+    beast::Journal j)
+{
+    auto const sleAcct = view.peek(keylet::account(account));
+    if (!sleAcct)
+        return tecINTERNAL;
+
+    std::uint32_t const uOwnerCount = sleAcct->getFieldU32(sfOwnerCount);
+    XRPAmount const reserveCreate(
+        (uOwnerCount < 2) ? XRPAmount(beast::zero)
+                          : view.fees().accountReserve(uOwnerCount + 1));
+
+    if (priorBalance < reserveCreate)
+        return tecINSUFFICIENT_RESERVE;
+
+    auto const mptokenKey = keylet::mptoken(mptIssuanceID, account);
+
+    auto const ownerNode = view.dirInsert(
+        keylet::ownerDir(account), mptokenKey, describeOwnerDir(account));
+
+    if (!ownerNode)
+        return tecDIR_FULL;
+
+    auto mptoken = std::make_shared<SLE>(mptokenKey);
+    (*mptoken)[sfAccount] = account;
+    (*mptoken)[sfMPTokenIssuanceID] =
+        getMptID(mptIssuanceID.second, mptIssuanceID.first);
+    (*mptoken)[sfFlags] = 0;
+    (*mptoken)[sfOwnerNode] = *ownerNode;
+    view.insert(mptoken);
+
+    // Update owner count.
+    adjustOwnerCount(view, sleAcct, 1, j);
+
     return tesSUCCESS;
 }
 

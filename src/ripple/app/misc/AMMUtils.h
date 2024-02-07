@@ -62,8 +62,8 @@ ammHolds(
 STAmount
 ammLPHolds(
     ReadView const& view,
-    Currency const& cur1,
-    Currency const& cur2,
+    Asset const& cur1,
+    Asset const& cur2,
     AccountID const& ammAccount,
     AccountID const& lpAccount,
     beast::Journal const j);

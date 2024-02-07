@@ -34,12 +34,12 @@ auto
 DeferredCredits::makeKey(
     AccountID const& a1,
     AccountID const& a2,
-    Currency const& c) -> Key
+    Asset const& a) -> Key
 {
     if (a1 < a2)
-        return std::make_tuple(a1, a2, c);
+        return std::make_tuple(a1, a2, a);
     else
-        return std::make_tuple(a2, a1, c);
+        return std::make_tuple(a2, a1, a);
 }
 
 void
@@ -113,11 +113,11 @@ auto
 DeferredCredits::adjustments(
     AccountID const& main,
     AccountID const& other,
-    Currency const& currency) const -> std::optional<Adjustment>
+    Asset const& asset) const -> std::optional<Adjustment>
 {
     std::optional<Adjustment> result;
 
-    Key const k = makeKey(main, other, currency);
+    Key const k = makeKey(main, other, asset);
     auto i = credits_.find(k);
     if (i == credits_.end())
         return result;
@@ -206,7 +206,8 @@ PaymentSandbox::balanceHook(
     // to compute usable balance just slightly above what the ledger
     // calculates (but always less than the actual balance).
     auto adjustedAmt = std::min({amount, lastBal - delta, minBal});
-    adjustedAmt.setIssuer(amount.getIssuer());
+    if (!adjustedAmt.isMPT())
+        adjustedAmt.setIssuer(amount.getIssuer());
 
     if (isXRP(issuer) && adjustedAmt < beast::zero)
         // A calculated negative XRP balance is not an error case. Consider a

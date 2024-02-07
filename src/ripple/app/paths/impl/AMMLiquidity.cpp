@@ -99,6 +99,8 @@ maxAmount()
 {
     if constexpr (std::is_same_v<T, XRPAmount>)
         return XRPAmount(STAmount::cMaxNative);
+    if constexpr (std::is_same_v<T, MPTAmount>)
+        return MPTAmount(STAmount::cMaxNative);
     else if constexpr (std::is_same_v<T, IOUAmount>)
         return IOUAmount(STAmount::cMaxValue / 2, STAmount::cMaxOffset);
     else if constexpr (std::is_same_v<T, STAmount>)

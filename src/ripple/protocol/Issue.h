@@ -83,13 +83,7 @@ public:
     Issue&
     operator=(uint192 const& mptid)
     {
-        std::uint32_t sequence;
-        std::memcpy(&sequence, mptid.data(), sizeof(sequence));
-        sequence = boost::endian::big_to_native(sequence);
-        AccountID account;
-        std::memcpy(
-            account.begin(), mptid.begin() + sizeof(sequence), sizeof(account));
-        asset_ = std::make_pair(sequence, account);
+        asset_ = mptid;
         account_ = std::nullopt;
         return *this;
     }

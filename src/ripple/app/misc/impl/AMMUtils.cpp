@@ -103,8 +103,8 @@ ammHolds(
 STAmount
 ammLPHolds(
     ReadView const& view,
-    Currency const& cur1,
-    Currency const& cur2,
+    Asset const& cur1,
+    Asset const& cur2,
     AccountID const& ammAccount,
     AccountID const& lpAccount,
     beast::Journal const j)
@@ -173,8 +173,21 @@ ammAccountHolds(
         if (auto const sle = view.read(keylet::account(ammAccountID)))
             return (*sle)[sfBalance];
     }
-    else if (auto const sle = view.read(
-                 keylet::line(ammAccountID, issue.account(), issue.asset()));
+    else if (issue.isMPT())
+    {
+        auto const cftokenID = keylet::mptoken(
+            keylet::mptIssuance(static_cast<MPT>(issue.asset())).key,
+            ammAccountID);
+        if (auto const sle = view.read(cftokenID))
+            return STAmount{
+                issue,
+                sle->getFieldU64(sfMPTAmount) -
+                    sle->getFieldU64(sfLockedAmount)};
+    }
+    else if (auto const sle = view.read(keylet::line(
+                 ammAccountID,
+                 issue.account(),
+                 static_cast<Currency>(issue.asset())));
              sle &&
              !isFrozen(view, ammAccountID, issue.asset(), issue.account()))
     {

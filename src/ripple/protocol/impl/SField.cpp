@@ -205,6 +205,9 @@ CONSTRUCT_TYPED_SFIELD(sfTakerGetsIssuer,       "TakerGetsIssuer",      UINT160,
 
 // 192-bit (common)
 CONSTRUCT_TYPED_SFIELD(sfMPTokenIssuanceID,     "MPTokenIssuanceID",    UINT192,    1);
+CONSTRUCT_TYPED_SFIELD(sfTakerPaysMPTID,        "TakerPaysMPTID",       UINT192,    2);
+CONSTRUCT_TYPED_SFIELD(sfTakerGetsMPTID,        "TakerGetsMPTID",       UINT192,    3);
+
 
 // 256-bit (common)
 CONSTRUCT_TYPED_SFIELD(sfLedgerHash,            "LedgerHash",           UINT256,    1);

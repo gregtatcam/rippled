@@ -59,15 +59,12 @@ ammAccountID(
 /** Calculate Liquidity Provider Token (LPT) Currency.
  */
 Currency
-ammLPTCurrency(Currency const& cur1, Currency const& cur2);
+ammLPTCurrency(Asset const& a1, Asset const& a2);
 
 /** Calculate LPT Issue from AMM asset pair.
  */
 Issue
-ammLPTIssue(
-    Currency const& cur1,
-    Currency const& cur2,
-    AccountID const& ammAccountID);
+ammLPTIssue(Asset const& a1, Asset const& a2, AccountID const& ammAccountID);
 
 /** Validate the amount.
  * If validZero is false and amount is beast::zero then invalid amount.

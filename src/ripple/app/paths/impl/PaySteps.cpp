@@ -133,41 +133,26 @@ toStep(
     if (isXRP(outAsset))
     {
         if (curIssue.isMPT())
-        {
-            JLOG(j.info()) << "Found mpt/xrp offer payment step";
-            return {temBAD_PATH, std::unique_ptr<Step>{}};
-        }
+            return make_BookStepMX(ctx, curIssue);
         return make_BookStepIX(ctx, curIssue);
     }
 
     if (isXRP(curIssue.asset()))
     {
         if (e2->hasMPT())
-        {
-            JLOG(j.info()) << "Found xrp/mpt offer payment step";
-            return {temBAD_PATH, std::unique_ptr<Step>{}};
-        }
+            return make_BookStepXM(ctx, {outAsset});
         return make_BookStepXI(ctx, {outAsset, outIssuer});
     }
 
-    // TODO MPT, add MPT for CI or IC, once supported in BookStep
+    // CI or IC
     if (curIssue.isMPT() && !e2->hasMPT())
-    {
-        JLOG(j.info()) << "Found mpt/iou offer payment step";
-        return {temBAD_PATH, std::unique_ptr<Step>{}};
-    }
+        return make_BookStepMI(ctx, curIssue, {outAsset, outIssuer});
     if (!curIssue.isMPT() && e2->hasMPT())
-    {
-        JLOG(j.info()) << "Found iou/mpt offer payment step";
-        return {temBAD_PATH, std::unique_ptr<Step>{}};
-    }
+        return make_BookStepIM(ctx, curIssue, {outAsset});  // TODO
 
-    // TODO MPT, add MPT for CC or II, once supported in BookStep
+    // CC or II
     if (curIssue.isMPT())
-    {
-        JLOG(j.info()) << "Found mpt/mpt offer payment step";
-        return {temBAD_PATH, std::unique_ptr<Step>{}};
-    }
+        return make_BookStepMM(ctx, curIssue, {outAsset});  // TODO
     return make_BookStepII(ctx, curIssue, {outAsset, outIssuer});
 }
 
@@ -225,7 +210,7 @@ toStrand(
         if (hasAccount && (pe.getAccountID() == noAccount()))
             return {temBAD_PATH, Strand{}};
 
-        if (hasMPT && (!hasIssuer || hasCurrency || hasAccount))
+        if (hasMPT && (hasIssuer || hasCurrency || hasAccount))
             return {temBAD_PATH, Strand{}};
     }
 
@@ -366,7 +351,7 @@ toStrand(
             Asset asset;
             asset = cur->getAsset();
             if (isXRP(asset))
-                curIssue.setIssuer(xrpAccount());
+                curIssue = xrpIssue();
             if (cur->hasCurrency())
                 curIssue = std::make_pair(asset, curIssue.account());
             else

@@ -202,7 +202,9 @@ private:
     static std::int32_t
     computeReserveReduction(StrandContext const& ctx, AccountID const& acc)
     {
-        if (ctx.isFirst && !ctx.view.read(keylet::line(acc, ctx.strandDeliver)))
+        if (ctx.isFirst &&
+            (ctx.strandDeliver.isMPT() ||
+             !ctx.view.read(keylet::line(acc, ctx.strandDeliver))))
             return -1;
         return 0;
     }

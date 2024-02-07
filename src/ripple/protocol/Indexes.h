@@ -339,6 +339,9 @@ uint256
 getTicketIndex(AccountID const& account, SeqProxy ticketSeq);
 
 uint192
+getMptID(MPT const& mpt);
+
+uint192
 getMptID(AccountID const& account, std::uint32_t sequence);
 
 }  // namespace ripple

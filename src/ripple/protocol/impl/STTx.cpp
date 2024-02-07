@@ -530,19 +530,26 @@ isMemoOkay(STObject const& st, std::string& reason)
 }
 
 // Ensure all account fields are 160-bits and that MPT amount is only passed
-// to Payment tx (until MPT is supported in more tx)
+// to Payment and OfferCreate tx (until MPT is supported in more tx)
 static bool
 isAccountAndMPTFieldOkay(STObject const& st)
 {
     auto const txType = st[~sfTransactionType];
-    bool const isPaymentTx = txType && safe_cast<TxType>(*txType) == ttPAYMENT;
+    bool const isMPTAmountAllowed = [&]() {
+        if (!txType)
+            return true;
+        auto t = safe_cast<TxType>(*txType);
+        return t == ttPAYMENT || t == ttOFFER_CREATE || t == ttAMM_CREATE ||
+            t == ttAMM_DEPOSIT || t == ttAMM_WITHDRAW || t == ttAMM_BID ||
+            t == ttAMM_VOTE || t == ttAMM_DELETE;
+    }();
     for (int i = 0; i < st.getCount(); ++i)
     {
         auto t = dynamic_cast<STAccount const*>(st.peekAtPIndex(i));
         if (t && t->isDefault())
             return false;
         auto amt = dynamic_cast<STAmount const*>(st.peekAtPIndex(i));
-        if (amt && amt->isMPT() && !isPaymentTx)
+        if (amt && amt->isMPT() && !isMPTAmountAllowed)
             return false;
     }
 

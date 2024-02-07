@@ -155,10 +155,10 @@ operator<<(std::ostream& os, PrettyAmount const& amount);
 struct BookSpec
 {
     AccountID account;
-    ripple::Currency currency;
+    ripple::Asset asset;
 
-    BookSpec(AccountID const& account_, ripple::Currency const& currency_)
-        : account(account_), currency(currency_)
+    BookSpec(AccountID const& account_, ripple::Asset const& asset_)
+        : account(account_), asset(asset_)
     {
     }
 };
@@ -407,11 +407,9 @@ public:
     }
 
     friend BookSpec
-    operator~(MPT const& mpt)
+    operator~(test::jtx::MPT const& mpt)
     {
-        assert(false);
-        Throw<std::logic_error>("MPT is not supported");
-        return BookSpec{beast::zero, noCurrency()};
+        return BookSpec{mpt.mptID.second, mpt.mptID};
     }
 };
 

@@ -138,6 +138,16 @@ getTicketIndex(AccountID const& account, SeqProxy ticketSeq)
 }
 
 uint192
+getMptID(MPT const& mpt)
+{
+    uint192 u;
+    auto const sequence = boost::endian::native_to_big(mpt.first);
+    memcpy(u.data(), &sequence, sizeof(sequence));
+    memcpy(u.data() + sizeof(sequence), mpt.second.data(), sizeof(mpt.second));
+    return u;
+}
+
+uint192
 getMptID(AccountID const& account, std::uint32_t sequence)
 {
     uint192 u;

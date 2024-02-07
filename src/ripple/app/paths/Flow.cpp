@@ -55,6 +55,19 @@ finishFlow(
     return result;
 };
 
+static std::variant<XRPAmount*, MPTAmount*, IOUAmount*>
+getTypedAmt(Issue const& iss)
+{
+    static auto xrp = XRPAmount{};
+    static auto cft = MPTAmount{};
+    static auto iou = IOUAmount{};
+    if (isXRP(iss))
+        return &xrp;
+    if (iss.isMPT())
+        return &cft;
+    return &iou;
+}
+
 path::RippleCalc::Output
 flow(
     PaymentSandbox& sb,
@@ -128,106 +141,32 @@ flow(
         }
     }
 
-    const bool srcIsXRP = isXRP(srcIssue.asset());
-    const bool dstIsXRP = isXRP(dstIssue.asset());
-
-    auto const asDeliver = toAmountSpec(deliver);
-
-    // The src account may send either xrp or iou. The dst account may receive
-    // either xrp or iou. Since XRP and IOU amounts are represented by different
-    // types, use templates to tell `flow` about the amount types.
-    if (srcIsXRP && dstIsXRP)
-    {
-        return finishFlow(
-            sb,
-            srcIssue,
-            dstIssue,
-            flow<XRPAmount, XRPAmount>(
+    // The src account may send either xrp,iou,cft. The dst account may receive
+    // either xrp,iou,cft. Since XRP and IOU amounts are represented by
+    // different types, use templates to tell `flow` about the amount types.
+    path::RippleCalc::Output result;
+    std::visit(
+        [&, &strands_ = strands]<typename TIn, typename TOut>(
+            TIn const*&&, TOut const*&&) {
+            result = finishFlow(
                 sb,
-                strands,
-                asDeliver.xrp,
-                partialPayment,
-                offerCrossing,
-                limitQuality,
-                sendMax,
-                j,
-                ammContext,
-                flowDebugInfo));
-    }
-
-    if (srcIsXRP && !dstIsXRP)
-    {
-        return finishFlow(
-            sb,
-            srcIssue,
-            dstIssue,
-            flow<XRPAmount, IOUAmount>(
-                sb,
-                strands,
-                asDeliver.iou,
-                partialPayment,
-                offerCrossing,
-                limitQuality,
-                sendMax,
-                j,
-                ammContext,
-                flowDebugInfo));
-    }
-
-    if (!srcIsXRP && dstIsXRP)
-    {
-        return finishFlow(
-            sb,
-            srcIssue,
-            dstIssue,
-            flow<IOUAmount, XRPAmount>(
-                sb,
-                strands,
-                asDeliver.xrp,
-                partialPayment,
-                offerCrossing,
-                limitQuality,
-                sendMax,
-                j,
-                ammContext,
-                flowDebugInfo));
-    }
-
-    assert(!srcIsXRP && !dstIsXRP);
-    if (srcIssue.asset().isMPT())
-    {
-        assert(dstIssue.asset().isMPT());
-        return finishFlow(
-            sb,
-            srcIssue,
-            dstIssue,
-            flow<MPTAmount, MPTAmount>(
-                sb,
-                strands,
-                asDeliver.mpt,
-                partialPayment,
-                offerCrossing,
-                limitQuality,
-                sendMax,
-                j,
-                ammContext,
-                flowDebugInfo));
-    }
-    return finishFlow(
-        sb,
-        srcIssue,
-        dstIssue,
-        flow<IOUAmount, IOUAmount>(
-            sb,
-            strands,
-            asDeliver.iou,
-            partialPayment,
-            offerCrossing,
-            limitQuality,
-            sendMax,
-            j,
-            ammContext,
-            flowDebugInfo));
+                srcIssue,
+                dstIssue,
+                flow<TIn, TOut>(
+                    sb,
+                    strands_,
+                    get<TOut>(deliver),
+                    partialPayment,
+                    offerCrossing,
+                    limitQuality,
+                    sendMax,
+                    j,
+                    ammContext,
+                    flowDebugInfo));
+        },
+        getTypedAmt(srcIssue),
+        getTypedAmt(dstIssue));
+    return result;
 }
 
 }  // namespace ripple

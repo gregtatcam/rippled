@@ -92,7 +92,8 @@ Payment::preflight(PreflightContext const& ctx)
     auto const& uDstAsset = saDstAmount.getAsset();
 
     bool const bXRPDirect = uSrcAsset.isXRP() && uDstAsset.isXRP();
-    bool const bMPTDirect = uSrcAsset.isMPT() && uDstAsset.isMPT();
+    bool const bMPTDirect =
+        uSrcAsset.isMPT() && uDstAsset.isMPT() && uSrcAsset == uDstAsset;
     bool const bDirect = bXRPDirect || bMPTDirect;
 
     if (!isLegalNet(saDstAmount) || !isLegalNet(maxSourceAmount))

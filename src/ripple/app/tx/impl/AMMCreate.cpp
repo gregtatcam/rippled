@@ -125,7 +125,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     }
 
     auto noDefaultRipple = [](ReadView const& view, Issue const& issue) {
-        if (isXRP(issue))
+        if (isXRP(issue) || issue.isMPT())
             return false;
 
         if (auto const issuerAccount =
@@ -206,6 +206,7 @@ applyCreate(
     ApplyContext& ctx_,
     Sandbox& sb,
     AccountID const& account_,
+    XRPAmount const& priorBalance,
     beast::Journal j_)
 {
     auto const amount = ctx_.tx[sfAmount];
@@ -304,6 +305,20 @@ applyCreate(
     }
 
     auto sendAndTrustSet = [&](STAmount const& amount) -> TER {
+        if (amount.isMPT())
+        {
+            auto const& mpt = static_cast<MPT>(amount.issue().asset());
+            auto const mptIssuanceID = keylet::mptIssuance(mpt);
+            if (auto const sle = sb.read(mptIssuanceID); !sle)
+                return tecINTERNAL;
+            else
+            {
+                if (auto const ter =
+                        mptAuthorize(sb, *ammAccount, mpt, 0, priorBalance, j_);
+                    ter != tesSUCCESS)
+                    return ter;
+            }
+        }
         if (auto const res = accountSend(
                 sb,
                 account_,
@@ -313,7 +328,7 @@ applyCreate(
                 WaiveTransferFee::Yes))
             return res;
         // Set AMM flag on AMM trustline
-        if (!isXRP(amount))
+        if (!isXRP(amount) && !amount.isMPT())
         {
             if (SLE::pointer sleRippleState =
                     sb.peek(keylet::line(*ammAccount, amount.issue()));
@@ -369,7 +384,7 @@ AMMCreate::doApply()
     // as we go on processing transactions.
     Sandbox sb(&ctx_.view());
 
-    auto const result = applyCreate(ctx_, sb, account_, j_);
+    auto const result = applyCreate(ctx_, sb, account_, mPriorBalance, j_);
     if (result.second)
         sb.apply(ctx_.rawView());
 

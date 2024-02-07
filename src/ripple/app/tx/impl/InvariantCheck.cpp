@@ -954,7 +954,7 @@ ValidMPTIssuance::finalize(
     {
         JLOG(j.fatal()) << "Invariant failed: a MPT issuance was deleted";
     }
-    else if (mptokensCreated_ != 0)
+    else if (mptokensCreated_ != 0 && tx.getTxnType() != ttAMM_CREATE)
     {
         JLOG(j.fatal()) << "Invariant failed: a MPToken was created";
     }
@@ -964,7 +964,8 @@ ValidMPTIssuance::finalize(
     }
 
     return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
-        mptokensCreated_ == 0 && mptokensDeleted_ == 0;
+        (tx.getTxnType() == ttAMM_CREATE || mptokensCreated_ == 0) &&
+        mptokensDeleted_ == 0;
 }
 
 }  // namespace ripple

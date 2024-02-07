@@ -103,7 +103,6 @@ struct MPTCreate
     std::optional<std::string> metadata = std::nullopt;
     std::optional<std::uint32_t> ownerCount = std::nullopt;
     std::optional<std::uint32_t> holderCount = std::nullopt;
-    bool fund = true;
     std::optional<std::uint32_t> flags = {0};
     std::optional<TER> err = std::nullopt;
 };
@@ -191,6 +190,13 @@ public:
 
     PrettyAmount
     mpt(std::uint64_t amount) const;
+
+    test::jtx::MPT
+    MPT() const
+    {
+        assert(mpt_);
+        return test::jtx::MPT(issuer_.name(), *mpt_);
+    }
 
     uint256 const&
     issuanceKey() const
