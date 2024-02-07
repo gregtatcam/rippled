@@ -826,7 +826,8 @@ class MPToken_test : public beast::unit_test::suite
 
         mptAlice.create();
 
-        env(check::create(env.master, alice, mptAlice.mpt(100)), ter(temINVALID));
+        env(check::create(env.master, alice, mptAlice.mpt(100)),
+            ter(temINVALID));
         env.close();
 
         BEAST_EXPECT(expectOffers(env, alice, 0));
@@ -1268,8 +1269,8 @@ class MPToken_test : public beast::unit_test::suite
             env.close();
 
             BEAST_EXPECT(env.balance(bob, YAN) == YAN(1'100));
-            BEAST_EXPECT(amm.expectBalances(
-                CRN(1'104), mpt3.mpt(1'000), amm.tokens()));
+            BEAST_EXPECT(
+                amm.expectBalances(CRN(1'104), mpt3.mpt(1'000), amm.tokens()));
             BEAST_EXPECT(expectOffers(env, alice, 0));
         }
     }

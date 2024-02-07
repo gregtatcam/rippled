@@ -63,11 +63,11 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
     if (isXRP(currency))
         issue_ = std::make_pair(currency, account);
     else if (auto const sequence = getSequence(currency);
-        sequence == getSequence(account) &&
-        memcmp(
-            currency.data() + seqSize,
-            account.data() + 2 * seqSize,
-            truncAcctSize - seqSize) == 0)
+             sequence == getSequence(account) &&
+             memcmp(
+                 currency.data() + seqSize,
+                 account.data() + 2 * seqSize,
+                 truncAcctSize - seqSize) == 0)
     {
         AccountID account1;
         memcpy(account1.data(), currency.data(), truncAcctSize);

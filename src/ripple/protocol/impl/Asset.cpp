@@ -33,7 +33,7 @@ Asset::addBitString(ripple::Serializer& s) const
     }
 }
 
-Asset::operator Currency const&() const
+Asset::operator Currency const &() const
 {
     assert(std::holds_alternative<Currency>(asset_));
     if (!std::holds_alternative<Currency>(asset_))
@@ -41,7 +41,7 @@ Asset::operator Currency const&() const
     return std::get<Currency>(asset_);
 }
 
-Asset::operator MPT const&() const
+Asset::operator MPT const &() const
 {
     // assert(std::holds_alternative<MPT>(asset_));
     if (!std::holds_alternative<MPT>(asset_))

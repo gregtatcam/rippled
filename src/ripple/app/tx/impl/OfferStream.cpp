@@ -149,7 +149,7 @@ accountFundsHelper(
 
 template <class TIn, class TOut>
 template <class TTakerPays, class TTakerGets>
-    requires ValidTaker<TTakerPays, TTakerGets> bool
+requires ValidTaker<TTakerPays, TTakerGets> bool
 TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
 {
     if (!view_.rules().enabled(fixRmSmallIncreasedQOffers))

@@ -175,7 +175,7 @@ public:
 inline constexpr std::weak_ordering
 operator<=>(Asset const& lhs, Asset const& rhs)
 {
-    //assert(lhs.isCurrency() == rhs.isCurrency());
+    assert(lhs.isCurrency() == rhs.isCurrency());
     if (lhs.isCurrency() != rhs.isCurrency())
         Throw<std::logic_error>("Invalid Asset comparison");
     if (lhs.isCurrency())
