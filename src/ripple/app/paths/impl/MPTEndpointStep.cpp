@@ -436,7 +436,7 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
         return {MPTAmount{max}, DebtDirection::issues};
     }
 
-    return {MPTAmount{0}, DebtDirection::issues}; // TODO MPT
+    return {MPTAmount{0}, DebtDirection::issues};  // TODO MPT
 }
 
 template <class TDerived>
