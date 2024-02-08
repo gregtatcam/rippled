@@ -78,6 +78,14 @@ public:
             ret = Oracle::aggregatePrice(
                 env, "XRP", "USD", {{{owner, oracle.documentID()}}});
             BEAST_EXPECT(ret[jss::error].asString() == "objectNotFound");
+
+            // invalid trim value
+            ret = Oracle::aggregatePrice(
+                env, "XRP", "USD", {{{owner, oracle.documentID()}}}, 0);
+            BEAST_EXPECT(ret[jss::error].asString() == "invalidParams");
+            ret = Oracle::aggregatePrice(
+                env, "XRP", "USD", {{{owner, oracle.documentID()}}}, 26);
+            BEAST_EXPECT(ret[jss::error].asString() == "invalidParams");
         }
 
         // too many oracles

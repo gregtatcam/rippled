@@ -191,6 +191,13 @@ doGetAggregatePrice(RPC::JsonContext& context)
         RPC::inject_error(std::get<error_code_i>(trim), result);
         return result;
     }
+    if (params.isMember(jss::trim) &&
+        (std::get<std::uint32_t>(trim) == 0 ||
+         std::get<std::uint32_t>(trim) > maxTrim))
+    {
+        RPC::inject_error(rpcINVALID_PARAMS, result);
+        return result;
+    }
 
     auto const timeThreshold = getField(jss::time_threshold, 0);
     if (std::holds_alternative<error_code_i>(timeThreshold))

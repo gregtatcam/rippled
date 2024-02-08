@@ -126,7 +126,13 @@ std::size_t constexpr maxOracleSymbolClass = 16;
 */
 std::size_t constexpr maxLastUpdateTimeDelta = 300;
 
+/** The maximum price scaling factor
+ */
 std::size_t constexpr maxPriceScale = 20;
+
+/** The maximum percentage of outliers to trim
+ */
+std::size_t constexpr maxTrim = 25;
 
 }  // namespace ripple
 
