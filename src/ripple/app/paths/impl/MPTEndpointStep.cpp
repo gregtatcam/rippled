@@ -40,7 +40,7 @@ class MPTEndpointStep
 protected:
     AccountID const src_;
     AccountID const dst_;
-    AccountID const issuer_;
+    AccountID const& issuer_;
     MPT mptID_;
 
     // Charge transfer fees when the prev step redeems
@@ -355,21 +355,6 @@ DirectMPTOfferCrossingStep::maxFlow(
     ReadView const& sb,
     MPTAmount const& desired) const
 {
-    // When isLast and offer crossing then ignore trust line limits.  Offer
-    // crossing has the ability to exceed the limit set by a trust line.
-    // We presume that if someone is creating an offer then they intend to
-    // fill as much of that offer as possible, even if the offer exceeds
-    // the limit that a trust line sets.
-    //
-    // A note on using "out" as the desired parameter for maxFlow.  In some
-    // circumstances during payments we end up needing a value larger than
-    // "out" for "maxSrcToDst".  But as of now (June 2016) that never happens
-    // during offer crossing.  That's because, due to a couple of factors,
-    // "dstQIn" is always QUALITY_ONE for offer crossing.
-
-    if (isLast_)
-        return {desired, DebtDirection::issues};
-
     return maxPaymentFlow(sb);
 }
 
@@ -432,7 +417,6 @@ template <class TDerived>
 std::pair<MPTAmount, DebtDirection>
 MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
-    // TODO MPT
     if (src_ != issuer_)
     {
         auto const srcOwed = toAmount<MPTAmount>(
@@ -452,14 +436,7 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
         return {MPTAmount{max}, DebtDirection::issues};
     }
 
-    return {MPTAmount{0}, DebtDirection::issues};
-
-#if 0
-        // srcOwed is negative or zero
-    return {
-        creditLimit2(sb, dst_, src_, asset_) + srcOwed,
-        DebtDirection::issues};
-#endif
+    return {MPTAmount{0}, DebtDirection::issues}; // TODO MPT
 }
 
 template <class TDerived>
@@ -471,10 +448,9 @@ MPTEndpointStep<TDerived>::debtDirection(
     if (dir == StrandDirection::forward && cache_)
         return cache_->srcDebtDir;
 
-    auto const srcOwed =
-        accountHolds(sb, src_, mptID_, dst_, fhIGNORE_FREEZE, j_);
-    return srcOwed.signum() > 0 ? DebtDirection::redeems
-                                : DebtDirection::issues;
+    if (src_ != issuer_)
+        return DebtDirection::redeems;
+    return DebtDirection::issues;
 }
 
 template <class TDerived>
