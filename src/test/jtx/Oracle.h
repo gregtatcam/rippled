@@ -26,6 +26,7 @@
 namespace ripple {
 namespace test {
 namespace jtx {
+namespace oracle {
 
 // base asset, quote asset, price, scale
 using DataSeries = std::vector<std::tuple<
@@ -177,6 +178,7 @@ public:
     }
 };
 
+}  // namespace oracle
 }  // namespace jtx
 }  // namespace test
 }  // namespace ripple

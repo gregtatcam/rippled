@@ -22,6 +22,8 @@
 
 namespace ripple {
 namespace test {
+namespace jtx {
+namespace oracle {
 
 struct Oracle_test : public beast::unit_test::suite
 {
@@ -686,6 +688,10 @@ public:
 };
 
 BEAST_DEFINE_TESTSUITE(Oracle, app, ripple);
+
+}  // namespace oracle
+
+}  // namespace jtx
 
 }  // namespace test
 

@@ -28,6 +28,7 @@
 namespace ripple {
 namespace test {
 namespace jtx {
+namespace oracle {
 
 Oracle::Oracle(Env& env, CreateArg const& arg, bool submit)
     : env_(env), owner_{}, documentID_{}
@@ -285,6 +286,7 @@ Oracle::ledgerEntry(
     return env.rpc("json", "ledger_entry", to_string(jvParams))[jss::result];
 }
 
+}  // namespace oracle
 }  // namespace jtx
 }  // namespace test
 }  // namespace ripple

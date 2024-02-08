@@ -24,6 +24,8 @@
 
 namespace ripple {
 namespace test {
+namespace jtx {
+namespace oracle {
 
 class GetAggregatePrice_test : public beast::unit_test::suite
 {
@@ -252,5 +254,7 @@ public:
 
 BEAST_DEFINE_TESTSUITE(GetAggregatePrice, app, ripple);
 
+}  // namespace oracle
+}  // namespace jtx
 }  // namespace test
 }  // namespace ripple
