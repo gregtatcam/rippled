@@ -37,6 +37,10 @@
 #include <ripple/app/tx/impl/DeleteAccount.h>
 #include <ripple/app/tx/impl/DepositPreauth.h>
 #include <ripple/app/tx/impl/Escrow.h>
+#include <ripple/app/tx/impl/MPTokenAuthorize.h>
+#include <ripple/app/tx/impl/MPTokenIssuanceCreate.h>
+#include <ripple/app/tx/impl/MPTokenIssuanceDestroy.h>
+#include <ripple/app/tx/impl/MPTokenIssuanceSet.h>
 #include <ripple/app/tx/impl/NFTokenAcceptOffer.h>
 #include <ripple/app/tx/impl/NFTokenBurn.h>
 #include <ripple/app/tx/impl/NFTokenCancelOffer.h>
@@ -159,6 +163,14 @@ with_txn_type(TxType txnType, F&& f)
             return f.template operator()<DIDSet>();
         case ttDID_DELETE:
             return f.template operator()<DIDDelete>();
+        case ttMPTOKEN_ISSUANCE_CREATE:
+            return f.template operator()<MPTokenIssuanceCreate>();
+        case ttMPTOKEN_ISSUANCE_DESTROY:
+            return f.template operator()<MPTokenIssuanceDestroy>();
+        case ttMPTOKEN_AUTHORIZE:
+            return f.template operator()<MPTokenAuthorize>();
+        case ttMPTOKEN_ISSUANCE_SET:
+            return f.template operator()<MPTokenIssuanceSet>();
         default:
             throw UnknownTxnType(txnType);
     }

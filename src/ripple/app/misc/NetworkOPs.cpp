@@ -67,6 +67,7 @@
 #include <ripple/resource/ResourceManager.h>
 #include <ripple/rpc/BookChanges.h>
 #include <ripple/rpc/DeliveredAmount.h>
+#include <ripple/rpc/MPTokenIssuanceID.h>
 #include <ripple/rpc/ServerHandler.h>
 #include <ripple/rpc/impl/RPCHelpers.h>
 #include <boost/asio/ip/host_name.hpp>
@@ -3120,6 +3121,8 @@ NetworkOPsImp::transJson(
         jvObj[jss::meta] = meta->get().getJson(JsonOptions::none);
         RPC::insertDeliveredAmount(
             jvObj[jss::meta], *ledger, transaction, meta->get());
+        RPC::insertMPTokenIssuanceID(
+            jvObj[jss::meta], transaction, meta->get());
     }
 
     if (!ledger->open())

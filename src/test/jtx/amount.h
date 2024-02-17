@@ -351,6 +351,76 @@ operator<<(std::ostream& os, IOU const& iou);
 
 //------------------------------------------------------------------------------
 
+/** Converts to MPT Issue or STAmount.
+
+    Examples:
+        MPT         Converts to the underlying Issue
+        MPT(10)     Returns STAmount of 10 of
+                        the underlying MPT
+*/
+class MPT
+{
+public:
+    std::string name;
+    ripple::MPT mptID;
+
+    MPT(std::string const& n, ripple::MPT const& mptID_)
+        : name(n), mptID(mptID_)
+    {
+    }
+
+    Issue
+    issue() const
+    {
+        // TODO MPT
+        return noIssue();  //{mptID};
+    }
+
+    /** Implicit conversion to Issue.
+
+        This allows passing an MPT
+        value where an Issue is expected.
+    */
+    operator Issue() const
+    {
+        return issue();
+    }
+
+    template <class T>
+    requires(sizeof(T) >= sizeof(int) && std::is_arithmetic_v<T>) PrettyAmount
+    operator()(T v) const
+    {
+        // VFALCO NOTE Should throw if the
+        //             representation of v is not exact.
+        return {amountFromString(issue(), std::to_string(v)), name};
+    }
+
+    PrettyAmount operator()(epsilon_t) const;
+    PrettyAmount operator()(detail::epsilon_multiple) const;
+
+    // VFALCO TODO
+    // STAmount operator()(char const* s) const;
+
+    /** Returns None-of-Issue */
+    None operator()(none_t) const
+    {
+        return {issue()};
+    }
+
+    friend BookSpec
+    operator~(MPT const& mpt)
+    {
+        assert(false);
+        Throw<std::logic_error>("MPT is not supported");
+        return BookSpec{beast::zero, noCurrency()};
+    }
+};
+
+std::ostream&
+operator<<(std::ostream& os, MPT const& mpt);
+
+//------------------------------------------------------------------------------
+
 struct any_t
 {
     inline AnyAmount

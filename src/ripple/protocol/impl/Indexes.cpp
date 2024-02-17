@@ -72,6 +72,9 @@ enum class LedgerNameSpace : std::uint16_t {
     XCHAIN_CLAIM_ID = 'Q',
     XCHAIN_CREATE_ACCOUNT_CLAIM_ID = 'K',
     DID = 'I',
+    MPTOKEN_ISSUANCE = '~',
+    MPTOKEN = 't',
+    MPT_DIR = 'k',
 
     // No longer used or supported. Left here to reserve the space
     // to avoid accidental reuse.
@@ -132,6 +135,16 @@ getTicketIndex(AccountID const& account, SeqProxy ticketSeq)
 {
     assert(ticketSeq.isTicket());
     return getTicketIndex(account, ticketSeq.value());
+}
+
+uint192
+getMptID(AccountID const& account, std::uint32_t sequence)
+{
+    uint192 u;
+    sequence = boost::endian::native_to_big(sequence);
+    memcpy(u.data(), &sequence, sizeof(sequence));
+    memcpy(u.data() + sizeof(sequence), account.data(), sizeof(account));
+    return u;
 }
 
 //------------------------------------------------------------------------------
@@ -444,6 +457,57 @@ did(AccountID const& account) noexcept
     return {ltDID, indexHash(LedgerNameSpace::DID, account)};
 }
 
+Keylet
+mptIssuance(AccountID const& issuer, std::uint32_t seq) noexcept
+{
+    return mptIssuance(getMptID(issuer, seq));
+}
+
+Keylet
+mptIssuance(ripple::MPT const& mpt) noexcept
+{
+    return mptIssuance(mpt.second, mpt.first);
+}
+
+Keylet
+mptIssuance(uint192 const& mpt) noexcept
+{
+    return {
+        ltMPTOKEN_ISSUANCE, indexHash(LedgerNameSpace::MPTOKEN_ISSUANCE, mpt)};
+}
+
+Keylet
+mptoken(uint192 const& issuanceID, AccountID const& holder) noexcept
+{
+    return mptoken(mptIssuance(issuanceID).key, holder);
+}
+
+Keylet
+mptoken(MPT const& mptID, AccountID const& holder) noexcept
+{
+    return mptoken(
+        mptIssuance(getMptID(mptID.second, mptID.first)).key, holder);
+}
+
+Keylet
+mptoken(uint256 const& issuanceKey, AccountID const& holder) noexcept
+{
+    return {
+        ltMPTOKEN, indexHash(LedgerNameSpace::MPTOKEN, issuanceKey, holder)};
+}
+
+Keylet
+mpt_dir(uint192 const& id) noexcept
+{
+    return {
+        ltDIR_NODE, indexHash(LedgerNameSpace::MPT_DIR, mptIssuance(id).key)};
+}
+
+Keylet
+mpt_dir(uint256 const& id) noexcept
+{
+    return {ltDIR_NODE, indexHash(LedgerNameSpace::MPT_DIR, id)};
+}
 }  // namespace keylet
 
 }  // namespace ripple

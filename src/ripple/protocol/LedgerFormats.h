@@ -192,6 +192,18 @@ enum LedgerEntryType : std::uint16_t
     */
     ltDID = 0x0049,
 
+    /** A ledger object representing an individual MPToken asset type, but not
+     * any balances of that asset itself.
+
+        \sa keylet::mptIssuance
+     */
+    ltMPTOKEN_ISSUANCE = 0x007e,
+
+    /** A ledger object representing an individual MPToken balance.
+
+        \sa keylet::mptoken
+     */
+    ltMPTOKEN = 0x007f,
     //---------------------------------------------------------------------------
     /** A special type, matching any ledger entry type.
 
@@ -303,6 +315,18 @@ enum LedgerSpecificFlags {
 
     // ltNFTOKEN_OFFER
     lsfSellNFToken = 0x00000001,
+
+    // ltMPTOKEN_ISSUANCE
+    lsfMPTLocked = 0x00000001, // Also used in ltMPTOKEN
+    lsfMPTCanLock = 0x00000002,
+    lsfMPTRequireAuth = 0x00000004,
+    lsfMPTCanEscrow = 0x00000008,
+    lsfMPTCanTrade = 0x00000010,
+    lsfMPTCanTransfer = 0x00000020,
+    lsfMPTCanClawback = 0x00000040,
+
+    // ltMPTOKEN
+    lsfMPTAuthorized = 0x00000002,
 };
 
 //------------------------------------------------------------------------------

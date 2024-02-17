@@ -283,6 +283,41 @@ xChainCreateAccountClaimID(STXChainBridge const& bridge, std::uint64_t seq);
 Keylet
 did(AccountID const& account) noexcept;
 
+Keylet
+mptIssuance(AccountID const& issuer, std::uint32_t seq) noexcept;
+
+Keylet
+mptIssuance(uint192 const& mpt) noexcept;
+
+Keylet
+mptIssuance(ripple::MPT const& mpt) noexcept;
+
+inline Keylet
+mptIssuance(uint256 const& issuance)
+{
+    return {ltMPTOKEN_ISSUANCE, issuance};
+}
+
+Keylet
+mptoken(MPT const& issuanceID, AccountID const& holder) noexcept;
+
+Keylet
+mptoken(uint192 const& issuanceID, AccountID const& holder) noexcept;
+
+inline Keylet
+mptoken(uint256 const& mptokenKey)
+{
+    return {ltMPTOKEN, mptokenKey};
+}
+
+Keylet
+mptoken(uint256 const& issuanceKey, AccountID const& holder) noexcept;
+
+Keylet
+mpt_dir(uint192 const& id) noexcept;
+
+Keylet
+mpt_dir(uint256 const& id) noexcept;
 }  // namespace keylet
 
 // Everything below is deprecated and should be removed in favor of keylets:
@@ -302,6 +337,9 @@ getTicketIndex(AccountID const& account, std::uint32_t uSequence);
 
 uint256
 getTicketIndex(AccountID const& account, SeqProxy ticketSeq);
+
+uint192
+getMptID(AccountID const& account, std::uint32_t sequence);
 
 }  // namespace ripple
 
