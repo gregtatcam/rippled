@@ -47,6 +47,9 @@ SetTrust::preflight(PreflightContext const& ctx)
 
     STAmount const saLimitAmount(tx.getFieldAmount(sfLimitAmount));
 
+    if (saLimitAmount.isMPT())
+        return temMPT_NOT_SUPPORTED;
+
     if (!isLegalNet(saLimitAmount))
         return temBAD_AMOUNT;
 
@@ -537,7 +540,7 @@ SetTrust::doApply()
     else
     {
         // Zero balance in currency.
-        STAmount saBalance({currency, noAccount()});
+        STAmount saBalance(Issue{currency, noAccount()});
 
         auto const k = keylet::line(account_, uDstAccountID, currency);
 

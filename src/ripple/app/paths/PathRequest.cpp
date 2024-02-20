@@ -313,6 +313,12 @@ PathRequest::parseJson(Json::Value const& jvParams)
         return PFR_PJ_INVALID;
     }
 
+    if (saDstAmount.isMPT())
+    {
+        jvStatus = rpcError(rpcMPT_NOT_SUPPORTED);
+        return PFR_PJ_INVALID;
+    }
+
     convert_all_ = saDstAmount == STAmount(saDstAmount.issue(), 1u, 0, true);
 
     if ((saDstAmount.getCurrency().isZero() &&
@@ -342,6 +348,12 @@ PathRequest::parseJson(Json::Value const& jvParams)
              *saSendMax != STAmount(saSendMax->issue(), 1u, 0, true)))
         {
             jvStatus = rpcError(rpcSENDMAX_MALFORMED);
+            return PFR_PJ_INVALID;
+        }
+
+        if (saSendMax->isMPT())
+        {
+            jvStatus = rpcError(rpcMPT_NOT_SUPPORTED);
             return PFR_PJ_INVALID;
         }
     }
@@ -562,7 +574,7 @@ PathRequest::findPaths(
         }();
 
         STAmount saMaxAmount = saSendMax.value_or(
-            STAmount({issue.currency, sourceAccount}, 1u, 0, true));
+            STAmount(Issue{issue.currency, sourceAccount}, 1u, 0, true));
 
         JLOG(m_journal.debug())
             << iIdentifier << " Paths found, calling rippleCalc";

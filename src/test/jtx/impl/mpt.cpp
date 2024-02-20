@@ -197,7 +197,7 @@ MPTTester::authorize(MPTAuthorize const& arg)
     }
     else if (
         arg.account != nullptr && *arg.account != issuer_ &&
-        arg.flags.value_or(0) == 0)
+        arg.flags.value_or(0) == 0 && issuanceKey_)
     {
         if (result == tecMPTOKEN_EXISTS)
         {
@@ -330,9 +330,7 @@ MPTTester::pay(
     }
     else
     {
-        // TODO MPT
-#if 0
-        STAmount const saAmount = {Issue{*mpt_}, amount};
+        STAmount const saAmount = {*mpt_, amount};
         STAmount const saActual =
             multiply(saAmount, transferRateMPT(*env_.current(), *mpt_));
         // Sender pays the transfer fee if any
@@ -341,7 +339,6 @@ MPTTester::pay(
         // Outstanding amount is reduced by the transfer fee if any
         env_.require(mptpay(
             *this, issuer_, outstnAmt - (saActual - saAmount).mpt().mpt()));
-#endif
     }
 }
 
@@ -355,6 +352,7 @@ MPTTester::mpt(std::uint64_t amount) const
 std::uint64_t
 MPTTester::getAmount(Account const& account) const
 {
+    assert(issuanceKey_);
     if (account == issuer_)
     {
         if (auto const sle = env_.le(keylet::mptIssuance(*issuanceKey_)))

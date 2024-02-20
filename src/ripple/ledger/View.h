@@ -82,6 +82,9 @@ enum FreezeHandling { fhIGNORE_FREEZE, fhZERO_IF_FROZEN };
 isGlobalFrozen(ReadView const& view, AccountID const& issuer);
 
 [[nodiscard]] bool
+isGlobalFrozen(ReadView const& view, MPTIssue const& mpt);
+
+[[nodiscard]] bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
@@ -97,6 +100,12 @@ isIndividualFrozen(
     return isIndividualFrozen(view, account, issue.currency, issue.account);
 }
 
+[[nodiscard]] inline bool
+isIndividualFrozen(
+    ReadView const& view,
+    AccountID const& account,
+    MPTIssue const& mpt);
+
 [[nodiscard]] bool
 isFrozen(
     ReadView const& view,
@@ -109,6 +118,9 @@ isFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
 {
     return isFrozen(view, account, issue.currency, issue.account);
 }
+
+[[nodiscard]] bool
+isFrozen(ReadView const& view, AccountID const& account, MPTIssue const& mpt);
 
 // Returns the amount an account can spend without going into debt.
 //
@@ -208,6 +220,9 @@ forEachItemAfter(
 
 [[nodiscard]] Rate
 transferRate(ReadView const& view, AccountID const& issuer);
+
+[[nodiscard]] Rate
+transferRateMPT(ReadView const& view, MPT const& id);
 
 /** Returns `true` if the directory is empty
     @param key The key of the directory
@@ -420,7 +435,24 @@ rippleCredit(
     beast::Journal j);
 
 [[nodiscard]] TER
+rippleMPTCredit(
+    ApplyView& view,
+    AccountID const& uSenderID,
+    AccountID const& uReceiverID,
+    STAmount saAmount,
+    beast::Journal j);
+
+[[nodiscard]] TER
 accountSend(
+    ApplyView& view,
+    AccountID const& from,
+    AccountID const& to,
+    const STAmount& saAmount,
+    beast::Journal j,
+    WaiveTransferFee waiveFee = WaiveTransferFee::No);
+
+[[nodiscard]] TER
+accountSendMPT(
     ApplyView& view,
     AccountID const& from,
     AccountID const& to,
@@ -458,6 +490,11 @@ transferXRP(
  */
 [[nodiscard]] TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
+[[nodiscard]] TER
+requireAuth(
+    ReadView const& view,
+    MPTIssue const& mpt,
+    AccountID const& account);
 
 /** Deleter function prototype. Returns the status of the entry deletion
  * (if should not be skipped) and if the entry should be skipped. The status

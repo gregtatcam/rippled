@@ -31,11 +31,15 @@ template <typename TIn, typename TOut>
 class AMMLiquidity;
 class QualityFunction;
 
+template <typename A>
+concept OfferAmount =
+    !(std::is_same_v<A, STAmount> || std::is_same_v<A, MPTAmount>);
+
 /** Represents synthetic AMM offer in BookStep. AMMOffer mirrors TOffer
  * methods for use in generic BookStep methods. AMMOffer amounts
  * are changed indirectly in BookStep limiting steps.
  */
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 class AMMOffer
 {
 private:

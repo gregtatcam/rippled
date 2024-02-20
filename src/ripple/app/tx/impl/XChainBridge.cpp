@@ -1382,6 +1382,10 @@ XChainCreateBridge::preflight(PreflightContext const& ctx)
     auto const reward = ctx.tx[sfSignatureReward];
     auto const minAccountCreate = ctx.tx[~sfMinAccountCreateAmount];
     auto const bridgeSpec = ctx.tx[sfXChainBridge];
+
+    if (reward.isMPT() || (minAccountCreate && minAccountCreate->isMPT()))
+        return temMPT_NOT_SUPPORTED;
+
     // Doors must be distinct to help prevent transaction replay attacks
     if (bridgeSpec.lockingChainDoor() == bridgeSpec.issuingChainDoor())
     {

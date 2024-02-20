@@ -443,8 +443,12 @@ toStrands(
     AMMContext& ammContext,
     beast::Journal j);
 
+template <typename A>
+concept StepAsset =
+    !(std::is_same_v<A, STAmount> || std::is_same_v<A, MPTAmount>);
+
 /// @cond INTERNAL
-template <class TIn, class TOut, class TDerived>
+template <StepAsset TIn, StepAsset TOut, class TDerived>
 struct StepImp : public Step
 {
     explicit StepImp() = default;

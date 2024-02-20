@@ -145,7 +145,10 @@ enum error_code_i {
     // AMM
     rpcISSUE_MALFORMED = 93,
 
-    rpcLAST = rpcISSUE_MALFORMED  // rpcLAST should always equal the last code.=
+    rpcMPT_NOT_SUPPORTED = 94,
+
+    rpcLAST =
+        rpcMPT_NOT_SUPPORTED  // rpcLAST should always equal the last code.=
 };
 
 /** Codes returned in the `warnings` array of certain RPC commands.

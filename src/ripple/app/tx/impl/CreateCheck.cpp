@@ -53,6 +53,10 @@ CreateCheck::preflight(PreflightContext const& ctx)
 
     {
         STAmount const sendMax{ctx.tx.getFieldAmount(sfSendMax)};
+
+        if (sendMax.isMPT())
+            return temMPT_NOT_SUPPORTED;
+
         if (!isLegalNet(sendMax) || sendMax.signum() <= 0)
         {
             JLOG(ctx.j.warn()) << "Malformed transaction: bad sendMax amount: "

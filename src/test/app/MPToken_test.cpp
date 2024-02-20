@@ -159,12 +159,9 @@ class MPToken_test : public beast::unit_test::suite
                 mptAlice.authorize({.account = &bob, .holderCount = 1});
 
                 // alice pays bob 100 tokens
-                // TODO MPT
-#if 0
                 mptAlice.pay(alice, bob, 100);
 
                 mptAlice.destroy({.err = tecHAS_OBLIGATIONS});
-#endif
             }
         }
     }
@@ -270,8 +267,6 @@ class MPToken_test : public beast::unit_test::suite
             // Check that bob cannot delete MPToken when his balance is
             // non-zero
             {
-                // TODO MPT
-#if 0
                 // alice pays bob 100 tokens
                 mptAlice.pay(alice, bob, 100);
 
@@ -284,7 +279,6 @@ class MPToken_test : public beast::unit_test::suite
 
                 // bob pays back alice 100 tokens
                 mptAlice.pay(bob, alice, 100);
-#endif
             }
 
             // bob deletes/unauthorizes his MPToken
@@ -887,14 +881,11 @@ public:
         testSetValidation(all);
         testSetEnabled(all);
 
-        // TODO MPT
-#if 0
         // Test Direct Payment
         testPayment(all);
 
         // Test MPT Amount is invalid in non-Payment Tx
         testMPTInvalidInTx(all);
-#endif
 
         // Test parsed MPTokenIssuanceID in API response metadata
         // TODO: This test exercises the parsing logic of mptID in `tx`,

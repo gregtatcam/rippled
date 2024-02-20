@@ -48,6 +48,9 @@ NFTokenCreateOffer::preflight(PreflightContext const& ctx)
     {
         STAmount const amount = ctx.tx[sfAmount];
 
+        if (amount.isMPT())
+            return temMPT_NOT_SUPPORTED;
+
         if (amount.negative() && ctx.rules.enabled(fixNFTokenNegOffer))
             // An offer for a negative amount makes no sense.
             return temBAD_AMOUNT;

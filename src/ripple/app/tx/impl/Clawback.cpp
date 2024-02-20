@@ -42,6 +42,9 @@ Clawback::preflight(PreflightContext const& ctx)
     AccountID const issuer = ctx.tx[sfAccount];
     STAmount const clawAmount = ctx.tx[sfAmount];
 
+    if (clawAmount.isMPT())
+        return temMPT_NOT_SUPPORTED;
+
     // The issuer field is used for the token holder instead
     AccountID const& holder = clawAmount.getIssuer();
 

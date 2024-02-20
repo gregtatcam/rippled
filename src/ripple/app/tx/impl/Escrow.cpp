@@ -105,6 +105,9 @@ EscrowCreate::preflight(PreflightContext const& ctx)
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
 
+    if (ctx.tx[sfAmount].isMPT())
+        return temMPT_NOT_SUPPORTED;
+
     if (!isXRP(ctx.tx[sfAmount]))
         return temBAD_AMOUNT;
 

@@ -53,6 +53,10 @@ CashCheck::preflight(PreflightContext const& ctx)
     auto const optAmount = ctx.tx[~sfAmount];
     auto const optDeliverMin = ctx.tx[~sfDeliverMin];
 
+    if ((optAmount && optAmount->isMPT()) ||
+        (optDeliverMin && optDeliverMin->isMPT()))
+        return temMPT_NOT_SUPPORTED;
+
     if (static_cast<bool>(optAmount) == static_cast<bool>(optDeliverMin))
     {
         JLOG(ctx.j.warn())

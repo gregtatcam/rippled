@@ -83,6 +83,9 @@ CreateOffer::preflight(PreflightContext const& ctx)
     STAmount saTakerPays = tx[sfTakerPays];
     STAmount saTakerGets = tx[sfTakerGets];
 
+    if (saTakerPays.isMPT() || saTakerGets.isMPT())
+        return temMPT_NOT_SUPPORTED;
+
     if (!isLegalNet(saTakerPays) || !isLegalNet(saTakerGets))
         return temBAD_AMOUNT;
 

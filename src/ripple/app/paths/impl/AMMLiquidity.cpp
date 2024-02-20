@@ -215,7 +215,6 @@ AMMLiquidity<TIn, TOut>::getOffer(
     return std::nullopt;
 }
 
-template class AMMLiquidity<STAmount, STAmount>;
 template class AMMLiquidity<IOUAmount, IOUAmount>;
 template class AMMLiquidity<XRPAmount, IOUAmount>;
 template class AMMLiquidity<IOUAmount, XRPAmount>;

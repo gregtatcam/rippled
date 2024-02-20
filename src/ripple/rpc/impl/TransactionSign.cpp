@@ -218,6 +218,9 @@ checkPayment(
         {
             if (!amountFromJsonNoThrow(sendMax, tx_json[jss::SendMax]))
                 return RPC::invalid_field_error("tx_json.SendMax");
+            if (sendMax.isMPT())
+                return RPC::make_error(
+                    rpcINVALID_PARAMS, "MPT is invalid in SendMax");
         }
         else
         {

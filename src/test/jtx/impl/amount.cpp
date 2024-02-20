@@ -91,11 +91,16 @@ operator<<(std::ostream& os, PrettyAmount const& amount)
 
         os << to_places(d, 6) << " XRP";
     }
-    else
+    else if (amount.value().isIssue())
     {
         os << amount.value().getText() << "/"
            << to_string(amount.value().issue().currency) << "(" << amount.name()
            << ")";
+    }
+    else
+    {
+        os << amount.value().getText() << "/" << to_string(amount.value().mpt())
+           << "(" << amount.name() << ")";
     }
     return os;
 }

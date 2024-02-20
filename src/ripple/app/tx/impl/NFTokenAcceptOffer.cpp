@@ -96,6 +96,9 @@ NFTokenAcceptOffer::preclaim(PreclaimContext const& ctx)
     if (!isTesSuccess(err2))
         return err2;
 
+    if ((bo && (*bo)[sfAmount].isMPT()) || (so && (*so)[sfAmount].isMPT()))
+        return temMPT_NOT_SUPPORTED;
+
     if (bo && so)
     {
         // Brokered mode:

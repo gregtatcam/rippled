@@ -23,6 +23,7 @@
 #include "ripple/app/misc/AMMHelpers.h"
 #include "ripple/app/misc/AMMUtils.h"
 #include "ripple/app/paths/AMMContext.h"
+#include "ripple/app/paths/AMMOffer.h"
 #include "ripple/basics/Log.h"
 #include "ripple/ledger/ReadView.h"
 #include "ripple/ledger/View.h"
@@ -30,9 +31,6 @@
 #include "ripple/protocol/STLedgerEntry.h"
 
 namespace ripple {
-
-template <typename TIn, typename TOut>
-class AMMOffer;
 
 /** AMMLiquidity class provides AMM offers to BookStep class.
  * The offers are generated in two ways. If there are multiple

@@ -155,12 +155,16 @@ template <typename T>
 Issue
 getIssue(T const& amt)
 {
+    static_assert(!std::is_same_v<T, MPTAmount>);
     if constexpr (std::is_same_v<IOUAmount, T>)
         return noIssue();
     if constexpr (std::is_same_v<XRPAmount, T>)
         return xrpIssue();
     if constexpr (std::is_same_v<STAmount, T>)
+    {
+        assert(!amt.isMPT());
         return amt.issue();
+    }
 }
 
 template <typename T>
@@ -171,6 +175,8 @@ get(STAmount const& a)
         return a.iou();
     if constexpr (std::is_same_v<XRPAmount, T>)
         return a.xrp();
+    if constexpr (std::is_same_v<MPTAmount, T>)
+        return a.mpt();
     if constexpr (std::is_same_v<STAmount, T>)
         return a;
 }

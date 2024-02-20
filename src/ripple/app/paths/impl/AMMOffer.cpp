@@ -23,7 +23,7 @@
 
 namespace ripple {
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 AMMOffer<TIn, TOut>::AMMOffer(
     AMMLiquidity<TIn, TOut> const& ammLiquidity,
     TAmounts<TIn, TOut> const& amounts,
@@ -37,35 +37,35 @@ AMMOffer<TIn, TOut>::AMMOffer(
 {
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 Issue const&
 AMMOffer<TIn, TOut>::issueIn() const
 {
     return ammLiquidity_.issueIn();
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 Issue const&
 AMMOffer<TIn, TOut>::issueOut() const
 {
     return ammLiquidity_.issueOut();
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 AccountID const&
 AMMOffer<TIn, TOut>::owner() const
 {
     return ammLiquidity_.ammAccount();
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 TAmounts<TIn, TOut> const&
 AMMOffer<TIn, TOut>::amount() const
 {
     return amounts_;
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 void
 AMMOffer<TIn, TOut>::consume(
     ApplyView& view,
@@ -83,7 +83,7 @@ AMMOffer<TIn, TOut>::consume(
     ammLiquidity_.context().setAMMUsed();
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 TAmounts<TIn, TOut>
 AMMOffer<TIn, TOut>::limitOut(
     TAmounts<TIn, TOut> const& offrAmt,
@@ -113,7 +113,7 @@ AMMOffer<TIn, TOut>::limitOut(
     return {swapAssetOut(*balances_, limit, ammLiquidity_.tradingFee()), limit};
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 TAmounts<TIn, TOut>
 AMMOffer<TIn, TOut>::limitIn(
     TAmounts<TIn, TOut> const& offrAmt,
@@ -125,7 +125,7 @@ AMMOffer<TIn, TOut>::limitIn(
     return {limit, swapAssetIn(*balances_, limit, ammLiquidity_.tradingFee())};
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 QualityFunction
 AMMOffer<TIn, TOut>::getQualityFunc() const
 {
@@ -135,7 +135,6 @@ AMMOffer<TIn, TOut>::getQualityFunc() const
         *balances_, ammLiquidity_.tradingFee(), QualityFunction::AMMTag{}};
 }
 
-template class AMMOffer<STAmount, STAmount>;
 template class AMMOffer<IOUAmount, IOUAmount>;
 template class AMMOffer<XRPAmount, IOUAmount>;
 template class AMMOffer<IOUAmount, XRPAmount>;

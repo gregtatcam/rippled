@@ -50,6 +50,12 @@ AMMCreate::preflight(PreflightContext const& ctx)
     auto const amount = ctx.tx[sfAmount];
     auto const amount2 = ctx.tx[sfAmount2];
 
+    if (amount.isMPT() || amount2.isIssue())
+    {
+        JLOG(ctx.j.debug()) << "AMM Instance: MPT is not supported.";
+        return temMPT_NOT_SUPPORTED;
+    }
+
     if (amount.issue() == amount2.issue())
     {
         JLOG(ctx.j.debug())

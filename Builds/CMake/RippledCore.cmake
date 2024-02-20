@@ -75,6 +75,7 @@ target_sources (xrpl_core PRIVATE
   #]===============================]
   src/ripple/protocol/impl/AccountID.cpp
   src/ripple/protocol/impl/AMMCore.cpp
+  src/ripple/protocol/impl/Asset.cpp
   src/ripple/protocol/impl/Book.cpp
   src/ripple/protocol/impl/BuildInfo.cpp
   src/ripple/protocol/impl/ErrorCodes.cpp
@@ -86,6 +87,7 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/Keylet.cpp
   src/ripple/protocol/impl/LedgerFormats.cpp
   src/ripple/protocol/impl/LedgerHeader.cpp
+  src/ripple/protocol/impl/MPTIssue.cpp
   src/ripple/protocol/impl/PublicKey.cpp
   src/ripple/protocol/impl/Quality.cpp
   src/ripple/protocol/impl/QualityFunction.cpp

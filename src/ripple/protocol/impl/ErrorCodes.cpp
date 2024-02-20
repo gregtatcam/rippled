@@ -84,6 +84,7 @@ constexpr static ErrorInfo unorderedErrorInfos[]{
     {rpcLGR_NOT_FOUND,          "lgrNotFound",          "Ledger not found.", 404},
     {rpcLGR_NOT_VALIDATED,      "lgrNotValidated",      "Ledger not validated.", 202},
     {rpcMASTER_DISABLED,        "masterDisabled",       "Master key is disabled.", 403},
+    {rpcMPT_NOT_SUPPORTED,      "mptNotSupported",      "MPT is not supported.", 403},
     {rpcNOT_ENABLED,            "notEnabled",           "Not enabled in configuration.", 501},
     {rpcNOT_IMPL,               "notImpl",              "Not implemented.", 501},
     {rpcNOT_READY,              "notReady",             "Not ready to handle this request.", 503},

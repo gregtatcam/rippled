@@ -96,6 +96,8 @@ invalidAMMAmount(
     std::optional<std::pair<Issue, Issue>> const& pair,
     bool validZero)
 {
+    if (amount.isMPT())
+        return temMPT_NOT_SUPPORTED;
     if (auto const res = invalidAMMAsset(amount.issue(), pair))
         return res;
     if (amount < beast::zero || (!validZero && amount == beast::zero))

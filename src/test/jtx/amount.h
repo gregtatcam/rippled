@@ -314,6 +314,10 @@ public:
     {
         return issue();
     }
+    operator Asset() const
+    {
+        return issue();
+    }
 
     template <
         class T,
@@ -369,11 +373,10 @@ public:
     {
     }
 
-    Issue
-    issue() const
+    ripple::MPT const&
+    mpt() const
     {
-        // TODO MPT
-        return noIssue();  //{mptID};
+        return mptID;
     }
 
     /** Implicit conversion to Issue.
@@ -381,9 +384,9 @@ public:
         This allows passing an MPT
         value where an Issue is expected.
     */
-    operator Issue() const
+    operator ripple::MPT() const
     {
-        return issue();
+        return mpt();
     }
 
     template <class T>
@@ -392,7 +395,7 @@ public:
     {
         // VFALCO NOTE Should throw if the
         //             representation of v is not exact.
-        return {amountFromString(issue(), std::to_string(v)), name};
+        return {amountFromString(mpt(), std::to_string(v)), name};
     }
 
     PrettyAmount operator()(epsilon_t) const;
@@ -402,10 +405,12 @@ public:
     // STAmount operator()(char const* s) const;
 
     /** Returns None-of-Issue */
+#if 0
     None operator()(none_t) const
     {
-        return {issue()};
+        return {Issue{}};
     }
+#endif
 
     friend BookSpec
     operator~(MPT const& mpt)

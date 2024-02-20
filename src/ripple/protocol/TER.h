@@ -136,6 +136,8 @@ enum TEMcodes : TERUnderlyingType {
     temXCHAIN_BRIDGE_BAD_REWARD_AMOUNT,
 
     temEMPTY_DID,
+
+    temMPT_NOT_SUPPORTED
 };
 
 //------------------------------------------------------------------------------
@@ -334,7 +336,8 @@ enum TECcodes : TERUnderlyingType {
     tecEMPTY_DID = 187,
     tecMPTOKEN_EXISTS = 188,
     tecMPT_MAX_AMOUNT_EXCEEDED = 189,
-    tecMPT_LOCKED = 190
+    tecMPT_LOCKED = 190,
+    tecMPT_NOT_SUPPORTED = 191,
 
 };
 

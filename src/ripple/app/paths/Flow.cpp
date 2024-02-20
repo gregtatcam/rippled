@@ -71,6 +71,12 @@ flow(
     beast::Journal j,
     path::detail::FlowDebugInfo* flowDebugInfo)
 {
+    if (deliver.isMPT() || (sendMax && sendMax->isMPT()))
+    {
+        path::RippleCalc::Output result;
+        result.setResult(tecMPT_NOT_SUPPORTED);
+    }
+
     Issue const srcIssue = [&] {
         if (sendMax)
             return sendMax->issue();

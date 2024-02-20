@@ -550,7 +550,7 @@ public:
    @return Actual amount in and out from the strands, errors, and payment
    sandbox
 */
-template <class TInAmt, class TOutAmt>
+template <StepAsset TInAmt, StepAsset TOutAmt>
 FlowResult<TInAmt, TOutAmt>
 flow(
     PaymentSandbox const& baseView,
