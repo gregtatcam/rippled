@@ -1,5 +1,5 @@
 <map id="ripple::Transactor" name="ripple::Transactor">
-<area shape="rect" id="node1" title=" " alt="" coords="5,1044,140,1071"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,1145,140,1172"/>
 <area shape="rect" id="node2" href="$classripple_1_1AMMBid.html" title="AMMBid implements AMM bid Transactor." alt="" coords="252,5,371,32"/>
 <area shape="rect" id="node3" href="$classripple_1_1AMMCreate.html" title="AMMCreate implements Automatic Market Maker(AMM) creation Transactor." alt="" coords="241,56,382,83"/>
 <area shape="rect" id="node4" href="$classripple_1_1AMMDelete.html" title="AMMDelete implements AMM delete transactor." alt="" coords="241,107,382,133"/>
@@ -22,24 +22,28 @@
 <area shape="rect" id="node21" href="$classripple_1_1EscrowCancel.html" title=" " alt="" coords="233,968,390,995"/>
 <area shape="rect" id="node22" href="$classripple_1_1EscrowCreate.html" title=" " alt="" coords="233,1019,389,1045"/>
 <area shape="rect" id="node23" href="$classripple_1_1EscrowFinish.html" title=" " alt="" coords="236,1069,387,1096"/>
-<area shape="rect" id="node24" href="$classripple_1_1NFTokenAcceptOffer.html" title=" " alt="" coords="212,1120,411,1147"/>
-<area shape="rect" id="node25" href="$classripple_1_1NFTokenBurn.html" title=" " alt="" coords="235,1171,387,1197"/>
-<area shape="rect" id="node26" href="$classripple_1_1NFTokenCancelOffer.html" title=" " alt="" coords="212,1221,411,1248"/>
-<area shape="rect" id="node27" href="$classripple_1_1NFTokenCreateOffer.html" title=" " alt="" coords="213,1272,410,1299"/>
-<area shape="rect" id="node28" href="$classripple_1_1NFTokenMint.html" title=" " alt="" coords="236,1323,387,1349"/>
-<area shape="rect" id="node29" href="$classripple_1_1PayChanClaim.html" title=" " alt="" coords="231,1373,392,1400"/>
-<area shape="rect" id="node30" href="$classripple_1_1PayChanCreate.html" title=" " alt="" coords="228,1424,395,1451"/>
-<area shape="rect" id="node31" href="$classripple_1_1PayChanFund.html" title=" " alt="" coords="235,1475,388,1501"/>
-<area shape="rect" id="node32" href="$classripple_1_1Payment.html" title=" " alt="" coords="249,1525,373,1552"/>
-<area shape="rect" id="node33" href="$classripple_1_1SetAccount.html" title=" " alt="" coords="241,1576,381,1603"/>
-<area shape="rect" id="node34" href="$classripple_1_1SetRegularKey.html" title=" " alt="" coords="231,1627,392,1653"/>
-<area shape="rect" id="node35" href="$classripple_1_1SetSignerList.html" title="See the README.md for an overview of the SetSignerList transaction that this class implements." alt="" coords="235,1677,387,1704"/>
-<area shape="rect" id="node36" href="$classripple_1_1SetTrust.html" title=" " alt="" coords="252,1728,371,1755"/>
-<area shape="rect" id="node37" href="$classripple_1_1XChainAddAccountCreateAttestation.html" title=" " alt="" coords="217,1779,406,1821"/>
-<area shape="rect" id="node38" href="$classripple_1_1XChainAddClaimAttestation.html" title=" " alt="" coords="188,1845,435,1872"/>
-<area shape="rect" id="node39" href="$classripple_1_1XChainClaim.html" title=" " alt="" coords="236,1896,387,1923"/>
-<area shape="rect" id="node40" href="$classripple_1_1XChainCommit.html" title=" " alt="" coords="229,1947,393,1973"/>
-<area shape="rect" id="node41" href="$classripple_1_1XChainCreateAccountCommit.html" title=" " alt="" coords="208,1998,415,2039"/>
-<area shape="rect" id="node42" href="$classripple_1_1XChainCreateBridge.html" title=" " alt="" coords="213,2064,410,2091"/>
-<area shape="rect" id="node43" href="$classripple_1_1XChainCreateClaimID.html" title=" " alt="" coords="208,2115,415,2141"/>
+<area shape="rect" id="node24" href="$classripple_1_1MPTokenAuthorize.html" title=" " alt="" coords="218,1120,405,1147"/>
+<area shape="rect" id="node25" href="$classripple_1_1MPTokenIssuanceCreate.html" title=" " alt="" coords="199,1171,423,1197"/>
+<area shape="rect" id="node26" href="$classripple_1_1MPTokenIssuanceDestroy.html" title=" " alt="" coords="195,1221,427,1248"/>
+<area shape="rect" id="node27" href="$classripple_1_1MPTokenIssuanceSet.html" title=" " alt="" coords="210,1272,413,1299"/>
+<area shape="rect" id="node28" href="$classripple_1_1NFTokenAcceptOffer.html" title=" " alt="" coords="212,1323,411,1349"/>
+<area shape="rect" id="node29" href="$classripple_1_1NFTokenBurn.html" title=" " alt="" coords="235,1373,387,1400"/>
+<area shape="rect" id="node30" href="$classripple_1_1NFTokenCancelOffer.html" title=" " alt="" coords="212,1424,411,1451"/>
+<area shape="rect" id="node31" href="$classripple_1_1NFTokenCreateOffer.html" title=" " alt="" coords="213,1475,410,1501"/>
+<area shape="rect" id="node32" href="$classripple_1_1NFTokenMint.html" title=" " alt="" coords="236,1525,387,1552"/>
+<area shape="rect" id="node33" href="$classripple_1_1PayChanClaim.html" title=" " alt="" coords="231,1576,392,1603"/>
+<area shape="rect" id="node34" href="$classripple_1_1PayChanCreate.html" title=" " alt="" coords="228,1627,395,1653"/>
+<area shape="rect" id="node35" href="$classripple_1_1PayChanFund.html" title=" " alt="" coords="235,1677,388,1704"/>
+<area shape="rect" id="node36" href="$classripple_1_1Payment.html" title=" " alt="" coords="249,1728,373,1755"/>
+<area shape="rect" id="node37" href="$classripple_1_1SetAccount.html" title=" " alt="" coords="241,1779,381,1805"/>
+<area shape="rect" id="node38" href="$classripple_1_1SetRegularKey.html" title=" " alt="" coords="231,1829,392,1856"/>
+<area shape="rect" id="node39" href="$classripple_1_1SetSignerList.html" title="See the README.md for an overview of the SetSignerList transaction that this class implements." alt="" coords="235,1880,387,1907"/>
+<area shape="rect" id="node40" href="$classripple_1_1SetTrust.html" title=" " alt="" coords="252,1931,371,1957"/>
+<area shape="rect" id="node41" href="$classripple_1_1XChainAddAccountCreateAttestation.html" title=" " alt="" coords="217,1982,406,2023"/>
+<area shape="rect" id="node42" href="$classripple_1_1XChainAddClaimAttestation.html" title=" " alt="" coords="188,2048,435,2075"/>
+<area shape="rect" id="node43" href="$classripple_1_1XChainClaim.html" title=" " alt="" coords="236,2099,387,2125"/>
+<area shape="rect" id="node44" href="$classripple_1_1XChainCommit.html" title=" " alt="" coords="229,2149,393,2176"/>
+<area shape="rect" id="node45" href="$classripple_1_1XChainCreateAccountCommit.html" title=" " alt="" coords="208,2201,415,2242"/>
+<area shape="rect" id="node46" href="$classripple_1_1XChainCreateBridge.html" title=" " alt="" coords="213,2267,410,2293"/>
+<area shape="rect" id="node47" href="$classripple_1_1XChainCreateClaimID.html" title=" " alt="" coords="208,2317,415,2344"/>
 </map>

@@ -219,6 +219,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae732d67da38fb704402903f616404836"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html">PrettyAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1Env.html#ae732d67da38fb704402903f616404836">balance</a> (<a class="el" href="classripple_1_1test_1_1jtx_1_1Account.html">Account</a> const &amp;account, <a class="el" href="classripple_1_1Issue.html">Issue</a> const &amp;issue) const</td></tr>
 <tr class="memdesc:ae732d67da38fb704402903f616404836"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the balance on an account.  <a href="classripple_1_1test_1_1jtx_1_1Env.html#ae732d67da38fb704402903f616404836">More...</a><br /></td></tr>
 <tr class="separator:ae732d67da38fb704402903f616404836"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c916b23eb27e3a11369df014ab32136"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1Env.html#a2c916b23eb27e3a11369df014ab32136">ownerCount</a> (<a class="el" href="classripple_1_1test_1_1jtx_1_1Account.html">Account</a> const &amp;account) const</td></tr>
+<tr class="memdesc:a2c916b23eb27e3a11369df014ab32136"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of objects owned by an account.  <a href="classripple_1_1test_1_1jtx_1_1Env.html#a2c916b23eb27e3a11369df014ab32136">More...</a><br /></td></tr>
+<tr class="separator:a2c916b23eb27e3a11369df014ab32136"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad63e69c823183e7e8991752b1cf8985f"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="namespaceripple.html#abbba3966df1925ac76f6d04c0aa1abe3">SLE</a> const  &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1Env.html#ad63e69c823183e7e8991752b1cf8985f">le</a> (<a class="el" href="classripple_1_1test_1_1jtx_1_1Account.html">Account</a> const &amp;account) const</td></tr>
 <tr class="memdesc:ad63e69c823183e7e8991752b1cf8985f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return an account root.  <a href="classripple_1_1test_1_1jtx_1_1Env.html#ad63e69c823183e7e8991752b1cf8985f">More...</a><br /></td></tr>
 <tr class="separator:ad63e69c823183e7e8991752b1cf8985f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -781,7 +784,7 @@ template&lt;class... Args&gt; </div>
 <p>Execute an <a class="el" href="namespaceripple_1_1RPC.html">RPC</a> command. </p>
 <p>The command is examined and used to build the correct JSON as per the arguments. </p>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00711">711</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00717">717</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -819,7 +822,7 @@ template&lt;class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00725">725</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00731">731</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -857,7 +860,7 @@ template&lt;class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00736">736</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00742">742</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -889,7 +892,7 @@ template&lt;class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00749">749</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00755">755</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1236,6 +1239,27 @@ template&lt;class Rep , class Period &gt; </div>
 
 </div>
 </div>
+<a id="a2c916b23eb27e3a11369df014ab32136"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c916b23eb27e3a11369df014ab32136">&#9670;&nbsp;</a></span>ownerCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> ripple::test::jtx::Env::ownerCount </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classripple_1_1test_1_1jtx_1_1Account.html">Account</a> const &amp;&#160;</td>
+          <td class="paramname"><em>account</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the number of objects owned by an account. </p>
+<p>Returns 0 if the account does not exist. </p>
+
+</div>
+</div>
 <a id="ad63e69c823183e7e8991752b1cf8985f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad63e69c823183e7e8991752b1cf8985f">&#9670;&nbsp;</a></span>le() <span class="overload">[1/2]</span></h2>
 
@@ -1312,7 +1336,7 @@ template&lt;class JsonValue , class... FN&gt; </div>
 
 <p>Create a <a class="el" href="structripple_1_1test_1_1jtx_1_1JTx.html" title="Execution context for applying a JSON transaction.">JTx</a> from parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00450">450</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00456">456</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1346,7 +1370,7 @@ template&lt;class JsonValue , class... FN&gt; </div>
 
 <p>Create a <a class="el" href="structripple_1_1test_1_1jtx_1_1JTx.html" title="Execution context for applying a JSON transaction.">JTx</a> from parameters. </p>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00462">462</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00468">468</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1381,7 +1405,7 @@ template&lt;class JsonValue , class... FN&gt; </div>
 <p>Create JSON from parameters. </p>
 <p>This will apply funclets and autofill. </p>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00476">476</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00482">482</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1406,7 +1430,7 @@ template&lt;class... Args&gt; </div>
 <p>Check a set of requirements. </p>
 <p>The requirements are formed from condition functors. </p>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00489">489</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00495">495</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1572,7 +1596,7 @@ template&lt;class JsonValue , class... FN&gt; </div>
 
 <p>Apply funclets and submit. </p>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00521">521</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00527">527</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1604,7 +1628,7 @@ template&lt;class JsonValue , class... FN&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00528">528</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00534">534</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1625,7 +1649,7 @@ template&lt;class JsonValue , class... FN&gt; </div>
 
 <p>Return the TER for the last <a class="el" href="structripple_1_1test_1_1jtx_1_1JTx.html" title="Execution context for applying a JSON transaction.">JTx</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00536">536</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00542">542</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1796,7 +1820,7 @@ effects.
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00577">577</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00583">583</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1836,7 +1860,7 @@ template&lt;std::size_t N&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00584">584</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00590">590</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1888,7 +1912,7 @@ template&lt;class Arg , class... Args&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00619">619</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00625">625</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -1968,7 +1992,7 @@ template&lt;class... Accounts&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00649">649</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00655">655</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -2139,7 +2163,7 @@ template&lt;class... FN&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00692">692</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00698">698</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -2179,7 +2203,7 @@ template&lt;class... FN&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00700">700</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00706">706</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -2276,7 +2300,7 @@ template&lt;class... FN&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00661">661</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00667">667</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -2300,7 +2324,7 @@ template&lt;class... FN&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00662">662</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00668">668</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -2324,7 +2348,7 @@ template&lt;class... FN&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00663">663</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00669">669</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -2348,7 +2372,7 @@ template&lt;class... FN&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00664">664</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00670">670</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
@@ -2372,7 +2396,7 @@ template&lt;class... FN&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00706">706</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Env_8h_source.html#l00712">712</a> of file <a class="el" href="Env_8h_source.html">Env.h</a>.</p>
 
 </div>
 </div>
