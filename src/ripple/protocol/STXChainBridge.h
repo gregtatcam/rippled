@@ -170,7 +170,8 @@ STXChainBridge::lockingChainDoor() const
 inline Issue const&
 STXChainBridge::lockingChainIssue() const
 {
-    return lockingChainIssue_.value();
+    // TODO MPT
+    return lockingChainIssue_.issue();
 };
 
 inline AccountID const&
@@ -182,7 +183,8 @@ STXChainBridge::issuingChainDoor() const
 inline Issue const&
 STXChainBridge::issuingChainIssue() const
 {
-    return issuingChainIssue_.value();
+    // TODO MPT
+    return issuingChainIssue_.issue();
 };
 
 inline STXChainBridge::value_type const&

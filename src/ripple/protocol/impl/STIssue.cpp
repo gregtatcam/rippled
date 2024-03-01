@@ -40,21 +40,74 @@ STIssue::STIssue(SField const& name) : STBase{name}
 
 STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
 {
-    issue_.currency = sit.get160();
-    if (!isXRP(issue_.currency))
-        issue_.account = sit.get160();
-    else
-        issue_.account = xrpAccount();
+    Issue issue;
+    issue.currency = sit.get160();
 
-    if (isXRP(issue_.currency) != isXRP(issue_.account))
+    if (isXRP(issue.currency))
+        issue.account = xrpAccount();
+    // Check if MPT
+    else
+    {
+        auto const seqSize = sizeof(MPT::first_type);
+        auto const size = sizeof(MPT::second_type) - seqSize;
+        auto getSequence = [&](uint160::pointer p) {
+            std::uint32_t sequence;
+            memcpy(&sequence, p, seqSize);
+            return boost::endian::big_to_native(sequence);
+        };
+        auto acctMatch = [&]() {
+            // first 128-bit of MPT account are serialized
+            // at issue.currency 32-bit offset
+            // last 128-bit of MPT account are serialized
+            // at issue.account 32-bit offset
+            // 96-bit must match if MPT
+            return memcmp(
+                       issue.currency.data() + 2 * seqSize,
+                       issue.account.data() + seqSize,
+                       size - seqSize) == 0;
+        };
+
+        issue.account = sit.get160();
+        MPTIssue mpt;
+        mpt.sequence() = getSequence(issue.currency.data());
+        // sequence and account must match if MPT
+        if (mpt.sequence() == getSequence(issue.account.data()) && acctMatch())
+        {
+            memcpy(mpt.account().data(), issue.currency.data() + seqSize, size);
+            memcpy(
+                mpt.account().data() + size,
+                issue.account.data() + size,
+                seqSize);
+            asset_ = mpt;
+        }
+        else
+        {
+            if (isXRP(issue.currency) != isXRP(issue.account))
+                Throw<std::runtime_error>(
+                    "invalid issue: currency and account native mismatch");
+            asset_ = issue;
+        }
+    }
+}
+
+STIssue::STIssue(SField const& name, Issue const& issue)
+    : STBase{name}, asset_{issue}
+{
+    if (isXRP(issue.currency) != isXRP(issue.account))
         Throw<std::runtime_error>(
             "invalid issue: currency and account native mismatch");
 }
 
-STIssue::STIssue(SField const& name, Issue const& issue)
-    : STBase{name}, issue_{issue}
+STIssue::STIssue(SField const& name, MPTIssue const& issue)
+    : STBase{name}, asset_{issue}
 {
-    if (isXRP(issue_.currency) != isXRP(issue_.account))
+}
+
+STIssue::STIssue(SField const& name, Asset const& asset)
+    : STBase{name}, asset_{asset}
+{
+    if (asset.isIssue() &&
+        isXRP(asset.issue().currency) != isXRP(asset.issue().account))
         Throw<std::runtime_error>(
             "invalid issue: currency and account native mismatch");
 }
@@ -68,20 +121,37 @@ STIssue::getSType() const
 std::string
 STIssue::getText() const
 {
-    return issue_.getText();
+    return asset_.getText();
 }
 
 Json::Value STIssue::getJson(JsonOptions) const
 {
-    return to_json(issue_);
+    return to_json(asset_);
 }
 
 void
 STIssue::add(Serializer& s) const
 {
-    s.addBitString(issue_.currency);
-    if (!isXRP(issue_.currency))
-        s.addBitString(issue_.account);
+    if (asset_.isIssue())
+    {
+        s.addBitString(asset_.issue().currency);
+        if (!isXRP(asset_.issue().currency))
+            s.addBitString(asset_.issue().account);
+    }
+    else
+    {
+        uint160 u;
+        auto const& mpt = asset_.mptIssue();
+        auto const sequence = boost::endian::native_to_big(mpt.sequence());
+        auto const seqSize = sizeof(MPT::first_type);
+        auto const size = sizeof(MPT::second_type) - seqSize;
+        assert(sizeof(MPT::second_type) == sizeof(u));
+        memcpy(u.data(), &sequence, seqSize);
+        memcpy(u.data() + seqSize, mpt.account().data(), size);
+        s.addBitString(u);
+        memcpy(u.data() + seqSize, mpt.account().data() + seqSize, size);
+        s.addBitString(u);
+    }
 }
 
 bool
@@ -94,7 +164,7 @@ STIssue::isEquivalent(const STBase& t) const
 bool
 STIssue::isDefault() const
 {
-    return issue_ == xrpIssue();
+    return asset_.isIssue() && asset_.issue() == xrpIssue();
 }
 
 std::unique_ptr<STIssue>
@@ -118,7 +188,7 @@ STIssue::move(std::size_t n, void* buf)
 STIssue
 issueFromJson(SField const& name, Json::Value const& v)
 {
-    return STIssue{name, issueFromJson(v)};
+    return STIssue{name, assetFromJson(v)};
 }
 
 }  // namespace ripple

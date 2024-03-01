@@ -199,6 +199,13 @@ public:
     PrettyAmount
     mpt(std::uint64_t amount) const;
 
+    test::jtx::MPT
+    MPT() const
+    {
+        assert(mpt_);
+        return test::jtx::MPT(issuer_.name(), *mpt_);
+    }
+
     uint256 const&
     issuanceKey() const
     {

@@ -33,7 +33,7 @@
 namespace ripple {
 
 /** The flavor of an offer crossing */
-enum class CrossType { XrpToIou, IouToXrp, IouToIou };
+enum class CrossType { XrpToAsset, AssetToXrp, AssetToAsset };
 
 /** State for the active party during order book or payment operations. */
 class BasicTaker
@@ -52,8 +52,8 @@ private:
     Amounts remaining_;
 
     // The issuers for the input and output
-    Issue const& issue_in_;
-    Issue const& issue_out_;
+    Asset const& asset_in_;
+    Asset const& asset_out_;
 
     // The rates that will be paid when the input and output currencies are
     // transfered and the currency issuer isn't involved:
@@ -91,7 +91,7 @@ private:
     log_flow(char const* description, Flow const& flow);
 
     Flow
-    flow_xrp_to_iou(
+    flow_xrp_to_asset(
         Amounts const& offer,
         Quality quality,
         STAmount const& owner_funds,
@@ -99,7 +99,7 @@ private:
         Rate const& rate_out);
 
     Flow
-    flow_iou_to_xrp(
+    flow_asset_to_xrp(
         Amounts const& offer,
         Quality quality,
         STAmount const& owner_funds,
@@ -107,7 +107,7 @@ private:
         Rate const& rate_in);
 
     Flow
-    flow_iou_to_iou(
+    flow_asset_to_asset(
         Amounts const& offer,
         Quality quality,
         STAmount const& owner_funds,
@@ -120,7 +120,7 @@ private:
     static Rate
     effective_rate(
         Rate const& rate,
-        Issue const& issue,
+        Asset const& asset,
         AccountID const& from,
         AccountID const& to);
 
@@ -188,18 +188,18 @@ public:
         return cross_type_;
     }
 
-    /** Returns the Issue associated with the input of the offer */
-    Issue const&
-    issue_in() const
+    /** Returns the Asset associated with the input of the offer */
+    Asset const&
+    asset_in() const
     {
-        return issue_in_;
+        return asset_in_;
     }
 
-    /** Returns the Issue associated with the output of the offer */
-    Issue const&
-    issue_out() const
+    /** Returns the Asset associated with the output of the offer */
+    Asset const&
+    asset_out() const
     {
-        return issue_out_;
+        return asset_out_;
     }
 
     /** Returns `true` if the taker has run out of funds. */
@@ -292,7 +292,7 @@ private:
     static Rate
     calculateRate(
         ApplyView const& view,
-        AccountID const& issuer,
+        Asset const& asset,
         AccountID const& account);
 
     TER

@@ -186,6 +186,14 @@ isGlobalFrozen(ReadView const& view, MPTIssue const& mpt)
 }
 
 bool
+isGlobalFrozen(ReadView const& view, Asset const& asset)
+{
+    if (asset.isIssue())
+        return isGlobalFrozen(view, asset.issue().account);
+    return isGlobalFrozen(view, asset.mptIssue());
+}
+
+bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
@@ -214,6 +222,17 @@ isIndividualFrozen(
     if (auto const sle = view.read(keylet::mptoken(mpt.mpt(), account)))
         return sle->getFlags() & lsfMPTLocked;
     return false;
+}
+
+bool
+isIndividualFrozen(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& asset)
+{
+    if (asset.isIssue())
+        return isIndividualFrozen(view, account, asset.issue());
+    return isIndividualFrozen(view, account, asset.mptIssue());
 }
 
 // Can the specified account spend the specified currency issued by
@@ -249,6 +268,14 @@ isFrozen(ReadView const& view, AccountID const& account, MPTIssue const& mpt)
     return isIndividualFrozen(view, account, mpt);
 }
 
+bool
+isFrozen(ReadView const& view, AccountID const& account, Asset const& asset)
+{
+    if (asset.isIssue())
+        return isFrozen(view, account, asset.issue());
+    return isFrozen(view, account, asset.mptIssue());
+}
+
 STAmount
 accountHolds(
     ReadView const& view,
@@ -268,7 +295,7 @@ accountHolds(
     auto const sle = view.read(keylet::line(account, issuer, currency));
     if (!sle)
     {
-        amount.clear({currency, issuer});
+        amount.clear(Issue{currency, issuer});
     }
     else if (
         (zeroIfFrozen == fhZERO_IF_FROZEN) &&
@@ -311,10 +338,22 @@ accountHolds(
     AccountID const& account,
     MPTIssue const& issue,
     FreezeHandling zeroIfFrozen,
+    beast::Journal j)
+{
+    return accountHolds(
+        view, account, issue, zeroIfFrozen, AuthHandling::ahIGNORE_AUTH, j);
+}
+
+STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    MPTIssue const& issue,
+    FreezeHandling zeroIfFrozen,
     AuthHandling zeroIfUnauthorized,
     beast::Journal j)
 {
-    STAmount amount;
+    STAmount amount{issue};
 
     auto const sleMpt = view.read(keylet::mptoken(issue.mpt(), account));
     if (!sleMpt)
@@ -346,6 +385,19 @@ accountHolds(
     return amount;
 }
 
+[[nodiscard]] STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& asset,
+    FreezeHandling zeroIfFrozen,
+    beast::Journal j)
+{
+    if (asset.isIssue())
+        return accountHolds(view, account, asset.issue(), zeroIfFrozen, j);
+    return accountHolds(view, account, asset.mptIssue(), zeroIfFrozen, j);
+}
+
 STAmount
 accountFunds(
     ReadView const& view,
@@ -354,16 +406,13 @@ accountFunds(
     FreezeHandling freezeHandling,
     beast::Journal j)
 {
-    if (!saDefault.native() && saDefault.getIssuer() == id)
+    if (saDefault.isMPT() && saDefault.mptIssue().account() == id)
+        return saDefault;
+    if (saDefault.isIssue() && !saDefault.native() &&
+        saDefault.getIssuer() == id)
         return saDefault;
 
-    return accountHolds(
-        view,
-        id,
-        saDefault.getCurrency(),
-        saDefault.getIssuer(),
-        freezeHandling,
-        j);
+    return accountHolds(view, id, saDefault.asset(), freezeHandling, j);
 }
 
 // Prevent ownerCount from wrapping under error conditions.
@@ -1034,6 +1083,8 @@ rippleCredit(
     bool bCheckIssuer,
     beast::Journal j)
 {
+    assert(saAmount.isIssue());
+
     AccountID const& issuer = saAmount.getIssuer();
     Currency const& currency = saAmount.getCurrency();
 
@@ -1226,6 +1277,10 @@ accountSend(
     beast::Journal j,
     WaiveTransferFee waiveFee)
 {
+    if (saAmount.isMPT())
+        return accountSendMPT(
+            view, uSenderID, uReceiverID, saAmount, j, waiveFee);
+
     assert(saAmount >= beast::zero && !saAmount.isMPT());
 
     /* If we aren't sending anything or if the sender is the same as the
@@ -1696,6 +1751,14 @@ requireAuth(ReadView const& view, MPTIssue const& mpt, AccountID const& account)
             return TER{tecNO_AUTH};
     }
     return tesSUCCESS;
+}
+
+TER
+requireAuth(ReadView const& view, Asset const& asset, AccountID const& account)
+{
+    if (asset.isIssue())
+        return requireAuth(view, asset.issue(), account);
+    return requireAuth(view, asset.mptIssue(), account);
 }
 
 TER

@@ -360,6 +360,15 @@ qualityUpperBound(ReadView const& v, Strand const& strand)
  * increases quality of AMM steps, increasing the strand's composite
  * quality as the result.
  */
+inline MPTAmount
+limitOut(
+    ReadView const& v,
+    Strand const& strand,
+    MPTAmount const& remainingOut,
+    Quality const& limitQuality)
+{
+    return remainingOut;
+}
 template <typename TOutAmt>
 inline TOutAmt
 limitOut(
@@ -396,9 +405,11 @@ limitOut(
             return XRPAmount{*out};
         else if constexpr (std::is_same_v<TOutAmt, IOUAmount>)
             return IOUAmount{*out};
+        else if constexpr (std::is_same_v<TOutAmt, MPTAmount>)
+            return MPTAmount{*out};
         else
             return STAmount{
-                remainingOut.issue(), out->mantissa(), out->exponent()};
+                remainingOut.asset(), out->mantissa(), out->exponent()};
     }();
     // A tiny difference could be due to the round off
     if (withinRelativeDistance(out, remainingOut, Number(1, -9)))

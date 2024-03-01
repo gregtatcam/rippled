@@ -22,7 +22,7 @@
 
 #include <ripple/basics/Number.h>
 #include <ripple/protocol/AccountID.h>
-#include <ripple/protocol/Issue.h>
+#include <ripple/protocol/Asset.h>
 #include <ripple/protocol/TER.h>
 #include <ripple/protocol/UintTypes.h>
 
@@ -59,14 +59,14 @@ ammAccountID(
 /** Calculate Liquidity Provider Token (LPT) Currency.
  */
 Currency
-ammLPTCurrency(Currency const& cur1, Currency const& cur2);
+ammLPTCurrency(Asset const& cur1, Asset const& cur2);
 
 /** Calculate LPT Issue from AMM asset pair.
  */
 Issue
 ammLPTIssue(
-    Currency const& cur1,
-    Currency const& cur2,
+    Asset const& asset1,
+    Asset const& asset2,
     AccountID const& ammAccountID);
 
 /** Validate the amount.
@@ -77,19 +77,19 @@ ammLPTIssue(
 NotTEC
 invalidAMMAmount(
     STAmount const& amount,
-    std::optional<std::pair<Issue, Issue>> const& pair = std::nullopt,
+    std::optional<std::pair<Asset, Asset>> const& pair = std::nullopt,
     bool validZero = false);
 
 NotTEC
 invalidAMMAsset(
-    Issue const& issue,
-    std::optional<std::pair<Issue, Issue>> const& pair = std::nullopt);
+    Asset const& asset,
+    std::optional<std::pair<Asset, Asset>> const& pair = std::nullopt);
 
 NotTEC
 invalidAMMAssetPair(
-    Issue const& issue1,
-    Issue const& issue2,
-    std::optional<std::pair<Issue, Issue>> const& pair = std::nullopt);
+    Asset const& asset1,
+    Asset const& asset2,
+    std::optional<std::pair<Asset, Asset>> const& pair = std::nullopt);
 
 /** Get time slot of the auction slot.
  */

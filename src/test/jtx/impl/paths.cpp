@@ -33,8 +33,8 @@ paths::operator()(Env& env, JTx& jt) const
     auto const to = env.lookup(jv[jss::Destination].asString());
     auto const amount = amountFromJson(sfAmount, jv[jss::Amount]);
     Pathfinder pf(
-        std::make_shared<RippleLineCache>(
-            env.current(), env.app().journal("RippleLineCache")),
+        std::make_shared<AssetCache>(
+            env.current(), env.app().journal("AssetCache")),
         from,
         to,
         in_.currency,
@@ -88,8 +88,13 @@ void
 path::append_one(BookSpec const& book)
 {
     auto& jv = create();
-    jv["currency"] = to_string(book.currency);
-    jv["issuer"] = toBase58(book.account);
+    if (book.asset.isMPT())
+        jv["mpt_issuance_id"] = to_string(book.asset);
+    else
+    {
+        jv["currency"] = to_string(book.asset.issue().currency);
+        jv["issuer"] = toBase58(book.asset.account());
+    }
 }
 
 void

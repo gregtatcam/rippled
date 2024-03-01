@@ -94,10 +94,8 @@ Payment::preflight(PreflightContext const& ctx)
     auto const& uSrcAsset = maxSourceAmount.asset();
     auto const& uDstAsset = saDstAmount.asset();
 
-    // isZero() is XRP.  FIX!
     bool const bXRPDirect = isXRP(uSrcAsset) && isXRP(uDstAsset);
-    bool const bMPTDirect = isMPT(uSrcAsset) && isMPT(uDstAsset);
-    bool const bDirect = bXRPDirect || bMPTDirect;
+    bool const bDirect = bXRPDirect;  // || bMPTDirect;
 
     if (!isLegalNet(saDstAmount) || !isLegalNet(maxSourceAmount))
         return temBAD_AMOUNT;
@@ -143,7 +141,7 @@ Payment::preflight(PreflightContext const& ctx)
         // Consistent but redundant transaction.
         JLOG(j.trace()) << "Malformed transaction: "
                         << "SendMax specified for XRP to XRP or MPT to MPT.";
-        return temBAD_SEND_XRP_MAX;  // TODO MPT new err code here and below
+        return temBAD_SEND_XRP_MAX;
     }
     if (bDirect && bPaths)
     {
@@ -368,8 +366,7 @@ Payment::doApply()
 
     bool const depositPreauth = view().rules().enabled(featureDepositPreauth);
 
-    bool const bRipple =
-        paths || sendMax || !(saDstAmount.native() || saDstAmount.isMPT());
+    bool const bRipple = paths || sendMax || !saDstAmount.native();
 
     // If the destination has lsfDepositAuth set, then only direct XRP
     // payments (no intermediate steps) are allowed to the destination.

@@ -38,17 +38,17 @@ AMMOffer<TIn, TOut>::AMMOffer(
 }
 
 template <OfferAmount TIn, OfferAmount TOut>
-Issue const&
-AMMOffer<TIn, TOut>::issueIn() const
+Asset const&
+AMMOffer<TIn, TOut>::assetIn() const
 {
-    return ammLiquidity_.issueIn();
+    return ammLiquidity_.assetIn();
 }
 
 template <OfferAmount TIn, OfferAmount TOut>
-Issue const&
-AMMOffer<TIn, TOut>::issueOut() const
+Asset const&
+AMMOffer<TIn, TOut>::assetOut() const
 {
-    return ammLiquidity_.issueOut();
+    return ammLiquidity_.assetOut();
 }
 
 template <OfferAmount TIn, OfferAmount TOut>
@@ -138,5 +138,10 @@ AMMOffer<TIn, TOut>::getQualityFunc() const
 template class AMMOffer<IOUAmount, IOUAmount>;
 template class AMMOffer<XRPAmount, IOUAmount>;
 template class AMMOffer<IOUAmount, XRPAmount>;
+template class AMMOffer<MPTAmount, MPTAmount>;
+template class AMMOffer<XRPAmount, MPTAmount>;
+template class AMMOffer<MPTAmount, XRPAmount>;
+template class AMMOffer<IOUAmount, MPTAmount>;
+template class AMMOffer<MPTAmount, IOUAmount>;
 
 }  // namespace ripple

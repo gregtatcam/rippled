@@ -131,6 +131,12 @@ struct hash<ripple::Currency> : ripple::Currency::hasher
 };
 
 template <>
+struct hash<ripple::MPT> : ripple::hardened_hash<>
+{
+    explicit hash() = default;
+};
+
+template <>
 struct hash<ripple::NodeID> : ripple::NodeID::hasher
 {
     explicit hash() = default;

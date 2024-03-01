@@ -61,6 +61,22 @@ toSTAmount(XRPAmount const& xrp, Issue const& iss)
     return toSTAmount(xrp);
 }
 
+inline STAmount
+toSTAmount(MPTAmount const& mpt)
+{
+    bool const isNeg = mpt.signum() < 0;
+    std::uint64_t const umant = isNeg ? -mpt.mpt() : mpt.mpt();
+    return STAmount(noMPTIssue(), umant, isNeg);
+}
+
+inline STAmount
+toSTAmount(MPTAmount const& mpt, MPTIssue const& iss)
+{
+    bool const isNeg = mpt.signum() < 0;
+    std::uint64_t const umant = isNeg ? -mpt.mpt() : mpt.mpt();
+    return STAmount{iss, umant, isNeg};
+}
+
 template <class T>
 T
 toAmount(STAmount const& amt) = delete;
@@ -98,6 +114,19 @@ toAmount<XRPAmount>(STAmount const& amt)
     return XRPAmount(sMant);
 }
 
+template <>
+inline MPTAmount
+toAmount<MPTAmount>(STAmount const& amt)
+{
+    assert(amt.mantissa() < std::numeric_limits<std::int64_t>::max());
+    bool const isNeg = amt.negative();
+    std::int64_t const sMant =
+        isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
+
+    assert(amt.isMPT());
+    return MPTAmount(sMant);
+}
+
 template <class T>
 T
 toAmount(IOUAmount const& amt) = delete;
@@ -120,51 +149,62 @@ toAmount<XRPAmount>(XRPAmount const& amt)
     return amt;
 }
 
+template <class T>
+T
+toAmount(MPTAmount const& amt) = delete;
+
+template <>
+inline MPTAmount
+toAmount<MPTAmount>(MPTAmount const& amt)
+{
+    return amt;
+}
+
 template <typename T>
 T
 toAmount(
-    Issue const& issue,
+    Asset const& asset,
     Number const& n,
     Number::rounding_mode mode = Number::getround())
 {
     saveNumberRoundMode rm(Number::getround());
-    if (isXRP(issue))
+    if (isXRP(asset))
         Number::setround(mode);
     if constexpr (std::is_same_v<IOUAmount, T>)
         return IOUAmount(n);
     if constexpr (std::is_same_v<XRPAmount, T>)
         return XRPAmount(static_cast<std::int64_t>(n));
+    if constexpr (std::is_same_v<MPTAmount, T>)
+        return MPTAmount(static_cast<std::int64_t>(n));
     if constexpr (std::is_same_v<STAmount, T>)
     {
-        if (isXRP(issue))
-            return STAmount(issue, static_cast<std::int64_t>(n));
-        return STAmount(issue, n.mantissa(), n.exponent());
+        if (isXRP(asset))
+            return STAmount(asset, static_cast<std::int64_t>(n));
+        return STAmount(asset, n.mantissa(), n.exponent());
     }
 }
 
 inline STAmount
 toSTAmount(
-    Issue const& issue,
+    Asset const& asset,
     Number const& n,
     Number::rounding_mode mode = Number::getround())
 {
-    return toAmount<STAmount>(issue, n, mode);
+    return toAmount<STAmount>(asset, n, mode);
 }
 
 template <typename T>
-Issue
-getIssue(T const& amt)
+Asset
+getAsset(T const& amt)
 {
-    static_assert(!std::is_same_v<T, MPTAmount>);
     if constexpr (std::is_same_v<IOUAmount, T>)
         return noIssue();
     if constexpr (std::is_same_v<XRPAmount, T>)
         return xrpIssue();
+    if constexpr (std::is_same_v<MPTAmount, T>)
+        return noMPTIssue();
     if constexpr (std::is_same_v<STAmount, T>)
-    {
-        assert(!amt.isMPT());
-        return amt.issue();
-    }
+        return amt.asset();
 }
 
 template <typename T>

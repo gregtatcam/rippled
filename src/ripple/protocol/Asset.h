@@ -35,6 +35,10 @@ public:
     Asset(Issue const& issue) : asset_(issue)
     {
     }
+    Asset(Currency const& currency, AccountID const& account)
+        : asset_(Issue{currency, account})
+    {
+    }
     Asset(MPTIssue const& mpt) : asset_(mpt)
     {
     }
@@ -84,6 +88,14 @@ public:
         return std::get<MPTIssue>(asset_);
     }
 
+    constexpr AccountID const&
+    account() const
+    {
+        if (isIssue())
+            return issue().account;
+        return mptIssue().account();
+    }
+
     constexpr bool
     isMPT() const
     {
@@ -99,20 +111,55 @@ public:
     std::string
     getText() const;
 
+    std::variant<Issue, MPTIssue> const&
+    value() const
+    {
+        return asset_;
+    }
+
     friend constexpr bool
     operator==(Asset const& lhs, Asset const& rhs)
     {
+        // it's valid to compare assets of different types.
+        // for instance, in book step with MPT/IOU offer
         if (lhs.isIssue() != rhs.isIssue())
-            Throw<std::logic_error>("Assets are not comparable");
+            return false;
         if (lhs.isIssue())
             return lhs.issue() == rhs.issue();
-        return lhs.mptIssue() == lhs.mptIssue();
+        return lhs.mptIssue() == rhs.mptIssue();
     }
 
     friend constexpr bool
     operator!=(Asset const& lhs, Asset const& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    friend constexpr std::weak_ordering
+    operator<=>(Asset const& lhs, Asset const& rhs)
+    {
+        // it's possible to have incompatible types.
+        // for instance, in minmax or container search
+        // treat issue as greater.
+        if (lhs.isIssue() && rhs.isMPT())
+            return std::weak_ordering::greater;
+        if (lhs.isMPT() && rhs.isIssue())
+            return std::weak_ordering::less;
+        if (lhs.isIssue())
+        {
+            if (auto const c{lhs.issue() <=> rhs.issue()}; c != 0)
+                return c;
+            return lhs.issue() <=> rhs.issue();
+        }
+        if (auto const c{lhs.mptIssue() <=> rhs.mptIssue()}; c != 0)
+            return c;
+        return lhs.mptIssue() <=> rhs.mptIssue();
+    }
+
+    friend bool
+    isXRP(Asset const& asset)
+    {
+        return asset.isIssue() && isXRP(asset.issue());
     }
 };
 
@@ -124,6 +171,40 @@ to_string(MPTIssue const& mpt);
 
 std::string
 to_string(MPT const& mpt);
+
+Json::Value
+toJson();
+
+Asset
+assetFromJson(Json::Value const& jv);
+
+bool
+isConsistent(Asset const& asset);
+
+std::ostream&
+operator<<(std::ostream& os, Asset const& x);
+
+template <typename Hasher>
+void
+hash_append(Hasher& h, Asset const& a)
+{
+    if (a.isIssue())
+        hash_append(h, a.issue());
+    else
+        hash_append(h, a.mptIssue().getMptID());
+}
+
+Json::Value
+to_json(Asset const& asset);
+
+bool
+validAsset(Asset const& asset);
+
+// When comparing assets from path finding perspective,
+// should compare currencies if assets represent Issue
+// to take into account rippling
+bool
+equalAssets(Asset const& asset1, Asset const& asset2);
 
 bool
 validJSONAsset(Json::Value const& jv);

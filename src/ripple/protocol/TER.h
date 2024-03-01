@@ -137,7 +137,9 @@ enum TEMcodes : TERUnderlyingType {
 
     temEMPTY_DID,
 
-    temMPT_NOT_SUPPORTED
+    temBAD_MPT,
+    temMPT_NOT_SUPPORTED,
+    temMPT_INVALID_USE
 };
 
 //------------------------------------------------------------------------------
@@ -221,6 +223,7 @@ enum TERcodes : TERUnderlyingType {
     terQUEUED,       // Transaction is being held in TxQ until fee drops
     terPRE_TICKET,   // Ticket is not yet in ledger but might be on its way
     terNO_AMM,       // AMM doesn't exist for the asset pair
+    terNO_MPT,       // MPT doesn't exist
 };
 
 //------------------------------------------------------------------------------

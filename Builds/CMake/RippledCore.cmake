@@ -83,6 +83,7 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/Indexes.cpp
   src/ripple/protocol/impl/InnerObjectFormats.cpp
   src/ripple/protocol/impl/Issue.cpp
+  src/ripple/protocol/impl/PathAsset.cpp
   src/ripple/protocol/impl/STIssue.cpp
   src/ripple/protocol/impl/Keylet.cpp
   src/ripple/protocol/impl/LedgerFormats.cpp
@@ -263,6 +264,7 @@ install (
     src/ripple/protocol/NFTSyntheticSerializer.h
     src/ripple/protocol/NFTokenID.h
     src/ripple/protocol/NFTokenOfferID.h
+    src/ripple/protocol/PathAsset.h
     src/ripple/protocol/Protocol.h
     src/ripple/protocol/PublicKey.h
     src/ripple/protocol/Quality.h
@@ -515,18 +517,19 @@ target_sources (rippled PRIVATE
   src/ripple/app/misc/impl/ValidatorList.cpp
   src/ripple/app/misc/impl/ValidatorSite.cpp
   src/ripple/app/paths/AccountCurrencies.cpp
+  src/ripple/app/paths/AssetCache.cpp
   src/ripple/app/paths/Credit.cpp
   src/ripple/app/paths/Flow.cpp
   src/ripple/app/paths/PathRequest.cpp
   src/ripple/app/paths/PathRequests.cpp
   src/ripple/app/paths/Pathfinder.cpp
   src/ripple/app/paths/RippleCalc.cpp
-  src/ripple/app/paths/RippleLineCache.cpp
   src/ripple/app/paths/TrustLine.cpp
   src/ripple/app/paths/impl/AMMLiquidity.cpp
   src/ripple/app/paths/impl/AMMOffer.cpp
   src/ripple/app/paths/impl/BookStep.cpp
   src/ripple/app/paths/impl/DirectStep.cpp
+  src/ripple/app/paths/impl/MPTEndpointStep.cpp
   src/ripple/app/paths/impl/PaySteps.cpp
   src/ripple/app/paths/impl/XRPEndpointStep.cpp
   src/ripple/app/rdb/backend/detail/impl/Node.cpp

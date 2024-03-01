@@ -648,6 +648,13 @@ STObject::getFieldArray(SField const& field) const
     return getFieldByConstRef<STArray>(field, empty);
 }
 
+STIssue const&
+STObject::getFieldIssue(SField const& field) const
+{
+    static STIssue const empty{};
+    return getFieldByConstRef<STIssue>(field, empty);
+}
+
 void
 STObject::set(std::unique_ptr<STBase> v)
 {
@@ -698,6 +705,12 @@ void
 STObject::setFieldH128(SField const& field, uint128 const& v)
 {
     setFieldUsingSetValue<STUInt128>(field, v);
+}
+
+void
+STObject::setFieldH192(SField const& field, uint192 const& v)
+{
+    setFieldUsingSetValue<STUInt192>(field, v);
 }
 
 void

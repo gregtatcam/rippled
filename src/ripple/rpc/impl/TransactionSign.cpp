@@ -218,15 +218,14 @@ checkPayment(
         {
             if (!amountFromJsonNoThrow(sendMax, tx_json[jss::SendMax]))
                 return RPC::invalid_field_error("tx_json.SendMax");
-            if (sendMax.isMPT())
-                return RPC::make_error(
-                    rpcINVALID_PARAMS, "MPT is invalid in SendMax");
         }
         else
         {
             // If no SendMax, default to Amount with sender as issuer.
             sendMax = amount;
-            sendMax.setIssuer(srcAddressID);
+            // TODO MPT is this right?
+            if (sendMax.isIssue())
+                sendMax.setIssuer(srcAddressID);
         }
 
         if (sendMax.native() && amount.native())
@@ -243,8 +242,8 @@ checkPayment(
             if (auto ledger = app.openLedger().current())
             {
                 Pathfinder pf(
-                    std::make_shared<RippleLineCache>(
-                        ledger, app.journal("RippleLineCache")),
+                    std::make_shared<AssetCache>(
+                        ledger, app.journal("AssetCache")),
                     srcAddressID,
                     *dstAccountID,
                     sendMax.issue().currency,

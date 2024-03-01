@@ -1109,6 +1109,8 @@ amountFromJson(SField const& name, Json::Value const& v)
             if (!u.parseHex(currencyOrMPTID.asString()))
                 Throw<std::runtime_error>("invalid MPTokenIssuanceID");
             asset = u;
+            if (asset.account() == beast::zero)
+                Throw<std::runtime_error>("invalid MPTokenIssuanceID account");
         }
         else
         {

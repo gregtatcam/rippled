@@ -93,14 +93,34 @@ indexHash(LedgerNameSpace space, Args const&... args)
 uint256
 getBookBase(Book const& book)
 {
-    assert(isConsistent(book));
+    if (!isConsistent(book))
+        assert(isConsistent(book));
 
-    auto const index = indexHash(
-        LedgerNameSpace::BOOK_DIR,
-        book.in.currency,
-        book.out.currency,
-        book.in.account,
-        book.out.account);
+    uint256 const index = [&]() {
+        if (book.in.isIssue() && book.out.isIssue())
+            return indexHash(
+                LedgerNameSpace::BOOK_DIR,
+                book.in.issue().currency,
+                book.out.issue().currency,
+                book.in.account(),
+                book.out.account());
+        if (book.in.isIssue() && book.out.isMPT())
+            return indexHash(
+                LedgerNameSpace::BOOK_DIR,
+                book.in.issue().currency,
+                book.out.mptIssue().getMptID(),
+                book.in.account());
+        if (book.in.isMPT() && book.out.isIssue())
+            return indexHash(
+                LedgerNameSpace::BOOK_DIR,
+                book.in.mptIssue().getMptID(),
+                book.out.issue().currency,
+                book.out.account());
+        return indexHash(
+            LedgerNameSpace::BOOK_DIR,
+            book.in.mptIssue().getMptID(),
+            book.out.mptIssue().getMptID());
+    }();
 
     // Return with quality 0.
     auto k = keylet::quality({ltDIR_NODE, index}, 0);
@@ -145,6 +165,23 @@ getMptID(AccountID const& account, std::uint32_t sequence)
     memcpy(u.data(), &sequence, sizeof(sequence));
     memcpy(u.data() + sizeof(sequence), account.data(), sizeof(account));
     return u;
+}
+
+uint192
+getMptID(MPT const& mpt)
+{
+    return getMptID(mpt.second, mpt.first);
+}
+
+MPT
+getMPT(uint192 const& u)
+{
+    std::uint32_t sequence;
+    AccountID account;
+    memcpy(&sequence, u.data(), sizeof(sequence));
+    sequence = boost::endian::big_to_native(sequence);
+    memcpy(account.data(), u.data() + sizeof(sequence), sizeof(AccountID));
+    return std::make_pair(sequence, account);
 }
 
 //------------------------------------------------------------------------------
@@ -393,15 +430,32 @@ nft_sells(uint256 const& id) noexcept
 }
 
 Keylet
-amm(Issue const& issue1, Issue const& issue2) noexcept
+amm(Asset const& asset1, Asset const& asset2) noexcept
 {
-    auto const& [minI, maxI] = std::minmax(issue1, issue2);
+    auto const& [minA, maxA] = std::minmax(asset1, asset2);
+    if (minA.isIssue() && maxA.isIssue())
+        return amm(indexHash(
+            LedgerNameSpace::AMM,
+            minA.account(),
+            minA.issue().currency,
+            maxA.account(),
+            maxA.issue().currency));
+    if (minA.isIssue() && maxA.isMPT())
+        return amm(indexHash(
+            LedgerNameSpace::AMM,
+            minA.account(),
+            minA.issue().currency,
+            maxA.mptIssue().getMptID()));
+    if (minA.isMPT() && maxA.isIssue())
+        return amm(indexHash(
+            LedgerNameSpace::AMM,
+            minA.mptIssue().getMptID(),
+            maxA.account(),
+            maxA.issue().currency));
     return amm(indexHash(
         LedgerNameSpace::AMM,
-        minI.account,
-        minI.currency,
-        maxI.account,
-        maxI.currency));
+        minA.mptIssue().getMptID(),
+        maxA.mptIssue().getMptID()));
 }
 
 Keylet

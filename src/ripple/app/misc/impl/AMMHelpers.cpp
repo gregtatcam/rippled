@@ -79,7 +79,7 @@ ammAssetIn(
     auto const b = 2 * d / t2 - 1 / f1;
     auto const c = d * d - f2 * f2;
     return toSTAmount(
-        asset1Balance.issue(), asset1Balance * solveQuadraticEq(a, b, c));
+        asset1Balance.asset(), asset1Balance * solveQuadraticEq(a, b, c));
 }
 
 /* Equation 7:
@@ -120,7 +120,7 @@ withdrawByTokens(
     auto const f = getFee(tfee);
     Number const t1 = lpTokens / lptAMMBalance;
     auto const b = assetBalance * (t1 * t1 - t1 * (2 - f)) / (t1 * f - 1);
-    return toSTAmount(assetBalance.issue(), b);
+    return toSTAmount(assetBalance.asset(), b);
 }
 
 Number
@@ -169,9 +169,9 @@ adjustAmountsByLPTokens(
         if (amount2)
         {
             Number const fr = lpTokensActual / lpTokens;
-            auto const amountActual = toSTAmount(amount.issue(), fr * amount);
+            auto const amountActual = toSTAmount(amount.asset(), fr * amount);
             auto const amount2Actual =
-                toSTAmount(amount2->issue(), fr * *amount2);
+                toSTAmount(amount2->asset(), fr * *amount2);
             return std::make_tuple(
                 amountActual < amount ? amountActual : amount,
                 amount2Actual < amount2 ? amount2Actual : amount2,

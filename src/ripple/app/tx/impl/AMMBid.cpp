@@ -59,6 +59,11 @@ AMMBid::preflight(PreflightContext const& ctx)
             JLOG(ctx.j.debug()) << "AMM Bid: invalid min slot price.";
             return res;
         }
+        if (bidMin->isMPT())
+        {
+            JLOG(ctx.j.debug()) << "AMM Bid: invalid MPT min slot price.";
+            return temMPT_INVALID_USE;
+        }
     }
 
     if (auto const bidMax = ctx.tx[~sfBidMax])
@@ -67,6 +72,11 @@ AMMBid::preflight(PreflightContext const& ctx)
         {
             JLOG(ctx.j.debug()) << "AMM Bid: invalid max slot price.";
             return res;
+        }
+        if (bidMax->isMPT())
+        {
+            JLOG(ctx.j.debug()) << "AMM Bid: invalid MPT min slot price.";
+            return temMPT_INVALID_USE;
         }
     }
 

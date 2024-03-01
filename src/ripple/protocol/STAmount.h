@@ -274,7 +274,10 @@ public:
     clear(Issue const& issue);
 
     void
-    clear(MPT const& mpt);
+    clear(MPTIssue const& mpt);
+
+    void
+    clear(Asset const& asset);
 
     void
     setIssuer(AccountID const& uIssuer);
@@ -579,7 +582,10 @@ STAmount::getCurrency() const
 inline AccountID const&
 STAmount::getIssuer() const
 {
-    return mAsset.issue().account;
+    // Is it reasonable to expect that getIssuer is applicable to MPT?
+    if (mAsset.isIssue())
+        return mAsset.issue().account;
+    return mAsset.mptIssue().account();
 }
 
 inline int
@@ -658,10 +664,19 @@ STAmount::clear(Issue const& issue)
 }
 
 inline void
-STAmount::clear(MPT const& mpt)
+STAmount::clear(MPTIssue const& mpt)
 {
     mAsset = mpt;
     clear();
+}
+
+inline void
+STAmount::clear(Asset const& asset)
+{
+    if (asset.isMPT())
+        clear(asset.mptIssue());
+    else
+        clear(asset.issue());
 }
 
 inline void

@@ -45,16 +45,16 @@ getAccount(Json::Value const& v, Json::Value& result)
     return std::optional<AccountID>(accountID);
 }
 
-Expected<Issue, error_code_i>
-getIssue(Json::Value const& v, beast::Journal j)
+Expected<Asset, error_code_i>
+getAsset(Json::Value const& v, beast::Journal j)
 {
     try
     {
-        return issueFromJson(v);
+        return assetFromJson(v);
     }
     catch (std::runtime_error const& ex)
     {
-        JLOG(j.debug()) << "getIssue " << ex.what();
+        JLOG(j.debug()) << "getAsset " << ex.what();
     }
     return Unexpected(rpcISSUE_MALFORMED);
 }
@@ -84,16 +84,16 @@ doAMMInfo(RPC::JsonContext& context)
     struct ValuesFromContextParams
     {
         std::optional<AccountID> accountID;
-        Issue issue1;
-        Issue issue2;
+        Asset asset1;
+        Asset asset2;
         std::shared_ptr<SLE const> amm;
     };
 
     auto getValuesFromContextParams =
         [&]() -> Expected<ValuesFromContextParams, error_code_i> {
         std::optional<AccountID> accountID;
-        std::optional<Issue> issue1;
-        std::optional<Issue> issue2;
+        std::optional<Asset> asset1;
+        std::optional<Asset> asset2;
         std::optional<uint256> ammID;
 
         if ((params.isMember(jss::asset) != params.isMember(jss::asset2)) ||
@@ -102,16 +102,16 @@ doAMMInfo(RPC::JsonContext& context)
 
         if (params.isMember(jss::asset))
         {
-            if (auto const i = getIssue(params[jss::asset], context.j))
-                issue1 = *i;
+            if (auto const i = getAsset(params[jss::asset], context.j))
+                asset1 = *i;
             else
                 return Unexpected(i.error());
         }
 
         if (params.isMember(jss::asset2))
         {
-            if (auto const i = getIssue(params[jss::asset2], context.j))
-                issue2 = *i;
+            if (auto const i = getAsset(params[jss::asset2], context.j))
+                asset2 = *i;
             else
                 return Unexpected(i.error());
         }
@@ -128,8 +128,8 @@ doAMMInfo(RPC::JsonContext& context)
         }
 
         assert(
-            (issue1.has_value() == issue2.has_value()) &&
-            (issue1.has_value() != ammID.has_value()));
+            (asset1.has_value() == asset2.has_value()) &&
+            (asset1.has_value() != ammID.has_value()));
 
         if (params.isMember(jss::account))
         {
@@ -139,22 +139,22 @@ doAMMInfo(RPC::JsonContext& context)
         }
 
         auto const ammKeylet = [&]() {
-            if (issue1 && issue2)
-                return keylet::amm(*issue1, *issue2);
+            if (asset1 && asset2)
+                return keylet::amm(*asset1, *asset2);
             assert(ammID);
             return keylet::amm(*ammID);
         }();
         auto const amm = ledger->read(ammKeylet);
         if (!amm)
             return Unexpected(rpcACT_NOT_FOUND);
-        if (!issue1 && !issue2)
+        if (!asset1 && !asset2)
         {
-            issue1 = (*amm)[sfAsset];
-            issue2 = (*amm)[sfAsset2];
+            asset1 = (*amm)[sfAsset];
+            asset2 = (*amm)[sfAsset2];
         }
 
         return ValuesFromContextParams{
-            accountID, *issue1, *issue2, std::move(amm)};
+            accountID, *asset1, *asset2, std::move(amm)};
     };
 
     auto const r = getValuesFromContextParams();
@@ -164,7 +164,7 @@ doAMMInfo(RPC::JsonContext& context)
         return result;
     }
 
-    auto const& [accountID, issue1, issue2, amm] = *r;
+    auto const& [accountID, asset1, asset2, amm] = *r;
 
     auto const ammAccountID = amm->getAccountID(sfAccount);
 
@@ -172,8 +172,8 @@ doAMMInfo(RPC::JsonContext& context)
     auto const [asset1Balance, asset2Balance] = ammPoolHolds(
         *ledger,
         ammAccountID,
-        issue1,
-        issue2,
+        asset1,
+        asset2,
         FreezeHandling::fhIGNORE_FREEZE,
         context.j);
     auto const lptAMMBalance = accountID
@@ -238,11 +238,9 @@ doAMMInfo(RPC::JsonContext& context)
     }
 
     if (!isXRP(asset1Balance))
-        ammResult[jss::asset_frozen] =
-            isFrozen(*ledger, ammAccountID, issue1.currency, issue1.account);
+        ammResult[jss::asset_frozen] = isFrozen(*ledger, ammAccountID, asset1);
     if (!isXRP(asset2Balance))
-        ammResult[jss::asset2_frozen] =
-            isFrozen(*ledger, ammAccountID, issue2.currency, issue2.account);
+        ammResult[jss::asset2_frozen] = isFrozen(*ledger, ammAccountID, asset2);
 
     result[jss::amm] = std::move(ammResult);
     if (!result.isMember(jss::ledger_index) &&

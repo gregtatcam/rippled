@@ -116,9 +116,8 @@ noIssue()
     return issue;
 }
 
-template <typename T>
-requires std::is_same_v<T, Issue> bool
-isXRP(T const& issue)
+inline bool
+isXRP(Issue const& issue)
 {
     return isXRP(issue.currency);
 }

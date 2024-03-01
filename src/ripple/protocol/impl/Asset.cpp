@@ -25,12 +25,7 @@ namespace ripple {
 
 Asset::Asset(uint192 const& u)
 {
-    std::uint32_t sequence;
-    AccountID account;
-    memcpy(&sequence, u.data(), sizeof(sequence));
-    sequence = boost::endian::big_to_native(sequence);
-    memcpy(account.data(), u.data() + sizeof(sequence), sizeof(AccountID));
-    asset_ = std::make_pair(sequence, account);
+    asset_ = getMPT(u);
 }
 
 std::string
@@ -59,6 +54,86 @@ std::string
 to_string(MPT const& mpt)
 {
     return to_string(getMptID(mpt.second, mpt.first));
+}
+
+Json::Value
+toJson(Asset const& asset)
+{
+    Json::Value jv;
+    if (asset.isMPT())
+        jv[jss::mpt_issuance_id] = to_string(asset.mptIssue().mpt());
+    else
+    {
+        jv[jss::currency] = to_string(asset.issue().currency);
+        if (!isXRP(asset.issue()))
+            jv[jss::issuer] = toBase58(asset.issue().account);
+    }
+    return jv;
+}
+
+Asset
+assetFromJson(Json::Value const& jv)
+{
+    Asset asset;
+    if (!validJSONAsset(jv))
+        Throw<std::runtime_error>("invalid Asset");
+
+    if (jv.isMember(jss::mpt_issuance_id))
+    {
+        uint192 u;
+        if (!u.parseHex(jv[jss::mpt_issuance_id].asString()))
+            Throw<std::runtime_error>("invalid MPTokenIssuanceID");
+        asset = u;
+        if (asset.account() == beast::zero)
+            Throw<std::runtime_error>("invalid MPTokenIssuanceID account");
+    }
+    else
+    {
+        asset = issueFromJson(jv);
+    }
+    return asset;
+}
+
+bool
+isConsistent(Asset const& asset)
+{
+    if (asset.isIssue())
+        return isConsistent(asset.issue());
+    return true;
+}
+
+std::ostream&
+operator<<(std::ostream& os, Asset const& x)
+{
+    os << to_string(x);
+    return os;
+}
+
+Json::Value
+to_json(Asset const& asset)
+{
+    if (asset.isIssue())
+        return to_json(asset.issue());
+    return to_json(asset.mptIssue());
+}
+
+bool
+validAsset(Asset const& asset)
+{
+    if (asset.isIssue())
+        return isConsistent(asset.issue()) &&
+            asset.issue().currency != badCurrency();
+    return asset.mptIssue().account() != beast::zero;
+}
+
+bool
+equalAssets(Asset const& asset1, Asset const& asset2)
+{
+    if (asset1.isIssue() != asset2.isIssue())
+        return false;
+    if (asset1.isIssue())
+        return asset1.issue().currency == asset2.issue().currency;
+    return asset1.mptIssue().mpt() == asset2.mptIssue().mpt();
 }
 
 bool

@@ -211,11 +211,11 @@ private:
         CrossType cross_type;
 
         if (isXRP(issue_out))
-            cross_type = CrossType::IouToXrp;
+            cross_type = CrossType::AssetToXrp;
         else if (isXRP(issue_in))
-            cross_type = CrossType::XrpToIou;
+            cross_type = CrossType::XrpToAsset;
         else
-            cross_type = CrossType::IouToIou;
+            cross_type = CrossType::AssetToAsset;
 
         // FIXME: We are always invoking the IOU-to-IOU taker. We should select
         // the correct type dynamically.

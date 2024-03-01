@@ -17,13 +17,13 @@
 */
 //==============================================================================
 
-#include <ripple/app/paths/RippleLineCache.h>
+#include <ripple/app/paths/AssetCache.h>
 #include <ripple/app/paths/TrustLine.h>
 #include <ripple/ledger/OpenView.h>
 
 namespace ripple {
 
-RippleLineCache::RippleLineCache(
+AssetCache::AssetCache(
     std::shared_ptr<ReadView const> const& ledger,
     beast::Journal j)
     : ledger_(ledger), journal_(j)
@@ -31,7 +31,7 @@ RippleLineCache::RippleLineCache(
     JLOG(journal_.debug()) << "created for ledger " << ledger_->info().seq;
 }
 
-RippleLineCache::~RippleLineCache()
+AssetCache::~AssetCache()
 {
     JLOG(journal_.debug()) << "destroyed for ledger " << ledger_->info().seq
                            << " with " << lines_.size() << " accounts and "
@@ -39,9 +39,7 @@ RippleLineCache::~RippleLineCache()
 }
 
 std::shared_ptr<std::vector<PathFindTrustLine>>
-RippleLineCache::getRippleLines(
-    AccountID const& accountID,
-    LineDirection direction)
+AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
 {
     auto const hash = hasher_(accountID);
     AccountKey key(accountID, direction, hash);
@@ -123,6 +121,35 @@ RippleLineCache::getRippleLines(
                            << totalLineCount_ << " trust lines";
 
     return it->second;
+}
+
+std::shared_ptr<std::vector<MPT>> const&
+AssetCache::getMPTs(const ripple::AccountID& account)
+{
+    std::lock_guard sl(mLock);
+
+    if (auto it = mpts_.find(account); it != mpts_.end())
+        return it->second;
+
+    std::vector<MPT> mpts;
+    // Get issued/authorized tokens
+    forEachItem(*ledger_, account, [&](std::shared_ptr<SLE const> const& sle) {
+        if (sle->getType() == ltMPTOKEN_ISSUANCE)
+            mpts.push_back(
+                std::make_pair(sle->getFieldU32(sfSequence), account));
+        else if (sle->getType() == ltMPTOKEN)
+            mpts.push_back(getMPT(sle->getFieldH192(sfMPTokenIssuanceID)));
+    });
+
+    totalMPTCount_ += mpts.size();
+
+    if (mpts.empty())
+        mpts_.emplace(account, nullptr);
+    else
+        mpts_.emplace(
+            account, std::make_shared<std::vector<MPT>>(std::move(mpts)));
+
+    return mpts_[account];
 }
 
 }  // namespace ripple

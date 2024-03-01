@@ -21,7 +21,7 @@
 #define RIPPLE_PROTOCOL_STISSUE_H_INCLUDED
 
 #include <ripple/basics/CountedObject.h>
-#include <ripple/protocol/Issue.h>
+#include <ripple/protocol/Asset.h>
 #include <ripple/protocol/SField.h>
 #include <ripple/protocol/STBase.h>
 #include <ripple/protocol/Serializer.h>
@@ -31,27 +31,37 @@ namespace ripple {
 class STIssue final : public STBase, CountedObject<STIssue>
 {
 private:
-    Issue issue_{xrpIssue()};
+    Asset asset_{xrpIssue()};
 
 public:
-    using value_type = Issue;
+    using value_type = Asset;
 
     STIssue() = default;
 
     explicit STIssue(SerialIter& sit, SField const& name);
 
+    explicit STIssue(SField const& name, Asset const& asset);
+
     explicit STIssue(SField const& name, Issue const& issue);
+
+    explicit STIssue(SField const& name, MPTIssue const& issue);
 
     explicit STIssue(SField const& name);
 
     Issue const&
     issue() const;
 
-    Issue const&
+    MPTIssue const&
+    mptIssue() const;
+
+    Asset const&
     value() const noexcept;
 
     void
     setIssue(Issue const& issue);
+
+    void
+    setIssue(MPTIssue const& issue);
 
     SerializedTypeID
     getSType() const override;
@@ -88,29 +98,49 @@ issueFromJson(SField const& name, Json::Value const& v);
 inline Issue const&
 STIssue::issue() const
 {
-    return issue_;
+    if (!asset_.isIssue())
+        Throw<std::logic_error>("STIssue doesn't hole Issue");
+    return asset_.issue();
 }
 
-inline Issue const&
+inline MPTIssue const&
+STIssue::mptIssue() const
+{
+    if (!asset_.isMPT())
+        Throw<std::logic_error>("STIssue doesn't hole MPTIssue");
+    return asset_.mptIssue();
+}
+
+inline Asset const&
 STIssue::value() const noexcept
 {
-    return issue_;
+    return asset_;
 }
 
 inline void
 STIssue::setIssue(Issue const& issue)
 {
-    if (isXRP(issue_.currency) != isXRP(issue_.account))
+    if (!asset_.isIssue() ||
+        (isXRP(asset_.issue().currency) != isXRP(asset_.issue().account)))
         Throw<std::runtime_error>(
             "invalid issue: currency and account native mismatch");
 
-    issue_ = issue;
+    asset_ = issue;
+}
+
+inline void
+STIssue::setIssue(MPTIssue const& issue)
+{
+    if (!asset_.isMPT())
+        Throw<std::runtime_error>("invalid mpt issue");
+
+    asset_ = issue;
 }
 
 inline bool
 operator==(STIssue const& lhs, STIssue const& rhs)
 {
-    return lhs.issue() == rhs.issue();
+    return lhs.value() == rhs.value();
 }
 
 inline bool

@@ -32,8 +32,7 @@ class AMMLiquidity;
 class QualityFunction;
 
 template <typename A>
-concept OfferAmount =
-    !(std::is_same_v<A, STAmount> || std::is_same_v<A, MPTAmount>);
+concept OfferAmount = !std::is_same_v<A, STAmount>;
 
 /** Represents synthetic AMM offer in BookStep. AMMOffer mirrors TOffer
  * methods for use in generic BookStep methods. AMMOffer amounts
@@ -76,11 +75,11 @@ public:
         return quality_;
     }
 
-    Issue const&
-    issueIn() const;
+    Asset const&
+    assetIn() const;
 
-    Issue const&
-    issueOut() const;
+    Asset const&
+    assetOut() const;
 
     AccountID const&
     owner() const;

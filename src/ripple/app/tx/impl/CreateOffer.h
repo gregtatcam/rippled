@@ -72,7 +72,7 @@ private:
         ApplyFlags const flags,
         AccountID const id,
         beast::Journal const j,
-        Issue const& issue);
+        Asset const& asset);
 
     bool
     dry_offer(ApplyView& view, Offer const& offer);

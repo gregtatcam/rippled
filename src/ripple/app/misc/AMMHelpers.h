@@ -186,7 +186,7 @@ changeSpotPriceQuality(
         if (nTakerPays <= 0)
             return std::nullopt;
         auto const takerPays = toAmount<TIn>(
-            getIssue(pool.in), nTakerPays, Number::rounding_mode::upward);
+            getAsset(pool.in), nTakerPays, Number::rounding_mode::upward);
         // should not fail
         if (auto const amounts =
                 TAmounts<TIn, TOut>{
@@ -229,7 +229,7 @@ swapAssetIn(
     std::uint16_t tfee)
 {
     return toAmount<TOut>(
-        getIssue(pool.out),
+        getAsset(pool.out),
         pool.out - (pool.in * pool.out) / (pool.in + assetIn * feeMult(tfee)),
         Number::rounding_mode::downward);
 }
@@ -251,7 +251,7 @@ swapAssetOut(
     std::uint16_t tfee)
 {
     return toAmount<TIn>(
-        getIssue(pool.in),
+        getAsset(pool.in),
         ((pool.in * pool.out) / (pool.out - assetOut) - pool.in) /
             feeMult(tfee),
         Number::rounding_mode::upward);

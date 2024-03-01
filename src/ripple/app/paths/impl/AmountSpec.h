@@ -32,26 +32,56 @@ struct AmountSpec
 {
     explicit AmountSpec() = default;
 
-    bool native;
-    union
-    {
-        XRPAmount xrp;
-        IOUAmount iou = {};
-        MPTAmount mpt;
-    };
+    std::variant<XRPAmount, IOUAmount, MPTAmount> amount;
     std::optional<AccountID> issuer;
     std::optional<Currency> currency;
     std::optional<MPT> mptid;
 
+    bool
+    native() const
+    {
+        return std::holds_alternative<XRPAmount>(amount);
+    }
+    bool
+    isIOU() const
+    {
+        return std::holds_alternative<IOUAmount>(amount);
+    }
+    template <typename T>
+    void
+    check() const
+    {
+        if (!std::holds_alternative<T>(amount))
+            Throw<std::logic_error>("AmountSpec doesn't hold requested amount");
+    }
+    XRPAmount const&
+    xrp() const
+    {
+        check<XRPAmount>();
+        return std::get<XRPAmount>(amount);
+    }
+    IOUAmount const&
+    iou() const
+    {
+        check<XRPAmount>();
+        return std::get<IOUAmount>(amount);
+    }
+    MPTAmount const&
+    mpt() const
+    {
+        check<XRPAmount>();
+        return std::get<MPTAmount>(amount);
+    }
+
     friend std::ostream&
     operator<<(std::ostream& stream, AmountSpec const& amt)
     {
-        if (amt.mptid)
+        if (std::holds_alternative<MPTAmount>(amt.amount))
             stream << to_string(*amt.mptid);
-        else if (amt.native)
-            stream << to_string(amt.xrp);
+        else if (amt.native())
+            stream << to_string(amt.xrp());
         else
-            stream << to_string(amt.iou);
+            stream << to_string(amt.iou());
         if (amt.currency)
             stream << "/(" << *amt.currency << ")";
         if (amt.issuer)
@@ -62,63 +92,86 @@ struct AmountSpec
 
 struct EitherAmount
 {
-#ifndef NDEBUG
-    bool native = false;
-#endif
-
-    union
-    {
-        IOUAmount iou = {};
-        XRPAmount xrp;
-    };
+    std::variant<XRPAmount, IOUAmount, MPTAmount> amount;
 
     EitherAmount() = default;
 
-    explicit EitherAmount(IOUAmount const& a) : iou(a)
+    explicit EitherAmount(IOUAmount const& a) : amount(a)
     {
     }
 
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-    // ignore warning about half of iou amount being uninitialized
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-    explicit EitherAmount(XRPAmount const& a) : xrp(a)
+    explicit EitherAmount(XRPAmount const& a) : amount(a)
     {
-#ifndef NDEBUG
-        native = true;
-#endif
     }
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
+
+    explicit EitherAmount(MPTAmount const& a) : amount(a)
+    {
+    }
 
     explicit EitherAmount(AmountSpec const& a)
     {
-#ifndef NDEBUG
-        native = a.native;
-#endif
-        if (a.native)
-            xrp = a.xrp;
-        else
-            iou = a.iou;
+        amount = a.amount;
+    }
+
+    bool
+    native() const
+    {
+        return std::holds_alternative<XRPAmount>(amount);
+    }
+    bool
+    isIOU() const
+    {
+        return std::holds_alternative<IOUAmount>(amount);
+    }
+    bool
+    isMPT() const
+    {
+        return std::holds_alternative<MPTAmount>(amount);
+    }
+    template <typename T>
+    void
+    check() const
+    {
+        if (!std::holds_alternative<T>(amount))
+            Throw<std::logic_error>(
+                "EitherAmount doesn't hold requested amount");
+    }
+    XRPAmount const&
+    xrp() const
+    {
+        check<XRPAmount>();
+        return std::get<XRPAmount>(amount);
+    }
+    IOUAmount const&
+    iou() const
+    {
+        check<IOUAmount>();
+        return std::get<IOUAmount>(amount);
+    }
+    MPTAmount const&
+    mpt() const
+    {
+        check<MPTAmount>();
+        return std::get<MPTAmount>(amount);
     }
 
 #ifndef NDEBUG
     friend std::ostream&
     operator<<(std::ostream& stream, EitherAmount const& amt)
     {
-        if (amt.native)
-            stream << to_string(amt.xrp);
+        if (amt.native())
+            stream << to_string(amt.xrp());
+        else if (amt.isIOU())
+            stream << to_string(amt.iou());
         else
-            stream << to_string(amt.iou);
+            stream << to_string(amt.mpt());
         return stream;
     }
 #endif
 };
 
 template <class T>
-T&
+T const&
 get(EitherAmount& amt)
 {
     static_assert(sizeof(T) == -1, "Must used specialized function");
@@ -126,19 +179,27 @@ get(EitherAmount& amt)
 }
 
 template <>
-inline IOUAmount&
+inline IOUAmount const&
 get<IOUAmount>(EitherAmount& amt)
 {
-    assert(!amt.native);
-    return amt.iou;
+    assert(amt.isIOU());
+    return amt.iou();
 }
 
 template <>
-inline XRPAmount&
+inline XRPAmount const&
 get<XRPAmount>(EitherAmount& amt)
 {
-    assert(amt.native);
-    return amt.xrp;
+    assert(amt.native());
+    return amt.xrp();
+}
+
+template <>
+inline MPTAmount const&
+get<MPTAmount>(EitherAmount& amt)
+{
+    assert(amt.isMPT());
+    return amt.mpt();
 }
 
 template <class T>
@@ -153,16 +214,24 @@ template <>
 inline IOUAmount const&
 get<IOUAmount>(EitherAmount const& amt)
 {
-    assert(!amt.native);
-    return amt.iou;
+    assert(!amt.native());
+    return amt.iou();
 }
 
 template <>
 inline XRPAmount const&
 get<XRPAmount>(EitherAmount const& amt)
 {
-    assert(amt.native);
-    return amt.xrp;
+    assert(amt.native());
+    return amt.xrp();
+}
+
+template <>
+inline MPTAmount const&
+get<MPTAmount>(EitherAmount const& amt)
+{
+    assert(amt.isMPT());
+    return amt.mpt();
 }
 
 inline AmountSpec
@@ -174,19 +243,18 @@ toAmountSpec(STAmount const& amt)
         isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
     AmountSpec result;
 
-    result.native = isXRP(amt);
-    if (result.native)
+    if (amt.isIssue() && isXRP(amt.issue()))
     {
-        result.xrp = XRPAmount(sMant);
+        result.amount = XRPAmount(sMant);
     }
     else if (amt.isMPT())
     {
         result.mptid = amt.mptIssue().mpt();
-        result.mpt = amt.mpt();
+        result.amount = amt.mpt();
     }
     else
     {
-        result.iou = IOUAmount(sMant, amt.exponent());
+        result.amount = IOUAmount(sMant, amt.exponent());
         result.issuer = amt.issue().account;
         result.currency = amt.issue().currency;
     }
@@ -199,24 +267,18 @@ toEitherAmount(STAmount const& amt)
 {
     if (isXRP(amt))
         return EitherAmount{amt.xrp()};
-    return EitherAmount{amt.iou()};
+    else if (amt.isIssue())
+        return EitherAmount{amt.iou()};
+    return EitherAmount(amt.mpt());
 }
 
 inline AmountSpec
 toAmountSpec(EitherAmount const& ea, std::optional<Currency> const& c)
 {
     AmountSpec r;
-    r.native = (!c || isXRP(*c));
     r.currency = c;
-    assert(ea.native == r.native);
-    if (r.native)
-    {
-        r.xrp = ea.xrp;
-    }
-    else
-    {
-        r.iou = ea.iou;
-    }
+    assert(ea.native() == r.native());
+    r.amount = ea.amount;
     return r;
 }
 

@@ -169,7 +169,7 @@ PathRequest::updateComplete()
 }
 
 bool
-PathRequest::isValid(std::shared_ptr<RippleLineCache> const& crCache)
+PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
 {
     if (!raSrcAccount || !raDstAccount)
         return false;
@@ -222,6 +222,13 @@ PathRequest::isValid(std::shared_ptr<RippleLineCache> const& crCache)
 
         for (auto const& currency : usDestCurrID)
             jvDestCur.append(to_string(currency));
+
+        if (auto mpts = crCache->getMPTs(*raDstAccount))
+        {
+            for (auto const& mpt : *mpts)
+                jvDestCur.append(to_string(mpt));
+        }
+
         jvStatus[jss::destination_tag] =
             (sleDest->getFlags() & lsfRequireDestTag);
     }
@@ -242,7 +249,7 @@ PathRequest::isValid(std::shared_ptr<RippleLineCache> const& crCache)
 */
 std::pair<bool, Json::Value>
 PathRequest::doCreate(
-    std::shared_ptr<RippleLineCache> const& cache,
+    std::shared_ptr<AssetCache> const& cache,
     Json::Value const& value)
 {
     bool valid = false;
@@ -313,17 +320,9 @@ PathRequest::parseJson(Json::Value const& jvParams)
         return PFR_PJ_INVALID;
     }
 
-    if (saDstAmount.isMPT())
-    {
-        jvStatus = rpcError(rpcMPT_NOT_SUPPORTED);
-        return PFR_PJ_INVALID;
-    }
+    convert_all_ = saDstAmount == STAmount(saDstAmount.asset(), 1u, 0, true);
 
-    convert_all_ = saDstAmount == STAmount(saDstAmount.issue(), 1u, 0, true);
-
-    if ((saDstAmount.getCurrency().isZero() &&
-         saDstAmount.getIssuer().isNonZero()) ||
-        (saDstAmount.getCurrency() == badCurrency()) ||
+    if (!validAsset(saDstAmount.asset()) ||
         (!convert_all_ && saDstAmount <= beast::zero))
     {
         jvStatus = rpcError(rpcDST_AMT_MALFORMED);
@@ -341,19 +340,11 @@ PathRequest::parseJson(Json::Value const& jvParams)
 
         saSendMax.emplace();
         if (!amountFromJsonNoThrow(*saSendMax, jvParams[jss::send_max]) ||
-            (saSendMax->getCurrency().isZero() &&
-             saSendMax->getIssuer().isNonZero()) ||
-            (saSendMax->getCurrency() == badCurrency()) ||
+            !validAsset(saSendMax->asset()) ||
             (*saSendMax <= beast::zero &&
-             *saSendMax != STAmount(saSendMax->issue(), 1u, 0, true)))
+             *saSendMax != STAmount(saSendMax->asset(), 1u, 0, true)))
         {
             jvStatus = rpcError(rpcSENDMAX_MALFORMED);
-            return PFR_PJ_INVALID;
-        }
-
-        if (saSendMax->isMPT())
-        {
-            jvStatus = rpcError(rpcMPT_NOT_SUPPORTED);
             return PFR_PJ_INVALID;
         }
     }
@@ -368,47 +359,72 @@ PathRequest::parseJson(Json::Value const& jvParams)
             return PFR_PJ_INVALID;
         }
 
-        sciSourceCurrencies.clear();
+        sciSourceAssets.clear();
 
         for (auto const& c : jvSrcCurrencies)
         {
-            // Mandatory currency
-            Currency srcCurrencyID;
-            if (!c.isObject() || !c.isMember(jss::currency) ||
-                !c[jss::currency].isString() ||
-                !to_currency(srcCurrencyID, c[jss::currency].asString()))
+            // Mandatory currency or MPT
+            if (!validJSONAsset(c) || !c.isObject())
             {
                 jvStatus = rpcError(rpcSRC_CUR_MALFORMED);
                 return PFR_PJ_INVALID;
             }
 
+            PathAsset srcPathAsset;
+            if (c.isMember(jss::currency))
+            {
+                Currency currency;
+                if (!c[jss::currency].isString() ||
+                    !to_currency(currency, c[jss::currency].asString()))
+                {
+                    jvStatus = rpcError(rpcSRC_CUR_MALFORMED);
+                    return PFR_PJ_INVALID;
+                }
+                srcPathAsset = currency;
+            }
+            else
+            {
+                uint192 u;
+                if (!c[jss::mpt_issuance_id].isString() ||
+                    !u.parseHex(c[jss::mpt_issuance_id].asString()))
+                {
+                    jvStatus = rpcError(rpcSRC_CUR_MALFORMED);
+                    return PFR_PJ_INVALID;
+                }
+                srcPathAsset = u;
+            }
+
             // Optional issuer
             AccountID srcIssuerID;
             if (c.isMember(jss::issuer) &&
-                (!c[jss::issuer].isString() ||
+                (c.isMember(jss::mpt_issuance_id) ||
+                 !c[jss::issuer].isString() ||
                  !to_issuer(srcIssuerID, c[jss::issuer].asString())))
             {
                 jvStatus = rpcError(rpcSRC_ISR_MALFORMED);
                 return PFR_PJ_INVALID;
             }
 
-            if (srcCurrencyID.isZero())
+            if (srcPathAsset.isCurrency())
             {
-                if (srcIssuerID.isNonZero())
+                if (srcPathAsset.currency().isZero())
                 {
-                    jvStatus = rpcError(rpcSRC_CUR_MALFORMED);
-                    return PFR_PJ_INVALID;
+                    if (srcIssuerID.isNonZero())
+                    {
+                        jvStatus = rpcError(rpcSRC_CUR_MALFORMED);
+                        return PFR_PJ_INVALID;
+                    }
                 }
-            }
-            else if (srcIssuerID.isZero())
-            {
-                srcIssuerID = *raSrcAccount;
+                else if (srcIssuerID.isZero())
+                {
+                    srcIssuerID = *raSrcAccount;
+                }
             }
 
             if (saSendMax)
             {
-                // If the currencies don't match, ignore the source currency.
-                if (srcCurrencyID == saSendMax->getCurrency())
+                // If the assets don't match, ignore the source asset.
+                if (equalAssets(srcPathAsset, saSendMax->asset()))
                 {
                     // If neither is the source and they are not equal, then the
                     // source issuer is illegal.
@@ -422,26 +438,37 @@ PathRequest::parseJson(Json::Value const& jvParams)
 
                     // If both are the source, use the source.
                     // Otherwise, use the one that's not the source.
-                    if (srcIssuerID != *raSrcAccount)
+                    if (srcPathAsset.isCurrency())
                     {
-                        sciSourceCurrencies.insert(
-                            {srcCurrencyID, srcIssuerID});
-                    }
-                    else if (saSendMax->getIssuer() != *raSrcAccount)
-                    {
-                        sciSourceCurrencies.insert(
-                            {srcCurrencyID, saSendMax->getIssuer()});
+                        if (srcIssuerID != *raSrcAccount)
+                        {
+                            sciSourceAssets.insert(
+                                Issue{srcPathAsset.currency(), srcIssuerID});
+                        }
+                        else if (saSendMax->getIssuer() != *raSrcAccount)
+                        {
+                            sciSourceAssets.insert(Issue{
+                                srcPathAsset.currency(),
+                                saSendMax->getIssuer()});
+                        }
+                        else
+                        {
+                            sciSourceAssets.insert(
+                                Issue{srcPathAsset.currency(), *raSrcAccount});
+                        }
                     }
                     else
-                    {
-                        sciSourceCurrencies.insert(
-                            {srcCurrencyID, *raSrcAccount});
-                    }
+                        sciSourceAssets.insert(srcPathAsset.mpt());
                 }
+            }
+            else if (srcPathAsset.isCurrency())
+            {
+                sciSourceAssets.insert(
+                    Issue{srcPathAsset.currency(), srcIssuerID});
             }
             else
             {
-                sciSourceCurrencies.insert({srcCurrencyID, srcIssuerID});
+                sciSourceAssets.insert(MPTIssue{srcPathAsset.mpt()});
             }
         }
     }
@@ -477,21 +504,21 @@ PathRequest::doAborting() const
 
 std::unique_ptr<Pathfinder> const&
 PathRequest::getPathFinder(
-    std::shared_ptr<RippleLineCache> const& cache,
-    hash_map<Currency, std::unique_ptr<Pathfinder>>& currency_map,
-    Currency const& currency,
+    std::shared_ptr<AssetCache> const& cache,
+    hash_map<PathAsset, std::unique_ptr<Pathfinder>>& pathasset_map,
+    PathAsset const& asset,
     STAmount const& dst_amount,
     int const level,
     std::function<bool(void)> const& continueCallback)
 {
-    auto i = currency_map.find(currency);
-    if (i != currency_map.end())
+    auto i = pathasset_map.find(asset);
+    if (i != pathasset_map.end())
         return i->second;
     auto pathfinder = std::make_unique<Pathfinder>(
         cache,
         *raSrcAccount,
         *raDstAccount,
-        currency,
+        asset,
         std::nullopt,
         dst_amount,
         saSendMax,
@@ -500,51 +527,59 @@ PathRequest::getPathFinder(
         pathfinder->computePathRanks(max_paths_, continueCallback);
     else
         pathfinder.reset();  // It's a bad request - clear it.
-    return currency_map[currency] = std::move(pathfinder);
+    return pathasset_map[asset] = std::move(pathfinder);
 }
 
 bool
 PathRequest::findPaths(
-    std::shared_ptr<RippleLineCache> const& cache,
+    std::shared_ptr<AssetCache> const& cache,
     int const level,
     Json::Value& jvArray,
     std::function<bool(void)> const& continueCallback)
 {
-    auto sourceCurrencies = sciSourceCurrencies;
-    if (sourceCurrencies.empty() && saSendMax)
+    auto sourceAssets = sciSourceAssets;
+    if (sourceAssets.empty() && saSendMax)
     {
-        sourceCurrencies.insert(saSendMax->issue());
+        sourceAssets.insert(saSendMax->asset());
     }
-    if (sourceCurrencies.empty())
+    if (sourceAssets.empty())
     {
         auto currencies = accountSourceCurrencies(*raSrcAccount, cache, true);
         bool const sameAccount = *raSrcAccount == *raDstAccount;
         for (auto const& c : currencies)
         {
-            if (!sameAccount || c != saDstAmount.getCurrency())
+            if (!sameAccount ||
+                (saDstAmount.isIssue() && c != saDstAmount.getCurrency()))
             {
-                if (sourceCurrencies.size() >= RPC::Tuning::max_auto_src_cur)
+                if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
                     return false;
-                sourceCurrencies.insert(
+                sourceAssets.insert(
                     {c, c.isZero() ? xrpAccount() : *raSrcAccount});
             }
+        }
+        if (auto mpts = cache->getMPTs(*raSrcAccount))
+        {
+            if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
+                return false;
+            for (auto const& mpt : *mpts)
+                sourceAssets.insert(mpt);
         }
     }
 
     auto const dst_amount = convertAmount(saDstAmount, convert_all_);
-    hash_map<Currency, std::unique_ptr<Pathfinder>> currency_map;
-    for (auto const& issue : sourceCurrencies)
+    hash_map<PathAsset, std::unique_ptr<Pathfinder>> pathasset_map;
+    for (auto const& asset : sourceAssets)
     {
         if (continueCallback && !continueCallback())
             break;
         JLOG(m_journal.debug())
             << iIdentifier
-            << " Trying to find paths: " << STAmount(issue, 1).getFullText();
+            << " Trying to find paths: " << STAmount(asset, 1).getFullText();
 
         auto& pathfinder = getPathFinder(
             cache,
-            currency_map,
-            issue.currency,
+            pathasset_map,
+            PathAsset::toPathAsset(asset),
             dst_amount,
             level,
             continueCallback);
@@ -558,23 +593,29 @@ PathRequest::findPaths(
         auto ps = pathfinder->getBestPaths(
             max_paths_,
             fullLiquidityPath,
-            mContext[issue],
-            issue.account,
+            mContext[asset],
+            asset.account(),
             continueCallback);
-        mContext[issue] = ps;
+        mContext[asset] = ps;
 
         auto const& sourceAccount = [&] {
-            if (!isXRP(issue.account))
-                return issue.account;
+            if (!isXRP(asset.account()))
+                return asset.account();
 
-            if (isXRP(issue.currency))
+            if (isXRP(asset))
                 return xrpAccount();
 
             return *raSrcAccount;
         }();
 
-        STAmount saMaxAmount = saSendMax.value_or(
-            STAmount(Issue{issue.currency, sourceAccount}, 1u, 0, true));
+        STAmount saMaxAmount = [&]() {
+            if (saSendMax)
+                return *saSendMax;
+            if (asset.isIssue())
+                return STAmount(
+                    Issue{asset.issue().currency, sourceAccount}, 1u, 0, true);
+            return STAmount(asset.mptIssue(), 1u, 0, true);
+        }();
 
         JLOG(m_journal.debug())
             << iIdentifier << " Paths found, calling rippleCalc";
@@ -631,7 +672,9 @@ PathRequest::findPaths(
         if (rc.result() == tesSUCCESS)
         {
             Json::Value jvEntry(Json::objectValue);
-            rc.actualAmountIn.setIssuer(sourceAccount);
+            // TODO MPT
+            if (rc.actualAmountIn.isIssue())
+                rc.actualAmountIn.setIssuer(sourceAccount);
             jvEntry[jss::source_amount] =
                 rc.actualAmountIn.getJson(JsonOptions::none);
             jvEntry[jss::paths_computed] = ps.getJson(JsonOptions::none);
@@ -659,14 +702,14 @@ PathRequest::findPaths(
         The minimum cost is 50 and the maximum is 400. The cost increases
         after four source currencies, 50 - (4 * 4) = 34.
     */
-    int const size = sourceCurrencies.size();
+    int const size = sourceAssets.size();
     consumer_.charge({std::clamp(size * size + 34, 50, 400), "path update"});
     return true;
 }
 
 Json::Value
 PathRequest::doUpdate(
-    std::shared_ptr<RippleLineCache> const& cache,
+    std::shared_ptr<AssetCache> const& cache,
     bool fast,
     std::function<bool(void)> const& continueCallback)
 {
@@ -686,11 +729,16 @@ PathRequest::doUpdate(
     if (hasCompletion())
     {
         // Old ripple_path_find API gives destination_currencies
-        auto& destCurrencies =
+        auto& destAssets =
             (newStatus[jss::destination_currencies] = Json::arrayValue);
-        auto usCurrencies = accountDestCurrencies(*raDstAccount, cache, true);
-        for (auto const& c : usCurrencies)
-            destCurrencies.append(to_string(c));
+        auto usAssets = accountDestCurrencies(*raDstAccount, cache, true);
+        for (auto const& c : usAssets)
+            destAssets.append(to_string(c));
+        if (auto mpts = cache->getMPTs(*raDstAccount))
+        {
+            for (auto const& mpt : *mpts)
+                destAssets.append(to_string(mpt));
+        }
     }
 
     newStatus[jss::source_account] = toBase58(*raSrcAccount);

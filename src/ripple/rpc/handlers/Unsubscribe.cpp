@@ -179,9 +179,10 @@ doUnsubscribe(RPC::JsonContext& context)
             Book book;
 
             // Parse mandatory currency.
+            Currency currencyIn;
+            AccountID accountIn;
             if (!taker_pays.isMember(jss::currency) ||
-                !to_currency(
-                    book.in.currency, taker_pays[jss::currency].asString()))
+                !to_currency(currencyIn, taker_pays[jss::currency].asString()))
             {
                 JLOG(context.j.info()) << "Bad taker_pays currency.";
                 return rpcError(rpcSRC_CUR_MALFORMED);
@@ -190,20 +191,22 @@ doUnsubscribe(RPC::JsonContext& context)
             else if (
                 ((taker_pays.isMember(jss::issuer)) &&
                  (!taker_pays[jss::issuer].isString() ||
-                  !to_issuer(
-                      book.in.account, taker_pays[jss::issuer].asString())))
+                  !to_issuer(accountIn, taker_pays[jss::issuer].asString())))
                 // Don't allow illegal issuers.
-                || !isConsistent(book.in) || noAccount() == book.in.account)
+                || !isConsistent(Issue{currencyIn, accountIn}) ||
+                noAccount() == accountIn)
             {
                 JLOG(context.j.info()) << "Bad taker_pays issuer.";
 
                 return rpcError(rpcSRC_ISR_MALFORMED);
             }
+            book.in = Asset{currencyIn, accountIn};
 
             // Parse mandatory currency.
+            Currency currencyOut;
+            AccountID accountOut;
             if (!taker_gets.isMember(jss::currency) ||
-                !to_currency(
-                    book.out.currency, taker_gets[jss::currency].asString()))
+                !to_currency(currencyOut, taker_gets[jss::currency].asString()))
             {
                 JLOG(context.j.info()) << "Bad taker_gets currency.";
 
@@ -213,15 +216,16 @@ doUnsubscribe(RPC::JsonContext& context)
             else if (
                 ((taker_gets.isMember(jss::issuer)) &&
                  (!taker_gets[jss::issuer].isString() ||
-                  !to_issuer(
-                      book.out.account, taker_gets[jss::issuer].asString())))
+                  !to_issuer(accountOut, taker_gets[jss::issuer].asString())))
                 // Don't allow illegal issuers.
-                || !isConsistent(book.out) || noAccount() == book.out.account)
+                || !isConsistent(Issue{currencyOut, accountOut}) ||
+                noAccount() == accountOut)
             {
                 JLOG(context.j.info()) << "Bad taker_gets issuer.";
 
                 return rpcError(rpcDST_ISR_MALFORMED);
             }
+            book.out = Asset{currencyOut, accountOut};
 
             if (book.in == book.out)
             {

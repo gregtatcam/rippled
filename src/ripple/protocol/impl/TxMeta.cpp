@@ -149,7 +149,7 @@ TxMeta::getAffectedAccounts() const
 
                         if (lim != nullptr)
                         {
-                            auto issuer = lim->getIssuer();
+                            auto issuer = lim->asset().account();
 
                             if (issuer.isNonZero())
                                 list.insert(issuer);

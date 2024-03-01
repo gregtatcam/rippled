@@ -163,6 +163,7 @@ transResults()
         MAKE_ERROR(temBAD_FEE,                   "Invalid fee, negative or not XRP."),
         MAKE_ERROR(temBAD_ISSUER,                "Malformed: Bad issuer."),
         MAKE_ERROR(temBAD_LIMIT,                 "Limits must be non-negative."),
+        MAKE_ERROR(temBAD_MPT,                   "Malformed: Bad MPT."),
         MAKE_ERROR(temBAD_OFFER,                 "Malformed: Bad offer."),
         MAKE_ERROR(temBAD_PATH,                  "Malformed: Bad path."),
         MAKE_ERROR(temBAD_PATH_LOOP,             "Malformed: Loop in path."),
@@ -185,6 +186,7 @@ transResults()
         MAKE_ERROR(temINVALID,                   "The transaction is ill-formed."),
         MAKE_ERROR(temINVALID_FLAG,              "The transaction has an invalid flag."),
         MAKE_ERROR(temMPT_NOT_SUPPORTED,         "MPT is not supported."),
+        MAKE_ERROR(temMPT_INVALID_USE,           "MPT is not valid in this context."),
         MAKE_ERROR(temREDUNDANT,                 "The transaction is redundant."),
         MAKE_ERROR(temRIPPLE_EMPTY,              "PathSet with no paths."),
         MAKE_ERROR(temUNCERTAIN,                 "In process of determining result. Never returned."),
@@ -216,6 +218,7 @@ transResults()
         MAKE_ERROR(terQUEUED,                 "Held until escalated fee drops."),
         MAKE_ERROR(terPRE_TICKET,             "Ticket is not yet in ledger."),
         MAKE_ERROR(terNO_AMM,                 "AMM doesn't exist for the asset pair."),
+        MAKE_ERROR(terNO_MPT,                 "MPT doesn't exist"),
 
         MAKE_ERROR(tesSUCCESS,                "The transaction was applied. Only final in a validated ledger."),
     };

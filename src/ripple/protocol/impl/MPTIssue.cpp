@@ -28,4 +28,12 @@ MPTIssue::getMptID() const
     return ripple::getMptID(account(), sequence());
 }
 
+Json::Value
+to_json(MPTIssue const& is)
+{
+    Json::Value jv;
+    jv["mpt_issuance_id"] = to_string(is);
+    return jv;
+}
+
 }  // namespace ripple

@@ -21,6 +21,7 @@
 #include <ripple/basics/contract.h>
 #include <ripple/basics/safe_cast.h>
 #include <ripple/beast/core/LexicalCast.h>
+#include <ripple/protocol/Asset.h>
 #include <ripple/protocol/ErrorCodes.h>
 #include <ripple/protocol/LedgerFormats.h>
 #include <ripple/protocol/SField.h>
@@ -625,7 +626,7 @@ parseLeaf(
                             json_name + "." + ss.str());
 
                         // each element in this path has some combination of
-                        // account, currency, or issuer
+                        // account, asset, or issuer
 
                         Json::Value pathEl = value[i][j];
 
@@ -635,12 +636,24 @@ parseLeaf(
                             return ret;
                         }
 
+                        if (pathEl.isMember(jss::currency) &&
+                            pathEl.isMember(jss::mpt_issuance_id))
+                        {
+                            error = RPC::make_error(
+                                rpcINVALID_PARAMS, "Invalid Asset.");
+                            return ret;
+                        }
+
+                        bool const isMPT =
+                            pathEl.isMember(jss::mpt_issuance_id);
+                        std::string const assetName =
+                            isMPT ? "mpt_issuance_id" : "currency";
                         Json::Value const& account = pathEl["account"];
-                        Json::Value const& currency = pathEl["currency"];
+                        Json::Value const& asset = pathEl[assetName];
                         Json::Value const& issuer = pathEl["issuer"];
                         bool hasCurrency = false;
                         AccountID uAccount, uIssuer;
-                        Currency uCurrency;
+                        PathAsset uAsset;
 
                         if (account)
                         {
@@ -668,27 +681,50 @@ parseLeaf(
                             }
                         }
 
-                        if (currency)
+                        if (asset)
                         {
-                            // human currency
-                            if (!currency.isString())
+                            // human asset
+                            if (!asset.isString())
                             {
                                 error =
-                                    string_expected(element_name, "currency");
+                                    string_expected(element_name, assetName);
                                 return ret;
                             }
 
                             hasCurrency = true;
 
-                            if (!uCurrency.parseHex(currency.asString()))
+                            if (isMPT)
                             {
-                                if (!to_currency(
-                                        uCurrency, currency.asString()))
+                                // uint32+accountID
+                                uint192 u;
+                                if (!u.parseHex(asset.asString()))
                                 {
                                     error =
-                                        invalid_data(element_name, "currency");
+                                        invalid_data(element_name, assetName);
                                     return ret;
                                 }
+                                uAsset = u;
+                                if (uAsset.mpt().second == beast::zero)
+                                {
+                                    error =
+                                        invalid_data(element_name, "account");
+                                    return ret;
+                                }
+                            }
+                            else
+                            {
+                                Currency currency;
+                                if (!currency.parseHex(asset.asString()))
+                                {
+                                    if (!to_currency(
+                                            currency, asset.asString()))
+                                    {
+                                        error = invalid_data(
+                                            element_name, assetName);
+                                        return ret;
+                                    }
+                                }
+                                uAsset = currency;
                             }
                         }
 
@@ -715,8 +751,7 @@ parseLeaf(
                             }
                         }
 
-                        p.emplace_back(
-                            uAccount, uCurrency, uIssuer, hasCurrency);
+                        p.emplace_back(uAccount, uAsset, uIssuer, hasCurrency);
                     }
 
                     tail.push_back(p);

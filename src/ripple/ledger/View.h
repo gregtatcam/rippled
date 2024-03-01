@@ -88,6 +88,9 @@ isGlobalFrozen(ReadView const& view, AccountID const& issuer);
 isGlobalFrozen(ReadView const& view, MPTIssue const& mpt);
 
 [[nodiscard]] bool
+isGlobalFrozen(ReadView const& view, Asset const& asset);
+
+[[nodiscard]] bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
@@ -110,6 +113,12 @@ isIndividualFrozen(
     MPTIssue const& mpt);
 
 [[nodiscard]] bool
+isIndividualFrozen(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& asset);
+
+[[nodiscard]] bool
 isFrozen(
     ReadView const& view,
     AccountID const& account,
@@ -124,6 +133,9 @@ isFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
 
 [[nodiscard]] bool
 isFrozen(ReadView const& view, AccountID const& account, MPTIssue const& mpt);
+
+[[nodiscard]] bool
+isFrozen(ReadView const& view, AccountID const& account, Asset const& asset);
 
 // Returns the amount an account can spend without going into debt.
 //
@@ -152,6 +164,22 @@ accountHolds(
     MPTIssue const& issue,
     FreezeHandling zeroIfFrozen,
     AuthHandling zeroIfUnauthorized,
+    beast::Journal j);
+
+[[nodiscard]] STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    MPTIssue const& issue,
+    FreezeHandling zeroIfFrozen = FreezeHandling::fhIGNORE_FREEZE,
+    beast::Journal j = beast::Journal{beast::Journal::getNullSink()});
+
+[[nodiscard]] STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& asset,
+    FreezeHandling zeroIfFrozen,
     beast::Journal j);
 
 // Returns the amount an account can spend of the currency type saDefault, or
@@ -507,6 +535,8 @@ requireAuth(
     ReadView const& view,
     MPTIssue const& mpt,
     AccountID const& account);
+[[nodiscard]] TER
+requireAuth(ReadView const& view, Asset const& asset, AccountID const& account);
 
 /** Deleter function prototype. Returns the status of the entry deletion
  * (if should not be skipped) and if the entry should be skipped. The status

@@ -83,9 +83,6 @@ CreateOffer::preflight(PreflightContext const& ctx)
     STAmount saTakerPays = tx[sfTakerPays];
     STAmount saTakerGets = tx[sfTakerGets];
 
-    if (saTakerPays.isMPT() || saTakerGets.isMPT())
-        return temMPT_NOT_SUPPORTED;
-
     if (!isLegalNet(saTakerPays) || !isLegalNet(saTakerGets))
         return temBAD_AMOUNT;
 
@@ -100,29 +97,40 @@ CreateOffer::preflight(PreflightContext const& ctx)
         return temBAD_OFFER;
     }
 
-    auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
-
-    auto const& uGetsIssuerID = saTakerGets.getIssuer();
-    auto const& uGetsCurrency = saTakerGets.getCurrency();
-
-    if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
+    if (saTakerPays.isIssue() && saTakerGets.isIssue())
     {
-        JLOG(j.debug()) << "Malformed offer: redundant (IOU for IOU)";
-        return temREDUNDANT;
+        auto const& uPaysIssuerID = saTakerPays.getIssuer();
+        auto const& uPaysCurrency = saTakerPays.getCurrency();
+
+        auto const& uGetsIssuerID = saTakerGets.getIssuer();
+        auto const& uGetsCurrency = saTakerGets.getCurrency();
+
+        if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
+        {
+            JLOG(j.debug()) << "Malformed offer: redundant (IOU for IOU)";
+            return temREDUNDANT;
+        }
+        // We don't allow a non-native currency to use the currency code XRP.
+        if (badCurrency() == uPaysCurrency || badCurrency() == uGetsCurrency)
+        {
+            JLOG(j.debug()) << "Malformed offer: bad currency";
+            return temBAD_CURRENCY;
+        }
+
+        if (saTakerPays.native() != !uPaysIssuerID ||
+            saTakerGets.native() != !uGetsIssuerID)
+        {
+            JLOG(j.debug()) << "Malformed offer: bad issuer";
+            return temBAD_ISSUER;
+        }
     }
-    // We don't allow a non-native currency to use the currency code XRP.
-    if (badCurrency() == uPaysCurrency || badCurrency() == uGetsCurrency)
+    else if (saTakerPays.isMPT() && saTakerGets.isMPT())
     {
-        JLOG(j.debug()) << "Malformed offer: bad currency";
-        return temBAD_CURRENCY;
-    }
-
-    if (saTakerPays.native() != !uPaysIssuerID ||
-        saTakerGets.native() != !uGetsIssuerID)
-    {
-        JLOG(j.debug()) << "Malformed offer: bad issuer";
-        return temBAD_ISSUER;
+        if (saTakerPays.mptIssue() == saTakerGets.mptIssue())
+        {
+            JLOG(j.debug()) << "Malformed offer: redundant (MPT for MPT)";
+            return temREDUNDANT;
+        }
     }
 
     return preflight2(ctx);
@@ -136,11 +144,6 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     auto saTakerPays = ctx.tx[sfTakerPays];
     auto saTakerGets = ctx.tx[sfTakerGets];
 
-    auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
-
-    auto const& uGetsIssuerID = saTakerGets.getIssuer();
-
     auto const cancelSequence = ctx.tx[~sfOfferSequence];
 
     auto const sleCreator = ctx.view.read(keylet::account(id));
@@ -151,8 +154,8 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
 
     auto viewJ = ctx.app.journal("View");
 
-    if (isGlobalFrozen(ctx.view, uPaysIssuerID) ||
-        isGlobalFrozen(ctx.view, uGetsIssuerID))
+    if (isGlobalFrozen(ctx.view, saTakerPays.asset()) ||
+        isGlobalFrozen(ctx.view, saTakerGets.asset()))
     {
         JLOG(ctx.j.debug()) << "Offer involves frozen asset";
         return tecFROZEN;
@@ -192,11 +195,7 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     if (!saTakerPays.native())
     {
         auto result = checkAcceptAsset(
-            ctx.view,
-            ctx.flags,
-            id,
-            ctx.j,
-            Issue(uPaysCurrency, uPaysIssuerID));
+            ctx.view, ctx.flags, id, ctx.j, saTakerPays.asset());
         if (result != tesSUCCESS)
             return result;
     }
@@ -210,18 +209,18 @@ CreateOffer::checkAcceptAsset(
     ApplyFlags const flags,
     AccountID const id,
     beast::Journal const j,
-    Issue const& issue)
+    Asset const& asset)
 {
     // Only valid for custom currencies
-    assert(!isXRP(issue.currency));
+    assert(!isXRP(asset));
 
-    auto const issuerAccount = view.read(keylet::account(issue.account));
+    auto const issuerAccount = view.read(keylet::account(asset.account()));
 
     if (!issuerAccount)
     {
         JLOG(j.debug())
-            << "delay: can't receive IOUs from non-existent issuer: "
-            << to_string(issue.account);
+            << "delay: can't receive IOUs or MPTs from non-existent issuer: "
+            << to_string(asset.account());
 
         return (flags & tapRETRY) ? TER{terNO_ACCOUNT} : TER{tecNO_ISSUER};
     }
@@ -229,14 +228,21 @@ CreateOffer::checkAcceptAsset(
     // This code is attached to the DepositPreauth amendment as a matter of
     // convenience.  The change is not significant enough to deserve its
     // own amendment.
-    if (view.rules().enabled(featureDepositPreauth) && (issue.account == id))
+    if (view.rules().enabled(featureDepositPreauth) && (asset.account() == id))
         // An account can always accept its own issuance.
         return tesSUCCESS;
 
+    if (asset.isMPT())
+    {
+        if (requireAuth(view, asset.mptIssue(), id) != tesSUCCESS)
+            return (flags & tapRETRY) ? TER{terNO_AUTH} : TER{tecNO_AUTH};
+        return tesSUCCESS;
+    }
+
     if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
-        auto const trustLine =
-            view.read(keylet::line(id, issue.account, issue.currency));
+        auto const trustLine = view.read(
+            keylet::line(id, asset.account(), asset.issue().currency));
 
         if (!trustLine)
         {
@@ -246,7 +252,7 @@ CreateOffer::checkAcceptAsset(
         // Entries have a canonical representation, determined by a
         // lexicographical "greater than" comparison employing strict weak
         // ordering. Determine which entry we need to access.
-        bool const canonical_gt(id > issue.account);
+        bool const canonical_gt(id > asset.account());
 
         bool const is_authorized(
             (*trustLine)[sfFlags] & (canonical_gt ? lsfLowAuth : lsfHighAuth));
@@ -338,7 +344,7 @@ CreateOffer::bridged_cross(
     OfferStream offers_direct(
         view,
         view_cancel,
-        Book(taker.issue_in(), taker.issue_out()),
+        Book(taker.asset_in(), taker.asset_out()),
         when,
         stepCounter_,
         j_);
@@ -346,7 +352,7 @@ CreateOffer::bridged_cross(
     OfferStream offers_leg1(
         view,
         view_cancel,
-        Book(taker.issue_in(), xrpIssue()),
+        Book(taker.asset_in(), xrpIssue()),
         when,
         stepCounter_,
         j_);
@@ -354,7 +360,7 @@ CreateOffer::bridged_cross(
     OfferStream offers_leg2(
         view,
         view_cancel,
-        Book(xrpIssue(), taker.issue_out()),
+        Book(xrpIssue(), taker.asset_out()),
         when,
         stepCounter_,
         j_);
@@ -520,7 +526,7 @@ CreateOffer::direct_cross(
     OfferStream offers(
         view,
         view_cancel,
-        Book(taker.issue_in(), taker.issue_out()),
+        Book(taker.asset_in(), taker.asset_out()),
         when,
         stepCounter_,
         j_);
@@ -659,7 +665,7 @@ CreateOffer::takerCross(
 
     try
     {
-        if (cross_type_ == CrossType::IouToIou)
+        if (cross_type_ == CrossType::AssetToAsset)
             return bridged_cross(taker, sb, sbCancel, when);
 
         return direct_cross(taker, sb, sbCancel, when);
@@ -699,15 +705,18 @@ CreateOffer::flowCross(
         // offer taker.  Set sendMax to allow for the gateway's cut.
         Rate gatewayXferRate{QUALITY_ONE};
         STAmount sendMax = takerAmount.in;
-        if (!sendMax.native() && (account_ != sendMax.getIssuer()))
+        if (((sendMax.isIssue() && !sendMax.native()) || sendMax.isMPT()) &&
+            (account_ != sendMax.asset().account()))
         {
-            gatewayXferRate = transferRate(psb, sendMax.getIssuer());
+            gatewayXferRate = sendMax.isIssue()
+                ? transferRate(psb, sendMax.getIssuer())
+                : transferRateMPT(psb, sendMax.mptIssue().mpt());
             if (gatewayXferRate.value != QUALITY_ONE)
             {
                 sendMax = multiplyRound(
                     takerAmount.in,
                     gatewayXferRate,
-                    takerAmount.in.issue(),
+                    takerAmount.in.asset(),
                     true);
             }
         }
@@ -734,7 +743,11 @@ CreateOffer::flowCross(
         if (!takerAmount.in.native() && !takerAmount.out.native())
         {
             STPath path;
-            path.emplace_back(std::nullopt, xrpCurrency(), std::nullopt);
+            path.emplace_back(
+                std::nullopt,
+                xrpCurrency(),
+                std::nullopt,
+                STPathElement::PathAssetTag{});
             paths.emplace_back(std::move(path));
         }
         // Special handling for the tfSell flag.
@@ -754,7 +767,7 @@ CreateOffer::flowCross(
                 // Since the transfer rate cannot exceed 200%, we use 1/2
                 // maxValue for our limit.
                 deliver = STAmount{
-                    takerAmount.out.issue(),
+                    takerAmount.out.asset(),
                     STAmount::cMaxValue / 2,
                     STAmount::cMaxOffset};
         }
@@ -817,7 +830,7 @@ CreateOffer::flowCross(
                         nonGatewayAmountIn = divideRound(
                             result.actualAmountIn,
                             gatewayXferRate,
-                            takerAmount.in.issue(),
+                            takerAmount.in.asset(),
                             true);
 
                     afterCross.in -= nonGatewayAmountIn;
@@ -839,11 +852,11 @@ CreateOffer::flowCross(
                             return divRoundStrict(
                                 afterCross.in,
                                 rate,
-                                takerAmount.out.issue(),
+                                takerAmount.out.asset(),
                                 false);
 
                         return divRound(
-                            afterCross.in, rate, takerAmount.out.issue(), true);
+                            afterCross.in, rate, takerAmount.out.asset(), true);
                     }();
                 }
                 else
@@ -856,7 +869,7 @@ CreateOffer::flowCross(
                     if (afterCross.out < beast::zero)
                         afterCross.out.clear();
                     afterCross.in = mulRound(
-                        afterCross.out, rate, takerAmount.in.issue(), true);
+                        afterCross.out, rate, takerAmount.in.asset(), true);
                 }
             }
         }
@@ -897,20 +910,20 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    txt += to_string(amount.asset());
     return txt;
 }
 
 void
 CreateOffer::preCompute()
 {
-    cross_type_ = CrossType::IouToIou;
+    cross_type_ = CrossType::AssetToAsset;
     bool const pays_xrp = ctx_.tx.getFieldAmount(sfTakerPays).native();
     bool const gets_xrp = ctx_.tx.getFieldAmount(sfTakerGets).native();
     if (pays_xrp && !gets_xrp)
-        cross_type_ = CrossType::IouToXrp;
+        cross_type_ = CrossType::AssetToXrp;
     else if (gets_xrp && !pays_xrp)
-        cross_type_ = CrossType::XrpToIou;
+        cross_type_ = CrossType::XrpToAsset;
 
     return Transactor::preCompute();
 }
@@ -982,8 +995,8 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     if (result == tesSUCCESS)
     {
         // If a tick size applies, round the offer to the tick size
-        auto const& uPaysIssuerID = saTakerPays.getIssuer();
-        auto const& uGetsIssuerID = saTakerGets.getIssuer();
+        auto const& uPaysIssuerID = saTakerPays.asset().account();
+        auto const& uGetsIssuerID = saTakerGets.asset().account();
 
         std::uint8_t uTickSize = Quality::maxTickSize;
         if (!isXRP(uPaysIssuerID))
@@ -1009,12 +1022,12 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             if (bSell)
             {
                 // this is a sell, round taker pays
-                saTakerPays = multiply(saTakerGets, rate, saTakerPays.issue());
+                saTakerPays = multiply(saTakerGets, rate, saTakerPays.asset());
             }
             else
             {
                 // this is a buy, round taker gets
-                saTakerGets = divide(saTakerPays, rate, saTakerGets.issue());
+                saTakerGets = divide(saTakerPays, rate, saTakerGets.asset());
             }
             if (!saTakerGets || !saTakerPays)
             {
@@ -1034,8 +1047,8 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         Amounts place_offer;
 
         JLOG(j_.debug()) << "Attempting cross: "
-                         << to_string(takerAmount.in.issue()) << " -> "
-                         << to_string(takerAmount.out.issue());
+                         << to_string(takerAmount.in.asset()) << " -> "
+                         << to_string(takerAmount.out.asset());
 
         if (auto stream = j_.trace())
         {
@@ -1067,8 +1080,8 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             return {result, true};
         }
 
-        assert(saTakerGets.issue() == place_offer.in.issue());
-        assert(saTakerPays.issue() == place_offer.out.issue());
+        assert(saTakerGets.asset() == place_offer.in.asset());
+        assert(saTakerPays.asset() == place_offer.out.asset());
 
         if (takerAmount != place_offer)
             crossed = true;
@@ -1177,10 +1190,10 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     // Update owner count.
     adjustOwnerCount(sb, sleCreator, 1, viewJ);
 
-    JLOG(j_.trace()) << "adding to book: " << to_string(saTakerPays.issue())
-                     << " : " << to_string(saTakerGets.issue());
+    JLOG(j_.trace()) << "adding to book: " << to_string(saTakerPays.asset())
+                     << " : " << to_string(saTakerGets.asset());
 
-    Book const book{saTakerPays.issue(), saTakerGets.issue()};
+    Book const book{saTakerPays.asset(), saTakerGets.asset()};
 
     // Add offer to order book, using the original rate
     // before any crossing occured.
@@ -1188,10 +1201,28 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        sle->setFieldH160(sfTakerPaysCurrency, saTakerPays.issue().currency);
-        sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
-        sle->setFieldH160(sfTakerGetsCurrency, saTakerGets.issue().currency);
-        sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
+        if (saTakerPays.isIssue())
+        {
+            sle->setFieldH160(
+                sfTakerPaysCurrency, saTakerPays.issue().currency);
+            sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
+        }
+        else
+        {
+            sle->setFieldH192(
+                sfTakerPaysMPT, saTakerPays.mptIssue().getMptID());
+        }
+        if (saTakerGets.isIssue())
+        {
+            sle->setFieldH160(
+                sfTakerGetsCurrency, saTakerGets.issue().currency);
+            sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
+        }
+        else
+        {
+            sle->setFieldH192(
+                sfTakerGetsMPT, saTakerGets.mptIssue().getMptID());
+        }
         sle->setFieldU64(sfExchangeRate, uRate);
     });
 

@@ -28,7 +28,7 @@ format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    txt += to_string(amount.asset());
     return txt;
 }
 
@@ -47,8 +47,8 @@ BasicTaker::BasicTaker(
     , sell_(flags & tfSell)
     , original_(amount)
     , remaining_(amount)
-    , issue_in_(remaining_.in.issue())
-    , issue_out_(remaining_.out.issue())
+    , asset_in_(remaining_.in.asset())
+    , asset_out_(remaining_.out.asset())
     , m_rate_in(rate_in)
     , m_rate_out(rate_out)
     , cross_type_(cross_type)
@@ -63,15 +63,15 @@ BasicTaker::BasicTaker(
     // If we are dealing with a particular flavor, make sure that it's the
     // flavor we expect:
     assert(
-        cross_type != CrossType::XrpToIou ||
-        (isXRP(issue_in()) && !isXRP(issue_out())));
+        cross_type != CrossType::XrpToAsset ||
+        (isXRP(asset_in()) && !isXRP(asset_out())));
 
     assert(
-        cross_type != CrossType::IouToXrp ||
-        (!isXRP(issue_in()) && isXRP(issue_out())));
+        cross_type != CrossType::AssetToXrp ||
+        (!isXRP(asset_in()) && isXRP(asset_out())));
 
     // And make sure we're not crossing XRP for XRP
-    assert(!isXRP(issue_in()) || !isXRP(issue_out()));
+    assert(!isXRP(asset_in()) || !isXRP(asset_out()));
 
     // If this is a passive order, we adjust the quality so as to prevent offers
     // at the same quality level from being consumed.
@@ -82,15 +82,15 @@ BasicTaker::BasicTaker(
 Rate
 BasicTaker::effective_rate(
     Rate const& rate,
-    Issue const& issue,
+    Asset const& asset,
     AccountID const& from,
     AccountID const& to)
 {
     // If there's a transfer rate, the issuer is not involved
     // and the sender isn't the same as the recipient, return
     // the actual transfer rate.
-    if (rate != parityRate && from != to && from != issue.account &&
-        to != issue.account)
+    if (rate != parityRate && from != to && from != asset.account() &&
+        to != asset.account())
     {
         return rate;
     }
@@ -155,14 +155,14 @@ BasicTaker::remaining_offer() const
         // We scale the output based on the remaining input:
         return Amounts(
             remaining_.in,
-            divRound(remaining_.in, quality_.rate(), issue_out_, true));
+            divRound(remaining_.in, quality_.rate(), asset_out_, true));
     }
 
     assert(remaining_.out > beast::zero);
 
     // We scale the input based on the remaining output:
     return Amounts(
-        mulRound(remaining_.out, quality_.rate(), issue_in_, true),
+        mulRound(remaining_.out, quality_.rate(), asset_in_, true),
         remaining_.out);
 }
 
@@ -177,14 +177,14 @@ BasicTaker::original_offer() const
 static STAmount
 qual_div(STAmount const& amount, Quality const& quality, STAmount const& output)
 {
-    auto result = divide(amount, quality.rate(), output.issue());
+    auto result = divide(amount, quality.rate(), output.asset());
     return std::min(result, output);
 }
 
 static STAmount
 qual_mul(STAmount const& amount, Quality const& quality, STAmount const& output)
 {
-    auto result = multiply(amount, quality.rate(), output.issue());
+    auto result = multiply(amount, quality.rate(), output.asset());
     return std::min(result, output);
 }
 
@@ -197,13 +197,13 @@ BasicTaker::log_flow(char const* description, Flow const& flow)
 
     stream << description;
 
-    if (isXRP(issue_in()))
+    if (isXRP(asset_in()))
         stream << "   order in: " << format_amount(flow.order.in);
     else
         stream << "   order in: " << format_amount(flow.order.in)
                << " (issuer: " << format_amount(flow.issuers.in) << ")";
 
-    if (isXRP(issue_out()))
+    if (isXRP(asset_out()))
         stream << "  order out: " << format_amount(flow.order.out);
     else
         stream << "  order out: " << format_amount(flow.order.out)
@@ -211,7 +211,7 @@ BasicTaker::log_flow(char const* description, Flow const& flow)
 }
 
 BasicTaker::Flow
-BasicTaker::flow_xrp_to_iou(
+BasicTaker::flow_xrp_to_asset(
     Amounts const& order,
     Quality quality,
     STAmount const& owner_funds,
@@ -222,7 +222,7 @@ BasicTaker::flow_xrp_to_iou(
     f.order = order;
     f.issuers.out = multiply(f.order.out, rate_out);
 
-    log_flow("flow_xrp_to_iou", f);
+    log_flow("flow_xrp_to_asset", f);
 
     // Clamp on owner balance
     if (owner_funds < f.issuers.out)
@@ -253,7 +253,7 @@ BasicTaker::flow_xrp_to_iou(
 
     // Clamp on remaining offer if we are not handling the second leg
     // of an autobridge.
-    if (cross_type_ == CrossType::XrpToIou && (remaining_.in < f.order.in))
+    if (cross_type_ == CrossType::XrpToAsset && (remaining_.in < f.order.in))
     {
         f.order.in = remaining_.in;
         f.order.out = qual_div(f.order.in, quality, f.order.out);
@@ -265,7 +265,7 @@ BasicTaker::flow_xrp_to_iou(
 }
 
 BasicTaker::Flow
-BasicTaker::flow_iou_to_xrp(
+BasicTaker::flow_asset_to_xrp(
     Amounts const& order,
     Quality quality,
     STAmount const& owner_funds,
@@ -276,7 +276,7 @@ BasicTaker::flow_iou_to_xrp(
     f.order = order;
     f.issuers.in = multiply(f.order.in, rate_in);
 
-    log_flow("flow_iou_to_xrp", f);
+    log_flow("flow_asset_to_xrp", f);
 
     // Clamp on owner's funds
     if (owner_funds < f.order.out)
@@ -289,7 +289,7 @@ BasicTaker::flow_iou_to_xrp(
 
     // Clamp if taker wants to limit the output and we are not the
     // first leg of an autobridge.
-    if (!sell_ && cross_type_ == CrossType::IouToXrp)
+    if (!sell_ && cross_type_ == CrossType::AssetToXrp)
     {
         if (remaining_.out < f.order.out)
         {
@@ -322,7 +322,7 @@ BasicTaker::flow_iou_to_xrp(
 }
 
 BasicTaker::Flow
-BasicTaker::flow_iou_to_iou(
+BasicTaker::flow_asset_to_asset(
     Amounts const& order,
     Quality quality,
     STAmount const& owner_funds,
@@ -335,7 +335,7 @@ BasicTaker::flow_iou_to_iou(
     f.issuers.in = multiply(f.order.in, rate_in);
     f.issuers.out = multiply(f.order.out, rate_out);
 
-    log_flow("flow_iou_to_iou", f);
+    log_flow("flow_asset_to_asset", f);
 
     // Clamp on owner balance
     if (owner_funds < f.issuers.out)
@@ -389,18 +389,18 @@ BasicTaker::do_cross(Amounts offer, Quality quality, AccountID const& owner)
 
     Flow result;
 
-    if (cross_type_ == CrossType::XrpToIou)
+    if (cross_type_ == CrossType::XrpToAsset)
     {
-        result = flow_xrp_to_iou(
+        result = flow_xrp_to_asset(
             offer,
             quality,
             owner_funds,
             taker_funds,
             out_rate(owner, account()));
     }
-    else if (cross_type_ == CrossType::IouToXrp)
+    else if (cross_type_ == CrossType::AssetToXrp)
     {
-        result = flow_iou_to_xrp(
+        result = flow_asset_to_xrp(
             offer,
             quality,
             owner_funds,
@@ -409,7 +409,7 @@ BasicTaker::do_cross(Amounts offer, Quality quality, AccountID const& owner)
     }
     else
     {
-        result = flow_iou_to_iou(
+        result = flow_asset_to_asset(
             offer,
             quality,
             owner_funds,
@@ -494,14 +494,14 @@ BasicTaker::do_cross(
 
     // Attempt to determine the maximal flow that can be achieved across each
     // leg independent of the other.
-    auto flow1 =
-        flow_iou_to_xrp(offer1, quality1, xrp_funds, leg1_in_funds, leg1_rate);
+    auto flow1 = flow_asset_to_xrp(
+        offer1, quality1, xrp_funds, leg1_in_funds, leg1_rate);
 
     if (!flow1.sanity_check())
         Throw<std::logic_error>("Computed flow1 fails sanity check.");
 
-    auto flow2 =
-        flow_xrp_to_iou(offer2, quality2, leg2_out_funds, xrp_funds, leg2_rate);
+    auto flow2 = flow_xrp_to_asset(
+        offer2, quality2, leg2_out_funds, xrp_funds, leg2_rate);
 
     if (!flow2.sanity_check())
         Throw<std::logic_error>("Computed flow2 fails sanity check.");
@@ -551,32 +551,32 @@ Taker::Taker(
           offer,
           Quality(offer),
           flags,
-          calculateRate(view, offer.in.getIssuer(), account),
-          calculateRate(view, offer.out.getIssuer(), account),
+          calculateRate(view, offer.in.asset(), account),
+          calculateRate(view, offer.out.asset(), account),
           journal)
     , view_(view)
     , xrp_flow_(0)
     , direct_crossings_(0)
     , bridge_crossings_(0)
 {
-    assert(issue_in() == offer.in.issue());
-    assert(issue_out() == offer.out.issue());
+    assert(asset_in() == offer.in.asset());
+    assert(asset_out() == offer.out.asset());
 
     if (auto stream = journal_.debug())
     {
         stream << "Crossing as: " << to_string(account);
 
-        if (isXRP(issue_in()))
+        if (isXRP(asset_in()))
             stream << "   Offer in: " << format_amount(offer.in);
         else
             stream << "   Offer in: " << format_amount(offer.in)
-                   << " (issuer: " << issue_in().account << ")";
+                   << " (issuer: " << asset_in().account() << ")";
 
-        if (isXRP(issue_out()))
+        if (isXRP(asset_out()))
             stream << "  Offer out: " << format_amount(offer.out);
         else
             stream << "  Offer out: " << format_amount(offer.out)
-                   << " (issuer: " << issue_out().account << ")";
+                   << " (issuer: " << asset_out().account() << ")";
 
         stream << "    Balance: "
                << format_amount(get_funds(account, offer.in));
@@ -687,7 +687,7 @@ Taker::fill(BasicTaker::Flow const& flow, Offer& offer)
 
     TER result = tesSUCCESS;
 
-    if (cross_type() != CrossType::XrpToIou)
+    if (cross_type() != CrossType::XrpToAsset)
     {
         assert(!isXRP(flow.order.in));
 
@@ -708,7 +708,7 @@ Taker::fill(BasicTaker::Flow const& flow, Offer& offer)
     }
 
     // Now send funds from the account whose offer we're taking
-    if (cross_type() != CrossType::IouToXrp)
+    if (cross_type() != CrossType::AssetToXrp)
     {
         assert(!isXRP(flow.order.out));
 
@@ -820,11 +820,14 @@ Taker::cross(Offer& leg1, Offer& leg2)
 Rate
 Taker::calculateRate(
     ApplyView const& view,
-    AccountID const& issuer,
+    Asset const& asset,
     AccountID const& account)
 {
-    return isXRP(issuer) || (account == issuer) ? parityRate
-                                                : transferRate(view, issuer);
+    if (isXRP(asset) || (account == asset.account()))
+        return parityRate;
+    if (asset.isIssue())
+        return transferRate(view, asset.account());
+    return transferRateMPT(view, asset.mptIssue().mpt());
 }
 
 }  // namespace ripple

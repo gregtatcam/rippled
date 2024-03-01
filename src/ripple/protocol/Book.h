@@ -21,10 +21,15 @@
 #define RIPPLE_PROTOCOL_BOOK_H_INCLUDED
 
 #include <ripple/basics/CountedObject.h>
-#include <ripple/protocol/Issue.h>
+#include <ripple/protocol/Asset.h>
 #include <boost/utility/base_from_member.hpp>
 
 namespace ripple {
+
+template <typename A>
+concept BookAsset =
+    (std::is_same_v<A, Issue> || std::is_same_v<A, MPTIssue> ||
+     std::is_same_v<A, Asset> || std::is_convertible_v<A, Issue>);
 
 /** Specifies an order book.
     The order book is a pair of Issues called in and out.
@@ -33,14 +38,15 @@ namespace ripple {
 class Book final : public CountedObject<Book>
 {
 public:
-    Issue in;
-    Issue out;
+    Asset in;
+    Asset out;
 
     Book()
     {
     }
 
-    Book(Issue const& in_, Issue const& out_) : in(in_), out(out_)
+    template <BookAsset AIn, BookAsset AOut>
+    Book(AIn const& in_, AOut const& out_) : in(in_), out(out_)
     {
     }
 };
@@ -119,13 +125,52 @@ public:
     }
 };
 
+template <>
+struct hash<ripple::Asset>
+    : private boost::base_from_member<std::hash<ripple::Currency>, 0>,
+      private boost::base_from_member<std::hash<ripple::AccountID>, 1>,
+      private boost::base_from_member<std::hash<ripple::MPT>, 2>
+{
+private:
+    using currency_hash_type =
+        boost::base_from_member<std::hash<ripple::Currency>, 0>;
+    using issuer_hash_type =
+        boost::base_from_member<std::hash<ripple::AccountID>, 1>;
+    using mpt_hash_type = boost::base_from_member<std::hash<ripple::MPT>, 2>;
+
+public:
+    explicit hash() = default;
+
+    using value_type = std::size_t;
+    using argument_type = ripple::Asset;
+
+    value_type
+    operator()(argument_type const& value) const
+    {
+        if (value.isIssue())
+        {
+            value_type result(
+                currency_hash_type::member(value.issue().currency));
+            if (!isXRP(value.issue().currency))
+                boost::hash_combine(
+                    result, issuer_hash_type::member(value.issue().account));
+            return result;
+        }
+        else
+        {
+            value_type result(mpt_hash_type::member(value.mptIssue().mpt()));
+            return result;
+        }
+    }
+};
+
 //------------------------------------------------------------------------------
 
 template <>
 struct hash<ripple::Book>
 {
 private:
-    using hasher = std::hash<ripple::Issue>;
+    using hasher = std::hash<ripple::Asset>;
 
     hasher m_hasher;
 
@@ -156,6 +201,16 @@ struct hash<ripple::Issue> : std::hash<ripple::Issue>
     explicit hash() = default;
 
     using Base = std::hash<ripple::Issue>;
+    // VFALCO NOTE broken in vs2012
+    // using Base::Base; // inherit ctors
+};
+
+template <>
+struct hash<ripple::Asset> : std::hash<ripple::Asset>
+{
+    explicit hash() = default;
+
+    using Base = std::hash<ripple::Asset>;
     // VFALCO NOTE broken in vs2012
     // using Base::Base; // inherit ctors
 };

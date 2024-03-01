@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2012, 2013 Ripple Labs Inc.
+    Copyright (c) 2024 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -20,8 +20,8 @@
 #include <ripple/app/paths/Credit.h>
 #include <ripple/app/paths/impl/StepChecks.h>
 #include <ripple/app/paths/impl/Steps.h>
-#include <ripple/basics/IOUAmount.h>
 #include <ripple/basics/Log.h>
+#include <ripple/basics/MPTAmount.h>
 #include <ripple/ledger/PaymentSandbox.h>
 #include <ripple/protocol/Feature.h>
 #include <ripple/protocol/Quality.h>
@@ -34,12 +34,13 @@
 namespace ripple {
 
 template <class TDerived>
-class DirectStepI : public StepImp<IOUAmount, IOUAmount, DirectStepI<TDerived>>
+class MPTEndpointStep
+    : public StepImp<MPTAmount, MPTAmount, MPTEndpointStep<TDerived>>
 {
 protected:
-    AccountID src_;
-    AccountID dst_;
-    Currency currency_;
+    AccountID const src_;
+    AccountID const dst_;
+    MPTIssue mptIssue_;
 
     // Charge transfer fees when the prev step redeems
     Step const* const prevStep_ = nullptr;
@@ -48,15 +49,15 @@ protected:
 
     struct Cache
     {
-        IOUAmount in;
-        IOUAmount srcToDst;
-        IOUAmount out;
+        MPTAmount in;
+        MPTAmount srcToDst;
+        MPTAmount out;
         DebtDirection srcDebtDir;
 
         Cache(
-            IOUAmount const& in_,
-            IOUAmount const& srcToDst_,
-            IOUAmount const& out_,
+            MPTAmount const& in_,
+            MPTAmount const& srcToDst_,
+            MPTAmount const& out_,
             DebtDirection srcDebtDir_)
             : in(in_), srcToDst(srcToDst_), out(out_), srcDebtDir(srcDebtDir_)
         {
@@ -69,7 +70,7 @@ protected:
     // the best available quality.
     // return: first element is max amount that can flow,
     //         second is the debt direction of the source w.r.t. the dst
-    std::pair<IOUAmount, DebtDirection>
+    std::pair<MPTAmount, DebtDirection>
     maxPaymentFlow(ReadView const& sb) const;
 
     // Compute srcQOut and dstQIn when the source redeems.
@@ -89,14 +90,14 @@ protected:
         StrandDirection strandDir) const;
 
 public:
-    DirectStepI(
+    MPTEndpointStep(
         StrandContext const& ctx,
         AccountID const& src,
         AccountID const& dst,
-        Currency const& c)
+        MPT const& mpt)
         : src_(src)
         , dst_(dst)
-        , currency_(c)
+        , mptIssue_(mpt)
         , prevStep_(ctx.prevStep)
         , isLast_(ctx.isLast)
         , j_(ctx.j)
@@ -113,10 +114,10 @@ public:
     {
         return dst_;
     }
-    Currency const&
-    currency() const
+    MPT const&
+    mptID() const
     {
-        return currency_;
+        return mptIssue_.mpt();
     }
 
     std::optional<EitherAmount>
@@ -156,19 +157,19 @@ public:
     std::pair<std::optional<Quality>, DebtDirection>
     qualityUpperBound(ReadView const& v, DebtDirection dir) const override;
 
-    std::pair<IOUAmount, IOUAmount>
+    std::pair<MPTAmount, MPTAmount>
     revImp(
         PaymentSandbox& sb,
         ApplyView& afView,
         boost::container::flat_set<uint256>& ofrsToRm,
-        IOUAmount const& out);
+        MPTAmount const& out);
 
-    std::pair<IOUAmount, IOUAmount>
+    std::pair<MPTAmount, MPTAmount>
     fwdImp(
         PaymentSandbox& sb,
         ApplyView& afView,
         boost::container::flat_set<uint256>& ofrsToRm,
-        IOUAmount const& in);
+        MPTAmount const& in);
 
     std::pair<bool, EitherAmount>
     validFwd(PaymentSandbox& sb, ApplyView& afView, EitherAmount const& in)
@@ -181,20 +182,20 @@ public:
 
     void
     setCacheLimiting(
-        IOUAmount const& fwdIn,
-        IOUAmount const& fwdSrcToDst,
-        IOUAmount const& fwdOut,
+        MPTAmount const& fwdIn,
+        MPTAmount const& fwdSrcToDst,
+        MPTAmount const& fwdOut,
         DebtDirection srcDebtDir);
 
     friend bool
-    operator==(DirectStepI const& lhs, DirectStepI const& rhs)
+    operator==(MPTEndpointStep const& lhs, MPTEndpointStep const& rhs)
     {
         return lhs.src_ == rhs.src_ && lhs.dst_ == rhs.dst_ &&
-            lhs.currency_ == rhs.currency_;
+            lhs.mptIssue_ == rhs.mptIssue_;
     }
 
     friend bool
-    operator!=(DirectStepI const& lhs, DirectStepI const& rhs)
+    operator!=(MPTEndpointStep const& lhs, MPTEndpointStep const& rhs)
     {
         return !(lhs == rhs);
     }
@@ -213,7 +214,7 @@ private:
     bool
     equal(Step const& rhs) const override
     {
-        if (auto ds = dynamic_cast<DirectStepI const*>(&rhs))
+        if (auto ds = dynamic_cast<MPTEndpointStep const*>(&rhs))
         {
             return *this == *ds;
         }
@@ -230,11 +231,11 @@ private:
 // quite, the same.
 
 // Payment DirectStep class (not offer crossing).
-class DirectIPaymentStep : public DirectStepI<DirectIPaymentStep>
+class DirectMPTPaymentStep : public MPTEndpointStep<DirectMPTPaymentStep>
 {
 public:
-    using DirectStepI<DirectIPaymentStep>::DirectStepI;
-    using DirectStepI<DirectIPaymentStep>::check;
+    using MPTEndpointStep<DirectMPTPaymentStep>::MPTEndpointStep;
+    using MPTEndpointStep<DirectMPTPaymentStep>::check;
 
     bool verifyPrevStepDebtDirection(DebtDirection) const
     {
@@ -256,8 +257,8 @@ public:
     // the best available quality.
     // return: first element is max amount that can flow,
     //         second is the debt direction w.r.t. the source account
-    std::pair<IOUAmount, DebtDirection>
-    maxFlow(ReadView const& sb, IOUAmount const& desired) const;
+    std::pair<MPTAmount, DebtDirection>
+    maxFlow(ReadView const& sb, MPTAmount const& desired) const;
 
     // Verify the consistency of the step.  These checks are specific to
     // payments and assume that general checks were already performed.
@@ -268,16 +269,17 @@ public:
     std::string
     logString() const override
     {
-        return logStringImpl("DirectIPaymentStep");
+        return logStringImpl("DirectMPTPaymentStep");
     }
 };
 
 // Offer crossing DirectStep class (not a payment).
-class DirectIOfferCrossingStep : public DirectStepI<DirectIOfferCrossingStep>
+class DirectMPTOfferCrossingStep
+    : public MPTEndpointStep<DirectMPTOfferCrossingStep>
 {
 public:
-    using DirectStepI<DirectIOfferCrossingStep>::DirectStepI;
-    using DirectStepI<DirectIOfferCrossingStep>::check;
+    using MPTEndpointStep<DirectMPTOfferCrossingStep>::MPTEndpointStep;
+    using MPTEndpointStep<DirectMPTOfferCrossingStep>::check;
 
     bool
     verifyPrevStepDebtDirection(DebtDirection prevStepDir) const
@@ -285,7 +287,7 @@ public:
         // During offer crossing we rely on the fact that prevStepRedeems
         // will *always* issue.  That's because:
         //  o If there's a prevStep_, it will always be a BookStep.
-        //  o BookStep::debtDirection() aways returns `issues` when offer
+        //  o BookStep::debtDirection() always returns `issues` when offer
         //  crossing.
         // An assert based on this return value will tell us if that
         // behavior changes.
@@ -307,8 +309,8 @@ public:
     // the best available quality.
     // return: first element is max amount that can flow,
     //         second is the debt direction w.r.t the source
-    std::pair<IOUAmount, DebtDirection>
-    maxFlow(ReadView const& sb, IOUAmount const& desired) const;
+    std::pair<MPTAmount, DebtDirection>
+    maxFlow(ReadView const& sb, MPTAmount const& desired) const;
 
     // Verify the consistency of the step.  These checks are specific to
     // offer crossing and assume that general checks were already performed.
@@ -319,81 +321,38 @@ public:
     std::string
     logString() const override
     {
-        return logStringImpl("DirectIOfferCrossingStep");
+        return logStringImpl("DirectMPTOfferCrossingStep");
     }
 };
 
 //------------------------------------------------------------------------------
 
 std::uint32_t
-DirectIPaymentStep::quality(ReadView const& sb, QualityDirection qDir) const
+DirectMPTPaymentStep::quality(ReadView const& sb, QualityDirection qDir) const
 {
-    if (src_ == dst_)
-        return QUALITY_ONE;
-
-    auto const sle = sb.read(keylet::line(dst_, src_, currency_));
-
-    if (!sle)
-        return QUALITY_ONE;
-
-    auto const& field = [this, qDir]() -> SF_UINT32 const& {
-        if (qDir == QualityDirection::in)
-        {
-            // compute dst quality in
-            if (this->dst_ < this->src_)
-                return sfLowQualityIn;
-            else
-                return sfHighQualityIn;
-        }
-        else
-        {
-            // compute src quality out
-            if (this->src_ < this->dst_)
-                return sfLowQualityOut;
-            else
-                return sfHighQualityOut;
-        }
-    }();
-
-    if (!sle->isFieldPresent(field))
-        return QUALITY_ONE;
-
-    auto const q = (*sle)[field];
-    if (!q)
-        return QUALITY_ONE;
-    return q;
-}
-
-std::uint32_t
-DirectIOfferCrossingStep::quality(ReadView const&, QualityDirection qDir) const
-{
-    // If offer crossing then ignore trust line Quality fields.  This
-    // preserves a long-standing tradition.
+    // There is no trust line Quality fields
     return QUALITY_ONE;
 }
 
-std::pair<IOUAmount, DebtDirection>
-DirectIPaymentStep::maxFlow(ReadView const& sb, IOUAmount const&) const
+std::uint32_t
+DirectMPTOfferCrossingStep::quality(ReadView const&, QualityDirection qDir)
+    const
+{
+    // There is no trust line Quality fields
+    return QUALITY_ONE;
+}
+
+std::pair<MPTAmount, DebtDirection>
+DirectMPTPaymentStep::maxFlow(ReadView const& sb, MPTAmount const&) const
 {
     return maxPaymentFlow(sb);
 }
 
-std::pair<IOUAmount, DebtDirection>
-DirectIOfferCrossingStep::maxFlow(ReadView const& sb, IOUAmount const& desired)
-    const
+std::pair<MPTAmount, DebtDirection>
+DirectMPTOfferCrossingStep::maxFlow(
+    ReadView const& sb,
+    MPTAmount const& desired) const
 {
-    // When isLast and offer crossing then ignore trust line limits.  Offer
-    // crossing has the ability to exceed the limit set by a trust line.
-    // We presume that if someone is creating an offer then they intend to
-    // fill as much of that offer as possible, even if the offer exceeds
-    // the limit that a trust line sets.
-    //
-    // A note on using "out" as the desired parameter for maxFlow.  In some
-    // circumstances during payments we end up needing a value larger than
-    // "out" for "maxSrcToDst".  But as of now (June 2016) that never happens
-    // during offer crossing.  That's because, due to a couple of factors,
-    // "dstQIn" is always QUALITY_ONE for offer crossing.
-
     if (isLast_)
         return {desired, DebtDirection::issues};
 
@@ -401,111 +360,105 @@ DirectIOfferCrossingStep::maxFlow(ReadView const& sb, IOUAmount const& desired)
 }
 
 TER
-DirectIPaymentStep::check(
+DirectMPTPaymentStep::check(
     StrandContext const& ctx,
     std::shared_ptr<const SLE> const& sleSrc) const
 {
-    // Since this is a payment a trust line must be present.  Perform all
-    // trust line related checks.
+    // Since this is a payment a MPToken must be present.  Perform all
+    // MPToken related checks.
+    if (!ctx.view.exists(keylet::mptIssuance(mptIssue_.mpt())))
+        return tecOBJECT_NOT_FOUND;
+    if (src_ != mptIssue_.account())
     {
-        auto const sleLine = ctx.view.read(keylet::line(src_, dst_, currency_));
-        if (!sleLine)
-        {
-            JLOG(j_.trace()) << "DirectStepI: No credit line. " << *this;
-            return terNO_LINE;
-        }
+        auto const mptokenID = keylet::mptoken(mptIssue_.mpt(), src_);
+        if (!ctx.view.exists(mptokenID))
+            return tecOBJECT_NOT_FOUND;
 
-        auto const authField = (src_ > dst_) ? lsfHighAuth : lsfLowAuth;
-
-        if (((*sleSrc)[sfFlags] & lsfRequireAuth) &&
-            !((*sleLine)[sfFlags] & authField) &&
-            (*sleLine)[sfBalance] == beast::zero)
-        {
-            JLOG(j_.warn())
-                << "DirectStepI: can't receive IOUs from issuer without auth."
-                << " src: " << src_;
-            return terNO_AUTH;
-        }
-
-        if (ctx.prevStep)
-        {
-            if (ctx.prevStep->bookStepBook())
-            {
-                auto const noRippleSrcToDst =
-                    ((*sleLine)[sfFlags] &
-                     ((src_ > dst_) ? lsfHighNoRipple : lsfLowNoRipple));
-                if (noRippleSrcToDst)
-                    return terNO_RIPPLE;
-            }
-        }
+        if (auto const ter = requireAuth(ctx.view, mptIssue_, src_);
+            ter != tesSUCCESS)
+            return ter;
     }
 
+    if (dst_ != mptIssue_.account())
     {
-        auto const owed = creditBalance(ctx.view, dst_, src_, currency_);
-        if (owed <= beast::zero)
-        {
-            auto const limit = creditLimit(ctx.view, dst_, src_, currency_);
-            if (-owed >= limit)
-            {
-                JLOG(j_.debug()) << "DirectStepI: dry: owed: " << owed
-                                 << " limit: " << limit;
-                return tecPATH_DRY;
-            }
-        }
+        auto const mptokenID = keylet::mptoken(mptIssue_.mpt(), dst_);
+        if (!ctx.view.exists(mptokenID))
+            return tecOBJECT_NOT_FOUND;
+
+        if (auto const ter = requireAuth(ctx.view, mptIssue_, dst_);
+            ter != tesSUCCESS)
+            return ter;
     }
+
+    // Direct MPT payment between holders
+    if (ctx.isFirst && ctx.strandDeliver.isMPT() &&
+        mptIssue_ == ctx.strandDeliver.mptIssue() && dst_ != ctx.strandDst)
+    {
+        if (isFrozen(ctx.view, src_, mptIssue_) ||
+            isFrozen(ctx.view, ctx.strandDst, mptIssue_))
+            return tecMPT_LOCKED;
+    }
+
     return tesSUCCESS;
 }
 
 TER
-DirectIOfferCrossingStep::check(
+DirectMPTOfferCrossingStep::check(
     StrandContext const&,
     std::shared_ptr<const SLE> const&) const
 {
-    // The standard checks are all we can do because any remaining checks
-    // require the existence of a trust line.  Offer crossing does not
-    // require a pre-existing trust line.
     return tesSUCCESS;
 }
 
 //------------------------------------------------------------------------------
 
 template <class TDerived>
-std::pair<IOUAmount, DebtDirection>
-DirectStepI<TDerived>::maxPaymentFlow(ReadView const& sb) const
+std::pair<MPTAmount, DebtDirection>
+MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
-    auto const srcOwed = toAmount<IOUAmount>(
-        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_));
+    if (src_ != mptIssue_.account())
+    {
+        auto const srcOwed = toAmount<MPTAmount>(
+            accountHolds(sb, src_, mptIssue_, fhIGNORE_FREEZE, j_));
 
-    if (srcOwed.signum() > 0)
         return {srcOwed, DebtDirection::redeems};
+    }
 
-    // srcOwed is negative or zero
-    return {
-        creditLimit2(sb, dst_, src_, currency_) + srcOwed,
-        DebtDirection::issues};
+    if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_.mpt())))
+    {
+        std::int64_t const max =
+            [&]() {
+                auto const max = sle->getFieldU64(sfMaximumAmount);
+                return max > 0 ? max : STAmount::cMaxNativeN;  // TODO MPT
+            }() -
+            sle->getFieldU64(sfOutstandingAmount);
+        return {MPTAmount{max}, DebtDirection::issues};
+    }
+
+    return {MPTAmount{0}, DebtDirection::issues};  // TODO MPT
 }
 
 template <class TDerived>
 DebtDirection
-DirectStepI<TDerived>::debtDirection(ReadView const& sb, StrandDirection dir)
-    const
+MPTEndpointStep<TDerived>::debtDirection(
+    ReadView const& sb,
+    StrandDirection dir) const
 {
     if (dir == StrandDirection::forward && cache_)
         return cache_->srcDebtDir;
 
-    auto const srcOwed =
-        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_);
-    return srcOwed.signum() > 0 ? DebtDirection::redeems
-                                : DebtDirection::issues;
+    if (src_ != mptIssue_.account())
+        return DebtDirection::redeems;
+    return DebtDirection::issues;
 }
 
 template <class TDerived>
-std::pair<IOUAmount, IOUAmount>
-DirectStepI<TDerived>::revImp(
+std::pair<MPTAmount, MPTAmount>
+MPTEndpointStep<TDerived>::revImp(
     PaymentSandbox& sb,
     ApplyView& /*afView*/,
     boost::container::flat_set<uint256>& /*ofrsToRm*/,
-    IOUAmount const& out)
+    MPTAmount const& out)
 {
     cache_.reset();
 
@@ -516,9 +469,9 @@ DirectStepI<TDerived>::revImp(
         qualities(sb, srcDebtDir, StrandDirection::reverse);
     assert(static_cast<TDerived const*>(this)->verifyDstQualityIn(dstQIn));
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
+    MPTIssue const srcToDstIss(mptIssue_);
 
-    JLOG(j_.trace()) << "DirectStepI::rev"
+    JLOG(j_.trace()) << "MPTEndpointStep::rev"
                      << " srcRedeems: " << redeems(srcDebtDir)
                      << " outReq: " << to_string(out)
                      << " maxSrcToDst: " << to_string(maxSrcToDst)
@@ -526,31 +479,27 @@ DirectStepI<TDerived>::revImp(
 
     if (maxSrcToDst.signum() <= 0)
     {
-        JLOG(j_.trace()) << "DirectStepI::rev: dry";
+        JLOG(j_.trace()) << "MPTEndpointStep::rev: dry";
         cache_.emplace(
-            IOUAmount(beast::zero),
-            IOUAmount(beast::zero),
-            IOUAmount(beast::zero),
+            MPTAmount(beast::zero),
+            MPTAmount(beast::zero),
+            MPTAmount(beast::zero),
             srcDebtDir);
         return {beast::zero, beast::zero};
     }
 
-    IOUAmount const srcToDst =
+    MPTAmount const srcToDst =
         mulRatio(out, QUALITY_ONE, dstQIn, /*roundUp*/ true);
 
     if (srcToDst <= maxSrcToDst)
     {
-        IOUAmount const in =
+        MPTAmount const in =
             mulRatio(srcToDst, srcQOut, QUALITY_ONE, /*roundUp*/ true);
-        cache_.emplace(in, srcToDst, out, srcDebtDir);
-        rippleCredit(
-            sb,
-            src_,
-            dst_,
-            toSTAmount(srcToDst, srcToDstIss),
-            /*checkIssuer*/ true,
-            j_);
-        JLOG(j_.trace()) << "DirectStepI::rev: Non-limiting"
+        cache_.emplace(in, srcToDst, srcToDst, srcDebtDir);
+        auto const ter = accountSendMPT(
+            sb, src_, dst_, toSTAmount(srcToDst, srcToDstIss), j_);
+        (void)ter;
+        JLOG(j_.trace()) << "MPTEndpointStep::rev: Non-limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
                          << " in: " << to_string(in)
                          << " srcToDst: " << to_string(srcToDst)
@@ -559,19 +508,16 @@ DirectStepI<TDerived>::revImp(
     }
 
     // limiting node
-    IOUAmount const in =
+    MPTAmount const in =
         mulRatio(maxSrcToDst, srcQOut, QUALITY_ONE, /*roundUp*/ true);
-    IOUAmount const actualOut =
+    MPTAmount const actualOut =
         mulRatio(maxSrcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
     cache_.emplace(in, maxSrcToDst, actualOut, srcDebtDir);
-    rippleCredit(
-        sb,
-        src_,
-        dst_,
-        toSTAmount(maxSrcToDst, srcToDstIss),
-        /*checkIssuer*/ true,
-        j_);
-    JLOG(j_.trace()) << "DirectStepI::rev: Limiting"
+
+    auto const ter = rippleMPTCredit(
+        sb, src_, dst_, toSTAmount(maxSrcToDst, srcToDstIss), j_);
+    (void)ter;
+    JLOG(j_.trace()) << "MPTEndpointStep::rev: Limiting"
                      << " srcRedeems: " << redeems(srcDebtDir)
                      << " in: " << to_string(in)
                      << " srcToDst: " << to_string(maxSrcToDst)
@@ -585,27 +531,25 @@ DirectStepI<TDerived>::revImp(
 // to prevent this.
 template <class TDerived>
 void
-DirectStepI<TDerived>::setCacheLimiting(
-    IOUAmount const& fwdIn,
-    IOUAmount const& fwdSrcToDst,
-    IOUAmount const& fwdOut,
+MPTEndpointStep<TDerived>::setCacheLimiting(
+    MPTAmount const& fwdIn,
+    MPTAmount const& fwdSrcToDst,
+    MPTAmount const& fwdOut,
     DebtDirection srcDebtDir)
 {
     if (cache_->in < fwdIn)
     {
-        IOUAmount const smallDiff(1, -9);
+        MPTAmount const smallDiff(1);
         auto const diff = fwdIn - cache_->in;
         if (diff > smallDiff)
         {
-            if (fwdIn.exponent() != cache_->in.exponent() ||
-                !cache_->in.mantissa() ||
-                (double(fwdIn.mantissa()) / double(cache_->in.mantissa())) >
-                    1.01)
+            if (!cache_->in.mpt() ||
+                (double(fwdIn.mpt()) / double(cache_->in.mpt())) > 1.01)
             {
                 // Detect large diffs on forward pass so they may be
                 // investigated
                 JLOG(j_.warn())
-                    << "DirectStepI::fwd: setCacheLimiting"
+                    << "MPTEndpointStep::fwd: setCacheLimiting"
                     << " fwdIn: " << to_string(fwdIn)
                     << " cacheIn: " << to_string(cache_->in)
                     << " fwdSrcToDst: " << to_string(fwdSrcToDst)
@@ -626,12 +570,12 @@ DirectStepI<TDerived>::setCacheLimiting(
 };
 
 template <class TDerived>
-std::pair<IOUAmount, IOUAmount>
-DirectStepI<TDerived>::fwdImp(
+std::pair<MPTAmount, MPTAmount>
+MPTEndpointStep<TDerived>::fwdImp(
     PaymentSandbox& sb,
     ApplyView& /*afView*/,
     boost::container::flat_set<uint256>& /*ofrsToRm*/,
-    IOUAmount const& in)
+    MPTAmount const& in)
 {
     assert(cache_);
 
@@ -641,9 +585,9 @@ DirectStepI<TDerived>::fwdImp(
     auto const [srcQOut, dstQIn] =
         qualities(sb, srcDebtDir, StrandDirection::forward);
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
+    MPTIssue const srcToDstIss(mptIssue_);
 
-    JLOG(j_.trace()) << "DirectStepI::fwd"
+    JLOG(j_.trace()) << "MPTEndpointStep::fwd"
                      << " srcRedeems: " << redeems(srcDebtDir)
                      << " inReq: " << to_string(in)
                      << " maxSrcToDst: " << to_string(maxSrcToDst)
@@ -651,31 +595,27 @@ DirectStepI<TDerived>::fwdImp(
 
     if (maxSrcToDst.signum() <= 0)
     {
-        JLOG(j_.trace()) << "DirectStepI::fwd: dry";
+        JLOG(j_.trace()) << "MPTEndpointStep::fwd: dry";
         cache_.emplace(
-            IOUAmount(beast::zero),
-            IOUAmount(beast::zero),
-            IOUAmount(beast::zero),
+            MPTAmount(beast::zero),
+            MPTAmount(beast::zero),
+            MPTAmount(beast::zero),
             srcDebtDir);
         return {beast::zero, beast::zero};
     }
 
-    IOUAmount const srcToDst =
+    MPTAmount const srcToDst =
         mulRatio(in, QUALITY_ONE, srcQOut, /*roundUp*/ false);
 
     if (srcToDst <= maxSrcToDst)
     {
-        IOUAmount const out =
+        MPTAmount const out =
             mulRatio(srcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
         setCacheLimiting(in, srcToDst, out, srcDebtDir);
-        rippleCredit(
-            sb,
-            src_,
-            dst_,
-            toSTAmount(cache_->srcToDst, srcToDstIss),
-            /*checkIssuer*/ true,
-            j_);
-        JLOG(j_.trace()) << "DirectStepI::fwd: Non-limiting"
+        auto const ter = rippleMPTCredit(
+            sb, src_, dst_, toSTAmount(cache_->srcToDst, srcToDstIss), j_);
+        (void)ter;
+        JLOG(j_.trace()) << "MPTEndpointStep::fwd: Non-limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
                          << " in: " << to_string(in)
                          << " srcToDst: " << to_string(srcToDst)
@@ -684,19 +624,15 @@ DirectStepI<TDerived>::fwdImp(
     else
     {
         // limiting node
-        IOUAmount const actualIn =
+        MPTAmount const actualIn =
             mulRatio(maxSrcToDst, srcQOut, QUALITY_ONE, /*roundUp*/ true);
-        IOUAmount const out =
+        MPTAmount const out =
             mulRatio(maxSrcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
         setCacheLimiting(actualIn, maxSrcToDst, out, srcDebtDir);
-        rippleCredit(
-            sb,
-            src_,
-            dst_,
-            toSTAmount(cache_->srcToDst, srcToDstIss),
-            /*checkIssuer*/ true,
-            j_);
-        JLOG(j_.trace()) << "DirectStepI::rev: Limiting"
+        auto const ter = rippleMPTCredit(
+            sb, src_, dst_, toSTAmount(cache_->srcToDst, srcToDstIss), j_);
+        (void)ter;
+        JLOG(j_.trace()) << "MPTEndpointStep::rev: Limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
                          << " in: " << to_string(actualIn)
                          << " srcToDst: " << to_string(srcToDst)
@@ -707,7 +643,7 @@ DirectStepI<TDerived>::fwdImp(
 
 template <class TDerived>
 std::pair<bool, EitherAmount>
-DirectStepI<TDerived>::validFwd(
+MPTEndpointStep<TDerived>::validFwd(
     PaymentSandbox& sb,
     ApplyView& afView,
     EitherAmount const& in)
@@ -715,12 +651,12 @@ DirectStepI<TDerived>::validFwd(
     if (!cache_)
     {
         JLOG(j_.trace()) << "Expected valid cache in validFwd";
-        return {false, EitherAmount(IOUAmount(beast::zero))};
+        return {false, EitherAmount(MPTAmount(beast::zero))};
     }
 
     auto const savCache = *cache_;
 
-    assert(!in.native());
+    assert(!in.native() && !in.isIOU());
 
     auto const [maxSrcToDst, srcDebtDir] =
         static_cast<TDerived const*>(this)->maxFlow(sb, cache_->srcToDst);
@@ -729,16 +665,16 @@ DirectStepI<TDerived>::validFwd(
     try
     {
         boost::container::flat_set<uint256> dummy;
-        fwdImp(sb, afView, dummy, in.iou());  // changes cache
+        fwdImp(sb, afView, dummy, in.mpt());  // changes cache
     }
     catch (FlowException const&)
     {
-        return {false, EitherAmount(IOUAmount(beast::zero))};
+        return {false, EitherAmount(MPTAmount(beast::zero))};
     }
 
     if (maxSrcToDst < cache_->srcToDst)
     {
-        JLOG(j_.warn()) << "DirectStepI: Strand re-execute check failed."
+        JLOG(j_.warn()) << "MPTEndpointStep: Strand re-execute check failed."
                         << " Exceeded max src->dst limit"
                         << " max src->dst: " << to_string(maxSrcToDst)
                         << " actual src->dst: " << to_string(cache_->srcToDst);
@@ -748,7 +684,7 @@ DirectStepI<TDerived>::validFwd(
     if (!(checkNear(savCache.in, cache_->in) &&
           checkNear(savCache.out, cache_->out)))
     {
-        JLOG(j_.warn()) << "DirectStepI: Strand re-execute check failed."
+        JLOG(j_.warn()) << "MPTEndpointStep: Strand re-execute check failed."
                         << " ExpectedIn: " << to_string(savCache.in)
                         << " CachedIn: " << to_string(cache_->in)
                         << " ExpectedOut: " << to_string(savCache.out)
@@ -761,7 +697,7 @@ DirectStepI<TDerived>::validFwd(
 // Returns srcQOut, dstQIn
 template <class TDerived>
 std::pair<std::uint32_t, std::uint32_t>
-DirectStepI<TDerived>::qualitiesSrcRedeems(ReadView const& sb) const
+MPTEndpointStep<TDerived>::qualitiesSrcRedeems(ReadView const& sb) const
 {
     if (!prevStep_)
         return {QUALITY_ONE, QUALITY_ONE};
@@ -778,7 +714,7 @@ DirectStepI<TDerived>::qualitiesSrcRedeems(ReadView const& sb) const
 // Returns srcQOut, dstQIn
 template <class TDerived>
 std::pair<std::uint32_t, std::uint32_t>
-DirectStepI<TDerived>::qualitiesSrcIssues(
+MPTEndpointStep<TDerived>::qualitiesSrcIssues(
     ReadView const& sb,
     DebtDirection prevStepDebtDirection) const
 {
@@ -788,7 +724,7 @@ DirectStepI<TDerived>::qualitiesSrcIssues(
         prevStepDebtDirection));
 
     std::uint32_t const srcQOut = redeems(prevStepDebtDirection)
-        ? transferRate(sb, src_).value
+        ? transferRateMPT(sb, mptIssue_.mpt()).value
         : QUALITY_ONE;
     auto dstQIn =
         static_cast<TDerived const*>(this)->quality(sb, QualityDirection::in);
@@ -801,7 +737,7 @@ DirectStepI<TDerived>::qualitiesSrcIssues(
 // Returns srcQOut, dstQIn
 template <class TDerived>
 std::pair<std::uint32_t, std::uint32_t>
-DirectStepI<TDerived>::qualities(
+MPTEndpointStep<TDerived>::qualities(
     ReadView const& sb,
     DebtDirection srcDebtDir,
     StrandDirection strandDir) const
@@ -823,7 +759,7 @@ DirectStepI<TDerived>::qualities(
 
 template <class TDerived>
 std::uint32_t
-DirectStepI<TDerived>::lineQualityIn(ReadView const& v) const
+MPTEndpointStep<TDerived>::lineQualityIn(ReadView const& v) const
 {
     // dst quality in
     return static_cast<TDerived const*>(this)->quality(v, QualityDirection::in);
@@ -831,7 +767,7 @@ DirectStepI<TDerived>::lineQualityIn(ReadView const& v) const
 
 template <class TDerived>
 std::pair<std::optional<Quality>, DebtDirection>
-DirectStepI<TDerived>::qualityUpperBound(
+MPTEndpointStep<TDerived>::qualityUpperBound(
     ReadView const& v,
     DebtDirection prevStepDir) const
 {
@@ -841,7 +777,7 @@ DirectStepI<TDerived>::qualityUpperBound(
     {
         std::uint32_t const srcQOut = [&]() -> std::uint32_t {
             if (redeems(prevStepDir) && issues(dir))
-                return transferRate(v, src_).value;
+                return transferRateMPT(v, mptIssue_.mpt()).value;
             return QUALITY_ONE;
         }();
         auto dstQIn = static_cast<TDerived const*>(this)->quality(
@@ -849,7 +785,7 @@ DirectStepI<TDerived>::qualityUpperBound(
 
         if (isLast_ && dstQIn > QUALITY_ONE)
             dstQIn = QUALITY_ONE;
-        Issue const iss{currency_, src_};
+        MPTIssue const iss{mptIssue_};
         return {
             Quality(getRate(STAmount(iss, srcQOut), STAmount(iss, dstQIn))),
             dir};
@@ -859,7 +795,7 @@ DirectStepI<TDerived>::qualityUpperBound(
         ? qualitiesSrcRedeems(v)
         : qualitiesSrcIssues(v, prevStepDir);
 
-    Issue const iss{currency_, src_};
+    MPTIssue const iss{mptIssue_};
     // Be careful not to switch the parameters to `getRate`. The
     // `getRate(offerOut, offerIn)` function is usually used for offers. It
     // returns offerIn/offerOut. For a direct step, the rate is srcQOut/dstQIn
@@ -872,18 +808,18 @@ DirectStepI<TDerived>::qualityUpperBound(
 
 template <class TDerived>
 TER
-DirectStepI<TDerived>::check(StrandContext const& ctx) const
+MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
 {
     // The following checks apply for both payments and offer crossing.
     if (!src_ || !dst_)
     {
-        JLOG(j_.debug()) << "DirectStepI: specified bad account.";
+        JLOG(j_.debug()) << "MPTEndpointStep: specified bad account.";
         return temBAD_PATH;
     }
 
     if (src_ == dst_)
     {
-        JLOG(j_.debug()) << "DirectStepI: same src and dst.";
+        JLOG(j_.debug()) << "MPTEndpointStep: same src and dst.";
         return temBAD_PATH;
     }
 
@@ -891,7 +827,7 @@ DirectStepI<TDerived>::check(StrandContext const& ctx) const
     if (!sleSrc)
     {
         JLOG(j_.warn())
-            << "DirectStepI: can't receive IOUs from non-existent issuer: "
+            << "MPTEndpointStep: can't receive MPT from non-existent issuer: "
             << src_;
         return terNO_ACCOUNT;
     }
@@ -899,52 +835,16 @@ DirectStepI<TDerived>::check(StrandContext const& ctx) const
     // pure issue/redeem can't be frozen
     if (!(ctx.isLast && ctx.isFirst))
     {
-        auto const ter = checkFreeze(ctx.view, src_, dst_, currency_);
-        if (ter != tesSUCCESS)
-            return ter;
+        if (isFrozen(ctx.view, src_, mptIssue_) ||
+            isFrozen(ctx.view, dst_, mptIssue_))
+            return tecMPT_LOCKED;
     }
 
-    // If previous step was a direct step then we need to check
-    // no ripple flags.
-    if (ctx.prevStep)
+    // MPT can only be an endpoint
+    if (!(ctx.isLast || ctx.isFirst))
     {
-        if (auto prevSrc = ctx.prevStep->directStepSrcAcct())
-        {
-            auto const ter =
-                checkNoRipple(ctx.view, *prevSrc, src_, dst_, currency_, j_);
-            if (ter != tesSUCCESS)
-                return ter;
-        }
-    }
-    {
-        Issue const srcIssue{currency_, src_};
-        Issue const dstIssue{currency_, dst_};
-
-        if (ctx.seenBookOuts.count(srcIssue))
-        {
-            if (!ctx.prevStep)
-            {
-                assert(0);  // prev seen book without a prev step!?!
-                return temBAD_PATH_LOOP;
-            }
-
-            // This is OK if the previous step is a book step that outputs this
-            // issue
-            if (auto book = ctx.prevStep->bookStepBook())
-            {
-                if (book->out.isIssue() && book->out.issue() != srcIssue)
-                    return temBAD_PATH_LOOP;
-            }
-        }
-
-        if (!ctx.seenDirectAssets[0].insert(srcIssue).second ||
-            !ctx.seenDirectAssets[1].insert(dstIssue).second)
-        {
-            JLOG(j_.debug())
-                << "DirectStepI: loop detected: Index: " << ctx.strandSize
-                << ' ' << *this;
-            return temBAD_PATH_LOOP;
-        }
+        JLOG(j_.warn()) << "MPTEndpointStep: MPT can only be an endpoint";
+        return terNO_RIPPLE;
     }
 
     return static_cast<TDerived const*>(this)->check(ctx, sleSrc);
@@ -952,46 +852,26 @@ DirectStepI<TDerived>::check(StrandContext const& ctx) const
 
 //------------------------------------------------------------------------------
 
-namespace test {
-// Needed for testing
-bool
-directStepEqual(
-    Step const& step,
-    AccountID const& src,
-    AccountID const& dst,
-    Currency const& currency)
-{
-    if (auto ds = dynamic_cast<DirectStepI<DirectIPaymentStep> const*>(&step))
-    {
-        return ds->src() == src && ds->dst() == dst &&
-            ds->currency() == currency;
-    }
-    return false;
-}
-}  // namespace test
-
-//------------------------------------------------------------------------------
-
 std::pair<TER, std::unique_ptr<Step>>
-make_DirectStepI(
+make_MPTEndpointStep(
     StrandContext const& ctx,
     AccountID const& src,
     AccountID const& dst,
-    Currency const& c)
+    MPT const& mpt)
 {
     TER ter = tefINTERNAL;
     std::unique_ptr<Step> r;
     if (ctx.offerCrossing)
     {
         auto offerCrossingStep =
-            std::make_unique<DirectIOfferCrossingStep>(ctx, src, dst, c);
+            std::make_unique<DirectMPTOfferCrossingStep>(ctx, src, dst, mpt);
         ter = offerCrossingStep->check(ctx);
         r = std::move(offerCrossingStep);
     }
     else  // payment
     {
         auto paymentStep =
-            std::make_unique<DirectIPaymentStep>(ctx, src, dst, c);
+            std::make_unique<DirectMPTPaymentStep>(ctx, src, dst, mpt);
         ter = paymentStep->check(ctx);
         r = std::move(paymentStep);
     }

@@ -243,6 +243,8 @@ public:
     getFieldV256(SField const& field) const;
     const STArray&
     getFieldArray(SField const& field) const;
+    const STIssue&
+    getFieldIssue(SField const& field) const;
 
     /** Get the value of a field.
         @param A TypedField built from an SField value representing the desired
@@ -357,6 +359,8 @@ public:
     setFieldU64(SField const& field, std::uint64_t);
     void
     setFieldH128(SField const& field, uint128 const&);
+    void
+    setFieldH192(SField const& field, uint192 const&);
     void
     setFieldH256(SField const& field, uint256 const&);
     void

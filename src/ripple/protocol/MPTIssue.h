@@ -34,6 +34,7 @@ public:
     MPTIssue(MPT const& mpt) : mpt_(mpt)
     {
     }
+    MPTIssue() = default;
 
     AccountID const&
     account() const
@@ -41,8 +42,20 @@ public:
         return mpt_.second;
     }
 
+    AccountID&
+    account()
+    {
+        return mpt_.second;
+    }
+
     std::uint32_t
     sequence() const
+    {
+        return mpt_.first;
+    }
+
+    std::uint32_t&
+    sequence()
     {
         return mpt_.first;
     }
@@ -67,7 +80,25 @@ public:
     {
         return lhs.mpt_ == rhs.mpt_;
     }
+
+    friend constexpr std::weak_ordering
+    operator<=>(MPTIssue const& lhs, MPTIssue const& rhs)
+    {
+        if (auto const c{lhs.mpt_ <=> rhs.mpt_}; c != 0)
+            return c;
+        return lhs.mpt_ <=> rhs.mpt_;
+    }
 };
+
+inline MPTIssue const&
+noMPTIssue()
+{
+    static MPTIssue issue{std::make_pair(0, noAccount())};
+    return issue;
+}
+
+Json::Value
+to_json(MPTIssue const& is);
 
 }  // namespace ripple
 
