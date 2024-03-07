@@ -65,8 +65,8 @@ bool
 validJSONAsset(Json::Value const& jv)
 {
     return (jv.isMember(jss::currency) && !jv.isMember(jss::mpt_issuance_id)) ||
-        (!jv.isMember(jss::currency) && jv.isMember(jss::mpt_issuance_id)) ||
-        (jv.isMember(jss::mpt_issuance_id) && !jv.isMember(jss::issuer));
+        (!jv.isMember(jss::currency) && !jv.isMember(jss::issuer) &&
+         jv.isMember(jss::mpt_issuance_id));
 }
 
 }  // namespace ripple
