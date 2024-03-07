@@ -19,6 +19,7 @@
 
 #include <ripple/protocol/Asset.h>
 #include <ripple/protocol/Indexes.h>
+#include <ripple/protocol/jss.h>
 
 namespace ripple {
 
@@ -58,6 +59,14 @@ std::string
 to_string(MPT const& mpt)
 {
     return to_string(getMptID(mpt.second, mpt.first));
+}
+
+bool
+validJSONAsset(Json::Value const& jv)
+{
+    return (jv.isMember(jss::currency) && !jv.isMember(jss::mpt_issuance_id)) ||
+        (!jv.isMember(jss::currency) && jv.isMember(jss::mpt_issuance_id)) ||
+        (jv.isMember(jss::mpt_issuance_id) && !jv.isMember(jss::issuer));
 }
 
 }  // namespace ripple

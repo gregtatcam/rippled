@@ -125,6 +125,9 @@ to_string(MPTIssue const& mpt);
 std::string
 to_string(MPT const& mpt);
 
+bool
+validJSONAsset(Json::Value const& jv);
+
 }  // namespace ripple
 
 #endif  // RIPPLE_PROTOCOL_ASSET_H_INCLUDED

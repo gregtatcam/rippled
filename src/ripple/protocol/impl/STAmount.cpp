@@ -1047,6 +1047,9 @@ amountFromJson(SField const& name, Json::Value const& v)
     }
     else if (v.isObject())
     {
+        if (!validJSONAsset(v))
+            Throw<std::runtime_error>("Invalid Asset's Json specification");
+
         value = v[jss::value];
         if (v.isMember(jss::mpt_issuance_id))
         {
