@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classripple_1_1test_1_1csf_1_1Validations__test_1_1Node.html" title=" " alt="" coords="5,5,173,47"/>
+<area shape="rect" id="node1" href="$classripple_1_1test_1_1detail_1_1multi__runner__base.html" title=" " alt="" coords="11,5,173,60"/>
+<area shape="rect" id="node2" href="$classripple_1_1test_1_1multi__runner__child.html" title="A class to run a subset of unit tests." alt="" coords="227,45,361,85"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,84,179,109"/>
 </map>
