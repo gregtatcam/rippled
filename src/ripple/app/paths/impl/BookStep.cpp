@@ -853,11 +853,18 @@ BookStep<TIn, TOut, TDerived>::tip(ReadView const& view) const
     BookTip bt(sb, book_);
     auto const clobQuality =
         bt.step(j_) ? std::optional<Quality>(bt.quality()) : std::nullopt;
-    // Don't pass in clobQuality. For one-path it returns the offer as
-    // the pool balances and the resulting quality is Spot Price Quality.
-    // For multi-path it returns the actual offer.
+    // Pass in clobQuality if single path. It might not be possible
+    // to generate AMM offer at this quality, in which case should use
+    // clobQuality. Multi-path generates actual offer with the quality
+    // calculated from the offer size.
+    auto const targetQuality = [&]() -> std::optional<Quality> {
+        if (view.rules().enabled(fixAMMOfferRounding) && ammLiquidity_ &&
+            !ammLiquidity_->context().multiPath())
+            return clobQuality;
+        return std::nullopt;
+    }();
     // AMM quality is better or no CLOB offer
-    if (auto const ammOffer = getAMMOffer(view, std::nullopt); ammOffer &&
+    if (auto const ammOffer = getAMMOffer(view, targetQuality); ammOffer &&
         ((clobQuality && ammOffer->quality() > clobQuality) || !clobQuality))
         return ammOffer;
     // CLOB quality is better or nullopt

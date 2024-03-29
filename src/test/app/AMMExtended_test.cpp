@@ -2910,40 +2910,47 @@ private:
         testcase("Step Limit");
 
         using namespace jtx;
-        Env env(*this, features);
-        auto const dan = Account("dan");
-        auto const ed = Account("ed");
+        for (auto const& features_ : {features, features - fixAMMOfferRounding})
+        {
+            Env env(*this, features_);
+            auto const dan = Account("dan");
+            auto const ed = Account("ed");
 
-        fund(env, gw, {ed}, XRP(100'000'000), {USD(11)});
-        env.fund(XRP(100'000'000), alice, bob, carol, dan);
-        env.trust(USD(1), bob);
-        env(pay(gw, bob, USD(1)));
-        env.trust(USD(1), dan);
-        env(pay(gw, dan, USD(1)));
-        n_offers(env, 2'000, bob, XRP(1), USD(1));
-        n_offers(env, 1, dan, XRP(1), USD(1));
-        AMM ammEd(env, ed, XRP(9), USD(11));
+            fund(env, gw, {ed}, XRP(100'000'000), {USD(11)});
+            env.fund(XRP(100'000'000), alice, bob, carol, dan);
+            env.trust(USD(1), bob);
+            env(pay(gw, bob, USD(1)));
+            env.trust(USD(1), dan);
+            env(pay(gw, dan, USD(1)));
+            n_offers(env, 2'000, bob, XRP(1), USD(1));
+            n_offers(env, 1, dan, XRP(1), USD(1));
+            AMM ammEd(env, ed, XRP(9), USD(11));
 
-        // Alice offers to buy 1000 XRP for 1000 USD. She takes Bob's first
-        // offer, removes 999 more as unfunded, then hits the step limit.
-        env(offer(alice, USD(1'000), XRP(1'000)));
-        env.require(
-            balance(alice, STAmount{USD, UINT64_C(2'050126257867561), -15}));
-        env.require(owners(alice, 2));
-        env.require(balance(bob, USD(0)));
-        env.require(owners(bob, 1'001));
-        env.require(balance(dan, USD(1)));
-        env.require(owners(dan, 2));
+            // Alice offers to buy 1000 XRP for 1000 USD. She takes Bob's first
+            // offer, removes 999 more as unfunded, then hits the step limit.
+            env(offer(alice, USD(1'000), XRP(1'000)));
+            if (!features_[fixAMMOfferRounding])
+                env.require(balance(
+                    alice, STAmount{USD, UINT64_C(2'050126257867561), -15}));
+            else
+                env.require(balance(
+                    alice, STAmount{USD, UINT64_C(2'050125257867587), -15}));
+            env.require(owners(alice, 2));
+            env.require(balance(bob, USD(0)));
+            env.require(owners(bob, 1'001));
+            env.require(balance(dan, USD(1)));
+            env.require(owners(dan, 2));
 
-        // Carol offers to buy 1000 XRP for 1000 USD. She removes Bob's next
-        // 1000 offers as unfunded and hits the step limit.
-        env(offer(carol, USD(1'000), XRP(1'000)));
-        env.require(balance(carol, USD(none)));
-        env.require(owners(carol, 1));
-        env.require(balance(bob, USD(0)));
-        env.require(owners(bob, 1));
-        env.require(balance(dan, USD(1)));
-        env.require(owners(dan, 2));
+            // Carol offers to buy 1000 XRP for 1000 USD. She removes Bob's next
+            // 1000 offers as unfunded and hits the step limit.
+            env(offer(carol, USD(1'000), XRP(1'000)));
+            env.require(balance(carol, USD(none)));
+            env.require(owners(carol, 1));
+            env.require(balance(bob, USD(0)));
+            env.require(owners(bob, 1));
+            env.require(balance(dan, USD(1)));
+            env.require(owners(dan, 2));
+        }
     }
 
     void

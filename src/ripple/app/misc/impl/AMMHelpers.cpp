@@ -203,4 +203,15 @@ solveQuadraticEq(Number const& a, Number const& b, Number const& c)
     return (-b + root2(b * b - 4 * a * c)) / (2 * a);
 }
 
+std::optional<Number>
+solveQuadraticEqSmallest(Number const& a, Number const& b, Number const& c)
+{
+    if (auto const r = b * b - 4 * a * c; r < 0)
+        return std::nullopt;
+    else if (b > 0)
+        return (-b + root2(r)) / (2 * a);
+    else
+        return (-b - root2(r)) / (2 * a);
+}
+
 }  // namespace ripple
