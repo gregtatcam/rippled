@@ -835,21 +835,23 @@ AMMDeposit::singleDepositEPrice(
 
     // LPTokens is asset out => E = b / t
     // substituting t in formula (3) as b/E:
-    // b/E = T * [b/B - sqrt(t2**2 + b/(f1*B)) + t2]/
-    //                      [1 + sqrt(t2**2 + b/(f1*B)) -t2] (A)
+    // b/E = T * [b/B - sqrt(f2**2 + b/(f1*B)) + f2]/
+    //                      [1 + sqrt(f2**2 + b/(f1*B)) - f2] (A)
     // where f1 = 1 - fee, f2 = (1 - fee/2)/f1
     // Let R = b/(f1*B), then b/B = f1*R and b = R*f1*B
     // Then (A) is
     // R*f1*B = E*T*[R*f1 -sqrt(f2**2 + R) + f2]/[1 + sqrt(f2**2 + R) - f2] =>
     // Let c = f1*B/(E*T) =>
-    // R*c*(1 + sqrt(f2**2 + R) + f2) = R*f1 - sqrt(f2**2 + R) - f2 =>
+    // R*c*(1 + sqrt(f2**2 + R) - f2) = R*f1 - sqrt(f2**2 + R) + f2 =>
+    // R*c + R*c*sqrt(f2**2 + R) - R*c*f2 = R*f1 - sqrt(f2**2 + R) + f2 =>
+    // R*c*sqrt(f2**2 + R) + sqrt(f2**2 + R) = R*f1 + f2 + R*c*f2 - R*c =>
     // (R*c + 1)*sqrt(f2**2 + R) = R*(f1 + c*f2 - c) + f2 =>
     // Let d = f1 + c*f2 - c =>
     // (R*c + 1)*sqrt(f2**2 + R) = R*d + f2 =>
     // (R*c + 1)**2 * (f2**2 + R) = (R*d + f2)**2 =>
     // (R*c)**2 + R*((c*f2)**2 + 2*c - d**2) + 2*c*f2**2 + 1 -2*d*f2 = 0 =>
     // a1 = c**2, b1 = (c*f2)**2 + 2*c - d**2, c1 = 2*c*f2**2 + 1 - 2*d*f2
-    // R = (-b1 + sqrt(b1**2 + 4*a1*c1))/(2*a1)
+    // R = (-b1 + sqrt(b1**2 - 4*a1*c1))/(2*a1)
     auto const f1 = feeMult(tfee);
     auto const f2 = feeMultHalf(tfee) / f1;
     auto const c = f1 * amountBalance / (ePrice * lptAMMBalance);

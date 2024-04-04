@@ -853,11 +853,23 @@ BookStep<TIn, TOut, TDerived>::tip(ReadView const& view) const
     BookTip bt(sb, book_);
     auto const clobQuality =
         bt.step(j_) ? std::optional<Quality>(bt.quality()) : std::nullopt;
-    // Don't pass in clobQuality. For one-path it returns the offer as
-    // the pool balances and the resulting quality is Spot Price Quality.
-    // For multi-path it returns the actual offer.
+    // Multi-path offer generates an offer with the quality
+    // calculated from the offer size and the quality is constant.
+    // Single path offer quality changes with the offer size. SPQ can't be
+    // used in this case as the upper bound quality because even if SPQ quality
+    // is better than LOB quality, it might not be possible to generate AMM
+    // offer at or better quality than LOB quality. Use LOB quality as
+    // low threshold to generate AMM offer. AMM or LOB offer whether
+    // multi-path or single path then can be selected based on the best
+    // offer quality.
+    auto const targetQuality = [&]() -> std::optional<Quality> {
+        if (view.rules().enabled(fixAMMOfferRounding) && ammLiquidity_ &&
+            !ammLiquidity_->context().multiPath())
+            return clobQuality;
+        return std::nullopt;
+    }();
     // AMM quality is better or no CLOB offer
-    if (auto const ammOffer = getAMMOffer(view, std::nullopt); ammOffer &&
+    if (auto const ammOffer = getAMMOffer(view, targetQuality); ammOffer &&
         ((clobQuality && ammOffer->quality() > clobQuality) || !clobQuality))
         return ammOffer;
     // CLOB quality is better or nullopt
