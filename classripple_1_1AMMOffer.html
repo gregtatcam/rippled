@@ -86,20 +86,11 @@ $(function() {
  <a href="classripple_1_1AMMOffer.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for ripple::AMMOffer&lt; TIn, TOut &gt;:</div>
-<div class="dyncontent">
-<div class="center"><img src="classripple_1_1AMMOffer__coll__graph.png" border="0" usemap="#aripple_1_1AMMOffer_3_01TIn_00_01TOut_01_4_coll__map" alt="Collaboration graph"/></div>
-<map name="aripple_1_1AMMOffer_3_01TIn_00_01TOut_01_4_coll__map" id="aripple_1_1AMMOffer_3_01TIn_00_01TOut_01_4_coll__map">
-<area shape="rect" title="Represents synthetic AMM offer in BookStep." alt="" coords="11,108,182,148"/>
-<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/utility/optional.html" title=" " alt="" coords="5,5,188,45"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a00af06cac7eb82c168a3cd0521256eb3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a00af06cac7eb82c168a3cd0521256eb3">AMMOffer</a> (<a class="el" href="classripple_1_1AMMLiquidity.html">AMMLiquidity</a>&lt; TIn, TOut &gt; const &amp;ammLiquidity, TAmounts&lt; TIn, TOut &gt; const &amp;amounts, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; TAmounts&lt; TIn, TOut &gt; &gt; const &amp;balances, Quality const &amp;<a class="el" href="classripple_1_1AMMOffer.html#a486876093ae0534c3b2f6e0de734822f">quality</a>)</td></tr>
-<tr class="separator:a00af06cac7eb82c168a3cd0521256eb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a209f16af670729ea5e5789856c0ad49f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a209f16af670729ea5e5789856c0ad49f">AMMOffer</a> (<a class="el" href="classripple_1_1AMMLiquidity.html">AMMLiquidity</a>&lt; TIn, TOut &gt; const &amp;ammLiquidity, TAmounts&lt; TIn, TOut &gt; const &amp;amounts, TAmounts&lt; TIn, TOut &gt; const &amp;balances, Quality const &amp;<a class="el" href="classripple_1_1AMMOffer.html#a486876093ae0534c3b2f6e0de734822f">quality</a>)</td></tr>
+<tr class="separator:a209f16af670729ea5e5789856c0ad49f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a486876093ae0534c3b2f6e0de734822f"><td class="memItemLeft" align="right" valign="top">Quality&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a486876093ae0534c3b2f6e0de734822f">quality</a> () const noexcept</td></tr>
 <tr class="separator:a486876093ae0534c3b2f6e0de734822f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6eff87d977b5a80f1a07660b455a6db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Issue.html">Issue</a> const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#ad6eff87d977b5a80f1a07660b455a6db">issueIn</a> () const</td></tr>
@@ -126,6 +117,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aedb2204df9f80970d1356c8e1997ca35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15fd33ac7f16cc9180854d0fd1c5d6ef"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a15fd33ac7f16cc9180854d0fd1c5d6ef">isFunded</a> () const</td></tr>
 <tr class="separator:a15fd33ac7f16cc9180854d0fd1c5d6ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d6bfd83553cd0ea0f242da69f13eeb2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a5d6bfd83553cd0ea0f242da69f13eeb2">checkInvariant</a> (TAmounts&lt; TIn, TOut &gt; const &amp;consumed, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j) const</td></tr>
+<tr class="memdesc:a5d6bfd83553cd0ea0f242da69f13eeb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check the new pool product is greater or equal to the old pool product or if decreases then within some threshold.  <a href="classripple_1_1AMMOffer.html#a5d6bfd83553cd0ea0f242da69f13eeb2">More...</a><br /></td></tr>
+<tr class="separator:a5d6bfd83553cd0ea0f242da69f13eeb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -142,8 +136,8 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a463950305358ecea6335e1556448024b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac869ea9f47d5a72de6e38b37b32f5ee6"><td class="memItemLeft" align="right" valign="top">TAmounts&lt; TIn, TOut &gt; const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#ac869ea9f47d5a72de6e38b37b32f5ee6">amounts_</a></td></tr>
 <tr class="separator:ac869ea9f47d5a72de6e38b37b32f5ee6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a345a4e98f4e264235d6dc1a15d490444"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; TAmounts&lt; TIn, TOut &gt; &gt; const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a345a4e98f4e264235d6dc1a15d490444">balances_</a></td></tr>
-<tr class="separator:a345a4e98f4e264235d6dc1a15d490444"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb2a16ab694596f97e5a404ecd9d1d01"><td class="memItemLeft" align="right" valign="top">TAmounts&lt; TIn, TOut &gt; const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#abb2a16ab694596f97e5a404ecd9d1d01">balances_</a></td></tr>
+<tr class="separator:abb2a16ab694596f97e5a404ecd9d1d01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b1d108410e7790da7d1fa64851ca1b2"><td class="memItemLeft" align="right" valign="top">Quality const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a2b1d108410e7790da7d1fa64851ca1b2">quality_</a></td></tr>
 <tr class="separator:a2b1d108410e7790da7d1fa64851ca1b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85677b5d46747caaf83f5d97d6122d22"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMOffer.html#a85677b5d46747caaf83f5d97d6122d22">consumed_</a></td></tr>
@@ -156,8 +150,8 @@ class ripple::AMMOffer&lt; TIn, TOut &gt;</div><p >Represents synthetic AMM offe
 
 <p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00039">39</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a00af06cac7eb82c168a3cd0521256eb3" name="a00af06cac7eb82c168a3cd0521256eb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a00af06cac7eb82c168a3cd0521256eb3">&#9670;&#160;</a></span>AMMOffer()</h2>
+<a id="a209f16af670729ea5e5789856c0ad49f" name="a209f16af670729ea5e5789856c0ad49f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a209f16af670729ea5e5789856c0ad49f">&#9670;&#160;</a></span>AMMOffer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -179,7 +173,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; TAmounts&lt; TIn, TOut &gt; &gt; const &amp;&#160;</td>
+          <td class="paramtype">TAmounts&lt; TIn, TOut &gt; const &amp;&#160;</td>
           <td class="paramname"><em>balances</em>, </td>
         </tr>
         <tr>
@@ -226,7 +220,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00070">70</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00069">69</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>
@@ -301,7 +295,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00085">85</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00084">84</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>
@@ -372,7 +366,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00097">97</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00096">96</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>
@@ -506,7 +500,7 @@ template&lt;typename... Args&gt; </div>
 
 <p>Send funds without incurring the transfer fee. </p>
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00127">127</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00126">126</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>
@@ -527,7 +521,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00133">133</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00132">132</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>
@@ -567,7 +561,41 @@ template&lt;typename TIn , typename TOut &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00140">140</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00139">139</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+
+</div>
+</div>
+<a id="a5d6bfd83553cd0ea0f242da69f13eeb2" name="a5d6bfd83553cd0ea0f242da69f13eeb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d6bfd83553cd0ea0f242da69f13eeb2">&#9670;&#160;</a></span>checkInvariant()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename TIn , typename TOut &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classripple_1_1AMMOffer.html">ripple::AMMOffer</a>&lt; TIn, TOut &gt;::checkInvariant </td>
+          <td>(</td>
+          <td class="paramtype">TAmounts&lt; TIn, TOut &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>consumed</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
+          <td class="paramname"><em>j</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Check the new pool product is greater or equal to the old pool product or if decreases then within some threshold. </p>
+
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8cpp_source.html#l00140">140</a> of file <a class="el" href="AMMOffer_8cpp_source.html">AMMOffer.cpp</a>.</p>
 
 </div>
 </div>
@@ -624,8 +652,8 @@ template&lt;typename TIn , typename TOut &gt; </div>
 
 </div>
 </div>
-<a id="a345a4e98f4e264235d6dc1a15d490444" name="a345a4e98f4e264235d6dc1a15d490444"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a345a4e98f4e264235d6dc1a15d490444">&#9670;&#160;</a></span>balances_</h2>
+<a id="abb2a16ab694596f97e5a404ecd9d1d01" name="abb2a16ab694596f97e5a404ecd9d1d01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb2a16ab694596f97e5a404ecd9d1d01">&#9670;&#160;</a></span>balances_</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -636,7 +664,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt;TAmounts&lt;TIn, TOut&gt; &gt; const <a class="el" href="classripple_1_1AMMOffer.html">ripple::AMMOffer</a>&lt; TIn, TOut &gt;::balances_</td>
+          <td class="memname">TAmounts&lt;TIn, TOut&gt; const <a class="el" href="classripple_1_1AMMOffer.html">ripple::AMMOffer</a>&lt; TIn, TOut &gt;::balances_</td>
         </tr>
       </table>
   </td>
@@ -646,7 +674,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00055">55</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00054">54</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>
@@ -672,7 +700,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00058">58</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00057">57</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>
@@ -698,7 +726,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00060">60</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMOffer_8h_source.html#l00059">59</a> of file <a class="el" href="AMMOffer_8h_source.html">AMMOffer.h</a>.</p>
 
 </div>
 </div>

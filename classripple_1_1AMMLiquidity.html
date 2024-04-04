@@ -144,9 +144,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:afc3099a63d626321df693638c4b09b34"><td class="memItemLeft" align="right" valign="top">TAmounts&lt; TIn, TOut &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMLiquidity.html#afc3099a63d626321df693638c4b09b34">generateFibSeqOffer</a> (TAmounts&lt; TIn, TOut &gt; const &amp;balances) const</td></tr>
 <tr class="memdesc:afc3099a63d626321df693638c4b09b34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate AMM offers with the offer size based on Fibonacci sequence.  <a href="classripple_1_1AMMLiquidity.html#afc3099a63d626321df693638c4b09b34">More...</a><br /></td></tr>
 <tr class="separator:afc3099a63d626321df693638c4b09b34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55c985379a5b167aff96d9c7c11e5fef"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1AMMOffer.html">AMMOffer</a>&lt; TIn, TOut &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMLiquidity.html#a55c985379a5b167aff96d9c7c11e5fef">maxOffer</a> (TAmounts&lt; TIn, TOut &gt; const &amp;balances) const</td></tr>
-<tr class="memdesc:a55c985379a5b167aff96d9c7c11e5fef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate max offer.  <a href="classripple_1_1AMMLiquidity.html#a55c985379a5b167aff96d9c7c11e5fef">More...</a><br /></td></tr>
-<tr class="separator:a55c985379a5b167aff96d9c7c11e5fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6752c49c9927eb6d07bb08f4418581e"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1AMMOffer.html">AMMOffer</a>&lt; TIn, TOut &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMLiquidity.html#ab6752c49c9927eb6d07bb08f4418581e">maxOffer</a> (TAmounts&lt; TIn, TOut &gt; const &amp;balances, <a class="el" href="classripple_1_1Rules.html">Rules</a> const &amp;rules) const</td></tr>
+<tr class="memdesc:ab6752c49c9927eb6d07bb08f4418581e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate max offer.  <a href="classripple_1_1AMMLiquidity.html#ab6752c49c9927eb6d07bb08f4418581e">More...</a><br /></td></tr>
+<tr class="separator:ab6752c49c9927eb6d07bb08f4418581e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -354,7 +354,7 @@ template&lt;typename TIn , typename TOut &gt; </div>
 <p>Generate AMM offer. </p>
 <p >Returns nullopt if clobQuality is provided and it is better than AMM offer quality. Otherwise returns AMM offer. If clobQuality is provided then AMM offer size is set based on the quality. </p>
 
-<p class="definition">Definition at line <a class="el" href="AMMLiquidity_8cpp_source.html#l00122">122</a> of file <a class="el" href="AMMLiquidity_8cpp_source.html">AMMLiquidity.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMLiquidity_8cpp_source.html#l00148">148</a> of file <a class="el" href="AMMLiquidity_8cpp_source.html">AMMLiquidity.cpp</a>.</p>
 
 </div>
 </div>
@@ -549,8 +549,8 @@ template&lt;typename TIn , typename TOut &gt; </div>
 
 </div>
 </div>
-<a id="a55c985379a5b167aff96d9c7c11e5fef" name="a55c985379a5b167aff96d9c7c11e5fef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55c985379a5b167aff96d9c7c11e5fef">&#9670;&#160;</a></span>maxOffer()</h2>
+<a id="ab6752c49c9927eb6d07bb08f4418581e" name="ab6752c49c9927eb6d07bb08f4418581e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6752c49c9927eb6d07bb08f4418581e">&#9670;&#160;</a></span>maxOffer()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -561,11 +561,21 @@ template&lt;typename TIn , typename TOut &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classripple_1_1AMMOffer.html">AMMOffer</a>&lt; TIn, TOut &gt; <a class="el" href="classripple_1_1AMMLiquidity.html">ripple::AMMLiquidity</a>&lt; TIn, TOut &gt;::maxOffer </td>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1AMMOffer.html">AMMOffer</a>&lt; TIn, TOut &gt; &gt; <a class="el" href="classripple_1_1AMMLiquidity.html">ripple::AMMLiquidity</a>&lt; TIn, TOut &gt;::maxOffer </td>
           <td>(</td>
           <td class="paramtype">TAmounts&lt; TIn, TOut &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>balances</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>balances</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classripple_1_1Rules.html">Rules</a> const &amp;&#160;</td>
+          <td class="paramname"><em>rules</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -576,8 +586,10 @@ template&lt;typename TIn , typename TOut &gt; </div>
 </div><div class="memdoc">
 
 <p>Generate max offer. </p>
+<p >If <code>fixAMMOverflowOffer</code> is active, the offer is generated as: takerGets = 99% * balances.out takerPays = swapOut(takerGets). Return nullopt if takerGets is 0 or takerGets == balances.out.</p>
+<p >If <code>fixAMMOverflowOffer</code> is not active, the offer is generated as: takerPays = max input amount; takerGets = swapIn(takerPays). </p>
 
-<p class="definition">Definition at line <a class="el" href="AMMLiquidity_8cpp_source.html#l00110">110</a> of file <a class="el" href="AMMLiquidity_8cpp_source.html">AMMLiquidity.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMLiquidity_8cpp_source.html#l00120">120</a> of file <a class="el" href="AMMLiquidity_8cpp_source.html">AMMLiquidity.cpp</a>.</p>
 
 </div>
 </div>
