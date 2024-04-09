@@ -443,6 +443,17 @@ private:
     expectAuctionSlot(auto&& cb) const;
 };
 
+inline std::ostream&
+operator<<(
+    std::ostream& s,
+    std::tuple<STAmount, STAmount, STAmount> const& balances)
+{
+    s << to_string(std::get<0>(balances)) << " "
+      << to_string(std::get<1>(balances)) << " "
+      << to_string(std::get<2>(balances)) << std::endl;
+    return s;
+}
+
 namespace amm {
 Json::Value
 trust(

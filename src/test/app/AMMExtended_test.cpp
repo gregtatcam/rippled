@@ -3638,10 +3638,12 @@ private:
             XRP(10'000), USD(10'000), ammAlice.tokens()));
 
         ammAlice.deposit(alice, 1'000'000);
+        std::cout << ammAlice.balances(XRP, USD);
         BEAST_EXPECT(ammAlice.expectBalances(
             XRP(11'000), USD(11'000), IOUAmount{11'000'000, 0}));
 
         ammAlice.withdraw(alice, 1'000'000);
+        std::cout << ammAlice.balances(XRP, USD);
         BEAST_EXPECT(ammAlice.expectBalances(
             XRP(10'000), USD(10'000), ammAlice.tokens()));
 
@@ -3651,6 +3653,7 @@ private:
         ammAlice.bid(alice, 100);
         BEAST_EXPECT(ammAlice.expectAuctionSlot(100, 0, IOUAmount{4'000}));
         // 4000 tokens burnt
+        std::cout << ammAlice.balances(XRP, USD);
         BEAST_EXPECT(ammAlice.expectBalances(
             XRP(10'000), USD(10'000), IOUAmount{9'996'000, 0}));
     }

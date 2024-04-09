@@ -456,7 +456,8 @@ AMMWithdraw::withdraw(
                 lpTokensAMMBalance,
                 lpTokensWithdraw,
                 tfee,
-                false);
+                false,
+                view.rules());
         return std::make_tuple(
             amountWithdraw, amount2Withdraw, lpTokensWithdraw);
     }();
@@ -590,27 +591,61 @@ AMMWithdraw::equalWithdrawTokens(
                 lpTokensWithdraw,
                 tfee);
 
-        auto const frac = divide(lpTokensWithdraw, lptAMMBalance, noIssue());
-        auto const withdrawAmount =
-            multiply(amountBalance, frac, amountBalance.issue());
-        auto const withdraw2Amount =
-            multiply(amount2Balance, frac, amount2Balance.issue());
-        // LP is making equal withdrawal by tokens but the requested amount
-        // of LP tokens is likely too small and results in one-sided pool
-        // withdrawal due to round off. Fail so the user withdraws
-        // more tokens.
-        if (withdrawAmount == beast::zero || withdraw2Amount == beast::zero)
-            return {tecAMM_FAILED, STAmount{}};
+        if (!view.rules().enabled(fixAMMOfferRounding))
+        {
+            auto const frac =
+                divide(lpTokensWithdraw, lptAMMBalance, noIssue());
+            auto const withdrawAmount =
+                multiply(amountBalance, frac, amountBalance.issue());
+            auto const withdraw2Amount =
+                multiply(amount2Balance, frac, amount2Balance.issue());
+            // LP is making equal withdrawal by tokens but the requested amount
+            // of LP tokens is likely too small and results in one-sided pool
+            // withdrawal due to round off. Fail so the user withdraws
+            // more tokens.
+            if (withdrawAmount == beast::zero || withdraw2Amount == beast::zero)
+                return {tecAMM_FAILED, STAmount{}};
 
-        return withdraw(
-            view,
-            ammAccount,
-            amountBalance,
-            withdrawAmount,
-            withdraw2Amount,
-            lptAMMBalance,
-            lpTokensWithdraw,
-            tfee);
+            return withdraw(
+                view,
+                ammAccount,
+                amountBalance,
+                withdrawAmount,
+                withdraw2Amount,
+                lptAMMBalance,
+                lpTokensWithdraw,
+                tfee);
+        }
+        else
+        {
+            auto const curRounding = Number::getround();
+            saveNumberRoundMode rm(
+                Number::setround(Number::rounding_mode::downward));
+            auto const frac =
+                divide(lpTokensWithdraw, lptAMMBalance, noIssue());
+            auto const withdrawAmount =
+                multiply(amountBalance, frac, amountBalance.issue());
+            auto const withdraw2Amount =
+                multiply(amount2Balance, frac, amount2Balance.issue());
+            // LP is making equal withdrawal by tokens but the requested amount
+            // of LP tokens is likely too small and results in one-sided pool
+            // withdrawal due to round off. Fail so the user withdraws
+            // more tokens.
+            if (withdrawAmount == beast::zero || withdraw2Amount == beast::zero)
+                return {tecAMM_FAILED, STAmount{}};
+
+            Number::setround(curRounding);
+
+            return withdraw(
+                view,
+                ammAccount,
+                amountBalance,
+                withdrawAmount,
+                withdraw2Amount,
+                lptAMMBalance,
+                lpTokensWithdraw,
+                tfee);
+        }
     }
     catch (std::exception const& e)
     {
@@ -656,30 +691,83 @@ AMMWithdraw::equalWithdrawLimit(
     STAmount const& amount2,
     std::uint16_t tfee)
 {
-    auto frac = Number{amount} / amountBalance;
-    auto const amount2Withdraw = amount2Balance * frac;
-    if (amount2Withdraw <= amount2)
+    if (view.rules().enabled(fixAMMOfferRounding))
+    {
+        auto frac = Number{amount} / amountBalance;
+        auto const amount2Withdraw = amount2Balance * frac;
+        if (amount2Withdraw <= amount2)
+            return withdraw(
+                view,
+                ammAccount,
+                amountBalance,
+                amount,
+                toSTAmount(
+                    amount2.issue(),
+                    amount2Withdraw,
+                    Number::rounding_mode::downward),
+                lptAMMBalance,
+                toSTAmount(
+                    lptAMMBalance.issue(),
+                    lptAMMBalance * frac,
+                    Number::rounding_mode::upward),
+                tfee);
+        frac = Number{amount2} / amount2Balance;
+        auto const amountWithdraw = amountBalance * frac;
+        assert(amountWithdraw <= amount);
         return withdraw(
             view,
             ammAccount,
             amountBalance,
-            amount,
-            toSTAmount(amount2.issue(), amount2Withdraw),
+            toSTAmount(
+                amount.issue(),
+                amountWithdraw,
+                Number::rounding_mode::downward),
+            amount2,
             lptAMMBalance,
-            toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac),
+            toSTAmount(
+                lptAMMBalance.issue(),
+                lptAMMBalance * frac,
+                Number::rounding_mode::upward),
             tfee);
-    frac = Number{amount2} / amount2Balance;
-    auto const amountWithdraw = amountBalance * frac;
-    assert(amountWithdraw <= amount);
-    return withdraw(
-        view,
-        ammAccount,
-        amountBalance,
-        toSTAmount(amount.issue(), amountWithdraw),
-        amount2,
-        lptAMMBalance,
-        toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac),
-        tfee);
+    }
+    else
+    {
+        auto const curRounding = Number::getround();
+        auto frac = Number{amount} / amountBalance;
+        saveNumberRoundMode rm(Number::rounding_mode::downward);
+        auto const amount2Withdraw =
+            toSTAmount(amount2.issue(), amount2Balance * frac);
+        Number::setround(Number::rounding_mode::upward);
+        auto lpTokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
+        Number::setround(curRounding);
+        if (amount2Withdraw <= amount2)
+            return withdraw(
+                view,
+                ammAccount,
+                amountBalance,
+                amount,
+                amount2Withdraw,
+                lptAMMBalance,
+                lpTokens,
+                tfee);
+        frac = Number{amount2} / amount2Balance;
+        Number::setround(Number::rounding_mode::downward);
+        auto const amountWithdraw =
+            toSTAmount(amount.issue(), amountBalance * frac);
+        assert(amountWithdraw <= amount);
+        Number::setround(Number::rounding_mode::upward);
+        lpTokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
+        Number::setround(curRounding);
+        return withdraw(
+            view,
+            ammAccount,
+            amountBalance,
+            amountWithdraw,
+            amount2,
+            lptAMMBalance,
+            lpTokens,
+            tfee);
+    }
 }
 
 /** Withdraw single asset equivalent to the amount specified in Asset1Out.
@@ -696,7 +784,9 @@ AMMWithdraw::singleWithdraw(
     STAmount const& amount,
     std::uint16_t tfee)
 {
-    auto const tokens = lpTokensOut(amountBalance, amount, lptAMMBalance, tfee);
+    // lpTokensOut handles rounding
+    auto const tokens =
+        lpTokensOut(amountBalance, amount, lptAMMBalance, tfee, view.rules());
     if (tokens == beast::zero)
         return {tecAMM_FAILED, STAmount{}};
     return withdraw(
@@ -730,8 +820,9 @@ AMMWithdraw::singleWithdrawTokens(
     STAmount const& lpTokensWithdraw,
     std::uint16_t tfee)
 {
-    auto const amountWithdraw =
-        withdrawByTokens(amountBalance, lptAMMBalance, lpTokensWithdraw, tfee);
+    // withdrawByTokens handles rounding
+    auto const amountWithdraw = withdrawByTokens(
+        amountBalance, lptAMMBalance, lpTokensWithdraw, tfee, view.rules());
     if (amount == beast::zero || amountWithdraw >= amount)
         return withdraw(
             view,
@@ -784,23 +875,56 @@ AMMWithdraw::singleWithdrawEPrice(
     // t1*T*f - T = t1*A*E + A*E*(f - 2) =>
     // t1*(T*f - A*E) = T + A*E*(f - 2) =>
     // t = T*(T + A*E*(f - 2))/(T*f - A*E)
-    Number const ae = amountBalance * ePrice;
-    auto const f = getFee(tfee);
-    auto const tokens = lptAMMBalance * (lptAMMBalance + ae * (f - 2)) /
-        (lptAMMBalance * f - ae);
-    if (tokens <= 0)
-        return {tecAMM_FAILED, STAmount{}};
-    auto const amountWithdraw = toSTAmount(amount.issue(), tokens / ePrice);
-    if (amount == beast::zero || amountWithdraw >= amount)
-        return withdraw(
-            view,
-            ammAccount,
-            amountBalance,
-            amountWithdraw,
-            std::nullopt,
-            lptAMMBalance,
-            toSTAmount(lptAMMBalance.issue(), tokens),
-            tfee);
+    if (!view.rules().enabled(fixAMMOfferRounding))
+    {
+        Number const ae = amountBalance * ePrice;
+        auto const f = getFee(tfee);
+        auto const tokens = lptAMMBalance * (lptAMMBalance + ae * (f - 2)) /
+            (lptAMMBalance * f - ae);
+        if (tokens <= 0)
+            return {tecAMM_FAILED, STAmount{}};
+        auto const amountWithdraw = toSTAmount(
+            amount.issue(), tokens / ePrice, Number::rounding_mode::downward);
+        if (amount == beast::zero || amountWithdraw >= amount)
+            return withdraw(
+                view,
+                ammAccount,
+                amountBalance,
+                amountWithdraw,
+                std::nullopt,
+                lptAMMBalance,
+                toSTAmount(
+                    lptAMMBalance.issue(),
+                    tokens,
+                    Number::rounding_mode::upward),
+                tfee);
+    }
+    else
+    {
+        auto const curRounding = Number::getround();
+        Number const ae = amountBalance * ePrice;
+        auto const f = getFee(tfee);
+        auto const res =
+            (lptAMMBalance + ae * (f - 2)) / (lptAMMBalance * f - ae);
+        saveNumberRoundMode rm(Number::rounding_mode::upward);
+        auto const tokens =
+            toSTAmount(lptAMMBalance.issue(), lptAMMBalance * res);
+        if (tokens <= beast::zero)
+            return {tecAMM_FAILED, STAmount{}};
+        Number::setround(Number::rounding_mode::downward);
+        auto const amountWithdraw = toSTAmount(amount.issue(), tokens / ePrice);
+        Number::setround(curRounding);
+        if (amount == beast::zero || amountWithdraw >= amount)
+            return withdraw(
+                view,
+                ammAccount,
+                amountBalance,
+                amountWithdraw,
+                std::nullopt,
+                lptAMMBalance,
+                tokens,
+                tfee);
+    }
 
     return {tecAMM_FAILED, STAmount{}};
 }

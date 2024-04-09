@@ -42,14 +42,25 @@ lpTokensIn(
     STAmount const& asset1Balance,
     STAmount const& asset1Deposit,
     STAmount const& lptAMMBalance,
-    std::uint16_t tfee)
+    std::uint16_t tfee,
+    Rules const& rules)
 {
     auto const f1 = feeMult(tfee);
     auto const f2 = feeMultHalf(tfee) / f1;
     Number const r = asset1Deposit / asset1Balance;
     auto const c = root2(f2 * f2 + r / f1) - f2;
-    auto const t = lptAMMBalance * (r - c) / (1 + c);
-    return toSTAmount(lptAMMBalance.issue(), t);
+    if (!rules.enabled(fixAMMOfferRounding))
+    {
+        auto const t = lptAMMBalance * (r - c) / (1 + c);
+        return toSTAmount(lptAMMBalance.issue(), t);
+    }
+    else
+    {
+        auto const res = (r - c) / (1 + c);
+        saveNumberRoundMode rm(
+            Number::setround(Number::rounding_mode::downward));
+        return toSTAmount(lptAMMBalance.issue(), lptAMMBalance * res);
+    }
 }
 
 /* Equation 4 solves equation 3 for b:
@@ -68,7 +79,8 @@ ammAssetIn(
     STAmount const& asset1Balance,
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
-    std::uint16_t tfee)
+    std::uint16_t tfee,
+    Rules const& rules)
 {
     auto const f1 = feeMult(tfee);
     auto const f2 = feeMultHalf(tfee) / f1;
@@ -78,8 +90,17 @@ ammAssetIn(
     auto const a = 1 / (t2 * t2);
     auto const b = 2 * d / t2 - 1 / f1;
     auto const c = d * d - f2 * f2;
-    return toSTAmount(
-        asset1Balance.issue(), asset1Balance * solveQuadraticEq(a, b, c));
+    if (!rules.enabled(fixAMMOfferRounding))
+    {
+        return toSTAmount(
+            asset1Balance.issue(), asset1Balance * solveQuadraticEq(a, b, c));
+    }
+    else
+    {
+        auto const res = solveQuadraticEq(a, b, c);
+        saveNumberRoundMode rm(Number::setround(Number::rounding_mode::upward));
+        return toSTAmount(asset1Balance.issue(), asset1Balance * res);
+    }
 }
 
 /* Equation 7:
@@ -91,13 +112,24 @@ lpTokensOut(
     STAmount const& asset1Balance,
     STAmount const& asset1Withdraw,
     STAmount const& lptAMMBalance,
-    std::uint16_t tfee)
+    std::uint16_t tfee,
+    Rules const& rules)
 {
     Number const fr = asset1Withdraw / asset1Balance;
     auto const f1 = getFee(tfee);
     auto const c = fr * f1 + 2 - f1;
-    auto const t = lptAMMBalance * (c - root2(c * c - 4 * fr)) / 2;
-    return toSTAmount(lptAMMBalance.issue(), t);
+    if (!rules.enabled(fixAMMOfferRounding))
+    {
+        auto const t = lptAMMBalance * (c - root2(c * c - 4 * fr)) / 2;
+        return toSTAmount(lptAMMBalance.issue(), t);
+    }
+    else
+    {
+        auto const res = root2(c * c - 4 * fr);
+        saveNumberRoundMode rm(Number::setround(Number::rounding_mode::upward));
+        auto const t = lptAMMBalance * (c - res) / 2;
+        return toSTAmount(lptAMMBalance.issue(), t);
+    }
 }
 
 /* Equation 8 solves equation 7 for b:
@@ -115,12 +147,23 @@ withdrawByTokens(
     STAmount const& assetBalance,
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
-    std::uint16_t tfee)
+    std::uint16_t tfee,
+    Rules const& rules)
 {
     auto const f = getFee(tfee);
     Number const t1 = lpTokens / lptAMMBalance;
-    auto const b = assetBalance * (t1 * t1 - t1 * (2 - f)) / (t1 * f - 1);
-    return toSTAmount(assetBalance.issue(), b);
+    if (!rules.enabled(fixAMMOfferRounding))
+    {
+        auto const b = assetBalance * (t1 * t1 - t1 * (2 - f)) / (t1 * f - 1);
+        return toSTAmount(assetBalance.issue(), b);
+    }
+    else
+    {
+        auto const res = (t1 * t1 - t1 * (2 - f)) / (t1 * f - 1);
+        saveNumberRoundMode rm(
+            Number::setround(Number::rounding_mode::downward));
+        return toSTAmount(assetBalance.issue(), assetBalance * res);
+    }
 }
 
 Number
@@ -151,7 +194,8 @@ adjustAmountsByLPTokens(
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
     std::uint16_t tfee,
-    bool isDeposit)
+    bool isDeposit,
+    Rules const& rules)
 {
     auto const lpTokensActual =
         adjustLPTokens(lptAMMBalance, lpTokens, isDeposit);
@@ -168,6 +212,15 @@ adjustAmountsByLPTokens(
         // Equal trade
         if (amount2)
         {
+            auto rounding = [&]() {
+                if (!rules.enabled(fixAMMOfferRounding))
+                    return Number::getround();
+                else if (isDeposit)
+                    return Number::rounding_mode::upward;
+                else
+                    return Number::rounding_mode::downward;
+            }();
+            saveNumberRoundMode rm(Number::setround(rounding));
             Number const fr = lpTokensActual / lpTokens;
             auto const amountActual = toSTAmount(amount.issue(), fr * amount);
             auto const amount2Actual =
@@ -182,17 +235,25 @@ adjustAmountsByLPTokens(
         auto const amountActual = [&]() {
             if (isDeposit)
                 return ammAssetIn(
-                    amountBalance, lptAMMBalance, lpTokensActual, tfee);
+                    amountBalance, lptAMMBalance, lpTokensActual, tfee, rules);
+            else if (!rules.enabled(fixAMMOfferRounding))
+                return withdrawByTokens(
+                    amountBalance, lptAMMBalance, lpTokens, tfee, rules);
             else
                 return withdrawByTokens(
-                    amountBalance, lptAMMBalance, lpTokens, tfee);
+                    amountBalance, lptAMMBalance, lpTokensActual, tfee, rules);
         }();
-        return amountActual < amount
-            ? std::make_tuple(amountActual, std::nullopt, lpTokensActual)
-            : std::make_tuple(amount, std::nullopt, lpTokensActual);
+        if (!rules.enabled(fixAMMOfferRounding))
+        {
+            return amountActual < amount
+                ? std::make_tuple(amountActual, std::nullopt, lpTokensActual)
+                : std::make_tuple(amount, std::nullopt, lpTokensActual);
+        }
+        else
+        {
+            return std::make_tuple(amountActual, std::nullopt, lpTokensActual);
+        }
     }
-
-    assert(lpTokensActual == lpTokens);
 
     return {amount, amount2, lpTokensActual};
 }

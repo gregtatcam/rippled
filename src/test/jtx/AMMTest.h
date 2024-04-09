@@ -58,6 +58,36 @@ fund(
     std::vector<STAmount> const& amts = {},
     Fund how = Fund::All);
 
+struct Features
+{
+    std::vector<FeatureBitset> features_;
+    void
+    add(FeatureBitset const& f)
+    {
+        features_.push_back(f);
+    }
+    template <typename... F>
+    void
+    add(FeatureBitset f, F const&... features)
+    {
+        add(f);
+        add(features...);
+    }
+    template <typename... F>
+    Features(F const&... features)
+    {
+        add(features...);
+    }
+};
+
+struct AMMTestArg
+{
+    std::optional<std::pair<STAmount, STAmount>> pool = std::nullopt;
+    std::uint16_t tfee = 0;
+    std::optional<jtx::ter> ter = std::nullopt;
+    std::optional<Features> features = std::nullopt;
+};
+
 class AMMTestBase : public beast::unit_test::suite
 {
 protected:
@@ -70,6 +100,7 @@ protected:
     jtx::IOU const GBP;
     jtx::IOU const BTC;
     jtx::IOU const BAD;
+    FeatureBitset supportedAmendments_;
 
 public:
     AMMTestBase();
@@ -84,7 +115,31 @@ protected:
         std::optional<std::pair<STAmount, STAmount>> const& pool = std::nullopt,
         std::uint16_t tfee = 0,
         std::optional<jtx::ter> const& ter = std::nullopt,
-        std::optional<FeatureBitset> const& features = std::nullopt);
+        std::optional<Features> const& features = std::nullopt);
+    void
+    testAMM(
+        std::function<void(jtx::AMM&, jtx::Env&)>&& cb,
+        AMMTestArg const& args)
+    {
+        testAMM(std::move(cb), args.pool, args.tfee, args.ter, args.features);
+    }
+
+    void
+    offerRoundingHelper(std::function<void(Env&)>&& cb)
+    {
+        auto const all = supported_amendments();
+        for (auto const features : {all, all - fixAMMOfferRounding})
+        {
+            Env env(*this, features);
+            cb(env);
+        }
+    }
+
+    bool
+    offerRoundingEnabled(Env const& env) const
+    {
+        return env.current()->rules().enabled(fixAMMOfferRounding);
+    }
 };
 
 class AMMTest : public jtx::AMMTestBase

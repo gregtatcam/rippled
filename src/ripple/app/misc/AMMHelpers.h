@@ -53,6 +53,7 @@ ammLPTokens(
  * @param asset1Deposit requested asset1 deposit amount
  * @param lptAMMBalance AMM LPT balance
  * @param tfee trading fee in basis points
+ * @param rules controlling protocol behavior
  * @return tokens
  */
 STAmount
@@ -60,13 +61,15 @@ lpTokensIn(
     STAmount const& asset1Balance,
     STAmount const& asset1Deposit,
     STAmount const& lptAMMBalance,
-    std::uint16_t tfee);
+    std::uint16_t tfee,
+    Rules const& rules);
 
 /** Calculate asset deposit given LP Tokens.
  * @param asset1Balance current AMM asset1 balance
  * @param lpTokens LP Tokens
  * @param lptAMMBalance AMM LPT balance
  * @param tfee trading fee in basis points
+ * @param rules controlling protocol behavior
  * @return
  */
 STAmount
@@ -74,7 +77,8 @@ ammAssetIn(
     STAmount const& asset1Balance,
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
-    std::uint16_t tfee);
+    std::uint16_t tfee,
+    Rules const& rules);
 
 /** Calculate LP Tokens given asset's withdraw amount. Return 0
  * if can't calculate.
@@ -82,6 +86,7 @@ ammAssetIn(
  * @param asset1Withdraw requested asset1 withdraw amount
  * @param lptAMMBalance AMM LPT balance
  * @param tfee trading fee in basis points
+ * @param rules controlling protocol behavior
  * @return tokens out amount
  */
 STAmount
@@ -89,13 +94,15 @@ lpTokensOut(
     STAmount const& asset1Balance,
     STAmount const& asset1Withdraw,
     STAmount const& lptAMMBalance,
-    std::uint16_t tfee);
+    std::uint16_t tfee,
+    Rules const& rules);
 
 /** Calculate asset withdrawal by tokens
  * @param assetBalance balance of the asset being withdrawn
  * @param lptAMMBalance total AMM Tokens balance
  * @param lpTokens LP Tokens balance
  * @param tfee trading fee in basis points
+ * @param rules controlling protocol behavior
  * @return calculated asset amount
  */
 STAmount
@@ -103,7 +110,8 @@ withdrawByTokens(
     STAmount const& assetBalance,
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
-    std::uint16_t tfee);
+    std::uint16_t tfee,
+    Rules const& rules);
 
 /** Check if the relative distance between the qualities
  * is within the requested distance.
@@ -534,6 +542,7 @@ adjustLPTokens(
  * @param lpTokens LP tokens to deposit or withdraw
  * @param tfee trading fee in basis points
  * @param isDeposit true if deposit, false if withdraw
+ * @param rules rules controlling protocol behavior
  * @return
  */
 std::tuple<STAmount, std::optional<STAmount>, STAmount>
@@ -544,7 +553,8 @@ adjustAmountsByLPTokens(
     STAmount const& lptAMMBalance,
     STAmount const& lpTokens,
     std::uint16_t tfee,
-    bool isDeposit);
+    bool isDeposit,
+    Rules const& rules);
 
 /** Positive solution for quadratic equation:
  * x = (-b + sqrt(b**2 - 4*a*c))/(2*a)

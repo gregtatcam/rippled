@@ -504,7 +504,8 @@ AMMDeposit::deposit(
                 lptAMMBalance,
                 lpTokensDeposit,
                 tfee,
-                true);
+                true,
+                view.rules());
 
     if (lpTokensDepositActual <= beast::zero)
     {
@@ -604,20 +605,48 @@ AMMDeposit::equalDepositTokens(
 {
     try
     {
-        auto const frac =
-            divide(lpTokensDeposit, lptAMMBalance, lptAMMBalance.issue());
-        return deposit(
-            view,
-            ammAccount,
-            amountBalance,
-            multiply(amountBalance, frac, amountBalance.issue()),
-            multiply(amount2Balance, frac, amount2Balance.issue()),
-            lptAMMBalance,
-            lpTokensDeposit,
-            depositMin,
-            deposit2Min,
-            std::nullopt,
-            tfee);
+        if (!view.rules().enabled(fixAMMOfferRounding))
+        {
+            auto const frac =
+                divide(lpTokensDeposit, lptAMMBalance, lptAMMBalance.issue());
+            return deposit(
+                view,
+                ammAccount,
+                amountBalance,
+                multiply(amountBalance, frac, amountBalance.issue()),
+                multiply(amount2Balance, frac, amount2Balance.issue()),
+                lptAMMBalance,
+                lpTokensDeposit,
+                depositMin,
+                deposit2Min,
+                std::nullopt,
+                tfee);
+        }
+        else
+        {
+            auto const curRounding = Number::getround();
+            saveNumberRoundMode rm(
+                Number::setround(Number::rounding_mode::upward));
+            auto const frac =
+                divide(lpTokensDeposit, lptAMMBalance, lptAMMBalance.issue());
+            auto const amount =
+                multiply(amountBalance, frac, amountBalance.issue());
+            auto const amount2 =
+                multiply(amount2Balance, frac, amount2Balance.issue());
+            Number::setround(curRounding);
+            return deposit(
+                view,
+                ammAccount,
+                amountBalance,
+                amount,
+                amount2,
+                lptAMMBalance,
+                lpTokensDeposit,
+                depositMin,
+                deposit2Min,
+                std::nullopt,
+                tfee);
+        }
     }
     catch (std::exception const& e)
     {
@@ -667,42 +696,94 @@ AMMDeposit::equalDepositLimit(
     std::optional<STAmount> const& lpTokensDepositMin,
     std::uint16_t tfee)
 {
-    auto frac = Number{amount} / amountBalance;
-    auto tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
-    if (tokens == beast::zero)
-        return {tecAMM_FAILED, STAmount{}};
-    auto const amount2Deposit = amount2Balance * frac;
-    if (amount2Deposit <= amount2)
-        return deposit(
-            view,
-            ammAccount,
-            amountBalance,
-            amount,
-            toSTAmount(amount2Balance.issue(), amount2Deposit),
-            lptAMMBalance,
-            tokens,
-            std::nullopt,
-            std::nullopt,
-            lpTokensDepositMin,
-            tfee);
-    frac = Number{amount2} / amount2Balance;
-    tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
-    if (tokens == beast::zero)
-        return {tecAMM_FAILED, STAmount{}};
-    auto const amountDeposit = amountBalance * frac;
-    if (amountDeposit <= amount)
-        return deposit(
-            view,
-            ammAccount,
-            amountBalance,
-            toSTAmount(amountBalance.issue(), amountDeposit),
-            amount2,
-            lptAMMBalance,
-            tokens,
-            std::nullopt,
-            std::nullopt,
-            lpTokensDepositMin,
-            tfee);
+    if (!view.rules().enabled(fixAMMOfferRounding))
+    {
+        auto frac = Number{amount} / amountBalance;
+        auto tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
+        if (tokens == beast::zero)
+            return {tecAMM_FAILED, STAmount{}};
+        auto const amount2Deposit = amount2Balance * frac;
+        if (amount2Deposit <= amount2)
+            return deposit(
+                view,
+                ammAccount,
+                amountBalance,
+                amount,
+                toSTAmount(amount2Balance.issue(), amount2Deposit),
+                lptAMMBalance,
+                tokens,
+                std::nullopt,
+                std::nullopt,
+                lpTokensDepositMin,
+                tfee);
+        frac = Number{amount2} / amount2Balance;
+        tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
+        if (tokens == beast::zero)
+            return {tecAMM_FAILED, STAmount{}};
+        auto const amountDeposit = amountBalance * frac;
+        if (amountDeposit <= amount)
+            return deposit(
+                view,
+                ammAccount,
+                amountBalance,
+                toSTAmount(amountBalance.issue(), amountDeposit),
+                amount2,
+                lptAMMBalance,
+                tokens,
+                std::nullopt,
+                std::nullopt,
+                lpTokensDepositMin,
+                tfee);
+    }
+    else
+    {
+        auto const curRound = Number::getround();
+        auto frac = Number{amount} / amountBalance;
+        saveNumberRoundMode rm(
+            Number::setround(Number::rounding_mode::downward));
+        auto tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
+        if (tokens == beast::zero)
+            return {tecAMM_FAILED, STAmount{}};
+        Number::setround(Number::rounding_mode::upward);
+        auto const amount2Deposit =
+            toSTAmount(amount2Balance.issue(), amount2Balance * frac);
+        Number::setround(curRound);
+        if (amount2Deposit <= amount2)
+            return deposit(
+                view,
+                ammAccount,
+                amountBalance,
+                amount,
+                amount2Deposit,
+                lptAMMBalance,
+                tokens,
+                std::nullopt,
+                std::nullopt,
+                lpTokensDepositMin,
+                tfee);
+        frac = Number{amount2} / amount2Balance;
+        Number::setround(Number::rounding_mode::downward);
+        tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
+        if (tokens == beast::zero)
+            return {tecAMM_FAILED, STAmount{}};
+        Number::setround(Number::rounding_mode::upward);
+        auto const amountDeposit =
+            toSTAmount(amountBalance.issue(), amountBalance * frac);
+        Number::setround(curRound);
+        if (amountDeposit <= amount)
+            return deposit(
+                view,
+                ammAccount,
+                amountBalance,
+                amountDeposit,
+                amount2,
+                lptAMMBalance,
+                tokens,
+                std::nullopt,
+                std::nullopt,
+                lpTokensDepositMin,
+                tfee);
+    }
     return {tecAMM_FAILED, STAmount{}};
 }
 
@@ -724,7 +805,9 @@ AMMDeposit::singleDeposit(
     std::optional<STAmount> const& lpTokensDepositMin,
     std::uint16_t tfee)
 {
-    auto const tokens = lpTokensIn(amountBalance, amount, lptAMMBalance, tfee);
+    // lpTokensIn handles the rounding
+    auto const tokens =
+        lpTokensIn(amountBalance, amount, lptAMMBalance, tfee, view.rules());
     if (tokens == beast::zero)
         return {tecAMM_FAILED, STAmount{}};
     return deposit(
@@ -758,8 +841,9 @@ AMMDeposit::singleDepositTokens(
     STAmount const& lpTokensDeposit,
     std::uint16_t tfee)
 {
-    auto const amountDeposit =
-        ammAssetIn(amountBalance, lptAMMBalance, lpTokensDeposit, tfee);
+    // ammAssetIn handles the rounding
+    auto const amountDeposit = ammAssetIn(
+        amountBalance, lptAMMBalance, lpTokensDeposit, tfee, view.rules());
     if (amountDeposit > amount)
         return {tecAMM_FAILED, STAmount{}};
     return deposit(
@@ -813,8 +897,9 @@ AMMDeposit::singleDepositEPrice(
 {
     if (amount != beast::zero)
     {
-        auto const tokens =
-            lpTokensIn(amountBalance, amount, lptAMMBalance, tfee);
+        // lpTokensIn handles the rounding
+        auto const tokens = lpTokensIn(
+            amountBalance, amount, lptAMMBalance, tfee, view.rules());
         if (tokens <= beast::zero)
             return {tecAMM_FAILED, STAmount{}};
         auto const ep = Number{amount} / tokens;
@@ -859,25 +944,54 @@ AMMDeposit::singleDepositEPrice(
     auto const a1 = c * c;
     auto const b1 = c * c * f2 * f2 + 2 * c - d * d;
     auto const c1 = 2 * c * f2 * f2 + 1 - 2 * d * f2;
-    auto const amountDeposit = toSTAmount(
-        amountBalance.issue(),
-        f1 * amountBalance * solveQuadraticEq(a1, b1, c1));
-    if (amountDeposit <= beast::zero)
-        return {tecAMM_FAILED, STAmount{}};
-    auto const tokens =
-        toSTAmount(lptAMMBalance.issue(), amountDeposit / ePrice);
-    return deposit(
-        view,
-        ammAccount,
-        amountBalance,
-        amountDeposit,
-        std::nullopt,
-        lptAMMBalance,
-        tokens,
-        std::nullopt,
-        std::nullopt,
-        std::nullopt,
-        tfee);
+    if (!view.rules().enabled(fixAMMOfferRounding))
+    {
+        auto const amountDeposit = toSTAmount(
+            amountBalance.issue(),
+            f1 * amountBalance * solveQuadraticEq(a1, b1, c1));
+        if (amountDeposit <= beast::zero)
+            return {tecAMM_FAILED, STAmount{}};
+        auto const tokens =
+            toSTAmount(lptAMMBalance.issue(), amountDeposit / ePrice);
+        return deposit(
+            view,
+            ammAccount,
+            amountBalance,
+            amountDeposit,
+            std::nullopt,
+            lptAMMBalance,
+            tokens,
+            std::nullopt,
+            std::nullopt,
+            std::nullopt,
+            tfee);
+    }
+    else
+    {
+        auto const curRounding = Number::getround();
+        auto const res = solveQuadraticEq(a1, b1, c1);
+        saveNumberRoundMode rm(Number::setround(Number::rounding_mode::upward));
+        auto const amountDeposit =
+            toSTAmount(amountBalance.issue(), f1 * amountBalance * res);
+        if (amountDeposit <= beast::zero)
+            return {tecAMM_FAILED, STAmount{}};
+        Number::setround(Number::rounding_mode::downward);
+        auto const tokens =
+            toSTAmount(lptAMMBalance.issue(), amountDeposit / ePrice);
+        Number::setround(curRounding);
+        return deposit(
+            view,
+            ammAccount,
+            amountBalance,
+            amountDeposit,
+            std::nullopt,
+            lptAMMBalance,
+            tokens,
+            std::nullopt,
+            std::nullopt,
+            std::nullopt,
+            tfee);
+    }
 }
 
 std::pair<TER, STAmount>

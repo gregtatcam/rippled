@@ -19,6 +19,8 @@
 
 #include <ripple/app/tx/impl/InvariantCheck.h>
 
+#include <ripple/app/misc/AMMHelpers.h>
+#include <ripple/app/misc/AMMUtils.h>
 #include <ripple/app/tx/impl/details/NFTokenUtils.h>
 #include <ripple/basics/FeeUnits.h>
 #include <ripple/basics/Log.h>
@@ -795,6 +797,103 @@ ValidClawback::finalize(
                                "despite failure of the transaction.";
             return false;
         }
+    }
+
+    return true;
+}
+
+void
+ValidAMM::visitEntry(
+    bool isDeleted,
+    std::shared_ptr<SLE const> const&,
+    std::shared_ptr<SLE const> const& after)
+{
+    if (isDeleted && after && after->getType() == ltAMM)
+    {
+        auto const asset_ = (*after)[sfAsset];
+        auto const asset2_ = (*after)[sfAsset2];
+        auto const& [asset, asset2] = std::minmax(asset_, asset2_);
+        deleted_.insert(std::make_pair(asset, asset2));
+    }
+}
+
+bool
+ValidAMM::checkInvariant(
+    ReadView const& view,
+    TxType txType,
+    Issue const& asset_,
+    Issue const& asset2_,
+    beast::Journal j) const
+{
+    auto const& [asset, asset2] = std::minmax(asset_, asset2_);
+    if (deleted_.contains(std::make_pair(asset, asset2)))
+        return true;
+
+    auto ammSle = view.read(keylet::amm(asset, asset2));
+    if (!ammSle)
+    {
+        JLOG(j.error()) << "ValidAMM::finalize, failed amm SLE" << asset << " "
+                        << asset2;
+        return false;
+    }
+    auto const expected = ammHolds(
+        view,
+        *ammSle,
+        std::nullopt,
+        std::nullopt,
+        FreezeHandling::fhIGNORE_FREEZE,
+        j);
+    if (!expected)
+    {
+        JLOG(j.error()) << "ValidAMM::finalize ammHolds failed " << asset << " "
+                        << asset2;
+        return false;
+    }
+
+    auto const& [amount, amount2, lpTokensBalance] = *expected;
+
+    auto const lpTokens = ammLPTokens(amount, amount2, lpTokensBalance.issue());
+    if (txType == ttAMM_CREATE && lpTokensBalance != lpTokens)
+    {
+        JLOG(j.error()) << "ValidAMM::finalize create invariant failed "
+                        << amount << " " << amount2 << " " << lpTokensBalance;
+        return false;
+    }
+    else if (
+        (txType == ttAMM_DEPOSIT || txType == ttAMM_WITHDRAW) &&
+        lpTokens < lpTokensBalance &&
+        !withinRelativeDistance(lpTokens, lpTokensBalance, Number{1, -7}))
+    {
+        JLOG(j.error())
+            << "ValidAMM::finalize deposit/withdraw invariant failed "
+            << static_cast<int>(txType) << " " << amount << " " << amount2
+            << " " << lpTokens << " " << lpTokensBalance
+            << " diff: " << (lpTokensBalance - lpTokens) / lpTokens;
+        return false;
+    }
+    return true;
+}
+
+bool
+ValidAMM::finalize(
+    STTx const& tx,
+    TER const result,
+    XRPAmount const,
+    ReadView const& view,
+    beast::Journal const& j)
+{
+    if (!view.rules().enabled(fixAMMOfferRounding))
+        return true;
+
+    auto const txType = tx.getTxnType();
+
+    if (result == tesSUCCESS)
+    {
+        if (txType == ttAMM_CREATE)
+            return checkInvariant(
+                view, txType, tx[sfAmount].issue(), tx[sfAmount2].issue(), j);
+        else if (txType == ttAMM_DEPOSIT || txType == ttAMM_WITHDRAW)
+            return checkInvariant(view, txType, tx[sfAsset], tx[sfAsset2], j);
     }
 
     return true;
