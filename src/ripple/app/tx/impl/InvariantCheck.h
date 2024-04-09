@@ -418,6 +418,44 @@ public:
         beast::Journal const&);
 };
 
+/**
+ * @brief Invariant: 1. square root of AMM pool product on Deposit/Withdraw
+ *                   must be greater or equal to AMM LPTokenBalance
+ *                   2. square root of AMM pool product on Create
+ *                   must be equal to AMM LPTokenBalance
+ *
+ * We iterate all account roots modified by the transaction and ensure that
+ * their XRP balances are reasonable.
+ */
+class ValidAMM
+{
+    hash_set<std::pair<Issue, Issue>> deleted_;
+
+public:
+    void
+    visitEntry(
+        bool,
+        std::shared_ptr<SLE const> const&,
+        std::shared_ptr<SLE const> const&);
+
+    bool
+    finalize(
+        STTx const&,
+        TER const,
+        XRPAmount const,
+        ReadView const&,
+        beast::Journal const&);
+
+private:
+    bool
+    checkInvariant(
+        ReadView const& view,
+        TxType txType,
+        Issue const& asset,
+        Issue const& asset2,
+        beast::Journal j) const;
+};
+
 // additional invariant checks can be declared above and then added to this
 // tuple
 using InvariantChecks = std::tuple<
@@ -432,7 +470,8 @@ using InvariantChecks = std::tuple<
     ValidNewAccountRoot,
     ValidNFTokenPage,
     NFTokenCountTracking,
-    ValidClawback>;
+    ValidClawback,
+    ValidAMM>;
 
 /**
  * @brief get a tuple of all invariant checks
