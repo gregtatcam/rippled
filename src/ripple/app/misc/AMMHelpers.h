@@ -349,7 +349,7 @@ changeSpotPriceQuality(
     Rules const& rules,
     beast::Journal j)
 {
-    if (!rules.enabled(fixAMMOfferRounding))
+    if (!rules.enabled(fixAMMRounding))
     {
         // Finds takerPays (i) and takerGets (o) such that given pool
         // composition poolGets(I) and poolPays(O): (O - o) / (I + i) = quality.

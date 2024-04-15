@@ -363,65 +363,84 @@ AMMDeposit::applyGuts(Sandbox& sb)
          &amountBalance = amountBalance,
          &amount2Balance = amount2Balance,
          &lptAMMBalance = lptAMMBalance]() -> std::pair<TER, STAmount> {
-        if (subTxType & tfTwoAsset)
-            return equalDepositLimit(
-                sb,
-                ammAccountID,
-                amountBalance,
-                amount2Balance,
-                lptAMMBalance,
-                *amount,
-                *amount2,
-                lpTokensDeposit,
-                tfee);
-        if (subTxType & tfOneAssetLPToken)
-            return singleDepositTokens(
-                sb,
-                ammAccountID,
-                amountBalance,
-                *amount,
-                lptAMMBalance,
-                *lpTokensDeposit,
-                tfee);
-        if (subTxType & tfLimitLPToken)
-            return singleDepositEPrice(
-                sb,
-                ammAccountID,
-                amountBalance,
-                *amount,
-                lptAMMBalance,
-                *ePrice,
-                tfee);
-        if (subTxType & tfSingleAsset)
-            return singleDeposit(
-                sb,
-                ammAccountID,
-                amountBalance,
-                lptAMMBalance,
-                *amount,
-                lpTokensDeposit,
-                tfee);
-        if (subTxType & tfLPToken)
-            return equalDepositTokens(
-                sb,
-                ammAccountID,
-                amountBalance,
-                amount2Balance,
-                lptAMMBalance,
-                *lpTokensDeposit,
-                amount,
-                amount2,
-                tfee);
-        if (subTxType & tfTwoAssetIfEmpty)
-            return equalDepositInEmptyState(
-                sb,
-                ammAccountID,
-                *amount,
-                *amount2,
-                lptAMMBalance.issue(),
-                tfee);
-        // should not happen.
-        JLOG(j_.error()) << "AMM Deposit: invalid options.";
+        try
+        {
+            if (subTxType & tfTwoAsset)
+                return equalDepositLimit(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    amount2Balance,
+                    lptAMMBalance,
+                    *amount,
+                    *amount2,
+                    lpTokensDeposit,
+                    tfee);
+            if (subTxType & tfOneAssetLPToken)
+                return singleDepositTokens(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    *amount,
+                    lptAMMBalance,
+                    *lpTokensDeposit,
+                    tfee);
+            if (subTxType & tfLimitLPToken)
+                return singleDepositEPrice(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    *amount,
+                    lptAMMBalance,
+                    *ePrice,
+                    tfee);
+            if (subTxType & tfSingleAsset)
+                return singleDeposit(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    lptAMMBalance,
+                    *amount,
+                    lpTokensDeposit,
+                    tfee);
+            if (subTxType & tfLPToken)
+                return equalDepositTokens(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    amount2Balance,
+                    lptAMMBalance,
+                    *lpTokensDeposit,
+                    amount,
+                    amount2,
+                    tfee);
+            if (subTxType & tfTwoAssetIfEmpty)
+                return equalDepositInEmptyState(
+                    sb,
+                    ammAccountID,
+                    *amount,
+                    *amount2,
+                    lptAMMBalance.issue(),
+                    tfee);
+            // should not happen.
+            JLOG(j_.error()) << "AMM Deposit: invalid options.";
+        }
+        catch (std::overflow_error const& e)
+        {
+            JLOG(j_.error()) << "AMM Deposit: overflow exception " << e.what();
+            if (!sb.rules().enabled(fixAMMRounding))
+                Rethrow();
+            // root2 may have a negative discriminant, which means
+            // there is no real solution
+            if (std::string("Number::root nan") == e.what())
+                return std::make_pair(tecAMM_FAILED, STAmount{});
+        }
+        catch (std::exception const& e)
+        {
+            JLOG(j_.error()) << "AMM Deposit: exception " << e.what();
+            if (!sb.rules().enabled(fixAMMRounding))
+                Rethrow();
+        }
         return std::make_pair(tecINTERNAL, STAmount{});
     }();
 
@@ -605,7 +624,7 @@ AMMDeposit::equalDepositTokens(
 {
     try
     {
-        if (!view.rules().enabled(fixAMMOfferRounding))
+        if (!view.rules().enabled(fixAMMRounding))
         {
             auto const frac =
                 divide(lpTokensDeposit, lptAMMBalance, lptAMMBalance.issue());
@@ -696,7 +715,7 @@ AMMDeposit::equalDepositLimit(
     std::optional<STAmount> const& lpTokensDepositMin,
     std::uint16_t tfee)
 {
-    if (!view.rules().enabled(fixAMMOfferRounding))
+    if (!view.rules().enabled(fixAMMRounding))
     {
         auto frac = Number{amount} / amountBalance;
         auto tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
@@ -944,7 +963,7 @@ AMMDeposit::singleDepositEPrice(
     auto const a1 = c * c;
     auto const b1 = c * c * f2 * f2 + 2 * c - d * d;
     auto const c1 = 2 * c * f2 * f2 + 1 - 2 * d * f2;
-    if (!view.rules().enabled(fixAMMOfferRounding))
+    if (!view.rules().enabled(fixAMMRounding))
     {
         auto const amountDeposit = toSTAmount(
             amountBalance.issue(),

@@ -802,39 +802,208 @@ ValidClawback::finalize(
     return true;
 }
 
-void
-ValidAMM::visitEntry(
-    bool isDeleted,
-    std::shared_ptr<SLE const> const&,
-    std::shared_ptr<SLE const> const& after)
+//------------------------------------------------------------------------------
+
+ValidAMM::Pool::Pool(STAmount const& a) : amount{a}
 {
-    if (isDeleted && after && after->getType() == ltAMM)
+}
+
+bool
+ValidAMM::Pool::hasAsset(Issue const& iss) const
+{
+    return amount.issue() == iss || amount2.issue() == iss;
+}
+
+bool
+ValidAMM::Pool::hasBothAssets() const
+{
+    return amount.issue() != noIssue() && amount2.issue() != noIssue() &&
+        amount.issue() != amount2.issue();
+}
+
+bool
+ValidAMM::Pool::hasAssetOrBothAssets(Issue const& iss) const
+{
+    return hasAsset(iss) || hasBothAssets();
+}
+
+void
+ValidAMM::Pool::addAmount2(STAmount const& a)
+{
+    if (a.issue() > amount.issue())
+        amount2 = a;
+    else
     {
-        auto const asset_ = (*after)[sfAsset];
-        auto const asset2_ = (*after)[sfAsset2];
-        auto const& [asset, asset2] = std::minmax(asset_, asset2_);
-        deleted_.insert(std::make_pair(asset, asset2));
+        amount2 = amount;
+        amount = a;
     }
 }
 
 bool
-ValidAMM::checkInvariant(
+ValidAMM::Pool::consistent(Pool const& other) const
+{
+    if (!hasBothAssets() || !other.hasBothAssets())
+        return false;
+    return amount.issue() == other.amount.issue() &&
+        amount2.issue() == other.amount2.issue();
+}
+
+bool
+ValidAMM::Pool::positive(AccountID const& ammAccount, STAmount const& amount)
+{
+    if (!isXRP(amount) && ammAccount > amount.getIssuer())
+        return amount.negative();
+    return !amount.negative();
+}
+
+bool
+ValidAMM::Pool::goodPool(AccountID const& ammAccount) const
+{
+    return hasBothAssets() && amount != beast::zero && amount2 != beast::zero &&
+        positive(ammAccount, amount) && positive(ammAccount, amount2);
+}
+
+Number
+ValidAMM::Pool::product(AccountID const& ammAccount) const
+{
+    Number amount_ = amount;
+    Number amount2_ = amount2;
+    if (!isXRP(amount) && ammAccount > amount.getIssuer())
+        amount_ = -amount_;
+    if (!isXRP(amount2) && ammAccount > amount2.getIssuer())
+        amount2_ = -amount2_;
+    return amount_ * amount2_;
+}
+
+void
+ValidAMM::addPoolXRP(
+    std::shared_ptr<SLE const> const& sle,
+    hash_map<AccountID, Pool>& ammPool)
+{
+    isAMMPayment_ = true;
+    auto const ammAccount = sle->getAccountID(sfAccount);
+    ammAccounts_.insert(ammAccount);
+    auto const& balance = sle->getFieldAmount(sfBalance);
+    if (!ammPool.contains(ammAccount))
+        ammPool.emplace(std::make_pair(ammAccount, Pool{balance}));
+    else if (ammPool.at(ammAccount).hasAssetOrBothAssets(balance.issue()))
+        error_ = true;
+    else
+        ammPool.at(ammAccount).addAmount2(balance);
+}
+
+void
+ValidAMM::addPoolIOU(
+    std::shared_ptr<SLE const> const& sle,
+    hash_map<AccountID, Pool>& ammPool)
+{
+    isAMMPayment_ = true;
+    auto balance = sle->getFieldAmount(sfBalance);
+    auto const& lowLimit = sle->getFieldAmount(sfLowLimit);
+    auto const& highLimit = sle->getFieldAmount(sfHighLimit);
+    auto addBalanceToPool = [&](AccountID const& ammAccount,
+                                AccountID const& issuer) {
+        balance.setIssuer(issuer);
+        if (!ammPool.contains(ammAccount))
+            ammPool.emplace(std::make_pair(ammAccount, balance));
+        else if (ammPool.at(ammAccount).hasAssetOrBothAssets(balance.issue()))
+        {
+            // This must be a non AMM account. The same AMM can not have
+            // more than two assets whether the same or not. But there might be
+            // multiple IOU for the same issuer.
+            if (ammAccounts_.contains(ammAccount))
+                error_ = true;
+        }
+        else
+            ammPool.at(ammAccount).addAmount2(balance);
+    };
+    auto updateKnownAMMAccount = [&](AccountID const& ammAccount,
+                                     AccountID const& issuer) {
+        if (!error_)
+        {
+            ammAccounts_.insert(ammAccount);
+            nonAMMAccounts_.insert(issuer);
+            poolBefore_.erase(issuer);
+            poolAfter_.erase(issuer);
+        }
+    };
+    // Have to add for both accounts since it is not known which one is AMM.
+    // There might be multiple AMM's in the payment with the same IOU
+    if (ammAccounts_.contains(lowLimit.getIssuer()) ||
+        nonAMMAccounts_.contains(highLimit.getIssuer()))
+    {
+        addBalanceToPool(lowLimit.getIssuer(), highLimit.getIssuer());
+        updateKnownAMMAccount(lowLimit.getIssuer(), highLimit.getIssuer());
+    }
+    else if (
+        ammAccounts_.contains(highLimit.getIssuer()) ||
+        nonAMMAccounts_.contains(lowLimit.getIssuer()))
+    {
+        addBalanceToPool(highLimit.getIssuer(), lowLimit.getIssuer());
+        updateKnownAMMAccount(highLimit.getIssuer(), lowLimit.getIssuer());
+    }
+    else
+    {
+        addBalanceToPool(lowLimit.getIssuer(), highLimit.getIssuer());
+        addBalanceToPool(highLimit.getIssuer(), lowLimit.getIssuer());
+    }
+}
+
+void
+ValidAMM::visitEntry(
+    bool isDeleted,
+    std::shared_ptr<SLE const> const& before,
+    std::shared_ptr<SLE const> const& after)
+{
+    if (error_)
+        return;
+
+    if (isDeleted && after && after->getType() == ltAMM)
+    {
+        auto const asset_ = (*before)[sfAsset];
+        auto const asset2_ = (*before)[sfAsset2];
+        auto const& [asset, asset2] = std::minmax(asset_, asset2_);
+        deleted_.insert(std::make_pair(asset, asset2));
+    }
+    else if (before && after)
+    {
+        if (before->getFieldU16(sfLedgerEntryType) == ltACCOUNT_ROOT &&
+            before->isFieldPresent(sfAMMID))
+        {
+            addPoolXRP(before, poolBefore_);
+        }
+        if (after->getFieldU16(sfLedgerEntryType) == ltACCOUNT_ROOT &&
+            after->isFieldPresent(sfAMMID))
+        {
+            addPoolXRP(after, poolAfter_);
+        }
+        if (before->getFieldU16(sfLedgerEntryType) == ltRIPPLE_STATE &&
+            (before->getFlags() & lsfAMMNode))
+        {
+            addPoolIOU(before, poolBefore_);
+        }
+        if (after->getFieldU16(sfLedgerEntryType) == ltRIPPLE_STATE &&
+            (after->getFlags() & lsfAMMNode))
+        {
+            addPoolIOU(after, poolAfter_);
+        }
+    }
+}
+
+std::optional<std::tuple<STAmount, STAmount, STAmount>>
+ValidAMM::getBalances(
     ReadView const& view,
     TxType txType,
-    Issue const& asset_,
-    Issue const& asset2_,
+    Issue const& asset,
+    Issue const& asset2,
     beast::Journal j) const
 {
-    auto const& [asset, asset2] = std::minmax(asset_, asset2_);
-    if (deleted_.contains(std::make_pair(asset, asset2)))
-        return true;
-
     auto ammSle = view.read(keylet::amm(asset, asset2));
     if (!ammSle)
     {
-        JLOG(j.error()) << "ValidAMM::finalize, failed amm SLE" << asset << " "
-                        << asset2;
-        return false;
+        JLOG(j.error()) << "ValidAMM::getBalances, failed amm SLE " << asset
+                        << " " << asset2;
+        return std::nullopt;
     }
     auto const expected = ammHolds(
         view,
@@ -845,32 +1014,199 @@ ValidAMM::checkInvariant(
         j);
     if (!expected)
     {
-        JLOG(j.error()) << "ValidAMM::finalize ammHolds failed " << asset << " "
-                        << asset2;
-        return false;
+        JLOG(j.error()) << "ValidAMM::getBalances ammHolds failed " << asset
+                        << " " << asset2;
+        return std::nullopt;
     }
 
-    auto const& [amount, amount2, lpTokensBalance] = *expected;
-
-    auto const lpTokens = ammLPTokens(amount, amount2, lpTokensBalance.issue());
-    if (txType == ttAMM_CREATE && lpTokensBalance != lpTokens)
+    // All zero balances are valid if AMM is in an empty state after
+    // Withdraw.
+    std::uint8_t zeros = (std::get<0>(*expected) == beast::zero) +
+        (std::get<1>(*expected) == beast::zero) +
+        (std::get<2>(*expected) == beast::zero);
+    if (((txType == ttAMM_CREATE || txType == ttAMM_DEPOSIT) && zeros) ||
+        (txType == ttAMM_WITHDRAW && (zeros == 1 || zeros == 2)))
     {
-        JLOG(j.error()) << "ValidAMM::finalize create invariant failed "
-                        << amount << " " << amount2 << " " << lpTokensBalance;
+        JLOG(j.error()) << "ValidAMM::getBalances invalid balances" << asset
+                        << " " << asset2 << std::get<0>(*expected) << " "
+                        << std::get<1>(*expected) << " "
+                        << std::get<2>(*expected);
+        return std::nullopt;
+    }
+
+    return *expected;
+}
+
+bool
+ValidAMM::checkCreate(
+    ReadView const& view,
+    Issue const& asset,
+    Issue const& asset2,
+    beast::Journal j) const
+{
+    auto const res = getBalances(view, ttAMM_CREATE, asset, asset2, j);
+    if (!res)
+        return false;
+    auto const& [amount, amount2, lptAMMBalance] = *res;
+    auto const lpTokens = ammLPTokens(amount, amount2, lptAMMBalance.issue());
+    if (lpTokens != lptAMMBalance || lpTokens == beast::zero)
+    {
+        JLOG(j.error()) << "ValidAMM::checkCreate failed: invariant " << amount
+                        << " " << amount2 << " " << lptAMMBalance;
         return false;
     }
-    else if (
-        (txType == ttAMM_DEPOSIT || txType == ttAMM_WITHDRAW) &&
-        lpTokens < lpTokensBalance &&
-        !withinRelativeDistance(lpTokens, lpTokensBalance, Number{1, -7}))
+
+    auto checkNonAMMAsset = [&](STAmount const& a) {
+        if (isXRP(a))
+            return true;
+        auto const sle = view.read(keylet::account(a.getIssuer()));
+        if (!sle)
+        {
+            JLOG(j.error()) << "ValidAMM::checkCreate failed: get account "
+                            << to_string(a.getIssuer()) << " " << amount << " "
+                            << amount2 << " " << lptAMMBalance;
+            return false;
+        }
+        if (sle->isFieldPresent(sfAMMID))
+        {
+            JLOG(j.error()) << "ValidAMM::checkCreate failed: invariant " << a
+                            << " is AMM token " << amount << " " << amount2
+                            << " " << lptAMMBalance;
+            return false;
+        }
+        return true;
+    };
+
+    return checkNonAMMAsset(amount) && checkNonAMMAsset(amount2);
+}
+
+bool
+ValidAMM::checkDepositWithdraw(
+    ReadView const& view,
+    TxType txType,
+    Issue const& asset_,
+    Issue const& asset2_,
+    beast::Journal j) const
+{
+    auto const& [asset, asset2] = std::minmax(asset_, asset2_);
+    if (deleted_.contains(std::make_pair(asset, asset2)))
+        return true;
+
+    auto const res = getBalances(view, txType, asset, asset2, j);
+    if (!res)
+        return false;
+    auto const& [amount, amount2, lptAMMBalance] = *res;
+
+    auto const lpTokens = ammLPTokens(amount, amount2, lptAMMBalance.issue());
+    if (lpTokens < lptAMMBalance &&
+        !withinRelativeDistance(lpTokens, lptAMMBalance, Number{1, -7}))
+    {
+        JLOG(j.error()) << "ValidAMM::checkDepositWithdraw failed: invariant "
+                        << static_cast<int>(txType) << " " << amount << " "
+                        << amount2 << " " << lpTokens << " " << lptAMMBalance
+                        << " diff: " << (lptAMMBalance - lpTokens) / lpTokens;
+        return false;
+    }
+
+    return true;
+}
+
+bool
+ValidAMM::checkPayment(ReadView const& view, beast::Journal j)
+{
+    if (error_ || poolBefore_.size() != poolAfter_.size() ||
+        poolBefore_.empty())
+    {
+        JLOG(j.error()) << "ValidAMM::checkPayment failed: "
+                           "inconsistent before/after";
+        return false;
+    }
+    if (!std::equal(
+            poolBefore_.begin(),
+            poolBefore_.end(),
+            poolAfter_.begin(),
+            [](auto const& it1, auto const& it2) {
+                return it1.first == it2.first;
+            }))
+    {
+        JLOG(j.error()) << "ValidAMM::checkPayment failed: "
+                           "inconsistent keys before/after";
+        return false;
+    }
+
+    auto invariantHolds = [&](AccountID const& ammAccount,
+                              Pool const& before,
+                              Pool const& after) {
+        if (!before.consistent(after))
+        {
+            JLOG(j.error()) << "ValidAMM::checkPayment failed: "
+                               "invalid before/after";
+            return false;
+        }
+        if (!after.goodPool(ammAccount))
+        {
+            JLOG(j.error()) << "ValidAMM::checkPayment failed: bad pool "
+                            << to_string(ammAccount) << " " << after.amount
+                            << " " << after.amount2;
+            return false;
+        }
+        Number const productBefore = before.product(ammAccount);
+        Number const productAfter = after.product(ammAccount);
+        if (productAfter < productBefore &&
+            !withinRelativeDistance(productBefore, productAfter, Number{1, -7}))
+        {
+            JLOG(j.error())
+                << "ValidAMM::checkPayment failed: invariant " << before.amount
+                << " " << before.amount2 << after.amount << " " << after.amount2
+                << (productBefore - productAfter) / productBefore;
+            return false;
+        }
+        return true;
+    };
+
+    for (auto const& it : poolBefore_)
+    {
+        auto const& account = it.first;
+        if (ammAccounts_.contains(account))
+        {
+            if (!invariantHolds(
+                    account, poolBefore_.at(account), poolAfter_.at(account)))
+                return false;
+            ammAccounts_.erase(account);
+            nonAMMAccounts_.erase(poolBefore_.at(account).amount.getIssuer());
+            nonAMMAccounts_.erase(poolBefore_.at(account).amount2.getIssuer());
+        }
+        else
+        {
+            auto const sle = view.read(keylet::account(account));
+            if (!sle)
+            {
+                JLOG(j.error()) << "ValidAMM::checkPayment failed: get account "
+                                << to_string(account);
+                return false;
+            }
+            if (sle->isFieldPresent(sfAMMID))
+            {
+                if (!invariantHolds(
+                        account,
+                        poolBefore_.at(account),
+                        poolAfter_.at(account)))
+                    return false;
+                nonAMMAccounts_.erase(
+                    poolBefore_.at(account).amount.getIssuer());
+                nonAMMAccounts_.erase(
+                    poolBefore_.at(account).amount2.getIssuer());
+            }
+        }
+    }
+
+    if (!ammAccounts_.empty() || !nonAMMAccounts_.empty())
     {
         JLOG(j.error())
-            << "ValidAMM::finalize deposit/withdraw invariant failed "
-            << static_cast<int>(txType) << " " << amount << " " << amount2
-            << " " << lpTokens << " " << lpTokensBalance
-            << " diff: " << (lpTokensBalance - lpTokens) / lpTokens;
+            << "ValidAMM::checkPayment failed: inconsistent accounts";
         return false;
     }
+
     return true;
 }
 
@@ -882,7 +1218,7 @@ ValidAMM::finalize(
     ReadView const& view,
     beast::Journal const& j)
 {
-    if (!view.rules().enabled(fixAMMOfferRounding))
+    if (!view.rules().enabled(fixAMMRounding))
         return true;
 
     auto const txType = tx.getTxnType();
@@ -890,10 +1226,13 @@ ValidAMM::finalize(
     if (result == tesSUCCESS)
     {
         if (txType == ttAMM_CREATE)
-            return checkInvariant(
-                view, txType, tx[sfAmount].issue(), tx[sfAmount2].issue(), j);
+            return checkCreate(
+                view, tx[sfAmount].issue(), tx[sfAmount2].issue(), j);
         else if (txType == ttAMM_DEPOSIT || txType == ttAMM_WITHDRAW)
-            return checkInvariant(view, txType, tx[sfAsset], tx[sfAsset2], j);
+            return checkDepositWithdraw(
+                view, txType, tx[sfAsset], tx[sfAsset2], j);
+        else if (txType == ttPAYMENT && isAMMPayment_)
+            return checkPayment(view, j);
     }
 
     return true;

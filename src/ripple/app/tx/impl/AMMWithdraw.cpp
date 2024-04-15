@@ -330,49 +330,74 @@ AMMWithdraw::applyGuts(Sandbox& sb)
          &amountBalance = amountBalance,
          &amount2Balance = amount2Balance,
          &lptAMMBalance = lptAMMBalance]() -> std::pair<TER, STAmount> {
-        if (subTxType & tfTwoAsset)
-            return equalWithdrawLimit(
-                sb,
-                ammAccountID,
-                amountBalance,
-                amount2Balance,
-                lptAMMBalance,
-                *amount,
-                *amount2,
-                tfee);
-        if (subTxType & tfOneAssetLPToken || subTxType & tfOneAssetWithdrawAll)
-            return singleWithdrawTokens(
-                sb,
-                ammAccountID,
-                amountBalance,
-                lptAMMBalance,
-                *amount,
-                *lpTokensWithdraw,
-                tfee);
-        if (subTxType & tfLimitLPToken)
-            return singleWithdrawEPrice(
-                sb,
-                ammAccountID,
-                amountBalance,
-                lptAMMBalance,
-                *amount,
-                *ePrice,
-                tfee);
-        if (subTxType & tfSingleAsset)
-            return singleWithdraw(
-                sb, ammAccountID, amountBalance, lptAMMBalance, *amount, tfee);
-        if (subTxType & tfLPToken || subTxType & tfWithdrawAll)
-            return equalWithdrawTokens(
-                sb,
-                ammAccountID,
-                amountBalance,
-                amount2Balance,
-                lptAMMBalance,
-                lpTokens,
-                *lpTokensWithdraw,
-                tfee);
-        // should not happen.
-        JLOG(j_.error()) << "AMM Withdraw: invalid options.";
+        try
+        {
+            if (subTxType & tfTwoAsset)
+                return equalWithdrawLimit(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    amount2Balance,
+                    lptAMMBalance,
+                    *amount,
+                    *amount2,
+                    tfee);
+            if (subTxType & tfOneAssetLPToken ||
+                subTxType & tfOneAssetWithdrawAll)
+                return singleWithdrawTokens(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    lptAMMBalance,
+                    *amount,
+                    *lpTokensWithdraw,
+                    tfee);
+            if (subTxType & tfLimitLPToken)
+                return singleWithdrawEPrice(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    lptAMMBalance,
+                    *amount,
+                    *ePrice,
+                    tfee);
+            if (subTxType & tfSingleAsset)
+                return singleWithdraw(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    lptAMMBalance,
+                    *amount,
+                    tfee);
+            if (subTxType & tfLPToken || subTxType & tfWithdrawAll)
+                return equalWithdrawTokens(
+                    sb,
+                    ammAccountID,
+                    amountBalance,
+                    amount2Balance,
+                    lptAMMBalance,
+                    lpTokens,
+                    *lpTokensWithdraw,
+                    tfee);
+            // should not happen.
+            JLOG(j_.error()) << "AMM Withdraw: invalid options.";
+        }
+        catch (std::overflow_error const& e)
+        {
+            JLOG(j_.error()) << "AMM Withdraw: overflow exception " << e.what();
+            if (!sb.rules().enabled(fixAMMRounding))
+                Rethrow();
+            // root2 may have a negative discriminant, which means
+            // there is no real solution
+            if (std::string("Number::root nan") == e.what())
+                return std::make_pair(tecAMM_FAILED, STAmount{});
+        }
+        catch (std::exception const& e)
+        {
+            JLOG(j_.error()) << "AMM Withdraw: exception " << e.what();
+            if (!sb.rules().enabled(fixAMMRounding))
+                Rethrow();
+        }
         return std::make_pair(tecINTERNAL, STAmount{});
     }();
 
@@ -591,7 +616,7 @@ AMMWithdraw::equalWithdrawTokens(
                 lpTokensWithdraw,
                 tfee);
 
-        if (!view.rules().enabled(fixAMMOfferRounding))
+        if (!view.rules().enabled(fixAMMRounding))
         {
             auto const frac =
                 divide(lpTokensWithdraw, lptAMMBalance, noIssue());
@@ -691,7 +716,7 @@ AMMWithdraw::equalWithdrawLimit(
     STAmount const& amount2,
     std::uint16_t tfee)
 {
-    if (view.rules().enabled(fixAMMOfferRounding))
+    if (view.rules().enabled(fixAMMRounding))
     {
         auto frac = Number{amount} / amountBalance;
         auto const amount2Withdraw = amount2Balance * frac;
@@ -875,7 +900,7 @@ AMMWithdraw::singleWithdrawEPrice(
     // t1*T*f - T = t1*A*E + A*E*(f - 2) =>
     // t1*(T*f - A*E) = T + A*E*(f - 2) =>
     // t = T*(T + A*E*(f - 2))/(T*f - A*E)
-    if (!view.rules().enabled(fixAMMOfferRounding))
+    if (!view.rules().enabled(fixAMMRounding))
     {
         Number const ae = amountBalance * ePrice;
         auto const f = getFee(tfee);

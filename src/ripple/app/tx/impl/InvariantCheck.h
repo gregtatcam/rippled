@@ -429,7 +429,48 @@ public:
  */
 class ValidAMM
 {
+    struct Pool
+    {
+        STAmount amount{noIssue()};
+        STAmount amount2{noIssue()};
+
+        Pool(STAmount const& a);
+        bool
+        hasAsset(Issue const& iss) const;
+
+        bool
+        hasBothAssets() const;
+
+        bool
+        hasAssetOrBothAssets(Issue const& iss) const;
+
+        void
+        addAmount2(STAmount const& a);
+
+        bool
+        consistent(Pool const& other) const;
+
+        static bool
+        positive(AccountID const& ammAccount, STAmount const& amount);
+
+        bool
+        goodPool(AccountID const& ammAccount) const;
+
+        Number
+        product(AccountID const& ammAccount) const;
+    };
+    // Deleted AMM with Withdraw auto-delete
     hash_set<std::pair<Issue, Issue>> deleted_;
+    hash_map<AccountID, Pool> poolBefore_;
+    hash_map<AccountID, Pool> poolAfter_;
+    // AMM account inferred from AMM root account
+    hash_set<AccountID> ammAccounts_;
+    // non-AMM account inferred from ammAccounts_
+    hash_set<AccountID> nonAMMAccounts_;
+    // Inconsistency found on AMM payment visit
+    bool error_{false};
+    // Payment is executed via AMM
+    bool isAMMPayment_{false};
 
 public:
     void
@@ -447,13 +488,41 @@ public:
         beast::Journal const&);
 
 private:
-    bool
-    checkInvariant(
+    std::optional<std::tuple<STAmount, STAmount, STAmount>>
+    getBalances(
         ReadView const& view,
         TxType txType,
         Issue const& asset,
         Issue const& asset2,
         beast::Journal j) const;
+
+    bool
+    checkCreate(
+        ReadView const& view,
+        Issue const& asset,
+        Issue const& asset2,
+        beast::Journal j) const;
+
+    bool
+    checkDepositWithdraw(
+        ReadView const& view,
+        TxType txType,
+        Issue const& asset,
+        Issue const& asset2,
+        beast::Journal j) const;
+
+    bool
+    checkPayment(ReadView const& view, beast::Journal j);
+
+    void
+    addPoolXRP(
+        std::shared_ptr<SLE const> const& sle,
+        hash_map<AccountID, Pool>& ammPool);
+
+    void
+    addPoolIOU(
+        std::shared_ptr<SLE const> const& sle,
+        hash_map<AccountID, Pool>& ammPool);
 };
 
 // additional invariant checks can be declared above and then added to this

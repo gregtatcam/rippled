@@ -793,7 +793,8 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     TAmounts<TIn, TOut> const& stepAmt,
     TOut const& ownerGives) const
 {
-    if (!offer.checkInvariant(ofrAmt, j_))
+    if (!sb.rules().enabled(fixAMMRounding) &&
+        !offer.checkInvariant(ofrAmt, j_))
     {
         // purposely written as separate if statements so we get logging even
         // when the amendment isn't active.
@@ -863,7 +864,7 @@ BookStep<TIn, TOut, TDerived>::tip(ReadView const& view) const
     // multi-path or single path then can be selected based on the best
     // offer quality.
     auto const targetQuality = [&]() -> std::optional<Quality> {
-        if (view.rules().enabled(fixAMMOfferRounding) && ammLiquidity_ &&
+        if (view.rules().enabled(fixAMMRounding) && ammLiquidity_ &&
             !ammLiquidity_->context().multiPath())
             return clobQuality;
         return std::nullopt;

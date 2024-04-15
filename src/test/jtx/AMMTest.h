@@ -128,7 +128,7 @@ protected:
     offerRoundingHelper(std::function<void(Env&)>&& cb)
     {
         auto const all = supported_amendments();
-        for (auto const features : {all, all - fixAMMOfferRounding})
+        for (auto const features : {all, all - fixAMMRounding})
         {
             Env env(*this, features);
             cb(env);
@@ -138,7 +138,7 @@ protected:
     bool
     offerRoundingEnabled(Env const& env) const
     {
-        return env.current()->rules().enabled(fixAMMOfferRounding);
+        return env.current()->rules().enabled(fixAMMRounding);
     }
 };
 

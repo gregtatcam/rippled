@@ -44,7 +44,7 @@ struct AMM_test : public jtx::AMMTest
 {
     jtx::Features roundFeatures_ = jtx::Features(
         supportedAmendments_,
-        supportedAmendments_ - fixAMMOfferRounding);
+        supportedAmendments_ - fixAMMRounding);
 
 private:
     void
@@ -785,14 +785,14 @@ private:
             // Tiny deposit
             // This test is added to testDeposit with
             // the feature enabled
-            env.disableFeature(fixAMMOfferRounding);
+            env.disableFeature(fixAMMRounding);
             ammAlice.deposit(
                 carol,
                 IOUAmount{1, -4},
                 std::nullopt,
                 std::nullopt,
                 ter(temBAD_AMOUNT));
-            env.enableFeature(fixAMMOfferRounding);
+            env.enableFeature(fixAMMRounding);
             ammAlice.deposit(
                 carol,
                 STAmount{USD, 1, -12},
@@ -1354,7 +1354,7 @@ private:
         testAMM(
             [&](AMM& ammAlice, Env& env) {
                 ammAlice.deposit(gw, 1'000'000);
-                if (!env.current()->rules().enabled(fixAMMOfferRounding))
+                if (!env.current()->rules().enabled(fixAMMRounding))
                     BEAST_EXPECT(ammAlice.expectBalances(
                         XRP(11'000), USD(11'000), IOUAmount{11'000'000}));
                 else
@@ -1363,7 +1363,7 @@ private:
                         USD(11'000),
                         IOUAmount{11'000'000}));
                 ammAlice.deposit(gw, USD(1'000));
-                if (!env.current()->rules().enabled(fixAMMOfferRounding))
+                if (!env.current()->rules().enabled(fixAMMRounding))
                     BEAST_EXPECT(ammAlice.expectBalances(
                         XRP(11'000),
                         STAmount{USD, UINT64_C(11'999'99999999998), -11},
@@ -1389,7 +1389,7 @@ private:
                     tfLPToken,
                     std::nullopt,
                     std::nullopt);
-                if (!env.current()->rules().enabled(fixAMMOfferRounding))
+                if (!env.current()->rules().enabled(fixAMMRounding))
                     BEAST_EXPECT(ammAlice.expectBalances(
                         XRP(11'000), USD(11'000), IOUAmount{11'000'000, 0}));
                 else
@@ -1706,14 +1706,14 @@ private:
             // Equal withdraw but due to XRP precision limit,
             // this results in full withdraw of XRP pool only,
             // while leaving a tiny amount in USD pool.
-            env.disableFeature(fixAMMOfferRounding);
+            env.disableFeature(fixAMMRounding);
             ammAlice.withdraw(
                 alice,
                 IOUAmount{9'999'999'9999, -4},
                 std::nullopt,
                 std::nullopt,
                 ter(tecAMM_BALANCE));
-            env.enableFeature(fixAMMOfferRounding);
+            env.enableFeature(fixAMMRounding);
             // Withdrawing from one side.
             // XRP by tokens
             ammAlice.withdraw(
@@ -1914,14 +1914,14 @@ private:
                 std::nullopt,
                 ter(tecAMM_FAILED));
             // Calculated tokens to withdraw are 0
-            env.disableFeature(fixAMMOfferRounding);
+            env.disableFeature(fixAMMRounding);
             ammAlice.withdraw(
                 alice,
                 std::nullopt,
                 STAmount{USD, 1, -11},
                 std::nullopt,
                 ter(tecAMM_INVALID_TOKENS));
-            env.enableFeature(fixAMMOfferRounding);
+            env.enableFeature(fixAMMRounding);
             ammAlice.deposit(carol, STAmount{USD, 1, -10});
             ammAlice.withdraw(
                 carol,
@@ -4157,7 +4157,7 @@ private:
         auto const LP2 = Account("LP2");
         auto const all = supported_amendments();
 
-        for (auto const& features : {all, all - fixAMMOfferRounding})
+        for (auto const& features : {all, all - fixAMMRounding})
         {
             auto prep = [&](auto const& offerCb, auto const& expectCb) {
                 Env env(*this, features);
@@ -4196,7 +4196,7 @@ private:
             // Execute with CLOB offer
             prep(
                 [&](Env& env) {
-                    if (!features[fixAMMOfferRounding])
+                    if (!features[fixAMMRounding])
                     {
                         env(offer(
                                 LP1,
@@ -4566,7 +4566,7 @@ private:
         using namespace jtx;
 
         auto const all = supported_amendments();
-        Features const features{all, all - fixAMMOfferRounding};
+        Features const features{all, all - fixAMMRounding};
 
         // Deposit/Withdraw in USD
         testAMM(
@@ -5482,7 +5482,7 @@ private:
         // tests that succeed should have the same amounts pre-fix and
         // post-fix
         std::vector<std::pair<STAmount, STAmount>> successAmounts;
-        for (auto const& features : {all, all - fixAMMOfferRounding})
+        for (auto const& features : {all, all - fixAMMRounding})
         {
             Env env(*this, features);
             for (auto const& t : tests)
@@ -5514,16 +5514,16 @@ private:
                     {
                         BEAST_EXPECT(
                             status == Status::Succeed ||
-                            (features[fixAMMOfferRounding] &&
+                            (features[fixAMMRounding] &&
                              status == Status::FailedShouldSucceed) ||
-                            (!features[fixAMMOfferRounding] &&
+                            (!features[fixAMMRounding] &&
                              status == Status::SucceededShouldFail));
                     }
                     else
                     {
                         BEAST_EXPECT(
                             status == Status::Fail ||
-                            (features[fixAMMOfferRounding] &&
+                            (features[fixAMMRounding] &&
                              (status == Status::SucceededShouldFail ||
                               status == Status::FailedShouldFail)));
                     }
@@ -5533,7 +5533,7 @@ private:
                     BEAST_EXPECT(
                         !strcmp(e.what(), "changeSpotPriceQuality failed"));
                     BEAST_EXPECT(
-                        !features[fixAMMOfferRounding] &&
+                        !features[fixAMMRounding] &&
                         (status == Status::FailedShouldSucceed ||
                          status == Status::FailedShouldFail));
                 }
@@ -5703,13 +5703,23 @@ private:
             [&](AMM& ammAlice, Env& env) { ammAlice.withdraw(alice, 1'000); },
             {{GBP(7'000), EUR(30'000)}});
 
+        // TODO !!!
         // tfWithdrawAll mode
+        // this fails because AMM object is not included in ValidAMM::visit() as
+        // deleted but it is erased in deleteAMMAccount().
         testAMM(
             [&](AMM& ammAlice, Env& env) {
                 ammAlice.withdraw(
                     WithdrawArg{.account = alice, .flags = tfWithdrawAll});
             },
             {{GBP(7'000), EUR(30'000)}});
+        // But this succeeds
+        {
+            Env env(*this);
+            fund(env, gw, {alice}, {GBP(30'000), EUR(30'000)}, Fund::All);
+            AMM amm(env, alice, GBP(7'000), EUR(30'000), false, 0);
+            amm.withdraw(WithdrawArg{.account = alice, .flags = tfWithdrawAll});
+        }
 
         // tfTwoAsset withdraw mode
         testAMM(

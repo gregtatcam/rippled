@@ -49,7 +49,7 @@ lpTokensIn(
     auto const f2 = feeMultHalf(tfee) / f1;
     Number const r = asset1Deposit / asset1Balance;
     auto const c = root2(f2 * f2 + r / f1) - f2;
-    if (!rules.enabled(fixAMMOfferRounding))
+    if (!rules.enabled(fixAMMRounding))
     {
         auto const t = lptAMMBalance * (r - c) / (1 + c);
         return toSTAmount(lptAMMBalance.issue(), t);
@@ -90,7 +90,7 @@ ammAssetIn(
     auto const a = 1 / (t2 * t2);
     auto const b = 2 * d / t2 - 1 / f1;
     auto const c = d * d - f2 * f2;
-    if (!rules.enabled(fixAMMOfferRounding))
+    if (!rules.enabled(fixAMMRounding))
     {
         return toSTAmount(
             asset1Balance.issue(), asset1Balance * solveQuadraticEq(a, b, c));
@@ -118,7 +118,7 @@ lpTokensOut(
     Number const fr = asset1Withdraw / asset1Balance;
     auto const f1 = getFee(tfee);
     auto const c = fr * f1 + 2 - f1;
-    if (!rules.enabled(fixAMMOfferRounding))
+    if (!rules.enabled(fixAMMRounding))
     {
         auto const t = lptAMMBalance * (c - root2(c * c - 4 * fr)) / 2;
         return toSTAmount(lptAMMBalance.issue(), t);
@@ -152,7 +152,7 @@ withdrawByTokens(
 {
     auto const f = getFee(tfee);
     Number const t1 = lpTokens / lptAMMBalance;
-    if (!rules.enabled(fixAMMOfferRounding))
+    if (!rules.enabled(fixAMMRounding))
     {
         auto const b = assetBalance * (t1 * t1 - t1 * (2 - f)) / (t1 * f - 1);
         return toSTAmount(assetBalance.issue(), b);
@@ -213,7 +213,7 @@ adjustAmountsByLPTokens(
         if (amount2)
         {
             auto rounding = [&]() {
-                if (!rules.enabled(fixAMMOfferRounding))
+                if (!rules.enabled(fixAMMRounding))
                     return Number::getround();
                 else if (isDeposit)
                     return Number::rounding_mode::upward;
@@ -236,14 +236,14 @@ adjustAmountsByLPTokens(
             if (isDeposit)
                 return ammAssetIn(
                     amountBalance, lptAMMBalance, lpTokensActual, tfee, rules);
-            else if (!rules.enabled(fixAMMOfferRounding))
+            else if (!rules.enabled(fixAMMRounding))
                 return withdrawByTokens(
                     amountBalance, lptAMMBalance, lpTokens, tfee, rules);
             else
                 return withdrawByTokens(
                     amountBalance, lptAMMBalance, lpTokensActual, tfee, rules);
         }();
-        if (!rules.enabled(fixAMMOfferRounding))
+        if (!rules.enabled(fixAMMRounding))
         {
             return amountActual < amount
                 ? std::make_tuple(amountActual, std::nullopt, lpTokensActual)
