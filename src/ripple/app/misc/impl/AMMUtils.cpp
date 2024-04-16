@@ -329,4 +329,51 @@ initializeFeeAuctionVote(
         auctionSlot.makeFieldAbsent(sfDiscountedFee);
 }
 
+bool
+isOnlyLiquidityProvider(
+    ReadView const& view,
+    AccountID const& ammAccount,
+    AccountID const& lpAccount)
+{
+    std::uint8_t nTrustLines = 0;
+    std::uint8_t limit = 10;
+    auto const root = keylet::ownerDir(ammAccount);
+    auto currentIndex = root;
+
+    while (limit-- <= 1)
+    {
+        auto const ownerDir = view.read(currentIndex);
+        if (!ownerDir)
+            return false;
+        for (auto const& key : ownerDir->getFieldV256(sfIndexes))
+        {
+            auto const sle = view.read(keylet::child(key));
+            if (!sle)
+            {
+                assert(false);
+                return false;
+            }
+            // Only one AMM object
+            if (sle->getFieldU16(sfLedgerEntryType) == ltAMM)
+                continue;
+            if (sle->getFieldU16(sfLedgerEntryType) != ltRIPPLE_STATE)
+            {
+                assert(false);
+                return false;
+            }
+            auto const lowLimit = sle->getFieldAmount(sfLowLimit);
+            auto const highLimit = sle->getFieldAmount(sfHighLimit);
+            if ((lowLimit.getIssuer() != lpAccount &&
+                 highLimit.getIssuer() != lpAccount))
+                return false;
+            ++nTrustLines;
+        }
+        auto const uNodeNext = ownerDir->getFieldU64(sfIndexNext);
+        if (uNodeNext == 0)
+            return nTrustLines == 2 || nTrustLines == 3;
+        currentIndex = keylet::page(root, uNodeNext);
+    }
+    return nTrustLines == 2 || nTrustLines == 3;
+}
+
 }  // namespace ripple

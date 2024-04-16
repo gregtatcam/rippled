@@ -124,7 +124,7 @@ public:
                 {
                     Account a(std::to_string(i));
                     votes.insert({a.human(), 50 * (i + 1)});
-                    if (!offerRoundingEnabled(env))
+                    if (!ammV1Enabled(env))
                         fund(env, gw, {a}, {USD(10000)}, Fund::Acct);
                     else
                         fund(env, gw, {a}, {USD(10001)}, Fund::Acct);
@@ -136,7 +136,7 @@ public:
                 Account bill("bill");
                 env.fund(XRP(1000), bob, ed, bill);
                 ammAlice.bid(alice, 100, std::nullopt, {carol, bob, ed, bill});
-                if (!offerRoundingEnabled(env))
+                if (!ammV1Enabled(env))
                     BEAST_EXPECT(ammAlice.expectAmmRpcInfo(
                         XRP(80'000),
                         USD(80'000),
@@ -217,7 +217,7 @@ public:
                     }
                 }
             },
-            AMMTestArg{.features = {Features{all, all - fixAMMRounding}}});
+            AMMTestArg{.features = {Features{all, all - fixAMMV1}}});
     }
 
     void

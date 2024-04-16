@@ -2910,7 +2910,7 @@ private:
         testcase("Step Limit");
 
         using namespace jtx;
-        for (auto const& features_ : {features, features - fixAMMRounding})
+        for (auto const& features_ : {features, features - fixAMMV1})
         {
             Env env(*this, features_);
             auto const dan = Account("dan");
@@ -2929,7 +2929,7 @@ private:
             // Alice offers to buy 1000 XRP for 1000 USD. She takes Bob's first
             // offer, removes 999 more as unfunded, then hits the step limit.
             env(offer(alice, USD(1'000), XRP(1'000)));
-            if (!features_[fixAMMRounding])
+            if (!features_[fixAMMV1])
                 env.require(balance(
                     alice, STAmount{USD, UINT64_C(2'050126257867561), -15}));
             else
@@ -3608,7 +3608,7 @@ private:
         Account const becky{"becky", KeyType::ed25519};
         Account const zelda{"zelda", KeyType::secp256k1};
 
-        for (auto const& features_ : {features, features - fixAMMRounding})
+        for (auto const& features_ : {features, features - fixAMMV1})
         {
             Env env{*this, features_};
             fund(env, gw, {alice, becky, zelda}, XRP(20'000), {USD(20'000)});
@@ -3642,7 +3642,7 @@ private:
                 XRP(10'000), USD(10'000), ammAlice.tokens()));
 
             ammAlice.deposit(alice, 1'000'000);
-            if (!features_[fixAMMRounding])
+            if (!features_[fixAMMV1])
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRP(11'000), USD(11'000), IOUAmount{11'000'000, 0}));
             else
@@ -3652,7 +3652,7 @@ private:
                     IOUAmount{11'000'000, 0}));
 
             ammAlice.withdraw(alice, 1'000'000);
-            if (!features_[fixAMMRounding])
+            if (!features_[fixAMMV1])
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRP(10'000), USD(10'000), ammAlice.tokens()));
             else
@@ -3665,7 +3665,7 @@ private:
             ammAlice.bid(alice, 100);
             BEAST_EXPECT(ammAlice.expectAuctionSlot(100, 0, IOUAmount{4'000}));
             // 4000 tokens burnt
-            if (!features_[fixAMMRounding])
+            if (!features_[fixAMMV1])
                 BEAST_EXPECT(ammAlice.expectBalances(
                     XRP(10'000), USD(10'000), IOUAmount{9'996'000, 0}));
             else

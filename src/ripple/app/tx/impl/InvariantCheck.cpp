@@ -1218,7 +1218,7 @@ ValidAMM::finalize(
     ReadView const& view,
     beast::Journal const& j)
 {
-    if (!view.rules().enabled(fixAMMRounding))
+    if (!view.rules().enabled(fixAMMV1))
         return true;
 
     auto const txType = tx.getTxnType();

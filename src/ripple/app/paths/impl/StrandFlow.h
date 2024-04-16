@@ -816,6 +816,8 @@ flow(
 
     JLOG(j.trace()) << "Total flow: in: " << to_string(actualIn)
                     << " out: " << to_string(actualOut);
+    std::cout << "Total flow: in: " << to_string(actualIn)
+                    << " out: " << to_string(actualOut) << std::endl;
 
     /* flowCross doesn't handle offer crossing with tfFillOrKill flag correctly.
      * 1. If tfFillOrKill is set then the owner must receive the full

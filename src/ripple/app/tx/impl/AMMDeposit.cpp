@@ -428,7 +428,7 @@ AMMDeposit::applyGuts(Sandbox& sb)
         catch (std::overflow_error const& e)
         {
             JLOG(j_.error()) << "AMM Deposit: overflow exception " << e.what();
-            if (!sb.rules().enabled(fixAMMRounding))
+            if (!sb.rules().enabled(fixAMMV1))
                 Rethrow();
             // root2 may have a negative discriminant, which means
             // there is no real solution
@@ -438,7 +438,7 @@ AMMDeposit::applyGuts(Sandbox& sb)
         catch (std::exception const& e)
         {
             JLOG(j_.error()) << "AMM Deposit: exception " << e.what();
-            if (!sb.rules().enabled(fixAMMRounding))
+            if (!sb.rules().enabled(fixAMMV1))
                 Rethrow();
         }
         return std::make_pair(tecINTERNAL, STAmount{});
@@ -624,7 +624,7 @@ AMMDeposit::equalDepositTokens(
 {
     try
     {
-        if (!view.rules().enabled(fixAMMRounding))
+        if (!view.rules().enabled(fixAMMV1))
         {
             auto const frac =
                 divide(lpTokensDeposit, lptAMMBalance, lptAMMBalance.issue());
@@ -715,7 +715,7 @@ AMMDeposit::equalDepositLimit(
     std::optional<STAmount> const& lpTokensDepositMin,
     std::uint16_t tfee)
 {
-    if (!view.rules().enabled(fixAMMRounding))
+    if (!view.rules().enabled(fixAMMV1))
     {
         auto frac = Number{amount} / amountBalance;
         auto tokens = toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac);
@@ -963,7 +963,7 @@ AMMDeposit::singleDepositEPrice(
     auto const a1 = c * c;
     auto const b1 = c * c * f2 * f2 + 2 * c - d * d;
     auto const c1 = 2 * c * f2 * f2 + 1 - 2 * d * f2;
-    if (!view.rules().enabled(fixAMMRounding))
+    if (!view.rules().enabled(fixAMMV1))
     {
         auto const amountDeposit = toSTAmount(
             amountBalance.issue(),

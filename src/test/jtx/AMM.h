@@ -42,7 +42,10 @@ public:
     LPToken(std::uint64_t tokens) : tokens_(tokens)
     {
     }
-    LPToken(IOUAmount tokens) : tokens_(tokens)
+    LPToken(IOUAmount const& tokens) : tokens_(tokens)
+    {
+    }
+    LPToken(Number const& tokens) : tokens_(tokens)
     {
     }
     IOUAmount const&

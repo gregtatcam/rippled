@@ -275,6 +275,7 @@ public:
 
     using BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>::BookStep;
     using BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>::qualityUpperBound;
+    using typename BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>::OfferType;
 
     // Never limit self cross quality on a payment.
     template <template <typename, typename> typename Offer>
@@ -320,7 +321,9 @@ public:
         ReadView const& v,
         Quality const& ofrQ,
         DebtDirection prevStepDir,
-        WaiveTransferFee waiveFee) const
+        WaiveTransferFee waiveFee,
+        OfferType,
+        Rules const&) const
     {
         // Charge the offer owner, not the sender
         // Charge a fee even if the owner is the same as the issuer
@@ -360,6 +363,8 @@ class BookOfferCrossingStep
 {
     using BookStep<TIn, TOut, BookOfferCrossingStep<TIn, TOut>>::
         qualityUpperBound;
+    using typename BookStep<TIn, TOut, BookOfferCrossingStep<TIn, TOut>>::
+        OfferType;
 
 private:
     // Helper function that throws if the optional passed to the constructor
@@ -486,7 +491,9 @@ public:
         ReadView const& v,
         Quality const& ofrQ,
         DebtDirection prevStepDir,
-        WaiveTransferFee waiveFee) const
+        WaiveTransferFee waiveFee,
+        OfferType offerType,
+        Rules const& rules) const
     {
         // Offer x-ing does not charge a transfer fee when the offer's owner
         // is the same as the strand dst. It is important that
@@ -494,7 +501,30 @@ public:
         // ignore strands whose quality cannot meet a minimum threshold).  When
         // calculating quality assume no fee is charged, or the estimate will no
         // longer be an upper bound.
-        return ofrQ;
+
+        // Single path AMM offer has to factor in the transfer in rate
+        // when calculating the upper bound quality and the quality function
+        // because single path AMM's offer quality is not constant.
+        if (!rules.enabled(fixAMMV1))
+            return ofrQ;
+        else if (
+            offerType == OfferType::CLOB ||
+            (this->ammLiquidity_ && this->ammLiquidity_->multiPath()))
+            return ofrQ;
+
+        auto rate = [&](AccountID const& id) {
+            if (isXRP(id) || id == this->strandDst_)
+                return parityRate;
+            return transferRate(v, id);
+        };
+
+        auto const trIn =
+            redeems(prevStepDir) ? rate(this->book_.in.account) : parityRate;
+        // AMM doesn't pay the transfer fee on the out amount
+        auto const trOut = parityRate;
+
+        Quality const q1{getRate(STAmount(trOut.value), STAmount(trIn.value))};
+        return composed_quality(q1, ofrQ);
     }
 
     std::string
@@ -536,7 +566,12 @@ BookStep<TIn, TOut, TDerived>::qualityUpperBound(
         : WaiveTransferFee::No;
 
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
-        v, std::get<Quality>(*res), prevStepDir, waiveFee);
+        v,
+        std::get<Quality>(*res),
+        prevStepDir,
+        waiveFee,
+        std::get<OfferType>(*res),
+        v.rules());
     return {q, dir};
 }
 
@@ -558,7 +593,12 @@ BookStep<TIn, TOut, TDerived>::getQualityFunc(
         auto static const qOne = Quality{STAmount::uRateOne};
         auto const q =
             static_cast<TDerived const*>(this)->adjustQualityWithFees(
-                v, qOne, prevStepDir, WaiveTransferFee::Yes);
+                v,
+                qOne,
+                prevStepDir,
+                WaiveTransferFee::Yes,
+                OfferType::AMM,
+                v.rules());
         if (q == qOne)
             return {res, dir};
         QualityFunction qf{q, QualityFunction::CLOBLikeTag{}};
@@ -568,7 +608,12 @@ BookStep<TIn, TOut, TDerived>::getQualityFunc(
 
     // CLOB
     Quality const q = static_cast<TDerived const*>(this)->adjustQualityWithFees(
-        v, *(res->quality()), prevStepDir, WaiveTransferFee::No);
+        v,
+        *(res->quality()),
+        prevStepDir,
+        WaiveTransferFee::No,
+        OfferType::CLOB,
+        v.rules());
     return {QualityFunction{q, QualityFunction::CLOBLikeTag{}}, dir};
 }
 
@@ -793,8 +838,7 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     TAmounts<TIn, TOut> const& stepAmt,
     TOut const& ownerGives) const
 {
-    if (!sb.rules().enabled(fixAMMRounding) &&
-        !offer.checkInvariant(ofrAmt, j_))
+    if (!sb.rules().enabled(fixAMMV1) && !offer.checkInvariant(ofrAmt, j_))
     {
         // purposely written as separate if statements so we get logging even
         // when the amendment isn't active.
@@ -864,7 +908,7 @@ BookStep<TIn, TOut, TDerived>::tip(ReadView const& view) const
     // multi-path or single path then can be selected based on the best
     // offer quality.
     auto const targetQuality = [&]() -> std::optional<Quality> {
-        if (view.rules().enabled(fixAMMRounding) && ammLiquidity_ &&
+        if (view.rules().enabled(fixAMMV1) && ammLiquidity_ &&
             !ammLiquidity_->context().multiPath())
             return clobQuality;
         return std::nullopt;

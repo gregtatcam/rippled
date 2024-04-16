@@ -310,6 +310,17 @@ AMMWithdraw::applyGuts(Sandbox& sb)
     auto const lpTokensWithdraw =
         tokensWithdraw(lpTokens, ctx_.tx[~sfLPTokenIn], ctx_.tx.getFlags());
 
+    // Due to rounding the total balance for the last LP
+    // might not match the LP's trustline balance
+    if (sb.rules().enabled(fixAMMV1) &&
+        isOnlyLiquidityProvider(sb, ammAccountID, account_) &&
+        withinRelativeDistance(
+            lpTokens, ammSle->getFieldAmount(sfLPTokenBalance), Number{1, -7}))
+    {
+        ammSle->setFieldAmount(sfLPTokenBalance, lpTokens);
+        sb.update(ammSle);
+    }
+
     auto const tfee = getTradingFee(ctx_.view(), *ammSle, account_);
 
     auto const expected = ammHolds(
@@ -385,7 +396,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         catch (std::overflow_error const& e)
         {
             JLOG(j_.error()) << "AMM Withdraw: overflow exception " << e.what();
-            if (!sb.rules().enabled(fixAMMRounding))
+            if (!sb.rules().enabled(fixAMMV1))
                 Rethrow();
             // root2 may have a negative discriminant, which means
             // there is no real solution
@@ -395,7 +406,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         catch (std::exception const& e)
         {
             JLOG(j_.error()) << "AMM Withdraw: exception " << e.what();
-            if (!sb.rules().enabled(fixAMMRounding))
+            if (!sb.rules().enabled(fixAMMV1))
                 Rethrow();
         }
         return std::make_pair(tecINTERNAL, STAmount{});
@@ -616,7 +627,7 @@ AMMWithdraw::equalWithdrawTokens(
                 lpTokensWithdraw,
                 tfee);
 
-        if (!view.rules().enabled(fixAMMRounding))
+        if (!view.rules().enabled(fixAMMV1))
         {
             auto const frac =
                 divide(lpTokensWithdraw, lptAMMBalance, noIssue());
@@ -716,7 +727,7 @@ AMMWithdraw::equalWithdrawLimit(
     STAmount const& amount2,
     std::uint16_t tfee)
 {
-    if (view.rules().enabled(fixAMMRounding))
+    if (view.rules().enabled(fixAMMV1))
     {
         auto frac = Number{amount} / amountBalance;
         auto const amount2Withdraw = amount2Balance * frac;
@@ -900,7 +911,7 @@ AMMWithdraw::singleWithdrawEPrice(
     // t1*T*f - T = t1*A*E + A*E*(f - 2) =>
     // t1*(T*f - A*E) = T + A*E*(f - 2) =>
     // t = T*(T + A*E*(f - 2))/(T*f - A*E)
-    if (!view.rules().enabled(fixAMMRounding))
+    if (!view.rules().enabled(fixAMMV1))
     {
         Number const ae = amountBalance * ePrice;
         auto const f = getFee(tfee);

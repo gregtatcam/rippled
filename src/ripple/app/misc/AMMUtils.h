@@ -113,6 +113,15 @@ initializeFeeAuctionVote(
     Issue const& lptIssue,
     std::uint16_t tfee);
 
+/** Return true if the liquidity provider is the only provider
+ * to the AMM.
+ */
+bool
+isOnlyLiquidityProvider(
+    ReadView const& view,
+    AccountID const& ammAccount,
+    AccountID const& lpAccount);
+
 }  // namespace ripple
 
 #endif  // RIPPLE_APP_MISC_AMMUTILS_H_INLCUDED

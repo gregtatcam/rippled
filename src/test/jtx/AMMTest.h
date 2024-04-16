@@ -125,10 +125,10 @@ protected:
     }
 
     void
-    offerRoundingHelper(std::function<void(Env&)>&& cb)
+    ammV1Helper(std::function<void(Env&)>&& cb)
     {
         auto const all = supported_amendments();
-        for (auto const features : {all, all - fixAMMRounding})
+        for (auto const features : {all, all - fixAMMV1})
         {
             Env env(*this, features);
             cb(env);
@@ -136,9 +136,9 @@ protected:
     }
 
     bool
-    offerRoundingEnabled(Env const& env) const
+    ammV1Enabled(Env const& env) const
     {
-        return env.current()->rules().enabled(fixAMMRounding);
+        return env.current()->rules().enabled(fixAMMV1);
     }
 };
 
