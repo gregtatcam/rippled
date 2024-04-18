@@ -3691,12 +3691,8 @@ private:
 
                 // Initial 30,000 - ~70.68(offers = 60.68(AMM) + 10(LOB)) * 1.25
                 //     = 88.35 = ~29911.64
-                // Intentionally fail. Need to investigate.
-                // The above is missing ~2.81GBP. carol pays 72.93GBP and
-                // therefore should pay 1.25 on this amount =>
-                // 72.93*1.25 = ~91.16. But the trustline shows that
-                // carol paid out 88.35GBP
-                BEAST_EXPECT(false);
+                // carol bought ~72.93EUR at the cost of ~70.68GBP
+                // the offer is partially consumed
                 BEAST_EXPECT(expectLine(
                     env,
                     carol,
