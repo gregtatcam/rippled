@@ -225,10 +225,18 @@ adjustAmountsByLPTokens(
             auto const amountActual = toSTAmount(amount.issue(), fr * amount);
             auto const amount2Actual =
                 toSTAmount(amount2->issue(), fr * *amount2);
-            return std::make_tuple(
-                amountActual < amount ? amountActual : amount,
-                amount2Actual < amount2 ? amount2Actual : amount2,
-                lpTokensActual);
+            if (!rules.enabled(fixAMMV1))
+            {
+                return std::make_tuple(
+                    amountActual < amount ? amountActual : amount,
+                    amount2Actual < amount2 ? amount2Actual : amount2,
+                    lpTokensActual);
+            }
+            else
+            {
+                return std::make_tuple(
+                    amountActual, amount2Actual, lpTokensActual);
+            }
         }
 
         // Single trade
@@ -254,6 +262,8 @@ adjustAmountsByLPTokens(
             return std::make_tuple(amountActual, std::nullopt, lpTokensActual);
         }
     }
+
+    assert(lpTokensActual == lpTokens);
 
     return {amount, amount2, lpTokensActual};
 }
