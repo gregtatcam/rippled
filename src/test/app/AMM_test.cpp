@@ -5874,6 +5874,39 @@ private:
     }
 
     void
+    testFixAMMOfferBlockedByLOB()
+    {
+        testcase("AMM Offer Blocked By LOB");
+        using namespace jtx;
+
+        ammV1Helper([&](Env& env) {
+            fund(env, gw, {alice, carol}, XRP(1'000'000), {USD(1'000'000)});
+            env(offer(alice, XRP(1), USD(0.01)));
+            AMM amm(env, gw, XRP(200'000), USD(100'000));
+            env(offer(carol, USD(0.49), XRP(1)));
+            env.close();
+
+            if (!ammV1Enabled(env))
+            {
+                BEAST_EXPECT(amm.expectBalances(
+                    XRP(200'000), USD(100'000), amm.tokens()));
+                BEAST_EXPECT(expectOffers(
+                    env, alice, 1, {{Amounts{XRP(1), USD(0.01)}}}));
+                BEAST_EXPECT(expectOffers(
+                    env, carol, 1, {{Amounts{USD(0.49), XRP(1)}}}));
+            }
+            else
+            {
+                BEAST_EXPECT(amm.expectBalances(
+                    XRPAmount(200'000'980'005), USD(99'999.51), amm.tokens()));
+                BEAST_EXPECT(expectOffers(
+                    env, alice, 1, {{Amounts{XRP(1), USD(0.01)}}}));
+                BEAST_EXPECT(expectOffers(env, carol, 0));
+            }
+        });
+    }
+
+    void
     testCore()
     {
         testInvalidInstance();
@@ -5903,6 +5936,7 @@ private:
         testFixAMMOfferRounding();
         testDepositRounding();
         testWithdrawRounding();
+        testFixAMMOfferBlockedByLOB();
     }
 
     void

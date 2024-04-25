@@ -298,6 +298,13 @@ public:
         return true;
     }
 
+    // Payment returns passed in quality
+    Quality const&
+    compareQualityThreshold(Quality const& quality) const
+    {
+        return quality;
+    }
+
     // For a payment ofrInRate is always the same as trIn.
     std::uint32_t
     getOfrInRate(Step const*, AccountID const&, std::uint32_t trIn) const
@@ -531,6 +538,15 @@ public:
     logString() const override
     {
         return this->logStringImpl("BookOfferCrossingStep");
+    }
+
+    // Return best quality
+    Quality const&
+    compareQualityThreshold(Quality const& quality) const
+    {
+        if (qualityThreshold_ > quality)
+            return qualityThreshold_;
+        return quality;
     }
 
 private:
@@ -804,7 +820,13 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 
     // At any payment engine iteration, AMM offer can only be consumed once.
     auto tryAMM = [&](std::optional<Quality> const& quality) -> bool {
-        auto ammOffer = getAMMOffer(sb, quality);
+        auto const bestQuality = [&]() -> std::optional<Quality> {
+            if (sb.rules().enabled(fixAMMV1) && quality)
+                return static_cast<TDerived const*>(this)
+                    ->compareQualityThreshold(*quality);
+            return quality;
+        }();
+        auto ammOffer = getAMMOffer(sb, bestQuality);
         return !ammOffer || execOffer(*ammOffer);
     };
 
@@ -903,14 +925,19 @@ BookStep<TIn, TOut, TDerived>::tip(ReadView const& view) const
     // Single path offer quality changes with the offer size. SPQ can't be
     // used in this case as the upper bound quality because even if SPQ quality
     // is better than LOB quality, it might not be possible to generate AMM
-    // offer at or better quality than LOB quality. Use LOB quality as
+    // offer at or better quality than LOB quality. Another factor to consider
+    // is quality limit on offer crossing. Use the best quality out of
+    // LOB quality and quality limit on offer crossing as
     // low threshold to generate AMM offer. AMM or LOB offer whether
     // multi-path or single path then can be selected based on the best
     // offer quality.
     auto const targetQuality = [&]() -> std::optional<Quality> {
         if (view.rules().enabled(fixAMMV1) && ammLiquidity_ &&
-            !ammLiquidity_->context().multiPath())
-            return clobQuality;
+            !ammLiquidity_->context().multiPath() && clobQuality)
+        {
+            return static_cast<TDerived const*>(this)->compareQualityThreshold(
+                *clobQuality);
+        }
         return std::nullopt;
     }();
     // AMM quality is better or no CLOB offer
