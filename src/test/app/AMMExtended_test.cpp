@@ -1265,17 +1265,34 @@ private:
         env(offer(cam, B_BUX(30), A_BUX(30)));
 
         // AMM is consumed up to the first cam Offer quality
-        BEAST_EXPECT(ammCarol.expectBalances(
-            STAmount{A_BUX, UINT64_C(309'3541659651605), -13},
-            STAmount{B_BUX, UINT64_C(320'0215509984417), -13},
-            ammCarol.tokens()));
-        BEAST_EXPECT(expectOffers(
-            env,
-            cam,
-            1,
-            {{Amounts{
-                STAmount{B_BUX, UINT64_C(20'0215509984417), -13},
-                STAmount{A_BUX, UINT64_C(20'0215509984417), -13}}}}));
+        if (!features[fixAMMOfferRounding])
+        {
+            BEAST_EXPECT(ammCarol.expectBalances(
+                STAmount{A_BUX, UINT64_C(309'3541659651605), -13},
+                STAmount{B_BUX, UINT64_C(320'0215509984417), -13},
+                ammCarol.tokens()));
+            BEAST_EXPECT(expectOffers(
+                env,
+                cam,
+                1,
+                {{Amounts{
+                    STAmount{B_BUX, UINT64_C(20'0215509984417), -13},
+                    STAmount{A_BUX, UINT64_C(20'0215509984417), -13}}}}));
+        }
+        else
+        {
+            BEAST_EXPECT(ammCarol.expectBalances(
+                STAmount{A_BUX, UINT64_C(309'3541659651602), -13},
+                STAmount{B_BUX, UINT64_C(320'021550998442), -12},
+                ammCarol.tokens()));
+            BEAST_EXPECT(expectOffers(
+                env,
+                cam,
+                1,
+                {{Amounts{
+                    STAmount{B_BUX, UINT64_C(20'021550998442), -12},
+                    STAmount{A_BUX, UINT64_C(20'021550998442), -12}}}}));
+        }
     }
 
     void
@@ -1425,6 +1442,7 @@ private:
         testBadPathAssert(all);
         testSellFlagBasic(all);
         testDirectToDirectPath(all);
+        testDirectToDirectPath(all - fixAMMOfferRounding);
         // testSelfCrossLowQualityOffer
         // testOfferInScaling
         // testOfferInScalingWithXferRate

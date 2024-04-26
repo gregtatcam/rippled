@@ -149,6 +149,9 @@ withinRelativeDistance(Amt const& calc, Amt const& req, Number const& dist)
 }
 // clang-format on
 
+/** Solve quadratic equation to find takerGets or takerPays. Round
+ * to minimize the amount in order to maximize the quality.
+ */
 std::optional<Number>
 solveQuadraticEqSmallest(Number const& a, Number const& b, Number const& c);
 
@@ -183,18 +186,69 @@ getAMMOfferStartWithTakerGets(
     std::uint16_t const& tfee)
 {
     assert(targetQuality.rate() != beast::zero);
-    auto const f = feeMult(tfee);
+    // calculate a, b, c to minimize quadratic equation solution
+    // b is negative
+    // calculate:
+    // (-b - root2(b * b - 4 * a * c)) / (2 * a)
+    // minimize:
+    // (-b - root2(b * b  - 4 * a * c)) / (2 * a)
+    // b
+    // maximize:
+    // root2(b * b - 4 * a * c)
+    // b * b
+    // minimize:
+    // 4 * a * c
+    // a
+    // c
+    // maximize:
+    // 2 * a
+    // a
+    // a must be maximized and minimized. a is 1, no rounding
+    // b must be maximized and minimized. choose minimize since the effect of
+    // the rounding outside of root2 is greater than the inside of root2.
+    // fee is always maximized
+    // feeMult is always minimized
+    auto const fee = upward()(getFee(tfee));
+    auto const feeMult = downward()(1 - fee);
     auto const a = 1;
-    auto const b = pool.in * (1 - 1 / f) / targetQuality.rate() - 2 * pool.out;
-    auto const c =
-        pool.out * pool.out - pool.in * pool.out / targetQuality.rate();
+    // minimize b
+    // b = pool.in * (1 - 1 / f) / targetQuality.rate() - 2 * pool.out
+    // minimize:
+    // pool.in * (1 - 1 / f) / targetQuality.rate()
+    // pool.in * (1 - 1 / f)
+    // maximize:
+    // 1 / f
+    // 2 * pool.out
+    auto const b = downward()(
+        pool.in * (1 - upward()(1 / feeMult)) / targetQuality.rate() -
+        upward()(2 * pool.out));
+    // minimize c
+    // c = pool.out * pool.out - pool.in * pool.out / targetQuality.rate()
+    // minimize:
+    // pool.out * pool.out - pool.in * pool.out / targetQuality.rate()
+    // pool.out * pool.out
+    // maximize:
+    // pool.in * pool.out / targetQuality.rate()
+    // pool.in * pool.out
+    auto const c = downward()(
+        pool.out * pool.out -
+        upward()((pool.in * pool.out) / targetQuality.rate()));
 
     auto nTakerGets = solveQuadraticEqSmallest(a, b, c);
     if (!nTakerGets || *nTakerGets <= 0)
         return std::nullopt;
 
-    auto const nTakerGetsConstraint =
-        pool.out - pool.in / (targetQuality.rate() * f);
+    // minimize constraint
+    // constraint = pool.out - pool.in / (targetQuality.rate() * f)
+    // minimize:
+    // pool.out - pool.in / (targetQuality.rate() * f)
+    // maximize:
+    // pool.in / (targetQuality.rate() * f)
+    // minimize:
+    // (targetQuality.rate() * f)
+    auto const nTakerGetsConstraint = downward()(
+        pool.out -
+        upward()(pool.in / downward()(targetQuality.rate() * feeMult)));
     if (nTakerGetsConstraint <= 0)
         return std::nullopt;
 
@@ -238,18 +292,56 @@ getAMMOfferStartWithTakerPays(
     Quality const& targetQuality,
     std::uint16_t tfee)
 {
-    auto const f = feeMult(tfee);
+    // calculate a, b, c to minimize quadratic equation solution
+    // b is positive
+    // calculate:
+    // (-b + root2(b * b - 4 * a * c)) / (2 * a)
+    // minimize:
+    // (-b + root2(b * b - 4 * a * c))
+    // maximize
+    // b
+    // minimize:
+    // root2(b * b - 4 * a * c)
+    // b * b
+    // maximize:
+    // 4 * a * c
+    // a
+    // c
+    // maximize:
+    // 2 * a
+    // a
+    // b must be maximized and minimized. choose maximize since the effect of
+    // the rounding outside of root2 is greater than the inside of root2.
+    // fee is always maximized
+    // feeMult is always minimized
+    auto const fee = upward()(getFee(tfee));
+    auto const f = downward()(1 - fee);
     auto const& a = f;
-    auto const b = pool.in * (1 + f);
-    auto const c =
-        pool.in * pool.in - pool.in * pool.out * targetQuality.rate();
+    // maximize b
+    auto const b = upward()(pool.in * (1 + f));
+    // maximize c
+    // c = pool.in * pool.in - pool.in * pool.out * targetQuality.rate()
+    // maximize:
+    // pool.in * pool.in
+    // minimize:
+    // pool.in * pool.out * targetQuality.rate()
+    auto const c = upward()(
+        pool.in * pool.in -
+        downward()(pool.in * pool.out * targetQuality.rate()));
 
     auto nTakerPays = solveQuadraticEqSmallest(a, b, c);
     if (!nTakerPays || nTakerPays <= 0)
         return std::nullopt;
 
+    // minimize constraint
+    // constraint = pool.out * targetQuality.rate() - pool.in / f
+    // minimize:
+    // pool.out * targetQuality.rate() - pool.in / f
+    // pool.out * targetQuality.rate()
+    // maximize:
+    // pool.in / f
     auto const nTakerPaysConstraint =
-        pool.out * targetQuality.rate() - pool.in / f;
+        downward()(pool.out * targetQuality.rate() - upward()(pool.in / f));
     if (nTakerPaysConstraint <= 0)
         return std::nullopt;
 

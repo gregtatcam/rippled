@@ -4615,11 +4615,14 @@ private:
             // results in AMM offer selection.
 
             // Same as the payment but reduced offer quality
+            for (auto const& features :
+                 {supported_amendments(),
+                  supported_amendments() - fixAMMOfferRounding})
             {
                 std::array<Quality, 3> q;
                 for (auto i = 0; i < 3; ++i)
                 {
-                    Env env(*this);
+                    Env env(*this, features);
                     prep(env, rates.first, rates.second);
                     std::optional<AMM> amm;
                     if (i == 0 || i == 2)
@@ -4643,31 +4646,65 @@ private:
                     {
                         if (rates.first == 1.5)
                         {
-                            BEAST_EXPECT(expectOffers(
-                                env,
-                                ed,
-                                1,
-                                {{Amounts{
-                                    STAmount{
-                                        ETH, UINT64_C(378'6327949540823), -13},
-                                    STAmount{
-                                        USD,
-                                        UINT64_C(283'9745962155617),
-                                        -13}}}}));
+                            if (!features[fixAMMOfferRounding])
+                                BEAST_EXPECT(expectOffers(
+                                    env,
+                                    ed,
+                                    1,
+                                    {{Amounts{
+                                        STAmount{
+                                            ETH,
+                                            UINT64_C(378'6327949540823),
+                                            -13},
+                                        STAmount{
+                                            USD,
+                                            UINT64_C(283'9745962155617),
+                                            -13}}}}));
+                            else
+                                BEAST_EXPECT(expectOffers(
+                                    env,
+                                    ed,
+                                    1,
+                                    {{Amounts{
+                                        STAmount{
+                                            ETH,
+                                            UINT64_C(378'6327949540813),
+                                            -13},
+                                        STAmount{
+                                            USD,
+                                            UINT64_C(283'974596215561),
+                                            -12}}}}));
                         }
                         else
                         {
-                            BEAST_EXPECT(expectOffers(
-                                env,
-                                ed,
-                                1,
-                                {{Amounts{
-                                    STAmount{
-                                        ETH, UINT64_C(325'299461620749), -12},
-                                    STAmount{
-                                        USD,
-                                        UINT64_C(243'9745962155617),
-                                        -13}}}}));
+                            if (!features[fixAMMOfferRounding])
+                                BEAST_EXPECT(expectOffers(
+                                    env,
+                                    ed,
+                                    1,
+                                    {{Amounts{
+                                        STAmount{
+                                            ETH,
+                                            UINT64_C(325'299461620749),
+                                            -12},
+                                        STAmount{
+                                            USD,
+                                            UINT64_C(243'9745962155617),
+                                            -13}}}}));
+                            else
+                                BEAST_EXPECT(expectOffers(
+                                    env,
+                                    ed,
+                                    1,
+                                    {{Amounts{
+                                        STAmount{
+                                            ETH,
+                                            UINT64_C(325'299461620748),
+                                            -12},
+                                        STAmount{
+                                            USD,
+                                            UINT64_C(243'974596215561),
+                                            -12}}}}));
                         }
                     }
                     BEAST_EXPECT(expectLine(env, bob, USD(2'100)));
@@ -5048,34 +5085,12 @@ private:
                         env.journal);
                     if (amounts)
                     {
-                        if (BEAST_EXPECT(
-                                status == Status::Succeed ||
-                                (features[fixAMMOfferRounding] &&
-                                 status == Status::FailedShouldSucceed) ||
-                                (!features[fixAMMOfferRounding] &&
-                                 status == Status::SucceededShouldFail)))
-                        {
-#if 0
-                            if (status == Status::Succeed)
-                            {
-                                if (features[fixAMMOfferRounding])
-                                {
-                                    successAmounts.push_back(std::make_pair(
-                                        amounts->in, amounts->out));
-                                }
-                                else
-                                {
-                                    BEAST_EXPECT(
-                                        std::find(
-                                            successAmounts.begin(),
-                                            successAmounts.end(),
-                                            std::make_pair(
-                                                amounts->in, amounts->out)) !=
-                                        successAmounts.end());
-                                }
-                            }
-#endif
-                        }
+                        BEAST_EXPECT(
+                            status == Status::Succeed ||
+                            (features[fixAMMOfferRounding] &&
+                             status == Status::FailedShouldSucceed) ||
+                            (!features[fixAMMOfferRounding] &&
+                             status == Status::SucceededShouldFail));
                     }
                     else
                         BEAST_EXPECT(
