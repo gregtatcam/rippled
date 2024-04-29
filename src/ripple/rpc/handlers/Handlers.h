@@ -73,8 +73,6 @@ doGatewayBalances(RPC::JsonContext&);
 Json::Value
 doGetCounts(RPC::JsonContext&);
 Json::Value
-doGetAggregatePrice(RPC::JsonContext&);
-Json::Value
 doLedgerAccept(RPC::JsonContext&);
 Json::Value
 doLedgerCleaner(RPC::JsonContext&);

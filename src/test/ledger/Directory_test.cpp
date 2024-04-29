@@ -463,7 +463,7 @@ struct Directory_test : public beast::unit_test::suite
                 BEAST_EXPECT(
                     directory["LedgerEntryType"] ==
                     jss::DirectoryNode);  // sanity check
-                if (directory[jss::Owner] == gw.human())
+                if (directory[sfOwner.jsonName] == gw.human())
                 {
                     // gw's directory did not get touched, so it
                     // should not have those fields populated

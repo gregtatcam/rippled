@@ -114,10 +114,6 @@ Handler const handlerArray[]{
     {"gateway_balances", byRef(&doGatewayBalances), Role::USER, NO_CONDITION},
 #endif
     {"get_counts", byRef(&doGetCounts), Role::ADMIN, NO_CONDITION},
-    {"get_aggregate_price",
-     byRef(&doGetAggregatePrice),
-     Role::USER,
-     NO_CONDITION},
     {"ledger_accept",
      byRef(&doLedgerAccept),
      Role::ADMIN,

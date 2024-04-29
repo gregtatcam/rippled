@@ -138,15 +138,6 @@ InnerObjectFormats::InnerObjectFormats()
         {
             {sfAccount, soeREQUIRED},
         });
-
-    add(sfPriceData.jsonName.c_str(),
-        sfPriceData.getCode(),
-        {
-            {sfBaseAsset, soeREQUIRED},
-            {sfQuoteAsset, soeREQUIRED},
-            {sfAssetPrice, soeOPTIONAL},
-            {sfScale, soeDEFAULT},
-        });
 }
 
 InnerObjectFormats const&

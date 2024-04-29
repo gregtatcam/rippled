@@ -29,7 +29,6 @@
 #include <ripple/protocol/SOTemplate.h>
 #include <ripple/protocol/STAmount.h>
 #include <ripple/protocol/STBase.h>
-#include <ripple/protocol/STCurrency.h>
 #include <ripple/protocol/STIssue.h>
 #include <ripple/protocol/STPathSet.h>
 #include <ripple/protocol/STVector256.h>
@@ -242,8 +241,6 @@ public:
     getFieldV256(SField const& field) const;
     const STArray&
     getFieldArray(SField const& field) const;
-    const STCurrency&
-    getFieldCurrency(SField const& field) const;
 
     /** Get the value of a field.
         @param A TypedField built from an SField value representing the desired
@@ -372,8 +369,6 @@ public:
     setFieldAmount(SField const& field, STAmount const&);
     void
     setFieldIssue(SField const& field, STIssue const&);
-    void
-    setFieldCurrency(SField const& field, STCurrency const&);
     void
     setFieldPathSet(SField const& field, STPathSet const&);
     void
