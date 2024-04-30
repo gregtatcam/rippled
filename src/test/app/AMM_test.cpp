@@ -4057,74 +4057,37 @@ private:
         // Offer crossing with AMM and another offer. AMM has a better
         // quality and is consumed first.
         {
-            for (auto const& features_ :
-                 {features, features - fixAMMOfferRounding})
+            Env env(*this, features);
+            fund(env, gw, {alice, carol, bob}, XRP(30'000), {USD(30'000)});
+            env(offer(bob, XRP(100), USD(100.001)));
+            AMM ammAlice(env, alice, XRP(10'000), USD(10'100));
+            env(offer(carol, USD(100), XRP(100)));
+            if (!features[fixAMMRounding])
             {
-                Env env(*this, features_);
-                fund(env, gw, {alice, carol, bob}, XRP(30'000), {USD(30'000)});
-                env(offer(bob, XRP(100), USD(100.001)));
-                AMM ammAlice(env, alice, XRP(10'000), USD(10'100));
-                env(offer(carol, USD(100), XRP(100)));
-                if (!features_[fixAMMOfferRounding] &&
-                    !features_[fixAMMRounding])
-                {
-                    BEAST_EXPECT(ammAlice.expectBalances(
-                        XRPAmount{10'049'825'373},
-                        STAmount{USD, UINT64_C(10'049'92586949302), -11},
-                        ammAlice.tokens()));
-                    BEAST_EXPECT(expectOffers(
-                        env,
-                        bob,
-                        1,
-                        {{{XRPAmount{50'074'629},
-                           STAmount{USD, UINT64_C(50'07513050698), -11}}}}));
-                }
-                else if (
-                    features_[fixAMMRounding] &&
-                    !features_[fixAMMOfferRounding])
-                {
-                    BEAST_EXPECT(ammAlice.expectBalances(
-                        XRPAmount{10'049'825'373},
-                        STAmount{USD, UINT64_C(10'049'92586949302), -11},
-                        ammAlice.tokens()));
-                    BEAST_EXPECT(expectOffers(
-                        env,
-                        bob,
-                        1,
-                        {{{XRPAmount{50'074'629},
-                           STAmount{USD, UINT64_C(50'07513050698), -11}}}}));
-                    BEAST_EXPECT(expectLine(env, carol, USD(30'100)));
-                }
-                else if (
-                    !features_[fixAMMRounding] &&
-                    features_[fixAMMOfferRounding])
-                {
-                    BEAST_EXPECT(ammAlice.expectBalances(
-                        XRPAmount{10'049'825'372},
-                        STAmount{USD, UINT64_C(10'049'92587049303), -11},
-                        ammAlice.tokens()));
-                    BEAST_EXPECT(expectOffers(
-                        env,
-                        bob,
-                        1,
-                        {{{XRPAmount{50'074'628},
-                           STAmount{USD, UINT64_C(50'07512950697), -11}}}}));
-                    BEAST_EXPECT(expectLine(env, carol, USD(30'100)));
-                }
-                else
-                {
-                    BEAST_EXPECT(ammAlice.expectBalances(
-                        XRPAmount{10'049'825'372},
-                        STAmount{USD, UINT64_C(10'049'92587049303), -11},
-                        ammAlice.tokens()));
-                    BEAST_EXPECT(expectOffers(
-                        env,
-                        bob,
-                        1,
-                        {{{XRPAmount{50'074'628},
-                           STAmount{USD, UINT64_C(50'07512950697), -11}}}}));
-                    BEAST_EXPECT(expectLine(env, carol, USD(30'100)));
-                }
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount{10'049'825'373},
+                    STAmount{USD, UINT64_C(10'049'92586949302), -11},
+                    ammAlice.tokens()));
+                BEAST_EXPECT(expectOffers(
+                    env,
+                    bob,
+                    1,
+                    {{{XRPAmount{50'074'629},
+                       STAmount{USD, UINT64_C(50'07513050698), -11}}}}));
+            }
+            else
+            {
+                BEAST_EXPECT(ammAlice.expectBalances(
+                    XRPAmount{10'049'825'372},
+                    STAmount{USD, UINT64_C(10'049'92587049303), -11},
+                    ammAlice.tokens()));
+                BEAST_EXPECT(expectOffers(
+                    env,
+                    bob,
+                    1,
+                    {{{XRPAmount{50'074'628},
+                       STAmount{USD, UINT64_C(50'07512950697), -11}}}}));
+                BEAST_EXPECT(expectLine(env, carol, USD(30'100)));
             }
         }
 
@@ -4397,25 +4360,11 @@ private:
         // Execute with CLOB offer
         prep(
             [&](Env& env) {
-                if (!features[fixAMMRounding] && !features[fixAMMOfferRounding])
+                if (!features[fixAMMRounding])
                     env(offer(
                             LP1,
                             XRPAmount{18'095'133},
                             STAmount{TST, UINT64_C(1'68737984885388), -14}),
-                        txflags(tfPassive));
-                else if (
-                    features[fixAMMRounding] && !features[fixAMMOfferRounding])
-                    env(offer(
-                            LP1,
-                            XRPAmount{18'095'132},
-                            STAmount{TST, UINT64_C(1'68737984885387), -14}),
-                        txflags(tfPassive));
-                else if (
-                    features[fixAMMOfferRounding] && !features[fixAMMRounding])
-                    env(offer(
-                            LP1,
-                            XRPAmount{18'095'132},
-                            STAmount{TST, UINT64_C(1'68737976189736), -14}),
                         txflags(tfPassive));
                 else
                     env(offer(
@@ -4739,17 +4688,6 @@ private:
                 BEAST_EXPECT(ammAlice.expectBalances(
                     USD(1'000),
                     STAmount{EUR, UINT64_C(1'005'012546992382), -12},
-                    ammAlice.tokens()));
-            }
-            else if (!features[fixAMMOfferRounding])
-            {
-                BEAST_EXPECT(expectLine(
-                    env,
-                    bob,
-                    STAmount{EUR, UINT64_C(1'989'987453007616), -12}));
-                BEAST_EXPECT(ammAlice.expectBalances(
-                    USD(1'000),
-                    STAmount{EUR, UINT64_C(1'005'012546992384), -12},
                     ammAlice.tokens()));
             }
             else
@@ -5276,7 +5214,7 @@ private:
                     {
                         if (rates.first == 1.5)
                         {
-                            if (!features[fixAMMOfferRounding])
+                            if (!features[fixAMMRounding])
                                 BEAST_EXPECT(expectOffers(
                                     env,
                                     ed,
@@ -5307,7 +5245,7 @@ private:
                         }
                         else
                         {
-                            if (!features[fixAMMOfferRounding])
+                            if (!features[fixAMMRounding])
                                 BEAST_EXPECT(expectOffers(
                                     env,
                                     ed,
@@ -5406,8 +5344,7 @@ private:
                 {
                     if (rates.first == 1.5)
                     {
-                        if (!features[fixAMMOfferRounding] ||
-                            !features[fixAMMRounding])
+                        if (!features[fixAMMRounding])
                         {
                             BEAST_EXPECT(expectOffers(
                                 env, ed, 1, {{Amounts{ETH(400), USD(250)}}}));
@@ -5442,8 +5379,7 @@ private:
                     }
                     else
                     {
-                        if (!features[fixAMMOfferRounding] ||
-                            !features[fixAMMRounding])
+                        if (!features[fixAMMRounding])
                         {
                             // Ed offer is partially crossed.
                             BEAST_EXPECT(expectOffers(
@@ -5716,11 +5652,10 @@ private:
     }
 
     void
-    testFixAMMOfferRounding()
+    testFixAMMOfferRounding(FeatureBitset features)
     {
         testcase("Fix AMM Offer Rounding");
         using namespace jtx;
-        FeatureBitset const all{supported_amendments()};
 
         enum class Status {
             FailedShouldSucceed,  // Failed in pre-fix due to rounding,
@@ -5805,59 +5740,56 @@ private:
         boost::smatch match;
         // tests that succeed should have the same amounts pre-fix and post-fix
         std::vector<std::pair<STAmount, STAmount>> successAmounts;
-        for (auto const& features : {all, all - fixAMMOfferRounding})
+        Env env(*this, features);
+        for (auto const& t : tests)
         {
-            Env env(*this, features);
-            for (auto const& t : tests)
+            auto getPool = [&](std::string const& v, bool isXRP) {
+                if (isXRP)
+                    return amountFromString(xrpIssue(), v);
+                return amountFromString(noIssue(), v);
+            };
+            auto const& quality = std::get<Quality>(t);
+            auto const tfee = std::get<std::uint16_t>(t);
+            auto const status = std::get<Status>(t);
+            auto const poolInIsXRP =
+                boost::regex_search(std::get<0>(t), match, rx);
+            auto const poolOutIsXRP =
+                boost::regex_search(std::get<1>(t), match, rx);
+            assert(!(poolInIsXRP && poolOutIsXRP));
+            auto const poolIn = getPool(std::get<0>(t), poolInIsXRP);
+            auto const poolOut = getPool(std::get<1>(t), poolOutIsXRP);
+            try
             {
-                auto getPool = [&](std::string const& v, bool isXRP) {
-                    if (isXRP)
-                        return amountFromString(xrpIssue(), v);
-                    return amountFromString(noIssue(), v);
-                };
-                auto const& quality = std::get<Quality>(t);
-                auto const tfee = std::get<std::uint16_t>(t);
-                auto const status = std::get<Status>(t);
-                auto const poolInIsXRP =
-                    boost::regex_search(std::get<0>(t), match, rx);
-                auto const poolOutIsXRP =
-                    boost::regex_search(std::get<1>(t), match, rx);
-                assert(!(poolInIsXRP && poolOutIsXRP));
-                auto const poolIn = getPool(std::get<0>(t), poolInIsXRP);
-                auto const poolOut = getPool(std::get<1>(t), poolOutIsXRP);
-                try
-                {
-                    auto const amounts = changeSpotPriceQuality(
-                        Amounts{poolIn, poolOut},
-                        quality,
-                        tfee,
-                        env.current()->rules(),
-                        env.journal);
-                    if (amounts)
-                    {
-                        BEAST_EXPECT(
-                            status == Status::Succeed ||
-                            (features[fixAMMOfferRounding] &&
-                             status == Status::FailedShouldSucceed) ||
-                            (!features[fixAMMOfferRounding] &&
-                             status == Status::SucceededShouldFail));
-                    }
-                    else
-                        BEAST_EXPECT(
-                            status == Status::Fail ||
-                            (features[fixAMMOfferRounding] &&
-                             (status == Status::SucceededShouldFail ||
-                              status == Status::FailedShouldFail)));
-                }
-                catch (std::runtime_error const& e)
+                auto const amounts = changeSpotPriceQuality(
+                    Amounts{poolIn, poolOut},
+                    quality,
+                    tfee,
+                    env.current()->rules(),
+                    env.journal);
+                if (amounts)
                 {
                     BEAST_EXPECT(
-                        !strcmp(e.what(), "changeSpotPriceQuality failed"));
-                    BEAST_EXPECT(
-                        !features[fixAMMOfferRounding] &&
-                        (status == Status::FailedShouldSucceed ||
-                         status == Status::FailedShouldFail));
+                        status == Status::Succeed ||
+                        (features[fixAMMRounding] &&
+                         status == Status::FailedShouldSucceed) ||
+                        (!features[fixAMMRounding] &&
+                         status == Status::SucceededShouldFail));
                 }
+                else
+                    BEAST_EXPECT(
+                        status == Status::Fail ||
+                        (features[fixAMMRounding] &&
+                         (status == Status::SucceededShouldFail ||
+                          status == Status::FailedShouldFail)));
+            }
+            catch (std::runtime_error const& e)
+            {
+                BEAST_EXPECT(
+                    !strcmp(e.what(), "changeSpotPriceQuality failed"));
+                BEAST_EXPECT(
+                    !features[fixAMMRounding] &&
+                    (status == Status::FailedShouldSucceed ||
+                     status == Status::FailedShouldFail));
             }
         }
     }
@@ -6305,7 +6237,7 @@ private:
         env(offer(carol, USD(0.49), XRP(1)));
         env.close();
 
-        if (!features[fixAMMOfferRounding])
+        if (!features[fixAMMRounding])
         {
             BEAST_EXPECT(
                 amm.expectBalances(XRP(200'000), USD(100'000), amm.tokens()));
@@ -6350,8 +6282,6 @@ private:
         testRippling();
         testAMMAndCLOB(all);
         testAMMAndCLOB(all - fixAMMRounding);
-        testAMMAndCLOB(all - fixAMMOfferRounding);
-        testAMMAndCLOB(all - fixAMMRounding - fixAMMOfferRounding);
         testTradingFee(all);
         testTradingFee(all - fixAMMRounding);
         testAdjustedTokens();
@@ -6359,17 +6289,16 @@ private:
         testClawback();
         testAMMID();
         testSelection(all);
-        testSelection(all - fixAMMRounding - fixAMMOfferRounding);
         testSelection(all - fixAMMRounding);
-        testSelection(all - fixAMMOfferRounding);
         testFixDefaultInnerObj();
         testMalformed();
         testFixOverflowOffer(all);
         testFixOverflowOffer(all - fixAMMRounding);
         testSwapRounding();
-        testFixAMMOfferRounding();
+        testFixAMMOfferRounding(all);
+        testFixAMMOfferRounding(all - fixAMMRounding);
         testFixAMMOfferBlockedByLOB(all);
-        testFixAMMOfferBlockedByLOB(all - fixAMMOfferRounding);
+        testFixAMMOfferBlockedByLOB(all - fixAMMRounding);
     }
 };
 
