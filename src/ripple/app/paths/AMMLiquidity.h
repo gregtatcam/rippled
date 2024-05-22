@@ -23,6 +23,7 @@
 #include <ripple/app/misc/AMMHelpers.h>
 #include <ripple/app/misc/AMMUtils.h>
 #include <ripple/app/paths/AMMContext.h>
+#include <ripple/app/paths/AMMOffer.h>
 #include <ripple/basics/Log.h>
 #include <ripple/ledger/ReadView.h>
 #include <ripple/ledger/View.h>

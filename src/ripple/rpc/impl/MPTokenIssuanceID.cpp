@@ -20,7 +20,6 @@
 #include <ripple/rpc/MPTokenIssuanceID.h>
 
 #include <ripple/app/misc/Transaction.h>
-#include <ripple/net/RPCErr.h>
 #include <ripple/protocol/Feature.h>
 #include <ripple/rpc/impl/RPCHelpers.h>
 

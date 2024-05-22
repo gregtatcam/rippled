@@ -190,23 +190,23 @@ enum TxType : std::uint16_t
     /** This transaction type deletes a DID */
     ttDID_DELETE = 50,
 
-    /** This transaction creates a new MPTokenIssuance object. */
-    ttMPTOKEN_ISSUANCE_CREATE = 51,
-
-    /** This transaction destroys an existing MPTokenIssuance object. */
-    ttMPTOKEN_ISSUANCE_DESTROY = 52,
-
-    /** This transaction destroys an existing MPTokenIssuance object. */
-    ttMPTOKEN_AUTHORIZE = 53,
-
-    /** This transaction sets an existing MPTokenIssuance or MPToken object. */
-    ttMPTOKEN_ISSUANCE_SET = 54,
-
     /** This transaction type creates an Oracle instance */
     ttORACLE_SET = 51,
 
     /** This transaction type deletes an Oracle instance */
     ttORACLE_DELETE = 52,
+
+    /** This transaction creates a new MPTokenIssuance object. */
+    ttMPTOKEN_ISSUANCE_CREATE = 53,
+
+    /** This transaction destroys an existing MPTokenIssuance object. */
+    ttMPTOKEN_ISSUANCE_DESTROY = 54,
+
+    /** This transaction destroys an existing MPTokenIssuance object. */
+    ttMPTOKEN_AUTHORIZE = 55,
+
+    /** This transaction sets an existing MPTokenIssuance or MPToken object. */
+    ttMPTOKEN_ISSUANCE_SET = 56,
 
     /** This system-generated transaction type is used to update the status of the various amendments.
 

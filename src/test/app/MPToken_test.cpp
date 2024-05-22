@@ -860,7 +860,7 @@ class MPToken_test : public beast::unit_test::suite
 
         mptAlice.create();
 
-        env(offer(alice, mptAlice.mpt(100), XRP(100)), ter(temINVALID));
+        env(offer(alice, mptAlice.mpt(100), XRP(100)), ter(telENV_RPC_FAILED));
         env.close();
 
         BEAST_EXPECT(expectOffers(env, alice, 0));

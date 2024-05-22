@@ -44,7 +44,7 @@ AMMOffer<TIn, TOut>::issueIn() const
     return ammLiquidity_.issueIn();
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 AccountID const&
 AMMOffer<TIn, TOut>::owner() const
 {
@@ -128,7 +128,7 @@ AMMOffer<TIn, TOut>::getQualityFunc() const
         balances_, ammLiquidity_.tradingFee(), QualityFunction::AMMTag{}};
 }
 
-template <typename TIn, typename TOut>
+template <OfferAmount TIn, OfferAmount TOut>
 bool
 AMMOffer<TIn, TOut>::checkInvariant(
     TAmounts<TIn, TOut> const& consumed,
