@@ -1226,7 +1226,17 @@ accountSend(
     beast::Journal j,
     WaiveTransferFee waiveFee)
 {
-    assert(saAmount >= beast::zero && !saAmount.isMPT());
+    if (view.rules().enabled(fixAMMv1_1))
+    {
+        if (saAmount < beast::zero || saAmount.isMPT())
+        {
+            return tecINTERNAL;
+        }
+    }
+    else
+    {
+        assert(saAmount >= beast::zero && !saAmount.isMPT());
+    }
 
     /* If we aren't sending anything or if the sender is the same as the
      * receiver then we don't need to do anything.

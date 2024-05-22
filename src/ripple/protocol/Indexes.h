@@ -284,6 +284,9 @@ Keylet
 did(AccountID const& account) noexcept;
 
 Keylet
+oracle(AccountID const& account, std::uint32_t const& documentID) noexcept;
+
+Keylet
 mptIssuance(AccountID const& issuer, std::uint32_t seq) noexcept;
 
 Keylet

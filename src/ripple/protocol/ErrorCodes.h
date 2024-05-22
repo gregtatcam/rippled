@@ -145,7 +145,10 @@ enum error_code_i {
     // AMM
     rpcISSUE_MALFORMED = 93,
 
-    rpcMPT_NOT_SUPPORTED = 94,
+    // Oracle
+    rpcORACLE_MALFORMED = 94,
+
+    rpcMPT_NOT_SUPPORTED = 95,
 
     rpcLAST =
         rpcMPT_NOT_SUPPORTED  // rpcLAST should always equal the last code.=

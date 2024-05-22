@@ -64,7 +64,8 @@ enum TELcodes : TERUnderlyingType {
     telCAN_NOT_QUEUE_FULL,
     telWRONG_NETWORK,
     telREQUIRES_NETWORK_ID,
-    telNETWORK_ID_MAKES_TX_NON_CANONICAL
+    telNETWORK_ID_MAKES_TX_NON_CANONICAL,
+    telENV_RPC_FAILED
 };
 
 //------------------------------------------------------------------------------
@@ -136,6 +137,9 @@ enum TEMcodes : TERUnderlyingType {
     temXCHAIN_BRIDGE_BAD_REWARD_AMOUNT,
 
     temEMPTY_DID,
+
+    temARRAY_EMPTY,
+    temARRAY_TOO_LARGE,
 
     temMPT_NOT_SUPPORTED
 };
@@ -334,10 +338,14 @@ enum TECcodes : TERUnderlyingType {
     tecXCHAIN_BAD_PUBLIC_KEY_ACCOUNT_PAIR = 185,
     tecXCHAIN_CREATE_ACCOUNT_DISABLED = 186,
     tecEMPTY_DID = 187,
-    tecMPTOKEN_EXISTS = 188,
-    tecMPT_MAX_AMOUNT_EXCEEDED = 189,
-    tecMPT_LOCKED = 190,
-    tecMPT_NOT_SUPPORTED = 191,
+    tecINVALID_UPDATE_TIME = 188,
+    tecTOKEN_PAIR_NOT_FOUND = 189,
+    tecARRAY_EMPTY = 190,
+    tecARRAY_TOO_LARGE = 191,
+    tecMPTOKEN_EXISTS = 192,
+    tecMPT_MAX_AMOUNT_EXCEEDED = 193,
+    tecMPT_LOCKED = 194,
+    tecMPT_NOT_SUPPORTED = 195,
 
 };
 

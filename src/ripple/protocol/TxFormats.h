@@ -202,6 +202,12 @@ enum TxType : std::uint16_t
     /** This transaction sets an existing MPTokenIssuance or MPToken object. */
     ttMPTOKEN_ISSUANCE_SET = 54,
 
+    /** This transaction type creates an Oracle instance */
+    ttORACLE_SET = 51,
+
+    /** This transaction type deletes an Oracle instance */
+    ttORACLE_DELETE = 52,
+
     /** This system-generated transaction type is used to update the status of the various amendments.
 
         For details, see: https://xrpl.org/amendments.html

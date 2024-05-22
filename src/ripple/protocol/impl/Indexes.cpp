@@ -72,6 +72,7 @@ enum class LedgerNameSpace : std::uint16_t {
     XCHAIN_CLAIM_ID = 'Q',
     XCHAIN_CREATE_ACCOUNT_CLAIM_ID = 'K',
     DID = 'I',
+    ORACLE = 'R',
     MPTOKEN_ISSUANCE = '~',
     MPTOKEN = 't',
 
@@ -454,6 +455,12 @@ Keylet
 did(AccountID const& account) noexcept
 {
     return {ltDID, indexHash(LedgerNameSpace::DID, account)};
+}
+
+Keylet
+oracle(AccountID const& account, std::uint32_t const& documentID) noexcept
+{
+    return {ltORACLE, indexHash(LedgerNameSpace::ORACLE, account, documentID)};
 }
 
 Keylet
