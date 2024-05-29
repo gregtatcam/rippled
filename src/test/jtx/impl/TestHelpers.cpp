@@ -161,7 +161,8 @@ expectOffers(
             }
             return true;
         });
-    return size == cnt && matched == toMatch.size();
+    return size == cnt &&
+        (toMatch.empty() || (!toMatch.empty() && matched == toMatch.size()));
 }
 
 Json::Value

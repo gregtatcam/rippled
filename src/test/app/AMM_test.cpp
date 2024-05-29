@@ -6741,6 +6741,7 @@ private:
     void
     testLPTokenBalance(FeatureBitset features)
     {
+        testcase("Fix LPToken Balance");
         using namespace jtx;
 
         // Last Liquidity Provider is the issuer of one token
@@ -6857,6 +6858,106 @@ private:
     }
 
     void
+    testFixAMMBlockingLOB(FeatureBitset features)
+    {
+        testcase("Fix AMM Offer Blocking LOB");
+        using namespace jtx;
+
+        {
+            Env env(*this, features);
+            auto const XPM = gw["XPM"];
+
+            fund(
+                env,
+                gw,
+                {alice, carol},
+                XRP(1'000'000'000),
+                {XPM(1'000'000'000)});
+
+            env(offer(alice, STAmount{XPM, UINT64_C(1), -9}, XRPAmount{1'000}));
+            env(offer(alice, STAmount{XPM, UINT64_C(1), -8}, XRPAmount{10}));
+            env(offer(alice, STAmount{XPM, UINT64_C(1), -5}, XRPAmount{1'000}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(5'00001605), -8},
+                XRPAmount{5'065'000}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(196'547002735), -9},
+                XRPAmount{196'527'350}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(1'05'314740196), -9},
+                XRPAmount{57'822'092}));
+            env(offer(
+                alice, STAmount{XPM, UINT64_C(100)}, XRPAmount{3'600'879}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(500'00555), -5},
+                XRPAmount{18'002'000}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(360'00288), -5},
+                XRPAmount{12'960'000}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(2'500'02), -2},
+                XRPAmount{90'000'000}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(400'009107432), -9},
+                XRPAmount{14'001'999}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(10'000'0714), -4},
+                XRPAmount{350'020'000}));
+            env(offer(
+                alice, STAmount{XPM, UINT64_C(142860)}, XRPAmount{5000175003}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(28'572), -3},
+                XRPAmount{1'000'000}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(924'828553344), -9},
+                XRPAmount{32'368'352}));
+            env(offer(
+                alice,
+                STAmount{XPM, UINT64_C(136'175266308), -9},
+                XRPAmount{4'766'039}));
+            env.close();
+
+            AMM amm(env, gw, XPM(1), XRPAmount{35'000}, false, 50);
+
+            env.close();
+
+            if (!features[fixAMMv1_1])
+            {
+                env(offer(carol, XRPAmount{34902}, XPM(25'714'285)),
+                    txflags(tfSell | tfImmediateOrCancel),
+                    ter(tecKILLED));
+                env.close();
+                BEAST_EXPECT(amm.expectBalances(
+                    XPM(1), XRPAmount{35'000}, amm.tokens()));
+                BEAST_EXPECT(expectOffers(env, alice, 16));
+                BEAST_EXPECT(expectOffers(env, carol, 0));
+            }
+            else
+            {
+                env(offer(carol, XRPAmount{34902}, XPM(25'714'285)),
+                    txflags(tfSell | tfImmediateOrCancel));
+                env.close();
+                BEAST_EXPECT(amm.expectBalances(
+                    STAmount{XPM, UINT64_C(8'758'662723307628), -12},
+                    XRPAmount{4},
+                    amm.tokens()));
+                BEAST_EXPECT(expectOffers(env, alice, 0));
+                BEAST_EXPECT(expectOffers(env, carol, 0));
+            }
+        }
+    }
+
+    void
     run() override
     {
         FeatureBitset const all{jtx::supported_amendments()};
@@ -6900,6 +7001,8 @@ private:
         testFixAMMOfferBlockedByLOB(all - fixAMMv1_1);
         testLPTokenBalance(all);
         testLPTokenBalance(all - fixAMMv1_1);
+        testFixAMMBlockingLOB(all);
+        testFixAMMBlockingLOB(all - fixAMMv1_1);
     }
 };
 

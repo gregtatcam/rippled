@@ -116,6 +116,17 @@ maxOut(T const& out, Issue const& iss)
 }  // namespace
 
 template <typename TIn, typename TOut>
+Quality
+AMMLiquidity<TIn, TOut>::adjSpotQualityWithFees(
+    TAmounts<TIn, TOut> const& balances) const
+{
+    auto const outWithFee =
+        toAmount<TOut>(issueOut_, balances.out * feeMult(tradingFee_));
+    return Quality{balances};
+    return Quality{TAmounts<TIn, TOut>{balances.in, outWithFee}};
+}
+
+template <typename TIn, typename TOut>
 std::optional<AMMOffer<TIn, TOut>>
 AMMLiquidity<TIn, TOut>::maxOffer(
     TAmounts<TIn, TOut> const& balances,
@@ -135,11 +146,16 @@ AMMLiquidity<TIn, TOut>::maxOffer(
         auto const out = maxOut<TOut>(balances.out, issueOut());
         if (out <= TOut{0} || out >= balances.out)
             return std::nullopt;
+        auto const spotPriceQ = [&]() {
+            if (!rules.enabled(fixAMMv1_1))
+                return Quality{balances};
+            return adjSpotQualityWithFees(balances);
+        }();
         return AMMOffer<TIn, TOut>(
             *this,
             {swapAssetOut(balances, out, tradingFee_), out},
             balances,
-            Quality{balances});
+            spotPriceQ);
     }
 }
 
@@ -176,7 +192,12 @@ AMMLiquidity<TIn, TOut>::getOffer(
     // to the requested clobQuality but not exactly and potentially SPQ may keep
     // on approaching clobQuality for many iterations. Checking for the quality
     // threshold prevents this scenario.
-    if (auto const spotPriceQ = Quality{balances}; clobQuality &&
+    auto const spotPriceQ = [&]() {
+        if (!view.rules().enabled(fixAMMv1_1))
+            return Quality{balances};
+        return adjSpotQualityWithFees(balances);
+    }();
+    if (clobQuality &&
         (spotPriceQ <= clobQuality ||
          withinRelativeDistance(spotPriceQ, *clobQuality, Number(1, -7))))
     {

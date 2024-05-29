@@ -148,6 +148,9 @@ private:
      */
     std::optional<AMMOffer<TIn, TOut>>
     maxOffer(TAmounts<TIn, TOut> const& balances, Rules const& rules) const;
+
+    Quality
+    adjSpotQualityWithFees(TAmounts<TIn, TOut> const& balances) const;
 };
 
 }  // namespace ripple
