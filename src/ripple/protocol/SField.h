@@ -41,8 +41,10 @@ Some fields have a different meaning for their
 //------------------------------------------------------------------------------
 
 // Forwards
+class Asset;
 class STAccount;
-class STAmount;
+template <typename TIss>
+class TSTAmount;
 class STIssue;
 class STBlob;
 template <int>
@@ -346,7 +348,7 @@ using SF_UINT384 = TypedField<STBitString<384>>;
 using SF_UINT512 = TypedField<STBitString<512>>;
 
 using SF_ACCOUNT = TypedField<STAccount>;
-using SF_AMOUNT = TypedField<STAmount>;
+using SF_AMOUNT = TypedField<TSTAmount<Asset>>;
 using SF_ISSUE = TypedField<STIssue>;
 using SF_CURRENCY = TypedField<STCurrency>;
 using SF_VL = TypedField<STBlob>;

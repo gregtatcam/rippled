@@ -45,7 +45,9 @@ std::uint16_t constexpr VOTE_MAX_SLOTS = 8;
 std::uint32_t constexpr VOTE_WEIGHT_SCALE_FACTOR = 100000;
 
 class STObject;
-class STAmount;
+template <typename TIss>
+class TSTAmount;
+using STAmount = TSTAmount<Asset>;
 class Rules;
 
 /** Calculate AMM account ID.

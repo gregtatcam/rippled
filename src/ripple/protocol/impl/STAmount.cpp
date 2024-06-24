@@ -104,7 +104,8 @@ areComparable(STAmount const& v1, STAmount const& v2)
          v1.issue().currency == v2.issue().currency);
 }
 
-STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
+template <typename TIss>
+TSTAmount<TIss>::TSTAmount(SerialIter& sit, SField const& name) : STBase(name)
 {
     // TODO MPT make sure backward compatible
 
@@ -240,13 +241,18 @@ STAmount::STAmount(
 }
 #endif
 
-STAmount::STAmount(SField const& name, std::int64_t mantissa)
+template <typename TIss>
+TSTAmount<TIss>::TSTAmount(SField const& name, std::int64_t mantissa)
     : STBase(name), mAsset(xrpIssue()), mOffset(0), mIsNative(true)
 {
     set(mantissa);
 }
 
-STAmount::STAmount(SField const& name, std::uint64_t mantissa, bool negative)
+template <typename TIss>
+TSTAmount<TIss>::TSTAmount(
+    SField const& name,
+    std::uint64_t mantissa,
+    bool negative)
     : STBase(name)
     , mAsset(xrpIssue())
     , mValue(mantissa)
@@ -275,7 +281,8 @@ STAmount::STAmount(
 }
 #endif
 
-STAmount::STAmount(SField const& name, STAmount const& from)
+template <typename TIss>
+TSTAmount<TIss>::TSTAmount(SField const& name, TSTAmount<TIss> const& from)
     : STBase(name)
     , mAsset(from.mAsset)
     , mValue(from.mValue)
@@ -288,7 +295,8 @@ STAmount::STAmount(SField const& name, STAmount const& from)
 
 //------------------------------------------------------------------------------
 
-STAmount::STAmount(std::uint64_t mantissa, bool negative)
+template <typename TIss>
+TSTAmount<TIss>::TSTAmount(std::uint64_t mantissa, bool negative)
     : mAsset(xrpIssue())
     , mValue(mantissa)
     , mOffset(0)
@@ -346,7 +354,8 @@ STAmount::STAmount(IOUAmount const& amount, Asset const& asset)
 }
 #endif
 
-STAmount::STAmount(XRPAmount const& amount)
+template <typename TIss>
+TSTAmount<TIss>::TSTAmount(XRPAmount const& amount)
     : mAsset(xrpIssue())
     , mOffset(0)
     , mIsNative(true)
@@ -376,20 +385,23 @@ STAmount::STAmount(MPTAmount const& amount, Asset const& asset)
 }
 #endif
 
-std::unique_ptr<STAmount>
-STAmount::construct(SerialIter& sit, SField const& name)
+template <typename TIss>
+std::unique_ptr<TSTAmount<TIss>>
+TSTAmount<TIss>::construct(SerialIter& sit, SField const& name)
 {
     return std::make_unique<STAmount>(sit, name);
 }
 
+template <typename TIss>
 STBase*
-STAmount::copy(std::size_t n, void* buf) const
+TSTAmount<TIss>::copy(std::size_t n, void* buf) const
 {
     return emplace(n, buf, *this);
 }
 
+template <typename TIss>
 STBase*
-STAmount::move(std::size_t n, void* buf)
+TSTAmount<TIss>::move(std::size_t n, void* buf)
 {
     return emplace(n, buf, std::move(*this));
 }
@@ -399,8 +411,9 @@ STAmount::move(std::size_t n, void* buf)
 // Conversion
 //
 //------------------------------------------------------------------------------
+template <typename TIss>
 XRPAmount
-STAmount::xrp() const
+TSTAmount<TIss>::xrp() const
 {
     if (!mIsNative)
         Throw<std::logic_error>(
@@ -414,8 +427,9 @@ STAmount::xrp() const
     return XRPAmount{drops};
 }
 
+template <typename TIss>
 IOUAmount
-STAmount::iou() const
+TSTAmount<TIss>::iou() const
 {
     if (mIsNative || isMPT())
         Throw<std::logic_error>("Cannot return native STAmount as IOUAmount");
@@ -429,8 +443,9 @@ STAmount::iou() const
     return {mantissa, exponent};
 }
 
+template <typename TIss>
 MPTAmount
-STAmount::mpt() const
+TSTAmount<TIss>::mpt() const
 {
     if (!isMPT())
         Throw<std::logic_error>("Cannot return STAmount as MPTAmount");
@@ -443,8 +458,9 @@ STAmount::mpt() const
     return MPTAmount{value};
 }
 
-STAmount&
-STAmount::operator=(IOUAmount const& iou)
+template <typename TIss>
+TSTAmount<TIss>&
+TSTAmount<TIss>::operator=(IOUAmount const& iou)
 {
     assert(mIsNative == false);
     mOffset = iou.exponent();
@@ -462,15 +478,17 @@ STAmount::operator=(IOUAmount const& iou)
 //
 //------------------------------------------------------------------------------
 
-STAmount&
-STAmount::operator+=(STAmount const& a)
+template <typename TIss>
+TSTAmount<TIss>&
+TSTAmount<TIss>::operator+=(TSTAmount<TIss> const& a)
 {
     *this = *this + a;
     return *this;
 }
 
-STAmount&
-STAmount::operator-=(STAmount const& a)
+template <typename TIss>
+TSTAmount<TIss>&
+TSTAmount<TIss>::operator-=(TSTAmount<TIss> const& a)
 {
     *this = *this - a;
     return *this;
@@ -559,10 +577,13 @@ operator-(STAmount const& v1, STAmount const& v2)
 
 //------------------------------------------------------------------------------
 
-std::uint64_t const STAmount::uRateOne = getRate(STAmount(1), STAmount(1));
+template <typename TIss>
+std::uint64_t const TSTAmount<TIss>::uRateOne =
+    getRate(STAmount(1), STAmount(1));
 
+template <typename TIss>
 void
-STAmount::setIssue(Issue const& issue)
+TSTAmount<TIss>::setIssue(Issue const& issue)
 {
     mAsset = issue;
     mIsNative = isXRP(*this);
@@ -599,8 +620,9 @@ getRate(STAmount const& offerOut, STAmount const& offerIn)
     return 0;
 }
 
+template <typename TIss>
 void
-STAmount::setJson(Json::Value& elem) const
+TSTAmount<TIss>::setJson(Json::Value& elem) const
 {
     elem = Json::objectValue;
 
@@ -629,14 +651,16 @@ STAmount::setJson(Json::Value& elem) const
 //
 //------------------------------------------------------------------------------
 
+template <typename TIss>
 SerializedTypeID
-STAmount::getSType() const
+TSTAmount<TIss>::getSType() const
 {
     return STI_AMOUNT;
 }
 
+template <typename TIss>
 std::string
-STAmount::getFullText() const
+TSTAmount<TIss>::getFullText() const
 {
     std::string ret;
 
@@ -645,8 +669,9 @@ STAmount::getFullText() const
     return ret;
 }
 
+template <typename TIss>
 std::string
-STAmount::getText() const
+TSTAmount<TIss>::getText() const
 {
     // keep full internal accuracy, but make more human friendly if posible
     if (*this == beast::zero)
@@ -730,15 +755,17 @@ STAmount::getText() const
     return ret;
 }
 
-Json::Value STAmount::getJson(JsonOptions) const
+template <typename TIss>
+Json::Value TSTAmount<TIss>::getJson(JsonOptions) const
 {
     Json::Value elem;
     setJson(elem);
     return elem;
 }
 
+template <typename TIss>
 void
-STAmount::add(Serializer& s) const
+TSTAmount<TIss>::add(Serializer& s) const
 {
     // TODO MPT make sure backward compatible
     if (mIsNative)
@@ -783,15 +810,17 @@ STAmount::add(Serializer& s) const
     }
 }
 
+template <typename TIss>
 bool
-STAmount::isEquivalent(const STBase& t) const
+TSTAmount<TIss>::isEquivalent(const STBase& t) const
 {
     const STAmount* v = dynamic_cast<const STAmount*>(&t);
     return v && (*v == *this);
 }
 
+template <typename TIss>
 bool
-STAmount::isDefault() const
+TSTAmount<TIss>::isDefault() const
 {
     return (mValue == 0) && mIsNative;
 }
@@ -814,8 +843,9 @@ STAmount::isDefault() const
 // mValue is zero if the amount is zero, otherwise it's within the range
 //    10^15 to (10^16 - 1) inclusive.
 // mOffset is in the range -96 to +80.
+template <typename TIss>
 void
-STAmount::canonicalize()
+TSTAmount<TIss>::canonicalize()
 {
     if (isXRP(*this) || mAsset.isMPT())
     {
@@ -933,8 +963,9 @@ STAmount::canonicalize()
     assert((mValue != 0) || (mOffset != -100));
 }
 
+template <typename TIss>
 void
-STAmount::set(std::int64_t v)
+TSTAmount<TIss>::set(std::int64_t v)
 {
     if (v < 0)
     {
@@ -1780,5 +1811,7 @@ divRoundStrict(
 {
     return divRoundImpl<NumberRoundModeGuard>(num, den, asset, roundUp);
 }
+
+template class TSTAmount<Asset>;
 
 }  // namespace ripple

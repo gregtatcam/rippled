@@ -31,7 +31,9 @@ namespace ripple {
 class PublicKey;
 class SecretKey;
 class STXChainBridge;
-class STAmount;
+template <typename TIss>
+class TSTAmount;
+using STAmount = TSTAmount<Asset>;
 
 namespace test {
 namespace jtx {
