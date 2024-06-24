@@ -640,8 +640,7 @@ TSTAmount<TIss>::operator Number() const
 }
 
 template <typename TIss>
-TSTAmount<TIss>&
-TSTAmount<TIss>::operator=(beast::Zero)
+TSTAmount<TIss>& TSTAmount<TIss>::operator=(beast::Zero)
 {
     clear();
     return *this;
