@@ -181,9 +181,6 @@ public:
     int
     exponent() const noexcept;
 
-    std::string
-    getTypeName() const noexcept;
-
     bool
     negative() const noexcept;
 

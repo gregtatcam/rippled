@@ -199,9 +199,6 @@ public:
     bool
     isIOU() const noexcept;
 
-    std::string
-    getTypeName() const noexcept;
-
     bool
     negative() const noexcept;
 
