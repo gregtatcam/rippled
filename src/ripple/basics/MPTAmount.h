@@ -41,10 +41,10 @@ class MPTAmount : private boost::totally_ordered<MPTAmount>,
                   private boost::additive<MPTAmount, std::int64_t>
 {
 public:
-    using mpt_type = std::int64_t;
+    using value_type = std::int64_t;
 
 protected:
-    mpt_type mpt_;
+    value_type mpt_;
 
 public:
     MPTAmount() = default;
@@ -56,7 +56,7 @@ public:
     {
     }
 
-    constexpr explicit MPTAmount(mpt_type value) : mpt_(value)
+    constexpr explicit MPTAmount(value_type value) : mpt_(value)
     {
     }
 
@@ -67,20 +67,20 @@ public:
     }
 
     MPTAmount&
-    operator=(mpt_type value)
+    operator=(value_type value)
     {
         mpt_ = value;
         return *this;
     }
 
     constexpr MPTAmount
-    operator*(mpt_type const& rhs) const
+    operator*(value_type const& rhs) const
     {
         return MPTAmount{mpt_ * rhs};
     }
 
     friend constexpr MPTAmount
-    operator*(mpt_type lhs, MPTAmount const& rhs)
+    operator*(value_type lhs, MPTAmount const& rhs)
     {
         // multiplication is commutative
         return rhs * lhs;
@@ -101,21 +101,21 @@ public:
     }
 
     MPTAmount&
-    operator+=(mpt_type const& rhs)
+    operator+=(value_type const& rhs)
     {
         mpt_ += rhs;
         return *this;
     }
 
     MPTAmount&
-    operator-=(mpt_type const& rhs)
+    operator-=(value_type const& rhs)
     {
         mpt_ -= rhs;
         return *this;
     }
 
     MPTAmount&
-    operator*=(mpt_type const& rhs)
+    operator*=(value_type const& rhs)
     {
         mpt_ *= rhs;
         return *this;
@@ -134,7 +134,7 @@ public:
     }
 
     bool
-    operator==(mpt_type other) const
+    operator==(value_type other) const
     {
         return mpt_ == other;
     }
@@ -162,7 +162,7 @@ public:
     jsonClipped() const
     {
         static_assert(
-            std::is_signed_v<mpt_type> && std::is_integral_v<mpt_type>,
+            std::is_signed_v<value_type> && std::is_integral_v<value_type>,
             "Expected MPTAmount to be a signed integral type");
 
         constexpr auto min = std::numeric_limits<Json::Int>::min();
@@ -179,7 +179,7 @@ public:
         function unless the type has been abstracted away,
         e.g. in a templated function.
     */
-    constexpr mpt_type
+    constexpr value_type
     mpt() const
     {
         return mpt_;
@@ -236,9 +236,9 @@ mulRatio(
         if (neg && !roundUp)
             r -= 1;
     }
-    if (r > std::numeric_limits<MPTAmount::mpt_type>::max())
+    if (r > std::numeric_limits<MPTAmount::value_type>::max())
         Throw<std::overflow_error>("XRP mulRatio overflow");
-    return MPTAmount(r.convert_to<MPTAmount::mpt_type>());
+    return MPTAmount(r.convert_to<MPTAmount::value_type>());
 }
 
 }  // namespace ripple

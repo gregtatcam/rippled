@@ -35,6 +35,7 @@
 
 namespace ripple {
 
+#if 0
 namespace {
 
 // Use a static inside a function to help prevent order-of-initialzation issues
@@ -57,6 +58,7 @@ setSTAmountCanonicalizeSwitchover(bool v)
 {
     *getStaticSTAmountCanonicalizeSwitchover() = v;
 }
+#endif
 
 static const std::uint64_t tenTo14 = 100000000000000ull;
 static const std::uint64_t tenTo14m1 = tenTo14 - 1;
@@ -435,7 +437,7 @@ STAmount::mpt() const
     if (!isMPT())
         Throw<std::logic_error>("Cannot return STAmount as MPTAmount");
 
-    auto value = static_cast<MPTAmount::mpt_type>(mValue);
+    auto value = static_cast<MPTAmount::value_type>(mValue);
 
     if (mIsNegative)
         value = -value;

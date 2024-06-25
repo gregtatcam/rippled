@@ -126,6 +126,7 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/AccountID.cpp
   src/ripple/protocol/impl/AMMCore.cpp
   src/ripple/protocol/impl/Asset.cpp
+  src/ripple/protocol/impl/BaseAmount.cpp
   src/ripple/protocol/impl/Book.cpp
   src/ripple/protocol/impl/BuildInfo.cpp
   src/ripple/protocol/impl/ErrorCodes.cpp
@@ -310,6 +311,7 @@ install (
     src/ripple/protocol/AmountConversions.h
     src/ripple/protocol/ApiVersion.h
     src/ripple/protocol/Asset.h
+    src/ripple/protocol/BaseAmount.h
     src/ripple/protocol/Book.h
     src/ripple/protocol/BuildInfo.h
     src/ripple/protocol/ErrorCodes.h
