@@ -323,7 +323,7 @@ areComparable(BaseAmount<T> const& v1, BaseAmount<T> const& v2)
          v1.asset().issue().currency == v2.asset().issue().currency);
 }
 
-}
+} // namespace detail
 
 template <ValidAsset T>
 BaseAmount<T>
@@ -477,7 +477,8 @@ getStaticSTAmountCanonicalizeSwitchover1()
     static LocalValue<bool> r{true};
     return r;
 }
-}  // namespace
+
+}  // namespace detail
 
 inline bool
 getSTAmountCanonicalizeSwitchover1()
@@ -809,8 +810,6 @@ divRoundImpl(
     }
     return result;
 }
-
-}  // namespace detail
 
 //------------------------------------------------------------------------------
 //
