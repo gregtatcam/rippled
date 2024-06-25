@@ -1258,8 +1258,7 @@ BaseAmount<T>::operator bool() const noexcept
 }
 
 template <ValidAsset T>
-BaseAmount<T>&
-BaseAmount<T>::operator=(beast::Zero)
+BaseAmount<T>& BaseAmount<T>::operator=(beast::Zero)
 {
     clear();
     return *this;
