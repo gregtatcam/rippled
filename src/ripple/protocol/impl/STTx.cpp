@@ -150,7 +150,7 @@ STTx::getMentionedAccounts() const
                     list.insert(issuer);
             }
             else
-                list.insert(samt->mptIssue().account());
+                list.insert(samt->mptIssue().getIssuer());
         }
     }
 

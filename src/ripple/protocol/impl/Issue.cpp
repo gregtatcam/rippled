@@ -49,6 +49,12 @@ Issue::getText() const
     return ret;
 }
 
+AccountID const&
+Issue::getIssuer() const
+{
+    return account;
+}
+
 bool
 isConsistent(Issue const& ac)
 {

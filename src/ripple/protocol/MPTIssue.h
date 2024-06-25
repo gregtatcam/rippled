@@ -36,7 +36,7 @@ public:
     }
 
     AccountID const&
-    account() const
+    getIssuer() const
     {
         return mpt_.second;
     }

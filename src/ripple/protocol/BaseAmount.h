@@ -191,7 +191,7 @@ public:
     mantissa() const noexcept;
 
     T const&
-    issue() const;
+    asset() const;
 
     AccountID const&
     getIssuer() const;
@@ -294,7 +294,7 @@ template <ValidAsset T>
 std::int64_t
 getSNValue(BaseAmount<T> const& amount)
 {
-    if (!isNative(amount.issue()))
+    if (!isNative(amount.asset()))
         Throw<std::runtime_error>("amount is not native!");
 
     auto ret = static_cast<std::int64_t>(amount.mantissa());
@@ -311,7 +311,7 @@ template <ValidAsset T>
 std::int64_t
 getMPTValue(BaseAmount<T> const& amount)
 {
-    if (!isMPT(amount.issue()))
+    if (!isMPT(amount.asset()))
         Throw<std::runtime_error>("amount is not MPT!");
 
     auto ret = static_cast<std::int64_t>(amount.mantissa());
@@ -507,9 +507,9 @@ BaseAmount<T>::mantissa() const noexcept
 
 template <ValidAsset T>
 T const&
-BaseAmount<T>::issue() const
+BaseAmount<T>::asset() const
 {
-    return mAsset.issue();
+    return mAsset;
 }
 
 template <ValidAsset T>

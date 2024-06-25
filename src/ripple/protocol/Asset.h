@@ -99,6 +99,9 @@ public:
     std::string
     getText() const;
 
+    AccountID const&
+    getIssuer() const;
+
     friend constexpr bool
     operator==(Asset const& lhs, Asset const& rhs)
     {

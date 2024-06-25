@@ -459,7 +459,7 @@ Payment::doApply()
             return ter;
 
         auto const& mpt = saDstAmount.mptIssue();
-        auto const& issuer = mpt.account();
+        auto const& issuer = mpt.getIssuer();
         // If globally/individually locked then
         //   can't send between holders
         //   holder can send back to issuer

@@ -1348,7 +1348,7 @@ rippleSendMPT(
     assert(uSenderID != uReceiverID);
 
     // Safe to get MPT since rippleSendMPT is only called by accountSendMPT
-    auto const issuer = saAmount.mptIssue().account();
+    auto const issuer = saAmount.mptIssue().getIssuer();
 
     if (uSenderID == issuer || uReceiverID == issuer || issuer == noAccount())
     {
@@ -1859,7 +1859,7 @@ rippleMPTCredit(
     beast::Journal j)
 {
     auto const mptID = keylet::mptIssuance(saAmount.mptIssue().mpt());
-    auto const issuer = saAmount.mptIssue().account();
+    auto const issuer = saAmount.mptIssue().getIssuer();
     if (uSenderID == issuer)
     {
         if (auto sle = view.peek(mptID))

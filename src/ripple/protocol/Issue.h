@@ -48,6 +48,9 @@ public:
 
     std::string
     getText() const;
+
+    AccountID const&
+    getIssuer() const;
 };
 
 bool
