@@ -323,7 +323,7 @@ areComparable(BaseAmount<T> const& v1, BaseAmount<T> const& v2)
          v1.asset().issue().currency == v2.asset().issue().currency);
 }
 
-} // namespace detail
+}  // namespace detail
 
 template <ValidAsset T>
 BaseAmount<T>
@@ -491,7 +491,6 @@ setSTAmountCanonicalizeSwitchover1(bool v)
 {
     *getStaticSTAmountCanonicalizeSwitchover1() = v;
 }
-
 
 void
 canonicalizeRoundStrict(
