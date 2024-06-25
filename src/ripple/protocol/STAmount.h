@@ -27,7 +27,6 @@
 #include <ripple/basics/Number.h>
 #include <ripple/basics/XRPAmount.h>
 #include <ripple/protocol/Asset.h>
-#include <ripple/protocol/BaseAmount.h>
 #include <ripple/protocol/Issue.h>
 #include <ripple/protocol/SField.h>
 #include <ripple/protocol/STBase.h>
@@ -792,7 +791,6 @@ isMPT(STAmount const& amount)
 // the low-level routine stAmountCanonicalize on an amendment switch. Only
 // transactions need to use this switchover. Outside of a transaction it's safe
 // to unconditionally use the new behavior.
-#if 0
 bool
 getSTAmountCanonicalizeSwitchover();
 
@@ -818,7 +816,6 @@ public:
 private:
     bool saved_;
 };
-#endif
 
 }  // namespace ripple
 
