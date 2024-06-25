@@ -93,9 +93,12 @@ operator<<(std::ostream& os, PrettyAmount const& amount)
     }
     else
     {
+        std::string id;
+        std::visit([&](auto&& a) {
+            id = to_string(a.issue().getAssetID());
+        }, amount.value().amount());
         os << amount.value().getText() << "/"
-           << to_string(amount.value().issue().currency) << "(" << amount.name()
-           << ")";
+           << id << "(" << amount.name() << ")";
     }
     return os;
 }

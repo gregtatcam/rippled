@@ -22,6 +22,7 @@
 
 #include <ripple/basics/CountedObject.h>
 #include <ripple/protocol/Issue.h>
+#include <ripple/protocol/MPTIssue.h>
 #include <boost/utility/base_from_member.hpp>
 
 namespace ripple {
@@ -33,8 +34,8 @@ namespace ripple {
 class Book final : public CountedObject<Book>
 {
 public:
-    Issue in;
-    Issue out;
+    std::variant<Issue, MPTIssue> in;
+    std::variant<Issue, MPTIssue> out;
 
     Book()
     {

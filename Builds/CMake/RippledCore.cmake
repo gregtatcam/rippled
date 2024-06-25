@@ -136,6 +136,7 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/Keylet.cpp
   src/ripple/protocol/impl/LedgerFormats.cpp
   src/ripple/protocol/impl/LedgerHeader.cpp
+  src/ripple/protocol/impl/MPTIssue.cpp
   src/ripple/protocol/impl/PublicKey.cpp
   src/ripple/protocol/impl/Quality.cpp
   src/ripple/protocol/impl/QualityFunction.cpp
@@ -150,8 +151,10 @@ target_sources (xrpl_core PRIVATE
   src/ripple/protocol/impl/STBase.cpp
   src/ripple/protocol/impl/STBlob.cpp
   src/ripple/protocol/impl/STCurrency.cpp
+  src/ripple/protocol/impl/STEitherAmount.cpp
   src/ripple/protocol/impl/STInteger.cpp
   src/ripple/protocol/impl/STLedgerEntry.cpp
+  src/ripple/protocol/impl/STMPTAmount.cpp
   src/ripple/protocol/impl/STObject.cpp
   src/ripple/protocol/impl/STParsedJSON.cpp
   src/ripple/protocol/impl/STPathSet.cpp
@@ -245,6 +248,7 @@ install (
     src/ripple/basics/LocalValue.h
     src/ripple/basics/Log.h
     src/ripple/basics/MathUtilities.h
+    src/ripple/basics/MPTAmount.h
     src/ripple/basics/Number.h
     src/ripple/basics/PerfLog.h
     src/ripple/basics/README.md
@@ -321,6 +325,7 @@ install (
     src/ripple/protocol/KnownFormats.h
     src/ripple/protocol/LedgerFormats.h
     src/ripple/protocol/LedgerHeader.h
+    src/ripple/protocol/MPTIssue.h
     src/ripple/protocol/MultiApiJson.h
     src/ripple/protocol/NFTSyntheticSerializer.h
     src/ripple/protocol/NFTokenID.h
@@ -347,10 +352,12 @@ install (
     src/ripple/protocol/STBitString.h
     src/ripple/protocol/STBlob.h
     src/ripple/protocol/STCurrency.h
+    src/ripple/protocol/STEitherAmount.h
     src/ripple/protocol/STExchange.h
     src/ripple/protocol/STInteger.h
     src/ripple/protocol/STIssue.h
     src/ripple/protocol/STLedgerEntry.h
+    src/ripple/protocol/STMPTAmount.h
     src/ripple/protocol/STObject.h
     src/ripple/protocol/STParsedJSON.h
     src/ripple/protocol/STPathSet.h

@@ -23,7 +23,8 @@
 #include <ripple/basics/FeeUnits.h>
 #include <ripple/basics/contract.h>
 #include <ripple/protocol/Issue.h>
-#include <ripple/protocol/STAmount.h>
+#include <ripple/protocol/MPTIssue.h>
+#include <ripple/protocol/STEitherAmount.h>
 #include <cstdint>
 #include <ostream>
 #include <string>
@@ -74,7 +75,7 @@ struct PrettyAmount
 {
 private:
     // VFALCO TODO should be Amount
-    STAmount amount_;
+    STEitherAmount amount_;
     std::string name_;
 
 public:
@@ -88,6 +89,11 @@ public:
     {
     }
 
+    PrettyAmount(STMPTAmount const& amount, std::string const& name)
+        : amount_(amount), name_(name)
+    {
+    }
+
     /** drops */
     template <class T>
     PrettyAmount(
@@ -95,7 +101,7 @@ public:
         std::enable_if_t<
             sizeof(T) >= sizeof(int) && std::is_integral_v<T> &&
             std::is_signed_v<T>>* = nullptr)
-        : amount_((v > 0) ? v : -v, v < 0)
+        : amount_(STAmount{static_cast<std::uint64_t>((v > 0) ? v : -v), v < 0})
     {
     }
 
@@ -105,12 +111,12 @@ public:
         T v,
         std::enable_if_t<sizeof(T) >= sizeof(int) && std::is_unsigned_v<T>>* =
             nullptr)
-        : amount_(v)
+        : amount_(STAmount{v})
     {
     }
 
     /** drops */
-    PrettyAmount(XRPAmount v) : amount_(v)
+    PrettyAmount(XRPAmount v) : amount_(STAmount{v})
     {
     }
 
@@ -120,15 +126,25 @@ public:
         return name_;
     }
 
-    STAmount const&
+    STEitherAmount const&
     value() const
     {
         return amount_;
     }
 
-    operator STAmount const &() const
+    operator STEitherAmount const&() const
     {
         return amount_;
+    }
+
+    operator STAmount const&() const
+    {
+        return static_cast<STAmount const&>(amount_);
+    }
+
+    explicit operator STMPTAmount const&() const
+    {
+        return static_cast<STMPTAmount const&>(amount_);
     }
 
     operator AnyAmount() const;
@@ -154,11 +170,13 @@ operator<<(std::ostream& os, PrettyAmount const& amount);
 // Specifies an order book
 struct BookSpec
 {
-    AccountID account;
-    ripple::Currency currency;
+    std::variant<Issue, MPTIssue> issue;
 
-    BookSpec(AccountID const& account_, ripple::Currency const& currency_)
-        : account(account_), currency(currency_)
+    BookSpec(AccountID const& account, ripple::Currency const& currency)
+        : issue{Issue{currency, account}}
+    {
+    }
+    BookSpec(MPT const& mpt) : issue{MPTIssue{mpt}}
     {
     }
 };
@@ -334,7 +352,8 @@ public:
     // STAmount operator()(char const* s) const;
 
     /** Returns None-of-Issue */
-    None operator()(none_t) const
+    None
+    operator()(none_t) const
     {
         return {issue()};
     }
@@ -346,6 +365,73 @@ public:
     }
 };
 
+/** Converts to MPT Issue or STAmount.
+
+Examples:
+    MPT         Converts to the underlying Issue
+        MPT(10)     Returns STAmount of 10 of
+    the underlying MPT
+        */
+class MPT
+{
+public:
+    std::string name;
+    ripple::MPT mptID;
+
+    MPT(std::string const& n, ripple::MPT const& mptID_)
+        : name(n), mptID(mptID_)
+    {
+    }
+
+    ripple::MPT const&
+    mpt() const
+    {
+        return mptID;
+    }
+
+    /** Implicit conversion to Issue.
+
+        This allows passing an MPT
+        value where an Issue is expected.
+    */
+    operator ripple::MPT() const
+    {
+        return mpt();
+    }
+
+    template <class T>
+        requires(sizeof(T) >= sizeof(int) && std::is_arithmetic_v<T>)
+    PrettyAmount
+    operator()(T v) const
+    {
+        // VFALCO NOTE Should throw if the
+        //             representation of v is not exact.
+        return {amountFromString(mpt(), std::to_string(v)), name};
+    }
+
+    PrettyAmount operator()(epsilon_t) const;
+    PrettyAmount operator()(detail::epsilon_multiple) const;
+
+    // VFALCO TODO
+    // STAmount operator()(char const* s) const;
+
+    /** Returns None-of-Issue */
+#if 0
+    None operator()(none_t) const
+    {
+        return {Issue{}};
+    }
+#endif
+
+    friend BookSpec
+    operator~(MPT const& mpt)
+    {
+        assert(false);
+        Throw<std::logic_error>("MPT is not supported");
+        return BookSpec{beast::zero, noCurrency()};
+    }
+};
+
 std::ostream&
 operator<<(std::ostream& os, IOU const& iou);
 
@@ -353,27 +439,41 @@ operator<<(std::ostream& os, IOU const& iou);
 
 struct any_t
 {
+    //inline AnyAmount
+    //operator()(STEitherAmount const& sta) const;
     inline AnyAmount
     operator()(STAmount const& sta) const;
+    inline AnyAmount
+    operator()(STMPTAmount const& sta) const;
 };
 
 /** Amount specifier with an option for any issuer. */
 struct AnyAmount
 {
     bool is_any;
-    STAmount value;
+    STEitherAmount value;
 
     AnyAmount() = delete;
     AnyAmount(AnyAmount const&) = default;
     AnyAmount&
     operator=(AnyAmount const&) = default;
 
-    AnyAmount(STAmount const& amount) : is_any(false), value(amount)
+    AnyAmount(STEitherAmount const& amount) : is_any(false), value(amount)
     {
     }
 
-    AnyAmount(STAmount const& amount, any_t const*)
+    AnyAmount(STEitherAmount const& amount, any_t const*)
         : is_any(true), value(amount)
+    {
+    }
+
+    AnyAmount(STAmount const& amount)
+        : is_any(false), value(amount)
+    {
+    }
+
+    AnyAmount(STMPTAmount const& amount)
+        : is_any(false), value(amount)
     {
     }
 
@@ -381,14 +481,26 @@ struct AnyAmount
     void
     to(AccountID const& id)
     {
-        if (!is_any)
+        if (!is_any || !value.isSTAmount())
             return;
-        value.setIssuer(id);
+        static_cast<STAmount>(value).setIssuer(id);
     }
 };
 
+/*inline AnyAmount
+any_t::operator()(STEitherAmount const& sta) const
+{
+    return AnyAmount(sta, this);
+}*/
+
 inline AnyAmount
 any_t::operator()(STAmount const& sta) const
+{
+    return AnyAmount(sta, this);
+}
+
+inline AnyAmount
+any_t::operator()(STMPTAmount const& sta) const
 {
     return AnyAmount(sta, this);
 }

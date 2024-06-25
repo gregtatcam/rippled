@@ -43,6 +43,12 @@ transferFeeAsRate(std::uint16_t fee)
 
 }  // namespace nft
 
+STEitherAmount
+multiply(STEitherAmount const&, Rate const&)
+{
+    return STEitherAmount{};
+}
+
 STAmount
 multiply(STAmount const& amount, Rate const& rate)
 {
@@ -80,6 +86,16 @@ multiplyRound(
     }
 
     return mulRound(amount, detail::as_amount(rate), issue, roundUp);
+}
+
+STEitherAmount
+multiplyRound(
+    STEitherAmount const& amount,
+    Rate const& rate,
+    std::variant<Issue, MPTIssue> const& issue,
+    bool roundUp)
+{
+    return STEitherAmount{};
 }
 
 STAmount

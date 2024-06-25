@@ -491,6 +491,7 @@ JSS(min_count);                  // in: GetCounts
 JSS(min_ledger);                 // in: LedgerCleaner
 JSS(minimum_fee);                // out: TxQ
 JSS(minimum_level);              // out: TxQ
+JSS(mpt_issuance_id);            // in/out: MPT
 JSS(missingCommand);             // error
 JSS(name);                       // out: AmendmentTableImpl, PeerImp
 JSS(needed_state_hashes);        // out: InboundLedger

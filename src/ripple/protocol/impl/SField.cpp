@@ -202,6 +202,9 @@ CONSTRUCT_TYPED_SFIELD(sfTakerPaysIssuer,       "TakerPaysIssuer",      UINT160,
 CONSTRUCT_TYPED_SFIELD(sfTakerGetsCurrency,     "TakerGetsCurrency",    UINT160,    3);
 CONSTRUCT_TYPED_SFIELD(sfTakerGetsIssuer,       "TakerGetsIssuer",      UINT160,    4);
 
+CONSTRUCT_TYPED_SFIELD(sfTakerPaysMPT,          "TakerPaysMPT",         UINT192,    1);
+CONSTRUCT_TYPED_SFIELD(sfTakerGetsMPT,          "TakerGetsMPT",         UINT192,    2);
+
 // 256-bit (common)
 CONSTRUCT_TYPED_SFIELD(sfLedgerHash,            "LedgerHash",           UINT256,    1);
 CONSTRUCT_TYPED_SFIELD(sfParentHash,            "ParentHash",           UINT256,    2);
@@ -242,8 +245,6 @@ CONSTRUCT_TYPED_SFIELD(sfHookSetTxnID,          "HookSetTxnID",         UINT256,
 CONSTRUCT_TYPED_SFIELD(sfAmount,                "Amount",               AMOUNT,     1);
 CONSTRUCT_TYPED_SFIELD(sfBalance,               "Balance",              AMOUNT,     2);
 CONSTRUCT_TYPED_SFIELD(sfLimitAmount,           "LimitAmount",          AMOUNT,     3);
-CONSTRUCT_TYPED_SFIELD(sfTakerPays,             "TakerPays",            AMOUNT,     4);
-CONSTRUCT_TYPED_SFIELD(sfTakerGets,             "TakerGets",            AMOUNT,     5);
 CONSTRUCT_TYPED_SFIELD(sfLowLimit,              "LowLimit",             AMOUNT,     6);
 CONSTRUCT_TYPED_SFIELD(sfHighLimit,             "HighLimit",            AMOUNT,     7);
 CONSTRUCT_TYPED_SFIELD(sfFee,                   "Fee",                  AMOUNT,     8);
@@ -252,6 +253,9 @@ CONSTRUCT_TYPED_SFIELD(sfDeliverMin,            "DeliverMin",           AMOUNT, 
 CONSTRUCT_TYPED_SFIELD(sfAmount2,               "Amount2",              AMOUNT,    11);
 CONSTRUCT_TYPED_SFIELD(sfBidMin,                "BidMin",               AMOUNT,    12);
 CONSTRUCT_TYPED_SFIELD(sfBidMax,                "BidMax",               AMOUNT,    13);
+
+CONSTRUCT_TYPED_SFIELD(sfTakerPays,             "TakerPays",            EITHER_AMOUNT,     1);
+CONSTRUCT_TYPED_SFIELD(sfTakerGets,             "TakerGets",            EITHER_AMOUNT,     2);
 
 // currency amount (uncommon)
 CONSTRUCT_TYPED_SFIELD(sfMinimumOffer,          "MinimumOffer",         AMOUNT,    16);

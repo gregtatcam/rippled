@@ -143,6 +143,14 @@ accountFunds(
     FreezeHandling freezeHandling,
     beast::Journal j);
 
+[[nodiscard]] STMPTAmount
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    STMPTAmount const& saDefault,
+    FreezeHandling freezeHandling,
+    beast::Journal j);
+
 // Return the account's liquid (not reserved) XRP.  Generally prefer
 // calling accountHolds() over this interface.  However, this interface
 // allows the caller to temporarily adjust the owner count should that be

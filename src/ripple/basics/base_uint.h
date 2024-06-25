@@ -521,7 +521,8 @@ public:
         return bytes;
     }
 
-    base_uint<Bits, Tag>& operator=(beast::Zero)
+    base_uint<Bits, Tag>&
+    operator=(beast::Zero)
     {
         data_.fill(0);
         return *this;
@@ -547,6 +548,7 @@ public:
 
 using uint128 = base_uint<128>;
 using uint160 = base_uint<160>;
+using uint192 = base_uint<192>;
 using uint256 = base_uint<256>;
 
 template <std::size_t Bits, class Tag>

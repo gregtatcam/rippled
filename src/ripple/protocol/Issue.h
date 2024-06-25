@@ -48,6 +48,18 @@ public:
 
     std::string
     getText() const;
+
+    AccountID const&
+    getAccount() const
+    {
+        return account;
+    }
+
+    Currency const&
+    getAssetID() const
+    {
+        return currency;
+    }
 };
 
 bool
@@ -114,6 +126,12 @@ noIssue()
 {
     static Issue issue{noCurrency(), noAccount()};
     return issue;
+}
+
+inline bool
+isXRP(Issue const& iss)
+{
+    return isXRP(iss.currency);
 }
 
 }  // namespace ripple

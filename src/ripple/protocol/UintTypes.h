@@ -58,6 +58,9 @@ using Currency = base_uint<160, detail::CurrencyTag>;
 /** NodeID is a 160-bit hash representing one node. */
 using NodeID = base_uint<160, detail::NodeIDTag>;
 
+/** MPT is a 192-bit hash representing MPTID. */
+using MPT = std::pair<std::uint32_t, AccountID>;
+
 /** XRP currency. */
 Currency const&
 xrpCurrency();
@@ -65,6 +68,9 @@ xrpCurrency();
 /** A placeholder for empty currencies. */
 Currency const&
 noCurrency();
+
+MPT const&
+noMPT();
 
 /** We deliberately disallow the currency that looks like "XRP" because too
     many people were using it instead of the correct XRP currency. */

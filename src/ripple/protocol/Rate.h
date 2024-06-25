@@ -20,6 +20,7 @@
 #ifndef RIPPLE_PROTOCOL_RATE_H_INCLUDED
 #define RIPPLE_PROTOCOL_RATE_H_INCLUDED
 
+#include <ripple/protocol/MPTIssue.h>
 #include <ripple/protocol/STAmount.h>
 #include <boost/operators.hpp>
 #include <cassert>
@@ -64,6 +65,9 @@ operator<<(std::ostream& os, Rate const& rate)
     return os;
 }
 
+STEitherAmount
+multiply(STEitherAmount const& amount, Rate const& rate);
+
 STAmount
 multiply(STAmount const& amount, Rate const& rate);
 
@@ -75,6 +79,13 @@ multiplyRound(
     STAmount const& amount,
     Rate const& rate,
     Issue const& issue,
+    bool roundUp);
+
+STEitherAmount
+multiplyRound(
+    STEitherAmount const& amount,
+    Rate const& rate,
+    std::variant<Issue, MPTIssue> const& issue,
     bool roundUp);
 
 STAmount

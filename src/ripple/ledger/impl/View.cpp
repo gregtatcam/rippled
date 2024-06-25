@@ -298,6 +298,17 @@ accountFunds(
         j);
 }
 
+STMPTAmount
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    STMPTAmount const& saDefault,
+    FreezeHandling freezeHandling,
+    beast::Journal j)
+{
+    return saDefault;
+}
+
 // Prevent ownerCount from wrapping under error conditions.
 //
 // adjustment allows the ownerCount to be adjusted up or down in multiple steps.

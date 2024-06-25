@@ -30,6 +30,9 @@ namespace ripple {
 class PaymentSandbox;
 class Sandbox;
 
+template <typename TIss>
+concept IssueType = (std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>);
+
 /** Transactor specialized for creating offers in the ledger. */
 class CreateOffer : public Transactor
 {
@@ -52,6 +55,9 @@ public:
     /** Enforce constraints beyond those of the Transactor base class. */
     static TER
     preclaim(PreclaimContext const& ctx);
+    template <typename TIn, typename TOut>
+    static TER
+    preclaimImpl(PreclaimContext const& ctx);
 
     /** Gather information beyond what the Transactor base class gathers. */
     void
@@ -62,17 +68,19 @@ public:
     doApply() override;
 
 private:
+    template <typename TIn, typename TOut>
     std::pair<TER, bool>
     applyGuts(Sandbox& view, Sandbox& view_cancel);
 
     // Determine if we are authorized to hold the asset we want to get.
+    template <IssueType TIss>
     static TER
     checkAcceptAsset(
         ReadView const& view,
         ApplyFlags const flags,
         AccountID const id,
         beast::Journal const j,
-        Issue const& issue);
+        TIss const& issue);
 
     bool
     dry_offer(ApplyView& view, Offer const& offer);
@@ -114,25 +122,29 @@ private:
     // and adjusting account balances accordingly.
     //
     // Charges fees on top to taker.
-    std::pair<TER, Amounts>
-    takerCross(Sandbox& sb, Sandbox& sbCancel, Amounts const& takerAmount);
+    template <typename TIn, typename TOut>
+    std::pair<TER, TAmounts<TIn, TOut>>
+    takerCross(Sandbox& sb, Sandbox& sbCancel, TAmounts<TIn, TOut> const& takerAmount);
 
     // Use the payment flow code to perform offer crossing.
-    std::pair<TER, Amounts>
+    template <typename TIn, typename TOut>
+    std::pair<TER, TAmounts<TIn, TOut>>
     flowCross(
         PaymentSandbox& psb,
         PaymentSandbox& psbCancel,
-        Amounts const& takerAmount);
+        TAmounts<TIn, TOut> const& takerAmount);
 
     // Temporary
     // This is a central location that invokes both versions of cross
     // so the results can be compared.  Eventually this layer will be
     // removed once flowCross is determined to be stable.
-    std::pair<TER, Amounts>
-    cross(Sandbox& sb, Sandbox& sbCancel, Amounts const& takerAmount);
+    template <typename TIn, typename TOut>
+    std::pair<TER, TAmounts<TIn, TOut>>
+    cross(Sandbox& sb, Sandbox& sbCancel, TAmounts<TIn, TOut> const& takerAmount);
 
+    template <typename T>
     static std::string
-    format_amount(STAmount const& amount);
+    format_amount(T const& amount);
 
 private:
     // What kind of offer we are placing

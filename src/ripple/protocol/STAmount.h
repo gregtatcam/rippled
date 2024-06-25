@@ -175,6 +175,9 @@ public:
     Currency const&
     getCurrency() const;
 
+    Currency const&
+    getAssetID() const;
+
     AccountID const&
     getIssuer() const;
 
@@ -354,6 +357,12 @@ STAmount::issue() const
 
 inline Currency const&
 STAmount::getCurrency() const
+{
+    return mIssue.currency;
+}
+
+inline Currency const&
+STAmount::getAssetID() const
 {
     return mIssue.currency;
 }

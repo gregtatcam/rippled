@@ -983,8 +983,8 @@ public:
             for (auto offerPtr : aliceOffers)
             {
                 auto const& offer = *offerPtr;
-                BEAST_EXPECT(offer[sfTakerGets] == XRP(2000));
-                BEAST_EXPECT(offer[sfTakerPays] == USD(1000));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == XRP(2000));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == USD(1000));
             }
 
             // bob creates a passive offer that could cross alice's.
@@ -998,8 +998,8 @@ public:
             for (auto offerPtr : bobOffers)
             {
                 auto const& offer = *offerPtr;
-                BEAST_EXPECT(offer[sfTakerGets] == USD(1000));
-                BEAST_EXPECT(offer[sfTakerPays] == XRP(2000));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == USD(1000));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == XRP(2000));
             }
 
             // It should be possible for gw to cross both of those offers.
@@ -1047,8 +1047,8 @@ public:
             for (auto offerPtr : bobOffers)
             {
                 auto const& offer = *offerPtr;
-                BEAST_EXPECT(offer[sfTakerGets] == USD(499.5));
-                BEAST_EXPECT(offer[sfTakerPays] == XRP(999));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == USD(499.5));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == XRP(999));
             }
         }
     }
@@ -1339,8 +1339,8 @@ public:
             {
                 auto const& offer = *offerPtr;
                 BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-                BEAST_EXPECT(offer[sfTakerGets] == USD(0));
-                BEAST_EXPECT(offer[sfTakerPays] == XRP(0));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == USD(0));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == XRP(0));
             }
         }
 
@@ -2303,11 +2303,11 @@ public:
         jtx::PrettyAmount const& expectBalance)
     {
         auto const sleTrust =
-            env.le(keylet::line(account.id(), expectBalance.value().issue()));
+            env.le(keylet::line(account.id(), static_cast<STAmount>(expectBalance.value()).issue()));
         BEAST_EXPECT(sleTrust);
         if (sleTrust)
         {
-            Issue const issue = expectBalance.value().issue();
+            Issue const issue = static_cast<STAmount>(expectBalance.value()).issue();
             bool const accountLow = account.id() < issue.account;
 
             STAmount low{issue};
@@ -2457,8 +2457,8 @@ public:
                 auto const& acctOffer = *(acctOffers.front());
 
                 auto const leftover = t.offerAmount - t.bookAmount;
-                BEAST_EXPECT(acctOffer[sfTakerGets] == XRP(leftover));
-                BEAST_EXPECT(acctOffer[sfTakerPays] == USD(leftover));
+                BEAST_EXPECT(static_cast<STAmount>(acctOffer[sfTakerGets]) == XRP(leftover));
+                BEAST_EXPECT(static_cast<STAmount>(acctOffer[sfTakerPays]) == USD(leftover));
             }
 
             if (t.preTrust == noPreTrust)
@@ -2557,8 +2557,8 @@ public:
             auto const& bobsOffer = *(bobsOffers.front());
 
             BEAST_EXPECT(bobsOffer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(bobsOffer[sfTakerGets] == USD(1));
-            BEAST_EXPECT(bobsOffer[sfTakerPays] == XRP(1));
+            BEAST_EXPECT(static_cast<STAmount>(bobsOffer[sfTakerGets]) == USD(1));
+            BEAST_EXPECT(static_cast<STAmount>(bobsOffer[sfTakerPays]) == XRP(1));
         }
     }
 
@@ -2643,8 +2643,8 @@ public:
             {
                 auto const& bobsOffer = *(bobsOffers.front());
 
-                BEAST_EXPECT(bobsOffer[sfTakerGets] == USD(1));
-                BEAST_EXPECT(bobsOffer[sfTakerPays] == EUR(1));
+                BEAST_EXPECT(static_cast<STAmount>(bobsOffer[sfTakerGets]) == USD(1));
+                BEAST_EXPECT(static_cast<STAmount>(bobsOffer[sfTakerPays]) == EUR(1));
             }
         }
 
@@ -2738,8 +2738,8 @@ public:
             auto const& alicesOffer = *(alicesOffers.front());
 
             BEAST_EXPECT(alicesOffer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(alicesOffer[sfTakerGets] == USD(600));
-            BEAST_EXPECT(alicesOffer[sfTakerPays] == XRP(600));
+            BEAST_EXPECT(static_cast<STAmount>(alicesOffer[sfTakerGets]) == USD(600));
+            BEAST_EXPECT(static_cast<STAmount>(alicesOffer[sfTakerPays]) == XRP(600));
         }
         {
             auto const bobsOffers = offersOnAccount(env, bob);
@@ -2747,8 +2747,8 @@ public:
             auto const& bobsOffer = *(bobsOffers.front());
 
             BEAST_EXPECT(bobsOffer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(bobsOffer[sfTakerGets] == XRP(600));
-            BEAST_EXPECT(bobsOffer[sfTakerPays] == EUR(600));
+            BEAST_EXPECT(static_cast<STAmount>(bobsOffer[sfTakerGets]) == XRP(600));
+            BEAST_EXPECT(static_cast<STAmount>(bobsOffer[sfTakerPays]) == EUR(600));
         }
 
         // carol makes an offer that exactly consumes alice and bob's offers.
@@ -2773,8 +2773,8 @@ public:
             auto const& alicesOffer = *(alicesOffers.front());
 
             BEAST_EXPECT(alicesOffer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(alicesOffer[sfTakerGets] == USD(0));
-            BEAST_EXPECT(alicesOffer[sfTakerPays] == XRP(0));
+            BEAST_EXPECT(static_cast<STAmount>(alicesOffer[sfTakerGets]) == USD(0));
+            BEAST_EXPECT(static_cast<STAmount>(alicesOffer[sfTakerPays]) == XRP(0));
         }
     }
 
@@ -2953,8 +2953,8 @@ public:
                     auto const& acctOffer = *(acctOffers.front());
 
                     BEAST_EXPECT(acctOffer[sfLedgerEntryType] == ltOFFER);
-                    BEAST_EXPECT(acctOffer[sfTakerGets] == t.takerGets);
-                    BEAST_EXPECT(acctOffer[sfTakerPays] == t.takerPays);
+                    BEAST_EXPECT(static_cast<STAmount>(acctOffer[sfTakerGets]) == t.takerGets);
+                    BEAST_EXPECT(static_cast<STAmount>(acctOffer[sfTakerPays]) == t.takerPays);
                 }
             }
 
@@ -3165,8 +3165,8 @@ public:
             {
                 auto const& evesOffer = *(evesOffers.front());
                 BEAST_EXPECT(evesOffer[sfLedgerEntryType] == ltOFFER);
-                BEAST_EXPECT(evesOffer[sfTakerGets] == XRP(2000));
-                BEAST_EXPECT(evesOffer[sfTakerPays] == USD(5));
+                BEAST_EXPECT(static_cast<STAmount>(evesOffer[sfTakerGets]) == XRP(2000));
+                BEAST_EXPECT(static_cast<STAmount>(evesOffer[sfTakerPays]) == USD(5));
             }
             env(offer_cancel(eve, eveOfferSeq));  // For later tests
 
@@ -3343,8 +3343,8 @@ public:
                 auto const& ovasOffer = *(ovasOffers.front());
 
                 BEAST_EXPECT(ovasOffer[sfLedgerEntryType] == ltOFFER);
-                BEAST_EXPECT(ovasOffer[sfTakerGets] == USD(0));
-                BEAST_EXPECT(ovasOffer[sfTakerPays] == XRP(0));
+                BEAST_EXPECT(static_cast<STAmount>(ovasOffer[sfTakerGets]) == USD(0));
+                BEAST_EXPECT(static_cast<STAmount>(ovasOffer[sfTakerPays]) == XRP(0));
             }
 
             env.require(balance(pat, USD(0)));
@@ -3406,8 +3406,8 @@ public:
         {
             auto const& offer = *offerPtr;
             BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(offer[sfTakerGets] == XRP(600));
-            BEAST_EXPECT(offer[sfTakerPays] == USD(60));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == XRP(600));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == USD(60));
         }
 
         // Since this offer crosses the first offers, the previous offers
@@ -3424,8 +3424,8 @@ public:
         {
             auto const& offer = *offerPtr;
             BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(offer[sfTakerGets] == USD(100));
-            BEAST_EXPECT(offer[sfTakerPays] == XRP(1000));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == USD(100));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == XRP(1000));
         }
     }
 
@@ -3502,8 +3502,8 @@ public:
             {
                 auto const& offer = *offerPtr;
                 BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-                BEAST_EXPECT(offer[sfTakerGets] == EUR(600));
-                BEAST_EXPECT(offer[sfTakerPays] == USD(500));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == EUR(600));
+                BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == USD(500));
             }
 
             env(offer(acct, EUR(600), USD(500)), ter(t.secondOfferTec));
@@ -3523,13 +3523,13 @@ public:
                 BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
                 if (offer[sfSequence] == firstOfferSeq)
                 {
-                    BEAST_EXPECT(offer[sfTakerGets] == EUR(600));
-                    BEAST_EXPECT(offer[sfTakerPays] == USD(500));
+                    BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == EUR(600));
+                    BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == USD(500));
                 }
                 else
                 {
-                    BEAST_EXPECT(offer[sfTakerGets] == USD(500));
-                    BEAST_EXPECT(offer[sfTakerPays] == EUR(600));
+                    BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == USD(500));
+                    BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == EUR(600));
                 }
             }
 
@@ -3589,8 +3589,8 @@ public:
         {
             auto const& offer = *offerPtr;
             BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(offer[sfTakerGets] == USD(25));
-            BEAST_EXPECT(offer[sfTakerPays] == XRP(250));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == USD(25));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == XRP(250));
         }
     }
 
@@ -3798,8 +3798,8 @@ public:
         {
             auto const& offer = *offerPtr;
             BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(offer[sfTakerGets] == drops(333599446582));
-            BEAST_EXPECT(offer[sfTakerPays] == CNY(13345.9461));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerGets]) == drops(333599446582));
+            BEAST_EXPECT(static_cast<STAmount>(offer[sfTakerPays]) == CNY(13345.9461));
         }
     }
 
@@ -3849,7 +3849,7 @@ public:
             auto const& offer = *offerPtr;
             BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
             BEAST_EXPECT(
-                offer[sfTakerGets] ==
+                static_cast<STAmount>(offer[sfTakerGets]) ==
                 STAmount(JPY.issue(), std::uint64_t(2230682446713524ul), -12));
             BEAST_EXPECT(offer[sfTakerPays] == BTC(0.035378));
         }
@@ -3914,10 +3914,10 @@ public:
             auto const& offer = *offerPtr;
             BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
             BEAST_EXPECT(
-                offer[sfTakerGets] ==
+                static_cast<STAmount>(offer[sfTakerGets]) ==
                 STAmount(USD.issue(), std::uint64_t(2185847305256635), -14));
             BEAST_EXPECT(
-                offer[sfTakerPays] ==
+                static_cast<STAmount>(offer[sfTakerPays]) ==
                 STAmount(JPY.issue(), std::uint64_t(2286608293434156), -12));
         }
     }
@@ -4105,7 +4105,7 @@ public:
                         actorOffers.begin(),
                         actorOffers.end(),
                         [](std::shared_ptr<SLE const>& offer) {
-                            return (*offer)[sfTakerGets].signum() == 0;
+                            return static_cast<STAmount>((*offer)[sfTakerGets]).signum() == 0;
                         }));
                 BEAST_EXPECT(offerCount == actor.offers);
 
@@ -4262,7 +4262,7 @@ public:
                         actorOffers.begin(),
                         actorOffers.end(),
                         [](std::shared_ptr<SLE const>& offer) {
-                            return (*offer)[sfTakerGets].signum() == 0;
+                            return static_cast<STAmount>((*offer)[sfTakerGets]).signum() == 0;
                         }));
                 BEAST_EXPECT(offerCount == actor.offers);
 
@@ -4811,7 +4811,7 @@ public:
                     offers.emplace(
                         (*sle)[sfSequence],
                         std::make_pair(
-                            (*sle)[sfTakerPays], (*sle)[sfTakerGets]));
+                            static_cast<STAmount>((*sle)[sfTakerPays]), static_cast<STAmount>((*sle)[sfTakerGets])));
             });
 
         // first offer

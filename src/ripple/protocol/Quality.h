@@ -142,7 +142,7 @@ public:
     /** Create a quality from the ratio of two amounts. */
     template <class In, class Out>
     Quality(Out const& out, In const& in)
-        : Quality(Amounts(toSTAmount(in), toSTAmount(out)))
+        : Quality(TAmounts(toSTAmount(in), toSTAmount(out)))
     {
     }
 

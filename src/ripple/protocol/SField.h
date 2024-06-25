@@ -43,6 +43,7 @@ Some fields have a different meaning for their
 // Forwards
 class STAccount;
 class STAmount;
+class STEitherAmount;
 class STIssue;
 class STBlob;
 template <int>
@@ -87,6 +88,8 @@ class STCurrency;
     STYPE(STI_ISSUE, 24)                          \
     STYPE(STI_XCHAIN_BRIDGE, 25)                  \
     STYPE(STI_CURRENCY, 26)                       \
+    STYPE(STI_EITHER_AMOUNT, 27)                  \
+    STYPE(STI_MPT_AMOUNT, 28)                     \
                                                   \
     /* high-level types */                        \
     /* cannot be serialized inside other types */ \
@@ -347,6 +350,7 @@ using SF_UINT512 = TypedField<STBitString<512>>;
 
 using SF_ACCOUNT = TypedField<STAccount>;
 using SF_AMOUNT = TypedField<STAmount>;
+using SF_EITHER_AMOUNT = TypedField<STEitherAmount>;
 using SF_ISSUE = TypedField<STIssue>;
 using SF_CURRENCY = TypedField<STCurrency>;
 using SF_VL = TypedField<STBlob>;
@@ -476,6 +480,9 @@ extern SF_UINT160 const sfTakerPaysIssuer;
 extern SF_UINT160 const sfTakerGetsCurrency;
 extern SF_UINT160 const sfTakerGetsIssuer;
 
+extern SF_UINT192 const sfTakerPaysMPT;
+extern SF_UINT192 const sfTakerGetsMPT;
+
 // 256-bit (common)
 extern SF_UINT256 const sfLedgerHash;
 extern SF_UINT256 const sfParentHash;
@@ -515,8 +522,8 @@ extern SF_UINT256 const sfHookSetTxnID;
 extern SF_AMOUNT const sfAmount;
 extern SF_AMOUNT const sfBalance;
 extern SF_AMOUNT const sfLimitAmount;
-extern SF_AMOUNT const sfTakerPays;
-extern SF_AMOUNT const sfTakerGets;
+extern SF_EITHER_AMOUNT const sfTakerPays;
+extern SF_EITHER_AMOUNT const sfTakerGets;
 extern SF_AMOUNT const sfLowLimit;
 extern SF_AMOUNT const sfHighLimit;
 extern SF_AMOUNT const sfFee;
