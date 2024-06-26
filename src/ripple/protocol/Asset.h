@@ -44,12 +44,12 @@ public:
     Asset(uint192 const& mptID);
     Asset() = default;
 
-    explicit operator Issue const&() const
+    explicit operator Issue const &() const
     {
         return issue();
     }
 
-    explicit operator MPTIssue const&() const
+    explicit operator MPTIssue const &() const
     {
         return mptIssue();
     }
