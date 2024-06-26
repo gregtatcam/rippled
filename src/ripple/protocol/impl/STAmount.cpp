@@ -761,7 +761,7 @@ STAmount::add(Serializer& s) const
             // s.add32(mAsset.mptIssue().sequence());
             // s.addBitString(mAsset.mptIssue().account());
             auto const& mptIssue = mAsset.mptIssue();
-            s.addBitString(getMptID(mptIssue.account(), mptIssue.sequence()));
+            s.addBitString(getMptID(mptIssue.getIssuer(), mptIssue.sequence()));
         }
         else
         {

@@ -48,6 +48,18 @@ public:
 
     std::string
     getText() const;
+
+    Currency const&
+    getAssetID() const
+    {
+        return currency;
+    }
+
+    AccountID const&
+    getIssuer() const
+    {
+        return account;
+    }
 };
 
 bool
@@ -117,7 +129,7 @@ noIssue()
 }
 
 template <typename T>
-requires std::is_same_v<T, Issue> bool
+    requires std::is_same_v<T, Issue> bool
 isXRP(T const& issue)
 {
     return isXRP(issue.currency);

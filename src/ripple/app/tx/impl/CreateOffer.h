@@ -31,6 +31,7 @@ class PaymentSandbox;
 class Sandbox;
 
 /** Transactor specialized for creating offers in the ledger. */
+template <typename TIssIn, typename TIssOut>
 class CreateOffer : public Transactor
 {
 public:

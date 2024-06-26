@@ -579,7 +579,7 @@ STAmount::getCurrency() const
 inline AccountID const&
 STAmount::getIssuer() const
 {
-    return mAsset.issue().account;
+    return mAsset.getIssuer();
 }
 
 inline int

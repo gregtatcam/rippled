@@ -41,6 +41,22 @@ Asset::getText() const
     return to_string(mptIssue().getMptID());
 }
 
+AccountID const&
+Asset::getIssuer() const
+{
+    if (isIssue())
+        return issue().getIssuer();
+    return mptIssue().getIssuer();
+}
+
+bool
+Asset::badAsset() const
+{
+    if (isIssue())
+        return issue().getAssetID() == badCurrency();
+    return mptIssue().getIssuer() == noAccount();
+}
+
 std::string
 to_string(Asset const& asset)
 {

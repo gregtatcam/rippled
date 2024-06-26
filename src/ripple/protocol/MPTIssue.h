@@ -36,9 +36,15 @@ public:
     }
 
     AccountID const&
-    account() const
+    getIssuer() const
     {
         return mpt_.second;
+    }
+
+    MPT const&
+    getAssetID() const
+    {
+        return mpt_;
     }
 
     std::uint32_t

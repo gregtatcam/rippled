@@ -29,8 +29,9 @@
 
 namespace ripple {
 
+template <typename TIss>
 TxConsequences
-Payment::makeTxConsequences(PreflightContext const& ctx)
+Payment<TIss>::makeTxConsequences(PreflightContext const& ctx)
 {
     auto calculateMaxXRPSpend = [](STTx const& tx) -> XRPAmount {
         STAmount const maxAmount =
@@ -44,8 +45,28 @@ Payment::makeTxConsequences(PreflightContext const& ctx)
     return TxConsequences{ctx.tx, calculateMaxXRPSpend(ctx.tx)};
 }
 
+template <typename TIss>
+concept ValidIssue =
+    (std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>);
+
+template <ValidIssue TIss>
+Asset
+getAsset(Asset const& asset, AccountID const& account)
+{
+    if constexpr (std::is_same_v<TIss, Issue>)
+    {
+        auto const& iss = static_cast<TIss>(asset);
+        return Issue{iss.getAssetID(), account};
+    }
+    else if constexpr (std::is_same_v<TIss, MPTIssue>)
+    {
+        return asset;
+    }
+}
+
+template <typename TIss>
 NotTEC
-Payment::preflight(PreflightContext const& ctx)
+Payment<TIss>::preflight(PreflightContext const& ctx)
 {
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
@@ -79,13 +100,8 @@ Payment::preflight(PreflightContext const& ctx)
         maxSourceAmount = saDstAmount;
     else
     {
-        auto const asset = [&]() -> Asset {
-            if (saDstAmount.isMPT())
-                return saDstAmount.asset();
-            return Issue{saDstAmount.getCurrency(), account};
-        }();
         maxSourceAmount = STAmount(
-            asset,
+            getAsset<TIss>(saDstAmount.asset(), account),
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);
@@ -122,11 +138,10 @@ Payment::preflight(PreflightContext const& ctx)
                         << "bad dst amount: " << saDstAmount.getFullText();
         return temBAD_AMOUNT;
     }
-    if ((uSrcAsset.isIssue() && badCurrency() == uSrcAsset.issue().currency) ||
-        (uDstAsset.isIssue() && badCurrency() == uDstAsset.issue().currency))
+    if (uSrcAsset.badAsset() || uDstAsset.badAsset())
     {
         JLOG(j.trace()) << "Malformed transaction: "
-                        << "Bad currency.";
+                        << "Bad asset.";
         return temBAD_CURRENCY;
     }
     if (account == uDstAccountID && uSrcAsset == uDstAsset && !bPaths)
@@ -216,8 +231,9 @@ Payment::preflight(PreflightContext const& ctx)
     return preflight2(ctx);
 }
 
+template <typename TIss>
 TER
-Payment::preclaim(PreclaimContext const& ctx)
+Payment<TIss>::preclaim(PreclaimContext const& ctx)
 {
     // Ripple if source or destination is non-native or if there are paths.
     std::uint32_t const uTxFlags = ctx.tx.getFlags();
@@ -300,8 +316,9 @@ Payment::preclaim(PreclaimContext const& ctx)
     return tesSUCCESS;
 }
 
+template <typename TIss>
 TER
-Payment::doApply()
+Payment<TIss>::doApply()
 {
     auto const deliverMin = ctx_.tx[~sfDeliverMin];
 
@@ -322,13 +339,8 @@ Payment::doApply()
         maxSourceAmount = saDstAmount;
     else
     {
-        auto const asset = [&]() -> Asset {
-            if (saDstAmount.isMPT())
-                return saDstAmount.asset();
-            return Issue{saDstAmount.getCurrency(), account_};
-        }();
         maxSourceAmount = STAmount(
-            asset,
+            getAsset<TIss>(saDstAmount.asset(), account_),
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);
@@ -459,7 +471,7 @@ Payment::doApply()
             return ter;
 
         auto const& mpt = saDstAmount.mptIssue();
-        auto const& issuer = mpt.account();
+        auto const& issuer = mpt.getIssuer();
         // If globally/individually locked then
         //   can't send between holders
         //   holder can send back to issuer
@@ -560,5 +572,8 @@ Payment::doApply()
 
     return tesSUCCESS;
 }
+
+template class Payment<Issue>;
+template class Payment<MPTIssue>;
 
 }  // namespace ripple

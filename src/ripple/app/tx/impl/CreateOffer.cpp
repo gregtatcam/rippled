@@ -28,8 +28,9 @@
 
 namespace ripple {
 
+template <typename TIssIn, typename TIssOut>
 TxConsequences
-CreateOffer::makeTxConsequences(PreflightContext const& ctx)
+CreateOffer<TIssIn, TIssOut>::makeTxConsequences(PreflightContext const& ctx)
 {
     auto calculateMaxXRPSpend = [](STTx const& tx) -> XRPAmount {
         auto const& amount{tx[sfTakerGets]};
@@ -39,8 +40,9 @@ CreateOffer::makeTxConsequences(PreflightContext const& ctx)
     return TxConsequences{ctx.tx, calculateMaxXRPSpend(ctx.tx)};
 }
 
+template <typename TIssIn, typename TIssOut>
 NotTEC
-CreateOffer::preflight(PreflightContext const& ctx)
+CreateOffer<TIssIn, TIssOut>::preflight(PreflightContext const& ctx)
 {
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
@@ -101,10 +103,12 @@ CreateOffer::preflight(PreflightContext const& ctx)
     }
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
+    auto const& uPaysCurrency =
+        static_cast<TIssIn>(saTakerPays.asset()).getAssetID();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
-    auto const& uGetsCurrency = saTakerGets.getCurrency();
+    auto const& uGetsCurrency =
+        static_cast<TIssOut>(saTakerGets.asset()).getAssetID();
 
     if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
     {
@@ -128,8 +132,9 @@ CreateOffer::preflight(PreflightContext const& ctx)
     return preflight2(ctx);
 }
 
+template <typename TIssIn, typename TIssOut>
 TER
-CreateOffer::preclaim(PreclaimContext const& ctx)
+CreateOffer<TIssIn, TIssOut>::preclaim(PreclaimContext const& ctx)
 {
     auto const id = ctx.tx[sfAccount];
 
@@ -137,7 +142,8 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     auto saTakerGets = ctx.tx[sfTakerGets];
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
+    auto const& uPaysCurrency =
+        static_cast<TIssIn>(saTakerPays.asset()).getAssetID();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
 
@@ -204,8 +210,9 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     return tesSUCCESS;
 }
 
+template <typename TIssIn, typename TIssOut>
 TER
-CreateOffer::checkAcceptAsset(
+CreateOffer<TIssIn, TIssOut>::checkAcceptAsset(
     ReadView const& view,
     ApplyFlags const flags,
     AccountID const id,
@@ -263,8 +270,9 @@ CreateOffer::checkAcceptAsset(
     return tesSUCCESS;
 }
 
+template <typename TIssIn, typename TIssOut>
 bool
-CreateOffer::dry_offer(ApplyView& view, Offer const& offer)
+CreateOffer<TIssIn, TIssOut>::dry_offer(ApplyView& view, Offer const& offer)
 {
     if (offer.fully_consumed())
         return true;
@@ -277,8 +285,9 @@ CreateOffer::dry_offer(ApplyView& view, Offer const& offer)
     return (amount <= beast::zero);
 }
 
+template <typename TIssIn, typename TIssOut>
 std::pair<bool, Quality>
-CreateOffer::select_path(
+CreateOffer<TIssIn, TIssOut>::select_path(
     bool have_direct,
     OfferStream const& direct,
     bool have_bridge,
@@ -310,8 +319,10 @@ CreateOffer::select_path(
     return std::make_pair(false, bridged_quality);
 }
 
+template <typename TIssIn, typename TIssOut>
 bool
-CreateOffer::reachedOfferCrossingLimit(Taker const& taker) const
+CreateOffer<TIssIn, TIssOut>::reachedOfferCrossingLimit(
+    Taker const& taker) const
 {
     auto const crossings =
         taker.get_direct_crossings() + (2 * taker.get_bridge_crossings());
@@ -321,8 +332,9 @@ CreateOffer::reachedOfferCrossingLimit(Taker const& taker) const
     return crossings >= 850;
 }
 
+template <typename TIssIn, typename TIssOut>
 std::pair<TER, Amounts>
-CreateOffer::bridged_cross(
+CreateOffer<TIssIn, TIssOut>::bridged_cross(
     Taker& taker,
     ApplyView& view,
     ApplyView& view_cancel,
@@ -510,8 +522,9 @@ CreateOffer::bridged_cross(
     return std::make_pair(cross_result, taker.remaining_offer());
 }
 
+template <typename TIssIn, typename TIssOut>
 std::pair<TER, Amounts>
-CreateOffer::direct_cross(
+CreateOffer<TIssIn, TIssOut>::direct_cross(
     Taker& taker,
     ApplyView& view,
     ApplyView& view_cancel,
@@ -603,8 +616,11 @@ CreateOffer::direct_cross(
 // Step through the stream for as long as possible, skipping any offers
 // that are from the taker or which cross the taker's threshold.
 // Return false if the is no offer in the book, true otherwise.
+template <typename TIssIn, typename TIssOut>
 bool
-CreateOffer::step_account(OfferStream& stream, Taker const& taker)
+CreateOffer<TIssIn, TIssOut>::step_account(
+    OfferStream& stream,
+    Taker const& taker)
 {
     while (stream.step())
     {
@@ -626,8 +642,9 @@ CreateOffer::step_account(OfferStream& stream, Taker const& taker)
 // Fill as much of the offer as possible by consuming offers
 // already on the books. Return the status and the amount of
 // the offer to left unfilled.
+template <typename TIssIn, typename TIssOut>
 std::pair<TER, Amounts>
-CreateOffer::takerCross(
+CreateOffer<TIssIn, TIssOut>::takerCross(
     Sandbox& sb,
     Sandbox& sbCancel,
     Amounts const& takerAmount)
@@ -671,8 +688,9 @@ CreateOffer::takerCross(
     }
 }
 
+template <typename TIssIn, typename TIssOut>
 std::pair<TER, Amounts>
-CreateOffer::flowCross(
+CreateOffer<TIssIn, TIssOut>::flowCross(
     PaymentSandbox& psb,
     PaymentSandbox& psbCancel,
     Amounts const& takerAmount)
@@ -707,7 +725,7 @@ CreateOffer::flowCross(
                 sendMax = multiplyRound(
                     takerAmount.in,
                     gatewayXferRate,
-                    takerAmount.in.issue(),
+                    static_cast<TIssIn>(takerAmount.in.asset()),
                     true);
             }
         }
@@ -754,7 +772,7 @@ CreateOffer::flowCross(
                 // Since the transfer rate cannot exceed 200%, we use 1/2
                 // maxValue for our limit.
                 deliver = STAmount{
-                    takerAmount.out.issue(),
+                    static_cast<TIssOut>(takerAmount.out.asset()),
                     STAmount::cMaxValue / 2,
                     STAmount::cMaxOffset};
         }
@@ -817,7 +835,7 @@ CreateOffer::flowCross(
                         nonGatewayAmountIn = divideRound(
                             result.actualAmountIn,
                             gatewayXferRate,
-                            takerAmount.in.issue(),
+                            static_cast<TIssIn>(takerAmount.in.asset()),
                             true);
 
                     afterCross.in -= nonGatewayAmountIn;
@@ -839,11 +857,14 @@ CreateOffer::flowCross(
                             return divRoundStrict(
                                 afterCross.in,
                                 rate,
-                                takerAmount.out.issue(),
+                                static_cast<TIssOut>(takerAmount.out.asset()),
                                 false);
 
                         return divRound(
-                            afterCross.in, rate, takerAmount.out.issue(), true);
+                            afterCross.in,
+                            rate,
+                            static_cast<TIssOut>(takerAmount.out.asset()),
+                            true);
                     }();
                 }
                 else
@@ -856,7 +877,10 @@ CreateOffer::flowCross(
                     if (afterCross.out < beast::zero)
                         afterCross.out.clear();
                     afterCross.in = mulRound(
-                        afterCross.out, rate, takerAmount.in.issue(), true);
+                        afterCross.out,
+                        rate,
+                        static_cast<TIssIn>(takerAmount.in.issue()),
+                        true);
                 }
             }
         }
@@ -871,8 +895,12 @@ CreateOffer::flowCross(
     return {tecINTERNAL, takerAmount};
 }
 
+template <typename TIssIn, typename TIssOut>
 std::pair<TER, Amounts>
-CreateOffer::cross(Sandbox& sb, Sandbox& sbCancel, Amounts const& takerAmount)
+CreateOffer<TIssIn, TIssOut>::cross(
+    Sandbox& sb,
+    Sandbox& sbCancel,
+    Amounts const& takerAmount)
 {
     if (sb.rules().enabled(featureFlowCross))
     {
@@ -892,8 +920,9 @@ CreateOffer::cross(Sandbox& sb, Sandbox& sbCancel, Amounts const& takerAmount)
     return ret;
 }
 
+template <typename TIssIn, typename TIssOut>
 std::string
-CreateOffer::format_amount(STAmount const& amount)
+CreateOffer<TIssIn, TIssOut>::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
@@ -901,8 +930,9 @@ CreateOffer::format_amount(STAmount const& amount)
     return txt;
 }
 
+template <typename TIssIn, typename TIssOut>
 void
-CreateOffer::preCompute()
+CreateOffer<TIssIn, TIssOut>::preCompute()
 {
     cross_type_ = CrossType::IouToIou;
     bool const pays_xrp = ctx_.tx.getFieldAmount(sfTakerPays).native();
@@ -915,8 +945,9 @@ CreateOffer::preCompute()
     return Transactor::preCompute();
 }
 
+template <typename TIssIn, typename TIssOut>
 std::pair<TER, bool>
-CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
+CreateOffer<TIssIn, TIssOut>::applyGuts(Sandbox& sb, Sandbox& sbCancel)
 {
     using beast::zero;
 
@@ -1009,12 +1040,18 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             if (bSell)
             {
                 // this is a sell, round taker pays
-                saTakerPays = multiply(saTakerGets, rate, saTakerPays.issue());
+                saTakerPays = multiply(
+                    saTakerGets,
+                    rate,
+                    static_cast<TIssIn>(saTakerPays.asset()));
             }
             else
             {
                 // this is a buy, round taker gets
-                saTakerGets = divide(saTakerPays, rate, saTakerGets.issue());
+                saTakerGets = divide(
+                    saTakerPays,
+                    rate,
+                    static_cast<TIssOut>(saTakerGets.asset()));
             }
             if (!saTakerGets || !saTakerPays)
             {
@@ -1033,9 +1070,10 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         // empty (fully crossed), or something in-between.
         Amounts place_offer;
 
-        JLOG(j_.debug()) << "Attempting cross: "
-                         << to_string(takerAmount.in.issue()) << " -> "
-                         << to_string(takerAmount.out.issue());
+        JLOG(j_.debug())
+            << "Attempting cross: "
+            << to_string(static_cast<TIssIn>(takerAmount.in.asset())) << " -> "
+            << to_string(static_cast<TIssOut>(takerAmount.out.asset()));
 
         if (auto stream = j_.trace())
         {
@@ -1067,8 +1105,12 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             return {result, true};
         }
 
-        assert(saTakerGets.issue() == place_offer.in.issue());
-        assert(saTakerPays.issue() == place_offer.out.issue());
+        assert(
+            static_cast<TIssIn>(saTakerGets.asset()) ==
+            static_cast<TIssIn>(place_offer.in.asset()));
+        assert(
+            static_cast<TIssOut>(saTakerPays.asset()) ==
+            static_cast<TIssOut>(place_offer.out.asset()));
 
         if (takerAmount != place_offer)
             crossed = true;
@@ -1177,10 +1219,14 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     // Update owner count.
     adjustOwnerCount(sb, sleCreator, 1, viewJ);
 
-    JLOG(j_.trace()) << "adding to book: " << to_string(saTakerPays.issue())
-                     << " : " << to_string(saTakerGets.issue());
+    JLOG(j_.trace()) << "adding to book: "
+                     << to_string(static_cast<TIssIn>(saTakerPays.asset()))
+                     << " : "
+                     << to_string(static_cast<TIssOut>(saTakerGets.asset()));
 
-    Book const book{saTakerPays.issue(), saTakerGets.issue()};
+    Book const book{
+        static_cast<TIssIn>(saTakerPays.asset()),
+        static_cast<TIssOut>(saTakerGets.asset())};
 
     // Add offer to order book, using the original rate
     // before any crossing occured.
@@ -1225,8 +1271,9 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     return {tesSUCCESS, true};
 }
 
+template <typename TIssIn, typename TIssOut>
 TER
-CreateOffer::doApply()
+CreateOffer<TIssIn, TIssOut>::doApply()
 {
     // This is the ledger view that we work against. Transactions are applied
     // as we go on processing transactions.
@@ -1244,5 +1291,7 @@ CreateOffer::doApply()
         sbCancel.apply(ctx_.rawView());
     return result.first;
 }
+
+template class CreateOffer<Issue, Issue>;
 
 }  // namespace ripple

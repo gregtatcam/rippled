@@ -44,12 +44,24 @@ public:
     Asset(uint192 const& mptID);
     Asset() = default;
 
-    operator Issue() const
+    explicit operator Issue const&() const
     {
         return issue();
     }
 
-    operator MPTIssue() const
+    explicit operator MPTIssue const&() const
+    {
+        return mptIssue();
+    }
+
+    explicit
+    operator Issue&()
+    {
+        return issue();
+    }
+
+    explicit
+    operator MPTIssue&()
     {
         return mptIssue();
     }
@@ -99,6 +111,9 @@ public:
     std::string
     getText() const;
 
+    AccountID const&
+    getIssuer() const;
+
     friend constexpr bool
     operator==(Asset const& lhs, Asset const& rhs)
     {
@@ -114,6 +129,9 @@ public:
     {
         return !(lhs == rhs);
     }
+
+    bool
+    badAsset() const;
 };
 
 std::string

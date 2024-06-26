@@ -25,7 +25,7 @@ namespace ripple {
 uint192
 MPTIssue::getMptID() const
 {
-    return ripple::getMptID(account(), sequence());
+    return ripple::getMptID(getIssuer(), sequence());
 }
 
 }  // namespace ripple

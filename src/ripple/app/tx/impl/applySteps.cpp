@@ -73,7 +73,7 @@ struct UnknownTxnType : std::exception
 // throw an "UnknownTxnType" exception on error
 template <class F>
 auto
-with_txn_type(TxType txnType, F&& f)
+with_txn_type(TxType txnType, auto const& tx, F&& f)
 {
     switch (txnType)
     {
@@ -92,7 +92,7 @@ with_txn_type(TxType txnType, F&& f)
         case ttOFFER_CANCEL:
             return f.template operator()<CancelOffer>();
         case ttOFFER_CREATE:
-            return f.template operator()<CreateOffer>();
+            return f.template operator()<CreateOffer<Issue, Issue>>();
         case ttESCROW_CREATE:
             return f.template operator()<EscrowCreate>();
         case ttESCROW_FINISH:
@@ -105,8 +105,11 @@ with_txn_type(TxType txnType, F&& f)
             return f.template operator()<PayChanCreate>();
         case ttPAYCHAN_FUND:
             return f.template operator()<PayChanFund>();
-        case ttPAYMENT:
-            return f.template operator()<Payment>();
+        case ttPAYMENT: {
+            if (tx[sfAmount].asset().isIssue())
+                return f.template operator()<Payment<Issue>>();
+            return f.template operator()<Payment<MPTIssue>>();
+        }
         case ttREGULAR_KEY_SET:
             return f.template operator()<SetRegularKey>();
         case ttSIGNER_LIST_SET:
@@ -221,7 +224,7 @@ invoke_preflight(PreflightContext const& ctx)
 {
     try
     {
-        return with_txn_type(ctx.tx.getTxnType(), [&]<typename T>() {
+        return with_txn_type(ctx.tx.getTxnType(), ctx.tx, [&]<typename T>() {
             auto const tec = T::preflight(ctx);
             return std::make_pair(
                 tec,
@@ -246,7 +249,7 @@ invoke_preclaim(PreclaimContext const& ctx)
     {
         // use name hiding to accomplish compile-time polymorphism of static
         // class functions for Transactor and derived classes.
-        return with_txn_type(ctx.tx.getTxnType(), [&]<typename T>() {
+        return with_txn_type(ctx.tx.getTxnType(), ctx.tx, [&]<typename T>() {
             // If the transactor requires a valid account and the transaction
             // doesn't list one, preflight will have already a flagged a
             // failure.
@@ -293,7 +296,7 @@ invoke_calculateBaseFee(ReadView const& view, STTx const& tx)
 {
     try
     {
-        return with_txn_type(tx.getTxnType(), [&]<typename T>() {
+        return with_txn_type(tx.getTxnType(), tx, [&]<typename T>() {
             return T::calculateBaseFee(view, tx);
         });
     }
@@ -348,7 +351,7 @@ invoke_apply(ApplyContext& ctx)
 {
     try
     {
-        return with_txn_type(ctx.tx.getTxnType(), [&]<typename T>() {
+        return with_txn_type(ctx.tx.getTxnType(), ctx.tx, [&]<typename T>() {
             T p(ctx);
             return p();
         });
