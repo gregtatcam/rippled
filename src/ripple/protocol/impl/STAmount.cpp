@@ -627,8 +627,7 @@ STAmount::getText() const
     return ret;
 }
 
-Json::Value
-STAmount::getJson(JsonOptions) const
+Json::Value STAmount::getJson(JsonOptions) const
 {
     Json::Value elem;
     setJson(elem);

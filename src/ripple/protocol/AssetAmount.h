@@ -280,8 +280,7 @@ AssetAmount<TIss>::operator-=(AssetAmount<TIss> const& a)
 }
 
 template <ValidAssetType TIss>
-AssetAmount<TIss>&
-AssetAmount<TIss>::operator=(beast::Zero)
+AssetAmount<TIss>& AssetAmount<TIss>::operator=(beast::Zero)
 {
     clear();
     return *this;
