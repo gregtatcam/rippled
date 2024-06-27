@@ -268,7 +268,7 @@ accountHolds(
     auto const sle = view.read(keylet::line(account, issuer, currency));
     if (!sle)
     {
-        amount.clear({currency, issuer});
+        amount.clear(Issue(currency, issuer));
     }
     else if (
         (zeroIfFrozen == fhZERO_IF_FROZEN) &&

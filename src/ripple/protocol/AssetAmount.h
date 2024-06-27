@@ -28,6 +28,31 @@
 
 namespace ripple {
 
+// Since `canonicalize` does not have access to a ledger, this is needed to put
+// the low-level routine stAmountCanonicalize on an amendment switch. Only
+// transactions need to use this switchover. Outside of a transaction it's safe
+// to unconditionally use the new behavior.
+
+// Use a static inside a function to help prevent order-of-initialzation issues
+inline LocalValue<bool>&
+getStaticSTAmountCanonicalizeSwitchover()
+{
+    static LocalValue<bool> r{true};
+    return r;
+}
+
+inline bool
+getSTAmountCanonicalizeSwitchover()
+{
+    return *getStaticSTAmountCanonicalizeSwitchover();
+}
+
+inline void
+setSTAmountCanonicalizeSwitchover(bool v)
+{
+    *getStaticSTAmountCanonicalizeSwitchover() = v;
+}
+
 struct AssetAmountConst
 {
     static constexpr int cMinOffset = -96;
@@ -47,10 +72,11 @@ struct AssetAmountConst
 };
 
 template <typename A>
-concept AssetType = std::is_same_v<A, Issue> || std::is_same_v<A, MPTIssue> ||
-    std::is_same_v<A, Asset>;
+concept ValidAssetType = std::is_same_v<A, Issue> ||
+    std::is_same_v<A, MPTIssue> || std::is_same_v<A, Asset> ||
+    std::is_convertible_v<A, Issue> || std::is_convertible_v<A, Asset>;
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 class AssetAmount : public AssetAmountConst
 {
 public:
@@ -64,11 +90,11 @@ public:
     };
 
 protected:
-    TIss asset_;
-    mantissa_type value_;
-    exponent_type exponent_;
-    bool isNative_;
-    bool isNegative_;
+    TIss mAsset;
+    mantissa_type mValue;
+    exponent_type mOffset;
+    bool mIsNative;
+    bool mIsNegative;
 
 public:
     AssetAmount(
@@ -86,13 +112,10 @@ public:
 
     AssetAmount(TIss const& iss, Number const& n);
 
-    // XRP drops
-    AssetAmount(mantissa_type value = 0);
-
     TIss const&
     asset() const
     {
-        return asset_;
+        return mAsset;
     }
 
     operator Number() const;
@@ -102,6 +125,8 @@ public:
 
     AssetAmount<TIss>&
     operator-=(AssetAmount<TIss> const&);
+
+    explicit operator bool() const noexcept;
 
     AssetAmount<TIss>& operator=(beast::Zero);
 
@@ -146,11 +171,15 @@ protected:
     void
     canonicalize();
 
-    friend AssetAmount<TIss>
-    operator+(AssetAmount<TIss> const& v1, AssetAmount<TIss> const& v2);
+    void
+    set(std::int64_t v);
+
+    template <typename T>
+    friend AssetAmount<T>
+    operator+(AssetAmount<T> const& v1, AssetAmount<T> const& v2);
 };
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 bool
 isNative(TIss const& issue)
 {
@@ -162,7 +191,7 @@ isNative(TIss const& issue)
         return isXRP(issue.issue());
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 bool
 isMPT(TIss const& issue)
 {
@@ -174,37 +203,51 @@ isMPT(TIss const& issue)
         return issue.isMPT();
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
+bool
+isNative(AssetAmount<TIss> const& amount)
+{
+    return isNative(amount.asset());
+}
+
+template <ValidAssetType TIss>
+bool
+isMPT(AssetAmount<TIss> const& amount)
+{
+    return isMPT(amount.asset());
+}
+
+template <ValidAssetType TIss>
 AssetAmount<TIss>::AssetAmount(
     TIss const& iss,
     mantissa_type value,
     exponent_type exponent,
     bool isNegative,
     unchecked)
-    : asset_(iss)
-    , value_(value)
-    , exponent_(exponent)
-    , isNegative_(isNegative)
-    , isNative_(isNative(iss))
+    : mAsset(iss)
+    , mValue(value)
+    , mOffset(exponent)
+    , mIsNative(isNative(iss))
+    , mIsNegative(isNegative)
 {
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>::AssetAmount(
     TIss const& iss,
     mantissa_type value,
     exponent_type exponent,
     bool isNegative)
-    : asset_(iss)
-    , value_(value)
-    , exponent_(exponent)
-    , isNegative_(isNegative)
-    , isNative_(isNative(iss))
+    : mAsset(iss)
+    , mValue(value)
+    , mOffset(exponent)
+    , mIsNative(isNative(iss))
+    , mIsNegative(isNegative)
 {
     canonicalize();
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>::AssetAmount(TIss const& iss, Number const& n)
     : AssetAmount(
           iss,
@@ -214,13 +257,13 @@ AssetAmount<TIss>::AssetAmount(TIss const& iss, Number const& n)
 {
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>::operator Number() const
 {
-    return Number(isNegative_ ? -value_ : value_, exponent_);
+    return Number(mIsNegative ? -mValue : mValue, mOffset);
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>&
 AssetAmount<TIss>::operator+=(AssetAmount<TIss> const& a)
 {
@@ -228,7 +271,7 @@ AssetAmount<TIss>::operator+=(AssetAmount<TIss> const& a)
     return *this;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>&
 AssetAmount<TIss>::operator-=(AssetAmount<TIss> const& a)
 {
@@ -236,100 +279,273 @@ AssetAmount<TIss>::operator-=(AssetAmount<TIss> const& a)
     return *this;
 }
 
-template <AssetType TIss>
-AssetAmount<TIss>& AssetAmount<TIss>::operator=(beast::Zero)
+template <ValidAssetType TIss>
+AssetAmount<TIss>&
+AssetAmount<TIss>::operator=(beast::Zero)
 {
     clear();
     return *this;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
+AssetAmount<TIss>::operator bool() const noexcept
+{
+    return *this != beast::zero;
+}
+
+template <ValidAssetType TIss>
+AssetAmount<TIss>
+operator-(AssetAmount<TIss> const& value)
+{
+    if (value.mantissa() == 0)
+        return value;
+    return AssetAmount<TIss>(
+        value.asset(),
+        value.mantissa(),
+        value.exponent(),
+        !value.negative(),
+        typename AssetAmount<TIss>::unchecked());
+}
+
+template <ValidAssetType TIss>
 AssetAmount<TIss>::mantissa_type
 AssetAmount<TIss>::mantissa() const
 {
-    return value_;
+    return mValue;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>::exponent_type
 AssetAmount<TIss>::exponent() const
 {
-    return exponent_;
+    return mOffset;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 bool
 AssetAmount<TIss>::negative() const
 {
-    return isNegative_;
+    return mIsNegative;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 int
 AssetAmount<TIss>::signum() const noexcept
 {
-    return value_ ? (isNegative_ ? -1 : 1) : 0;
+    return mValue ? (mIsNegative ? -1 : 1) : 0;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AccountID const&
 AssetAmount<TIss>::getIssuer() const
 {
-    return asset_.getIssuer();
+    return mAsset.getIssuer();
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss> const&
 AssetAmount<TIss>::value() const noexcept
 {
     return *this;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 AssetAmount<TIss>::zeroed() const
 {
-    return AssetAmount<TIss>(asset_);
+    return AssetAmount<TIss>(mAsset);
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 void
 AssetAmount<TIss>::clear()
 {
-    exponent_ = isNative_ ? 0 : -100;
-    value_ = 0;
-    isNegative_ = false;
+    mOffset = mIsNative ? 0 : -100;
+    mValue = 0;
+    mIsNegative = false;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 void
 AssetAmount<TIss>::clear(TIss const& iss)
 {
-    asset_ = iss;
-    isNative_ = isNative(iss);
+    mAsset = iss;
+    mIsNative = isNative(iss);
     clear();
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 void
 AssetAmount<TIss>::clear(AssetAmount<TIss> const& a)
 {
     clear(a.asset());
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 void
 AssetAmount<TIss>::negate()
 {
     if (*this != beast::zero)
-        isNegative_ = !isNegative_;
+        mIsNegative = !mIsNegative;
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 void
 AssetAmount<TIss>::setAsset(TIss const& iss)
 {
-    asset_ = iss;
+    mAsset = iss;
+}
+
+// amount = mValue * [10 ^ mOffset]
+// Representation range is 10^80 - 10^(-80).
+//
+// On the wire:
+// - high bit is 0 for XRP, 1 for issued currency
+// - next bit is 1 for positive, 0 for negative (except 0 issued currency, which
+//      is a special case of 0x8000000000000000
+// - for issued currencies, the next 8 bits are (mOffset+97).
+//   The +97 is so that this value is always positive.
+// - The remaining bits are significant digits (mantissa)
+//   That's 54 bits for issued currency and 62 bits for native
+//   (but XRP only needs 57 bits for the max value of 10^17 drops)
+//
+// mValue is zero if the amount is zero, otherwise it's within the range
+//    10^15 to (10^16 - 1) inclusive.
+// mOffset is in the range -96 to +80.
+template <ValidAssetType TIss>
+void
+AssetAmount<TIss>::canonicalize()
+{
+    if (isNative(mAsset) || isMPT(mAsset))
+    {
+        // native currency amounts should always have an offset of zero
+        mIsNative = isNative(mAsset);
+
+        // log(2^64,10) ~ 19.2
+        if (mValue == 0 || mOffset <= -20)
+        {
+            mValue = 0;
+            mOffset = 0;
+            mIsNegative = false;
+            return;
+        }
+
+        if (getSTAmountCanonicalizeSwitchover())
+        {
+            // log(cMaxNativeN, 10) == 17
+            if (mOffset > 17)
+                Throw<std::runtime_error>(
+                    "Native currency amount out of range");
+        }
+
+        if (getSTNumberSwitchover() && getSTAmountCanonicalizeSwitchover())
+        {
+            Number num(
+                mIsNegative ? -mValue : mValue, mOffset, Number::unchecked{});
+            if (mIsNative)
+            {
+                XRPAmount xrp{num};
+                mIsNegative = xrp.drops() < 0;
+                mValue = mIsNegative ? -xrp.drops() : xrp.drops();
+            }
+            else
+            {
+                MPTAmount c{num};
+                mIsNegative = c.mpt() < 0;
+                mValue = mIsNegative ? -c.mpt() : c.mpt();
+            }
+            mOffset = 0;
+        }
+        else
+        {
+            while (mOffset < 0)
+            {
+                mValue /= 10;
+                ++mOffset;
+            }
+
+            while (mOffset > 0)
+            {
+                if (getSTAmountCanonicalizeSwitchover())
+                {
+                    // N.B. do not move the overflow check to after the
+                    // multiplication
+                    if (mValue > cMaxNativeN)
+                        Throw<std::runtime_error>(
+                            "Native currency amount out of range");
+                }
+                mValue *= 10;
+                --mOffset;
+            }
+        }
+
+        if (mValue > cMaxNativeN)
+            Throw<std::runtime_error>("Native currency amount out of range");
+
+        return;
+    }
+
+    mIsNative = false;
+
+    if (getSTNumberSwitchover())
+    {
+        *this = AssetAmount<TIss>(mAsset, operator Number());
+        return;
+    }
+
+    if (mValue == 0)
+    {
+        mOffset = -100;
+        mIsNegative = false;
+        return;
+    }
+
+    while ((mValue < cMinValue) && (mOffset > cMinOffset))
+    {
+        mValue *= 10;
+        --mOffset;
+    }
+
+    while (mValue > cMaxValue)
+    {
+        if (mOffset >= cMaxOffset)
+            Throw<std::runtime_error>("value overflow");
+
+        mValue /= 10;
+        ++mOffset;
+    }
+
+    if ((mOffset < cMinOffset) || (mValue < cMinValue))
+    {
+        mValue = 0;
+        mIsNegative = false;
+        mOffset = -100;
+        return;
+    }
+
+    if (mOffset > cMaxOffset)
+        Throw<std::runtime_error>("value overflow");
+
+    assert((mValue == 0) || ((mValue >= cMinValue) && (mValue <= cMaxValue)));
+    assert(
+        (mValue == 0) || ((mOffset >= cMinOffset) && (mOffset <= cMaxOffset)));
+    assert((mValue != 0) || (mOffset != -100));
+}
+
+template <ValidAssetType TIss>
+void
+AssetAmount<TIss>::set(std::int64_t v)
+{
+    if (v < 0)
+    {
+        mIsNegative = true;
+        mValue = static_cast<std::uint64_t>(-v);
+    }
+    else
+    {
+        mIsNegative = false;
+        mValue = static_cast<std::uint64_t>(v);
+    }
 }
 
 namespace detail {
@@ -338,18 +554,19 @@ static constexpr std::uint64_t tenTo14 = 100000000000000ull;
 static constexpr std::uint64_t tenTo14m1 = tenTo14 - 1;
 static constexpr std::uint64_t tenTo17 = tenTo14 * 1000;
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 bool
 areComparable(AssetAmount<TIss> const& v1, AssetAmount<TIss> const& v2)
 {
     if constexpr (std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>)
-        return v1.getAssetID() == v2.getAssetID();
+        return v1.asset().getAssetID() == v2.asset().getAssetID();
     else if constexpr (std::is_same_v<TIss, Asset>)
     {
         return (
             (isMPT(v1) && isMPT(v2) && v1.asset() == v2.asset()) ||
-            (v1.isIssue() && isNative(v1) == isNative(v2) &&
-             v1.issue().getAssetID() == v2.issue().getAssetID()));
+            (v1.asset().isIssue() && isNative(v1) == isNative(v2) &&
+             v1.asset().issue().getAssetID() ==
+                 v2.asset().issue().getAssetID()));
     }
 }
 
@@ -400,8 +617,8 @@ muldiv_round(
     return static_cast<uint64_t>(ret);
 }
 
-template <AssetType TIss>
-std::int64_t
+template <ValidAssetType TIss>
+std::uint64_t
 getSNValue(AssetAmount<TIss> const& amount)
 {
     if (!isNative(amount))
@@ -417,8 +634,8 @@ getSNValue(AssetAmount<TIss> const& amount)
     return ret;
 }
 
-template <AssetType TIss>
-std::int64_t
+template <ValidAssetType TIss>
+std::uint64_t
 getMPTValue(AssetAmount<TIss> const& amount)
 {
     if (!isMPT(amount))
@@ -493,7 +710,7 @@ canonicalizeRound(bool native, std::uint64_t& value, int& offset, bool)
 // be specified.  It also ignored some of the bits that could contribute to
 // rounding decisions.  canonicalizeRoundStrict() tracks all of the bits in
 // the value being rounded.
-void
+inline void
 canonicalizeRoundStrict(
     bool native,
     std::uint64_t& value,
@@ -577,7 +794,7 @@ public:
 template <
     void (*CanonicalizeFunc)(bool, std::uint64_t&, int&, bool),
     typename MightSaveRound,
-    AssetType TIss>
+    ValidAssetType TIss>
 AssetAmount<TIss>
 mulRoundImpl(
     AssetAmount<TIss> const& v1,
@@ -606,7 +823,7 @@ mulRoundImpl(
         if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
             Throw<std::runtime_error>("Native value overflow");
 
-        return AssetAmount<TIss>(minV * maxV);
+        return AssetAmount<TIss>{asset, minV * maxV};
     }
     // TODO MPT
     if (isMPT(v1) && isMPT(v2) && isMPT(asset))
@@ -699,7 +916,7 @@ mulRoundImpl(
 
 // We might need to use NumberRoundModeGuard.  Allow the caller
 // to pass either that or a replacement as a template parameter.
-template <typename MightSaveRound, AssetType TIss>
+template <typename MightSaveRound, ValidAssetType TIss>
 static AssetAmount<TIss>
 divRoundImpl(
     AssetAmount<TIss> const& num,
@@ -790,11 +1007,11 @@ divRoundImpl(
 
 }  // namespace detail
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 operator+(AssetAmount<TIss> const& v1, AssetAmount<TIss> const& v2)
 {
-    if (!areComparable(v1, v2))
+    if (!detail::areComparable(v1, v2))
         Throw<std::runtime_error>("Can't add amounts that aren't comparable!");
 
     if (v2 == beast::zero)
@@ -809,9 +1026,11 @@ operator+(AssetAmount<TIss> const& v1, AssetAmount<TIss> const& v2)
 
     // TODO
     if (isNative(v1))
-        return {detail::getSNValue(v1) + detail::getSNValue(v2)};
+        return AssetAmount<TIss>{
+            v1.asset(), detail::getSNValue(v1) + detail::getSNValue(v2)};
     if (isMPT(v1))
-        return {v1.mAsset, v1.mpt().mpt() + v2.mpt().mpt()};
+        return AssetAmount<TIss>{
+            v1.asset(), detail::getMPTValue(v1) + detail::getMPTValue(v2)};
 
     if (getSTNumberSwitchover())
         return AssetAmount{
@@ -855,14 +1074,14 @@ operator+(AssetAmount<TIss> const& v1, AssetAmount<TIss> const& v2)
         v1.asset(), static_cast<std::uint64_t>(-fv), ov1, true};
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 operator-(AssetAmount<TIss> const& v1, AssetAmount<TIss> const& v2)
 {
     return v1 + (-v2);
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 divide(
     AssetAmount<TIss> const& num,
@@ -880,7 +1099,7 @@ divide(
     int numOffset = num.exponent();
     int denOffset = den.exponent();
 
-    if (num.native() || num.isMPT())
+    if (isNative(num) || isMPT(num))
     {
         while (numVal < AssetAmount<TIss>::cMinValue)
         {
@@ -890,7 +1109,7 @@ divide(
         }
     }
 
-    if (den.native() || den.isMPT())
+    if (isNative(den) || isMPT(den))
     {
         while (denVal < AssetAmount<TIss>::cMinValue)
         {
@@ -911,7 +1130,7 @@ divide(
         num.negative() != den.negative());
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 multiply(
     AssetAmount<TIss> const& v1,
@@ -938,9 +1157,9 @@ multiply(
         if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
             Throw<std::runtime_error>("Native value overflow");
 
-        return STAmount(v1.getFName(), minV * maxV);
+        return AssetAmount<TIss>(asset, minV * maxV);
     }
-    if (v1.isMPT() && v2.isMPT() && asset.isMPT())
+    if (isMPT(v1) && isMPT(v2) && isMPT(asset))
     {
         std::uint64_t const minV =
             detail::getMPTValue(v1) < detail::getMPTValue(v2)
@@ -961,7 +1180,7 @@ multiply(
     }
 
     if (getSTNumberSwitchover())
-        return {Number{v1} * Number{v2}, asset};
+        return AssetAmount<TIss>{asset, Number{v1} * Number{v2}};
 
     std::uint64_t value1 = v1.mantissa();
     std::uint64_t value2 = v2.mantissa();
@@ -998,7 +1217,7 @@ multiply(
         v1.negative() != v2.negative());
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 mulRound(
     AssetAmount<TIss> const& v1,
@@ -1012,7 +1231,7 @@ mulRound(
         TIss>(v1, v2, asset, roundUp);
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 mulRoundStrict(
     AssetAmount<TIss> const& v1,
@@ -1026,7 +1245,7 @@ mulRoundStrict(
         TIss>(v1, v2, asset, roundUp);
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 divRound(
     AssetAmount<TIss> const& num,
@@ -1038,7 +1257,7 @@ divRound(
         num, den, asset, roundUp);
 }
 
-template <AssetType TIss>
+template <ValidAssetType TIss>
 AssetAmount<TIss>
 divRoundStrict(
     AssetAmount<TIss> const& num,

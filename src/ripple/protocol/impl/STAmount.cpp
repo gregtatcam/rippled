@@ -35,76 +35,8 @@
 
 namespace ripple {
 
-namespace {
-
-// Use a static inside a function to help prevent order-of-initialzation issues
-LocalValue<bool>&
-getStaticSTAmountCanonicalizeSwitchover()
-{
-    static LocalValue<bool> r{true};
-    return r;
-}
-}  // namespace
-
-bool
-getSTAmountCanonicalizeSwitchover()
-{
-    return *getStaticSTAmountCanonicalizeSwitchover();
-}
-
-void
-setSTAmountCanonicalizeSwitchover(bool v)
-{
-    *getStaticSTAmountCanonicalizeSwitchover() = v;
-}
-
-static const std::uint64_t tenTo14 = 100000000000000ull;
-static const std::uint64_t tenTo14m1 = tenTo14 - 1;
-static const std::uint64_t tenTo17 = tenTo14 * 1000;
-
-//------------------------------------------------------------------------------
-static std::int64_t
-getSNValue(STAmount const& amount)
-{
-    if (!amount.native())
-        Throw<std::runtime_error>("amount is not native!");
-
-    auto ret = static_cast<std::int64_t>(amount.mantissa());
-
-    assert(static_cast<std::uint64_t>(ret) == amount.mantissa());
-
-    if (amount.negative())
-        ret = -ret;
-
-    return ret;
-}
-
-static std::int64_t
-getMPTValue(STAmount const& amount)
-{
-    if (!amount.isMPT())
-        Throw<std::runtime_error>("amount is not native!");
-
-    auto ret = static_cast<std::int64_t>(amount.mantissa());
-
-    assert(static_cast<std::uint64_t>(ret) == amount.mantissa());
-
-    if (amount.negative())
-        ret = -ret;
-
-    return ret;
-}
-
-static bool
-areComparable(STAmount const& v1, STAmount const& v2)
-{
-    return (v1.isMPT() && v2.isMPT() &&
-            v1.asset().mptIssue() == v2.asset().mptIssue()) ||
-        (v1.isIssue() && v1.native() == v2.native() &&
-         v1.issue().currency == v2.issue().currency);
-}
-
-STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
+STAmount::STAmount(SerialIter& sit, SField const& name)
+    : AssetAmount<Asset>(xrpIssue()), STBase(name)
 {
     // TODO MPT make sure backward compatible
 
@@ -241,18 +173,13 @@ STAmount::STAmount(
 #endif
 
 STAmount::STAmount(SField const& name, std::int64_t mantissa)
-    : STBase(name), mAsset(xrpIssue()), mOffset(0), mIsNative(true)
+    : AssetAmount<Asset>(xrpIssue(), mantissa, 0, false), STBase(name)
 {
     set(mantissa);
 }
 
 STAmount::STAmount(SField const& name, std::uint64_t mantissa, bool negative)
-    : STBase(name)
-    , mAsset(xrpIssue())
-    , mValue(mantissa)
-    , mOffset(0)
-    , mIsNative(true)
-    , mIsNegative(negative)
+    : AssetAmount<Asset>(xrpIssue(), mantissa, 0, negative), STBase(name)
 {
     assert(mValue <= std::numeric_limits<std::int64_t>::max());
 }
@@ -276,11 +203,13 @@ STAmount::STAmount(
 #endif
 
 STAmount::STAmount(SField const& name, STAmount const& from)
-    : STBase(name)
-    , mAsset(from.mAsset)
-    , mValue(from.mValue)
-    , mOffset(from.mOffset)
-    , mIsNegative(from.mIsNegative)
+    : AssetAmount<Asset>(
+          from.mAsset,
+          from.mValue,
+          from.mOffset,
+          from.mIsNegative,
+          unchecked())
+    , STBase(name)
 {
     assert(mValue <= std::numeric_limits<std::int64_t>::max());
     canonicalize();
@@ -289,11 +218,7 @@ STAmount::STAmount(SField const& name, STAmount const& from)
 //------------------------------------------------------------------------------
 
 STAmount::STAmount(std::uint64_t mantissa, bool negative)
-    : mAsset(xrpIssue())
-    , mValue(mantissa)
-    , mOffset(0)
-    , mIsNative(true)
-    , mIsNegative(mantissa != 0 && negative)
+    : AssetAmount<Asset>(xrpIssue(), mantissa, 0, negative, unchecked())
 {
     assert(mValue <= std::numeric_limits<std::int64_t>::max());
 }
@@ -347,15 +272,54 @@ STAmount::STAmount(IOUAmount const& amount, Asset const& asset)
 #endif
 
 STAmount::STAmount(XRPAmount const& amount)
-    : mAsset(xrpIssue())
-    , mOffset(0)
-    , mIsNative(true)
-    , mIsNegative(amount < beast::zero)
+    : AssetAmount<Asset>(
+          xrpIssue(),
+          amount.drops(),
+          0,
+          amount < beast::zero,
+          unchecked())
 {
     if (mIsNegative)
-        mValue = unsafe_cast<std::uint64_t>(-amount.drops());
-    else
-        mValue = unsafe_cast<std::uint64_t>(amount.drops());
+        mValue = -mValue;
+
+    canonicalize();
+}
+
+STAmount::STAmount(SField const& name, AssetAmount<Asset> const& amount)
+    : STAmount{
+          name,
+          amount.asset(),
+          amount.mantissa(),
+          amount.exponent(),
+          amount.negative()}
+{
+}
+
+// Legacy support for new-style amounts
+STAmount::STAmount(IOUAmount const& amount, Asset const& asset)
+    : AssetAmount<Asset>(
+          asset,
+          amount.mantissa(),
+          amount.exponent(),
+          amount < beast::zero,
+          unchecked())
+{
+    if (mIsNegative)
+        mValue = -mValue;
+
+    canonicalize();
+}
+
+STAmount::STAmount(MPTAmount const& amount, Asset const& asset)
+    : AssetAmount<Asset>(
+          asset,
+          amount.mpt(),
+          0,
+          amount < beast::zero,
+          unchecked())
+{
+    if (mIsNegative)
+        mValue = -mValue;
 
     canonicalize();
 }
@@ -479,76 +443,9 @@ STAmount::operator-=(STAmount const& a)
 STAmount
 operator+(STAmount const& v1, STAmount const& v2)
 {
-    if (!areComparable(v1, v2))
-        Throw<std::runtime_error>("Can't add amounts that are't comparable!");
-
-    if (v2 == beast::zero)
-        return v1;
-
-    if (v1 == beast::zero)
-    {
-        // Result must be in terms of v1 currency and issuer.
-        return {
-            v1.getFName(),
-            v1.asset(),
-            v2.mantissa(),
-            v2.exponent(),
-            v2.negative()};
-    }
-
-    // TODO
-    if (v1.native())
-        return {v1.getFName(), getSNValue(v1) + getSNValue(v2)};
-    if (v1.isMPT())
-        return {v1.mAsset, v1.mpt().mpt() + v2.mpt().mpt()};
-
-    if (getSTNumberSwitchover())
-    {
-        auto x = v1;
-        x = v1.iou() + v2.iou();
-        return x;
-    }
-
-    int ov1 = v1.exponent(), ov2 = v2.exponent();
-    std::int64_t vv1 = static_cast<std::int64_t>(v1.mantissa());
-    std::int64_t vv2 = static_cast<std::int64_t>(v2.mantissa());
-
-    if (v1.negative())
-        vv1 = -vv1;
-
-    if (v2.negative())
-        vv2 = -vv2;
-
-    while (ov1 < ov2)
-    {
-        vv1 /= 10;
-        ++ov1;
-    }
-
-    while (ov2 < ov1)
-    {
-        vv2 /= 10;
-        ++ov2;
-    }
-
-    // This addition cannot overflow an std::int64_t. It can overflow an
-    // STAmount and the constructor will throw.
-
-    std::int64_t fv = vv1 + vv2;
-
-    if ((fv >= -10) && (fv <= 10))
-        return {v1.getFName(), v1.asset()};
-
-    if (fv >= 0)
-        return STAmount{
-            v1.getFName(),
-            v1.asset(),
-            static_cast<std::uint64_t>(fv),
-            ov1,
-            false};
-
-    return STAmount{
-        v1.getFName(), v1.asset(), static_cast<std::uint64_t>(-fv), ov1, true};
+    auto const res = static_cast<AssetAmount<Asset> const&>(v1) +
+        static_cast<AssetAmount<Asset> const&>(v2);
+    return STAmount{v1.getFName(), res};
 }
 
 STAmount
@@ -730,7 +627,8 @@ STAmount::getText() const
     return ret;
 }
 
-Json::Value STAmount::getJson(JsonOptions) const
+Json::Value
+STAmount::getJson(JsonOptions) const
 {
     Json::Value elem;
     setJson(elem);
@@ -794,158 +692,6 @@ bool
 STAmount::isDefault() const
 {
     return (mValue == 0) && mIsNative;
-}
-
-//------------------------------------------------------------------------------
-
-// amount = mValue * [10 ^ mOffset]
-// Representation range is 10^80 - 10^(-80).
-//
-// On the wire:
-// - high bit is 0 for XRP, 1 for issued currency
-// - next bit is 1 for positive, 0 for negative (except 0 issued currency, which
-//      is a special case of 0x8000000000000000
-// - for issued currencies, the next 8 bits are (mOffset+97).
-//   The +97 is so that this value is always positive.
-// - The remaining bits are significant digits (mantissa)
-//   That's 54 bits for issued currency and 62 bits for native
-//   (but XRP only needs 57 bits for the max value of 10^17 drops)
-//
-// mValue is zero if the amount is zero, otherwise it's within the range
-//    10^15 to (10^16 - 1) inclusive.
-// mOffset is in the range -96 to +80.
-void
-STAmount::canonicalize()
-{
-    if (isXRP(*this) || mAsset.isMPT())
-    {
-        // native currency amounts should always have an offset of zero
-        mIsNative = isXRP(*this);
-
-        // log(2^64,10) ~ 19.2
-        if (mValue == 0 || mOffset <= -20)
-        {
-            mValue = 0;
-            mOffset = 0;
-            mIsNegative = false;
-            return;
-        }
-
-        if (getSTAmountCanonicalizeSwitchover())
-        {
-            // log(cMaxNativeN, 10) == 17
-            if (mOffset > 17)
-                Throw<std::runtime_error>(
-                    "Native currency amount out of range");
-        }
-
-        if (getSTNumberSwitchover() && getSTAmountCanonicalizeSwitchover())
-        {
-            Number num(
-                mIsNegative ? -mValue : mValue, mOffset, Number::unchecked{});
-            if (mIsNative)
-            {
-                XRPAmount xrp{num};
-                mIsNegative = xrp.drops() < 0;
-                mValue = mIsNegative ? -xrp.drops() : xrp.drops();
-            }
-            else
-            {
-                MPTAmount c{num};
-                mIsNegative = c.mpt() < 0;
-                mValue = mIsNegative ? -c.mpt() : c.mpt();
-            }
-            mOffset = 0;
-        }
-        else
-        {
-            while (mOffset < 0)
-            {
-                mValue /= 10;
-                ++mOffset;
-            }
-
-            while (mOffset > 0)
-            {
-                if (getSTAmountCanonicalizeSwitchover())
-                {
-                    // N.B. do not move the overflow check to after the
-                    // multiplication
-                    if (mValue > cMaxNativeN)
-                        Throw<std::runtime_error>(
-                            "Native currency amount out of range");
-                }
-                mValue *= 10;
-                --mOffset;
-            }
-        }
-
-        if (mValue > cMaxNativeN)
-            Throw<std::runtime_error>("Native currency amount out of range");
-
-        return;
-    }
-
-    mIsNative = false;
-
-    if (getSTNumberSwitchover())
-    {
-        *this = iou();
-        return;
-    }
-
-    if (mValue == 0)
-    {
-        mOffset = -100;
-        mIsNegative = false;
-        return;
-    }
-
-    while ((mValue < cMinValue) && (mOffset > cMinOffset))
-    {
-        mValue *= 10;
-        --mOffset;
-    }
-
-    while (mValue > cMaxValue)
-    {
-        if (mOffset >= cMaxOffset)
-            Throw<std::runtime_error>("value overflow");
-
-        mValue /= 10;
-        ++mOffset;
-    }
-
-    if ((mOffset < cMinOffset) || (mValue < cMinValue))
-    {
-        mValue = 0;
-        mIsNegative = false;
-        mOffset = -100;
-        return;
-    }
-
-    if (mOffset > cMaxOffset)
-        Throw<std::runtime_error>("value overflow");
-
-    assert((mValue == 0) || ((mValue >= cMinValue) && (mValue <= cMaxValue)));
-    assert(
-        (mValue == 0) || ((mOffset >= cMinOffset) && (mOffset <= cMaxOffset)));
-    assert((mValue != 0) || (mOffset != -100));
-}
-
-void
-STAmount::set(std::int64_t v)
-{
-    if (v < 0)
-    {
-        mIsNegative = true;
-        mValue = static_cast<std::uint64_t>(-v);
-    }
-    else
-    {
-        mIsNegative = false;
-        mValue = static_cast<std::uint64_t>(v);
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -1181,14 +927,15 @@ amountFromJsonNoThrow(STAmount& result, Json::Value const& jvSource)
 bool
 operator==(STAmount const& lhs, STAmount const& rhs)
 {
-    return areComparable(lhs, rhs) && lhs.negative() == rhs.negative() &&
-        lhs.exponent() == rhs.exponent() && lhs.mantissa() == rhs.mantissa();
+    return detail::areComparable(lhs, rhs) &&
+        lhs.negative() == rhs.negative() && lhs.exponent() == rhs.exponent() &&
+        lhs.mantissa() == rhs.mantissa();
 }
 
 bool
 operator<(STAmount const& lhs, STAmount const& rhs)
 {
-    if (!areComparable(lhs, rhs))
+    if (!detail::areComparable(lhs, rhs))
         Throw<std::runtime_error>(
             "Can't compare amounts that are't comparable!");
 
@@ -1235,440 +982,24 @@ operator-(STAmount const& value)
         STAmount::unchecked{});
 }
 
-//------------------------------------------------------------------------------
-//
-// Arithmetic
-//
-//------------------------------------------------------------------------------
-
-// Calculate (a * b) / c when all three values are 64-bit
-// without loss of precision:
-static std::uint64_t
-muldiv(
-    std::uint64_t multiplier,
-    std::uint64_t multiplicand,
-    std::uint64_t divisor)
-{
-    boost::multiprecision::uint128_t ret;
-
-    boost::multiprecision::multiply(ret, multiplier, multiplicand);
-    ret /= divisor;
-
-    if (ret > std::numeric_limits<std::uint64_t>::max())
-    {
-        Throw<std::overflow_error>(
-            "overflow: (" + std::to_string(multiplier) + " * " +
-            std::to_string(multiplicand) + ") / " + std::to_string(divisor));
-    }
-
-    return static_cast<uint64_t>(ret);
-}
-
-static std::uint64_t
-muldiv_round(
-    std::uint64_t multiplier,
-    std::uint64_t multiplicand,
-    std::uint64_t divisor,
-    std::uint64_t rounding)
-{
-    boost::multiprecision::uint128_t ret;
-
-    boost::multiprecision::multiply(ret, multiplier, multiplicand);
-    ret += rounding;
-    ret /= divisor;
-
-    if (ret > std::numeric_limits<std::uint64_t>::max())
-    {
-        Throw<std::overflow_error>(
-            "overflow: ((" + std::to_string(multiplier) + " * " +
-            std::to_string(multiplicand) + ") + " + std::to_string(rounding) +
-            ") / " + std::to_string(divisor));
-    }
-
-    return static_cast<uint64_t>(ret);
-}
-
 STAmount
 divide(STAmount const& num, STAmount const& den, Asset const& asset)
 {
-    if (den == beast::zero)
-        Throw<std::runtime_error>("division by zero");
-
-    if (num == beast::zero)
-        return {asset};
-
-    std::uint64_t numVal = num.mantissa();
-    std::uint64_t denVal = den.mantissa();
-    int numOffset = num.exponent();
-    int denOffset = den.exponent();
-
-    if (num.native() || num.isMPT())
-    {
-        while (numVal < STAmount::cMinValue)
-        {
-            // Need to bring into range
-            numVal *= 10;
-            --numOffset;
-        }
-    }
-
-    if (den.native() || den.isMPT())
-    {
-        while (denVal < STAmount::cMinValue)
-        {
-            denVal *= 10;
-            --denOffset;
-        }
-    }
-
-    // We divide the two mantissas (each is between 10^15
-    // and 10^16). To maintain precision, we multiply the
-    // numerator by 10^17 (the product is in the range of
-    // 10^32 to 10^33) followed by a division, so the result
-    // is in the range of 10^16 to 10^15.
-    return STAmount(
-        asset,
-        muldiv(numVal, tenTo17, denVal) + 5,
-        numOffset - denOffset - 17,
-        num.negative() != den.negative());
+    auto const res = divide(
+        static_cast<AssetAmount<Asset> const&>(num),
+        static_cast<AssetAmount<Asset> const&>(den),
+        asset);
+    return STAmount{num.getFName(), res};
 }
 
 STAmount
 multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
 {
-    if (v1 == beast::zero || v2 == beast::zero)
-        return STAmount(asset);
-
-    if (v1.native() && v2.native() && isXRP(asset))
-    {
-        std::uint64_t const minV =
-            getSNValue(v1) < getSNValue(v2) ? getSNValue(v1) : getSNValue(v2);
-        std::uint64_t const maxV =
-            getSNValue(v1) < getSNValue(v2) ? getSNValue(v2) : getSNValue(v1);
-
-        if (minV > 3000000000ull)  // sqrt(cMaxNative)
-            Throw<std::runtime_error>("Native value overflow");
-
-        if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
-            Throw<std::runtime_error>("Native value overflow");
-
-        return STAmount(v1.getFName(), minV * maxV);
-    }
-    if (v1.isMPT() && v2.isMPT() && asset.isMPT())
-    {
-        std::uint64_t const minV = getMPTValue(v1) < getMPTValue(v2)
-            ? getMPTValue(v1)
-            : getMPTValue(v2);
-        std::uint64_t const maxV = getMPTValue(v1) < getMPTValue(v2)
-            ? getMPTValue(v2)
-            : getMPTValue(v1);
-
-        if (minV > 3000000000ull)  // sqrt(cMaxNative)
-            Throw<std::runtime_error>("Asset value overflow");
-
-        if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
-            Throw<std::runtime_error>("Asset value overflow");
-
-        return STAmount(asset, minV * maxV);
-    }
-
-    if (getSTNumberSwitchover())
-        return {IOUAmount{Number{v1} * Number{v2}}, asset};
-
-    std::uint64_t value1 = v1.mantissa();
-    std::uint64_t value2 = v2.mantissa();
-    int offset1 = v1.exponent();
-    int offset2 = v2.exponent();
-
-    // TODO MPT
-    if (v1.native() || v1.isMPT())
-    {
-        while (value1 < STAmount::cMinValue)
-        {
-            value1 *= 10;
-            --offset1;
-        }
-    }
-
-    if (v2.native() || v2.isMPT())
-    {
-        while (value2 < STAmount::cMinValue)
-        {
-            value2 *= 10;
-            --offset2;
-        }
-    }
-
-    // We multiply the two mantissas (each is between 10^15
-    // and 10^16), so their product is in the 10^30 to 10^32
-    // range. Dividing their product by 10^14 maintains the
-    // precision, by scaling the result to 10^16 to 10^18.
-    return STAmount(
-        asset,
-        muldiv(value1, value2, tenTo14) + 7,
-        offset1 + offset2 + 14,
-        v1.negative() != v2.negative());
-}
-
-// This is the legacy version of canonicalizeRound.  It's been in use
-// for years, so it is deeply embedded in the behavior of cross-currency
-// transactions.
-//
-// However in 2022 it was noticed that the rounding characteristics were
-// surprising.  When the code converts from IOU-like to XRP-like there may
-// be a fraction of the IOU-like representation that is too small to be
-// represented in drops.  `canonicalizeRound()` currently does some unusual
-// rounding.
-//
-//  1. If the fractional part is greater than or equal to 0.1, then the
-//     number of drops is rounded up.
-//
-//  2. However, if the fractional part is less than 0.1 (for example,
-//     0.099999), then the number of drops is rounded down.
-//
-// The XRP Ledger has this rounding behavior baked in.  But there are
-// situations where this rounding behavior led to undesirable outcomes.
-// So an alternative rounding approach was introduced.  You'll see that
-// alternative below.
-static void
-canonicalizeRound(bool native, std::uint64_t& value, int& offset, bool)
-{
-    if (native)
-    {
-        if (offset < 0)
-        {
-            int loops = 0;
-
-            while (offset < -1)
-            {
-                value /= 10;
-                ++offset;
-                ++loops;
-            }
-
-            value += (loops >= 2) ? 9 : 10;  // add before last divide
-            value /= 10;
-            ++offset;
-        }
-    }
-    else if (value > STAmount::cMaxValue)
-    {
-        while (value > (10 * STAmount::cMaxValue))
-        {
-            value /= 10;
-            ++offset;
-        }
-
-        value += 9;  // add before last divide
-        value /= 10;
-        ++offset;
-    }
-}
-
-// The original canonicalizeRound did not allow the rounding direction to
-// be specified.  It also ignored some of the bits that could contribute to
-// rounding decisions.  canonicalizeRoundStrict() tracks all of the bits in
-// the value being rounded.
-static void
-canonicalizeRoundStrict(
-    bool native,
-    std::uint64_t& value,
-    int& offset,
-    bool roundUp)
-{
-    if (native)
-    {
-        if (offset < 0)
-        {
-            bool hadRemainder = false;
-
-            while (offset < -1)
-            {
-                // It would be better to use std::lldiv than to separately
-                // compute the remainder.  But std::lldiv does not support
-                // unsigned arguments.
-                std::uint64_t const newValue = value / 10;
-                hadRemainder |= (value != (newValue * 10));
-                value = newValue;
-                ++offset;
-            }
-            value +=
-                (hadRemainder && roundUp) ? 10 : 9;  // Add before last divide
-            value /= 10;
-            ++offset;
-        }
-    }
-    else if (value > STAmount::cMaxValue)
-    {
-        while (value > (10 * STAmount::cMaxValue))
-        {
-            value /= 10;
-            ++offset;
-        }
-        value += 9;  // add before last divide
-        value /= 10;
-        ++offset;
-    }
-}
-
-namespace {
-
-// saveNumberRoundMode doesn't do quite enough for us.  What we want is a
-// Number::RoundModeGuard that sets the new mode and restores the old mode
-// when it leaves scope.  Since Number doesn't have that facility, we'll
-// build it here.
-class NumberRoundModeGuard
-{
-    saveNumberRoundMode saved_;
-
-public:
-    explicit NumberRoundModeGuard(Number::rounding_mode mode) noexcept
-        : saved_{Number::setround(mode)}
-    {
-    }
-
-    NumberRoundModeGuard(NumberRoundModeGuard const&) = delete;
-
-    NumberRoundModeGuard&
-    operator=(NumberRoundModeGuard const&) = delete;
-};
-
-// We need a class that has an interface similar to NumberRoundModeGuard
-// but does nothing.
-class DontAffectNumberRoundMode
-{
-public:
-    explicit DontAffectNumberRoundMode(Number::rounding_mode mode) noexcept
-    {
-    }
-
-    DontAffectNumberRoundMode(DontAffectNumberRoundMode const&) = delete;
-
-    DontAffectNumberRoundMode&
-    operator=(DontAffectNumberRoundMode const&) = delete;
-};
-
-}  // anonymous namespace
-
-// Pass the canonicalizeRound function pointer as a template parameter.
-//
-// We might need to use NumberRoundModeGuard.  Allow the caller
-// to pass either that or a replacement as a template parameter.
-template <
-    void (*CanonicalizeFunc)(bool, std::uint64_t&, int&, bool),
-    typename MightSaveRound>
-static STAmount
-mulRoundImpl(
-    STAmount const& v1,
-    STAmount const& v2,
-    Asset const& asset,
-    bool roundUp)
-{
-    if (v1 == beast::zero || v2 == beast::zero)
-        return {asset};
-
-    bool const xrp = isXRP(asset);
-
-    // TODO MPT
-    if (v1.native() && v2.native() && xrp)
-    {
-        std::uint64_t minV =
-            (getSNValue(v1) < getSNValue(v2)) ? getSNValue(v1) : getSNValue(v2);
-        std::uint64_t maxV =
-            (getSNValue(v1) < getSNValue(v2)) ? getSNValue(v2) : getSNValue(v1);
-
-        if (minV > 3000000000ull)  // sqrt(cMaxNative)
-            Throw<std::runtime_error>("Native value overflow");
-
-        if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
-            Throw<std::runtime_error>("Native value overflow");
-
-        return STAmount(v1.getFName(), minV * maxV);
-    }
-    // TODO MPT
-    if (v1.isMPT() && v2.isMPT() && asset.isMPT())
-    {
-        std::uint64_t minV = (getMPTValue(v1) < getMPTValue(v2))
-            ? getMPTValue(v1)
-            : getMPTValue(v2);
-        std::uint64_t maxV = (getMPTValue(v1) < getMPTValue(v2))
-            ? getMPTValue(v2)
-            : getMPTValue(v1);
-
-        if (minV > 3000000000ull)  // sqrt(cMaxNative)
-            Throw<std::runtime_error>("Asset value overflow");
-
-        if (((maxV >> 32) * minV) > 2095475792ull)  // cMaxNative / 2^32
-            Throw<std::runtime_error>("Asset value overflow");
-
-        return STAmount(asset, minV * maxV);
-    }
-
-    std::uint64_t value1 = v1.mantissa(), value2 = v2.mantissa();
-    int offset1 = v1.exponent(), offset2 = v2.exponent();
-
-    // TODO MPT
-    if (v1.native() || v1.isMPT())
-    {
-        while (value1 < STAmount::cMinValue)
-        {
-            value1 *= 10;
-            --offset1;
-        }
-    }
-
-    // TODO MPT
-    if (v2.native() || v2.isMPT())
-    {
-        while (value2 < STAmount::cMinValue)
-        {
-            value2 *= 10;
-            --offset2;
-        }
-    }
-
-    bool const resultNegative = v1.negative() != v2.negative();
-
-    // We multiply the two mantissas (each is between 10^15
-    // and 10^16), so their product is in the 10^30 to 10^32
-    // range. Dividing their product by 10^14 maintains the
-    // precision, by scaling the result to 10^16 to 10^18.
-    //
-    // If the we're rounding up, we want to round up away
-    // from zero, and if we're rounding down, truncation
-    // is implicit.
-    std::uint64_t amount = muldiv_round(
-        value1, value2, tenTo14, (resultNegative != roundUp) ? tenTo14m1 : 0);
-
-    int offset = offset1 + offset2 + 14;
-    if (resultNegative != roundUp)
-    {
-        CanonicalizeFunc(xrp, amount, offset, roundUp);
-    }
-    STAmount result = [&]() {
-        // If appropriate, tell Number to round down.  This gives the desired
-        // result from STAmount::canonicalize.
-        MightSaveRound const savedRound(Number::towards_zero);
-        return STAmount(asset, amount, offset, resultNegative);
-    }();
-
-    if (roundUp && !resultNegative && !result)
-    {
-        if (xrp)
-        {
-            // return the smallest value above zero
-            amount = 1;
-            offset = 0;
-        }
-        else
-        {
-            // return the smallest value above zero
-            amount = STAmount::cMinValue;
-            offset = STAmount::cMinOffset;
-        }
-        return STAmount(asset, amount, offset, resultNegative);
-    }
-    return result;
+    auto const res = multiply(
+        static_cast<AssetAmount<Asset> const&>(v1),
+        static_cast<AssetAmount<Asset> const&>(v2),
+        asset);
+    return STAmount{v1.getFName(), res};
 }
 
 STAmount
@@ -1678,8 +1009,12 @@ mulRound(
     Asset const& asset,
     bool roundUp)
 {
-    return mulRoundImpl<canonicalizeRound, DontAffectNumberRoundMode>(
-        v1, v2, asset, roundUp);
+    auto const res = mulRound(
+        static_cast<AssetAmount<Asset> const&>(v1),
+        static_cast<AssetAmount<Asset> const&>(v2),
+        asset,
+        roundUp);
+    return STAmount{v1.getFName(), res};
 }
 
 STAmount
@@ -1689,96 +1024,12 @@ mulRoundStrict(
     Asset const& asset,
     bool roundUp)
 {
-    return mulRoundImpl<canonicalizeRoundStrict, NumberRoundModeGuard>(
-        v1, v2, asset, roundUp);
-}
-
-// We might need to use NumberRoundModeGuard.  Allow the caller
-// to pass either that or a replacement as a template parameter.
-template <typename MightSaveRound>
-static STAmount
-divRoundImpl(
-    STAmount const& num,
-    STAmount const& den,
-    Asset const& asset,
-    bool roundUp)
-{
-    if (den == beast::zero)
-        Throw<std::runtime_error>("division by zero");
-
-    if (num == beast::zero)
-        return {asset};
-
-    std::uint64_t numVal = num.mantissa(), denVal = den.mantissa();
-    int numOffset = num.exponent(), denOffset = den.exponent();
-
-    // TODO MPT
-    if (num.native() || num.isMPT())
-    {
-        while (numVal < STAmount::cMinValue)
-        {
-            numVal *= 10;
-            --numOffset;
-        }
-    }
-
-    // TODO MPT
-    if (den.native() || den.isMPT())
-    {
-        while (denVal < STAmount::cMinValue)
-        {
-            denVal *= 10;
-            --denOffset;
-        }
-    }
-
-    bool const resultNegative = (num.negative() != den.negative());
-
-    // We divide the two mantissas (each is between 10^15
-    // and 10^16). To maintain precision, we multiply the
-    // numerator by 10^17 (the product is in the range of
-    // 10^32 to 10^33) followed by a division, so the result
-    // is in the range of 10^16 to 10^15.
-    //
-    // We round away from zero if we're rounding up or
-    // truncate if we're rounding down.
-    std::uint64_t amount = muldiv_round(
-        numVal, tenTo17, denVal, (resultNegative != roundUp) ? denVal - 1 : 0);
-
-    int offset = numOffset - denOffset - 17;
-
-    // TODO MPT
-    if (resultNegative != roundUp)
-        canonicalizeRound(
-            isXRP(asset) /*|| issue.isMPT()*/, amount, offset, roundUp);
-
-    STAmount result = [&]() {
-        // If appropriate, tell Number the rounding mode we are using.
-        // Note that "roundUp == true" actually means "round away from zero".
-        // Otherwise round toward zero.
-        using enum Number::rounding_mode;
-        MightSaveRound const savedRound(
-            roundUp ^ resultNegative ? upward : downward);
-        return STAmount(asset, amount, offset, resultNegative);
-    }();
-
-    if (roundUp && !resultNegative && !result)
-    {
-        if (isXRP(asset) || asset.isMPT())
-        {
-            // return the smallest value above zero
-            amount = 1;
-            offset = 0;
-        }
-        else
-        {
-            // return the smallest value above zero
-            amount = STAmount::cMinValue;
-            offset = STAmount::cMinOffset;
-        }
-        return STAmount(asset, amount, offset, resultNegative);
-    }
-    return result;
+    auto const res = mulRoundStrict(
+        static_cast<AssetAmount<Asset> const&>(v1),
+        static_cast<AssetAmount<Asset> const&>(v2),
+        asset,
+        roundUp);
+    return STAmount{v1.getFName(), res};
 }
 
 STAmount
@@ -1788,7 +1039,12 @@ divRound(
     Asset const& asset,
     bool roundUp)
 {
-    return divRoundImpl<DontAffectNumberRoundMode>(num, den, asset, roundUp);
+    auto const res = divRound(
+        static_cast<AssetAmount<Asset> const&>(num),
+        static_cast<AssetAmount<Asset> const&>(den),
+        asset,
+        roundUp);
+    return STAmount{num.getFName(), res};
 }
 
 STAmount
@@ -1798,7 +1054,12 @@ divRoundStrict(
     Asset const& asset,
     bool roundUp)
 {
-    return divRoundImpl<NumberRoundModeGuard>(num, den, asset, roundUp);
+    auto const res = divRoundStrict(
+        static_cast<AssetAmount<Asset> const&>(num),
+        static_cast<AssetAmount<Asset> const&>(den),
+        asset,
+        roundUp);
+    return STAmount{num.getFName(), res};
 }
 
 }  // namespace ripple

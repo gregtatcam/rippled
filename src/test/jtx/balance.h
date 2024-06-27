@@ -44,7 +44,7 @@ private:
 
 public:
     balance(Account const& account, none_t)
-        : none_(true), account_(account), value_(XRP)
+        : none_(true), account_(account), value_(xrpIssue())
     {
     }
 
