@@ -188,7 +188,7 @@ isNative(TIss const& issue)
     else if constexpr (std::is_same_v<TIss, Issue>)
         return isXRP(issue);
     else if constexpr (std::is_same_v<TIss, Asset>)
-        return isXRP(issue.issue());
+        return issue.isIssue() && isXRP(issue.issue());
 }
 
 template <ValidAssetType TIss>
@@ -253,7 +253,8 @@ AssetAmount<TIss>::AssetAmount(TIss const& iss, Number const& n)
           iss,
           n.mantissa() > 0 ? n.mantissa() : -n.mantissa(),
           n.exponent(),
-          n.mantissa() < 0)
+          n.mantissa() < 0,
+          unchecked())
 {
 }
 

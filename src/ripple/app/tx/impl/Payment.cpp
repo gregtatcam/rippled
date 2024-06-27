@@ -29,9 +29,9 @@
 
 namespace ripple {
 
-template <typename TIss>
+template <typename TDeliver, typename TSendMax>
 TxConsequences
-Payment<TIss>::makeTxConsequences(PreflightContext const& ctx)
+Payment<TDeliver, TSendMax>::makeTxConsequences(PreflightContext const& ctx)
 {
     auto calculateMaxXRPSpend = [](STTx const& tx) -> XRPAmount {
         STAmount const maxAmount =
@@ -45,28 +45,21 @@ Payment<TIss>::makeTxConsequences(PreflightContext const& ctx)
     return TxConsequences{ctx.tx, calculateMaxXRPSpend(ctx.tx)};
 }
 
-template <typename TIss>
-concept ValidIssue =
-    (std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>);
-
-template <ValidIssue TIss>
 Asset
-getAsset(Asset const& asset, AccountID const& account)
+getAsset(Issue const& issue, AccountID const& account)
 {
-    if constexpr (std::is_same_v<TIss, Issue>)
-    {
-        auto const& iss = static_cast<TIss>(asset);
-        return Issue{iss.getAssetID(), account};
-    }
-    else if constexpr (std::is_same_v<TIss, MPTIssue>)
-    {
-        return asset;
-    }
+    return Issue{issue.getAssetID(), account};
 }
 
-template <typename TIss>
+Asset
+getAsset(MPTIssue const& issue, AccountID const&)
+{
+    return issue;
+}
+
+template <typename TDeliver, typename TSendMax>
 NotTEC
-Payment<TIss>::preflight(PreflightContext const& ctx)
+Payment<TDeliver, TSendMax>::preflight(PreflightContext const& ctx)
 {
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
@@ -101,7 +94,7 @@ Payment<TIss>::preflight(PreflightContext const& ctx)
     else
     {
         maxSourceAmount = STAmount(
-            getAsset<TIss>(saDstAmount.asset(), account),
+            getAsset(static_cast<TDeliver>(saDstAmount.asset()), account),
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);
@@ -211,7 +204,7 @@ Payment<TIss>::preflight(PreflightContext const& ctx)
                 << " amount. " << dMin.getFullText();
             return temBAD_AMOUNT;
         }
-        if (dMin.issue() != saDstAmount.issue())
+        if (dMin.asset() != saDstAmount.asset())
         {
             JLOG(j.trace())
                 << "Malformed transaction: Dst issue differs "
@@ -231,9 +224,9 @@ Payment<TIss>::preflight(PreflightContext const& ctx)
     return preflight2(ctx);
 }
 
-template <typename TIss>
+template <typename TDeliver, typename TSendMax>
 TER
-Payment<TIss>::preclaim(PreclaimContext const& ctx)
+Payment<TDeliver, TSendMax>::preclaim(PreclaimContext const& ctx)
 {
     // Ripple if source or destination is non-native or if there are paths.
     std::uint32_t const uTxFlags = ctx.tx.getFlags();
@@ -316,9 +309,9 @@ Payment<TIss>::preclaim(PreclaimContext const& ctx)
     return tesSUCCESS;
 }
 
-template <typename TIss>
+template <typename TDeliver, typename TSendMax>
 TER
-Payment<TIss>::doApply()
+Payment<TDeliver, TSendMax>::doApply()
 {
     auto const deliverMin = ctx_.tx[~sfDeliverMin];
 
@@ -340,7 +333,7 @@ Payment<TIss>::doApply()
     else
     {
         maxSourceAmount = STAmount(
-            getAsset<TIss>(saDstAmount.asset(), account_),
+            getAsset(static_cast<TDeliver>(saDstAmount.asset()), account_),
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);
@@ -573,7 +566,9 @@ Payment<TIss>::doApply()
     return tesSUCCESS;
 }
 
-template class Payment<Issue>;
-template class Payment<MPTIssue>;
+template class Payment<Issue, Issue>;
+template class Payment<MPTIssue, Issue>;
+template class Payment<Issue, MPTIssue>;
+template class Payment<MPTIssue, MPTIssue>;
 
 }  // namespace ripple

@@ -31,6 +31,10 @@ private:
     MPT mpt_;
 
 public:
+    MPTIssue()
+    {
+    }
+
     MPTIssue(MPT const& mpt) : mpt_(mpt)
     {
     }

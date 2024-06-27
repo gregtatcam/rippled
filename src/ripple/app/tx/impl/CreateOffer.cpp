@@ -103,12 +103,10 @@ CreateOffer<TIssIn, TIssOut>::preflight(PreflightContext const& ctx)
     }
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency =
-        static_cast<TIssIn>(saTakerPays.asset()).getAssetID();
+    auto const& uPaysCurrency = saTakerPays.asset();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
-    auto const& uGetsCurrency =
-        static_cast<TIssOut>(saTakerGets.asset()).getAssetID();
+    auto const& uGetsCurrency = saTakerGets.asset();
 
     if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
     {
@@ -116,7 +114,7 @@ CreateOffer<TIssIn, TIssOut>::preflight(PreflightContext const& ctx)
         return temREDUNDANT;
     }
     // We don't allow a non-native currency to use the currency code XRP.
-    if (badCurrency() == uPaysCurrency || badCurrency() == uGetsCurrency)
+    if (uPaysCurrency.badAsset() || uGetsCurrency.badAsset())
     {
         JLOG(j.debug()) << "Malformed offer: bad currency";
         return temBAD_CURRENCY;
@@ -879,7 +877,7 @@ CreateOffer<TIssIn, TIssOut>::flowCross(
                     afterCross.in = mulRound(
                         afterCross.out,
                         rate,
-                        static_cast<TIssIn>(takerAmount.in.issue()),
+                        static_cast<TIssIn>(takerAmount.in.asset()),
                         true);
                 }
             }
@@ -921,12 +919,13 @@ CreateOffer<TIssIn, TIssOut>::cross(
 }
 
 template <typename TIssIn, typename TIssOut>
+template <typename TIss>
 std::string
 CreateOffer<TIssIn, TIssOut>::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    txt += to_string(static_cast<TIss>(amount.asset()).getAssetID());
     return txt;
 }
 
@@ -1079,8 +1078,8 @@ CreateOffer<TIssIn, TIssOut>::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         {
             stream << "   mode: " << (bPassive ? "passive " : "")
                    << (bSell ? "sell" : "buy");
-            stream << "     in: " << format_amount(takerAmount.in);
-            stream << "    out: " << format_amount(takerAmount.out);
+            stream << "     in: " << format_amount<TIssIn>(takerAmount.in);
+            stream << "    out: " << format_amount<TIssOut>(takerAmount.out);
         }
 
         std::tie(result, place_offer) = cross(sb, sbCancel, takerAmount);
@@ -1092,8 +1091,8 @@ CreateOffer<TIssIn, TIssOut>::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         if (auto stream = j_.trace())
         {
             stream << "Cross result: " << transToken(result);
-            stream << "     in: " << format_amount(place_offer.in);
-            stream << "    out: " << format_amount(place_offer.out);
+            stream << "     in: " << format_amount<TIssIn>(place_offer.in);
+            stream << "    out: " << format_amount<TIssOut>(place_offer.out);
         }
 
         if (result == tecFAILED_PROCESSING && bOpenLedger)
@@ -1119,9 +1118,10 @@ CreateOffer<TIssIn, TIssOut>::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         // never be negative. If it is, something went very very wrong.
         if (place_offer.in < zero || place_offer.out < zero)
         {
-            JLOG(j_.fatal()) << "Cross left offer negative!"
-                             << "     in: " << format_amount(place_offer.in)
-                             << "    out: " << format_amount(place_offer.out);
+            JLOG(j_.fatal())
+                << "Cross left offer negative!"
+                << "     in: " << format_amount<TIssIn>(place_offer.in)
+                << "    out: " << format_amount<TIssOut>(place_offer.out);
             return {tefINTERNAL, true};
         }
 
@@ -1234,10 +1234,14 @@ CreateOffer<TIssIn, TIssOut>::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        sle->setFieldH160(sfTakerPaysCurrency, saTakerPays.issue().currency);
-        sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
-        sle->setFieldH160(sfTakerGetsCurrency, saTakerGets.issue().currency);
-        sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
+        sle->setFieldH160(
+            sfTakerPaysCurrency,
+            static_cast<TIssIn>(saTakerPays.asset()).getAssetID());
+        sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.asset().getIssuer());
+        sle->setFieldH160(
+            sfTakerGetsCurrency,
+            static_cast<TIssOut>(saTakerGets.asset()).getAssetID());
+        sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.asset().getIssuer());
         sle->setFieldU64(sfExchangeRate, uRate);
     });
 

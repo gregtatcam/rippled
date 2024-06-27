@@ -132,6 +132,7 @@ private:
     std::pair<TER, Amounts>
     cross(Sandbox& sb, Sandbox& sbCancel, Amounts const& takerAmount);
 
+    template <typename TIss>
     static std::string
     format_amount(STAmount const& amount);
 

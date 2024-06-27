@@ -106,9 +106,13 @@ with_txn_type(TxType txnType, auto const& tx, F&& f)
         case ttPAYCHAN_FUND:
             return f.template operator()<PayChanFund>();
         case ttPAYMENT: {
-            if (tx[sfAmount].asset().isIssue())
-                return f.template operator()<Payment<Issue>>();
-            return f.template operator()<Payment<MPTIssue>>();
+            auto const sendMax = tx[~sfSendMax].value_or(tx[sfAmount]);
+            return std::visit(
+                [&]<typename D, typename M>(D const&, M const&) {
+                    return f.template operator()<Payment<D, M>>();
+                },
+                tx[sfAmount].asset().value(),
+                sendMax.asset().value());
         }
         case ttREGULAR_KEY_SET:
             return f.template operator()<SetRegularKey>();

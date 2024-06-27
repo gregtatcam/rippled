@@ -44,12 +44,12 @@ public:
     Asset(uint192 const& mptID);
     Asset() = default;
 
-    explicit operator Issue const &() const
+    explicit operator Issue const&() const
     {
         return issue();
     }
 
-    explicit operator MPTIssue const &() const
+    explicit operator MPTIssue const&() const
     {
         return mptIssue();
     }
@@ -113,6 +113,12 @@ public:
 
     AccountID const&
     getIssuer() const;
+
+    std::variant<Issue, MPTIssue> const&
+    value() const
+    {
+        return asset_;
+    }
 
     friend constexpr bool
     operator==(Asset const& lhs, Asset const& rhs)

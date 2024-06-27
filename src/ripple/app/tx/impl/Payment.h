@@ -27,7 +27,7 @@
 
 namespace ripple {
 
-template <typename TIss>
+template <typename TDeliver, typename TSendMax>
 class Payment : public Transactor
 {
     /* The largest number of paths we allow */
