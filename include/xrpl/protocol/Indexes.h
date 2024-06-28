@@ -287,6 +287,36 @@ did(AccountID const& account) noexcept;
 Keylet
 oracle(AccountID const& account, std::uint32_t const& documentID) noexcept;
 
+Keylet
+mptIssuance(AccountID const& issuer, std::uint32_t seq) noexcept;
+
+Keylet
+mptIssuance(uint192 const& mpt) noexcept;
+
+Keylet
+mptIssuance(ripple::MPT const& mpt) noexcept;
+
+inline Keylet
+mptIssuance(uint256 const& issuance)
+{
+    return {ltMPTOKEN_ISSUANCE, issuance};
+}
+
+Keylet
+mptoken(MPT const& issuanceID, AccountID const& holder) noexcept;
+
+Keylet
+mptoken(uint192 const& issuanceID, AccountID const& holder) noexcept;
+
+inline Keylet
+mptoken(uint256 const& mptokenKey)
+{
+    return {ltMPTOKEN, mptokenKey};
+}
+
+Keylet
+mptoken(uint256 const& issuanceKey, AccountID const& holder) noexcept;
+
 }  // namespace keylet
 
 // Everything below is deprecated and should be removed in favor of keylets:
@@ -326,6 +356,9 @@ std::array<keyletDesc<AccountID const&>, 6> const directAccountKeylets{
      {&keylet::nftpage_min, jss::NFTokenPage, true},
      {&keylet::nftpage_max, jss::NFTokenPage, true},
      {&keylet::did, jss::DID, true}}};
+
+uint192
+getMptID(AccountID const& account, std::uint32_t sequence);
 
 }  // namespace ripple
 

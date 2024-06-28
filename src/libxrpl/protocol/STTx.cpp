@@ -143,9 +143,14 @@ STTx::getMentionedAccounts() const
         }
         else if (auto samt = dynamic_cast<STAmount const*>(&it))
         {
-            auto const& issuer = samt->getIssuer();
-            if (!isXRP(issuer))
-                list.insert(issuer);
+            if (samt->isIssue())
+            {
+                auto const& issuer = samt->getIssuer();
+                if (!isXRP(issuer))
+                    list.insert(issuer);
+            }
+            else
+                list.insert(samt->getIssuer());
         }
     }
 
@@ -529,14 +534,22 @@ isMemoOkay(STObject const& st, std::string& reason)
     return true;
 }
 
-// Ensure all account fields are 160-bits
+// Ensure all account fields are 160-bits and that MPT amount is only passed
+// to Payment or Clawback tx (until MPT is supported in more tx)
 static bool
-isAccountFieldOkay(STObject const& st)
+isAccountAndMPTFieldOkay(STObject const& st)
 {
+    auto const txType = st[~sfTransactionType];
+    static std::unordered_set<TxType> const mptAmountTx{ttPAYMENT, ttCLAWBACK};
+    bool const isMPTAmountAllowed = txType &&
+        (mptAmountTx.find(safe_cast<TxType>(*txType)) != mptAmountTx.end());
     for (int i = 0; i < st.getCount(); ++i)
     {
         auto t = dynamic_cast<STAccount const*>(st.peekAtPIndex(i));
         if (t && t->isDefault())
+            return false;
+        auto amt = dynamic_cast<STAmount const*>(st.peekAtPIndex(i));
+        if (amt && amt->isMPT() && !isMPTAmountAllowed)
             return false;
     }
 
@@ -549,9 +562,9 @@ passesLocalChecks(STObject const& st, std::string& reason)
     if (!isMemoOkay(st, reason))
         return false;
 
-    if (!isAccountFieldOkay(st))
+    if (!isAccountAndMPTFieldOkay(st))
     {
-        reason = "An account field is invalid.";
+        reason = "An account or MPT field is invalid.";
         return false;
     }
 

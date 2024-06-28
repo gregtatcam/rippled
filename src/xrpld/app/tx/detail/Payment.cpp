@@ -20,6 +20,7 @@
 #include <xrpld/app/paths/RippleCalc.h>
 #include <xrpld/app/tx/detail/Payment.h>
 #include <xrpld/core/Config.h>
+#include <xrpld/ledger/View.h>
 #include <xrpl/basics/Log.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/TxFlags.h>
@@ -77,17 +78,26 @@ Payment::preflight(PreflightContext const& ctx)
     else if (saDstAmount.native())
         maxSourceAmount = saDstAmount;
     else
+    {
+        auto const asset = [&]() -> Asset {
+            if (saDstAmount.isMPT())
+                return saDstAmount.asset();
+            return Issue{saDstAmount.getCurrency(), account};
+        }();
         maxSourceAmount = STAmount(
-            {saDstAmount.getCurrency(), account},
+            asset,
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);
+    }
 
-    auto const& uSrcCurrency = maxSourceAmount.getCurrency();
-    auto const& uDstCurrency = saDstAmount.getCurrency();
+    auto const& uSrcAsset = maxSourceAmount.asset();
+    auto const& uDstAsset = saDstAmount.asset();
 
     // isZero() is XRP.  FIX!
-    bool const bXRPDirect = uSrcCurrency.isZero() && uDstCurrency.isZero();
+    bool const bXRPDirect = isXRP(uSrcAsset) && isXRP(uDstAsset);
+    bool const bMPTDirect = isMPT(uSrcAsset) && isMPT(uDstAsset);
+    bool const bDirect = bXRPDirect || bMPTDirect;
 
     if (!isLegalNet(saDstAmount) || !isLegalNet(maxSourceAmount))
         return temBAD_AMOUNT;
@@ -112,55 +122,58 @@ Payment::preflight(PreflightContext const& ctx)
                         << "bad dst amount: " << saDstAmount.getFullText();
         return temBAD_AMOUNT;
     }
-    if (badCurrency() == uSrcCurrency || badCurrency() == uDstCurrency)
+    if ((uSrcAsset.isIssue() && badCurrency() == uSrcAsset.issue().currency) ||
+        (uDstAsset.isIssue() && badCurrency() == uDstAsset.issue().currency))
     {
         JLOG(j.trace()) << "Malformed transaction: "
                         << "Bad currency.";
         return temBAD_CURRENCY;
     }
-    if (account == uDstAccountID && uSrcCurrency == uDstCurrency && !bPaths)
+    if (account == uDstAccountID && uSrcAsset == uDstAsset && !bPaths)
     {
         // You're signing yourself a payment.
         // If bPaths is true, you might be trying some arbitrage.
         JLOG(j.trace()) << "Malformed transaction: "
                         << "Redundant payment from " << to_string(account)
-                        << " to self without path for "
-                        << to_string(uDstCurrency);
+                        << " to self without path for " << to_string(uDstAsset);
         return temREDUNDANT;
     }
-    if (bXRPDirect && bMax)
+    if (bDirect && bMax)
     {
         // Consistent but redundant transaction.
         JLOG(j.trace()) << "Malformed transaction: "
-                        << "SendMax specified for XRP to XRP.";
-        return temBAD_SEND_XRP_MAX;
+                        << "SendMax specified for XRP to XRP or MPT to MPT.";
+        return temBAD_SEND_XRP_MAX;  // TODO MPT new err code here and below
     }
-    if (bXRPDirect && bPaths)
+    if (bDirect && bPaths)
     {
         // XRP is sent without paths.
         JLOG(j.trace()) << "Malformed transaction: "
-                        << "Paths specified for XRP to XRP.";
+                        << "Paths specified for XRP to XRP or MPT to MPT.";
         return temBAD_SEND_XRP_PATHS;
     }
-    if (bXRPDirect && partialPaymentAllowed)
+    if (bDirect && partialPaymentAllowed)
     {
         // Consistent but redundant transaction.
-        JLOG(j.trace()) << "Malformed transaction: "
-                        << "Partial payment specified for XRP to XRP.";
+        JLOG(j.trace())
+            << "Malformed transaction: "
+            << "Partial payment specified for XRP to XRP or MPT to MPT.";
         return temBAD_SEND_XRP_PARTIAL;
     }
-    if (bXRPDirect && limitQuality)
+    if (bDirect && limitQuality)
     {
         // Consistent but redundant transaction.
-        JLOG(j.trace()) << "Malformed transaction: "
-                        << "Limit quality specified for XRP to XRP.";
+        JLOG(j.trace())
+            << "Malformed transaction: "
+            << "Limit quality specified for XRP to XRP or MPT to MPT.";
         return temBAD_SEND_XRP_LIMIT;
     }
-    if (bXRPDirect && !defaultPathsAllowed)
+    if (bDirect && !defaultPathsAllowed)
     {
         // Consistent but redundant transaction.
-        JLOG(j.trace()) << "Malformed transaction: "
-                        << "No ripple direct specified for XRP to XRP.";
+        JLOG(j.trace())
+            << "Malformed transaction: "
+            << "No ripple direct specified for XRP to XRP or MPT to MPT.";
         return temBAD_SEND_XRP_NO_DIRECT;
     }
 
@@ -308,11 +321,18 @@ Payment::doApply()
     else if (saDstAmount.native())
         maxSourceAmount = saDstAmount;
     else
+    {
+        auto const asset = [&]() -> Asset {
+            if (saDstAmount.isMPT())
+                return saDstAmount.asset();
+            return Issue{saDstAmount.getCurrency(), account_};
+        }();
         maxSourceAmount = STAmount(
-            {saDstAmount.getCurrency(), account_},
+            asset,
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);
+    }
 
     JLOG(j_.trace()) << "maxSourceAmount=" << maxSourceAmount.getFullText()
                      << " saDstAmount=" << saDstAmount.getFullText();
@@ -348,7 +368,8 @@ Payment::doApply()
 
     bool const depositPreauth = view().rules().enabled(featureDepositPreauth);
 
-    bool const bRipple = paths || sendMax || !saDstAmount.native();
+    bool const bRipple =
+        paths || sendMax || !(saDstAmount.native() || saDstAmount.isMPT());
 
     // If the destination has lsfDepositAuth set, then only direct XRP
     // payments (no intermediate steps) are allowed to the destination.
@@ -419,6 +440,40 @@ Payment::doApply()
         if (isTerRetry(terResult))
             terResult = tecPATH_DRY;
         return terResult;
+    }
+    else if (saDstAmount.isMPT())
+    {
+        if (auto const ter =
+                requireAuth(view(), saDstAmount.mptIssue(), account_);
+            ter != tesSUCCESS)
+            return ter;
+
+        if (auto const ter =
+                requireAuth(view(), saDstAmount.mptIssue(), uDstAccountID);
+            ter != tesSUCCESS)
+            return ter;
+
+        if (auto const ter = canTransfer(
+                view(), saDstAmount.mptIssue(), account_, uDstAccountID);
+            ter != tesSUCCESS)
+            return ter;
+
+        auto const& mpt = saDstAmount.mptIssue();
+        auto const& issuer = mpt.getIssuer();
+        // If globally/individually locked then
+        //   can't send between holders
+        //   holder can send back to issuer
+        //   issuer can send to holder
+        if (account_ != issuer && uDstAccountID != issuer &&
+            (isFrozen(view(), account_, mpt) ||
+             isFrozen(view(), uDstAccountID, mpt)))
+            return tecMPT_LOCKED;
+
+        PaymentSandbox pv(&view());
+        auto const res =
+            accountSendMPT(pv, account_, uDstAccountID, saDstAmount, j_);
+        pv.apply(ctx_.rawView());
+        return res;
     }
 
     assert(saDstAmount.native());

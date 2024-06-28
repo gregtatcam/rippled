@@ -38,13 +38,12 @@ public:
     Currency currency{};
     AccountID account{};
 
-    Issue()
-    {
-    }
+    Issue() = default;
 
-    Issue(Currency const& c, AccountID const& a) : currency(c), account(a)
-    {
-    }
+    Issue(Currency const& c, AccountID const& a);
+
+    AccountID const&
+    getIssuer() const;
 
     std::string
     getText() const;
