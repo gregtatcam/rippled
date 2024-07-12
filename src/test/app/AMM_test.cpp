@@ -6863,6 +6863,232 @@ private:
     }
 
     void
+    testFixReducedOffers2(FeatureBitset features)
+    {
+        testcase("Fix Reduced OffersV2");
+        using namespace jtx;
+
+        {
+            Env env(*this, features);
+            auto const magIssuer = Account("mag");
+            auto const bitcoIssuer = Account("bitco");
+            auto const rogue = Account("rogue");
+            auto const ammCreator = Account("amm");
+
+            auto const MAG = magIssuer["MAG"];
+            auto const BIT = bitcoIssuer["BIT"];
+
+            env.fund(XRP(10'000'000), magIssuer);
+            env.fund(XRP(10'000'000), bitcoIssuer);
+
+            fund(
+                env,
+                {rogue, ammCreator, alice, carol},
+                XRP(10'000'000),
+                {MAG(10'000'000)},
+                Fund::Acct);
+            fund(
+                env,
+                {rogue, ammCreator, alice, carol},
+                XRP(10'000'000),
+                {BIT(10'000'000)},
+                Fund::IOUOnly);
+
+            env(offer(
+                alice,
+                XRPAmount(2'651'895),
+                STAmount{BIT, UINT64_C(1894211093920852), -16}));
+            env(offer(
+                carol,
+                STAmount{MAG, UINT64_C(6999444544557101), -17},
+                XRPAmount(482'751'685)));
+            env.close();
+
+            AMM ammBIT(
+                env,
+                ammCreator,
+                XRPAmount(112'860'408),
+                STAmount(BIT, UINT64_C(11'70680687051454), -14),
+                false,
+                14);
+            AMM ammMAG(
+                env,
+                ammCreator,
+                XRPAmount(3'530'425'515'218),
+                STAmount(MAG, UINT64_C(505'5090645117707), -13),
+                false,
+                1000);
+            AMM ammMAG_BIT(
+                env,
+                ammCreator,
+                STAmount(MAG, UINT64_C(7289985642643932), -19),
+                STAmount(BIT, UINT64_C(5222900686060028), -16),
+                false,
+                1);
+
+            env(offer(
+                    rogue,
+                    STAmount{BIT, UINT64_C(7027318844740422), -28},
+                    STAmount{MAG, UINT64_C(9808699749086149), -28}),
+                txflags(tfSell | tfImmediateOrCancel));
+
+            if (features[fixReducedOffersV2])
+            {
+                // Auto-bridging fails to generate offers if amendment
+                // is enabled
+                BEAST_EXPECT(ammBIT.expectBalances(
+                    XRPAmount(112'860'408),
+                    STAmount(BIT, UINT64_C(11'70680687051454), -14),
+                    ammBIT.tokens()));
+                BEAST_EXPECT(ammMAG.expectBalances(
+                    XRPAmount(3'530'425'515'218),
+                    STAmount(MAG, UINT64_C(505'5090645117707), -13),
+                    ammMAG.tokens()));
+                // MAG/BIT AMM is consumed
+                BEAST_EXPECT(ammMAG_BIT.expectBalances(
+                    STAmount(MAG, UINT64_C(7289985652452632), -19),
+                    STAmount(BIT, UINT64_C(5222900679034425), -16),
+                    ammMAG_BIT.tokens()));
+            }
+            else
+            {
+                // Auto-bridging offers are used if amendment is disabled
+                // This rounds the XRP offer size to 1 drop resulting
+                // in altered rate
+                BEAST_EXPECT(ammBIT.expectBalances(
+                    XRPAmount(112'860'409),
+                    STAmount(BIT, UINT64_C(11'70680676682678), -14),
+                    ammBIT.tokens()));
+                BEAST_EXPECT(ammMAG.expectBalances(
+                    XRPAmount(3'530'425'515'217),
+                    STAmount(MAG, UINT64_C(505'5090645117717), -13),
+                    ammMAG.tokens()));
+                // MAG/BIT AMM is not consumed
+                BEAST_EXPECT(ammMAG_BIT.expectBalances(
+                    STAmount(MAG, UINT64_C(7289985642643932), -19),
+                    STAmount(BIT, UINT64_C(5222900686060028), -16),
+                    ammMAG_BIT.tokens()));
+            }
+        }
+
+        {
+            Env env(*this, features);
+            auto const gateHub = Account("gateHub");
+            auto const bitstamp = Account("bitstamp");
+            auto const ammCreator = Account("amm");
+            auto const rogue = Account("rogue");
+
+            auto const USDGit = gateHub["USD"];
+            auto const USDBit = bitstamp["USD"];
+
+            env.fund(XRP(10'000'000), gateHub);
+            env.fund(XRP(10'000'000), bitstamp);
+
+            fund(
+                env,
+                {ammCreator, alice, carol, bob, rogue},
+                XRP(10'000'000),
+                {USDGit(10'000'000)},
+                Fund::Acct);
+            fund(
+                env,
+                {ammCreator, alice, carol, bob, rogue},
+                XRP(10'000'000),
+                {USDBit(10'000'000)},
+                Fund::IOUOnly);
+
+            env(offer(
+                alice,
+                STAmount{USDGit, UINT64_C(2986'982449964811), -12},
+                STAmount{USDBit, UINT64_C(2942'177713215346), -12}));
+            env(offer(
+                carol,
+                STAmount{USDGit, UINT64_C(43'93168381210000), -14},
+                XRPAmount(100'040'574)));
+            env(offer(
+                bob,
+                XRPAmount(200'000'000'000),
+                STAmount{USDBit, UINT64_C(86'733'07240000000), -11}));
+            env.close();
+
+            AMM ammUSDGit(
+                env,
+                ammCreator,
+                XRPAmount(83'912'334'394),
+                STAmount(USDGit, UINT64_C(36'450'97403472131), -11),
+                false,
+                323);
+            AMM ammUSDBit(
+                env,
+                ammCreator,
+                XRPAmount(14'209'063'792),
+                STAmount(USDBit, UINT64_C(6'156'703670983485), -12),
+                false,
+                276);
+            AMM ammUSDGit_USDBit(
+                env,
+                ammCreator,
+                STAmount(USDGit, UINT64_C(78'60366403959643), -14),
+                STAmount(USDBit, UINT64_C(78'14740882911861), -14),
+                false,
+                131);
+
+            env(offer(
+                    rogue,
+                    STAmount{USDBit, UINT64_C(9189523633053675), -25},
+                    STAmount{USDGit, UINT64_C(9255318092738661), -22}),
+                txflags(tfSell | tfImmediateOrCancel));
+
+            if (features[fixReducedOffersV2])
+            {
+                // rogue buys 0.00000087 USDbitstamp with 0.000000926 USDgithub
+                BEAST_EXPECT(
+                    STAmount(USDBit, 87, -8) ==
+                    (env.balance(rogue, USDBit) - USDBit(10'000'000)));
+                BEAST_EXPECT(
+                    STAmount(USDGit, 926, -9) ==
+                    (USDGit(10'000'000) - env.balance(rogue, USDGit)));
+                BEAST_EXPECT(ammUSDGit.expectBalances(
+                    XRPAmount(83'912'334'392),
+                    STAmount(USDGit, UINT64_C(36'450'97403564684), -11),
+                    ammUSDGit.tokens()));
+                // Not consumed
+                BEAST_EXPECT(ammUSDBit.expectBalances(
+                    XRPAmount(14'209'063'792),
+                    STAmount(USDBit, UINT64_C(6'156'703670983485), -12),
+                    ammUSDBit.tokens()));
+                BEAST_EXPECT(ammUSDGit_USDBit.expectBalances(
+                    STAmount(USDGit, UINT64_C(78'60366403959643), -14),
+                    STAmount(USDBit, UINT64_C(78'14740882911861), -14),
+                    ammUSDGit_USDBit.tokens()));
+            }
+            else
+            {
+                // rogue buys 0.0000013 USDbitstamp with 0.000000926 USDgithub
+                BEAST_EXPECT(
+                    STAmount(USDBit, 13, -7) ==
+                    (env.balance(rogue, USDBit) - USDBit(10'000'000)));
+                BEAST_EXPECT(
+                    STAmount(USDGit, 926, -9) ==
+                    (USDGit(10'000'000) - env.balance(rogue, USDGit)));
+                BEAST_EXPECT(ammUSDGit.expectBalances(
+                    XRPAmount(83'912'334'391),
+                    STAmount(USDGit, UINT64_C(36'450'97403564684), -11),
+                    ammUSDGit.tokens()));
+                // Not consumed
+                BEAST_EXPECT(ammUSDBit.expectBalances(
+                    XRPAmount(14'209'063'792),
+                    STAmount(USDBit, UINT64_C(6'156'703670983485), -12),
+                    ammUSDBit.tokens()));
+                BEAST_EXPECT(ammUSDGit_USDBit.expectBalances(
+                    STAmount(USDGit, UINT64_C(78'60366403959643), -14),
+                    STAmount(USDBit, UINT64_C(78'14740882911861), -14),
+                    ammUSDGit_USDBit.tokens()));
+            }
+        }
+    }
+
+    void
     run() override
     {
         FeatureBitset const all{jtx::supported_amendments()};
@@ -6908,6 +7134,8 @@ private:
         testFixAMMOfferBlockedByLOB(all - fixAMMv1_1);
         testLPTokenBalance(all);
         testLPTokenBalance(all - fixAMMv1_1);
+        testFixReducedOffers2(all);
+        testFixReducedOffers2(all - fixAMMv1_1 - fixReducedOffersV2);
     }
 };
 
