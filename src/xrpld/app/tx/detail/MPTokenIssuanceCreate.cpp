@@ -68,54 +68,75 @@ MPTokenIssuanceCreate::preflight(PreflightContext const& ctx)
 }
 
 TER
-MPTokenIssuanceCreate::doApply()
+MPTokenIssuanceCreate::create(
+    ApplyView& view,
+    beast::Journal journal,
+    MPTCreateArgs const& args)
 {
-    auto const acct = view().peek(keylet::account(account_));
+    auto const acct = view.peek(keylet::account(args.account));
     if (!acct)
         return tecINTERNAL;
 
-    if (mPriorBalance < view().fees().accountReserve((*acct)[sfOwnerCount] + 1))
+    if (args.priorBalance <
+        view.fees().accountReserve((*acct)[sfOwnerCount] + 1))
         return tecINSUFFICIENT_RESERVE;
 
     auto const mptIssuanceKeylet =
-        keylet::mptIssuance(account_, ctx_.tx.getSeqProxy().value());
+        keylet::mptIssuance(args.account, args.sequence);
 
     // create the MPTokenIssuance
     {
-        auto const ownerNode = view().dirInsert(
-            keylet::ownerDir(account_),
+        auto const ownerNode = view.dirInsert(
+            keylet::ownerDir(args.account),
             mptIssuanceKeylet,
-            describeOwnerDir(account_));
+            describeOwnerDir(args.account));
 
         if (!ownerNode)
             return tecDIR_FULL;
 
         auto mptIssuance = std::make_shared<SLE>(mptIssuanceKeylet);
-        (*mptIssuance)[sfFlags] = ctx_.tx.getFlags() & ~tfUniversal;
-        (*mptIssuance)[sfIssuer] = account_;
+        (*mptIssuance)[sfFlags] = args.flags & ~tfUniversal;
+        (*mptIssuance)[sfIssuer] = args.account;
         (*mptIssuance)[sfOutstandingAmount] = 0;
         (*mptIssuance)[sfOwnerNode] = *ownerNode;
-        (*mptIssuance)[sfSequence] = ctx_.tx.getSeqProxy().value();
+        (*mptIssuance)[sfSequence] = args.sequence;
 
-        if (auto const max = ctx_.tx[~sfMaximumAmount])
-            (*mptIssuance)[sfMaximumAmount] = *max;
+        if (args.maxAmount)
+            (*mptIssuance)[sfMaximumAmount] = *args.maxAmount;
 
-        if (auto const scale = ctx_.tx[~sfAssetScale])
-            (*mptIssuance)[sfAssetScale] = *scale;
+        if (args.assetScale)
+            (*mptIssuance)[sfAssetScale] = *args.assetScale;
 
-        if (auto const fee = ctx_.tx[~sfTransferFee])
-            (*mptIssuance)[sfTransferFee] = *fee;
+        if (args.transferFee)
+            (*mptIssuance)[sfTransferFee] = *args.transferFee;
 
-        if (auto const metadata = ctx_.tx[~sfMPTokenMetadata])
-            (*mptIssuance)[sfMPTokenMetadata] = *metadata;
+        if (args.metadata)
+            (*mptIssuance)[sfMPTokenMetadata] = *args.metadata;
 
-        view().insert(mptIssuance);
+        view.insert(mptIssuance);
     }
 
     // Update owner count.
-    adjustOwnerCount(view(), acct, 1, j_);
+    adjustOwnerCount(view, acct, 1, journal);
 
     return tesSUCCESS;
+}
+
+TER
+MPTokenIssuanceCreate::doApply()
+{
+    auto const& tx = ctx_.tx;
+    return create(
+        ctx_.view(),
+        ctx_.journal,
+        {.priorBalance = mPriorBalance,
+         .account = account_,
+         .sequence = tx.getSeqProxy().value(),
+         .flags = tx.getFlags(),
+         .maxAmount = tx[~sfMaximumAmount],
+         .assetScale = tx[~sfAssetScale],
+         .transferFee = tx[~sfTransferFee],
+         .metadata = tx[~sfMPTokenMetadata]});
 }
 
 }  // namespace ripple

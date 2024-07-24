@@ -24,6 +24,15 @@
 
 namespace ripple {
 
+struct MPTAuthorizeArgs
+{
+    XRPAmount const& priorBalance;
+    uint192 const& mptIssuanceID;
+    AccountID const& account;
+    std::uint32_t flags;
+    std::optional<AccountID> holderID;
+};
+
 class MPTokenAuthorize : public Transactor
 {
 public:
@@ -38,6 +47,12 @@ public:
 
     static TER
     preclaim(PreclaimContext const& ctx);
+
+    static TER
+    authorize(
+        ApplyView& view,
+        beast::Journal journal,
+        MPTAuthorizeArgs const& args);
 
     TER
     doApply() override;

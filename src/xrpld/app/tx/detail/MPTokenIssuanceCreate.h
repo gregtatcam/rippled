@@ -24,6 +24,18 @@
 
 namespace ripple {
 
+struct MPTCreateArgs
+{
+    XRPAmount const& priorBalance;
+    AccountID const& account;
+    std::uint32_t sequence;
+    std::uint32_t flags;
+    std::optional<std::uint64_t> maxAmount;
+    std::optional<std::uint8_t> assetScale;
+    std::optional<std::uint16_t> transferFee;
+    std::optional<Slice> const& metadata;
+};
+
 class MPTokenIssuanceCreate : public Transactor
 {
 public:
@@ -38,6 +50,9 @@ public:
 
     TER
     doApply() override;
+
+    static TER
+    create(ApplyView& view, beast::Journal journal, MPTCreateArgs const& args);
 };
 
 }  // namespace ripple
