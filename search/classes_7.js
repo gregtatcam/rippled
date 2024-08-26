@@ -39,7 +39,5 @@ var searchData=
   ['hours_36',['hours',['http://en.cppreference.com/w/cpp/chrono/duration.html',1,'std::chrono']]],
   ['httpclient_37',['HTTPClient',['../classripple_1_1HTTPClient.html',1,'ripple']]],
   ['httpclientimp_38',['HTTPClientImp',['../classripple_1_1HTTPClientImp.html',1,'ripple']]],
-  ['httpclientsslcontext_39',['HTTPClientSSLContext',['../classripple_1_1HTTPClientSSLContext.html',1,'ripple']]],
-  ['httpdownloader_40',['HTTPDownloader',['../classripple_1_1HTTPDownloader.html',1,'ripple']]],
-  ['httpstream_41',['HTTPStream',['../classripple_1_1HTTPStream.html',1,'ripple']]]
+  ['httpclientsslcontext_39',['HTTPClientSSLContext',['../classripple_1_1HTTPClientSSLContext.html',1,'ripple']]]
 ];

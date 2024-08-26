@@ -153,8 +153,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a012991cb6d3b79b1515ddd8478cd6c8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e3f03e303b8524cdac477e7f6f4288f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1Family.html">Family</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a9e3f03e303b8524cdac477e7f6f4288f">getNodeFamily</a> ()=0</td></tr>
 <tr class="separator:a9e3f03e303b8524cdac477e7f6f4288f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad5a910480b24e2a645eb33eb1cdc8063"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1Family.html">Family</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#ad5a910480b24e2a645eb33eb1cdc8063">getShardFamily</a> ()=0</td></tr>
-<tr class="separator:ad5a910480b24e2a645eb33eb1cdc8063"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6053f47d2aefc7800dc2bb1eda0cf91d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1TimeKeeper.html">TimeKeeper</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a6053f47d2aefc7800dc2bb1eda0cf91d">timeKeeper</a> ()=0</td></tr>
 <tr class="separator:a6053f47d2aefc7800dc2bb1eda0cf91d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79e319577676b37dbff4ce5fc86aa23f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1JobQueue.html">JobQueue</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a79e319577676b37dbff4ce5fc86aa23f">getJobQueue</a> ()=0</td></tr>
@@ -191,10 +189,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a362cf2d2e3ab0e9b508a1da8ef60b8a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a337ff00f72b3421fd50b54656456acdb"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1NodeStore_1_1Database.html">NodeStore::Database</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a337ff00f72b3421fd50b54656456acdb">getNodeStore</a> ()=0</td></tr>
 <tr class="separator:a337ff00f72b3421fd50b54656456acdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a742601392cc1ad50a5bd5e415933877e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1NodeStore_1_1DatabaseShard.html">NodeStore::DatabaseShard</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a742601392cc1ad50a5bd5e415933877e">getShardStore</a> ()=0</td></tr>
-<tr class="separator:a742601392cc1ad50a5bd5e415933877e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac82ea28099978508138bb3e432cf5391"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1RPC_1_1ShardArchiveHandler.html">RPC::ShardArchiveHandler</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#ac82ea28099978508138bb3e432cf5391">getShardArchiveHandler</a> (bool tryRecovery=false)=0</td></tr>
-<tr class="separator:ac82ea28099978508138bb3e432cf5391"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a915619bcedd33aaed53cf784a5863dab"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1InboundLedgers.html">InboundLedgers</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a915619bcedd33aaed53cf784a5863dab">getInboundLedgers</a> ()=0</td></tr>
 <tr class="separator:a915619bcedd33aaed53cf784a5863dab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cd78b04a507ef505863ae0e1230a6ce"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classripple_1_1InboundTransactions.html">InboundTransactions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a5cd78b04a507ef505863ae0e1230a6ce">getInboundTransactions</a> ()=0</td></tr>
@@ -251,6 +245,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac57d9b2dd4e172f0934c7a1e34485842"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceripple.html#a12af8e98b794e8ee3b4dbecaed2a4efd">LedgerIndex</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#ac57d9b2dd4e172f0934c7a1e34485842">getMaxDisallowedLedger</a> ()=0</td></tr>
 <tr class="memdesc:ac57d9b2dd4e172f0934c7a1e34485842"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure that a newly-started validator does not sign proposals older than the last ledger it persisted.  <a href="classripple_1_1Application.html#ac57d9b2dd4e172f0934c7a1e34485842">More...</a><br /></td></tr>
 <tr class="separator:ac57d9b2dd4e172f0934c7a1e34485842"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43e7d6b9a54db220da67532d2708e90c"><td class="memItemLeft" align="right" valign="top">virtual const <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Application.html#a43e7d6b9a54db220da67532d2708e90c">trapTxID</a> () const =0</td></tr>
+<tr class="separator:a43e7d6b9a54db220da67532d2708e90c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5672372869d3a59c7cd2f7ce3056ae33"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classbeast_1_1PropertyStream_1_1Source.html#a5672372869d3a59c7cd2f7ce3056ae33">name</a> () const</td></tr>
 <tr class="memdesc:a5672372869d3a59c7cd2f7ce3056ae33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the name of this source.  <a href="classbeast_1_1PropertyStream_1_1Source.html#a5672372869d3a59c7cd2f7ce3056ae33">More...</a><br /></td></tr>
 <tr class="separator:a5672372869d3a59c7cd2f7ce3056ae33"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -313,7 +309,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="Application_8h_source.html#l00116">116</a> of file <a class="el" href="Application_8h_source.html">Application.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Application_8h_source.html#l00112">112</a> of file <a class="el" href="Application_8h_source.html">Application.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="af49bed1dd2fb49345992a96347c50f76" name="af49bed1dd2fb49345992a96347c50f76"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af49bed1dd2fb49345992a96347c50f76">&#9670;&#160;</a></span>MutexType</h2>
@@ -327,7 +323,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Application_8h_source.html#l00130">130</a> of file <a class="el" href="Application_8h_source.html">Application.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Application_8h_source.html#l00126">126</a> of file <a class="el" href="Application_8h_source.html">Application.h</a>.</p>
 
 </div>
 </div>
@@ -347,7 +343,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Application_8cpp_source.html#l02356">2356</a> of file <a class="el" href="Application_8cpp_source.html">Application.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Application_8cpp_source.html#l02192">2192</a> of file <a class="el" href="Application_8cpp_source.html">Application.cpp</a>.</p>
 
 </div>
 </div>
@@ -758,33 +754,6 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Implemented in <a class="el" href="classripple_1_1ApplicationImp.html#a20b6e0fc0f1c67171fb84625a9d659ea">ripple::ApplicationImp</a>.</p>
-
-</div>
-</div>
-<a id="ad5a910480b24e2a645eb33eb1cdc8063" name="ad5a910480b24e2a645eb33eb1cdc8063"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5a910480b24e2a645eb33eb1cdc8063">&#9670;&#160;</a></span>getShardFamily()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classripple_1_1Family.html">Family</a> * ripple::Application::getShardFamily </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="classripple_1_1ApplicationImp.html#a0adce49eab112fce5ca5a629fb4fd6ea">ripple::ApplicationImp</a>.</p>
 
 </div>
 </div>
@@ -1271,61 +1240,6 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Implemented in <a class="el" href="classripple_1_1ApplicationImp.html#ab910d6e1e9d8212d7cfbe48099240878">ripple::ApplicationImp</a>.</p>
-
-</div>
-</div>
-<a id="a742601392cc1ad50a5bd5e415933877e" name="a742601392cc1ad50a5bd5e415933877e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a742601392cc1ad50a5bd5e415933877e">&#9670;&#160;</a></span>getShardStore()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classripple_1_1NodeStore_1_1DatabaseShard.html">NodeStore::DatabaseShard</a> * ripple::Application::getShardStore </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="classripple_1_1ApplicationImp.html#aebb72321069efe43ee91113555a9ef70">ripple::ApplicationImp</a>.</p>
-
-</div>
-</div>
-<a id="ac82ea28099978508138bb3e432cf5391" name="ac82ea28099978508138bb3e432cf5391"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac82ea28099978508138bb3e432cf5391">&#9670;&#160;</a></span>getShardArchiveHandler()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classripple_1_1RPC_1_1ShardArchiveHandler.html">RPC::ShardArchiveHandler</a> * ripple::Application::getShardArchiveHandler </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>tryRecovery</em> = <code>false</code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="classripple_1_1ApplicationImp.html#a112a4b3cda08fadf78e9962de9a4a6c5">ripple::ApplicationImp</a>.</p>
 
 </div>
 </div>
@@ -2064,6 +1978,33 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="a43e7d6b9a54db220da67532d2708e90c" name="a43e7d6b9a54db220da67532d2708e90c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43e7d6b9a54db220da67532d2708e90c">&#9670;&#160;</a></span>trapTxID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> &gt; &amp; ripple::Application::trapTxID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classripple_1_1ApplicationImp.html#a47404b738189809542e77436a781b589">ripple::ApplicationImp</a>.</p>
+
+</div>
+</div>
 <a id="a5672372869d3a59c7cd2f7ce3056ae33" name="a5672372869d3a59c7cd2f7ce3056ae33"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5672372869d3a59c7cd2f7ce3056ae33">&#9670;&#160;</a></span>name()</h2>
 
@@ -2543,7 +2484,7 @@ template&lt;class Derived &gt; </div>
 <p>Subclass override. </p>
 <p >The default version does nothing. </p>
 
-<p>Reimplemented in <a class="el" href="classripple_1_1LedgerCleanerImp.html#acafe1b2bea4bb3820cb697ce5fa711b4">ripple::LedgerCleanerImp</a>, <a class="el" href="classripple_1_1PeerFinder_1_1ManagerImp.html#a870c8e53e39d362015e4b165fa0be489">ripple::PeerFinder::ManagerImp</a>, <a class="el" href="classripple_1_1Resource_1_1ManagerImp.html#a527375e0f24eac6dd82caeeb7cd42cc5">ripple::Resource::ManagerImp</a>, <a class="el" href="classripple_1_1ApplicationImp.html#afe72bf359aadee6192a2ec13be0c279f">ripple::ApplicationImp</a>, and <a class="el" href="classripple_1_1OverlayImpl.html#a20efec9ce4b1701e4a988430465cbe24">ripple::OverlayImpl</a>.</p>
+<p>Reimplemented in <a class="el" href="classripple_1_1Resource_1_1ManagerImp.html#a527375e0f24eac6dd82caeeb7cd42cc5">ripple::Resource::ManagerImp</a>, <a class="el" href="classripple_1_1LedgerCleanerImp.html#acafe1b2bea4bb3820cb697ce5fa711b4">ripple::LedgerCleanerImp</a>, <a class="el" href="classripple_1_1PeerFinder_1_1ManagerImp.html#a870c8e53e39d362015e4b165fa0be489">ripple::PeerFinder::ManagerImp</a>, <a class="el" href="classripple_1_1ApplicationImp.html#afe72bf359aadee6192a2ec13be0c279f">ripple::ApplicationImp</a>, and <a class="el" href="classripple_1_1OverlayImpl.html#a20efec9ce4b1701e4a988430465cbe24">ripple::OverlayImpl</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="beast__PropertyStream_8cpp_source.html#l00380">380</a> of file <a class="el" href="beast__PropertyStream_8cpp_source.html">beast_PropertyStream.cpp</a>.</p>
 

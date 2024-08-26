@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_9f69212e4c6e2ca9ec5ab59cd7b6275c.html">app</a></li><li class="navelem"><a class="el" href="dir_1e0db5c7188e9c3cb47dd9ba683c8f27.html">paths</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_c69db3203fa08a9ff994909ba6ee9783.html">app</a></li><li class="navelem"><a class="el" href="dir_a6d14a898e5042b88feceb06bece5732.html">paths</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,9 +98,9 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_APP_PATHS_CREDIT_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_APP_PATHS_CREDIT_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/IOUAmount.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/ledger/View.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/protocol/STAmount.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpld/ledger/View.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/basics/IOUAmount.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/protocol/STAmount.h&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
@@ -126,7 +126,7 @@ $(function() {
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>}  <span class="comment">// namespace ripple</span></div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a00ae0d729cb3e35b6bcac9a27ebb5284"><div class="ttname"><a href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">ripple::AccountID</a></div><div class="ttdeci">base_uint&lt; 160, detail::AccountIDTag &gt; AccountID</div><div class="ttdoc">A 160-bit unsigned that uniquely identifies an account.</div><div class="ttdef"><b>Definition:</b> <a href="AccountID_8h_source.html#l00049">AccountID.h:49</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a59b34a5a4179de5ca0ebd178b26c5767"><div class="ttname"><a href="namespaceripple.html#a59b34a5a4179de5ca0ebd178b26c5767">ripple::creditLimit</a></div><div class="ttdeci">STAmount creditLimit(ReadView const &amp;view, AccountID const &amp;account, AccountID const &amp;issuer, Currency const &amp;currency)</div><div class="ttdoc">Calculate the maximum amount of IOUs that an account can hold.</div><div class="ttdef"><b>Definition:</b> <a href="Credit_8cpp_source.html#l00028">Credit.cpp:28</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a676d0eac3fcb58c8634598bab4f5554b"><div class="ttname"><a href="namespaceripple.html#a676d0eac3fcb58c8634598bab4f5554b">ripple::creditBalance</a></div><div class="ttdeci">STAmount creditBalance(ReadView const &amp;view, AccountID const &amp;account, AccountID const &amp;issuer, Currency const &amp;currency)</div><div class="ttdoc">Returns the amount of IOUs issued by issuer that are held by an account.</div><div class="ttdef"><b>Definition:</b> <a href="Credit_8cpp_source.html#l00061">Credit.cpp:61</a></div></div>

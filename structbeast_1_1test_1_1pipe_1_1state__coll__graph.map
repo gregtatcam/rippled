@@ -1,0 +1,7 @@
+<map id="beast::test::pipe::state" name="beast::test::pipe::state">
+<area shape="rect" id="node1" title=" " alt="" coords="140,211,275,251"/>
+<area shape="rect" id="node2" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/thread/mutex.html" title=" " alt="" coords="5,115,97,141"/>
+<area shape="rect" id="node3" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/thread/condition_variable.html" title=" " alt="" coords="122,115,293,141"/>
+<area shape="rect" id="node4" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/unique_ptr.html" title=" " alt="" coords="317,108,487,148"/>
+<area shape="rect" id="node5" href="$structbeast_1_1test_1_1pipe_1_1read__op.html" title=" " alt="" coords="335,5,469,45"/>
+</map>

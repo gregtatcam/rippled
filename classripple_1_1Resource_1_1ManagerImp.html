@@ -153,8 +153,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8fb74ff3c516b21065e81812e8af6d71"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Resource_1_1Consumer.html">Consumer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Resource_1_1ManagerImp.html#a8fb74ff3c516b21065e81812e8af6d71">newInboundEndpoint</a> (<a class="el" href="classbeast_1_1IP_1_1Endpoint.html">beast::IP::Endpoint</a> const &amp;address) override</td></tr>
 <tr class="memdesc:a8fb74ff3c516b21065e81812e8af6d71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new endpoint keyed by inbound IP address or the forwarded IP if proxied.  <a href="classripple_1_1Resource_1_1ManagerImp.html#a8fb74ff3c516b21065e81812e8af6d71">More...</a><br /></td></tr>
 <tr class="separator:a8fb74ff3c516b21065e81812e8af6d71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad5e845d883eab4afc9327ae3f571efc5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Resource_1_1Consumer.html">Consumer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Resource_1_1ManagerImp.html#ad5e845d883eab4afc9327ae3f571efc5">newInboundEndpoint</a> (<a class="el" href="classbeast_1_1IP_1_1Endpoint.html">beast::IP::Endpoint</a> const &amp;address, bool const proxy, boost::string_view const &amp;<a class="el" href="namespaceripple.html#a8fdfc19db800245e87ac4f66f0304092">forwardedFor</a>) override</td></tr>
-<tr class="separator:ad5e845d883eab4afc9327ae3f571efc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77da3faa04523505150bbbc791d54b12"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Resource_1_1Consumer.html">Consumer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Resource_1_1ManagerImp.html#a77da3faa04523505150bbbc791d54b12">newInboundEndpoint</a> (<a class="el" href="classbeast_1_1IP_1_1Endpoint.html">beast::IP::Endpoint</a> const &amp;address, bool const proxy, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a> <a class="el" href="namespaceripple.html#aa1d2bbcba6f5e3838895165723dae5f0">forwardedFor</a>) override</td></tr>
+<tr class="separator:a77da3faa04523505150bbbc791d54b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a348f6fbdfcc137c796b82661e088e61c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Resource_1_1Consumer.html">Consumer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Resource_1_1ManagerImp.html#a348f6fbdfcc137c796b82661e088e61c">newOutboundEndpoint</a> (<a class="el" href="classbeast_1_1IP_1_1Endpoint.html">beast::IP::Endpoint</a> const &amp;address) override</td></tr>
 <tr class="memdesc:a348f6fbdfcc137c796b82661e088e61c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new endpoint keyed by outbound IP address and port.  <a href="classripple_1_1Resource_1_1ManagerImp.html#a348f6fbdfcc137c796b82661e088e61c">More...</a><br /></td></tr>
 <tr class="separator:a348f6fbdfcc137c796b82661e088e61c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -420,8 +420,8 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ad5e845d883eab4afc9327ae3f571efc5" name="ad5e845d883eab4afc9327ae3f571efc5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad5e845d883eab4afc9327ae3f571efc5">&#9670;&#160;</a></span>newInboundEndpoint() <span class="overload">[2/2]</span></h2>
+<a id="a77da3faa04523505150bbbc791d54b12" name="a77da3faa04523505150bbbc791d54b12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77da3faa04523505150bbbc791d54b12">&#9670;&#160;</a></span>newInboundEndpoint() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -444,7 +444,7 @@ Private Attributes</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">boost::string_view const &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a>&#160;</td>
           <td class="paramname"><em>forwardedFor</em>&#160;</td>
         </tr>
         <tr>
@@ -460,7 +460,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#a8ca310730ac596bb90ac9922d088864b">ripple::Resource::Manager</a>.</p>
+<p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#a645857a391d946ff5d684a9b379be319">ripple::Resource::Manager</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00077">77</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
@@ -494,7 +494,7 @@ Private Attributes</h2></td></tr>
 
 <p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#ad4ffe7b5b4c60c74ab86c29bf212377e">ripple::Resource::Manager</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00101">101</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00100">100</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>
@@ -526,7 +526,7 @@ Private Attributes</h2></td></tr>
 
 <p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#a88e81fee5bbd2f26bc1f20b3f28ccfa1">ripple::Resource::Manager</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00107">107</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00106">106</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>
@@ -557,7 +557,7 @@ Private Attributes</h2></td></tr>
 
 <p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#a098033b7735f83f882d9945939c63d6c">ripple::Resource::Manager</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00113">113</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00112">112</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>
@@ -605,7 +605,7 @@ Private Attributes</h2></td></tr>
 
 <p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#aa932836afb30bf1db023222eff401247">ripple::Resource::Manager</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00119">119</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00118">118</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>
@@ -636,7 +636,7 @@ Private Attributes</h2></td></tr>
 
 <p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#a06751117098e01ef0e0a780df25a9b2d">ripple::Resource::Manager</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00127">127</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00126">126</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>
@@ -666,7 +666,7 @@ Private Attributes</h2></td></tr>
 
 <p>Implements <a class="el" href="classripple_1_1Resource_1_1Manager.html#ab5fe84b72cd833f4cd659b0ceca673b0">ripple::Resource::Manager</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00133">133</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00132">132</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>
@@ -699,7 +699,7 @@ Private Attributes</h2></td></tr>
 
 <p>Reimplemented from <a class="el" href="classbeast_1_1PropertyStream_1_1Source.html#accd7269755b1a27d4c66715edc1f5915">beast::PropertyStream::Source</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00141">141</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00140">140</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>
@@ -726,7 +726,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00150">150</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ResourceManager_8cpp_source.html#l00149">149</a> of file <a class="el" href="ResourceManager_8cpp_source.html">ResourceManager.cpp</a>.</p>
 
 </div>
 </div>

@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_a49d03dbe37362975c505cb11669e4db.html">resource</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_0103a8ad82dcc2c51f5cde661b4b5cb7.html">xrpl</a></li><li class="navelem"><a class="el" href="dir_68f79f171b7159941f300783854c1b48.html">resource</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,9 +98,9 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_RESOURCE_CONSUMER_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_RESOURCE_CONSUMER_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/Log.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/resource/Charge.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/resource/Disposition.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/Log.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/resource/Charge.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/resource/Disposition.h&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">namespace </span>Resource {</div>
@@ -180,10 +180,10 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1Resource_1_1Consumer_html_ad7cedbf4822211a1c627483b36d8a2b4"><div class="ttname"><a href="classripple_1_1Resource_1_1Consumer.html#ad7cedbf4822211a1c627483b36d8a2b4">ripple::Resource::Consumer::disposition</a></div><div class="ttdeci">Disposition disposition() const</div><div class="ttdoc">Returns the current disposition of this consumer.</div><div class="ttdef"><b>Definition:</b> <a href="Consumer_8cpp_source.html#l00089">Consumer.cpp:89</a></div></div>
 <div class="ttc" id="aclassripple_1_1Resource_1_1Consumer_html_ae6ce4aef62d151f2ed8750eb79596a5a"><div class="ttname"><a href="classripple_1_1Resource_1_1Consumer.html#ae6ce4aef62d151f2ed8750eb79596a5a">ripple::Resource::Consumer::elevate</a></div><div class="ttdeci">void elevate(std::string const &amp;name)</div><div class="ttdoc">Raise the Consumer's privilege level to a Named endpoint.</div></div>
 <div class="ttc" id="aclassripple_1_1Resource_1_1Consumer_html_afb78dbde97d941cdd72a31fe573da014"><div class="ttname"><a href="classripple_1_1Resource_1_1Consumer.html#afb78dbde97d941cdd72a31fe573da014">ripple::Resource::Consumer::~Consumer</a></div><div class="ttdeci">~Consumer()</div><div class="ttdef"><b>Definition:</b> <a href="Consumer_8cpp_source.html#l00047">Consumer.cpp:47</a></div></div>
-<div class="ttc" id="aclassripple_1_1Resource_1_1Logic_html"><div class="ttname"><a href="classripple_1_1Resource_1_1Logic.html">ripple::Resource::Logic</a></div><div class="ttdef"><b>Definition:</b> <a href="resource_2impl_2Logic_8h_source.html#l00040">resource/impl/Logic.h:41</a></div></div>
+<div class="ttc" id="aclassripple_1_1Resource_1_1Logic_html"><div class="ttname"><a href="classripple_1_1Resource_1_1Logic.html">ripple::Resource::Logic</a></div><div class="ttdef"><b>Definition:</b> <a href="include_2xrpl_2resource_2detail_2Logic_8h_source.html#l00040">include/xrpl/resource/detail/Logic.h:41</a></div></div>
 <div class="ttc" id="anamespaceripple_1_1Resource_html_a3ffff64b06f7de442d3c4335e951e208"><div class="ttname"><a href="namespaceripple_1_1Resource.html#a3ffff64b06f7de442d3c4335e951e208">ripple::Resource::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, Charge const &amp;v)</div><div class="ttdef"><b>Definition:</b> <a href="Charge_8cpp_source.html#l00051">Charge.cpp:52</a></div></div>
 <div class="ttc" id="anamespaceripple_1_1Resource_html_ae12997de115c1cf0032794aa5ea1b15d"><div class="ttname"><a href="namespaceripple_1_1Resource.html#ae12997de115c1cf0032794aa5ea1b15d">ripple::Resource::Disposition</a></div><div class="ttdeci">Disposition</div><div class="ttdoc">The disposition of a consumer after applying a load charge.</div><div class="ttdef"><b>Definition:</b> <a href="Disposition_8h_source.html#l00027">Disposition.h:27</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="astructripple_1_1Resource_1_1Entry_html"><div class="ttname"><a href="structripple_1_1Resource_1_1Entry.html">ripple::Resource::Entry</a></div><div class="ttdef"><b>Definition:</b> <a href="Entry_8h_source.html#l00037">Entry.h:38</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

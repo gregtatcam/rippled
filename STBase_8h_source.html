@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_1e765e6a8d5970800a535eb2615ec474.html">protocol</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_0103a8ad82dcc2c51f5cde661b4b5cb7.html">xrpl</a></li><li class="navelem"><a class="el" href="dir_8d04e3c0b58cad28d7755ed462d1b6c0.html">protocol</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,9 +98,9 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_PROTOCOL_STBASE_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_PROTOCOL_STBASE_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/contract.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/protocol/SField.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/protocol/Serializer.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/contract.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/protocol/SField.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/protocol/Serializer.h&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/memory.html">memory</a>&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/ostream.html">ostream</a>&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/string.html">string</a>&gt;</span></div>
@@ -250,7 +250,7 @@ $(function() {
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><span class="comment">//------------------------------------------------------------------------------</span></div>
 <div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span> </div>
 <div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a>&amp;</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><a class="code hl_function" href="namespaceripple.html#a057808985eb1cda645ec3b17a027113e">operator&lt;&lt;</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a>&amp; <a class="code hl_enumvalue" href="namespaceripple.html#a7cc64e12723fbc9606d85442a2569fedac68271a63ddbc431c307beb7d2918275">out</a>, <span class="keyword">const</span> <a class="code hl_class" href="classripple_1_1STBase.html">STBase</a>&amp; t);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span><a class="code hl_function" href="namespaceripple.html#a5c77599883897def8bd3e9e4ad140f95">operator&lt;&lt;</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a>&amp; <a class="code hl_enumvalue" href="namespaceripple.html#a7cc64e12723fbc9606d85442a2569fedac68271a63ddbc431c307beb7d2918275">out</a>, <span class="keyword">const</span> <a class="code hl_class" href="classripple_1_1STBase.html">STBase</a>&amp; t);</div>
 <div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> D&gt;</div>
 <div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>D&amp;</div>
@@ -316,9 +316,9 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1detail_1_1STVar_html"><div class="ttname"><a href="classripple_1_1detail_1_1STVar.html">ripple::detail::STVar</a></div><div class="ttdef"><b>Definition:</b> <a href="STVar_8h_source.html#l00049">STVar.h:50</a></div></div>
 <div class="ttc" id="adecay_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/decay.html">std::decay_t</a></div></div>
 <div class="ttc" id="amemory_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/memory.html">memory</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a057808985eb1cda645ec3b17a027113e"><div class="ttname"><a href="namespaceripple.html#a057808985eb1cda645ec3b17a027113e">ripple::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, TOffer&lt; TIn, TOut &gt; const &amp;offer)</div><div class="ttdef"><b>Definition:</b> <a href="Offer_8h_source.html#l00311">Offer.h:312</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a3e7e3f29aef85bcca06706da54e950fc"><div class="ttname"><a href="namespaceripple.html#a3e7e3f29aef85bcca06706da54e950fc">ripple::SerializedTypeID</a></div><div class="ttdeci">SerializedTypeID</div><div class="ttdef"><b>Definition:</b> <a href="SField_8h_source.html#l00106">SField.h:106</a></div></div>
+<div class="ttc" id="anamespaceripple_html_a5c77599883897def8bd3e9e4ad140f95"><div class="ttname"><a href="namespaceripple.html#a5c77599883897def8bd3e9e4ad140f95">ripple::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;out, base_uint&lt; Bits, Tag &gt; const &amp;u)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00627">base_uint.h:628</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a7cc64e12723fbc9606d85442a2569fedac68271a63ddbc431c307beb7d2918275"><div class="ttname"><a href="namespaceripple.html#a7cc64e12723fbc9606d85442a2569fedac68271a63ddbc431c307beb7d2918275">ripple::QualityDirection::out</a></div><div class="ttdeci">@ out</div></div>
 <div class="ttc" id="aostream_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/ostream.html">ostream</a></div></div>
 <div class="ttc" id="asize_t_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a></div></div>

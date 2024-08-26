@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_d7c39fc6a58949d9b8efa0ea0aabeed8.html">core</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_ba3df07e81ea6c232f7f0c8823316f62.html">core</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -107,8 +107,8 @@ $(function() {
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;sys/types.h&gt;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;ripple/basics/contract.h&gt;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;ripple/core/Pg.h&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;xrpld/core/Pg.h&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;xrpl/basics/contract.h&gt;</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;boost/asio/ssl/detail/openssl_init.hpp&gt;</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;boost/format.hpp&gt;</span></div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/algorithm.html">algorithm</a>&gt;</span></div>
@@ -423,7 +423,7 @@ $(function() {
 <div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span> </div>
 <div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    <span class="comment">// The connection object must be freed using the libpq API PQfinish() call.</span></div>
 <div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>    pg_connection_type conn(</div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>        PQconnectdb(<a class="code hl_function" href="namespaceripple.html#a6f6bdc124fdecbf98999bb7c4a581f08">get</a>(pgConfig, <span class="stringliteral">&quot;conninfo&quot;</span>).c_str()),</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>        PQconnectdb(<a class="code hl_function" href="namespaceripple.html#ac341e8b4d6615fda7866d3c1c0014e44">get</a>(pgConfig, <span class="stringliteral">&quot;conninfo&quot;</span>).c_str()),</div>
 <div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        [](PGconn* conn) { PQfinish(conn); });</div>
 <div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>    <span class="keywordflow">if</span> (!conn)</div>
 <div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>        Throw&lt;std::runtime_error&gt;(<span class="stringliteral">&quot;Can&#39;t create DB connection.&quot;</span>);</div>
@@ -447,7 +447,7 @@ $(function() {
 <div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    }</div>
 <div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
 <div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    <span class="comment">// Set &quot;port&quot; and &quot;hostaddr&quot; if we&#39;re caching it.</span></div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    <span class="keywordtype">bool</span> <span class="keyword">const</span> remember_ip = <a class="code hl_function" href="namespaceripple.html#a6f6bdc124fdecbf98999bb7c4a581f08">get</a>(pgConfig, <span class="stringliteral">&quot;remember_ip&quot;</span>, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    <span class="keywordtype">bool</span> <span class="keyword">const</span> remember_ip = <a class="code hl_function" href="namespaceripple.html#ac341e8b4d6615fda7866d3c1c0014e44">get</a>(pgConfig, <span class="stringliteral">&quot;remember_ip&quot;</span>, <span class="keyword">true</span>);</div>
 <div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
 <div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>    <span class="keywordflow">if</span> (remember_ip)</div>
 <div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>    {</div>
@@ -1420,9 +1420,9 @@ $(function() {
 <div class="ttc" id="alock_guard_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/thread/lock_guard.html">std::lock_guard</a></div></div>
 <div class="ttc" id="alock_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/thread/lock.html">std::lock</a></div><div class="ttdeci">T lock(T... args)</div></div>
 <div class="ttc" id="amin_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/algorithm/min.html">std::min</a></div><div class="ttdeci">T min(T... args)</div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a55f440d44d3b98aa990fadd4ebb7c87e"><div class="ttname"><a href="namespaceripple.html#a55f440d44d3b98aa990fadd4ebb7c87e">ripple::get_if_exists</a></div><div class="ttdeci">bool get_if_exists(Section const &amp;section, std::string const &amp;name, T &amp;v)</div><div class="ttdef"><b>Definition:</b> <a href="BasicConfig_8h_source.html#l00384">BasicConfig.h:384</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a6f6bdc124fdecbf98999bb7c4a581f08"><div class="ttname"><a href="namespaceripple.html#a6f6bdc124fdecbf98999bb7c4a581f08">ripple::get</a></div><div class="ttdeci">T &amp; get(EitherAmount &amp;amt)</div><div class="ttdef"><b>Definition:</b> <a href="AmountSpec_8h_source.html#l00118">AmountSpec.h:118</a></div></div>
+<div class="ttc" id="anamespaceripple_html_ac341e8b4d6615fda7866d3c1c0014e44"><div class="ttname"><a href="namespaceripple.html#ac341e8b4d6615fda7866d3c1c0014e44">ripple::get</a></div><div class="ttdeci">T get(Section const &amp;section, std::string const &amp;name, T const &amp;defaultValue=T{})</div><div class="ttdoc">Retrieve a key/value pair from a section.</div><div class="ttdef"><b>Definition:</b> <a href="BasicConfig_8h_source.html#l00353">BasicConfig.h:353</a></div></div>
 <div class="ttc" id="anext_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/iterator/next.html">std::next</a></div><div class="ttdeci">T next(T... args)</div></div>
 <div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
 <div class="ttc" id="areserve_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/reserve.html">std::vector::reserve</a></div><div class="ttdeci">T reserve(T... args)</div></div>

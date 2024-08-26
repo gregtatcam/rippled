@@ -1,0 +1,5 @@
+<map id="beast::test::fail_stream&lt; NextLayer &gt;" name="beast::test::fail_stream&lt; NextLayer &gt;">
+<area shape="rect" id="node1" title="A stream wrapper that fails." alt="" coords="7,181,180,221"/>
+<area shape="rect" id="node2" href="$classbeast_1_1test_1_1fail__counter.html" title="A countdown to simulated failure." alt="" coords="5,93,181,119"/>
+<area shape="rect" id="node3" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/size_t.html" title=" " alt="" coords="49,5,137,31"/>
+</map>

@@ -95,17 +95,17 @@ $(function() {
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//==============================================================================</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;ripple/beast/clock/manual_clock.h&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;ripple/beast/unit_test.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;xrpl/beast/clock/manual_clock.h&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;xrpl/beast/unit_test.h&gt;</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_map.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_multimap.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_multiset.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_set.h&gt;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_unordered_map.h&gt;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_unordered_multimap.h&gt;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_unordered_multiset.h&gt;</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;ripple/beast/container/aged_unordered_set.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_map.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_multimap.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_multiset.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_set.h&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_unordered_map.h&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_unordered_multimap.h&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_unordered_multiset.h&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;xrpl/beast/container/aged_unordered_set.h&gt;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/list.html">list</a>&gt;</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/vector.html">vector</a>&gt;</span></div>
@@ -128,7 +128,7 @@ $(function() {
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacebeast.html">beast</a> {</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classbeast_1_1aged__associative__container__test__base.html">   53</a></span><span class="keyword">class </span><a class="code hl_class" href="classbeast_1_1aged__associative__container__test__base.html">aged_associative_container_test_base</a> : <span class="keyword">public</span> unit_test::suite</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="classbeast_1_1aged__associative__container__test__base.html">   53</a></span><span class="keyword">class </span><a class="code hl_class" href="classbeast_1_1aged__associative__container__test__base.html">aged_associative_container_test_base</a> : <span class="keyword">public</span> <a class="code hl_class" href="classbeast_1_1unit__test_1_1suite.html">unit_test::suite</a></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>{</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
@@ -735,7 +735,7 @@ $(function() {
 <div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>    }</div>
 <div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>    <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/out_of_range.html">std::out_of_range</a> <span class="keyword">const</span>&amp;)</div>
 <div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>    {</div>
-<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>        fail(<span class="stringliteral">&quot;caught exception&quot;</span>);</div>
+<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#af5ea30f883ad3a2a841af60a9a82c29c">fail</a>(<span class="stringliteral">&quot;caught exception&quot;</span>);</div>
 <div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>    }</div>
 <div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>}</div>
 <div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span> </div>
@@ -851,7 +851,7 @@ $(function() {
 <div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
 <div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span> </div>
 <div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>    <span class="comment">// testcase (Traits::name() + &quot; empty&quot;);</span></div>
-<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>    testcase(<span class="stringliteral">&quot;empty&quot;</span>);</div>
+<div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;empty&quot;</span>);</div>
 <div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span> </div>
 <div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>    {</div>
 <div class="line"><a id="l00779" name="l00779"></a><span class="lineno">  779</span>        <span class="keyword">typename</span> Traits::template Cont&lt;Comp, Alloc&gt; c(clock);</div>
@@ -894,7 +894,7 @@ $(function() {
 <div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
 <div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span> </div>
 <div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span>    <span class="comment">// testcase (Traits::name() + &quot; empty&quot;);</span></div>
-<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span>    testcase(<span class="stringliteral">&quot;empty&quot;</span>);</div>
+<div class="line"><a id="l00819" name="l00819"></a><span class="lineno">  819</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;empty&quot;</span>);</div>
 <div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span>    {</div>
 <div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>        <span class="keyword">typename</span> Traits::template Cont&lt;Hash, Equal, Alloc&gt; c(clock);</div>
 <div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>        <a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#ad9670f0475860fa72c3e95c50f179316">checkContents</a>(c);</div>
@@ -961,7 +961,7 @@ $(function() {
 <div class="line"><a id="l00883" name="l00883"></a><span class="lineno">  883</span>    <span class="keyword">auto</span> <span class="keyword">const</span> v(Traits::values());</div>
 <div class="line"><a id="l00884" name="l00884"></a><span class="lineno">  884</span> </div>
 <div class="line"><a id="l00885" name="l00885"></a><span class="lineno">  885</span>    <span class="comment">// testcase (Traits::name() + &quot; range&quot;);</span></div>
-<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>    testcase(<span class="stringliteral">&quot;range&quot;</span>);</div>
+<div class="line"><a id="l00886" name="l00886"></a><span class="lineno">  886</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;range&quot;</span>);</div>
 <div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span> </div>
 <div class="line"><a id="l00888" name="l00888"></a><span class="lineno">  888</span>    {</div>
 <div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span>        <span class="keyword">typename</span> Traits::template Cont&lt;Comp, Alloc&gt; c(</div>
@@ -1018,7 +1018,7 @@ $(function() {
 <div class="line"><a id="l00940" name="l00940"></a><span class="lineno">  940</span>    <span class="keyword">auto</span> <span class="keyword">const</span> v(Traits::values());</div>
 <div class="line"><a id="l00941" name="l00941"></a><span class="lineno">  941</span> </div>
 <div class="line"><a id="l00942" name="l00942"></a><span class="lineno">  942</span>    <span class="comment">// testcase (Traits::name() + &quot; range&quot;);</span></div>
-<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>    testcase(<span class="stringliteral">&quot;range&quot;</span>);</div>
+<div class="line"><a id="l00943" name="l00943"></a><span class="lineno">  943</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;range&quot;</span>);</div>
 <div class="line"><a id="l00944" name="l00944"></a><span class="lineno">  944</span> </div>
 <div class="line"><a id="l00945" name="l00945"></a><span class="lineno">  945</span>    {</div>
 <div class="line"><a id="l00946" name="l00946"></a><span class="lineno">  946</span>        <span class="keyword">typename</span> Traits::template Cont&lt;Hash, Equal, Alloc&gt; c(</div>
@@ -1086,11 +1086,11 @@ $(function() {
 <div class="line"><a id="l01008" name="l01008"></a><span class="lineno"> 1008</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
 <div class="line"><a id="l01009" name="l01009"></a><span class="lineno"> 1009</span> </div>
 <div class="line"><a id="l01010" name="l01010"></a><span class="lineno"> 1010</span>    <span class="comment">// testcase (Traits::name() + &quot; init-list&quot;);</span></div>
-<div class="line"><a id="l01011" name="l01011"></a><span class="lineno"> 1011</span>    testcase(<span class="stringliteral">&quot;init-list&quot;</span>);</div>
+<div class="line"><a id="l01011" name="l01011"></a><span class="lineno"> 1011</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;init-list&quot;</span>);</div>
 <div class="line"><a id="l01012" name="l01012"></a><span class="lineno"> 1012</span> </div>
 <div class="line"><a id="l01013" name="l01013"></a><span class="lineno"> 1013</span>    <span class="comment">// VFALCO TODO</span></div>
 <div class="line"><a id="l01014" name="l01014"></a><span class="lineno"> 1014</span> </div>
-<div class="line"><a id="l01015" name="l01015"></a><span class="lineno"> 1015</span>    pass();</div>
+<div class="line"><a id="l01015" name="l01015"></a><span class="lineno"> 1015</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01016" name="l01016"></a><span class="lineno"> 1016</span>}</div>
 <div class="line"><a id="l01017" name="l01017"></a><span class="lineno"> 1017</span> </div>
 <div class="line"><a id="l01018" name="l01018"></a><span class="lineno"> 1018</span><span class="comment">// unordered</span></div>
@@ -1112,10 +1112,10 @@ $(function() {
 <div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
 <div class="line"><a id="l01035" name="l01035"></a><span class="lineno"> 1035</span> </div>
 <div class="line"><a id="l01036" name="l01036"></a><span class="lineno"> 1036</span>    <span class="comment">// testcase (Traits::name() + &quot; init-list&quot;);</span></div>
-<div class="line"><a id="l01037" name="l01037"></a><span class="lineno"> 1037</span>    testcase(<span class="stringliteral">&quot;init-list&quot;</span>);</div>
+<div class="line"><a id="l01037" name="l01037"></a><span class="lineno"> 1037</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;init-list&quot;</span>);</div>
 <div class="line"><a id="l01038" name="l01038"></a><span class="lineno"> 1038</span> </div>
 <div class="line"><a id="l01039" name="l01039"></a><span class="lineno"> 1039</span>    <span class="comment">// VFALCO TODO</span></div>
-<div class="line"><a id="l01040" name="l01040"></a><span class="lineno"> 1040</span>    pass();</div>
+<div class="line"><a id="l01040" name="l01040"></a><span class="lineno"> 1040</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01041" name="l01041"></a><span class="lineno"> 1041</span>}</div>
 <div class="line"><a id="l01042" name="l01042"></a><span class="lineno"> 1042</span> </div>
 <div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span><span class="comment">//------------------------------------------------------------------------------</span></div>
@@ -1135,7 +1135,7 @@ $(function() {
 <div class="line"><a id="l01057" name="l01057"></a><span class="lineno"> 1057</span>    <span class="keyword">auto</span> <span class="keyword">const</span> v(Traits::values());</div>
 <div class="line"><a id="l01058" name="l01058"></a><span class="lineno"> 1058</span> </div>
 <div class="line"><a id="l01059" name="l01059"></a><span class="lineno"> 1059</span>    <span class="comment">// testcase (Traits::name() + &quot; copy/move&quot;);</span></div>
-<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span>    testcase(<span class="stringliteral">&quot;copy/move&quot;</span>);</div>
+<div class="line"><a id="l01060" name="l01060"></a><span class="lineno"> 1060</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;copy/move&quot;</span>);</div>
 <div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span> </div>
 <div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span>    <span class="comment">// copy</span></div>
 <div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span> </div>
@@ -1145,7 +1145,7 @@ $(function() {
 <div class="line"><a id="l01067" name="l01067"></a><span class="lineno"> 1067</span>        <a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#ad9670f0475860fa72c3e95c50f179316">checkContents</a>(c, v);</div>
 <div class="line"><a id="l01068" name="l01068"></a><span class="lineno"> 1068</span>        <a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#ad9670f0475860fa72c3e95c50f179316">checkContents</a>(c2, v);</div>
 <div class="line"><a id="l01069" name="l01069"></a><span class="lineno"> 1069</span>        BEAST_EXPECT(c == c2);</div>
-<div class="line"><a id="l01070" name="l01070"></a><span class="lineno"> 1070</span>        unexpected(c != c2);</div>
+<div class="line"><a id="l01070" name="l01070"></a><span class="lineno"> 1070</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a865757d2d9992fb2c91c51e137166e9d">unexpected</a>(c != c2);</div>
 <div class="line"><a id="l01071" name="l01071"></a><span class="lineno"> 1071</span>    }</div>
 <div class="line"><a id="l01072" name="l01072"></a><span class="lineno"> 1072</span> </div>
 <div class="line"><a id="l01073" name="l01073"></a><span class="lineno"> 1073</span>    {</div>
@@ -1154,7 +1154,7 @@ $(function() {
 <div class="line"><a id="l01076" name="l01076"></a><span class="lineno"> 1076</span>        <a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#ad9670f0475860fa72c3e95c50f179316">checkContents</a>(c, v);</div>
 <div class="line"><a id="l01077" name="l01077"></a><span class="lineno"> 1077</span>        <a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#ad9670f0475860fa72c3e95c50f179316">checkContents</a>(c2, v);</div>
 <div class="line"><a id="l01078" name="l01078"></a><span class="lineno"> 1078</span>        BEAST_EXPECT(c == c2);</div>
-<div class="line"><a id="l01079" name="l01079"></a><span class="lineno"> 1079</span>        unexpected(c != c2);</div>
+<div class="line"><a id="l01079" name="l01079"></a><span class="lineno"> 1079</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a865757d2d9992fb2c91c51e137166e9d">unexpected</a>(c != c2);</div>
 <div class="line"><a id="l01080" name="l01080"></a><span class="lineno"> 1080</span>    }</div>
 <div class="line"><a id="l01081" name="l01081"></a><span class="lineno"> 1081</span> </div>
 <div class="line"><a id="l01082" name="l01082"></a><span class="lineno"> 1082</span>    {</div>
@@ -1164,7 +1164,7 @@ $(function() {
 <div class="line"><a id="l01086" name="l01086"></a><span class="lineno"> 1086</span>        <a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#ad9670f0475860fa72c3e95c50f179316">checkContents</a>(c, v);</div>
 <div class="line"><a id="l01087" name="l01087"></a><span class="lineno"> 1087</span>        <a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#ad9670f0475860fa72c3e95c50f179316">checkContents</a>(c2, v);</div>
 <div class="line"><a id="l01088" name="l01088"></a><span class="lineno"> 1088</span>        BEAST_EXPECT(c == c2);</div>
-<div class="line"><a id="l01089" name="l01089"></a><span class="lineno"> 1089</span>        unexpected(c != c2);</div>
+<div class="line"><a id="l01089" name="l01089"></a><span class="lineno"> 1089</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a865757d2d9992fb2c91c51e137166e9d">unexpected</a>(c != c2);</div>
 <div class="line"><a id="l01090" name="l01090"></a><span class="lineno"> 1090</span>    }</div>
 <div class="line"><a id="l01091" name="l01091"></a><span class="lineno"> 1091</span> </div>
 <div class="line"><a id="l01092" name="l01092"></a><span class="lineno"> 1092</span>    <span class="comment">// move</span></div>
@@ -1206,7 +1206,7 @@ $(function() {
 <div class="line"><a id="l01128" name="l01128"></a><span class="lineno"> 1128</span>    <span class="keyword">auto</span> <span class="keyword">const</span> v(Traits::values());</div>
 <div class="line"><a id="l01129" name="l01129"></a><span class="lineno"> 1129</span> </div>
 <div class="line"><a id="l01130" name="l01130"></a><span class="lineno"> 1130</span>    <span class="comment">// testcase (Traits::name() + &quot; iterators&quot;);</span></div>
-<div class="line"><a id="l01131" name="l01131"></a><span class="lineno"> 1131</span>    testcase(<span class="stringliteral">&quot;iterator&quot;</span>);</div>
+<div class="line"><a id="l01131" name="l01131"></a><span class="lineno"> 1131</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;iterator&quot;</span>);</div>
 <div class="line"><a id="l01132" name="l01132"></a><span class="lineno"> 1132</span> </div>
 <div class="line"><a id="l01133" name="l01133"></a><span class="lineno"> 1133</span>    <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c{clock};</div>
 <div class="line"><a id="l01134" name="l01134"></a><span class="lineno"> 1134</span> </div>
@@ -1264,7 +1264,7 @@ $(function() {
 <div class="line"><a id="l01186" name="l01186"></a><span class="lineno"> 1186</span>    <span class="keyword">auto</span> <span class="keyword">const</span> v(Traits::values());</div>
 <div class="line"><a id="l01187" name="l01187"></a><span class="lineno"> 1187</span> </div>
 <div class="line"><a id="l01188" name="l01188"></a><span class="lineno"> 1188</span>    <span class="comment">// testcase (Traits::name() + &quot; reverse_iterators&quot;);</span></div>
-<div class="line"><a id="l01189" name="l01189"></a><span class="lineno"> 1189</span>    testcase(<span class="stringliteral">&quot;reverse_iterator&quot;</span>);</div>
+<div class="line"><a id="l01189" name="l01189"></a><span class="lineno"> 1189</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;reverse_iterator&quot;</span>);</div>
 <div class="line"><a id="l01190" name="l01190"></a><span class="lineno"> 1190</span> </div>
 <div class="line"><a id="l01191" name="l01191"></a><span class="lineno"> 1191</span>    <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c{clock};</div>
 <div class="line"><a id="l01192" name="l01192"></a><span class="lineno"> 1192</span> </div>
@@ -1419,7 +1419,7 @@ $(function() {
 <div class="line"><a id="l01341" name="l01341"></a><span class="lineno"> 1341</span>    <span class="keyword">auto</span> <span class="keyword">const</span> l(<a class="code hl_function" href="classbeast_1_1aged__associative__container__test__base.html#a277911ace25ea44c3b5ca82e530fbb82">make_list</a>(v));</div>
 <div class="line"><a id="l01342" name="l01342"></a><span class="lineno"> 1342</span> </div>
 <div class="line"><a id="l01343" name="l01343"></a><span class="lineno"> 1343</span>    <span class="comment">// testcase (Traits::name() + &quot; modify&quot;);</span></div>
-<div class="line"><a id="l01344" name="l01344"></a><span class="lineno"> 1344</span>    testcase(<span class="stringliteral">&quot;modify&quot;</span>);</div>
+<div class="line"><a id="l01344" name="l01344"></a><span class="lineno"> 1344</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;modify&quot;</span>);</div>
 <div class="line"><a id="l01345" name="l01345"></a><span class="lineno"> 1345</span> </div>
 <div class="line"><a id="l01346" name="l01346"></a><span class="lineno"> 1346</span>    {</div>
 <div class="line"><a id="l01347" name="l01347"></a><span class="lineno"> 1347</span>        <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c(clock);</div>
@@ -1478,7 +1478,7 @@ $(function() {
 <div class="line"><a id="l01400" name="l01400"></a><span class="lineno"> 1400</span>    <span class="keyword">auto</span> <span class="keyword">const</span> v(Traits::values());</div>
 <div class="line"><a id="l01401" name="l01401"></a><span class="lineno"> 1401</span> </div>
 <div class="line"><a id="l01402" name="l01402"></a><span class="lineno"> 1402</span>    <span class="comment">// testcase (Traits::name() + &quot; chronological&quot;);</span></div>
-<div class="line"><a id="l01403" name="l01403"></a><span class="lineno"> 1403</span>    testcase(<span class="stringliteral">&quot;chronological&quot;</span>);</div>
+<div class="line"><a id="l01403" name="l01403"></a><span class="lineno"> 1403</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;chronological&quot;</span>);</div>
 <div class="line"><a id="l01404" name="l01404"></a><span class="lineno"> 1404</span> </div>
 <div class="line"><a id="l01405" name="l01405"></a><span class="lineno"> 1405</span>    <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c(v.begin(), v.end(), clock);</div>
 <div class="line"><a id="l01406" name="l01406"></a><span class="lineno"> 1406</span> </div>
@@ -1551,7 +1551,7 @@ $(function() {
 <div class="line"><a id="l01473" name="l01473"></a><span class="lineno"> 1473</span>    <span class="keyword">auto</span> v(Traits::values());</div>
 <div class="line"><a id="l01474" name="l01474"></a><span class="lineno"> 1474</span> </div>
 <div class="line"><a id="l01475" name="l01475"></a><span class="lineno"> 1475</span>    <span class="comment">// testcase (Traits::name() + &quot; array create&quot;);</span></div>
-<div class="line"><a id="l01476" name="l01476"></a><span class="lineno"> 1476</span>    testcase(<span class="stringliteral">&quot;array create&quot;</span>);</div>
+<div class="line"><a id="l01476" name="l01476"></a><span class="lineno"> 1476</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;array create&quot;</span>);</div>
 <div class="line"><a id="l01477" name="l01477"></a><span class="lineno"> 1477</span> </div>
 <div class="line"><a id="l01478" name="l01478"></a><span class="lineno"> 1478</span>    {</div>
 <div class="line"><a id="l01479" name="l01479"></a><span class="lineno"> 1479</span>        <span class="comment">// Copy construct key</span></div>
@@ -1612,7 +1612,7 @@ $(function() {
 <div class="line"><a id="l01534" name="l01534"></a><span class="lineno"> 1534</span>{</div>
 <div class="line"><a id="l01535" name="l01535"></a><span class="lineno"> 1535</span>    <span class="keywordflow">if</span> (beginIter == endIter)</div>
 <div class="line"><a id="l01536" name="l01536"></a><span class="lineno"> 1536</span>    {</div>
-<div class="line"><a id="l01537" name="l01537"></a><span class="lineno"> 1537</span>        fail(<span class="stringliteral">&quot;Internal test failure. Cannot advance beginIter&quot;</span>);</div>
+<div class="line"><a id="l01537" name="l01537"></a><span class="lineno"> 1537</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#af5ea30f883ad3a2a841af60a9a82c29c">fail</a>(<span class="stringliteral">&quot;Internal test failure. Cannot advance beginIter&quot;</span>);</div>
 <div class="line"><a id="l01538" name="l01538"></a><span class="lineno"> 1538</span>        <span class="keywordflow">return</span> beginIter;</div>
 <div class="line"><a id="l01539" name="l01539"></a><span class="lineno"> 1539</span>    }</div>
 <div class="line"><a id="l01540" name="l01540"></a><span class="lineno"> 1540</span> </div>
@@ -1655,14 +1655,14 @@ $(function() {
 <div class="line"><a id="l01577" name="l01577"></a><span class="lineno"> 1577</span> </div>
 <div class="line"><a id="l01578" name="l01578"></a><span class="lineno"> 1578</span>        <span class="keywordflow">if</span> (it != expectIt)</div>
 <div class="line"><a id="l01579" name="l01579"></a><span class="lineno"> 1579</span>        {</div>
-<div class="line"><a id="l01580" name="l01580"></a><span class="lineno"> 1580</span>            fail(<span class="stringliteral">&quot;Unexpected returned iterator from element erase&quot;</span>);</div>
+<div class="line"><a id="l01580" name="l01580"></a><span class="lineno"> 1580</span>            <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#af5ea30f883ad3a2a841af60a9a82c29c">fail</a>(<span class="stringliteral">&quot;Unexpected returned iterator from element erase&quot;</span>);</div>
 <div class="line"><a id="l01581" name="l01581"></a><span class="lineno"> 1581</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l01582" name="l01582"></a><span class="lineno"> 1582</span>        }</div>
 <div class="line"><a id="l01583" name="l01583"></a><span class="lineno"> 1583</span> </div>
 <div class="line"><a id="l01584" name="l01584"></a><span class="lineno"> 1584</span>        --count;</div>
 <div class="line"><a id="l01585" name="l01585"></a><span class="lineno"> 1585</span>        <span class="keywordflow">if</span> (count != c.size())</div>
 <div class="line"><a id="l01586" name="l01586"></a><span class="lineno"> 1586</span>        {</div>
-<div class="line"><a id="l01587" name="l01587"></a><span class="lineno"> 1587</span>            fail(<span class="stringliteral">&quot;Failed to erase element&quot;</span>);</div>
+<div class="line"><a id="l01587" name="l01587"></a><span class="lineno"> 1587</span>            <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#af5ea30f883ad3a2a841af60a9a82c29c">fail</a>(<span class="stringliteral">&quot;Failed to erase element&quot;</span>);</div>
 <div class="line"><a id="l01588" name="l01588"></a><span class="lineno"> 1588</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l01589" name="l01589"></a><span class="lineno"> 1589</span>        }</div>
 <div class="line"><a id="l01590" name="l01590"></a><span class="lineno"> 1590</span> </div>
@@ -1670,7 +1670,7 @@ $(function() {
 <div class="line"><a id="l01592" name="l01592"></a><span class="lineno"> 1592</span>        {</div>
 <div class="line"><a id="l01593" name="l01593"></a><span class="lineno"> 1593</span>            <span class="keywordflow">if</span> (it != endItr)</div>
 <div class="line"><a id="l01594" name="l01594"></a><span class="lineno"> 1594</span>            {</div>
-<div class="line"><a id="l01595" name="l01595"></a><span class="lineno"> 1595</span>                fail(<span class="stringliteral">&quot;Erase of last element didn&#39;t produce end&quot;</span>);</div>
+<div class="line"><a id="l01595" name="l01595"></a><span class="lineno"> 1595</span>                <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#af5ea30f883ad3a2a841af60a9a82c29c">fail</a>(<span class="stringliteral">&quot;Erase of last element didn&#39;t produce end&quot;</span>);</div>
 <div class="line"><a id="l01596" name="l01596"></a><span class="lineno"> 1596</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l01597" name="l01597"></a><span class="lineno"> 1597</span>            }</div>
 <div class="line"><a id="l01598" name="l01598"></a><span class="lineno"> 1598</span>        }</div>
@@ -1691,7 +1691,7 @@ $(function() {
 <div class="line"><a id="l01613" name="l01613"></a><span class="lineno"> 1613</span>    <span class="keyword">using </span>Traits = <a class="code hl_struct" href="structbeast_1_1aged__associative__container__test__base_1_1TestTraits.html">TestTraits&lt;IsUnordered, IsMulti, IsMap&gt;</a>;</div>
 <div class="line"><a id="l01614" name="l01614"></a><span class="lineno"> 1614</span> </div>
 <div class="line"><a id="l01615" name="l01615"></a><span class="lineno"> 1615</span>    <span class="comment">// testcase (Traits::name() + &quot; element erase&quot;</span></div>
-<div class="line"><a id="l01616" name="l01616"></a><span class="lineno"> 1616</span>    testcase(<span class="stringliteral">&quot;element erase&quot;</span>);</div>
+<div class="line"><a id="l01616" name="l01616"></a><span class="lineno"> 1616</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;element erase&quot;</span>);</div>
 <div class="line"><a id="l01617" name="l01617"></a><span class="lineno"> 1617</span> </div>
 <div class="line"><a id="l01618" name="l01618"></a><span class="lineno"> 1618</span>    <span class="comment">// Make and fill the container</span></div>
 <div class="line"><a id="l01619" name="l01619"></a><span class="lineno"> 1619</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
@@ -1706,7 +1706,7 @@ $(function() {
 <div class="line"><a id="l01628" name="l01628"></a><span class="lineno"> 1628</span>            <span class="keywordflow">return</span>;  <span class="comment">// Test failed</span></div>
 <div class="line"><a id="l01629" name="l01629"></a><span class="lineno"> 1629</span> </div>
 <div class="line"><a id="l01630" name="l01630"></a><span class="lineno"> 1630</span>        BEAST_EXPECT(tempContainer.empty());</div>
-<div class="line"><a id="l01631" name="l01631"></a><span class="lineno"> 1631</span>        pass();</div>
+<div class="line"><a id="l01631" name="l01631"></a><span class="lineno"> 1631</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01632" name="l01632"></a><span class="lineno"> 1632</span>    }</div>
 <div class="line"><a id="l01633" name="l01633"></a><span class="lineno"> 1633</span>    {</div>
 <div class="line"><a id="l01634" name="l01634"></a><span class="lineno"> 1634</span>        <span class="comment">// Test chronological iterators</span></div>
@@ -1716,7 +1716,7 @@ $(function() {
 <div class="line"><a id="l01638" name="l01638"></a><span class="lineno"> 1638</span>            <span class="keywordflow">return</span>;  <span class="comment">// Test failed</span></div>
 <div class="line"><a id="l01639" name="l01639"></a><span class="lineno"> 1639</span> </div>
 <div class="line"><a id="l01640" name="l01640"></a><span class="lineno"> 1640</span>        BEAST_EXPECT(tempContainer.empty());</div>
-<div class="line"><a id="l01641" name="l01641"></a><span class="lineno"> 1641</span>        pass();</div>
+<div class="line"><a id="l01641" name="l01641"></a><span class="lineno"> 1641</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01642" name="l01642"></a><span class="lineno"> 1642</span>    }</div>
 <div class="line"><a id="l01643" name="l01643"></a><span class="lineno"> 1643</span>    {</div>
 <div class="line"><a id="l01644" name="l01644"></a><span class="lineno"> 1644</span>        <span class="comment">// Test standard iterator partial erase</span></div>
@@ -1729,7 +1729,7 @@ $(function() {
 <div class="line"><a id="l01651" name="l01651"></a><span class="lineno"> 1651</span>            <span class="keywordflow">return</span>;  <span class="comment">// Test failed</span></div>
 <div class="line"><a id="l01652" name="l01652"></a><span class="lineno"> 1652</span> </div>
 <div class="line"><a id="l01653" name="l01653"></a><span class="lineno"> 1653</span>        BEAST_EXPECT(tempContainer.size() == 2);</div>
-<div class="line"><a id="l01654" name="l01654"></a><span class="lineno"> 1654</span>        pass();</div>
+<div class="line"><a id="l01654" name="l01654"></a><span class="lineno"> 1654</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01655" name="l01655"></a><span class="lineno"> 1655</span>    }</div>
 <div class="line"><a id="l01656" name="l01656"></a><span class="lineno"> 1656</span>    {</div>
 <div class="line"><a id="l01657" name="l01657"></a><span class="lineno"> 1657</span>        <span class="comment">// Test chronological iterator partial erase</span></div>
@@ -1743,7 +1743,7 @@ $(function() {
 <div class="line"><a id="l01665" name="l01665"></a><span class="lineno"> 1665</span>            <span class="keywordflow">return</span>;  <span class="comment">// Test failed</span></div>
 <div class="line"><a id="l01666" name="l01666"></a><span class="lineno"> 1666</span> </div>
 <div class="line"><a id="l01667" name="l01667"></a><span class="lineno"> 1667</span>        BEAST_EXPECT(tempContainer.size() == 2);</div>
-<div class="line"><a id="l01668" name="l01668"></a><span class="lineno"> 1668</span>        pass();</div>
+<div class="line"><a id="l01668" name="l01668"></a><span class="lineno"> 1668</span>        <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01669" name="l01669"></a><span class="lineno"> 1669</span>    }</div>
 <div class="line"><a id="l01670" name="l01670"></a><span class="lineno"> 1670</span>    {</div>
 <div class="line"><a id="l01671" name="l01671"></a><span class="lineno"> 1671</span>        <span class="keyword">auto</span> tempContainer(c);</div>
@@ -1809,7 +1809,7 @@ $(function() {
 <div class="line"><a id="l01731" name="l01731"></a><span class="lineno"> 1731</span>    <span class="keyword">using </span>Traits = <a class="code hl_struct" href="structbeast_1_1aged__associative__container__test__base_1_1TestTraits.html">TestTraits&lt;IsUnordered, IsMulti, IsMap&gt;</a>;</div>
 <div class="line"><a id="l01732" name="l01732"></a><span class="lineno"> 1732</span> </div>
 <div class="line"><a id="l01733" name="l01733"></a><span class="lineno"> 1733</span>    <span class="comment">// testcase (Traits::name() + &quot; element erase&quot;</span></div>
-<div class="line"><a id="l01734" name="l01734"></a><span class="lineno"> 1734</span>    testcase(<span class="stringliteral">&quot;range erase&quot;</span>);</div>
+<div class="line"><a id="l01734" name="l01734"></a><span class="lineno"> 1734</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;range erase&quot;</span>);</div>
 <div class="line"><a id="l01735" name="l01735"></a><span class="lineno"> 1735</span> </div>
 <div class="line"><a id="l01736" name="l01736"></a><span class="lineno"> 1736</span>    <span class="comment">// Make and fill the container</span></div>
 <div class="line"><a id="l01737" name="l01737"></a><span class="lineno"> 1737</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
@@ -1844,19 +1844,19 @@ $(function() {
 <div class="line"><a id="l01766" name="l01766"></a><span class="lineno"> 1766</span>    <span class="keyword">auto</span> <span class="keyword">const</span> v(Traits::values());</div>
 <div class="line"><a id="l01767" name="l01767"></a><span class="lineno"> 1767</span> </div>
 <div class="line"><a id="l01768" name="l01768"></a><span class="lineno"> 1768</span>    <span class="comment">// testcase (Traits::name() + &quot; array create&quot;);</span></div>
-<div class="line"><a id="l01769" name="l01769"></a><span class="lineno"> 1769</span>    testcase(<span class="stringliteral">&quot;array create&quot;</span>);</div>
+<div class="line"><a id="l01769" name="l01769"></a><span class="lineno"> 1769</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;array create&quot;</span>);</div>
 <div class="line"><a id="l01770" name="l01770"></a><span class="lineno"> 1770</span> </div>
 <div class="line"><a id="l01771" name="l01771"></a><span class="lineno"> 1771</span>    <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c1(v.begin(), v.end(), clock);</div>
 <div class="line"><a id="l01772" name="l01772"></a><span class="lineno"> 1772</span> </div>
 <div class="line"><a id="l01773" name="l01773"></a><span class="lineno"> 1773</span>    <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c2(v.begin(), v.end(), clock);</div>
 <div class="line"><a id="l01774" name="l01774"></a><span class="lineno"> 1774</span>    c2.erase(c2.cbegin());</div>
 <div class="line"><a id="l01775" name="l01775"></a><span class="lineno"> 1775</span> </div>
-<div class="line"><a id="l01776" name="l01776"></a><span class="lineno"> 1776</span>    expect(c1 != c2);</div>
-<div class="line"><a id="l01777" name="l01777"></a><span class="lineno"> 1777</span>    unexpected(c1 == c2);</div>
-<div class="line"><a id="l01778" name="l01778"></a><span class="lineno"> 1778</span>    expect(c1 &lt; c2);</div>
-<div class="line"><a id="l01779" name="l01779"></a><span class="lineno"> 1779</span>    expect(c1 &lt;= c2);</div>
-<div class="line"><a id="l01780" name="l01780"></a><span class="lineno"> 1780</span>    unexpected(c1 &gt; c2);</div>
-<div class="line"><a id="l01781" name="l01781"></a><span class="lineno"> 1781</span>    unexpected(c1 &gt;= c2);</div>
+<div class="line"><a id="l01776" name="l01776"></a><span class="lineno"> 1776</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#ac6fc161c3c00cfbbc9590afe9e4559aa">expect</a>(c1 != c2);</div>
+<div class="line"><a id="l01777" name="l01777"></a><span class="lineno"> 1777</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a865757d2d9992fb2c91c51e137166e9d">unexpected</a>(c1 == c2);</div>
+<div class="line"><a id="l01778" name="l01778"></a><span class="lineno"> 1778</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#ac6fc161c3c00cfbbc9590afe9e4559aa">expect</a>(c1 &lt; c2);</div>
+<div class="line"><a id="l01779" name="l01779"></a><span class="lineno"> 1779</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#ac6fc161c3c00cfbbc9590afe9e4559aa">expect</a>(c1 &lt;= c2);</div>
+<div class="line"><a id="l01780" name="l01780"></a><span class="lineno"> 1780</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a865757d2d9992fb2c91c51e137166e9d">unexpected</a>(c1 &gt; c2);</div>
+<div class="line"><a id="l01781" name="l01781"></a><span class="lineno"> 1781</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a865757d2d9992fb2c91c51e137166e9d">unexpected</a>(c1 &gt;= c2);</div>
 <div class="line"><a id="l01782" name="l01782"></a><span class="lineno"> 1782</span>}</div>
 <div class="line"><a id="l01783" name="l01783"></a><span class="lineno"> 1783</span> </div>
 <div class="line"><a id="l01784" name="l01784"></a><span class="lineno"> 1784</span><span class="comment">//------------------------------------------------------------------------------</span></div>
@@ -1874,13 +1874,13 @@ $(function() {
 <div class="line"><a id="l01796" name="l01796"></a><span class="lineno"> 1796</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
 <div class="line"><a id="l01797" name="l01797"></a><span class="lineno"> 1797</span> </div>
 <div class="line"><a id="l01798" name="l01798"></a><span class="lineno"> 1798</span>    <span class="comment">// testcase (Traits::name() + &quot; observers&quot;);</span></div>
-<div class="line"><a id="l01799" name="l01799"></a><span class="lineno"> 1799</span>    testcase(<span class="stringliteral">&quot;observers&quot;</span>);</div>
+<div class="line"><a id="l01799" name="l01799"></a><span class="lineno"> 1799</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;observers&quot;</span>);</div>
 <div class="line"><a id="l01800" name="l01800"></a><span class="lineno"> 1800</span> </div>
 <div class="line"><a id="l01801" name="l01801"></a><span class="lineno"> 1801</span>    <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c(clock);</div>
 <div class="line"><a id="l01802" name="l01802"></a><span class="lineno"> 1802</span>    c.key_comp();</div>
 <div class="line"><a id="l01803" name="l01803"></a><span class="lineno"> 1803</span>    c.value_comp();</div>
 <div class="line"><a id="l01804" name="l01804"></a><span class="lineno"> 1804</span> </div>
-<div class="line"><a id="l01805" name="l01805"></a><span class="lineno"> 1805</span>    pass();</div>
+<div class="line"><a id="l01805" name="l01805"></a><span class="lineno"> 1805</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01806" name="l01806"></a><span class="lineno"> 1806</span>}</div>
 <div class="line"><a id="l01807" name="l01807"></a><span class="lineno"> 1807</span> </div>
 <div class="line"><a id="l01808" name="l01808"></a><span class="lineno"> 1808</span><span class="comment">// unordered</span></div>
@@ -1892,13 +1892,13 @@ $(function() {
 <div class="line"><a id="l01814" name="l01814"></a><span class="lineno"> 1814</span>    <span class="keyword">typename</span> Traits::ManualClock clock;</div>
 <div class="line"><a id="l01815" name="l01815"></a><span class="lineno"> 1815</span> </div>
 <div class="line"><a id="l01816" name="l01816"></a><span class="lineno"> 1816</span>    <span class="comment">// testcase (Traits::name() + &quot; observers&quot;);</span></div>
-<div class="line"><a id="l01817" name="l01817"></a><span class="lineno"> 1817</span>    testcase(<span class="stringliteral">&quot;observers&quot;</span>);</div>
+<div class="line"><a id="l01817" name="l01817"></a><span class="lineno"> 1817</span>    <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;observers&quot;</span>);</div>
 <div class="line"><a id="l01818" name="l01818"></a><span class="lineno"> 1818</span> </div>
 <div class="line"><a id="l01819" name="l01819"></a><span class="lineno"> 1819</span>    <span class="keyword">typename</span> Traits::template Cont&lt;&gt; c(clock);</div>
 <div class="line"><a id="l01820" name="l01820"></a><span class="lineno"> 1820</span>    c.hash_function();</div>
 <div class="line"><a id="l01821" name="l01821"></a><span class="lineno"> 1821</span>    c.key_eq();</div>
 <div class="line"><a id="l01822" name="l01822"></a><span class="lineno"> 1822</span> </div>
-<div class="line"><a id="l01823" name="l01823"></a><span class="lineno"> 1823</span>    pass();</div>
+<div class="line"><a id="l01823" name="l01823"></a><span class="lineno"> 1823</span>    <a class="code hl_function" href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">pass</a>();</div>
 <div class="line"><a id="l01824" name="l01824"></a><span class="lineno"> 1824</span>}</div>
 <div class="line"><a id="l01825" name="l01825"></a><span class="lineno"> 1825</span> </div>
 <div class="line"><a id="l01826" name="l01826"></a><span class="lineno"> 1826</span><span class="comment">//------------------------------------------------------------------------------</span></div>
@@ -2063,14 +2063,14 @@ $(function() {
 <div class="line"><a id="l01985" name="l01985"></a><span class="lineno"> 1985</span>    }</div>
 <div class="line"><a id="l01986" name="l01986"></a><span class="lineno"> 1986</span>};</div>
 <div class="line"><a id="l01987" name="l01987"></a><span class="lineno"> 1987</span> </div>
-<div class="line"><a id="l01988" name="l01988"></a><span class="lineno"><a class="line" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82"> 1988</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_set</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
-<div class="line"><a id="l01989" name="l01989"></a><span class="lineno"><a class="line" href="namespacebeast.html#a7dffa08697f7dc7e6ce1ae7720547a57"> 1989</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_map</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
-<div class="line"><a id="l01990" name="l01990"></a><span class="lineno"><a class="line" href="namespacebeast.html#a2325a64584f5ae14f0cf275c7c18f5a0"> 1990</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_multiset</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
-<div class="line"><a id="l01991" name="l01991"></a><span class="lineno"><a class="line" href="namespacebeast.html#a11ce17bc465bf3b332406d64d66fef90"> 1991</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_multimap</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
-<div class="line"><a id="l01992" name="l01992"></a><span class="lineno"><a class="line" href="namespacebeast.html#aa7c3ab2ec5cc1fe6204257f27d1fa55a"> 1992</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_set</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
-<div class="line"><a id="l01993" name="l01993"></a><span class="lineno"><a class="line" href="namespacebeast.html#abd32cc41b6488147eae4cbebabe7e26d"> 1993</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_map</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
-<div class="line"><a id="l01994" name="l01994"></a><span class="lineno"><a class="line" href="namespacebeast.html#a223f53faceabd4668a1d91582a36b351"> 1994</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_multiset</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
-<div class="line"><a id="l01995" name="l01995"></a><span class="lineno"><a class="line" href="namespacebeast.html#af74fb8a66114965745c15bc8a72d7d65"> 1995</a></span><a class="code hl_function" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">BEAST_DEFINE_TESTSUITE</a>(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_multimap</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01988" name="l01988"></a><span class="lineno"><a class="line" href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82"> 1988</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_set</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01989" name="l01989"></a><span class="lineno"><a class="line" href="namespacebeast.html#a7dffa08697f7dc7e6ce1ae7720547a57"> 1989</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_map</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01990" name="l01990"></a><span class="lineno"><a class="line" href="namespacebeast.html#a2325a64584f5ae14f0cf275c7c18f5a0"> 1990</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_multiset</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01991" name="l01991"></a><span class="lineno"><a class="line" href="namespacebeast.html#a11ce17bc465bf3b332406d64d66fef90"> 1991</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__ordered__container.html">aged_multimap</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01992" name="l01992"></a><span class="lineno"><a class="line" href="namespacebeast.html#aa7c3ab2ec5cc1fe6204257f27d1fa55a"> 1992</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_set</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01993" name="l01993"></a><span class="lineno"><a class="line" href="namespacebeast.html#abd32cc41b6488147eae4cbebabe7e26d"> 1993</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_map</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01994" name="l01994"></a><span class="lineno"><a class="line" href="namespacebeast.html#a223f53faceabd4668a1d91582a36b351"> 1994</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_multiset</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
+<div class="line"><a id="l01995" name="l01995"></a><span class="lineno"><a class="line" href="namespacebeast.html#af74fb8a66114965745c15bc8a72d7d65"> 1995</a></span>BEAST_DEFINE_TESTSUITE(<a class="code hl_class" href="classbeast_1_1detail_1_1aged__unordered__container.html">aged_unordered_multimap</a>, container, <a class="code hl_namespace" href="namespacebeast.html">beast</a>);</div>
 <div class="line"><a id="l01996" name="l01996"></a><span class="lineno"> 1996</span> </div>
 <div class="line"><a id="l01997" name="l01997"></a><span class="lineno"> 1997</span>}  <span class="comment">// namespace beast</span></div>
 <div class="ttc" id="aallocator_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/memory/allocator.html">std::allocator</a></div></div>
@@ -2136,25 +2136,31 @@ $(function() {
 <div class="ttc" id="aclassbeast_1_1aged__associative__container__test__base_html_af331354f095d23187ada9be4a416bb82"><div class="ttname"><a href="classbeast_1_1aged__associative__container__test__base.html#af331354f095d23187ada9be4a416bb82">beast::aged_associative_container_test_base::checkEmplaceHint</a></div><div class="ttdeci">void checkEmplaceHint(Container &amp;c, Values const &amp;v)</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01325">aged_associative_container_test.cpp:1325</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__associative__container__test__base_html_af8fcd65b69eba0d57f9c595db2588a05"><div class="ttname"><a href="classbeast_1_1aged__associative__container__test__base.html#af8fcd65b69eba0d57f9c595db2588a05">beast::aged_associative_container_test_base::checkInsertMove</a></div><div class="ttdeci">void checkInsertMove(Container &amp;c, Values const &amp;v)</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01279">aged_associative_container_test.cpp:1279</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__map__test_html"><div class="ttname"><a href="classbeast_1_1aged__map__test.html">beast::aged_map_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01918">aged_associative_container_test.cpp:1919</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__map__test_html_abb6bee42db5660c375ac7b2474f6741c"><div class="ttname"><a href="classbeast_1_1aged__map__test.html#abb6bee42db5660c375ac7b2474f6741c">beast::aged_map_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01922">aged_associative_container_test.cpp:1922</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__map__test_html_abb6bee42db5660c375ac7b2474f6741c"><div class="ttname"><a href="classbeast_1_1aged__map__test.html#abb6bee42db5660c375ac7b2474f6741c">beast::aged_map_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01922">aged_associative_container_test.cpp:1922</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__multimap__test_html"><div class="ttname"><a href="classbeast_1_1aged__multimap__test.html">beast::aged_multimap_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01938">aged_associative_container_test.cpp:1939</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__multimap__test_html_a8bcfca396df62885935de4916618cc02"><div class="ttname"><a href="classbeast_1_1aged__multimap__test.html#a8bcfca396df62885935de4916618cc02">beast::aged_multimap_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01942">aged_associative_container_test.cpp:1942</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__multimap__test_html_a8bcfca396df62885935de4916618cc02"><div class="ttname"><a href="classbeast_1_1aged__multimap__test.html#a8bcfca396df62885935de4916618cc02">beast::aged_multimap_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01942">aged_associative_container_test.cpp:1942</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__multiset__test_html"><div class="ttname"><a href="classbeast_1_1aged__multiset__test.html">beast::aged_multiset_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01928">aged_associative_container_test.cpp:1929</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__multiset__test_html_a33a88dc1736a6b572a59dedc8a5b9387"><div class="ttname"><a href="classbeast_1_1aged__multiset__test.html#a33a88dc1736a6b572a59dedc8a5b9387">beast::aged_multiset_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01932">aged_associative_container_test.cpp:1932</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__multiset__test_html_a33a88dc1736a6b572a59dedc8a5b9387"><div class="ttname"><a href="classbeast_1_1aged__multiset__test.html#a33a88dc1736a6b572a59dedc8a5b9387">beast::aged_multiset_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01932">aged_associative_container_test.cpp:1932</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__set__test_html"><div class="ttname"><a href="classbeast_1_1aged__set__test.html">beast::aged_set_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01855">aged_associative_container_test.cpp:1856</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__set__test_html_a3017b223689974cab0db30854d50efed"><div class="ttname"><a href="classbeast_1_1aged__set__test.html#a3017b223689974cab0db30854d50efed">beast::aged_set_test::T</a></div><div class="ttdeci">int T</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01861">aged_associative_container_test.cpp:1861</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__set__test_html_af5ea5de7eda5cb335238078d68c15623"><div class="ttname"><a href="classbeast_1_1aged__set__test.html#af5ea5de7eda5cb335238078d68c15623">beast::aged_set_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01912">aged_associative_container_test.cpp:1912</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__set__test_html_af5ea5de7eda5cb335238078d68c15623"><div class="ttname"><a href="classbeast_1_1aged__set__test.html#af5ea5de7eda5cb335238078d68c15623">beast::aged_set_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01912">aged_associative_container_test.cpp:1912</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__unordered__map__test_html"><div class="ttname"><a href="classbeast_1_1aged__unordered__map__test.html">beast::aged_unordered_map_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01958">aged_associative_container_test.cpp:1959</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__unordered__map__test_html_a2f1ffbd9694b322fa85775fdfc87bde5"><div class="ttname"><a href="classbeast_1_1aged__unordered__map__test.html#a2f1ffbd9694b322fa85775fdfc87bde5">beast::aged_unordered_map_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01962">aged_associative_container_test.cpp:1962</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__unordered__map__test_html_a2f1ffbd9694b322fa85775fdfc87bde5"><div class="ttname"><a href="classbeast_1_1aged__unordered__map__test.html#a2f1ffbd9694b322fa85775fdfc87bde5">beast::aged_unordered_map_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01962">aged_associative_container_test.cpp:1962</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__unordered__multimap__test_html"><div class="ttname"><a href="classbeast_1_1aged__unordered__multimap__test.html">beast::aged_unordered_multimap_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01978">aged_associative_container_test.cpp:1979</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__unordered__multimap__test_html_acc633b32a3523f266462ecd63dc517dd"><div class="ttname"><a href="classbeast_1_1aged__unordered__multimap__test.html#acc633b32a3523f266462ecd63dc517dd">beast::aged_unordered_multimap_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01982">aged_associative_container_test.cpp:1982</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__unordered__multimap__test_html_acc633b32a3523f266462ecd63dc517dd"><div class="ttname"><a href="classbeast_1_1aged__unordered__multimap__test.html#acc633b32a3523f266462ecd63dc517dd">beast::aged_unordered_multimap_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01982">aged_associative_container_test.cpp:1982</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__unordered__multiset__test_html"><div class="ttname"><a href="classbeast_1_1aged__unordered__multiset__test.html">beast::aged_unordered_multiset_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01968">aged_associative_container_test.cpp:1969</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__unordered__multiset__test_html_aed204892b6c6c07a7d15c8cc52b75fb1"><div class="ttname"><a href="classbeast_1_1aged__unordered__multiset__test.html#aed204892b6c6c07a7d15c8cc52b75fb1">beast::aged_unordered_multiset_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01972">aged_associative_container_test.cpp:1972</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__unordered__multiset__test_html_aed204892b6c6c07a7d15c8cc52b75fb1"><div class="ttname"><a href="classbeast_1_1aged__unordered__multiset__test.html#aed204892b6c6c07a7d15c8cc52b75fb1">beast::aged_unordered_multiset_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01972">aged_associative_container_test.cpp:1972</a></div></div>
 <div class="ttc" id="aclassbeast_1_1aged__unordered__set__test_html"><div class="ttname"><a href="classbeast_1_1aged__unordered__set__test.html">beast::aged_unordered_set_test</a></div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01948">aged_associative_container_test.cpp:1949</a></div></div>
-<div class="ttc" id="aclassbeast_1_1aged__unordered__set__test_html_ab4ebf0b92a462070b53c58ef9f1b1c53"><div class="ttname"><a href="classbeast_1_1aged__unordered__set__test.html#ab4ebf0b92a462070b53c58ef9f1b1c53">beast::aged_unordered_set_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01952">aged_associative_container_test.cpp:1952</a></div></div>
+<div class="ttc" id="aclassbeast_1_1aged__unordered__set__test_html_ab4ebf0b92a462070b53c58ef9f1b1c53"><div class="ttname"><a href="classbeast_1_1aged__unordered__set__test.html#ab4ebf0b92a462070b53c58ef9f1b1c53">beast::aged_unordered_set_test::run</a></div><div class="ttdeci">void run() override</div><div class="ttdoc">Runs the suite.</div><div class="ttdef"><b>Definition:</b> <a href="aged__associative__container__test_8cpp_source.html#l01952">aged_associative_container_test.cpp:1952</a></div></div>
 <div class="ttc" id="aclassbeast_1_1detail_1_1aged__ordered__container_html"><div class="ttname"><a href="classbeast_1_1detail_1_1aged__ordered__container.html">beast::detail::aged_ordered_container</a></div><div class="ttdoc">Associative container where each element is also indexed by time.</div><div class="ttdef"><b>Definition:</b> <a href="aged__ordered__container_8h_source.html#l00082">aged_ordered_container.h:83</a></div></div>
 <div class="ttc" id="aclassbeast_1_1detail_1_1aged__unordered__container_html"><div class="ttname"><a href="classbeast_1_1detail_1_1aged__unordered__container.html">beast::detail::aged_unordered_container</a></div><div class="ttdoc">Associative container where each element is also indexed by time.</div><div class="ttdef"><b>Definition:</b> <a href="aged__unordered__container_8h_source.html#l00085">aged_unordered_container.h:86</a></div></div>
 <div class="ttc" id="aclassbeast_1_1manual__clock_html"><div class="ttname"><a href="classbeast_1_1manual__clock.html">beast::manual_clock</a></div><div class="ttdoc">Manual clock implementation.</div><div class="ttdef"><b>Definition:</b> <a href="manual__clock_8h_source.html#l00038">manual_clock.h:39</a></div></div>
+<div class="ttc" id="aclassbeast_1_1unit__test_1_1suite_html"><div class="ttname"><a href="classbeast_1_1unit__test_1_1suite.html">beast::unit_test::suite</a></div><div class="ttdoc">A testsuite class.</div><div class="ttdef"><b>Definition:</b> <a href="suite_8h_source.html#l00052">suite.h:53</a></div></div>
+<div class="ttc" id="aclassbeast_1_1unit__test_1_1suite_html_a5c723fb774d3c25ba877c5b9ce681d6f"><div class="ttname"><a href="classbeast_1_1unit__test_1_1suite.html#a5c723fb774d3c25ba877c5b9ce681d6f">beast::unit_test::suite::pass</a></div><div class="ttdeci">void pass()</div><div class="ttdoc">Record a successful test condition.</div><div class="ttdef"><b>Definition:</b> <a href="suite_8h_source.html#l00509">suite.h:509</a></div></div>
+<div class="ttc" id="aclassbeast_1_1unit__test_1_1suite_html_a865757d2d9992fb2c91c51e137166e9d"><div class="ttname"><a href="classbeast_1_1unit__test_1_1suite.html#a865757d2d9992fb2c91c51e137166e9d">beast::unit_test::suite::unexpected</a></div><div class="ttdeci">bool unexpected(Condition shouldBeFalse, String const &amp;reason)</div><div class="ttdef"><b>Definition:</b> <a href="suite_8h_source.html#l00497">suite.h:497</a></div></div>
+<div class="ttc" id="aclassbeast_1_1unit__test_1_1suite_html_aaa1237d9b85c69d35fe86645cee094b5"><div class="ttname"><a href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">beast::unit_test::suite::testcase</a></div><div class="ttdeci">testcase_t testcase</div><div class="ttdoc">Memberspace for declaring test cases.</div><div class="ttdef"><b>Definition:</b> <a href="suite_8h_source.html#l00153">suite.h:153</a></div></div>
+<div class="ttc" id="aclassbeast_1_1unit__test_1_1suite_html_ac6fc161c3c00cfbbc9590afe9e4559aa"><div class="ttname"><a href="classbeast_1_1unit__test_1_1suite.html#ac6fc161c3c00cfbbc9590afe9e4559aa">beast::unit_test::suite::expect</a></div><div class="ttdeci">bool expect(Condition const &amp;shouldBeTrue)</div><div class="ttdoc">Evaluate a test condition.</div><div class="ttdef"><b>Definition:</b> <a href="suite_8h_source.html#l00227">suite.h:227</a></div></div>
+<div class="ttc" id="aclassbeast_1_1unit__test_1_1suite_html_af5ea30f883ad3a2a841af60a9a82c29c"><div class="ttname"><a href="classbeast_1_1unit__test_1_1suite.html#af5ea30f883ad3a2a841af60a9a82c29c">beast::unit_test::suite::fail</a></div><div class="ttdeci">void fail(String const &amp;reason, char const *file, int line)</div><div class="ttdoc">Record a failure.</div><div class="ttdef"><b>Definition:</b> <a href="suite_8h_source.html#l00531">suite.h:531</a></div></div>
 <div class="ttc" id="adistance_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/iterator/distance.html">std::distance</a></div><div class="ttdeci">T distance(T... args)</div></div>
 <div class="ttc" id="aenable_if_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/enable_if.html">std::enable_if</a></div></div>
 <div class="ttc" id="aequal_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/algorithm/equal.html">std::equal</a></div><div class="ttdeci">T equal(T... args)</div></div>
@@ -2167,7 +2173,6 @@ $(function() {
 <div class="ttc" id="alist_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/list.html">list</a></div></div>
 <div class="ttc" id="amake_pair_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/pair/make_pair.html">std::make_pair</a></div><div class="ttdeci">T make_pair(T... args)</div></div>
 <div class="ttc" id="anamespacebeast_html"><div class="ttname"><a href="namespacebeast.html">beast</a></div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00641">base_uint.h:641</a></div></div>
-<div class="ttc" id="anamespacebeast_html_acf354b548fbcd87bc88d817eeb675e82"><div class="ttname"><a href="namespacebeast.html#acf354b548fbcd87bc88d817eeb675e82">beast::BEAST_DEFINE_TESTSUITE</a></div><div class="ttdeci">BEAST_DEFINE_TESTSUITE(aged_set, container, beast)</div></div>
 <div class="ttc" id="aout_of_range_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/error/out_of_range.html">std::out_of_range</a></div></div>
 <div class="ttc" id="apair_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a></div></div>
 <div class="ttc" id="aremove_reference_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/remove_reference.html">std::remove_reference</a></div></div>

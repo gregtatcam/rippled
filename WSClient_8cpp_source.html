@@ -95,14 +95,14 @@ $(function() {
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//==============================================================================</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;ripple/json/json_reader.h&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;ripple/json/to_string.h&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ripple/protocol/jss.h&gt;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/server/Port.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;boost/beast/core/multi_buffer.hpp&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;boost/beast/websocket.hpp&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;test/jtx.h&gt;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;test/jtx/WSClient.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;test/jtx.h&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;test/jtx/WSClient.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;xrpl/json/json_reader.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/json/to_string.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/protocol/jss.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/server/Port.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;boost/beast/core/multi_buffer.hpp&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;boost/beast/websocket.hpp&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/condition_variable.html">condition_variable</a>&gt;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/string.html">string</a>&gt;</span></div>
@@ -110,7 +110,7 @@ $(function() {
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/iostream.html">iostream</a>&gt;</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;ripple/beast/unit_test.h&gt;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;xrpl/beast/unit_test.h&gt;</span></div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keyword">namespace </span>test {</div>
@@ -263,7 +263,7 @@ $(function() {
 <div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>            }</div>
 <div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>            <span class="keywordflow">else</span></div>
 <div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>                jp[jss::command] = cmd;</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            <span class="keyword">auto</span> <span class="keyword">const</span> s = <a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(jp);</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            <span class="keyword">auto</span> <span class="keyword">const</span> s = <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(jp);</div>
 <div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>            ws_.write_some(<span class="keyword">true</span>, buffer(s));</div>
 <div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        }</div>
 <div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
@@ -438,10 +438,10 @@ $(function() {
 <div class="ttc" id="alock_guard_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/thread/lock_guard.html">std::lock_guard</a></div></div>
 <div class="ttc" id="amutex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/thread/mutex.html">std::mutex</a></div></div>
 <div class="ttc" id="anamespaceripple_1_1test_html_aa4c787a68f386968ba9901187fa01873"><div class="ttname"><a href="namespaceripple_1_1test.html#aa4c787a68f386968ba9901187fa01873">ripple::test::makeWSClient</a></div><div class="ttdeci">std::unique_ptr&lt; WSClient &gt; makeWSClient(Config const &amp;cfg, bool v2, unsigned rpc_version, std::unordered_map&lt; std::string, std::string &gt; const &amp;headers)</div><div class="ttdoc">Returns a client operating through WebSockets/S.</div><div class="ttdef"><b>Definition:</b> <a href="WSClient_8cpp_source.html#l00300">WSClient.cpp:300</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a5b67e65f60cd241099149dc88f1e4bfd"><div class="ttname"><a href="namespaceripple.html#a5b67e65f60cd241099149dc88f1e4bfd">ripple::parse_Port</a></div><div class="ttdeci">void parse_Port(ParsedPort &amp;port, Section const &amp;section, std::ostream &amp;log)</div><div class="ttdef"><b>Definition:</b> <a href="Port_8cpp_source.html#l00199">Port.cpp:199</a></div></div>
+<div class="ttc" id="anamespaceripple_html_ac124fe6744b7fe887dec949b56b16d50"><div class="ttname"><a href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">ripple::to_string</a></div><div class="ttdeci">std::string to_string(base_uint&lt; Bits, Tag &gt; const &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00621">base_uint.h:621</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ad99788f1aca6ce31a1fe8365eee1bba3"><div class="ttname"><a href="namespaceripple.html#ad99788f1aca6ce31a1fe8365eee1bba3">ripple::Rethrow</a></div><div class="ttdeci">void Rethrow()</div><div class="ttdoc">Rethrow the exception currently being handled.</div><div class="ttdef"><b>Definition:</b> <a href="contract_8h_source.html#l00048">contract.h:48</a></div></div>
-<div class="ttc" id="anamespaceripple_html_af9776f187d3686a7fba4c2d2fbeebdf4"><div class="ttname"><a href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">ripple::to_string</a></div><div class="ttdeci">std::string to_string(Manifest const &amp;m)</div><div class="ttdoc">Format the specified manifest to a string for debugging purposes.</div><div class="ttdef"><b>Definition:</b> <a href="app_2misc_2impl_2Manifest_8cpp_source.html#l00038">app/misc/impl/Manifest.cpp:38</a></div></div>
 <div class="ttc" id="anotify_all_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/thread/condition_variable/notify_all.html">std::condition_variable::notify_all</a></div><div class="ttdeci">T notify_all(T... args)</div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a></div></div>
 <div class="ttc" id="apop_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/list/pop_back.html">std::list::pop_back</a></div><div class="ttdeci">T pop_back(T... args)</div></div>

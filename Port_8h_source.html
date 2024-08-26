@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_80c35e8ddb2dc186c009e0af0763187b.html">server</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_0103a8ad82dcc2c51f5cde661b4b5cb7.html">xrpl</a></li><li class="navelem"><a class="el" href="dir_9d7e4921ea2f62e76f4d31f5afd6d533.html">server</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,8 +98,8 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_SERVER_PORT_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_SERVER_PORT_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/BasicConfig.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/beast/net/IPEndpoint.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/BasicConfig.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/beast/net/IPEndpoint.h&gt;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;boost/asio/ip/address.hpp&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;boost/asio/ip/network_v4.hpp&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;boost/asio/ip/network_v6.hpp&gt;</span></div>
@@ -113,8 +113,8 @@ $(function() {
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/variant.html">variant</a>&gt;</span></div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceboost.html">boost</a> {</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keyword">namespace </span>asio {</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">namespace </span>ssl {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="namespaceboost_1_1asio.html">   38</a></span><span class="keyword">namespace </span>asio {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="namespaceboost_1_1asio_1_1ssl.html">   39</a></span><span class="keyword">namespace </span>ssl {</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">class </span>context;</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}  <span class="comment">// namespace asio</span></div>
@@ -166,7 +166,7 @@ $(function() {
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>};</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a>&amp;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><a class="code hl_function" href="namespaceripple.html#a057808985eb1cda645ec3b17a027113e">operator&lt;&lt;</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a>&amp; os, <a class="code hl_struct" href="structripple_1_1Port.html">Port</a> <span class="keyword">const</span>&amp; p);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><a class="code hl_function" href="namespaceripple.html#a5c77599883897def8bd3e9e4ad140f95">operator&lt;&lt;</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a>&amp; os, <a class="code hl_struct" href="structripple_1_1Port.html">Port</a> <span class="keyword">const</span>&amp; p);</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="comment">//------------------------------------------------------------------------------</span></div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
@@ -209,9 +209,9 @@ $(function() {
 <div class="ttc" id="ainteger_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a></div></div>
 <div class="ttc" id="amemory_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/memory.html">memory</a></div></div>
 <div class="ttc" id="anamespaceboost_html"><div class="ttname"><a href="namespaceboost.html">boost</a></div><div class="ttdef"><b>Definition:</b> <a href="IPAddress_8h_source.html#l00103">IPAddress.h:103</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a057808985eb1cda645ec3b17a027113e"><div class="ttname"><a href="namespaceripple.html#a057808985eb1cda645ec3b17a027113e">ripple::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, TOffer&lt; TIn, TOut &gt; const &amp;offer)</div><div class="ttdef"><b>Definition:</b> <a href="Offer_8h_source.html#l00311">Offer.h:312</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a5b67e65f60cd241099149dc88f1e4bfd"><div class="ttname"><a href="namespaceripple.html#a5b67e65f60cd241099149dc88f1e4bfd">ripple::parse_Port</a></div><div class="ttdeci">void parse_Port(ParsedPort &amp;port, Section const &amp;section, std::ostream &amp;log)</div><div class="ttdef"><b>Definition:</b> <a href="Port_8cpp_source.html#l00199">Port.cpp:199</a></div></div>
+<div class="ttc" id="anamespaceripple_html_a5c77599883897def8bd3e9e4ad140f95"><div class="ttname"><a href="namespaceripple.html#a5c77599883897def8bd3e9e4ad140f95">ripple::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;out, base_uint&lt; Bits, Tag &gt; const &amp;u)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00627">base_uint.h:628</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="aset_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/set.html">set</a></div></div>
 <div class="ttc" id="ashared_ptr_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a></div></div>

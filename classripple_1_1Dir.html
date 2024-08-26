@@ -83,13 +83,16 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="Directory_8h_source.html">Directory.h</a>&gt;</code></p>
+<p>A class that simplifies iterating ledger directory pages.  
+ <a href="classripple_1_1Dir.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="Dir_8h_source.html">Dir.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for ripple::Dir:</div>
 <div class="dyncontent">
 <div class="center"><img src="classripple_1_1Dir__coll__graph.png" border="0" usemap="#aripple_1_1Dir_coll__map" alt="Collaboration graph"/></div>
 <map name="aripple_1_1Dir_coll__map" id="aripple_1_1Dir_coll__map">
-<area shape="rect" title=" " alt="" coords="2467,291,2554,317"/>
+<area shape="rect" title="A class that simplifies iterating ledger directory pages." alt="" coords="2467,291,2554,317"/>
 <area shape="rect" href="classripple_1_1ReadView.html" title="A view into a ledger." alt="" coords="2171,123,2303,149"/>
 <area shape="rect" href="classripple_1_1detail_1_1ReadViewFwdRange.html" title=" " alt="" coords="2417,52,2604,92"/>
 <area shape="rect" href="classripple_1_1detail_1_1ReadViewFwdRange.html" title=" " alt="" coords="2422,116,2599,156"/>
@@ -157,8 +160,12 @@ Private Attributes</h2></td></tr>
 <tr class="separator:ac3e691652fd8ec1e5cdd6a8dee5c0862"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="Directory_8h_source.html#l00028">28</a> of file <a class="el" href="Directory_8h_source.html">Directory.h</a>.</p>
+<div class="textblock"><p >A class that simplifies iterating ledger directory pages. </p>
+<p >The <a class="el" href="classripple_1_1Dir.html" title="A class that simplifies iterating ledger directory pages.">Dir</a> class provides a forward iterator for walking through the uint256 values contained in ledger directories.</p>
+<p >The <a class="el" href="classripple_1_1Dir.html" title="A class that simplifies iterating ledger directory pages.">Dir</a> class also allows accelerated directory walking by stepping directly from one page to the next using the next_page() member function.</p>
+<p >As of July 2024, the <a class="el" href="classripple_1_1Dir.html" title="A class that simplifies iterating ledger directory pages.">Dir</a> class is only being used with NFTokenOffer directories and for unit tests. </p>
+
+<p class="definition">Definition at line <a class="el" href="Dir_8h_source.html#l00040">40</a> of file <a class="el" href="Dir_8h_source.html">Dir.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a92642ead82a8db15a77ac9c7ec9688a3" name="a92642ead82a8db15a77ac9c7ec9688a3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a92642ead82a8db15a77ac9c7ec9688a3">&#9670;&#160;</a></span>value_type</h2>
@@ -172,7 +179,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8h_source.html#l00038">38</a> of file <a class="el" href="Directory_8h_source.html">Directory.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8h_source.html#l00050">50</a> of file <a class="el" href="Dir_8h_source.html">Dir.h</a>.</p>
 
 </div>
 </div>
@@ -203,7 +210,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8cpp_source.html#l00026">26</a> of file <a class="el" href="Directory_8cpp_source.html">Directory.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8cpp_source.html#l00026">26</a> of file <a class="el" href="Dir_8cpp_source.html">Dir.cpp</a>.</p>
 
 </div>
 </div>
@@ -223,7 +230,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8cpp_source.html#l00034">34</a> of file <a class="el" href="Directory_8cpp_source.html">Directory.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8cpp_source.html#l00034">34</a> of file <a class="el" href="Dir_8cpp_source.html">Dir.cpp</a>.</p>
 
 </div>
 </div>
@@ -242,7 +249,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8cpp_source.html#l00052">52</a> of file <a class="el" href="Directory_8cpp_source.html">Directory.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8cpp_source.html#l00052">52</a> of file <a class="el" href="Dir_8cpp_source.html">Dir.cpp</a>.</p>
 
 </div>
 </div>
@@ -267,7 +274,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8h_source.html#l00031">31</a> of file <a class="el" href="Directory_8h_source.html">Directory.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8h_source.html#l00043">43</a> of file <a class="el" href="Dir_8h_source.html">Dir.h</a>.</p>
 
 </div>
 </div>
@@ -291,7 +298,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8h_source.html#l00032">32</a> of file <a class="el" href="Directory_8h_source.html">Directory.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8h_source.html#l00044">44</a> of file <a class="el" href="Dir_8h_source.html">Dir.h</a>.</p>
 
 </div>
 </div>
@@ -315,7 +322,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8h_source.html#l00033">33</a> of file <a class="el" href="Directory_8h_source.html">Directory.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8h_source.html#l00045">45</a> of file <a class="el" href="Dir_8h_source.html">Dir.h</a>.</p>
 
 </div>
 </div>
@@ -339,7 +346,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Directory_8h_source.html#l00034">34</a> of file <a class="el" href="Directory_8h_source.html">Directory.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Dir_8h_source.html#l00046">46</a> of file <a class="el" href="Dir_8h_source.html">Dir.h</a>.</p>
 
 </div>
 </div>

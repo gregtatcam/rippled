@@ -178,8 +178,6 @@ Concepts</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:aeb2a1b7b18c8dd127461be172a910a66"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aeb2a1b7b18c8dd127461be172a910a66">response_type</a> = boost::beast::http::response&lt; boost::beast::http::string_body &gt;</td></tr>
-<tr class="separator:aeb2a1b7b18c8dd127461be172a910a66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab71dc38912727712056be6817a81bcd1"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ab71dc38912727712056be6817a81bcd1">seed_pair</a> = <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> &gt;</td></tr>
 <tr class="separator:ab71dc38912727712056be6817a81bcd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc38aa9ea5bbed77a9d15119fe3ad676"><td class="memTemplParams" colspan="2">template&lt;class Engine , class <a class="el" href="namespaceripple.html#a60696b01dc3651699da2361a1e1479f2">Result</a>  = typename Engine::result_type&gt; </td></tr>
@@ -197,6 +195,8 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a0d1eb807267e0803b585e348424b7c7c"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a0d1eb807267e0803b585e348424b7c7c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a0d1eb807267e0803b585e348424b7c7c">test_hardened_unordered_multimap</a> = <a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_multimap.html">std::unordered_multimap</a>&lt; T, int, <a class="el" href="classripple_1_1hardened__hash.html">hardened_hash</a>&lt;&gt; &gt;</td></tr>
 <tr class="separator:a0d1eb807267e0803b585e348424b7c7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb2a1b7b18c8dd127461be172a910a66"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aeb2a1b7b18c8dd127461be172a910a66">response_type</a> = boost::beast::http::response&lt; boost::beast::http::string_body &gt;</td></tr>
+<tr class="separator:aeb2a1b7b18c8dd127461be172a910a66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -208,6 +208,47 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a249a9f5f4201996e85c94a88e2364843"><td class="memTemplParams" colspan="2">template&lt;bool  = true&gt; </td></tr>
+<tr class="memitem:a249a9f5f4201996e85c94a88e2364843"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceripple_1_1detail.html#ab71dc38912727712056be6817a81bcd1">seed_pair</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a249a9f5f4201996e85c94a88e2364843">make_seed_pair</a> () noexcept</td></tr>
+<tr class="separator:a249a9f5f4201996e85c94a88e2364843"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf18322072d0123a1b0021484634552a"><td class="memTemplParams" colspan="2">template&lt;class  = void&gt; </td></tr>
+<tr class="memitem:acf18322072d0123a1b0021484634552a"><td class="memTemplItemLeft" align="right" valign="top">boost::thread_specific_ptr&lt; <a class="el" href="structripple_1_1detail_1_1LocalValues.html">detail::LocalValues</a> &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#acf18322072d0123a1b0021484634552a">getLocalValues</a> ()</td></tr>
+<tr class="separator:acf18322072d0123a1b0021484634552a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86d9198b3b1df674eb3345f3ad8f4320"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a86d9198b3b1df674eb3345f3ad8f4320">spin_pause</a> () noexcept</td></tr>
+<tr class="memdesc:a86d9198b3b1df674eb3345f3ad8f4320"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inform the processor that we are in a tight spin-wait loop.  <a href="namespaceripple_1_1detail.html#a86d9198b3b1df674eb3345f3ad8f4320">More...</a><br /></td></tr>
+<tr class="separator:a86d9198b3b1df674eb3345f3ad8f4320"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c5fe1959d420a2a34e2b722031dff4e"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
+<tr class="memitem:a3c5fe1959d420a2a34e2b722031dff4e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a3c5fe1959d420a2a34e2b722031dff4e">make_stvar</a> (Args &amp;&amp;... args)</td></tr>
+<tr class="separator:a3c5fe1959d420a2a34e2b722031dff4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d35a1558ac6ed399df07c9eb9dbe2c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a6d35a1558ac6ed399df07c9eb9dbe2c2">operator==</a> (<a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;lhs, <a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;rhs)</td></tr>
+<tr class="separator:a6d35a1558ac6ed399df07c9eb9dbe2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5cc8daa9fe01aa816164b9637c5aa7b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ab5cc8daa9fe01aa816164b9637c5aa7b">operator!=</a> (<a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;lhs, <a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;rhs)</td></tr>
+<tr class="separator:ab5cc8daa9fe01aa816164b9637c5aa7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa306c03c39352f8b30c6fbde3fe972f3"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/map.html">std::map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, <a class="el" href="namespaceripple.html#aa5778f9faa15e3677dcda7975d9db7c6">VoteBehavior</a> &gt; const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aa306c03c39352f8b30c6fbde3fe972f3">supportedAmendments</a> ()</td></tr>
+<tr class="memdesc:aa306c03c39352f8b30c6fbde3fe972f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amendments that this server supports and the default voting behavior.  <a href="namespaceripple_1_1detail.html#aa306c03c39352f8b30c6fbde3fe972f3">More...</a><br /></td></tr>
+<tr class="separator:aa306c03c39352f8b30c6fbde3fe972f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a907b165d0a3ebb3ce0a2f1c64c50e107"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a907b165d0a3ebb3ce0a2f1c64c50e107">numDownVotedAmendments</a> ()</td></tr>
+<tr class="memdesc:a907b165d0a3ebb3ce0a2f1c64c50e107"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amendments that this server won't vote for by default.  <a href="namespaceripple_1_1detail.html#a907b165d0a3ebb3ce0a2f1c64c50e107">More...</a><br /></td></tr>
+<tr class="separator:a907b165d0a3ebb3ce0a2f1c64c50e107"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48573a366f17fd2a6294905c3cb4a29e"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a48573a366f17fd2a6294905c3cb4a29e">numUpVotedAmendments</a> ()</td></tr>
+<tr class="memdesc:a48573a366f17fd2a6294905c3cb4a29e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amendments that this server will vote for by default.  <a href="namespaceripple_1_1detail.html#a48573a366f17fd2a6294905c3cb4a29e">More...</a><br /></td></tr>
+<tr class="separator:a48573a366f17fd2a6294905c3cb4a29e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3266bff106a961696ef3397134178cac"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a3266bff106a961696ef3397134178cac">make_hash_prefix</a> (char a, char b, char c)</td></tr>
+<tr class="separator:a3266bff106a961696ef3397134178cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d97f07e5b7bfe169282ff5bacde87b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a7d97f07e5b7bfe169282ff5bacde87b5">accessViolation</a> () noexcept</td></tr>
+<tr class="separator:a7d97f07e5b7bfe169282ff5bacde87b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a367989857fb62d21d0d9d5f1b2c91e87"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a367989857fb62d21d0d9d5f1b2c91e87">as_amount</a> (<a class="el" href="structripple_1_1Rate.html">Rate</a> const &amp;rate)</td></tr>
+<tr class="separator:a367989857fb62d21d0d9d5f1b2c91e87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68243c57c7d8b97e81f46e46bc9d1823"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a68243c57c7d8b97e81f46e46bc9d1823">copy_uint32</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a> *<a class="el" href="namespaceripple.html#a7cc64e12723fbc9606d85442a2569fedac68271a63ddbc431c307beb7d2918275">out</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> v)</td></tr>
+<tr class="separator:a68243c57c7d8b97e81f46e46bc9d1823"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecc1aa4944a6cc802ab85597b012a2de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aecc1aa4944a6cc802ab85597b012a2de">deriveDeterministicRootKey</a> (<a class="el" href="classripple_1_1Seed.html">Seed</a> const &amp;seed)</td></tr>
+<tr class="separator:aecc1aa4944a6cc802ab85597b012a2de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d900d363b7c2725a8d1698e15067ec3"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a0d900d363b7c2725a8d1698e15067ec3">configContents</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbPath, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;validatorsFile)</td></tr>
+<tr class="separator:a0d900d363b7c2725a8d1698e15067ec3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c5d9fb1006ebe79534ff7eb895abdbb"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a1c5d9fb1006ebe79534ff7eb895abdbb">valFileContents</a> ()</td></tr>
+<tr class="separator:a1c5d9fb1006ebe79534ff7eb895abdbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2407266f6fb0fccc12032875b2cbb01"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ad2407266f6fb0fccc12032875b2cbb01">reduceOffer</a> (auto const &amp;amount)</td></tr>
+<tr class="separator:ad2407266f6fb0fccc12032875b2cbb01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65a7960dc32d16b224fd2af48bb144ed"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; bool, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a65a7960dc32d16b224fd2af48bb144ed">sumOfFirstSquares</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> xIn)</td></tr>
 <tr class="separator:a65a7960dc32d16b224fd2af48bb144ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f63e85f3ddc69a1ed04477d43275202"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
@@ -267,71 +308,48 @@ Functions</h2></td></tr>
 <tr class="memitem:adfb393d7c85f7ba8d0f8495ef9c286a9"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/map.html">std::map</a>&lt; <a class="el" href="namespaceripple.html#a12af8e98b794e8ee3b4dbecaed2a4efd">LedgerIndex</a>, <a class="el" href="structripple_1_1LedgerHashPair.html">LedgerHashPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#adfb393d7c85f7ba8d0f8495ef9c286a9">getHashesByIndex</a> (soci::session &amp;session, <a class="el" href="namespaceripple.html#a12af8e98b794e8ee3b4dbecaed2a4efd">LedgerIndex</a> minSeq, <a class="el" href="namespaceripple.html#a12af8e98b794e8ee3b4dbecaed2a4efd">LedgerIndex</a> maxSeq, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="memdesc:adfb393d7c85f7ba8d0f8495ef9c286a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">getHashesByIndex Returns hash of the ledger and hash of parent ledger for all ledgers with seqyences from given minimum limit to fiven maximum limit.  <a href="namespaceripple_1_1detail.html#adfb393d7c85f7ba8d0f8495ef9c286a9">More...</a><br /></td></tr>
 <tr class="separator:adfb393d7c85f7ba8d0f8495ef9c286a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad59a5fc0f6a9f503b07a183beefef591"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1Transaction.html">Transaction</a> &gt; &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ad59a5fc0f6a9f503b07a183beefef591">getTxHistory</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="namespaceripple.html#a12af8e98b794e8ee3b4dbecaed2a4efd">LedgerIndex</a> startIndex, int quantity, bool count)</td></tr>
-<tr class="memdesc:ad59a5fc0f6a9f503b07a183beefef591"><td class="mdescLeft">&#160;</td><td class="mdescRight">getTxHistory Returns given number of most recent transactions starting from given number of entry.  <a href="namespaceripple_1_1detail.html#ad59a5fc0f6a9f503b07a183beefef591">More...</a><br /></td></tr>
-<tr class="separator:ad59a5fc0f6a9f503b07a183beefef591"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af518019ee1fbe40a13c4f800e6e85e62"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#af518019ee1fbe40a13c4f800e6e85e62">transactionsSQL</a> (<a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> selection, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;limit_used, bool descending, bool binary, bool count, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:af518019ee1fbe40a13c4f800e6e85e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">transactionsSQL Returns a SQL query for selecting the oldest or newest transactions in decoded or binary form for the account that matches the given criteria starting from the provided offset.  <a href="namespaceripple_1_1detail.html#af518019ee1fbe40a13c4f800e6e85e62">More...</a><br /></td></tr>
-<tr class="separator:af518019ee1fbe40a13c4f800e6e85e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e5d0a4ff5243de16700b345c11ff9c0"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#a1af9139d7f4c8f662c7b8e49473a21e2">RelationalDatabase::AccountTxs</a>, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a5e5d0a4ff5243de16700b345c11ff9c0">getAccountTxs</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> &amp;<a class="el" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7fa2267e9b1bf739a70bb1860ab2a99c">ledgerMaster</a>, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;limit_used, bool descending, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:a5e5d0a4ff5243de16700b345c11ff9c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">getAccountTxs Returns the oldest or newest transactions for the account that matches the given criteria starting from the provided offset.  <a href="namespaceripple_1_1detail.html#a5e5d0a4ff5243de16700b345c11ff9c0">More...</a><br /></td></tr>
-<tr class="separator:a5e5d0a4ff5243de16700b345c11ff9c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aae6a1cd6a0f1d41264bad9363e3715aa"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#a1af9139d7f4c8f662c7b8e49473a21e2">RelationalDatabase::AccountTxs</a>, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aae6a1cd6a0f1d41264bad9363e3715aa">getOldestAccountTxs</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> &amp;<a class="el" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7fa2267e9b1bf739a70bb1860ab2a99c">ledgerMaster</a>, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const  &amp;limit_used, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:aae6a1cd6a0f1d41264bad9363e3715aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">getOldestAccountTxs Returns oldest transactions for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#aae6a1cd6a0f1d41264bad9363e3715aa">More...</a><br /></td></tr>
-<tr class="separator:aae6a1cd6a0f1d41264bad9363e3715aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b6f99cc7d09f4c98038d1ec0c3c1d96"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#a1af9139d7f4c8f662c7b8e49473a21e2">RelationalDatabase::AccountTxs</a>, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a8b6f99cc7d09f4c98038d1ec0c3c1d96">getNewestAccountTxs</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> &amp;<a class="el" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7fa2267e9b1bf739a70bb1860ab2a99c">ledgerMaster</a>, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const  &amp;limit_used, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:a8b6f99cc7d09f4c98038d1ec0c3c1d96"><td class="mdescLeft">&#160;</td><td class="mdescRight">getNewestAccountTxs Returns newest transactions for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#a8b6f99cc7d09f4c98038d1ec0c3c1d96">More...</a><br /></td></tr>
-<tr class="separator:a8b6f99cc7d09f4c98038d1ec0c3c1d96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93970c4d918879724b5ad1cd5907208c"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#ad49d721f8f069c1ee9652b93a3485423">RelationalDatabase::txnMetaLedgerType</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a93970c4d918879724b5ad1cd5907208c">getAccountTxsB</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;limit_used, bool descending, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:a93970c4d918879724b5ad1cd5907208c"><td class="mdescLeft">&#160;</td><td class="mdescRight">getAccountTxsB Returns the oldest or newest transactions in binary form for the account that matches given criteria starting from the provided offset.  <a href="namespaceripple_1_1detail.html#a93970c4d918879724b5ad1cd5907208c">More...</a><br /></td></tr>
-<tr class="separator:a93970c4d918879724b5ad1cd5907208c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a200b53f197260a928dbcbb777a2e3b6f"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#ad49d721f8f069c1ee9652b93a3485423">RelationalDatabase::txnMetaLedgerType</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a200b53f197260a928dbcbb777a2e3b6f">getOldestAccountTxsB</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const  &amp;limit_used, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:a200b53f197260a928dbcbb777a2e3b6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">getOldestAccountTxsB Returns oldest transactions in binary form for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#a200b53f197260a928dbcbb777a2e3b6f">More...</a><br /></td></tr>
-<tr class="separator:a200b53f197260a928dbcbb777a2e3b6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9f544f38cf755215588e5759421b4420"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#ad49d721f8f069c1ee9652b93a3485423">RelationalDatabase::txnMetaLedgerType</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a9f544f38cf755215588e5759421b4420">getNewestAccountTxsB</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const  &amp;limit_used, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:a9f544f38cf755215588e5759421b4420"><td class="mdescLeft">&#160;</td><td class="mdescRight">getNewestAccountTxsB Returns newest transactions in binary form for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#a9f544f38cf755215588e5759421b4420">More...</a><br /></td></tr>
-<tr class="separator:a9f544f38cf755215588e5759421b4420"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42f954d745a4ab40aca43437b8d393e0"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxMarker.html">RelationalDatabase::AccountTxMarker</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a42f954d745a4ab40aca43437b8d393e0">accountTxPage</a> (soci::session &amp;session, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>)&gt; const &amp;onUnsavedLedger, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;)&gt; const &amp;onTransaction, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxPageOptions.html">RelationalDatabase::AccountTxPageOptions</a> const &amp;options, int limit_used, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> page_length, bool <a class="el" href="namespaceripple.html#a2fca0f72cfacc04d15ad41d84ebf46fda965dbaac085fc891bfbbd4f9d145bbc8">forward</a>)</td></tr>
-<tr class="memdesc:a42f954d745a4ab40aca43437b8d393e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">accountTxPage Searches for the oldest or newest transactions for the account that matches the given criteria starting from the provided marker and invokes the callback parameter for each found transaction.  <a href="namespaceripple_1_1detail.html#a42f954d745a4ab40aca43437b8d393e0">More...</a><br /></td></tr>
-<tr class="separator:a42f954d745a4ab40aca43437b8d393e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a691df57c4b491e41afe720405ac9ebb3"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxMarker.html">RelationalDatabase::AccountTxMarker</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a691df57c4b491e41afe720405ac9ebb3">oldestAccountTxPage</a> (soci::session &amp;session, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>)&gt; const  &amp;onUnsavedLedger, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const  &amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;)&gt; const  &amp;onTransaction, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxPageOptions.html">RelationalDatabase::AccountTxPageOptions</a> const  &amp;options, int limit_used, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> page_length)</td></tr>
-<tr class="memdesc:a691df57c4b491e41afe720405ac9ebb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">oldestAccountTxPage Searches oldest transactions for given account which match given criteria starting from given marker and calls callback for each found transaction.  <a href="namespaceripple_1_1detail.html#a691df57c4b491e41afe720405ac9ebb3">More...</a><br /></td></tr>
-<tr class="separator:a691df57c4b491e41afe720405ac9ebb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aebe9c123515b55f0778e74f55c61e026"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxMarker.html">RelationalDatabase::AccountTxMarker</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aebe9c123515b55f0778e74f55c61e026">newestAccountTxPage</a> (soci::session &amp;session, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>)&gt; const  &amp;onUnsavedLedger, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const  &amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;)&gt; const  &amp;onTransaction, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxPageOptions.html">RelationalDatabase::AccountTxPageOptions</a> const  &amp;options, int limit_used, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> page_length)</td></tr>
-<tr class="memdesc:aebe9c123515b55f0778e74f55c61e026"><td class="mdescLeft">&#160;</td><td class="mdescRight">newestAccountTxPage Searches newest transactions for given account which match given criteria starting from given marker and calls callback for each found transaction.  <a href="namespaceripple_1_1detail.html#aebe9c123515b55f0778e74f55c61e026">More...</a><br /></td></tr>
-<tr class="separator:aebe9c123515b55f0778e74f55c61e026"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85ce1135aee0b32318ef92bac4c8e523"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1Transaction.html">Transaction</a> &gt; &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a85ce1135aee0b32318ef92bac4c8e523">getTxHistory</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="namespaceripple.html#a12af8e98b794e8ee3b4dbecaed2a4efd">LedgerIndex</a> startIndex, int quantity)</td></tr>
+<tr class="memdesc:a85ce1135aee0b32318ef92bac4c8e523"><td class="mdescLeft">&#160;</td><td class="mdescRight">getTxHistory Returns given number of most recent transactions starting from given number of entry.  <a href="namespaceripple_1_1detail.html#a85ce1135aee0b32318ef92bac4c8e523">More...</a><br /></td></tr>
+<tr class="separator:a85ce1135aee0b32318ef92bac4c8e523"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad380a45f146ab8776065e4252da8f5c6"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ad380a45f146ab8776065e4252da8f5c6">transactionsSQL</a> (<a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> selection, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;options, bool descending, bool binary, bool count, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
+<tr class="memdesc:ad380a45f146ab8776065e4252da8f5c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">transactionsSQL Returns a SQL query for selecting the oldest or newest transactions in decoded or binary form for the account that matches the given criteria starting from the provided offset.  <a href="namespaceripple_1_1detail.html#ad380a45f146ab8776065e4252da8f5c6">More...</a><br /></td></tr>
+<tr class="separator:ad380a45f146ab8776065e4252da8f5c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a460007ea7b9520d58ff5171a31a88ed6"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#a1af9139d7f4c8f662c7b8e49473a21e2">RelationalDatabase::AccountTxs</a>, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a460007ea7b9520d58ff5171a31a88ed6">getAccountTxs</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> &amp;<a class="el" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7fa2267e9b1bf739a70bb1860ab2a99c">ledgerMaster</a>, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;options, bool descending, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
+<tr class="memdesc:a460007ea7b9520d58ff5171a31a88ed6"><td class="mdescLeft">&#160;</td><td class="mdescRight">getAccountTxs Returns the oldest or newest transactions for the account that matches the given criteria starting from the provided offset.  <a href="namespaceripple_1_1detail.html#a460007ea7b9520d58ff5171a31a88ed6">More...</a><br /></td></tr>
+<tr class="separator:a460007ea7b9520d58ff5171a31a88ed6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82a9f04cd692063aa77ccd0d32cc5f59"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#a1af9139d7f4c8f662c7b8e49473a21e2">RelationalDatabase::AccountTxs</a>, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a82a9f04cd692063aa77ccd0d32cc5f59">getOldestAccountTxs</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> &amp;<a class="el" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7fa2267e9b1bf739a70bb1860ab2a99c">ledgerMaster</a>, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
+<tr class="memdesc:a82a9f04cd692063aa77ccd0d32cc5f59"><td class="mdescLeft">&#160;</td><td class="mdescRight">getOldestAccountTxs Returns oldest transactions for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#a82a9f04cd692063aa77ccd0d32cc5f59">More...</a><br /></td></tr>
+<tr class="separator:a82a9f04cd692063aa77ccd0d32cc5f59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5776ebfa029c50255885aea11465939"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#a1af9139d7f4c8f662c7b8e49473a21e2">RelationalDatabase::AccountTxs</a>, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ae5776ebfa029c50255885aea11465939">getNewestAccountTxs</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> &amp;<a class="el" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7fa2267e9b1bf739a70bb1860ab2a99c">ledgerMaster</a>, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
+<tr class="memdesc:ae5776ebfa029c50255885aea11465939"><td class="mdescLeft">&#160;</td><td class="mdescRight">getNewestAccountTxs Returns newest transactions for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#ae5776ebfa029c50255885aea11465939">More...</a><br /></td></tr>
+<tr class="separator:ae5776ebfa029c50255885aea11465939"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a047a8547c875e1f889f872149631a98e"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#ad49d721f8f069c1ee9652b93a3485423">RelationalDatabase::txnMetaLedgerType</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a047a8547c875e1f889f872149631a98e">getAccountTxsB</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;options, bool descending, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
+<tr class="memdesc:a047a8547c875e1f889f872149631a98e"><td class="mdescLeft">&#160;</td><td class="mdescRight">getAccountTxsB Returns the oldest or newest transactions in binary form for the account that matches given criteria starting from the provided offset.  <a href="namespaceripple_1_1detail.html#a047a8547c875e1f889f872149631a98e">More...</a><br /></td></tr>
+<tr class="separator:a047a8547c875e1f889f872149631a98e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab90e41cda88695fd8110750c8f8d3ff8"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#ad49d721f8f069c1ee9652b93a3485423">RelationalDatabase::txnMetaLedgerType</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ab90e41cda88695fd8110750c8f8d3ff8">getOldestAccountTxsB</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
+<tr class="memdesc:ab90e41cda88695fd8110750c8f8d3ff8"><td class="mdescLeft">&#160;</td><td class="mdescRight">getOldestAccountTxsB Returns oldest transactions in binary form for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#ab90e41cda88695fd8110750c8f8d3ff8">More...</a><br /></td></tr>
+<tr class="separator:ab90e41cda88695fd8110750c8f8d3ff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae85db139f5c6edcd6b87e80683938704"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#ad49d721f8f069c1ee9652b93a3485423">RelationalDatabase::txnMetaLedgerType</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ae85db139f5c6edcd6b87e80683938704">getNewestAccountTxsB</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const  &amp;options, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
+<tr class="memdesc:ae85db139f5c6edcd6b87e80683938704"><td class="mdescLeft">&#160;</td><td class="mdescRight">getNewestAccountTxsB Returns newest transactions in binary form for given account which match given criteria starting from given offset.  <a href="namespaceripple_1_1detail.html#ae85db139f5c6edcd6b87e80683938704">More...</a><br /></td></tr>
+<tr class="separator:ae85db139f5c6edcd6b87e80683938704"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5d3a4868d9b307760e3d8c198104524"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxMarker.html">RelationalDatabase::AccountTxMarker</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#af5d3a4868d9b307760e3d8c198104524">accountTxPage</a> (soci::session &amp;session, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>)&gt; const &amp;onUnsavedLedger, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;)&gt; const &amp;onTransaction, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxPageOptions.html">RelationalDatabase::AccountTxPageOptions</a> const &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> page_length, bool <a class="el" href="namespaceripple.html#a2fca0f72cfacc04d15ad41d84ebf46fda965dbaac085fc891bfbbd4f9d145bbc8">forward</a>)</td></tr>
+<tr class="memdesc:af5d3a4868d9b307760e3d8c198104524"><td class="mdescLeft">&#160;</td><td class="mdescRight">accountTxPage Searches for the oldest or newest transactions for the account that matches the given criteria starting from the provided marker and invokes the callback parameter for each found transaction.  <a href="namespaceripple_1_1detail.html#af5d3a4868d9b307760e3d8c198104524">More...</a><br /></td></tr>
+<tr class="separator:af5d3a4868d9b307760e3d8c198104524"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55d0c66eeed95f9cce7627df62c89f18"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxMarker.html">RelationalDatabase::AccountTxMarker</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a55d0c66eeed95f9cce7627df62c89f18">oldestAccountTxPage</a> (soci::session &amp;session, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>)&gt; const  &amp;onUnsavedLedger, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const  &amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;)&gt; const  &amp;onTransaction, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxPageOptions.html">RelationalDatabase::AccountTxPageOptions</a> const  &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> page_length)</td></tr>
+<tr class="memdesc:a55d0c66eeed95f9cce7627df62c89f18"><td class="mdescLeft">&#160;</td><td class="mdescRight">oldestAccountTxPage Searches oldest transactions for given account which match given criteria starting from given marker and calls callback for each found transaction.  <a href="namespaceripple_1_1detail.html#a55d0c66eeed95f9cce7627df62c89f18">More...</a><br /></td></tr>
+<tr class="separator:a55d0c66eeed95f9cce7627df62c89f18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34fdefc0f48c3da6e5d73e10e23205a3"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxMarker.html">RelationalDatabase::AccountTxMarker</a> &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a34fdefc0f48c3da6e5d73e10e23205a3">newestAccountTxPage</a> (soci::session &amp;session, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>)&gt; const  &amp;onUnsavedLedger, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const  &amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;, <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a> &amp;&amp;)&gt; const  &amp;onTransaction, <a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxPageOptions.html">RelationalDatabase::AccountTxPageOptions</a> const  &amp;options, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> page_length)</td></tr>
+<tr class="memdesc:a34fdefc0f48c3da6e5d73e10e23205a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">newestAccountTxPage Searches newest transactions for given account which match given criteria starting from given marker and calls callback for each found transaction.  <a href="namespaceripple_1_1detail.html#a34fdefc0f48c3da6e5d73e10e23205a3">More...</a><br /></td></tr>
+<tr class="separator:a34fdefc0f48c3da6e5d73e10e23205a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5d7eac1c2a92d6e9c464f4873f636a0"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/variant.html">std::variant</a>&lt; <a class="el" href="classripple_1_1RelationalDatabase.html#a251e55e3d5aa9b4e4d1a7eebe2157d46">RelationalDatabase::AccountTx</a>, <a class="el" href="namespaceripple.html#a7ffb3f54d739bb8f967d695f08fb66cc">TxSearched</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#af5d7eac1c2a92d6e9c464f4873f636a0">getTransaction</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const  &amp;id, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a79dcedfb918a7b371ab7797ae9d9bf23">ClosedInterval</a>&lt; uint32_t &gt; &gt; const  &amp;<a class="el" href="namespaceripple.html#ac1258b27600294cf1c6dc05ce3cf58d3">range</a>, <a class="el" href="namespaceripple.html#a32d6d3ce1a48272b677d2c88b1d30932">error_code_i</a> &amp;ec)</td></tr>
 <tr class="memdesc:af5d7eac1c2a92d6e9c464f4873f636a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">getTransaction Returns transaction with given hash.  <a href="namespaceripple_1_1detail.html#af5d7eac1c2a92d6e9c464f4873f636a0">More...</a><br /></td></tr>
 <tr class="separator:af5d7eac1c2a92d6e9c464f4873f636a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb3e941928e4b3997a5f46821622f625"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#acb3e941928e4b3997a5f46821622f625">dbHasSpace</a> (soci::session &amp;session, <a class="el" href="classripple_1_1Config.html">Config</a> const  &amp;config, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="memdesc:acb3e941928e4b3997a5f46821622f625"><td class="mdescLeft">&#160;</td><td class="mdescRight">dbHasSpace Checks if given database has available space.  <a href="namespaceripple_1_1detail.html#acb3e941928e4b3997a5f46821622f625">More...</a><br /></td></tr>
 <tr class="separator:acb3e941928e4b3997a5f46821622f625"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a131118ac74fb5f75f95f3cc038d9240c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1DatabasePair.html">DatabasePair</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a131118ac74fb5f75f95f3cc038d9240c">makeMetaDBs</a> (<a class="el" href="classripple_1_1Config.html">Config</a> const  &amp;config, <a class="el" href="structripple_1_1DatabaseCon_1_1Setup.html">DatabaseCon::Setup</a> const  &amp;setup, <a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">DatabaseCon::CheckpointerSetup</a> const  &amp;checkpointerSetup)</td></tr>
-<tr class="memdesc:a131118ac74fb5f75f95f3cc038d9240c"><td class="mdescLeft">&#160;</td><td class="mdescRight">makeMetaDBs Opens ledger and transaction 'meta' databases which map ledger hashes and transaction IDs to the index of the shard that holds the ledger or transaction.  <a href="namespaceripple_1_1detail.html#a131118ac74fb5f75f95f3cc038d9240c">More...</a><br /></td></tr>
-<tr class="separator:a131118ac74fb5f75f95f3cc038d9240c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab91a734fd58da3e9628afe37bd4b6204"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ab91a734fd58da3e9628afe37bd4b6204">saveLedgerMeta</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1Ledger.html">Ledger</a> const  &gt; const  &amp;ledger, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, soci::session &amp;lgrMetaSession, soci::session &amp;txnMetaSession, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> shardIndex)</td></tr>
-<tr class="memdesc:ab91a734fd58da3e9628afe37bd4b6204"><td class="mdescLeft">&#160;</td><td class="mdescRight">saveLedgerMeta Stores (transaction ID -&gt; shard index) and (ledger hash -&gt; shard index) mappings in the meta databases.  <a href="namespaceripple_1_1detail.html#ab91a734fd58da3e9628afe37bd4b6204">More...</a><br /></td></tr>
-<tr class="separator:ab91a734fd58da3e9628afe37bd4b6204"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad54aa93bcb0bf57d942f1b9bb54f8d16"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ad54aa93bcb0bf57d942f1b9bb54f8d16">getShardIndexforLedger</a> (soci::session &amp;session, <a class="el" href="namespaceripple.html#af5a72d3e0d9b6913c13f688390b90796">LedgerHash</a> const  &amp;hash)</td></tr>
-<tr class="memdesc:ad54aa93bcb0bf57d942f1b9bb54f8d16"><td class="mdescLeft">&#160;</td><td class="mdescRight">getShardIndexforLedger Queries the ledger meta database to retrieve the index of the shard that contains this ledger.  <a href="namespaceripple_1_1detail.html#ad54aa93bcb0bf57d942f1b9bb54f8d16">More...</a><br /></td></tr>
-<tr class="separator:ad54aa93bcb0bf57d942f1b9bb54f8d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab126eebd8d37a5cfee0882a45977d1d9"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ab126eebd8d37a5cfee0882a45977d1d9">getShardIndexforTransaction</a> (soci::session &amp;session, <a class="el" href="namespaceripple.html#a3f39560bfd60c64700b109c412e90f72">TxID</a> const  &amp;id)</td></tr>
-<tr class="memdesc:ab126eebd8d37a5cfee0882a45977d1d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">getShardIndexforTransaction Queries the transaction meta database to retrieve the index of the shard that contains this transaction.  <a href="namespaceripple_1_1detail.html#ab126eebd8d37a5cfee0882a45977d1d9">More...</a><br /></td></tr>
-<tr class="separator:ab126eebd8d37a5cfee0882a45977d1d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9769881a083fcc3aba7e9ddaaa7ece28"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a9769881a083fcc3aba7e9ddaaa7ece28">toString</a> (<a class="el" href="namespaceripple.html#aaf521cde20561da32d6a54a105363555">LedgerInfo</a> const &amp;info)</td></tr>
 <tr class="memdesc:a9769881a083fcc3aba7e9ddaaa7ece28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convenience function for printing out basic ledger info.  <a href="namespaceripple_1_1detail.html#a9769881a083fcc3aba7e9ddaaa7ece28">More...</a><br /></td></tr>
 <tr class="separator:a9769881a083fcc3aba7e9ddaaa7ece28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a249a9f5f4201996e85c94a88e2364843"><td class="memTemplParams" colspan="2">template&lt;bool  = true&gt; </td></tr>
-<tr class="memitem:a249a9f5f4201996e85c94a88e2364843"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="namespaceripple_1_1detail.html#ab71dc38912727712056be6817a81bcd1">seed_pair</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a249a9f5f4201996e85c94a88e2364843">make_seed_pair</a> () noexcept</td></tr>
-<tr class="separator:a249a9f5f4201996e85c94a88e2364843"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d97f07e5b7bfe169282ff5bacde87b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a7d97f07e5b7bfe169282ff5bacde87b5">accessViolation</a> () noexcept</td></tr>
-<tr class="separator:a7d97f07e5b7bfe169282ff5bacde87b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf18322072d0123a1b0021484634552a"><td class="memTemplParams" colspan="2">template&lt;class  = void&gt; </td></tr>
-<tr class="memitem:acf18322072d0123a1b0021484634552a"><td class="memTemplItemLeft" align="right" valign="top">boost::thread_specific_ptr&lt; <a class="el" href="structripple_1_1detail_1_1LocalValues.html">detail::LocalValues</a> &gt; &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#acf18322072d0123a1b0021484634552a">getLocalValues</a> ()</td></tr>
-<tr class="separator:acf18322072d0123a1b0021484634552a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a86d9198b3b1df674eb3345f3ad8f4320"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a86d9198b3b1df674eb3345f3ad8f4320">spin_pause</a> () noexcept</td></tr>
-<tr class="memdesc:a86d9198b3b1df674eb3345f3ad8f4320"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inform the processor that we are in a tight spin-wait loop.  <a href="namespaceripple_1_1detail.html#a86d9198b3b1df674eb3345f3ad8f4320">More...</a><br /></td></tr>
-<tr class="separator:a86d9198b3b1df674eb3345f3ad8f4320"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af55810910292bce584eb1aa14e55fae1"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#af55810910292bce584eb1aa14e55fae1">getSociSqliteInit</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;name, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dir, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;ext)</td></tr>
 <tr class="separator:af55810910292bce584eb1aa14e55fae1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2fc6c0177558ca5d07f884e0efcb1c3d"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a2fc6c0177558ca5d07f884e0efcb1c3d">getSociInit</a> (<a class="el" href="classripple_1_1BasicConfig.html">BasicConfig</a> const &amp;config, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName)</td></tr>
@@ -358,74 +376,30 @@ Functions</h2></td></tr>
 <tr class="memitem:a1ebc7f9a2b695a1f5987457e5eaaf79b"><td class="memTemplParams" colspan="2">template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&lt;        std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </td></tr>
 <tr class="memitem:a1ebc7f9a2b695a1f5987457e5eaaf79b"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a1ebc7f9a2b695a1f5987457e5eaaf79b">invoke</a> (<a class="el" href="structripple_1_1detail_1_1MessageHeader.html">MessageHeader</a> const &amp;header, Buffers const &amp;buffers, Handler &amp;handler)</td></tr>
 <tr class="separator:a1ebc7f9a2b695a1f5987457e5eaaf79b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa306c03c39352f8b30c6fbde3fe972f3"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/map.html">std::map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, <a class="el" href="namespaceripple.html#aa5778f9faa15e3677dcda7975d9db7c6">VoteBehavior</a> &gt; const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aa306c03c39352f8b30c6fbde3fe972f3">supportedAmendments</a> ()</td></tr>
-<tr class="memdesc:aa306c03c39352f8b30c6fbde3fe972f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amendments that this server supports and the default voting behavior.  <a href="namespaceripple_1_1detail.html#aa306c03c39352f8b30c6fbde3fe972f3">More...</a><br /></td></tr>
-<tr class="separator:aa306c03c39352f8b30c6fbde3fe972f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a907b165d0a3ebb3ce0a2f1c64c50e107"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a907b165d0a3ebb3ce0a2f1c64c50e107">numDownVotedAmendments</a> ()</td></tr>
-<tr class="memdesc:a907b165d0a3ebb3ce0a2f1c64c50e107"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amendments that this server won't vote for by default.  <a href="namespaceripple_1_1detail.html#a907b165d0a3ebb3ce0a2f1c64c50e107">More...</a><br /></td></tr>
-<tr class="separator:a907b165d0a3ebb3ce0a2f1c64c50e107"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48573a366f17fd2a6294905c3cb4a29e"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a48573a366f17fd2a6294905c3cb4a29e">numUpVotedAmendments</a> ()</td></tr>
-<tr class="memdesc:a48573a366f17fd2a6294905c3cb4a29e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Amendments that this server will vote for by default.  <a href="namespaceripple_1_1detail.html#a48573a366f17fd2a6294905c3cb4a29e">More...</a><br /></td></tr>
-<tr class="separator:a48573a366f17fd2a6294905c3cb4a29e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3266bff106a961696ef3397134178cac"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a3266bff106a961696ef3397134178cac">make_hash_prefix</a> (char a, char b, char c)</td></tr>
-<tr class="separator:a3266bff106a961696ef3397134178cac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a367989857fb62d21d0d9d5f1b2c91e87"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a367989857fb62d21d0d9d5f1b2c91e87">as_amount</a> (<a class="el" href="structripple_1_1Rate.html">Rate</a> const &amp;rate)</td></tr>
-<tr class="separator:a367989857fb62d21d0d9d5f1b2c91e87"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68243c57c7d8b97e81f46e46bc9d1823"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a68243c57c7d8b97e81f46e46bc9d1823">copy_uint32</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a> *<a class="el" href="namespaceripple.html#a7cc64e12723fbc9606d85442a2569fedac68271a63ddbc431c307beb7d2918275">out</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> v)</td></tr>
-<tr class="separator:a68243c57c7d8b97e81f46e46bc9d1823"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aecc1aa4944a6cc802ab85597b012a2de"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aecc1aa4944a6cc802ab85597b012a2de">deriveDeterministicRootKey</a> (<a class="el" href="classripple_1_1Seed.html">Seed</a> const &amp;seed)</td></tr>
-<tr class="separator:aecc1aa4944a6cc802ab85597b012a2de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c5fe1959d420a2a34e2b722031dff4e"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
-<tr class="memitem:a3c5fe1959d420a2a34e2b722031dff4e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a3c5fe1959d420a2a34e2b722031dff4e">make_stvar</a> (Args &amp;&amp;... args)</td></tr>
-<tr class="separator:a3c5fe1959d420a2a34e2b722031dff4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d35a1558ac6ed399df07c9eb9dbe2c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a6d35a1558ac6ed399df07c9eb9dbe2c2">operator==</a> (<a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;lhs, <a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;rhs)</td></tr>
-<tr class="separator:a6d35a1558ac6ed399df07c9eb9dbe2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5cc8daa9fe01aa816164b9637c5aa7b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ab5cc8daa9fe01aa816164b9637c5aa7b">operator!=</a> (<a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;lhs, <a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;rhs)</td></tr>
-<tr class="separator:ab5cc8daa9fe01aa816164b9637c5aa7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53dd6e91b821e1164c05d1cb69a94d04"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1SlabAllocatorSet.html">SlabAllocatorSet</a>&lt; <a class="el" href="classripple_1_1SHAMapItem.html">SHAMapItem</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a53dd6e91b821e1164c05d1cb69a94d04">slabber</a> ({ { 128, <a class="el" href="namespaceripple.html#a13d7c6c34d30731bbc221f629e03f8db">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(60)) }, { 192, <a class="el" href="namespaceripple.html#a13d7c6c34d30731bbc221f629e03f8db">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(46)) }, { 272, <a class="el" href="namespaceripple.html#a13d7c6c34d30731bbc221f629e03f8db">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(60)) }, { 384, <a class="el" href="namespaceripple.html#a13d7c6c34d30731bbc221f629e03f8db">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(56)) }, { 564, <a class="el" href="namespaceripple.html#a13d7c6c34d30731bbc221f629e03f8db">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(40)) }, { 772, <a class="el" href="namespaceripple.html#a13d7c6c34d30731bbc221f629e03f8db">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(46)) }, { 1052, <a class="el" href="namespaceripple.html#a13d7c6c34d30731bbc221f629e03f8db">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(60)) }, })</td></tr>
 <tr class="separator:a53dd6e91b821e1164c05d1cb69a94d04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d900d363b7c2725a8d1698e15067ec3"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a0d900d363b7c2725a8d1698e15067ec3">configContents</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbPath, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;validatorsFile)</td></tr>
-<tr class="separator:a0d900d363b7c2725a8d1698e15067ec3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c5d9fb1006ebe79534ff7eb895abdbb"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a1c5d9fb1006ebe79534ff7eb895abdbb">valFileContents</a> ()</td></tr>
-<tr class="separator:a1c5d9fb1006ebe79534ff7eb895abdbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a8ae7bb2924041d323f1d27c2f7b8af9f"><td class="memItemLeft" align="right" valign="top">constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a8ae7bb2924041d323f1d27c2f7b8af9f">TableTypeCount</a> = 3</td></tr>
-<tr class="separator:a8ae7bb2924041d323f1d27c2f7b8af9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a21f3cf18de89d49823e064f09526cb5f"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a21f3cf18de89d49823e064f09526cb5f">numFeatures</a> = 71</td></tr>
-<tr class="separator:a21f3cf18de89d49823e064f09526cb5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad7cc030b8a64621b81be32a2dc7ad84f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1detail_1_1defaultObject__t.html">defaultObject_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ad7cc030b8a64621b81be32a2dc7ad84f">defaultObject</a></td></tr>
 <tr class="separator:ad7cc030b8a64621b81be32a2dc7ad84f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b142da3d10ee6d6b09c707724ca3c80"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1detail_1_1nonPresentObject__t.html">nonPresentObject_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a8b142da3d10ee6d6b09c707724ca3c80">nonPresentObject</a></td></tr>
 <tr class="separator:a8b142da3d10ee6d6b09c707724ca3c80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21f3cf18de89d49823e064f09526cb5f"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a21f3cf18de89d49823e064f09526cb5f">numFeatures</a> = 79</td></tr>
+<tr class="separator:a21f3cf18de89d49823e064f09526cb5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc37c640e48de2d66b7384743da0fd39"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:adc37c640e48de2d66b7384743da0fd39"><td class="memTemplItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#adc37c640e48de2d66b7384743da0fd39">is_integral_constant</a> = false</td></tr>
+<tr class="separator:adc37c640e48de2d66b7384743da0fd39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07fecf760b0d3d55d9ef3100e4ee6a72"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a07fecf760b0d3d55d9ef3100e4ee6a72">isoCharSet</a></td></tr>
 <tr class="separator:a07fecf760b0d3d55d9ef3100e4ee6a72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa90919279708825034b597a8a9155d7f"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#aa90919279708825034b597a8a9155d7f">isoCodeOffset</a> = 12</td></tr>
 <tr class="separator:aa90919279708825034b597a8a9155d7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace90ced4f3340b72426e39a99bf04bb6"><td class="memItemLeft" align="right" valign="top">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ace90ced4f3340b72426e39a99bf04bb6">isoCodeLength</a> = 3</td></tr>
 <tr class="separator:ace90ced4f3340b72426e39a99bf04bb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc37c640e48de2d66b7384743da0fd39"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:adc37c640e48de2d66b7384743da0fd39"><td class="memTemplItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#adc37c640e48de2d66b7384743da0fd39">is_integral_constant</a> = false</td></tr>
-<tr class="separator:adc37c640e48de2d66b7384743da0fd39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ae7bb2924041d323f1d27c2f7b8af9f"><td class="memItemLeft" align="right" valign="top">constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a8ae7bb2924041d323f1d27c2f7b8af9f">TableTypeCount</a> = 3</td></tr>
+<tr class="separator:a8ae7bb2924041d323f1d27c2f7b8af9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
-<a id="aeb2a1b7b18c8dd127461be172a910a66" name="aeb2a1b7b18c8dd127461be172a910a66"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb2a1b7b18c8dd127461be172a910a66">&#9670;&#160;</a></span>response_type</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">using <a class="el" href="namespaceripple_1_1detail.html#aeb2a1b7b18c8dd127461be172a910a66">ripple::detail::response_type</a> = typedef boost::beast::http::response&lt;boost::beast::http::string_body&gt;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Work_8h_source.html#l00034">34</a> of file <a class="el" href="Work_8h_source.html">Work.h</a>.</p>
-
-</div>
-</div>
 <a id="ab71dc38912727712056be6817a81bcd1" name="ab71dc38912727712056be6817a81bcd1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab71dc38912727712056be6817a81bcd1">&#9670;&#160;</a></span>seed_pair</h2>
 
@@ -456,7 +430,7 @@ template&lt;class Engine , class <a class="el" href="namespaceripple.html#a60696
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ripple_2basics_2random_8h_source.html#l00051">51</a> of file <a class="el" href="ripple_2basics_2random_8h_source.html">ripple/basics/random.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="include_2xrpl_2basics_2random_8h_source.html#l00051">51</a> of file <a class="el" href="include_2xrpl_2basics_2random_8h_source.html">include/xrpl/basics/random.h</a>.</p>
 
 </div>
 </div>
@@ -532,6 +506,22 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a id="aeb2a1b7b18c8dd127461be172a910a66" name="aeb2a1b7b18c8dd127461be172a910a66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb2a1b7b18c8dd127461be172a910a66">&#9670;&#160;</a></span>response_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="namespaceripple_1_1detail.html#aeb2a1b7b18c8dd127461be172a910a66">ripple::detail::response_type</a> = typedef boost::beast::http::response&lt;boost::beast::http::string_body&gt;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Work_8h_source.html#l00034">34</a> of file <a class="el" href="Work_8h_source.html">Work.h</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="a389870f45417a1e9cef591f28a0c05b0" name="a389870f45417a1e9cef591f28a0c05b0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a389870f45417a1e9cef591f28a0c05b0">&#9670;&#160;</a></span>TableType</h2>
@@ -563,6 +553,446 @@ template&lt;class T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="a249a9f5f4201996e85c94a88e2364843" name="a249a9f5f4201996e85c94a88e2364843"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a249a9f5f4201996e85c94a88e2364843">&#9670;&#160;</a></span>make_seed_pair()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;bool  = true&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceripple_1_1detail.html#ab71dc38912727712056be6817a81bcd1">seed_pair</a> ripple::detail::make_seed_pair </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="hardened__hash_8h_source.html#l00043">43</a> of file <a class="el" href="hardened__hash_8h_source.html">hardened_hash.h</a>.</p>
+
+</div>
+</div>
+<a id="acf18322072d0123a1b0021484634552a" name="acf18322072d0123a1b0021484634552a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf18322072d0123a1b0021484634552a">&#9670;&#160;</a></span>getLocalValues()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class  = void&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">boost::thread_specific_ptr&lt; <a class="el" href="structripple_1_1detail_1_1LocalValues.html">detail::LocalValues</a> &gt; &amp; ripple::detail::getLocalValues </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="LocalValue_8h_source.html#l00074">74</a> of file <a class="el" href="LocalValue_8h_source.html">LocalValue.h</a>.</p>
+
+</div>
+</div>
+<a id="a86d9198b3b1df674eb3345f3ad8f4320" name="a86d9198b3b1df674eb3345f3ad8f4320"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86d9198b3b1df674eb3345f3ad8f4320">&#9670;&#160;</a></span>spin_pause()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ripple::detail::spin_pause </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inform the processor that we are in a tight spin-wait loop. </p>
+<p >Spinlocks caught in tight loops can result in the processor's pipeline filling up with comparison operations, resulting in a misprediction at the time the lock is finally acquired, necessitating pipeline flushing which is ridiculously expensive and results in very high latency.</p>
+<p >This function instructs the processor to "pause" for some architecture specific amount of time, to prevent this. </p>
+
+<p class="definition">Definition at line <a class="el" href="spinlock_8h_source.html#l00044">44</a> of file <a class="el" href="spinlock_8h_source.html">spinlock.h</a>.</p>
+
+</div>
+</div>
+<a id="a3c5fe1959d420a2a34e2b722031dff4e" name="a3c5fe1959d420a2a34e2b722031dff4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c5fe1959d420a2a34e2b722031dff4e">&#9670;&#160;</a></span>make_stvar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T , class... Args&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> ripple::detail::make_stvar </td>
+          <td>(</td>
+          <td class="paramtype">Args &amp;&amp;...&#160;</td>
+          <td class="paramname"><em>args</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00143">143</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
+
+</div>
+</div>
+<a id="a6d35a1558ac6ed399df07c9eb9dbe2c2" name="a6d35a1558ac6ed399df07c9eb9dbe2c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d35a1558ac6ed399df07c9eb9dbe2c2">&#9670;&#160;</a></span>operator==()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ripple::detail::operator== </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
+          <td class="paramname"><em>lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00151">151</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
+
+</div>
+</div>
+<a id="ab5cc8daa9fe01aa816164b9637c5aa7b" name="ab5cc8daa9fe01aa816164b9637c5aa7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab5cc8daa9fe01aa816164b9637c5aa7b">&#9670;&#160;</a></span>operator!=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ripple::detail::operator!= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
+          <td class="paramname"><em>lhs</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
+          <td class="paramname"><em>rhs</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00157">157</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
+
+</div>
+</div>
+<a id="aa306c03c39352f8b30c6fbde3fe972f3" name="aa306c03c39352f8b30c6fbde3fe972f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa306c03c39352f8b30c6fbde3fe972f3">&#9670;&#160;</a></span>supportedAmendments()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/map.html">std::map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, <a class="el" href="namespaceripple.html#aa5778f9faa15e3677dcda7975d9db7c6">VoteBehavior</a> &gt; const  &amp; ripple::detail::supportedAmendments </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Amendments that this server supports and the default voting behavior. </p>
+<p >Amendments that this server supports.</p>
+<p >Whether they are enabled depends on the <a class="el" href="classripple_1_1Rules.html" title="Rules controlling protocol behavior.">Rules</a> defined in the validated ledger </p>
+
+<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00346">346</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a907b165d0a3ebb3ce0a2f1c64c50e107" name="a907b165d0a3ebb3ce0a2f1c64c50e107"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a907b165d0a3ebb3ce0a2f1c64c50e107">&#9670;&#160;</a></span>numDownVotedAmendments()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> ripple::detail::numDownVotedAmendments </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Amendments that this server won't vote for by default. </p>
+<p >This function is only used in unit tests. </p>
+
+<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00353">353</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a48573a366f17fd2a6294905c3cb4a29e" name="a48573a366f17fd2a6294905c3cb4a29e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48573a366f17fd2a6294905c3cb4a29e">&#9670;&#160;</a></span>numUpVotedAmendments()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> ripple::detail::numUpVotedAmendments </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Amendments that this server will vote for by default. </p>
+<p >This function is only used in unit tests. </p>
+
+<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00360">360</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a3266bff106a961696ef3397134178cac" name="a3266bff106a961696ef3397134178cac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3266bff106a961696ef3397134178cac">&#9670;&#160;</a></span>make_hash_prefix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> ripple::detail::make_hash_prefix </td>
+          <td>(</td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="HashPrefix_8h_source.html#l00031">31</a> of file <a class="el" href="HashPrefix_8h_source.html">HashPrefix.h</a>.</p>
+
+</div>
+</div>
+<a id="a7d97f07e5b7bfe169282ff5bacde87b5" name="a7d97f07e5b7bfe169282ff5bacde87b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d97f07e5b7bfe169282ff5bacde87b5">&#9670;&#160;</a></span>accessViolation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ripple::detail::accessViolation </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="contract_8cpp_source.html#l00030">30</a> of file <a class="el" href="contract_8cpp_source.html">contract.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a367989857fb62d21d0d9d5f1b2c91e87" name="a367989857fb62d21d0d9d5f1b2c91e87"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a367989857fb62d21d0d9d5f1b2c91e87">&#9670;&#160;</a></span>as_amount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classripple_1_1STAmount.html">STAmount</a> ripple::detail::as_amount </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structripple_1_1Rate.html">Rate</a> const &amp;&#160;</td>
+          <td class="paramname"><em>rate</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Rate2_8cpp_source.html#l00030">30</a> of file <a class="el" href="Rate2_8cpp_source.html">Rate2.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a68243c57c7d8b97e81f46e46bc9d1823" name="a68243c57c7d8b97e81f46e46bc9d1823"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68243c57c7d8b97e81f46e46bc9d1823">&#9670;&#160;</a></span>copy_uint32()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ripple::detail::copy_uint32 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a> *&#160;</td>
+          <td class="paramname"><em>out</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
+          <td class="paramname"><em>v</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="SecretKey_8cpp_source.html#l00059">59</a> of file <a class="el" href="SecretKey_8cpp_source.html">SecretKey.cpp</a>.</p>
+
+</div>
+</div>
+<a id="aecc1aa4944a6cc802ab85597b012a2de" name="aecc1aa4944a6cc802ab85597b012a2de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecc1aa4944a6cc802ab85597b012a2de">&#9670;&#160;</a></span>deriveDeterministicRootKey()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> ripple::detail::deriveDeterministicRootKey </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classripple_1_1Seed.html">Seed</a> const &amp;&#160;</td>
+          <td class="paramname"><em>seed</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="SecretKey_8cpp_source.html#l00068">68</a> of file <a class="el" href="SecretKey_8cpp_source.html">SecretKey.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0d900d363b7c2725a8d1698e15067ec3" name="a0d900d363b7c2725a8d1698e15067ec3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d900d363b7c2725a8d1698e15067ec3">&#9670;&#160;</a></span>configContents()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> ripple::detail::configContents </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td>
+          <td class="paramname"><em>dbPath</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td>
+          <td class="paramname"><em>validatorsFile</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Config__test_8cpp_source.html#l00034">34</a> of file <a class="el" href="Config__test_8cpp_source.html">Config_test.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1c5d9fb1006ebe79534ff7eb895abdbb" name="a1c5d9fb1006ebe79534ff7eb895abdbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c5d9fb1006ebe79534ff7eb895abdbb">&#9670;&#160;</a></span>valFileContents()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> ripple::detail::valFileContents </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Config__test_8cpp_source.html#l00203">203</a> of file <a class="el" href="Config__test_8cpp_source.html">Config_test.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ad2407266f6fb0fccc12032875b2cbb01" name="ad2407266f6fb0fccc12032875b2cbb01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2407266f6fb0fccc12032875b2cbb01">&#9670;&#160;</a></span>reduceOffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classripple_1_1Number.html">Number</a> ripple::detail::reduceOffer </td>
+          <td>(</td>
+          <td class="paramtype">auto const &amp;&#160;</td>
+          <td class="paramname"><em>amount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="AMMHelpers_8h_source.html#l00043">43</a> of file <a class="el" href="AMMHelpers_8h_source.html">AMMHelpers.h</a>.</p>
+
+</div>
+</div>
 <a id="a65a7960dc32d16b224fd2af48bb144ed" name="a65a7960dc32d16b224fd2af48bb144ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a65a7960dc32d16b224fd2af48bb144ed">&#9670;&#160;</a></span>sumOfFirstSquares()</h2>
 
@@ -1450,8 +1880,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="ad59a5fc0f6a9f503b07a183beefef591" name="ad59a5fc0f6a9f503b07a183beefef591"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad59a5fc0f6a9f503b07a183beefef591">&#9670;&#160;</a></span>getTxHistory()</h2>
+<a id="a85ce1135aee0b32318ef92bac4c8e523" name="a85ce1135aee0b32318ef92bac4c8e523"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85ce1135aee0b32318ef92bac4c8e523">&#9670;&#160;</a></span>getTxHistory()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1478,13 +1908,7 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>quantity</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>count</em>&#160;</td>
+          <td class="paramname"><em>quantity</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1501,7 +1925,6 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">startIndex</td><td>Offset of first returned entry. </td></tr>
     <tr><td class="paramname">quantity</td><td><a class="el" href="classripple_1_1Number.html">Number</a> of returned entries. </td></tr>
-    <tr><td class="paramname">count</td><td>True if counting of all transaction in that shard required. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1511,8 +1934,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="af518019ee1fbe40a13c4f800e6e85e62" name="af518019ee1fbe40a13c4f800e6e85e62"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af518019ee1fbe40a13c4f800e6e85e62">&#9670;&#160;</a></span>transactionsSQL()</h2>
+<a id="ad380a45f146ab8776065e4252da8f5c6" name="ad380a45f146ab8776065e4252da8f5c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad380a45f146ab8776065e4252da8f5c6">&#9670;&#160;</a></span>transactionsSQL()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1537,12 +1960,6 @@ template&lt;class T &gt; </div>
           <td></td>
           <td class="paramtype"><a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;&#160;</td>
           <td class="paramname"><em>options</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1587,7 +2004,6 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">selection</td><td>List of table fields to select from the database. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxOptions which contains the criteria to match: the account, the ledger search range, the offset of the first entry to return, the number of transactions to return, and a flag if this number is unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> of transactions already returned in calls to other shard databases, if shard databases are used. No value if the node database is used. </td></tr>
     <tr><td class="paramname">descending</td><td>True for descending order, false for ascending. </td></tr>
     <tr><td class="paramname">binary</td><td>True for binary form, false for decoded. </td></tr>
     <tr><td class="paramname">count</td><td>True for counting the number of transactions, false for selecting them. </td></tr>
@@ -1597,12 +2013,12 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SQL query string. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00694">694</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00683">683</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a5e5d0a4ff5243de16700b345c11ff9c0" name="a5e5d0a4ff5243de16700b345c11ff9c0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5e5d0a4ff5243de16700b345c11ff9c0">&#9670;&#160;</a></span>getAccountTxs()</h2>
+<a id="a460007ea7b9520d58ff5171a31a88ed6" name="a460007ea7b9520d58ff5171a31a88ed6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a460007ea7b9520d58ff5171a31a88ed6">&#9670;&#160;</a></span>getAccountTxs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1637,12 +2053,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>descending</em>, </td>
         </tr>
@@ -1672,7 +2082,6 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">ledgerMaster</td><td><a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> object. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxOptions which contains the criteria to match: the account, the ledger search range, the offset of the first entry to return, the number of transactions to return, and a flag if this number is unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> of transactions already returned in calls to other shard databases, if shard databases are used. No value if the node database is used. </td></tr>
     <tr><td class="paramname">descending</td><td>True for descending order, false for ascending. </td></tr>
     <tr><td class="paramname">j</td><td>Journal. </td></tr>
   </table>
@@ -1680,12 +2089,12 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted by account sequence in the specified order along with the number of transactions processed or skipped. If this number is &gt;= 0, then it represents the number of transactions processed, if it is &lt; 0, then -number represents the number of transactions skipped. We need to skip some number of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00802">802</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00779">779</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="aae6a1cd6a0f1d41264bad9363e3715aa" name="aae6a1cd6a0f1d41264bad9363e3715aa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aae6a1cd6a0f1d41264bad9363e3715aa">&#9670;&#160;</a></span>getOldestAccountTxs()</h2>
+<a id="a82a9f04cd692063aa77ccd0d32cc5f59" name="a82a9f04cd692063aa77ccd0d32cc5f59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82a9f04cd692063aa77ccd0d32cc5f59">&#9670;&#160;</a></span>getOldestAccountTxs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1717,12 +2126,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
           <td class="paramname"><em>j</em>&#160;</td>
         </tr>
@@ -1741,19 +2144,18 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">ledgerMaster</td><td><a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> object. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxOptions which contain criteria to match: the account, minimum and maximum ledger numbers to search, offset of first entry to return, number of transactions to return, flag if this number unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> or transactions already returned in calls to another shard databases, if shard databases are used. None if node database is used. </td></tr>
     <tr><td class="paramname">j</td><td>Journal. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted in ascending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00896">896</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00859">859</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a8b6f99cc7d09f4c98038d1ec0c3c1d96" name="a8b6f99cc7d09f4c98038d1ec0c3c1d96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b6f99cc7d09f4c98038d1ec0c3c1d96">&#9670;&#160;</a></span>getNewestAccountTxs()</h2>
+<a id="ae5776ebfa029c50255885aea11465939" name="ae5776ebfa029c50255885aea11465939"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5776ebfa029c50255885aea11465939">&#9670;&#160;</a></span>getNewestAccountTxs()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1785,12 +2187,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
           <td class="paramname"><em>j</em>&#160;</td>
         </tr>
@@ -1809,19 +2205,18 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">ledgerMaster</td><td><a class="el" href="classripple_1_1LedgerMaster.html">LedgerMaster</a> object. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxOptions which contain criteria to match: the account, minimum and maximum ledger numbers to search, offset of first entry to return, number of transactions to return, flag if this number unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> or transactions already returned in calls to another shard databases, if shard databases are used. None if node database is used. </td></tr>
     <tr><td class="paramname">j</td><td>Journal. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted in descending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00909">909</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00870">870</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a93970c4d918879724b5ad1cd5907208c" name="a93970c4d918879724b5ad1cd5907208c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a93970c4d918879724b5ad1cd5907208c">&#9670;&#160;</a></span>getAccountTxsB()</h2>
+<a id="a047a8547c875e1f889f872149631a98e" name="a047a8547c875e1f889f872149631a98e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a047a8547c875e1f889f872149631a98e">&#9670;&#160;</a></span>getAccountTxsB()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1846,12 +2241,6 @@ template&lt;class T &gt; </div>
           <td></td>
           <td class="paramtype"><a class="el" href="structripple_1_1RelationalDatabase_1_1AccountTxOptions.html">RelationalDatabase::AccountTxOptions</a> const &amp;&#160;</td>
           <td class="paramname"><em>options</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1884,7 +2273,6 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">session</td><td><a class="el" href="classripple_1_1Session.html" title="Persistent state information for a connection session.">Session</a> with the database. </td></tr>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxOptions which contains the criteria to match: the account, the ledger search range, the offset of the first entry to return, the number of transactions to return, and a flag if this number is unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> of transactions already returned in calls to other shard databases, if shard databases are used. No value if the node database is used. </td></tr>
     <tr><td class="paramname">descending</td><td>True for descending order, false for ascending. </td></tr>
     <tr><td class="paramname">j</td><td>Journal. </td></tr>
   </table>
@@ -1892,12 +2280,12 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples each containing (the found transactions, their metadata, and their account sequences) sorted by account sequence in the specified order along with the number of transactions processed or skipped. If this number is &gt;= 0, then it represents the number of transactions processed, if it is &lt; 0, then -number represents the number of transactions skipped. We need to skip some number of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00945">945</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00901">901</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a200b53f197260a928dbcbb777a2e3b6f" name="a200b53f197260a928dbcbb777a2e3b6f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a200b53f197260a928dbcbb777a2e3b6f">&#9670;&#160;</a></span>getOldestAccountTxsB()</h2>
+<a id="ab90e41cda88695fd8110750c8f8d3ff8" name="ab90e41cda88695fd8110750c8f8d3ff8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab90e41cda88695fd8110750c8f8d3ff8">&#9670;&#160;</a></span>getOldestAccountTxsB()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1923,12 +2311,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
           <td class="paramname"><em>j</em>&#160;</td>
         </tr>
@@ -1946,19 +2328,18 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">session</td><td><a class="el" href="classripple_1_1Session.html" title="Persistent state information for a connection session.">Session</a> with database. </td></tr>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxOptions which contain criteria to match: the account, minimum and maximum ledger numbers to search, offset of first entry to return, number of transactions to return, flag if this number unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> or transactions already returned in calls to another shard databases, if shard databases are used. None if node database is used. </td></tr>
     <tr><td class="paramname">j</td><td>Journal. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in ascending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01017">1017</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00959">959</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a9f544f38cf755215588e5759421b4420" name="a9f544f38cf755215588e5759421b4420"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9f544f38cf755215588e5759421b4420">&#9670;&#160;</a></span>getNewestAccountTxsB()</h2>
+<a id="ae85db139f5c6edcd6b87e80683938704" name="ae85db139f5c6edcd6b87e80683938704"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae85db139f5c6edcd6b87e80683938704">&#9670;&#160;</a></span>getNewestAccountTxsB()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1984,12 +2365,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; int &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
           <td class="paramname"><em>j</em>&#160;</td>
         </tr>
@@ -2007,19 +2382,18 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">session</td><td><a class="el" href="classripple_1_1Session.html" title="Persistent state information for a connection session.">Session</a> with database. </td></tr>
     <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxOptions which contain criteria to match: the account, minimum and maximum ledger numbers to search, offset of first entry to return, number of transactions to return, flag if this number unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> or transactions already returned in calls to another shard databases, if shard databases are used. None if node database is used. </td></tr>
     <tr><td class="paramname">j</td><td>Journal. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in descending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01028">1028</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00969">969</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a42f954d745a4ab40aca43437b8d393e0" name="a42f954d745a4ab40aca43437b8d393e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42f954d745a4ab40aca43437b8d393e0">&#9670;&#160;</a></span>accountTxPage()</h2>
+<a id="af5d3a4868d9b307760e3d8c198104524" name="af5d3a4868d9b307760e3d8c198104524"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5d3a4868d9b307760e3d8c198104524">&#9670;&#160;</a></span>accountTxPage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2054,12 +2428,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
           <td class="paramname"><em>page_length</em>, </td>
         </tr>
@@ -2089,7 +2457,6 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">onUnsavedLedger</td><td>Callback function to call on each found unsaved ledger within the given range. </td></tr>
     <tr><td class="paramname">onTransaction</td><td>Callback function to call on each found transaction. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxPageOptions which contains the criteria to match: the account, the ledger search range, the marker of the first returned entry, the number of transactions to return, and a flag if this number unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> of transactions already returned in calls to other shard databases. </td></tr>
     <tr><td class="paramname">page_length</td><td>Total number of transactions to return. </td></tr>
     <tr><td class="paramname">forward</td><td>True for ascending order, false for descending. </td></tr>
   </table>
@@ -2097,12 +2464,12 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in the specified order by account sequence, a marker for the next search if the search was not finished and the number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01060">1060</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00998">998</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a691df57c4b491e41afe720405ac9ebb3" name="a691df57c4b491e41afe720405ac9ebb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a691df57c4b491e41afe720405ac9ebb3">&#9670;&#160;</a></span>oldestAccountTxPage()</h2>
+<a id="a55d0c66eeed95f9cce7627df62c89f18" name="a55d0c66eeed95f9cce7627df62c89f18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55d0c66eeed95f9cce7627df62c89f18">&#9670;&#160;</a></span>oldestAccountTxPage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2134,12 +2501,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
           <td class="paramname"><em>page_length</em>&#160;</td>
         </tr>
@@ -2158,19 +2519,18 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">onUnsavedLedger</td><td>Callback function to call on each found unsaved ledger within given range. </td></tr>
     <tr><td class="paramname">onTransaction</td><td>Callback function to call on each found transaction. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxPageOptions which contain criteria to match: the account, minimum and maximum ledger numbers to search, marker of first returned entry, number of transactions to return, flag if this number unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> or transactions already returned in calls to another shard databases. </td></tr>
     <tr><td class="paramname">page_length</td><td>Total number of transactions to return. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in ascending order by account sequence and marker for next search if search not finished. Also number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01221">1221</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01152">1152</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
-<a id="aebe9c123515b55f0778e74f55c61e026" name="aebe9c123515b55f0778e74f55c61e026"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aebe9c123515b55f0778e74f55c61e026">&#9670;&#160;</a></span>newestAccountTxPage()</h2>
+<a id="a34fdefc0f48c3da6e5d73e10e23205a3" name="a34fdefc0f48c3da6e5d73e10e23205a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34fdefc0f48c3da6e5d73e10e23205a3">&#9670;&#160;</a></span>newestAccountTxPage()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2202,12 +2562,6 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>limit_used</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
           <td class="paramname"><em>page_length</em>&#160;</td>
         </tr>
@@ -2226,14 +2580,13 @@ template&lt;class T &gt; </div>
     <tr><td class="paramname">onUnsavedLedger</td><td>Callback function to call on each found unsaved ledger within given range. </td></tr>
     <tr><td class="paramname">onTransaction</td><td>Callback function to call on each found transaction. </td></tr>
     <tr><td class="paramname">options</td><td>Struct AccountTxPageOptions which contain criteria to match: the account, minimum and maximum ledger numbers to search, marker of first returned entry, number of transactions to return, flag if this number unlimited. </td></tr>
-    <tr><td class="paramname">limit_used</td><td><a class="el" href="classripple_1_1Number.html">Number</a> or transactions already returned in calls to another shard databases. </td></tr>
     <tr><td class="paramname">page_length</td><td>Total number of transactions to return. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in descending order by account sequence and marker for next search if search not finished. Also number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01242">1242</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01166">1166</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2294,7 +2647,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Transaction.html">Transaction</a> and its metadata if found, <a class="el" href="namespaceripple.html#a7ffb3f54d739bb8f967d695f08fb66ccaa181a603769c1f98ad927e7367c7aa51">TxSearched::all</a> if range given and all ledgers from range are present in the database, <a class="el" href="namespaceripple.html#a7ffb3f54d739bb8f967d695f08fb66cca03d59e663c1af9ac33a9949d1193505a">TxSearched::some</a> if range given and not all ledgers are present, <a class="el" href="namespaceripple.html#a7ffb3f54d739bb8f967d695f08fb66ccaad921d60486366258809553a3db49a4a">TxSearched::unknown</a> if range not given or deserializing error occured. In the last case error code modified in ec link parameter, in other cases default error code remained. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01263">1263</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01180">1180</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2341,195 +2694,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if space is available. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01344">1344</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a131118ac74fb5f75f95f3cc038d9240c" name="a131118ac74fb5f75f95f3cc038d9240c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a131118ac74fb5f75f95f3cc038d9240c">&#9670;&#160;</a></span>makeMetaDBs()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structripple_1_1DatabasePair.html">DatabasePair</a> ripple::detail::makeMetaDBs </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classripple_1_1Config.html">Config</a> const &amp;&#160;</td>
-          <td class="paramname"><em>config</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structripple_1_1DatabaseCon_1_1Setup.html">DatabaseCon::Setup</a> const &amp;&#160;</td>
-          <td class="paramname"><em>setup</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">DatabaseCon::CheckpointerSetup</a> const &amp;&#160;</td>
-          <td class="paramname"><em>checkpointerSetup</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>makeMetaDBs Opens ledger and transaction 'meta' databases which map ledger hashes and transaction IDs to the index of the shard that holds the ledger or transaction. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">config</td><td><a class="el" href="classripple_1_1Config.html">Config</a> object. </td></tr>
-    <tr><td class="paramname">setup</td><td>Path to database and opening parameters. </td></tr>
-    <tr><td class="paramname">checkpointerSetup</td><td>Database checkpointer setup. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Struct <a class="el" href="structripple_1_1DatabasePair.html">DatabasePair</a> which contains unique pointers to the ledger and transaction databases. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html#l00032">32</a> of file <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html">app/rdb/backend/detail/impl/Shard.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ab91a734fd58da3e9628afe37bd4b6204" name="ab91a734fd58da3e9628afe37bd4b6204"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab91a734fd58da3e9628afe37bd4b6204">&#9670;&#160;</a></span>saveLedgerMeta()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ripple::detail::saveLedgerMeta </td>
-          <td>(</td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1Ledger.html">Ledger</a> const &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>ledger</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classripple_1_1Application.html">Application</a> &amp;&#160;</td>
-          <td class="paramname"><em>app</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">soci::session &amp;&#160;</td>
-          <td class="paramname"><em>lgrMetaSession</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">soci::session &amp;&#160;</td>
-          <td class="paramname"><em>txnMetaSession</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
-          <td class="paramname"><em>shardIndex</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>saveLedgerMeta Stores (transaction ID -&gt; shard index) and (ledger hash -&gt; shard index) mappings in the meta databases. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">ledger</td><td>The ledger. </td></tr>
-    <tr><td class="paramname">app</td><td><a class="el" href="classripple_1_1Application.html">Application</a> object. </td></tr>
-    <tr><td class="paramname">lgrMetaSession</td><td><a class="el" href="classripple_1_1Session.html" title="Persistent state information for a connection session.">Session</a> to ledger meta database. </td></tr>
-    <tr><td class="paramname">txnMetaSession</td><td><a class="el" href="classripple_1_1Session.html" title="Persistent state information for a connection session.">Session</a> to transaction meta database. </td></tr>
-    <tr><td class="paramname">shardIndex</td><td>The index of the shard that contains this ledger. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True on success. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html#l00056">56</a> of file <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html">app/rdb/backend/detail/impl/Shard.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ad54aa93bcb0bf57d942f1b9bb54f8d16" name="ad54aa93bcb0bf57d942f1b9bb54f8d16"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad54aa93bcb0bf57d942f1b9bb54f8d16">&#9670;&#160;</a></span>getShardIndexforLedger()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> &gt; ripple::detail::getShardIndexforLedger </td>
-          <td>(</td>
-          <td class="paramtype">soci::session &amp;&#160;</td>
-          <td class="paramname"><em>session</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespaceripple.html#af5a72d3e0d9b6913c13f688390b90796">LedgerHash</a> const &amp;&#160;</td>
-          <td class="paramname"><em>hash</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>getShardIndexforLedger Queries the ledger meta database to retrieve the index of the shard that contains this ledger. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">session</td><td><a class="el" href="classripple_1_1Session.html" title="Persistent state information for a connection session.">Session</a> to the database. </td></tr>
-    <tr><td class="paramname">hash</td><td>Hash of the ledger. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The index of the shard on success, otherwise an unseated value. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html#l00117">117</a> of file <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html">app/rdb/backend/detail/impl/Shard.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ab126eebd8d37a5cfee0882a45977d1d9" name="ab126eebd8d37a5cfee0882a45977d1d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab126eebd8d37a5cfee0882a45977d1d9">&#9670;&#160;</a></span>getShardIndexforTransaction()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> &gt; ripple::detail::getShardIndexforTransaction </td>
-          <td>(</td>
-          <td class="paramtype">soci::session &amp;&#160;</td>
-          <td class="paramname"><em>session</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespaceripple.html#a3f39560bfd60c64700b109c412e90f72">TxID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>id</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>getShardIndexforTransaction Queries the transaction meta database to retrieve the index of the shard that contains this transaction. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">session</td><td><a class="el" href="classripple_1_1Session.html" title="Persistent state information for a connection session.">Session</a> to the database. </td></tr>
-    <tr><td class="paramname">id</td><td>ID of the transaction. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The index of the shard on success, otherwise an unseated value. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html#l00131">131</a> of file <a class="el" href="app_2rdb_2backend_2detail_2impl_2Shard_8cpp_source.html">app/rdb/backend/detail/impl/Shard.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01261">1261</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2552,114 +2717,6 @@ template&lt;class T &gt; </div>
 <p>Convenience function for printing out basic ledger info. </p>
 
 <p class="definition">Definition at line <a class="el" href="ReportingETL_8cpp_source.html#l00042">42</a> of file <a class="el" href="ReportingETL_8cpp_source.html">ReportingETL.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a249a9f5f4201996e85c94a88e2364843" name="a249a9f5f4201996e85c94a88e2364843"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a249a9f5f4201996e85c94a88e2364843">&#9670;&#160;</a></span>make_seed_pair()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;bool  = true&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespaceripple_1_1detail.html#ab71dc38912727712056be6817a81bcd1">seed_pair</a> ripple::detail::make_seed_pair </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="hardened__hash_8h_source.html#l00043">43</a> of file <a class="el" href="hardened__hash_8h_source.html">hardened_hash.h</a>.</p>
-
-</div>
-</div>
-<a id="a7d97f07e5b7bfe169282ff5bacde87b5" name="a7d97f07e5b7bfe169282ff5bacde87b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d97f07e5b7bfe169282ff5bacde87b5">&#9670;&#160;</a></span>accessViolation()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ripple::detail::accessViolation </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="contract_8cpp_source.html#l00030">30</a> of file <a class="el" href="contract_8cpp_source.html">contract.cpp</a>.</p>
-
-</div>
-</div>
-<a id="acf18322072d0123a1b0021484634552a" name="acf18322072d0123a1b0021484634552a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf18322072d0123a1b0021484634552a">&#9670;&#160;</a></span>getLocalValues()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class  = void&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">boost::thread_specific_ptr&lt; <a class="el" href="structripple_1_1detail_1_1LocalValues.html">detail::LocalValues</a> &gt; &amp; ripple::detail::getLocalValues </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="LocalValue_8h_source.html#l00074">74</a> of file <a class="el" href="LocalValue_8h_source.html">LocalValue.h</a>.</p>
-
-</div>
-</div>
-<a id="a86d9198b3b1df674eb3345f3ad8f4320" name="a86d9198b3b1df674eb3345f3ad8f4320"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a86d9198b3b1df674eb3345f3ad8f4320">&#9670;&#160;</a></span>spin_pause()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ripple::detail::spin_pause </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Inform the processor that we are in a tight spin-wait loop. </p>
-<p >Spinlocks caught in tight loops can result in the processor's pipeline filling up with comparison operations, resulting in a misprediction at the time the lock is finally acquired, necessitating pipeline flushing which is ridiculously expensive and results in very high latency.</p>
-<p >This function instructs the processor to "pause" for some architecture specific amount of time, to prevent this. </p>
-
-<p class="definition">Definition at line <a class="el" href="spinlock_8h_source.html#l00044">44</a> of file <a class="el" href="spinlock_8h_source.html">spinlock.h</a>.</p>
 
 </div>
 </div>
@@ -2847,7 +2904,7 @@ template&lt;typename BufferSequence &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00152">152</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00144">144</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -2869,7 +2926,7 @@ template&lt;typename BufferSequence &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00160">160</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00152">152</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -2920,7 +2977,7 @@ template&lt;class BufferSequence &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00177">177</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00169">169</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -2952,7 +3009,7 @@ template&lt;class T , class Buffers , class  = std::enable_if_t&lt;        std::
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00272">272</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00264">264</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -2990,270 +3047,7 @@ template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00307">307</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
-
-</div>
-</div>
-<a id="aa306c03c39352f8b30c6fbde3fe972f3" name="aa306c03c39352f8b30c6fbde3fe972f3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa306c03c39352f8b30c6fbde3fe972f3">&#9670;&#160;</a></span>supportedAmendments()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/map.html">std::map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, <a class="el" href="namespaceripple.html#aa5778f9faa15e3677dcda7975d9db7c6">VoteBehavior</a> &gt; const  &amp; ripple::detail::supportedAmendments </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Amendments that this server supports and the default voting behavior. </p>
-<p >Amendments that this server supports.</p>
-<p >Whether they are enabled depends on the <a class="el" href="classripple_1_1Rules.html" title="Rules controlling protocol behavior.">Rules</a> defined in the validated ledger </p>
-
-<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00320">320</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a907b165d0a3ebb3ce0a2f1c64c50e107" name="a907b165d0a3ebb3ce0a2f1c64c50e107"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a907b165d0a3ebb3ce0a2f1c64c50e107">&#9670;&#160;</a></span>numDownVotedAmendments()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> ripple::detail::numDownVotedAmendments </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Amendments that this server won't vote for by default. </p>
-<p >This function is only used in unit tests. </p>
-
-<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00327">327</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a48573a366f17fd2a6294905c3cb4a29e" name="a48573a366f17fd2a6294905c3cb4a29e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a48573a366f17fd2a6294905c3cb4a29e">&#9670;&#160;</a></span>numUpVotedAmendments()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> ripple::detail::numUpVotedAmendments </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Amendments that this server will vote for by default. </p>
-<p >This function is only used in unit tests. </p>
-
-<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00334">334</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a3266bff106a961696ef3397134178cac" name="a3266bff106a961696ef3397134178cac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3266bff106a961696ef3397134178cac">&#9670;&#160;</a></span>make_hash_prefix()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> ripple::detail::make_hash_prefix </td>
-          <td>(</td>
-          <td class="paramtype">char&#160;</td>
-          <td class="paramname"><em>a</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char&#160;</td>
-          <td class="paramname"><em>b</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char&#160;</td>
-          <td class="paramname"><em>c</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="HashPrefix_8h_source.html#l00031">31</a> of file <a class="el" href="HashPrefix_8h_source.html">HashPrefix.h</a>.</p>
-
-</div>
-</div>
-<a id="a367989857fb62d21d0d9d5f1b2c91e87" name="a367989857fb62d21d0d9d5f1b2c91e87"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a367989857fb62d21d0d9d5f1b2c91e87">&#9670;&#160;</a></span>as_amount()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classripple_1_1STAmount.html">STAmount</a> ripple::detail::as_amount </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="structripple_1_1Rate.html">Rate</a> const &amp;&#160;</td>
-          <td class="paramname"><em>rate</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Rate2_8cpp_source.html#l00030">30</a> of file <a class="el" href="Rate2_8cpp_source.html">Rate2.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a68243c57c7d8b97e81f46e46bc9d1823" name="a68243c57c7d8b97e81f46e46bc9d1823"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68243c57c7d8b97e81f46e46bc9d1823">&#9670;&#160;</a></span>copy_uint32()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void ripple::detail::copy_uint32 </td>
-          <td>(</td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a> *&#160;</td>
-          <td class="paramname"><em>out</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
-          <td class="paramname"><em>v</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="SecretKey_8cpp_source.html#l00059">59</a> of file <a class="el" href="SecretKey_8cpp_source.html">SecretKey.cpp</a>.</p>
-
-</div>
-</div>
-<a id="aecc1aa4944a6cc802ab85597b012a2de" name="aecc1aa4944a6cc802ab85597b012a2de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aecc1aa4944a6cc802ab85597b012a2de">&#9670;&#160;</a></span>deriveDeterministicRootKey()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> ripple::detail::deriveDeterministicRootKey </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classripple_1_1Seed.html">Seed</a> const &amp;&#160;</td>
-          <td class="paramname"><em>seed</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="SecretKey_8cpp_source.html#l00068">68</a> of file <a class="el" href="SecretKey_8cpp_source.html">SecretKey.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a3c5fe1959d420a2a34e2b722031dff4e" name="a3c5fe1959d420a2a34e2b722031dff4e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3c5fe1959d420a2a34e2b722031dff4e">&#9670;&#160;</a></span>make_stvar()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class T , class... Args&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> ripple::detail::make_stvar </td>
-          <td>(</td>
-          <td class="paramtype">Args &amp;&amp;...&#160;</td>
-          <td class="paramname"><em>args</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00143">143</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
-
-</div>
-</div>
-<a id="a6d35a1558ac6ed399df07c9eb9dbe2c2" name="a6d35a1558ac6ed399df07c9eb9dbe2c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d35a1558ac6ed399df07c9eb9dbe2c2">&#9670;&#160;</a></span>operator==()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ripple::detail::operator== </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
-          <td class="paramname"><em>lhs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
-          <td class="paramname"><em>rhs</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00151">151</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
-
-</div>
-</div>
-<a id="ab5cc8daa9fe01aa816164b9637c5aa7b" name="ab5cc8daa9fe01aa816164b9637c5aa7b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab5cc8daa9fe01aa816164b9637c5aa7b">&#9670;&#160;</a></span>operator!=()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ripple::detail::operator!= </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
-          <td class="paramname"><em>lhs</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classripple_1_1detail_1_1STVar.html">STVar</a> const &amp;&#160;</td>
-          <td class="paramname"><em>rhs</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00157">157</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00299">299</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -3275,104 +3069,7 @@ template&lt;class T , class... Args&gt; </div>
 
 </div>
 </div>
-<a id="a0d900d363b7c2725a8d1698e15067ec3" name="a0d900d363b7c2725a8d1698e15067ec3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d900d363b7c2725a8d1698e15067ec3">&#9670;&#160;</a></span>configContents()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> ripple::detail::configContents </td>
-          <td>(</td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td>
-          <td class="paramname"><em>dbPath</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td>
-          <td class="paramname"><em>validatorsFile</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Config__test_8cpp_source.html#l00034">34</a> of file <a class="el" href="Config__test_8cpp_source.html">Config_test.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a1c5d9fb1006ebe79534ff7eb895abdbb" name="a1c5d9fb1006ebe79534ff7eb895abdbb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c5d9fb1006ebe79534ff7eb895abdbb">&#9670;&#160;</a></span>valFileContents()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> ripple::detail::valFileContents </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Config__test_8cpp_source.html#l00203">203</a> of file <a class="el" href="Config__test_8cpp_source.html">Config_test.cpp</a>.</p>
-
-</div>
-</div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a id="a8ae7bb2924041d323f1d27c2f7b8af9f" name="a8ae7bb2924041d323f1d27c2f7b8af9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ae7bb2924041d323f1d27c2f7b8af9f">&#9670;&#160;</a></span>TableTypeCount</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">constexpr int ripple::detail::TableTypeCount = 3</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Node_8h_source.html#l00036">36</a> of file <a class="el" href="Node_8h_source.html">Node.h</a>.</p>
-
-</div>
-</div>
-<a id="a21f3cf18de89d49823e064f09526cb5f" name="a21f3cf18de89d49823e064f09526cb5f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a21f3cf18de89d49823e064f09526cb5f">&#9670;&#160;</a></span>numFeatures</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> ripple::detail::numFeatures = 71</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Feature_8h_source.html#l00077">77</a> of file <a class="el" href="Feature_8h_source.html">Feature.h</a>.</p>
-
-</div>
-</div>
 <a id="ad7cc030b8a64621b81be32a2dc7ad84f" name="ad7cc030b8a64621b81be32a2dc7ad84f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad7cc030b8a64621b81be32a2dc7ad84f">&#9670;&#160;</a></span>defaultObject</h2>
 
@@ -3402,6 +3099,56 @@ template&lt;class T , class... Args&gt; </div>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="STVar_8cpp_source.html#l00042">42</a> of file <a class="el" href="STVar_8cpp_source.html">STVar.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a21f3cf18de89d49823e064f09526cb5f" name="a21f3cf18de89d49823e064f09526cb5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21f3cf18de89d49823e064f09526cb5f">&#9670;&#160;</a></span>numFeatures</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> ripple::detail::numFeatures = 79</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Feature_8h_source.html#l00083">83</a> of file <a class="el" href="Feature_8h_source.html">Feature.h</a>.</p>
+
+</div>
+</div>
+<a id="adc37c640e48de2d66b7384743da0fd39" name="adc37c640e48de2d66b7384743da0fd39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc37c640e48de2d66b7384743da0fd39">&#9670;&#160;</a></span>is_integral_constant</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr bool ripple::detail::is_integral_constant = false</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="MultiApiJson_8h_source.html#l00039">39</a> of file <a class="el" href="MultiApiJson_8h_source.html">MultiApiJson.h</a>.</p>
 
 </div>
 </div>
@@ -3482,19 +3229,17 @@ template&lt;class T , class... Args&gt; </div>
 
 </div>
 </div>
-<a id="adc37c640e48de2d66b7384743da0fd39" name="adc37c640e48de2d66b7384743da0fd39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adc37c640e48de2d66b7384743da0fd39">&#9670;&#160;</a></span>is_integral_constant</h2>
+<a id="a8ae7bb2924041d323f1d27c2f7b8af9f" name="a8ae7bb2924041d323f1d27c2f7b8af9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ae7bb2924041d323f1d27c2f7b8af9f">&#9670;&#160;</a></span>TableTypeCount</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr bool ripple::detail::is_integral_constant = false</td>
+          <td class="memname">constexpr int ripple::detail::TableTypeCount = 3</td>
         </tr>
       </table>
   </td>
@@ -3504,7 +3249,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="MultiApiJson_8h_source.html#l00039">39</a> of file <a class="el" href="MultiApiJson_8h_source.html">MultiApiJson.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8h_source.html#l00036">36</a> of file <a class="el" href="Node_8h_source.html">Node.h</a>.</p>
 
 </div>
 </div>

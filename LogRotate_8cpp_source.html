@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_f4afb74df24474efa0cc7e8ea3ddd5ce.html">rpc</a></li><li class="navelem"><a class="el" href="dir_72652aacd0eb4ee32af795650dd02b37.html">handlers</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_42b876eb66f74e25995e23a7c0222dc7.html">rpc</a></li><li class="navelem"><a class="el" href="dir_202f05fcc82d395fac3f43e301f5a49f.html">handlers</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -95,10 +95,10 @@ $(function() {
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//==============================================================================</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;ripple/app/main/Application.h&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;ripple/basics/Log.h&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ripple/basics/PerfLog.h&gt;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/rpc/impl/Handler.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;xrpld/app/main/Application.h&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;xrpld/perflog/PerfLog.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;xrpld/rpc/detail/Handler.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/Log.h&gt;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
@@ -116,7 +116,7 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1Logs_html_a9810b92768ee6f4cc34017c322069da3"><div class="ttname"><a href="classripple_1_1Logs.html#a9810b92768ee6f4cc34017c322069da3">ripple::Logs::rotate</a></div><div class="ttdeci">std::string rotate()</div><div class="ttdef"><b>Definition:</b> <a href="Log_8cpp_source.html#l00194">Log.cpp:194</a></div></div>
 <div class="ttc" id="aclassripple_1_1perf_1_1PerfLog_html_ac3fc03156fdfc007f23056c0f007edf1"><div class="ttname"><a href="classripple_1_1perf_1_1PerfLog.html#ac3fc03156fdfc007f23056c0f007edf1">ripple::perf::PerfLog::rotate</a></div><div class="ttdeci">virtual void rotate()=0</div><div class="ttdoc">Rotate perf log file.</div></div>
 <div class="ttc" id="anamespaceripple_1_1RPC_html_a4e628867fe5111cabdf253dc2ed8f165"><div class="ttname"><a href="namespaceripple_1_1RPC.html#a4e628867fe5111cabdf253dc2ed8f165">ripple::RPC::makeObjectValue</a></div><div class="ttdeci">Json::Value makeObjectValue(Value const &amp;value, Json::StaticString const &amp;field=jss::message)</div><div class="ttdoc">Return a Json::objectValue with a single entry.</div><div class="ttdef"><b>Definition:</b> <a href="Handler_8h_source.html#l00067">Handler.h:67</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ad8ffa06b8bf3836b24ba52d1fd139dd3"><div class="ttname"><a href="namespaceripple.html#ad8ffa06b8bf3836b24ba52d1fd139dd3">ripple::doLogRotate</a></div><div class="ttdeci">Json::Value doLogRotate(RPC::JsonContext &amp;)</div><div class="ttdef"><b>Definition:</b> <a href="LogRotate_8cpp_source.html#l00028">LogRotate.cpp:28</a></div></div>
 <div class="ttc" id="astructripple_1_1RPC_1_1Context_html_a7878751d68ed7fd43c385913c5e6ff04"><div class="ttname"><a href="structripple_1_1RPC_1_1Context.html#a7878751d68ed7fd43c385913c5e6ff04">ripple::RPC::Context::app</a></div><div class="ttdeci">Application &amp; app</div><div class="ttdef"><b>Definition:</b> <a href="Context_8h_source.html#l00042">Context.h:42</a></div></div>
 <div class="ttc" id="astructripple_1_1RPC_1_1JsonContext_html"><div class="ttname"><a href="structripple_1_1RPC_1_1JsonContext.html">ripple::RPC::JsonContext</a></div><div class="ttdef"><b>Definition:</b> <a href="Context_8h_source.html#l00053">Context.h:54</a></div></div>

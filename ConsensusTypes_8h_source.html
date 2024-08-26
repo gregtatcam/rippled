@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_20e3efd5b2bc43fb837b12b621a85eb0.html">consensus</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_a45383be4b466e94d1f055eccb2c6f46.html">consensus</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,9 +98,9 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_CONSENSUS_CONSENSUS_TYPES_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_CONSENSUS_CONSENSUS_TYPES_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/chrono.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/consensus/ConsensusProposal.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/consensus/DisputedTx.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpld/consensus/ConsensusProposal.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpld/consensus/DisputedTx.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/basics/chrono.h&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/chrono.html">chrono</a>&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/map.html">map</a>&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
@@ -114,7 +114,7 @@ $(function() {
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keyword">inline</span> <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="namespaceripple.html#adc3c30f5af69be2fb015915e83bec5ff">   70</a></span><a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(<a class="code hl_enumeration" href="namespaceripple.html#a33f8b6e68b5f63faf2e9755cc251563e">ConsensusMode</a> m)</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno"><a class="line" href="namespaceripple.html#adc3c30f5af69be2fb015915e83bec5ff">   70</a></span><a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(<a class="code hl_enumeration" href="namespaceripple.html#a33f8b6e68b5f63faf2e9755cc251563e">ConsensusMode</a> m)</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>{</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keywordflow">switch</span> (m)</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    {</div>
@@ -140,7 +140,7 @@ $(function() {
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>};</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="keyword">inline</span> <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="namespaceripple.html#adacaa5bdc65e1615b5485f9b0b9b72f1">  117</a></span><a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(<a class="code hl_enumeration" href="namespaceripple.html#a77adb10ef53a2e25195ccd38b46bfe9b">ConsensusPhase</a> p)</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="namespaceripple.html#adacaa5bdc65e1615b5485f9b0b9b72f1">  117</a></span><a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(<a class="code hl_enumeration" href="namespaceripple.html#a77adb10ef53a2e25195ccd38b46bfe9b">ConsensusPhase</a> p)</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>{</div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <span class="keywordflow">switch</span> (p)</div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    {</div>
@@ -261,7 +261,7 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1DisputedTx_html"><div class="ttname"><a href="classripple_1_1DisputedTx.html">ripple::DisputedTx</a></div><div class="ttdoc">A transaction discovered to be in dispute during consensus.</div><div class="ttdef"><b>Definition:</b> <a href="DisputedTx_8h_source.html#l00050">DisputedTx.h:51</a></div></div>
 <div class="ttc" id="aduration_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/chrono/duration.html">std::chrono::milliseconds</a></div></div>
 <div class="ttc" id="amap_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/map.html">map</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a33f8b6e68b5f63faf2e9755cc251563e"><div class="ttname"><a href="namespaceripple.html#a33f8b6e68b5f63faf2e9755cc251563e">ripple::ConsensusMode</a></div><div class="ttdeci">ConsensusMode</div><div class="ttdoc">Represents how a node currently participates in Consensus.</div><div class="ttdef"><b>Definition:</b> <a href="ConsensusTypes_8h_source.html#l00055">ConsensusTypes.h:55</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a33f8b6e68b5f63faf2e9755cc251563ea1dde5f68261b60a2e4655f5ad1f13e0b"><div class="ttname"><a href="namespaceripple.html#a33f8b6e68b5f63faf2e9755cc251563ea1dde5f68261b60a2e4655f5ad1f13e0b">ripple::ConsensusMode::wrongLedger</a></div><div class="ttdeci">@ wrongLedger</div><div class="ttdoc">We have the wrong ledger and are attempting to acquire it.</div></div>
 <div class="ttc" id="anamespaceripple_html_a33f8b6e68b5f63faf2e9755cc251563ea80dcf57f5ecd4be3cbfa37eccbcb6f44"><div class="ttname"><a href="namespaceripple.html#a33f8b6e68b5f63faf2e9755cc251563ea80dcf57f5ecd4be3cbfa37eccbcb6f44">ripple::ConsensusMode::proposing</a></div><div class="ttdeci">@ proposing</div><div class="ttdoc">We are normal participant in consensus and propose our position.</div></div>
@@ -276,7 +276,7 @@ $(function() {
 <div class="ttc" id="anamespaceripple_html_a79cc3b590c118bd551b693bb333fb9d1a93cba07454f06a4a960172bbd6e2a435"><div class="ttname"><a href="namespaceripple.html#a79cc3b590c118bd551b693bb333fb9d1a93cba07454f06a4a960172bbd6e2a435">ripple::ConsensusState::Yes</a></div><div class="ttdeci">@ Yes</div><div class="ttdoc">We have consensus along with the network.</div></div>
 <div class="ttc" id="anamespaceripple_html_a79cc3b590c118bd551b693bb333fb9d1abafd7322c6e97d25b6299b5d6fe8920b"><div class="ttname"><a href="namespaceripple.html#a79cc3b590c118bd551b693bb333fb9d1abafd7322c6e97d25b6299b5d6fe8920b">ripple::ConsensusState::No</a></div><div class="ttdeci">@ No</div><div class="ttdoc">We do not have consensus.</div></div>
 <div class="ttc" id="anamespaceripple_html_a8a16d6f665a032453ec4cbfca01929b6a3e4d891a5df3d6d0d7dd9432a1bc6470"><div class="ttname"><a href="namespaceripple.html#a8a16d6f665a032453ec4cbfca01929b6a3e4d891a5df3d6d0d7dd9432a1bc6470">ripple::ManifestDisposition::accepted</a></div><div class="ttdeci">@ accepted</div><div class="ttdoc">Manifest is valid.</div></div>
-<div class="ttc" id="anamespaceripple_html_af9776f187d3686a7fba4c2d2fbeebdf4"><div class="ttname"><a href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">ripple::to_string</a></div><div class="ttdeci">std::string to_string(Manifest const &amp;m)</div><div class="ttdoc">Format the specified manifest to a string for debugging purposes.</div><div class="ttdef"><b>Definition:</b> <a href="app_2misc_2impl_2Manifest_8cpp_source.html#l00038">app/misc/impl/Manifest.cpp:38</a></div></div>
+<div class="ttc" id="anamespaceripple_html_ac124fe6744b7fe887dec949b56b16d50"><div class="ttname"><a href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">ripple::to_string</a></div><div class="ttdeci">std::string to_string(base_uint&lt; Bits, Tag &gt; const &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00621">base_uint.h:621</a></div></div>
 <div class="ttc" id="anamespacestd_1_1chrono_html"><div class="ttname"><a href="http://en.cppreference.com/w/namespacestd_1_1chrono.html">std::chrono</a></div></div>
 <div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdoc">STL namespace.</div></div>
 <div class="ttc" id="asize_t_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a></div></div>

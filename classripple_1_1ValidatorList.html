@@ -195,9 +195,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a727b089f03d260cebfaca07ee4c83059"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1ValidatorList.html#a727b089f03d260cebfaca07ee4c83059">for_each_available</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;<a class="el" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7f5cb74af5d7f4b82200738fdbdc5a45">manifest</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> version, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/map.html">std::map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>, <a class="el" href="structripple_1_1ValidatorBlobInfo.html">ValidatorBlobInfo</a> &gt; const &amp;blobInfos, <a class="el" href="classripple_1_1PublicKey.html">PublicKey</a> const &amp;pubKey, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> maxSequence, <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const &amp;hash)&gt; func) const</td></tr>
 <tr class="memdesc:a727b089f03d260cebfaca07ee4c83059"><td class="mdescLeft">&#160;</td><td class="mdescRight">Invokes the callback once for every available publisher list's raw data members.  <a href="classripple_1_1ValidatorList.html#a727b089f03d260cebfaca07ee4c83059">More...</a><br /></td></tr>
 <tr class="separator:a727b089f03d260cebfaca07ee4c83059"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5aa008bd5f235894ff77e2d09f980aae"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classJson_1_1Value.html">Json::Value</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1ValidatorList.html#a5aa008bd5f235894ff77e2d09f980aae">getAvailable</a> (boost::beast::string_view const &amp;pubKey, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> &gt; forceVersion={})</td></tr>
-<tr class="memdesc:a5aa008bd5f235894ff77e2d09f980aae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current valid list for the given publisher key, if available, as a <a class="el" href="namespaceJson.html" title="JSON (JavaScript Object Notation).">Json</a> object.  <a href="classripple_1_1ValidatorList.html#a5aa008bd5f235894ff77e2d09f980aae">More...</a><br /></td></tr>
-<tr class="separator:a5aa008bd5f235894ff77e2d09f980aae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62f2c33d93c3985c6c486a9bfc6499fe"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classJson_1_1Value.html">Json::Value</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1ValidatorList.html#a62f2c33d93c3985c6c486a9bfc6499fe">getAvailable</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a> pubKey, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> &gt; forceVersion={})</td></tr>
+<tr class="memdesc:a62f2c33d93c3985c6c486a9bfc6499fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current valid list for the given publisher key, if available, as a <a class="el" href="namespaceJson.html" title="JSON (JavaScript Object Notation).">Json</a> object.  <a href="classripple_1_1ValidatorList.html#a62f2c33d93c3985c6c486a9bfc6499fe">More...</a><br /></td></tr>
+<tr class="separator:a62f2c33d93c3985c6c486a9bfc6499fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a002fda13878b813249f3fd49e64577fd"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1ValidatorList.html#a002fda13878b813249f3fd49e64577fd">count</a> () const</td></tr>
 <tr class="memdesc:a002fda13878b813249f3fd49e64577fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of configured validator list sites.  <a href="classripple_1_1ValidatorList.html#a002fda13878b813249f3fd49e64577fd">More...</a><br /></td></tr>
 <tr class="separator:a002fda13878b813249f3fd49e64577fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -345,7 +345,7 @@ Friends</h2></td></tr>
 <tr class="separator:aff78bcfb98b735a41d082871e735ccc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h2><a class="anchor" id="autotoc_md137"></a>
+<div class="textblock"><h2><a class="anchor" id="autotoc_md487"></a>
 Trusted Validators List</h2>
 <p >Rippled accepts ledger proposals and validations from trusted validator nodes. A ledger is considered fully-validated once the number of received trusted validations for a ledger meets or exceeds a quorum value.</p>
 <p >This class manages the set of validation public keys the local rippled node trusts. The list of trusted keys is populated using the keys listed in the configuration file as well as lists signed by trusted publishers. The trusted publisher public keys are specified in the config.</p>
@@ -482,7 +482,7 @@ Trusted Validators List</h2>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ValidatorList_8cpp_source.html#l00119">119</a> of file <a class="el" href="ValidatorList_8cpp_source.html">ValidatorList.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ValidatorList_8cpp_source.html#l00118">118</a> of file <a class="el" href="ValidatorList_8cpp_source.html">ValidatorList.cpp</a>.</p>
 
 </div>
 </div>
@@ -557,7 +557,7 @@ Trusted Validators List</h2>
 <p>May be called concurrently</p>
 <dl class="section return"><dt>Returns</dt><dd><code>false</code> if an entry is invalid or unparsable </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="ValidatorList_8cpp_source.html#l00137">137</a> of file <a class="el" href="ValidatorList_8cpp_source.html">ValidatorList.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ValidatorList_8cpp_source.html#l00136">136</a> of file <a class="el" href="ValidatorList_8cpp_source.html">ValidatorList.cpp</a>.</p>
 
 </div>
 </div>
@@ -1317,8 +1317,8 @@ Trusted Validators List</h2>
 
 </div>
 </div>
-<a id="a5aa008bd5f235894ff77e2d09f980aae" name="a5aa008bd5f235894ff77e2d09f980aae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5aa008bd5f235894ff77e2d09f980aae">&#9670;&#160;</a></span>getAvailable()</h2>
+<a id="a62f2c33d93c3985c6c486a9bfc6499fe" name="a62f2c33d93c3985c6c486a9bfc6499fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62f2c33d93c3985c6c486a9bfc6499fe">&#9670;&#160;</a></span>getAvailable()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1326,7 +1326,7 @@ Trusted Validators List</h2>
         <tr>
           <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classJson_1_1Value.html">Json::Value</a> &gt; ripple::ValidatorList::getAvailable </td>
           <td>(</td>
-          <td class="paramtype">boost::beast::string_view const &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html">std::string_view</a>&#160;</td>
           <td class="paramname"><em>pubKey</em>, </td>
         </tr>
         <tr>

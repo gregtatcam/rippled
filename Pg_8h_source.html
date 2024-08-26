@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_d7c39fc6a58949d9b8efa0ea0aabeed8.html">core</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_ba3df07e81ea6c232f7f0c8823316f62.html">core</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -99,9 +99,9 @@ $(function() {
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#ifndef RIPPLE_CORE_PG_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#define RIPPLE_CORE_PG_H_INCLUDED</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/basics/BasicConfig.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/basics/Log.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/protocol/Protocol.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/basics/BasicConfig.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/basics/Log.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/protocol/Protocol.h&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;boost/lexical_cast.hpp&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/atomic.html">atomic</a>&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/chrono.html">chrono</a>&gt;</span></div>
@@ -269,7 +269,7 @@ $(function() {
 <div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>{</div>
 <div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    <span class="keyword">friend</span> <span class="keyword">class </span>PgQuery;</div>
 <div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespaceripple_1_1PeerFinder.html#af4627ce974986eba7f69f7c89666d3fa">clock_type</a> = <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/steady_clock.html">std::chrono::steady_clock</a>;</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>    <span class="keyword">using </span><a class="code hl_typedef" href="namespaceripple_1_1Resource.html#a6cf750013e8f059c07f8eca00a1aae3c">clock_type</a> = <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/steady_clock.html">std::chrono::steady_clock</a>;</div>
 <div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span> </div>
 <div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    PgConfig config_;</div>
 <div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>    <a class="code hl_class" href="classbeast_1_1Journal.html">beast::Journal</a> <span class="keyword">const</span> j_;</div>
@@ -366,8 +366,8 @@ $(function() {
 <div class="ttc" id="amemory_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/memory.html">memory</a></div></div>
 <div class="ttc" id="amultimap_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/multimap.html">std::multimap</a></div></div>
 <div class="ttc" id="amutex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/mutex.html">mutex</a></div></div>
-<div class="ttc" id="anamespaceripple_1_1PeerFinder_html_af4627ce974986eba7f69f7c89666d3fa"><div class="ttname"><a href="namespaceripple_1_1PeerFinder.html#af4627ce974986eba7f69f7c89666d3fa">ripple::PeerFinder::clock_type</a></div><div class="ttdeci">beast::abstract_clock&lt; std::chrono::steady_clock &gt; clock_type</div><div class="ttdef"><b>Definition:</b> <a href="PeerfinderManager_8h_source.html#l00032">PeerfinderManager.h:32</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_1_1Resource_html_a6cf750013e8f059c07f8eca00a1aae3c"><div class="ttname"><a href="namespaceripple_1_1Resource.html#a6cf750013e8f059c07f8eca00a1aae3c">ripple::Resource::clock_type</a></div><div class="ttdeci">beast::abstract_clock&lt; std::chrono::steady_clock &gt; clock_type</div><div class="ttdef"><b>Definition:</b> <a href="Entry_8h_source.html#l00033">Entry.h:33</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdoc">STL namespace.</div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="apair_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a></div></div>

@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_5f536ab1985a8dcd28bcfd618bc58e92.html">basics</a></li><li class="navelem"><a class="el" href="dir_6f921693cf6aba7edd915fbfc33f741e.html">impl</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_90ffdbabf412cfdffe6b2193e0ce938a.html">libxrpl</a></li><li class="navelem"><a class="el" href="dir_c9ad8b908996c4ad90b9a0cfb3c90cd8.html">basics</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -95,12 +95,12 @@ $(function() {
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//==============================================================================</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;ripple/basics/partitioned_unordered_map.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;xrpl/basics/partitioned_unordered_map.h&gt;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ripple/basics/SHAMapHash.h&gt;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/base_uint.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/beast/hash/uhash.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/protocol/Protocol.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;xrpl/basics/SHAMapHash.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/base_uint.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/beast/hash/uhash.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/protocol/Protocol.h&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/limits.html">limits</a>&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/string.html">string</a>&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
@@ -166,7 +166,7 @@ $(function() {
 <div class="ttc" id="ainteger_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a></div></div>
 <div class="ttc" id="alimits_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/limits.html">limits</a></div></div>
 <div class="ttc" id="amemcpy_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/byte/memcpy.html">std::memcpy</a></div><div class="ttdeci">T memcpy(T... args)</div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a0e4c90d5c9b92e36829fcf70740d40af"><div class="ttname"><a href="namespaceripple.html#a0e4c90d5c9b92e36829fcf70740d40af">ripple::partitioner&lt; std::string &gt;</a></div><div class="ttdeci">template std::size_t partitioner&lt; std::string &gt;(std::string const &amp;key, std::size_t const numPartitions)</div></div>
 <div class="ttc" id="anamespaceripple_html_a208517700724be17511ebb152d019385"><div class="ttname"><a href="namespaceripple.html#a208517700724be17511ebb152d019385">ripple::partitioner</a></div><div class="ttdeci">std::size_t partitioner(Key const &amp;key, std::size_t const numPartitions)</div><div class="ttdef"><b>Definition:</b> <a href="partitioned__unordered__map_8cpp_source.html#l00061">partitioned_unordered_map.cpp:61</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a22206eb014f353afcc96542e370e40e3"><div class="ttname"><a href="namespaceripple.html#a22206eb014f353afcc96542e370e40e3">ripple::partitioner&lt; uint256 &gt;</a></div><div class="ttdeci">template std::size_t partitioner&lt; uint256 &gt;(uint256 const &amp;key, std::size_t const numPartitions)</div></div>

@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_1e765e6a8d5970800a535eb2615ec474.html">protocol</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_0103a8ad82dcc2c51f5cde661b4b5cb7.html">xrpl</a></li><li class="navelem"><a class="el" href="dir_8d04e3c0b58cad28d7755ed462d1b6c0.html">protocol</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -121,7 +121,7 @@ $(function() {
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>}</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="keyword">inline</span> <span class="keywordtype">char</span> <span class="keyword">const</span>*</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="namespaceripple.html#a2ab8e177c93819235a0e65f04851548f">   46</a></span><a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(<a class="code hl_enumeration" href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4dde">KeyType</a> type)</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="namespaceripple.html#a2ab8e177c93819235a0e65f04851548f">   46</a></span><a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(<a class="code hl_enumeration" href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4dde">KeyType</a> type)</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>{</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">if</span> (type == <a class="code hl_enumvalue" href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4ddea82c2b7829b8129e5a2d53665ba4b4757">KeyType::secp256k1</a>)</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">return</span> <span class="stringliteral">&quot;secp256k1&quot;</span>;</div>
@@ -134,22 +134,22 @@ $(function() {
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> Stream&gt;</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="namespaceripple.html#a03090a28f2a39db112269297682a91c4">   58</a></span><span class="keyword">inline</span> Stream&amp;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><a class="code hl_function" href="namespaceripple.html#a057808985eb1cda645ec3b17a027113e">operator&lt;&lt;</a>(Stream&amp; s, <a class="code hl_enumeration" href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4dde">KeyType</a> type)</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><a class="code hl_function" href="namespaceripple.html#a5c77599883897def8bd3e9e4ad140f95">operator&lt;&lt;</a>(Stream&amp; s, <a class="code hl_enumeration" href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4dde">KeyType</a> type)</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>{</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">return</span> s &lt;&lt; <a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(type);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordflow">return</span> s &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(type);</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>}</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>}  <span class="comment">// namespace ripple</span></div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="abasic_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a02fdc1af16f82fc44ffd3c2a60c4c083"><div class="ttname"><a href="namespaceripple.html#a02fdc1af16f82fc44ffd3c2a60c4c083">ripple::keyTypeFromString</a></div><div class="ttdeci">std::optional&lt; KeyType &gt; keyTypeFromString(std::string const &amp;s)</div><div class="ttdef"><b>Definition:</b> <a href="KeyType_8h_source.html#l00034">KeyType.h:34</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a057808985eb1cda645ec3b17a027113e"><div class="ttname"><a href="namespaceripple.html#a057808985eb1cda645ec3b17a027113e">ripple::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;os, TOffer&lt; TIn, TOut &gt; const &amp;offer)</div><div class="ttdef"><b>Definition:</b> <a href="Offer_8h_source.html#l00311">Offer.h:312</a></div></div>
+<div class="ttc" id="anamespaceripple_html_a5c77599883897def8bd3e9e4ad140f95"><div class="ttname"><a href="namespaceripple.html#a5c77599883897def8bd3e9e4ad140f95">ripple::operator&lt;&lt;</a></div><div class="ttdeci">std::ostream &amp; operator&lt;&lt;(std::ostream &amp;out, base_uint&lt; Bits, Tag &gt; const &amp;u)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00627">base_uint.h:628</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a9de744cfdefe1132969eb982e57e4dde"><div class="ttname"><a href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4dde">ripple::KeyType</a></div><div class="ttdeci">KeyType</div><div class="ttdef"><b>Definition:</b> <a href="KeyType_8h_source.html#l00028">KeyType.h:28</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a9de744cfdefe1132969eb982e57e4ddea8183aa2c95dc1385c8f58bf1917fcb0b"><div class="ttname"><a href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4ddea8183aa2c95dc1385c8f58bf1917fcb0b">ripple::KeyType::ed25519</a></div><div class="ttdeci">@ ed25519</div></div>
 <div class="ttc" id="anamespaceripple_html_a9de744cfdefe1132969eb982e57e4ddea82c2b7829b8129e5a2d53665ba4b4757"><div class="ttname"><a href="namespaceripple.html#a9de744cfdefe1132969eb982e57e4ddea82c2b7829b8129e5a2d53665ba4b4757">ripple::KeyType::secp256k1</a></div><div class="ttdeci">@ secp256k1</div></div>
-<div class="ttc" id="anamespaceripple_html_af9776f187d3686a7fba4c2d2fbeebdf4"><div class="ttname"><a href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">ripple::to_string</a></div><div class="ttdeci">std::string to_string(Manifest const &amp;m)</div><div class="ttdoc">Format the specified manifest to a string for debugging purposes.</div><div class="ttdef"><b>Definition:</b> <a href="app_2misc_2impl_2Manifest_8cpp_source.html#l00038">app/misc/impl/Manifest.cpp:38</a></div></div>
+<div class="ttc" id="anamespaceripple_html_ac124fe6744b7fe887dec949b56b16d50"><div class="ttname"><a href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">ripple::to_string</a></div><div class="ttdeci">std::string to_string(base_uint&lt; Bits, Tag &gt; const &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00621">base_uint.h:621</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="astring_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/string.html">string</a></div></div>
 </div><!-- fragment --></div><!-- contents -->

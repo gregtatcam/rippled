@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_5f536ab1985a8dcd28bcfd618bc58e92.html">basics</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_0103a8ad82dcc2c51f5cde661b4b5cb7.html">xrpl</a></li><li class="navelem"><a class="el" href="dir_f534ca90a4985f34ab325acfbcd39b84.html">basics</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,8 +98,8 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_BASICS_HARDENED_HASH_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_BASICS_HARDENED_HASH_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/beast/hash/hash_append.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/beast/hash/xxhasher.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/beast/hash/hash_append.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/beast/hash/xxhasher.h&gt;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/cstdint.html">cstdint</a>&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/functional.html">functional</a>&gt;</span></div>
@@ -158,7 +158,7 @@ $(function() {
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="classripple_1_1hardened__hash.html#addb99e4c2034d9eb2027345e4f50ce34">  110</a></span>    <a class="code hl_function" href="classripple_1_1hardened__hash.html#addb99e4c2034d9eb2027345e4f50ce34">operator()</a>(T <span class="keyword">const</span>&amp; t) <span class="keyword">const</span> <span class="keyword">noexcept</span></div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    {</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        HashAlgorithm h(<a class="code hl_variable" href="classripple_1_1hardened__hash.html#a3765aed06bf6e6296439d0fc70c709a3">m_seeds</a>.<a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">first</a>, <a class="code hl_variable" href="classripple_1_1hardened__hash.html#a3765aed06bf6e6296439d0fc70c709a3">m_seeds</a>.<a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">second</a>);</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        <a class="code hl_function" href="namespaceripple.html#a9c3a01178261b6e8a98c0ea99f01d154">hash_append</a>(h, t);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        <a class="code hl_function" href="namespaceripple.html#a06da0e52773c5c0841994317a3d5e3d0">hash_append</a>(h, t);</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="classripple_1_1hardened__hash.html#a0447c9ec0860439ed67f13cd9d01b732">result_type</a><span class="keyword">&gt;</span>(h);</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    }</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>};</div>
@@ -177,8 +177,8 @@ $(function() {
 <div class="ttc" id="amersenne_twister_engine_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/random/mersenne_twister_engine.html">std::mt19937_64</a></div></div>
 <div class="ttc" id="amutex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/mutex.html">mutex</a></div></div>
 <div class="ttc" id="anamespaceripple_1_1detail_html_a249a9f5f4201996e85c94a88e2364843"><div class="ttname"><a href="namespaceripple_1_1detail.html#a249a9f5f4201996e85c94a88e2364843">ripple::detail::make_seed_pair</a></div><div class="ttdeci">seed_pair make_seed_pair() noexcept</div><div class="ttdef"><b>Definition:</b> <a href="hardened__hash_8h_source.html#l00043">hardened_hash.h:43</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a9c3a01178261b6e8a98c0ea99f01d154"><div class="ttname"><a href="namespaceripple.html#a9c3a01178261b6e8a98c0ea99f01d154">ripple::hash_append</a></div><div class="ttdeci">void hash_append(Hasher &amp;h, ValidatorBlobInfo const &amp;blobInfo)</div><div class="ttdef"><b>Definition:</b> <a href="ValidatorList_8h_source.html#l00909">ValidatorList.h:909</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
+<div class="ttc" id="anamespaceripple_html_a06da0e52773c5c0841994317a3d5e3d0"><div class="ttname"><a href="namespaceripple.html#a06da0e52773c5c0841994317a3d5e3d0">ripple::hash_append</a></div><div class="ttdeci">void hash_append(Hasher &amp;h, Slice const &amp;v)</div><div class="ttdef"><b>Definition:</b> <a href="Slice_8h_source.html#l00196">Slice.h:196</a></div></div>
 <div class="ttc" id="apair_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair&lt; std::uint64_t, std::uint64_t &gt;</a></div></div>
 <div class="ttc" id="arandom_device_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/numeric/random/random_device.html">std::random_device</a></div></div>
 <div class="ttc" id="arandom_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/random.html">random</a></div></div>

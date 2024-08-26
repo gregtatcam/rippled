@@ -82,6 +82,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1token_1_1amount.html">amount</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the optional amount field on an <a class="el" href="classripple_1_1NFTokenMint.html">NFTokenMint</a>.  <a href="classripple_1_1test_1_1jtx_1_1token_1_1amount.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1token_1_1brokerFee.html">brokerFee</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the optional NFTokenBrokerFee field in a brokerOffer transaction.  <a href="classripple_1_1test_1_1jtx_1_1token_1_1brokerFee.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -121,7 +124,7 @@ Functions</h2></td></tr>
 <tr class="memitem:ac8f58dedb4946a2d5681304c8bf03929"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classJson_1_1Value.html">Json::Value</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1test_1_1jtx_1_1token.html#ac8f58dedb4946a2d5681304c8bf03929">burn</a> (<a class="el" href="classripple_1_1test_1_1jtx_1_1Account.html">jtx::Account</a> const  &amp;account, <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const  &amp;nftokenID)</td></tr>
 <tr class="memdesc:ac8f58dedb4946a2d5681304c8bf03929"><td class="mdescLeft">&#160;</td><td class="mdescRight">Burn an NFToken.  <a href="namespaceripple_1_1test_1_1jtx_1_1token.html#ac8f58dedb4946a2d5681304c8bf03929">More...</a><br /></td></tr>
 <tr class="separator:ac8f58dedb4946a2d5681304c8bf03929"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40dfafd85108b010176f95d9af3b9c33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classJson_1_1Value.html">Json::Value</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1test_1_1jtx_1_1token.html#a40dfafd85108b010176f95d9af3b9c33">createOffer</a> (<a class="el" href="classripple_1_1test_1_1jtx_1_1Account.html">jtx::Account</a> const  &amp;account, <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const  &amp;nftokenID, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const  &amp;amount)</td></tr>
+<tr class="memitem:a40dfafd85108b010176f95d9af3b9c33"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classJson_1_1Value.html">Json::Value</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1test_1_1jtx_1_1token.html#a40dfafd85108b010176f95d9af3b9c33">createOffer</a> (<a class="el" href="classripple_1_1test_1_1jtx_1_1Account.html">jtx::Account</a> const  &amp;account, <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const  &amp;nftokenID, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const  &amp;<a class="el" href="classripple_1_1test_1_1jtx_1_1token_1_1amount.html">amount</a>)</td></tr>
 <tr class="memdesc:a40dfafd85108b010176f95d9af3b9c33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an NFTokenOffer.  <a href="namespaceripple_1_1test_1_1jtx_1_1token.html#a40dfafd85108b010176f95d9af3b9c33">More...</a><br /></td></tr>
 <tr class="separator:a40dfafd85108b010176f95d9af3b9c33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2f8bf73487f4b063fa202cb8a1937b2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
@@ -227,7 +230,7 @@ Functions</h2></td></tr>
 
 <p>Get the next NFTokenID that will be issued. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00061">61</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00067">67</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -283,7 +286,7 @@ Functions</h2></td></tr>
 
 <p>Get the NFTokenID for a particular nftSequence. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00075">75</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00081">81</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -315,7 +318,7 @@ Functions</h2></td></tr>
 
 <p>Burn an NFToken. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00096">96</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00102">102</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -353,7 +356,7 @@ Functions</h2></td></tr>
 
 <p>Create an NFTokenOffer. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00106">106</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00112">112</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -393,7 +396,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00139">139</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00145">145</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -425,7 +428,7 @@ template&lt;typename T &gt; </div>
 
 <p>Cancel NFTokenOffers. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00154">154</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00160">160</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -455,7 +458,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00162">162</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00168">168</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -487,7 +490,7 @@ template&lt;typename T &gt; </div>
 
 <p>Accept an NFToken buy offer. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00176">176</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00182">182</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -519,7 +522,7 @@ template&lt;typename T &gt; </div>
 
 <p>Accept an NFToken sell offer. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00186">186</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00192">192</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -557,7 +560,7 @@ template&lt;typename T &gt; </div>
 
 <p>Broker two NFToken offers. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00196">196</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00202">202</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -589,7 +592,7 @@ template&lt;typename T &gt; </div>
 
 <p>Set the authorized minter on an account root. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00216">216</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00222">222</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>
@@ -611,7 +614,7 @@ template&lt;typename T &gt; </div>
 
 <p>Clear any authorized minter from an account root. </p>
 
-<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00224">224</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="token_8cpp_source.html#l00230">230</a> of file <a class="el" href="token_8cpp_source.html">token.cpp</a>.</p>
 
 </div>
 </div>

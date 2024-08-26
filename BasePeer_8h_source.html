@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_80c35e8ddb2dc186c009e0af0763187b.html">server</a></li><li class="navelem"><a class="el" href="dir_7246a9c65fcef65657f13ac0fbd0871b.html">impl</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_0103a8ad82dcc2c51f5cde661b4b5cb7.html">xrpl</a></li><li class="navelem"><a class="el" href="dir_9d7e4921ea2f62e76f4d31f5afd6d533.html">server</a></li><li class="navelem"><a class="el" href="dir_7e087469d2ac96de512fc3a89c49a74a.html">detail</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,10 +98,10 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_SERVER_BASEPEER_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_SERVER_BASEPEER_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/beast/utility/WrappedSink.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/server/Port.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/server/impl/LowestLayer.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/server/impl/io_list.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/beast/utility/WrappedSink.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/server/Port.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/server/detail/LowestLayer.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/server/detail/io_list.h&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;boost/asio.hpp&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/atomic.html">atomic</a>&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/cassert.html">cassert</a>&gt;</span></div>
@@ -207,7 +207,7 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1BasePeer_html_ab398a39c766b0d6f2385e2508556465b"><div class="ttname"><a href="classripple_1_1BasePeer.html#ab398a39c766b0d6f2385e2508556465b">ripple::BasePeer::strand_</a></div><div class="ttdeci">boost::asio::strand&lt; boost::asio::executor &gt; strand_</div><div class="ttdef"><b>Definition:</b> <a href="BasePeer_8h_source.html#l00052">BasePeer.h:52</a></div></div>
 <div class="ttc" id="aclassripple_1_1io__list_1_1work_html"><div class="ttname"><a href="classripple_1_1io__list_1_1work.html">ripple::io_list::work</a></div><div class="ttdef"><b>Definition:</b> <a href="io__list_8h_source.html#l00038">io_list.h:39</a></div></div>
 <div class="ttc" id="afunctional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/functional.html">functional</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ab560b13cbf9e3bc5a0255a2c1b622442"><div class="ttname"><a href="namespaceripple.html#ab560b13cbf9e3bc5a0255a2c1b622442">ripple::get_lowest_layer</a></div><div class="ttdeci">decltype(auto) get_lowest_layer(T &amp;t) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="LowestLayer_8h_source.html#l00035">LowestLayer.h:35</a></div></div>
 <div class="ttc" id="astring_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/string.html">string</a></div></div>
 <div class="ttc" id="astructripple_1_1Port_html"><div class="ttname"><a href="structripple_1_1Port.html">ripple::Port</a></div><div class="ttdoc">Configuration information for a Server listening port.</div><div class="ttdef"><b>Definition:</b> <a href="Port_8h_source.html#l00048">Port.h:49</a></div></div>

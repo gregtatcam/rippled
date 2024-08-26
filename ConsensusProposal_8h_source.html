@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_20e3efd5b2bc43fb837b12b621a85eb0.html">consensus</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_a45383be4b466e94d1f055eccb2c6f46.html">consensus</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -97,11 +97,11 @@ $(function() {
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#ifndef RIPPLE_CONSENSUS_CONSENSUSPROPOSAL_H_INCLUDED</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define RIPPLE_CONSENSUS_CONSENSUSPROPOSAL_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ripple/basics/base_uint.h&gt;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/chrono.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/json/json_value.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/protocol/HashPrefix.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/protocol/jss.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;xrpl/basics/base_uint.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/chrono.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/json/json_value.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/protocol/HashPrefix.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/protocol/jss.h&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/cstdint.html">cstdint</a>&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a>&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
@@ -216,16 +216,16 @@ $(function() {
 <div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        <span class="keyword">using </span><a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/to_string.html">std::to_string</a>;</div>
 <div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
 <div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> ret = <a class="code hl_enumvalue" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6">Json::objectValue</a>;</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        ret[jss::previous_ledger] = <a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(<a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a272953b62a8db41c7953e7701c3d9cca">prevLedger</a>());</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        ret[jss::previous_ledger] = <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(<a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a272953b62a8db41c7953e7701c3d9cca">prevLedger</a>());</div>
 <div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
 <div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a2b7c39cd60f61c4e424085f4eefe73f5">isBowOut</a>())</div>
 <div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        {</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            ret[jss::transaction_hash] = <a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(<a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a91e326fe44578217610b5ace9e246004">position</a>());</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            ret[jss::transaction_hash] = <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(<a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a91e326fe44578217610b5ace9e246004">position</a>());</div>
 <div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>            ret[jss::propose_seq] = <a class="code hl_function" href="classripple_1_1ConsensusProposal.html#aad1cb7d0dc62fcec8ab135e28c4e9606">proposeSeq</a>();</div>
 <div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        }</div>
 <div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
 <div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        ret[jss::close_time] =</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>            <a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(<a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a717d26d7ef21b48974d0684b94e59c01">closeTime</a>().time_since_epoch().count());</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>            <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(<a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a717d26d7ef21b48974d0684b94e59c01">closeTime</a>().time_since_epoch().count());</div>
 <div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
 <div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordflow">return</span> ret;</div>
 <div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    }</div>
@@ -265,7 +265,7 @@ $(function() {
 <div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
 <div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> NodeID_t, <span class="keyword">class</span> LedgerID_t, <span class="keyword">class</span> Position_t&gt;</div>
 <div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="keywordtype">bool</span></div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="namespaceripple.html#a9bf3dd371c9291c917d56626c6f599a1">  260</a></span><a class="code hl_function" href="namespaceripple.html#a4a7f562868748b9246dbcab39091021c">operator==</a>(</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno"><a class="line" href="namespaceripple.html#a9bf3dd371c9291c917d56626c6f599a1">  260</a></span><a class="code hl_function" href="namespaceripple.html#adb9995d7c8e8a2aa3d702b73edfa0672">operator==</a>(</div>
 <div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <a class="code hl_class" href="classripple_1_1ConsensusProposal.html">ConsensusProposal&lt;NodeID_t, LedgerID_t, Position_t&gt;</a> <span class="keyword">const</span>&amp; a,</div>
 <div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <a class="code hl_class" href="classripple_1_1ConsensusProposal.html">ConsensusProposal&lt;NodeID_t, LedgerID_t, Position_t&gt;</a> <span class="keyword">const</span>&amp; b)</div>
 <div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>{</div>
@@ -305,11 +305,11 @@ $(function() {
 <div class="ttc" id="acstdint_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/cstdint.html">cstdint</a></div></div>
 <div class="ttc" id="ainteger_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a></div></div>
 <div class="ttc" id="anamespaceJson_html_a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6"><div class="ttname"><a href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6">Json::objectValue</a></div><div class="ttdeci">@ objectValue</div><div class="ttdoc">object value (collection of name/value pairs).</div><div class="ttdef"><b>Definition:</b> <a href="json__value_8h_source.html#l00044">json_value.h:43</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a4a7f562868748b9246dbcab39091021c"><div class="ttname"><a href="namespaceripple.html#a4a7f562868748b9246dbcab39091021c">ripple::operator==</a></div><div class="ttdeci">bool operator==(Manifest const &amp;lhs, Manifest const &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="Manifest_8h_source.html#l00189">Manifest.h:189</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
+<div class="ttc" id="anamespaceripple_html_ac124fe6744b7fe887dec949b56b16d50"><div class="ttname"><a href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">ripple::to_string</a></div><div class="ttdeci">std::string to_string(base_uint&lt; Bits, Tag &gt; const &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00621">base_uint.h:621</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ad5143ceada01141772ae4aab984f94bdab314439bc1697845de3749d51dca7c15"><div class="ttname"><a href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bdab314439bc1697845de3749d51dca7c15">ripple::HashPrefix::proposal</a></div><div class="ttdeci">@ proposal</div><div class="ttdoc">proposal for signing</div></div>
+<div class="ttc" id="anamespaceripple_html_adb9995d7c8e8a2aa3d702b73edfa0672"><div class="ttname"><a href="namespaceripple.html#adb9995d7c8e8a2aa3d702b73edfa0672">ripple::operator==</a></div><div class="ttdeci">constexpr bool operator==(base_uint&lt; Bits, Tag &gt; const &amp;lhs, base_uint&lt; Bits, Tag &gt; const &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00576">base_uint.h:576</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ae3f5bc352766a1a8dbf5270eb7dbc2e7"><div class="ttname"><a href="namespaceripple.html#ae3f5bc352766a1a8dbf5270eb7dbc2e7">ripple::sha512Half</a></div><div class="ttdeci">sha512_half_hasher::result_type sha512Half(Args const &amp;... args)</div><div class="ttdoc">Returns the SHA512-Half of a series of objects.</div><div class="ttdef"><b>Definition:</b> <a href="digest_8h_source.html#l00216">digest.h:216</a></div></div>
-<div class="ttc" id="anamespaceripple_html_af9776f187d3686a7fba4c2d2fbeebdf4"><div class="ttname"><a href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">ripple::to_string</a></div><div class="ttdeci">std::string to_string(Manifest const &amp;m)</div><div class="ttdoc">Format the specified manifest to a string for debugging purposes.</div><div class="ttdef"><b>Definition:</b> <a href="app_2misc_2impl_2Manifest_8cpp_source.html#l00038">app/misc/impl/Manifest.cpp:38</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="atime_point_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/chrono/time_point.html">std::chrono::time_point</a></div></div>
 <div class="ttc" id="ato_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string/to_string.html">std::to_string</a></div><div class="ttdeci">T to_string(T... args)</div></div>

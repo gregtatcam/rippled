@@ -356,7 +356,7 @@ class ripple::Validations&lt; Adaptor &gt;</div><p >Maintains current and recent
 <div class="line">    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/time_point.html">NetClock::time_point</a> now() <span class="keyword">const</span>;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Attempt to acquire a specific ledger.</span></div>
-<div class="line">    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;Ledger&gt;</a> <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9a86a4fa105ff51b8c3be84734797d8144">acquire</a>(Ledger::ID <span class="keyword">const</span> &amp; ledgerID);</div>
+<div class="line">    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;Ledger&gt;</a> acquire(Ledger::ID <span class="keyword">const</span> &amp; ledgerID);</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// ... implementation specific</span></div>
 <div class="line">};</div>
@@ -367,7 +367,6 @@ class ripple::Validations&lt; Adaptor &gt;</div><p >Maintains current and recent
 <div class="ttc" id="aclassripple_1_1Validations_html_a678c0348bd68f913d6f53f53e40c3f50"><div class="ttname"><a href="classripple_1_1Validations.html#a678c0348bd68f913d6f53f53e40c3f50">ripple::Validations::NodeID</a></div><div class="ttdeci">typename Validation::NodeID NodeID</div><div class="ttdef"><b>Definition:</b> <a href="Validations_8h_source.html#l00295">Validations.h:295</a></div></div>
 <div class="ttc" id="aclassripple_1_1Validations_html_ab12762703bf6418522381ff513a33856"><div class="ttname"><a href="classripple_1_1Validations.html#ab12762703bf6418522381ff513a33856">ripple::Validations::Ledger</a></div><div class="ttdeci">typename Adaptor::Ledger Ledger</div><div class="ttdef"><b>Definition:</b> <a href="Validations_8h_source.html#l00292">Validations.h:292</a></div></div>
 <div class="ttc" id="amutex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/thread/mutex.html">std::mutex</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a63a883cebf81b764433e67d90d4470d9a86a4fa105ff51b8c3be84734797d8144"><div class="ttname"><a href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9a86a4fa105ff51b8c3be84734797d8144">ripple::ShardState::acquire</a></div><div class="ttdeci">@ acquire</div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a></div></div>
 <div class="ttc" id="atime_point_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/chrono/time_point.html">std::chrono::time_point</a></div></div>
 </div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>

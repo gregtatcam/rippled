@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_479102fde392347bd126b381f7d9d4f1.html">conditions</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_8c4263eeea7d8983010ce4dc8e9da018.html">conditions</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,9 +98,9 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_CONDITIONS_CONDITION_H</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_CONDITIONS_CONDITION_H</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/Buffer.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/basics/Slice.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/conditions/impl/utils.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpld/conditions/detail/utils.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/basics/Buffer.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/basics/Slice.h&gt;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/array.html">array</a>&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/cstdint.html">cstdint</a>&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/set.html">set</a>&gt;</span></div>
@@ -109,7 +109,7 @@ $(function() {
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/vector.html">vector</a>&gt;</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespaceripple_1_1cryptoconditions.html">   34</a></span><span class="keyword">namespace </span>cryptoconditions {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">namespace </span>cryptoconditions {</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="namespaceripple_1_1cryptoconditions.html#aa3107e15003c13674a275abb96856ccd">   36</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespaceripple_1_1cryptoconditions.html#aa3107e15003c13674a275abb96856ccd">Type</a> : <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a> {</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <a class="code hl_enumvalue" href="namespaceripple_1_1cryptoconditions.html#aa3107e15003c13674a275abb96856ccda40536493d814905a0c7e5e89dca8efd1">preimageSha256</a> = 0,</div>
@@ -199,7 +199,7 @@ $(function() {
 <div class="ttc" id="anamespaceripple_1_1cryptoconditions_html_aa3107e15003c13674a275abb96856ccda58e63c39e1333aaee04f4e7d56209206"><div class="ttname"><a href="namespaceripple_1_1cryptoconditions.html#aa3107e15003c13674a275abb96856ccda58e63c39e1333aaee04f4e7d56209206">ripple::cryptoconditions::Type::ed25519Sha256</a></div><div class="ttdeci">@ ed25519Sha256</div></div>
 <div class="ttc" id="anamespaceripple_1_1cryptoconditions_html_aa3107e15003c13674a275abb96856ccdab3badbc47369a7d1f7eb4184dbd7b35a"><div class="ttname"><a href="namespaceripple_1_1cryptoconditions.html#aa3107e15003c13674a275abb96856ccdab3badbc47369a7d1f7eb4184dbd7b35a">ripple::cryptoconditions::Type::thresholdSha256</a></div><div class="ttdeci">@ thresholdSha256</div></div>
 <div class="ttc" id="anamespaceripple_1_1cryptoconditions_html_aa3107e15003c13674a275abb96856ccdabcd20d75e5c9a7bd6b5e78ecc90a07af"><div class="ttname"><a href="namespaceripple_1_1cryptoconditions.html#aa3107e15003c13674a275abb96856ccdabcd20d75e5c9a7bd6b5e78ecc90a07af">ripple::cryptoconditions::Type::prefixSha256</a></div><div class="ttdeci">@ prefixSha256</div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdoc">STL namespace.</div></div>
 <div class="ttc" id="aset_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/set.html">set</a></div></div>
 <div class="ttc" id="asize_t_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a></div></div>

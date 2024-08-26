@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_44aff85a5b558cac9311bb222eb8fa78.html">peerfinder</a></li><li class="navelem"><a class="el" href="dir_01f812eedbcff88039c2ca147e9e73a6.html">impl</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_89046728185f0c274a4164d3e2cb38fb.html">peerfinder</a></li><li class="navelem"><a class="el" href="dir_e9607b4c59cebecf2224e361d8d6d362.html">detail</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -95,13 +95,13 @@ $(function() {
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//==============================================================================</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;ripple/basics/Log.h&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;ripple/peerfinder/impl/Bootcache.h&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ripple/peerfinder/impl/Tuning.h&gt;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/peerfinder/impl/iosformat.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;xrpld/peerfinder/detail/Bootcache.h&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;xrpld/peerfinder/detail/Tuning.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;xrpld/peerfinder/detail/iosformat.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/Log.h&gt;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="namespaceripple_1_1PeerFinder.html">   26</a></span><span class="keyword">namespace </span>PeerFinder {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">namespace </span>PeerFinder {</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="classripple_1_1PeerFinder_1_1Bootcache.html#a5f54731513e882975574bc001fa9bd8f">   28</a></span><a class="code hl_function" href="classripple_1_1PeerFinder_1_1Bootcache.html#a5f54731513e882975574bc001fa9bd8f">Bootcache::Bootcache</a>(<a class="code hl_class" href="classripple_1_1PeerFinder_1_1Store.html">Store</a>&amp; store, <a class="code hl_class" href="classbeast_1_1abstract__clock.html">clock_type</a>&amp; clock, <a class="code hl_class" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    : m_store(store)</div>
@@ -389,7 +389,7 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1PeerFinder_1_1Store_html"><div class="ttname"><a href="classripple_1_1PeerFinder_1_1Store.html">ripple::PeerFinder::Store</a></div><div class="ttdoc">Abstract persistence for PeerFinder data.</div><div class="ttdef"><b>Definition:</b> <a href="Store_8h_source.html#l00027">Store.h:28</a></div></div>
 <div class="ttc" id="aclassripple_1_1PeerFinder_1_1Store_html_ac7438695b75741d34718790f810a6430"><div class="ttname"><a href="classripple_1_1PeerFinder_1_1Store.html#ac7438695b75741d34718790f810a6430">ripple::PeerFinder::Store::load</a></div><div class="ttdeci">virtual std::size_t load(load_callback const &amp;cb)=0</div></div>
 <div class="ttc" id="ainteger_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/integer.html">std::int32_t</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="apush_back_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/push_back.html">std::vector::push_back</a></div><div class="ttdeci">T push_back(T... args)</div></div>
 <div class="ttc" id="areserve_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/reserve.html">std::vector::reserve</a></div><div class="ttdeci">T reserve(T... args)</div></div>
 <div class="ttc" id="astructbeast_1_1leftw_html"><div class="ttname"><a href="structbeast_1_1leftw.html">beast::leftw</a></div><div class="ttdoc">Left justifies a field at the specified width.</div><div class="ttdef"><b>Definition:</b> <a href="iosformat_8h_source.html#l00033">iosformat.h:34</a></div></div>

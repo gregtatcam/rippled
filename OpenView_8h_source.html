@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_df67e75ba07853ef5c3c9d8f74c2f968.html">ledger</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_bdaaaf6daa78e191205beecf69f3206b.html">ledger</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,10 +98,10 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_LEDGER_OPENVIEW_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_LEDGER_OPENVIEW_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/XRPAmount.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/ledger/RawView.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/ledger/ReadView.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/ledger/detail/RawStateTable.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpld/ledger/RawView.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpld/ledger/ReadView.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpld/ledger/detail/RawStateTable.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/basics/XRPAmount.h&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;boost/container/pmr/monotonic_buffer_resource.hpp&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;boost/container/pmr/polymorphic_allocator.hpp&gt;</span></div>
@@ -313,7 +313,7 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1ReadView_html"><div class="ttname"><a href="classripple_1_1ReadView.html">ripple::ReadView</a></div><div class="ttdoc">A view into a ledger.</div><div class="ttdef"><b>Definition:</b> <a href="ReadView_8h_source.html#l00054">ReadView.h:55</a></div></div>
 <div class="ttc" id="aclassripple_1_1ReadView_html_a937328125a7d62270f32b4e1555c5cdd"><div class="ttname"><a href="classripple_1_1ReadView.html#a937328125a7d62270f32b4e1555c5cdd">ripple::ReadView::key_type</a></div><div class="ttdeci">uint256 key_type</div><div class="ttdef"><b>Definition:</b> <a href="ReadView_8h_source.html#l00060">ReadView.h:60</a></div></div>
 <div class="ttc" id="aclassripple_1_1ReadView_html_ab1430dec61fd5ef9bf4a013aab558d71"><div class="ttname"><a href="classripple_1_1ReadView.html#ab1430dec61fd5ef9bf4a013aab558d71">ripple::ReadView::tx_type</a></div><div class="ttdeci">std::pair&lt; std::shared_ptr&lt; STTx const  &gt;, std::shared_ptr&lt; STObject const  &gt; &gt; tx_type</div><div class="ttdef"><b>Definition:</b> <a href="ReadView_8h_source.html#l00057">ReadView.h:58</a></div></div>
-<div class="ttc" id="aclassripple_1_1Rules_html"><div class="ttname"><a href="classripple_1_1Rules.html">ripple::Rules</a></div><div class="ttdoc">Rules controlling protocol behavior.</div><div class="ttdef"><b>Definition:</b> <a href="Rules_8h_source.html#l00033">Rules.h:34</a></div></div>
+<div class="ttc" id="aclassripple_1_1Rules_html"><div class="ttname"><a href="classripple_1_1Rules.html">ripple::Rules</a></div><div class="ttdoc">Rules controlling protocol behavior.</div><div class="ttdef"><b>Definition:</b> <a href="Rules_8h_source.html#l00034">Rules.h:35</a></div></div>
 <div class="ttc" id="aclassripple_1_1TxsRawView_html"><div class="ttname"><a href="classripple_1_1TxsRawView.html">ripple::TxsRawView</a></div><div class="ttdoc">Interface for changing ledger entries with transactions.</div><div class="ttdef"><b>Definition:</b> <a href="RawView_8h_source.html#l00097">RawView.h:98</a></div></div>
 <div class="ttc" id="aclassripple_1_1XRPAmount_html"><div class="ttname"><a href="classripple_1_1XRPAmount.html">ripple::XRPAmount</a></div><div class="ttdef"><b>Definition:</b> <a href="XRPAmount_8h_source.html#l00046">XRPAmount.h:50</a></div></div>
 <div class="ttc" id="aclassripple_1_1base__uint_html"><div class="ttname"><a href="classripple_1_1base__uint.html">ripple::base_uint&lt; 256 &gt;</a></div></div>
@@ -321,7 +321,7 @@ $(function() {
 <div class="ttc" id="afunctional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/functional.html">functional</a></div></div>
 <div class="ttc" id="aless_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/functional/less.html">std::less</a></div></div>
 <div class="ttc" id="amap_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/map.html">std::map&lt; key_type, txData, std::less&lt; key_type &gt;, boost::container::pmr::polymorphic_allocator&lt; std::pair&lt; key_type const, txData &gt; &gt; &gt;</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a8f7c1dac6a768426c7fc2bf4b544254a"><div class="ttname"><a href="namespaceripple.html#a8f7c1dac6a768426c7fc2bf4b544254a">ripple::kilobytes</a></div><div class="ttdeci">constexpr auto kilobytes(T value) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="ByteUtilities_8h_source.html#l00027">ByteUtilities.h:27</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ab30574a8f31dbd4d579a6a589f82fbe7"><div class="ttname"><a href="namespaceripple.html#ab30574a8f31dbd4d579a6a589f82fbe7">ripple::open_ledger</a></div><div class="ttdeci">open_ledger_t const open_ledger</div><div class="ttdef"><b>Definition:</b> <a href="OpenView_8cpp_source.html#l00025">OpenView.cpp:25</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a></div></div>

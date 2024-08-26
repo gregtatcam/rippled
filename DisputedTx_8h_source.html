@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_20e3efd5b2bc43fb837b12b621a85eb0.html">consensus</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_a45383be4b466e94d1f055eccb2c6f46.html">consensus</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,13 +98,13 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_APP_CONSENSUS_IMPL_DISPUTEDTX_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_APP_CONSENSUS_IMPL_DISPUTEDTX_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/basics/Log.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/basics/base_uint.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/beast/utility/Journal.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/consensus/ConsensusParms.h&gt;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;ripple/json/json_writer.h&gt;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;ripple/protocol/Serializer.h&gt;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;ripple/protocol/UintTypes.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpld/consensus/ConsensusParms.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/basics/Log.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/basics/base_uint.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/beast/utility/Journal.h&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;xrpl/json/json_writer.h&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;xrpl/protocol/Serializer.h&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;xrpl/protocol/UintTypes.h&gt;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;boost/container/flat_map.hpp&gt;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/memory.html">memory</a>&gt;</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
@@ -300,7 +300,7 @@ $(function() {
 <div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    {</div>
 <div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> votesj(<a class="code hl_enumvalue" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6">Json::objectValue</a>);</div>
 <div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> <span class="keyword">const</span>&amp; [nodeId, vote] : votes_)</div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>            votesj[<a class="code hl_function" href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">to_string</a>(nodeId)] = vote;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>            votesj[<a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(nodeId)] = vote;</div>
 <div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        ret[<span class="stringliteral">&quot;votes&quot;</span>] = std::move(votesj);</div>
 <div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    }</div>
 <div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
@@ -336,10 +336,10 @@ $(function() {
 <div class="ttc" id="amake_pair_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/pair/make_pair.html">std::make_pair</a></div><div class="ttdeci">T make_pair(T... args)</div></div>
 <div class="ttc" id="amemory_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/memory.html">memory</a></div></div>
 <div class="ttc" id="anamespaceJson_html_a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6"><div class="ttname"><a href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6">Json::objectValue</a></div><div class="ttdeci">@ objectValue</div><div class="ttdoc">object value (collection of name/value pairs).</div><div class="ttdef"><b>Definition:</b> <a href="json__value_8h_source.html#l00044">json_value.h:43</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a33f8b6e68b5f63faf2e9755cc251563ea80dcf57f5ecd4be3cbfa37eccbcb6f44"><div class="ttname"><a href="namespaceripple.html#a33f8b6e68b5f63faf2e9755cc251563ea80dcf57f5ecd4be3cbfa37eccbcb6f44">ripple::ConsensusMode::proposing</a></div><div class="ttdeci">@ proposing</div><div class="ttdoc">We are normal participant in consensus and propose our position.</div></div>
+<div class="ttc" id="anamespaceripple_html_ac124fe6744b7fe887dec949b56b16d50"><div class="ttname"><a href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">ripple::to_string</a></div><div class="ttdeci">std::string to_string(base_uint&lt; Bits, Tag &gt; const &amp;a)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00621">base_uint.h:621</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ad30131b5a5b7cf60d9b392ab868b8c0e"><div class="ttname"><a href="namespaceripple.html#ad30131b5a5b7cf60d9b392ab868b8c0e">ripple::getJson</a></div><div class="ttdeci">Json::Value getJson(LedgerFill const &amp;fill)</div><div class="ttdoc">Return a new Json::Value representing the ledger with given options.</div><div class="ttdef"><b>Definition:</b> <a href="LedgerToJson_8cpp_source.html#l00355">LedgerToJson.cpp:355</a></div></div>
-<div class="ttc" id="anamespaceripple_html_af9776f187d3686a7fba4c2d2fbeebdf4"><div class="ttname"><a href="namespaceripple.html#af9776f187d3686a7fba4c2d2fbeebdf4">ripple::to_string</a></div><div class="ttdeci">std::string to_string(Manifest const &amp;m)</div><div class="ttdoc">Format the specified manifest to a string for debugging purposes.</div><div class="ttdef"><b>Definition:</b> <a href="app_2misc_2impl_2Manifest_8cpp_source.html#l00038">app/misc/impl/Manifest.cpp:38</a></div></div>
 <div class="ttc" id="asize_t_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a></div></div>
 <div class="ttc" id="astructripple_1_1ConsensusParms_html"><div class="ttname"><a href="structripple_1_1ConsensusParms.html">ripple::ConsensusParms</a></div><div class="ttdoc">Consensus algorithm parameters.</div><div class="ttdef"><b>Definition:</b> <a href="ConsensusParms_8h_source.html#l00033">ConsensusParms.h:34</a></div></div>
 <div class="ttc" id="astructripple_1_1ConsensusParms_html_a004108774cadaf48b592ab0c5805b865"><div class="ttname"><a href="structripple_1_1ConsensusParms.html#a004108774cadaf48b592ab0c5805b865">ripple::ConsensusParms::avINIT_CONSENSUS_PCT</a></div><div class="ttdeci">std::size_t avINIT_CONSENSUS_PCT</div><div class="ttdoc">Percentage of nodes on our UNL that must vote yes.</div><div class="ttdef"><b>Definition:</b> <a href="ConsensusParms_8h_source.html#l00116">ConsensusParms.h:116</a></div></div>

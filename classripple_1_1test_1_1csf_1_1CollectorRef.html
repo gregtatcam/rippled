@@ -137,7 +137,7 @@ Private Attributes</h2></td></tr>
 <p >A collector is any class that implements </p><pre class="fragment">on(NodeID, SimTime, Event)
 </pre><p> for all events emitted by a <a class="el" href="structripple_1_1test_1_1csf_1_1Peer.html" title="A single peer in the simulation.">Peer</a>.</p>
 <p >This class is used to type-erase the actual collector used by each peer in the simulation. The idea is to compose complicated and typed collectors using the helpers in <a class="el" href="collectors_8h_source.html">collectors.h</a>, then only type erase at the higher-most level when adding to the simulation.</p>
-<p >The example code below demonstrates the reason for storing the collector as a reference. The collector's lifetime will generally be be longer than the simulation; perhaps several simulations are run for a single collector instance. The collector potentially stores lots of data as well, so the simulation needs to point to the single instance, rather than requiring collectors to manage copying that data efficiently in their design.</p>
+<p >The example code below demonstrates the reason for storing the collector as a reference. The collector's lifetime will generally be longer than the simulation; perhaps several simulations are run for a single collector instance. The collector potentially stores lots of data as well, so the simulation needs to point to the single instance, rather than requiring collectors to manage copying that data efficiently in their design.</p>
 <div class="fragment"><div class="line"><span class="comment">// Initialize a specific collector that might write to a file.</span></div>
 <div class="line">SomeFancyCollector collector{<span class="stringliteral">&quot;out.file&quot;</span>};</div>
 <div class="line"> </div>

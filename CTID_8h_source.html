@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_f4afb74df24474efa0cc7e8ea3ddd5ce.html">rpc</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_42b876eb66f74e25995e23a7c0222dc7.html">rpc</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -141,7 +141,7 @@ $(function() {
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordflow">if</span> (ctidString.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/size.html">length</a>() != 16)</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            <span class="keywordflow">return</span> {};</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">if</span> (!boost::regex_match(ctidString, boost::regex(<span class="stringliteral">&quot;^[0-9A-F]+$&quot;</span>)))</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">if</span> (!boost::regex_match(ctidString, boost::regex(<span class="stringliteral">&quot;^[0-9A-Fa-f]+$&quot;</span>)))</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <span class="keywordflow">return</span> {};</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        ctidValue = <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/stoul.html">std::stoull</a>(ctidString, <span class="keyword">nullptr</span>, 16);</div>
@@ -169,7 +169,7 @@ $(function() {
 <div class="ttc" id="ahex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/manip/hex.html">std::hex</a></div><div class="ttdeci">T hex(T... args)</div></div>
 <div class="ttc" id="anamespaceripple_1_1RPC_html_a077733484afe4bf4398a699dd7a15d70"><div class="ttname"><a href="namespaceripple_1_1RPC.html#a077733484afe4bf4398a699dd7a15d70">ripple::RPC::decodeCTID</a></div><div class="ttdeci">std::optional&lt; std::tuple&lt; uint32_t, uint16_t, uint16_t &gt; &gt; decodeCTID(const T ctid) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="CTID_8h_source.html#l00054">CTID.h:54</a></div></div>
 <div class="ttc" id="anamespaceripple_1_1RPC_html_ab1859f351e933259eca54268b686e8d0"><div class="ttname"><a href="namespaceripple_1_1RPC.html#ab1859f351e933259eca54268b686e8d0">ripple::RPC::encodeCTID</a></div><div class="ttdeci">std::optional&lt; std::string &gt; encodeCTID(uint32_t ledger_seq, uint16_t txn_index, uint16_t network_id) noexcept</div><div class="ttdef"><b>Definition:</b> <a href="CTID_8h_source.html#l00034">CTID.h:34</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="aregex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/regex.html">regex</a></div></div>
 <div class="ttc" id="asetfill_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/manip/setfill.html">std::setfill</a></div><div class="ttdeci">T setfill(T... args)</div></div>

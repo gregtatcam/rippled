@@ -1,0 +1,11 @@
+<map id="beast::test::pipe" name="beast::test::pipe">
+<area shape="rect" id="node1" title="A bidirectional in&#45;memory communication channel." alt="" coords="928,159,1055,185"/>
+<area shape="rect" id="node2" href="$structbeast_1_1test_1_1pipe_1_1state.html" title=" " alt="" coords="471,163,606,203"/>
+<area shape="rect" id="node7" href="$classbeast_1_1test_1_1pipe_1_1stream.html" title="Represents an endpoint." alt="" coords="704,92,839,132"/>
+<area shape="rect" id="node3" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/thread/mutex.html" title=" " alt="" coords="250,121,342,146"/>
+<area shape="rect" id="node4" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/thread/condition_variable.html" title=" " alt="" coords="211,170,381,195"/>
+<area shape="rect" id="node5" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/unique_ptr.html" title=" " alt="" coords="211,220,381,260"/>
+<area shape="rect" id="node6" href="$structbeast_1_1test_1_1pipe_1_1read__op.html" title=" " alt="" coords="5,220,140,260"/>
+<area shape="rect" id="node8" href="$classbeast_1_1test_1_1fail__counter.html" title="A countdown to simulated failure." alt="" coords="451,90,627,115"/>
+<area shape="rect" id="node9" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/size_t.html" title=" " alt="" coords="252,50,340,75"/>
+</map>

@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_087b3a20fd5b4508d264eb4b8265a765.html">net</a></li><li class="navelem"><a class="el" href="dir_cbcb7358f1d59bb762cad4574f36cb82.html">impl</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_8ab752db1bfd568bc49a33b42d67d397.html">net</a></li><li class="navelem"><a class="el" href="dir_1ee3758d44aa54e5f438bd3c269a9a22.html">detail</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -95,13 +95,13 @@ $(function() {
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//==============================================================================</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;ripple/basics/Log.h&gt;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;ripple/basics/StringUtilities.h&gt;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ripple/basics/contract.h&gt;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/beast/core/LexicalCast.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/net/AutoSocket.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/net/HTTPClient.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/net/HTTPClientSSLContext.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;xrpld/net/AutoSocket.h&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;xrpld/net/HTTPClient.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;xrpld/net/HTTPClientSSLContext.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/basics/Log.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/basics/StringUtilities.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/basics/contract.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/beast/core/LexicalCast.h&gt;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;boost/asio.hpp&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;boost/asio/ip/tcp.hpp&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;boost/asio/ssl.hpp&gt;</span></div>
@@ -174,12 +174,12 @@ $(function() {
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt;<span class="keywordtype">bool</span>(</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            <span class="keyword">const</span> boost::system::error_code&amp; ecResult,</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            <span class="keywordtype">int</span> iStatus,</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>)</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; complete)</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    {</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#a803530f42ba50674f874b43065bcb1e2">mSSL</a> = bSSL;</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#aaa2c53daf04ffac40570485b052a1661">mDeqSites</a> = deqSites;</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#a4a5da80a8c6d9c3c5b756c0f76dd2fea">mBuild</a> = build;</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#aef2482173138689ecd3b97a77acaf1e3">mComplete</a> = <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#aef2482173138689ecd3b97a77acaf1e3">mComplete</a> = complete;</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#a403d8002bc472368fb4a5340afd4f3bc">mTimeout</a> = timeout;</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        <a class="code hl_function" href="classripple_1_1HTTPClientImp.html#a008ec5bfacbccd5a2733378638db5146">httpsNext</a>();</div>
@@ -195,9 +195,9 @@ $(function() {
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt;<span class="keywordtype">bool</span>(</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>            <span class="keyword">const</span> boost::system::error_code&amp; ecResult,</div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>            <span class="keywordtype">int</span> iStatus,</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>)</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; complete)</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    {</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#aef2482173138689ecd3b97a77acaf1e3">mComplete</a> = <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#aef2482173138689ecd3b97a77acaf1e3">mComplete</a> = complete;</div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <a class="code hl_variable" href="classripple_1_1HTTPClientImp.html#a403d8002bc472368fb4a5340afd4f3bc">mTimeout</a> = timeout;</div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        <a class="code hl_function" href="classripple_1_1HTTPClientImp.html#a1173a644fb33f4e4d74259edd7dff376">request</a>(</div>
@@ -210,7 +210,7 @@ $(function() {
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>                std::placeholders::_1,</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>                std::placeholders::_2),</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>            timeout,</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>            <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>);</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>            complete);</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    }</div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="comment">//--------------------------------------------------------------------------</span></div>
@@ -629,12 +629,12 @@ $(function() {
 <div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt;<span class="keywordtype">bool</span>(</div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>        <span class="keyword">const</span> boost::system::error_code&amp; ecResult,</div>
 <div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>        <span class="keywordtype">int</span> iStatus,</div>
-<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>,</div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; complete,</div>
 <div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>    <a class="code hl_class" href="classbeast_1_1Journal.html">beast::Journal</a>&amp; j)</div>
 <div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>{</div>
 <div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>    <span class="keyword">auto</span> client =</div>
 <div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>        std::make_shared&lt;HTTPClientImp&gt;(io_service, port, responseMax, j);</div>
-<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>    client-&gt;get(bSSL, deqSites, strPath, timeout, <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>);</div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>    client-&gt;get(bSSL, deqSites, strPath, timeout, complete);</div>
 <div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>}</div>
 <div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span> </div>
 <div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span><span class="keywordtype">void</span></div>
@@ -649,14 +649,14 @@ $(function() {
 <div class="line"><a id="l00571" name="l00571"></a><span class="lineno">  571</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt;<span class="keywordtype">bool</span>(</div>
 <div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span>        <span class="keyword">const</span> boost::system::error_code&amp; ecResult,</div>
 <div class="line"><a id="l00573" name="l00573"></a><span class="lineno">  573</span>        <span class="keywordtype">int</span> iStatus,</div>
-<div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>,</div>
+<div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; complete,</div>
 <div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>    <a class="code hl_class" href="classbeast_1_1Journal.html">beast::Journal</a>&amp; j)</div>
 <div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span>{</div>
 <div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/container/deque.html">std::deque&lt;std::string&gt;</a> deqSites(1, strSite);</div>
 <div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span> </div>
 <div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>    <span class="keyword">auto</span> client =</div>
 <div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span>        std::make_shared&lt;HTTPClientImp&gt;(io_service, port, responseMax, j);</div>
-<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span>    client-&gt;get(bSSL, deqSites, strPath, timeout, <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>);</div>
+<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span>    client-&gt;get(bSSL, deqSites, strPath, timeout, complete);</div>
 <div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>}</div>
 <div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span> </div>
 <div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span><span class="keywordtype">void</span></div>
@@ -672,14 +672,14 @@ $(function() {
 <div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt;<span class="keywordtype">bool</span>(</div>
 <div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>        <span class="keyword">const</span> boost::system::error_code&amp; ecResult,</div>
 <div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span>        <span class="keywordtype">int</span> iStatus,</div>
-<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>,</div>
+<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; strData)&gt; complete,</div>
 <div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>    <a class="code hl_class" href="classbeast_1_1Journal.html">beast::Journal</a>&amp; j)</div>
 <div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span>{</div>
 <div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/container/deque.html">std::deque&lt;std::string&gt;</a> deqSites(1, strSite);</div>
 <div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span> </div>
 <div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>    <span class="keyword">auto</span> client =</div>
 <div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>        std::make_shared&lt;HTTPClientImp&gt;(io_service, port, responseMax, j);</div>
-<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>    client-&gt;request(bSSL, deqSites, setRequest, timeout, <a class="code hl_enumvalue" href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">complete</a>);</div>
+<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>    client-&gt;request(bSSL, deqSites, setRequest, timeout, complete);</div>
 <div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>}</div>
 <div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span> </div>
 <div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span>}  <span class="comment">// namespace ripple</span></div>
@@ -742,9 +742,8 @@ $(function() {
 <div class="ttc" id="aenable_shared_from_this_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/memory/enable_shared_from_this.html">std::enable_shared_from_this</a></div></div>
 <div class="ttc" id="afunction_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a></div></div>
 <div class="ttc" id="aistreambuf_iterator_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/iterator/istreambuf_iterator.html">std::istreambuf_iterator</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a2cce8c2bb8c05b8dc96301e32267979b"><div class="ttname"><a href="namespaceripple.html#a2cce8c2bb8c05b8dc96301e32267979b">ripple::httpClientSSLContext</a></div><div class="ttdeci">static std::optional&lt; HTTPClientSSLContext &gt; httpClientSSLContext</div><div class="ttdef"><b>Definition:</b> <a href="HTTPClient_8cpp_source.html#l00035">HTTPClient.cpp:35</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1"><div class="ttname"><a href="namespaceripple.html#a63a883cebf81b764433e67d90d4470d9ad9a22d7a8178d5b42a8750123cbfe5b1">ripple::ShardState::complete</a></div><div class="ttdeci">@ complete</div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="apop_front_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/deque/pop_front.html">std::deque::pop_front</a></div><div class="ttdeci">T pop_front(T... args)</div></div>
 <div class="ttc" id="ashared_from_this_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/memory/enable_shared_from_this/shared_from_this.html">std::enable_shared_from_this&lt; HTTPClientImp &gt;::shared_from_this</a></div><div class="ttdeci">T shared_from_this(T... args)</div></div>

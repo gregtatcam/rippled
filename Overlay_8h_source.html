@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_b003f5a72efe503c7552f86021e0c4d2.html">overlay</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_a62226f9e3a6c7c5a3be455e2f87ae01.html">xrpld</a></li><li class="navelem"><a class="el" href="dir_c4f38cd849aa2a8e7280b7c5f705957a.html">overlay</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -98,11 +98,11 @@ $(function() {
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#ifndef RIPPLE_OVERLAY_OVERLAY_H_INCLUDED</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define RIPPLE_OVERLAY_OVERLAY_H_INCLUDED</span></div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/beast/utility/PropertyStream.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/json/json_value.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/overlay/Peer.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/overlay/PeerSet.h&gt;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;ripple/server/Handoff.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpld/overlay/Peer.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpld/overlay/PeerSet.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/beast/utility/PropertyStream.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/json/json_value.h&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;xrpl/server/Handoff.h&gt;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;boost/asio/buffer.hpp&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;boost/asio/ip/tcp.hpp&gt;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;boost/asio/ssl/context.hpp&gt;</span></div>
@@ -116,8 +116,8 @@ $(function() {
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/type_traits.html">type_traits</a>&gt;</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceboost.html">boost</a> {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="namespaceboost_1_1asio.html">   41</a></span><span class="keyword">namespace </span>asio {</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="namespaceboost_1_1asio_1_1ssl.html">   42</a></span><span class="keyword">namespace </span>ssl {</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="keyword">namespace </span>asio {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="keyword">namespace </span>ssl {</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">class </span>context;</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>}  <span class="comment">// namespace asio</span></div>
@@ -243,19 +243,16 @@ $(function() {
 <div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="keyword">virtual</span> <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a></div>
 <div class="line"><a id="l00220" name="l00220"></a><span class="lineno"><a class="line" href="classripple_1_1Overlay.html#af00afb4bb76983b57ff67a1f62b6185e">  220</a></span>    <a class="code hl_function" href="classripple_1_1Overlay.html#af00afb4bb76983b57ff67a1f62b6185e">getPeerDisconnectCharges</a>() <span class="keyword">const</span> = 0;</div>
 <div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a></div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="classripple_1_1Overlay.html#a7a5ec50b42d082f8566136ba68087f9e">  229</a></span>    <a class="code hl_function" href="classripple_1_1Overlay.html#a7a5ec50b42d082f8566136ba68087f9e">crawlShards</a>(<span class="keywordtype">bool</span> includePublicKey, <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> hops) = 0;</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span> </div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <span class="keyword">virtual</span> <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;std::uint32_t&gt;</a></div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno"><a class="line" href="classripple_1_1Overlay.html#a66caa10ee0ea3ed74fa1a95982973f3d">  240</a></span>    <a class="code hl_function" href="classripple_1_1Overlay.html#a66caa10ee0ea3ed74fa1a95982973f3d">networkID</a>() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="keyword">virtual</span> <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;std::uint32_t&gt;</a></div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno"><a class="line" href="classripple_1_1Overlay.html#a66caa10ee0ea3ed74fa1a95982973f3d">  231</a></span>    <a class="code hl_function" href="classripple_1_1Overlay.html#a66caa10ee0ea3ed74fa1a95982973f3d">networkID</a>() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno"><a class="line" href="classripple_1_1Overlay.html#a856f1e66387e4ad7ff78cf03e16c7029">  237</a></span>    <a class="code hl_function" href="classripple_1_1Overlay.html#a856f1e66387e4ad7ff78cf03e16c7029">txMetrics</a>() <span class="keyword">const</span> = 0;</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>};</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>}  <span class="comment">// namespace ripple</span></div>
 <div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    <span class="keyword">virtual</span> <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a></div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno"><a class="line" href="classripple_1_1Overlay.html#a856f1e66387e4ad7ff78cf03e16c7029">  246</a></span>    <a class="code hl_function" href="classripple_1_1Overlay.html#a856f1e66387e4ad7ff78cf03e16c7029">txMetrics</a>() <span class="keyword">const</span> = 0;</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>};</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>}  <span class="comment">// namespace ripple</span></div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassJson_1_1Value_html"><div class="ttname"><a href="classJson_1_1Value.html">Json::Value</a></div><div class="ttdoc">Represents a JSON value.</div><div class="ttdef"><b>Definition:</b> <a href="json__value_8h_source.html#l00145">json_value.h:146</a></div></div>
 <div class="ttc" id="aclassbeast_1_1IP_1_1Endpoint_html"><div class="ttname"><a href="classbeast_1_1IP_1_1Endpoint.html">beast::IP::Endpoint</a></div><div class="ttdoc">A version-independent IP address and port combination.</div><div class="ttdef"><b>Definition:</b> <a href="IPEndpoint_8h_source.html#l00038">IPEndpoint.h:39</a></div></div>
 <div class="ttc" id="aclassbeast_1_1PropertyStream_1_1Source_html"><div class="ttname"><a href="classbeast_1_1PropertyStream_1_1Source.html">beast::PropertyStream::Source</a></div><div class="ttdoc">Subclasses can be called to write to a stream and have children.</div><div class="ttdef"><b>Definition:</b> <a href="PropertyStream_8h_source.html#l00330">PropertyStream.h:331</a></div></div>
@@ -274,7 +271,6 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1Overlay_html_a65ae784ceb12313431360962d2fca2d6"><div class="ttname"><a href="classripple_1_1Overlay.html#a65ae784ceb12313431360962d2fca2d6">ripple::Overlay::relay</a></div><div class="ttdeci">virtual std::set&lt; Peer::id_t &gt; relay(protocol::TMProposeSet &amp;m, uint256 const &amp;uid, PublicKey const &amp;validator)=0</div><div class="ttdoc">Relay a proposal.</div></div>
 <div class="ttc" id="aclassripple_1_1Overlay_html_a66caa10ee0ea3ed74fa1a95982973f3d"><div class="ttname"><a href="classripple_1_1Overlay.html#a66caa10ee0ea3ed74fa1a95982973f3d">ripple::Overlay::networkID</a></div><div class="ttdeci">virtual std::optional&lt; std::uint32_t &gt; networkID() const =0</div><div class="ttdoc">Returns the ID of the network this server is configured for, if any.</div></div>
 <div class="ttc" id="aclassripple_1_1Overlay_html_a714999620d56264939efa061a3ca6bb6"><div class="ttname"><a href="classripple_1_1Overlay.html#a714999620d56264939efa061a3ca6bb6">ripple::Overlay::socket_type</a></div><div class="ttdeci">boost::beast::tcp_stream socket_type</div><div class="ttdef"><b>Definition:</b> <a href="Overlay_8h_source.html#l00054">Overlay.h:54</a></div></div>
-<div class="ttc" id="aclassripple_1_1Overlay_html_a7a5ec50b42d082f8566136ba68087f9e"><div class="ttname"><a href="classripple_1_1Overlay.html#a7a5ec50b42d082f8566136ba68087f9e">ripple::Overlay::crawlShards</a></div><div class="ttdeci">virtual Json::Value crawlShards(bool includePublicKey, std::uint32_t hops)=0</div><div class="ttdoc">Returns information reported to the crawl shard RPC command.</div></div>
 <div class="ttc" id="aclassripple_1_1Overlay_html_a81a1499888369dfb338d45af35f09068"><div class="ttname"><a href="classripple_1_1Overlay.html#a81a1499888369dfb338d45af35f09068">ripple::Overlay::checkTracking</a></div><div class="ttdeci">virtual void checkTracking(std::uint32_t index)=0</div><div class="ttdoc">Calls the checkTracking function on each peer.</div></div>
 <div class="ttc" id="aclassripple_1_1Overlay_html_a856f1e66387e4ad7ff78cf03e16c7029"><div class="ttname"><a href="classripple_1_1Overlay.html#a856f1e66387e4ad7ff78cf03e16c7029">ripple::Overlay::txMetrics</a></div><div class="ttdeci">virtual Json::Value txMetrics() const =0</div><div class="ttdoc">Returns tx reduce-relay metrics.</div></div>
 <div class="ttc" id="aclassripple_1_1Overlay_html_a876aee0822b3e6b83e236f5ea531ae50"><div class="ttname"><a href="classripple_1_1Overlay.html#a876aee0822b3e6b83e236f5ea531ae50">ripple::Overlay::relay</a></div><div class="ttdeci">virtual void relay(uint256 const &amp;hash, protocol::TMTransaction &amp;m, std::set&lt; Peer::id_t &gt; const &amp;toSkip)=0</div><div class="ttdoc">Relay a transaction.</div></div>
@@ -302,8 +298,8 @@ $(function() {
 <div class="ttc" id="anamespacebeast_1_1IP_html_adbe597760cb20a7aa3f2ff92f7bed2cc"><div class="ttname"><a href="namespacebeast_1_1IP.html#adbe597760cb20a7aa3f2ff92f7bed2cc">beast::IP::Address</a></div><div class="ttdeci">boost::asio::ip::address Address</div><div class="ttdef"><b>Definition:</b> <a href="IPAddress_8h_source.html#l00041">IPAddress.h:41</a></div></div>
 <div class="ttc" id="anamespacebeast_html"><div class="ttname"><a href="namespacebeast.html">beast</a></div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00641">base_uint.h:641</a></div></div>
 <div class="ttc" id="anamespaceboost_html"><div class="ttname"><a href="namespaceboost.html">boost</a></div><div class="ttdef"><b>Definition:</b> <a href="IPAddress_8h_source.html#l00103">IPAddress.h:103</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
-<div class="ttc" id="anamespaceripple_html_aa265217edeb8282e636c78b50049f4c0"><div class="ttname"><a href="namespaceripple.html#aa265217edeb8282e636c78b50049f4c0">ripple::http_request_type</a></div><div class="ttdeci">boost::beast::http::request&lt; boost::beast::http::dynamic_body &gt; http_request_type</div><div class="ttdef"><b>Definition:</b> <a href="Handshake_8h_source.html#l00046">Handshake.h:47</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
+<div class="ttc" id="anamespaceripple_html_aa265217edeb8282e636c78b50049f4c0"><div class="ttname"><a href="namespaceripple.html#aa265217edeb8282e636c78b50049f4c0">ripple::http_request_type</a></div><div class="ttdeci">boost::beast::http::request&lt; boost::beast::http::dynamic_body &gt; http_request_type</div><div class="ttdef"><b>Definition:</b> <a href="Handoff_8h_source.html#l00030">Handoff.h:31</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="aset_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/set.html">std::set</a></div></div>
 <div class="ttc" id="ashared_ptr_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a></div></div>

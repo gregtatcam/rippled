@@ -1,5 +1,5 @@
 <map id="ripple::Dir" name="ripple::Dir">
-<area shape="rect" id="node1" title=" " alt="" coords="2467,291,2554,317"/>
+<area shape="rect" id="node1" title="A class that simplifies iterating ledger directory pages." alt="" coords="2467,291,2554,317"/>
 <area shape="rect" id="node2" href="$classripple_1_1ReadView.html" title="A view into a ledger." alt="" coords="2171,123,2303,149"/>
 <area shape="rect" id="node4" href="$classripple_1_1detail_1_1ReadViewFwdRange.html" title=" " alt="" coords="2417,52,2604,92"/>
 <area shape="rect" id="node6" href="$classripple_1_1detail_1_1ReadViewFwdRange.html" title=" " alt="" coords="2422,116,2599,156"/>

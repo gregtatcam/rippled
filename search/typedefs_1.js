@@ -16,7 +16,8 @@ var searchData=
   ['bucket_5ftype_13',['bucket_type',['../classbeast_1_1detail_1_1aged__unordered__container.html#a49beb554a9055bff389c6789036f9fff',1,'beast::detail::aged_unordered_container']]],
   ['bucketallocator_14',['BucketAllocator',['../classbeast_1_1detail_1_1aged__unordered__container.html#ae84192154b2507fb80d8b757da4f4040',1,'beast::detail::aged_unordered_container']]],
   ['bucketallocatortraits_15',['BucketAllocatorTraits',['../classbeast_1_1detail_1_1aged__unordered__container.html#a241b964e5d6631de20fb0f6105b87662',1,'beast::detail::aged_unordered_container']]],
-  ['buffers_5ftype_16',['buffers_type',['../classripple_1_1ZeroCopyOutputStream.html#a1b20481c6304939598847d98ae077037',1,'ripple::ZeroCopyOutputStream']]],
-  ['by_5fwhen_5fhook_17',['by_when_hook',['../classripple_1_1test_1_1csf_1_1Scheduler.html#abcec6f63af9cd91a3d939fe4068f1bdc',1,'ripple::test::csf::Scheduler']]],
-  ['by_5fwhen_5fset_18',['by_when_set',['../classripple_1_1test_1_1csf_1_1Scheduler_1_1queue__type.html#a2dadac6a586f78b918abddbf419006e5',1,'ripple::test::csf::Scheduler::queue_type']]]
+  ['buffer_5ftype_16',['buffer_type',['../classbeast_1_1test_1_1pipe.html#a09f22da4818596aa8ffac20ac3a639d4',1,'beast::test::pipe::buffer_type()'],['../classbeast_1_1test_1_1pipe_1_1stream.html#a475ae439a8bb8c0bac7418c2f077744f',1,'beast::test::pipe::stream::buffer_type()']]],
+  ['buffers_5ftype_17',['buffers_type',['../classripple_1_1ZeroCopyOutputStream.html#a1b20481c6304939598847d98ae077037',1,'ripple::ZeroCopyOutputStream']]],
+  ['by_5fwhen_5fhook_18',['by_when_hook',['../classripple_1_1test_1_1csf_1_1Scheduler.html#abcec6f63af9cd91a3d939fe4068f1bdc',1,'ripple::test::csf::Scheduler']]],
+  ['by_5fwhen_5fset_19',['by_when_set',['../classripple_1_1test_1_1csf_1_1Scheduler_1_1queue__type.html#a2dadac6a586f78b918abddbf419006e5',1,'ripple::test::csf::Scheduler::queue_type']]]
 ];

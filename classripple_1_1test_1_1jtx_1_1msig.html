@@ -119,9 +119,10 @@ Classes</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a9e6d8d440d0defa5c1314649fc6eaefd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1msig.html#a9e6d8d440d0defa5c1314649fc6eaefd">msig</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="el" href="structripple_1_1test_1_1jtx_1_1msig_1_1Reg.html">Reg</a> &gt; signers_)</td></tr>
 <tr class="separator:a9e6d8d440d0defa5c1314649fc6eaefd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a569bae983a46b544da1065d9f05af079"><td class="memTemplParams" colspan="2">template&lt;class AccountType , class... Accounts&gt; </td></tr>
-<tr class="memitem:a569bae983a46b544da1065d9f05af079"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1msig.html#a569bae983a46b544da1065d9f05af079">msig</a> (AccountType &amp;&amp;a0, Accounts &amp;&amp;... aN)</td></tr>
-<tr class="separator:a569bae983a46b544da1065d9f05af079"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab771e4b0e1fc78cc70e9592b54691aaa"><td class="memTemplParams" colspan="2">template&lt;class AccountType , class... Accounts&gt; <br />
+requires std::convertible_to&lt;AccountType, <a class="el" href="structripple_1_1test_1_1jtx_1_1msig_1_1Reg.html">Reg</a>&gt;</td></tr>
+<tr class="memitem:ab771e4b0e1fc78cc70e9592b54691aaa"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1msig.html#ab771e4b0e1fc78cc70e9592b54691aaa">msig</a> (AccountType &amp;&amp;a0, Accounts &amp;&amp;... aN)</td></tr>
+<tr class="separator:ab771e4b0e1fc78cc70e9592b54691aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57e487aed9cc8d8ee19abbf7eca12a0d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1test_1_1jtx_1_1msig.html#a57e487aed9cc8d8ee19abbf7eca12a0d">operator()</a> (<a class="el" href="classripple_1_1test_1_1jtx_1_1Env.html">Env</a> &amp;, <a class="el" href="structripple_1_1test_1_1jtx_1_1JTx.html">JTx</a> &amp;jt) const</td></tr>
 <tr class="separator:a57e487aed9cc8d8ee19abbf7eca12a0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -133,7 +134,7 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Set a multisignature on a <a class="el" href="structripple_1_1test_1_1jtx_1_1JTx.html" title="Execution context for applying a JSON transaction.">JTx</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="multisign_8h_source.html#l00063">63</a> of file <a class="el" href="multisign_8h_source.html">multisign.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multisign_8h_source.html#l00064">64</a> of file <a class="el" href="multisign_8h_source.html">multisign.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a9e6d8d440d0defa5c1314649fc6eaefd" name="a9e6d8d440d0defa5c1314649fc6eaefd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9e6d8d440d0defa5c1314649fc6eaefd">&#9670;&#160;</a></span>msig() <span class="overload">[1/2]</span></h2>
@@ -155,13 +156,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a569bae983a46b544da1065d9f05af079" name="a569bae983a46b544da1065d9f05af079"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a569bae983a46b544da1065d9f05af079">&#9670;&#160;</a></span>msig() <span class="overload">[2/2]</span></h2>
+<a id="ab771e4b0e1fc78cc70e9592b54691aaa" name="ab771e4b0e1fc78cc70e9592b54691aaa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab771e4b0e1fc78cc70e9592b54691aaa">&#9670;&#160;</a></span>msig() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class AccountType , class... Accounts&gt; </div>
+template&lt;class AccountType , class... Accounts&gt; <br />
+requires std::convertible_to&lt;AccountType, <a class="el" href="structripple_1_1test_1_1jtx_1_1msig_1_1Reg.html">Reg</a>&gt;</div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -191,7 +193,7 @@ template&lt;class AccountType , class... Accounts&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multisign_8h_source.html#l00102">102</a> of file <a class="el" href="multisign_8h_source.html">multisign.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multisign_8h_source.html#l00103">103</a> of file <a class="el" href="multisign_8h_source.html">multisign.h</a>.</p>
 
 </div>
 </div>
@@ -239,7 +241,7 @@ template&lt;class AccountType , class... Accounts&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multisign_8h_source.html#l00096">96</a> of file <a class="el" href="multisign_8h_source.html">multisign.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multisign_8h_source.html#l00097">97</a> of file <a class="el" href="multisign_8h_source.html">multisign.h</a>.</p>
 
 </div>
 </div>

@@ -69,7 +69,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_df9c78dcf3f59a33b12284f95992a64b.html">ripple</a></li><li class="navelem"><a class="el" href="dir_1e765e6a8d5970800a535eb2615ec474.html">protocol</a></li><li class="navelem"><a class="el" href="dir_41c387a0f328eeb295307369675c1162.html">impl</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_90ffdbabf412cfdffe6b2193e0ce938a.html">libxrpl</a></li><li class="navelem"><a class="el" href="dir_4cb643486f27a568a0d40f174f670f35.html">protocol</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -95,23 +95,23 @@ $(function() {
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">*/</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//==============================================================================</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;ripple/protocol/impl/STVar.h&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;xrpl/protocol/detail/STVar.h&gt;</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;ripple/basics/contract.h&gt;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;ripple/protocol/STAccount.h&gt;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;ripple/protocol/STAmount.h&gt;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;ripple/protocol/STArray.h&gt;</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;ripple/protocol/STBase.h&gt;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;ripple/protocol/STBitString.h&gt;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;ripple/protocol/STBlob.h&gt;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;ripple/protocol/STCurrency.h&gt;</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;ripple/protocol/STInteger.h&gt;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;ripple/protocol/STIssue.h&gt;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;ripple/protocol/STObject.h&gt;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;ripple/protocol/STPathSet.h&gt;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;ripple/protocol/STVector256.h&gt;</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;ripple/protocol/STXChainBridge.h&gt;</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;ripple/protocol/XChainAttestations.h&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;xrpl/basics/contract.h&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;xrpl/protocol/STAccount.h&gt;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;xrpl/protocol/STAmount.h&gt;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &lt;xrpl/protocol/STArray.h&gt;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &lt;xrpl/protocol/STBase.h&gt;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &lt;xrpl/protocol/STBitString.h&gt;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;xrpl/protocol/STBlob.h&gt;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &lt;xrpl/protocol/STCurrency.h&gt;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &lt;xrpl/protocol/STInteger.h&gt;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &lt;xrpl/protocol/STIssue.h&gt;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;xrpl/protocol/STObject.h&gt;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &lt;xrpl/protocol/STPathSet.h&gt;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;xrpl/protocol/STVector256.h&gt;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;xrpl/protocol/STXChainBridge.h&gt;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;xrpl/protocol/XChainAttestations.h&gt;</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">namespace </span>detail {</div>
@@ -347,7 +347,7 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1detail_1_1STVar_html_af3eea17835554db68e2dfe87a9665f00"><div class="ttname"><a href="classripple_1_1detail_1_1STVar.html#af3eea17835554db68e2dfe87a9665f00">ripple::detail::STVar::STVar</a></div><div class="ttdeci">STVar()=default</div></div>
 <div class="ttc" id="anamespaceripple_1_1detail_html_a8b142da3d10ee6d6b09c707724ca3c80"><div class="ttname"><a href="namespaceripple_1_1detail.html#a8b142da3d10ee6d6b09c707724ca3c80">ripple::detail::nonPresentObject</a></div><div class="ttdeci">nonPresentObject_t nonPresentObject</div><div class="ttdef"><b>Definition:</b> <a href="STVar_8cpp_source.html#l00042">STVar.cpp:42</a></div></div>
 <div class="ttc" id="anamespaceripple_1_1detail_html_ad7cc030b8a64621b81be32a2dc7ad84f"><div class="ttname"><a href="namespaceripple_1_1detail.html#ad7cc030b8a64621b81be32a2dc7ad84f">ripple::detail::defaultObject</a></div><div class="ttdeci">defaultObject_t defaultObject</div><div class="ttdef"><b>Definition:</b> <a href="STVar_8cpp_source.html#l00041">STVar.cpp:41</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="RCLCensorshipDetector_8h_source.html#l00029">RCLCensorshipDetector.h:29</a></div></div>
+<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition:</b> <a href="algorithm_8h_source.html#l00026">algorithm.h:26</a></div></div>
 <div class="ttc" id="anamespaceripple_html_a3e7e3f29aef85bcca06706da54e950fc"><div class="ttname"><a href="namespaceripple.html#a3e7e3f29aef85bcca06706da54e950fc">ripple::SerializedTypeID</a></div><div class="ttdeci">SerializedTypeID</div><div class="ttdef"><b>Definition:</b> <a href="SField_8h_source.html#l00106">SField.h:106</a></div></div>
 <div class="ttc" id="astructripple_1_1detail_1_1defaultObject__t_html"><div class="ttname"><a href="structripple_1_1detail_1_1defaultObject__t.html">ripple::detail::defaultObject_t</a></div><div class="ttdef"><b>Definition:</b> <a href="STVar_8h_source.html#l00034">STVar.h:35</a></div></div>
 <div class="ttc" id="astructripple_1_1detail_1_1nonPresentObject__t_html"><div class="ttname"><a href="structripple_1_1detail_1_1nonPresentObject__t.html">ripple::detail::nonPresentObject_t</a></div><div class="ttdef"><b>Definition:</b> <a href="STVar_8h_source.html#l00039">STVar.h:40</a></div></div>
