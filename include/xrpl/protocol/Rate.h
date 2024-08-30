@@ -74,11 +74,21 @@ multiply(STMPTAmount const& amount, Rate const& rate);
 STAmount
 multiplyRound(STAmount const& amount, Rate const& rate, bool roundUp);
 
+STMPTAmount
+multiplyRound(STMPTAmount const& amount, Rate const& rate, bool roundUp);
+
 STAmount
 multiplyRound(
     STAmount const& amount,
     Rate const& rate,
     Issue const& issue,
+    bool roundUp);
+
+STMPTAmount
+multiplyRound(
+    STMPTAmount const& amount,
+    Rate const& rate,
+    MPTIssue const& issue,
     bool roundUp);
 
 STAmount

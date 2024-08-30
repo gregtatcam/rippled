@@ -28,22 +28,43 @@
 
 namespace ripple {
 
-TxConsequences
-CreateOffer::makeTxConsequences(PreflightContext const& ctx)
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
+CreateOfferHelper<TPays, TGets>::CreateOfferHelper(
+    ApplyContext& ctx,
+    AccountID const& account,
+    XRPAmount const& priorBalance)
+    : ctx_(ctx), account_(account), priorBalance_(priorBalance), j_(ctx.journal)
 {
-    auto calculateMaxXRPSpend = [](STTx const& tx) -> XRPAmount {
-        auto const& amount{tx[sfTakerGets]};
-        return amount.native() ? amount.xrp() : beast::zero;
-    };
-
-    return TxConsequences{ctx.tx, calculateMaxXRPSpend(ctx.tx)};
 }
 
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
+TxConsequences
+CreateOfferHelper<TPays, TGets>::makeTxConsequences(PreflightContext const& ctx)
+{
+    if constexpr (std::is_same_v<TGets, STAmount>)
+    {
+        auto calculateMaxXRPSpend = [](STTx const& tx) -> XRPAmount {
+            auto const& amount{get<STAmount>(tx[sfTakerGets])};
+            return amount.native() ? amount.xrp() : beast::zero;
+        };
+
+        return TxConsequences{ctx.tx, calculateMaxXRPSpend(ctx.tx)};
+    }
+    else
+        return TxConsequences{ctx.tx, beast::zero};
+}
+
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
 NotTEC
-CreateOffer::preflight(PreflightContext const& ctx)
+CreateOfferHelper<TPays, TGets>::preflight(PreflightContext const& ctx)
 {
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
+
+    bool constexpr isMPT = std::is_same_v<TPays, STMPTAmount> ||
+        std::is_same_v<TGets, STMPTAmount>;
+    if (isMPT && !ctx.rules.enabled(featureMPTokensV2))
+        return temDISABLED;
 
     auto& tx = ctx.tx;
     auto& j = ctx.j;
@@ -80,13 +101,13 @@ CreateOffer::preflight(PreflightContext const& ctx)
         return temBAD_SEQUENCE;
     }
 
-    STAmount saTakerPays = tx[sfTakerPays];
-    STAmount saTakerGets = tx[sfTakerGets];
+    TPays saTakerPays = get<TPays>(tx[sfTakerPays]);
+    TGets saTakerGets = get<TGets>(tx[sfTakerGets]);
 
     if (!isLegalNet(saTakerPays) || !isLegalNet(saTakerGets))
         return temBAD_AMOUNT;
 
-    if (saTakerPays.native() && saTakerGets.native())
+    if (isNative(saTakerPays) && isNative(saTakerGets))
     {
         JLOG(j.debug()) << "Malformed offer: redundant (XRP for XRP)";
         return temBAD_OFFER;
@@ -103,20 +124,20 @@ CreateOffer::preflight(PreflightContext const& ctx)
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
     auto const& uGetsCurrency = saTakerGets.getCurrency();
 
-    if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
+    if (sameAsset(saTakerPays.issue(), saTakerGets.issue()))
     {
         JLOG(j.debug()) << "Malformed offer: redundant (IOU for IOU)";
         return temREDUNDANT;
     }
     // We don't allow a non-native currency to use the currency code XRP.
-    if (badCurrency() == uPaysCurrency || badCurrency() == uGetsCurrency)
+    if (badAsset() == uPaysCurrency || badAsset() == uGetsCurrency)
     {
         JLOG(j.debug()) << "Malformed offer: bad currency";
         return temBAD_CURRENCY;
     }
 
-    if (saTakerPays.native() != !uPaysIssuerID ||
-        saTakerGets.native() != !uGetsIssuerID)
+    if (isNative(saTakerPays) != !uPaysIssuerID ||
+        isNative(saTakerGets) != !uGetsIssuerID)
     {
         JLOG(j.debug()) << "Malformed offer: bad issuer";
         return temBAD_ISSUER;
@@ -125,18 +146,14 @@ CreateOffer::preflight(PreflightContext const& ctx)
     return preflight2(ctx);
 }
 
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
 TER
-CreateOffer::preclaim(PreclaimContext const& ctx)
+CreateOfferHelper<TPays, TGets>::preclaim(PreclaimContext const& ctx)
 {
     auto const id = ctx.tx[sfAccount];
 
-    auto saTakerPays = ctx.tx[sfTakerPays];
-    auto saTakerGets = ctx.tx[sfTakerGets];
-
-    auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
-
-    auto const& uGetsIssuerID = saTakerGets.getIssuer();
+    TPays saTakerPays = get<TPays>(ctx.tx[sfTakerPays]);
+    TGets saTakerGets = get<TGets>(ctx.tx[sfTakerGets]);
 
     auto const cancelSequence = ctx.tx[~sfOfferSequence];
 
@@ -148,19 +165,37 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
 
     auto viewJ = ctx.app.journal("View");
 
-    if (isGlobalFrozen(ctx.view, uPaysIssuerID) ||
-        isGlobalFrozen(ctx.view, uGetsIssuerID))
+    if (isGlobalFrozen(ctx.view, saTakerPays.issue()) ||
+        isGlobalFrozen(ctx.view, saTakerGets.issue()))
     {
         JLOG(ctx.j.debug()) << "Offer involves frozen asset";
         return tecFROZEN;
     }
 
-    if (accountFunds(ctx.view, id, saTakerGets, fhZERO_IF_FROZEN, viewJ) <=
-        beast::zero)
+    if constexpr (std::is_same_v<TGets, STAmount>)
     {
-        JLOG(ctx.j.debug())
-            << "delay: Offers must be at least partially funded.";
-        return tecUNFUNDED_OFFER;
+        if (accountFunds(ctx.view, id, saTakerGets, fhZERO_IF_FROZEN, viewJ) <=
+            beast::zero)
+        {
+            JLOG(ctx.j.debug())
+                << "delay: Offers must be at least partially funded.";
+            return tecUNFUNDED_OFFER;
+        }
+    }
+    else
+    {
+        if (accountFunds(
+                ctx.view,
+                id,
+                saTakerGets,
+                fhZERO_IF_FROZEN,
+                ahZERO_IF_UNAUTHORIZED,
+                viewJ) <= beast::zero)
+        {
+            JLOG(ctx.j.debug())
+                << "delay: Offers must be at least partially funded.";
+            return tecUNFUNDED_OFFER;
+        }
     }
 
     // This can probably be simplified to make sure that you cancel sequences
@@ -186,14 +221,10 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     }
 
     // Make sure that we are authorized to hold what the taker will pay us.
-    if (!saTakerPays.native())
+    if (!isNative(saTakerPays))
     {
         auto result = checkAcceptAsset(
-            ctx.view,
-            ctx.flags,
-            id,
-            ctx.j,
-            Issue(uPaysCurrency, uPaysIssuerID));
+            ctx.view, ctx.flags, id, ctx.j, saTakerPays.issue());
         if (result != tesSUCCESS)
             return result;
     }
@@ -201,478 +232,99 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     return tesSUCCESS;
 }
 
+// Determine if we are authorized to hold the asset we want to get.
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
+template <ValidIssueType Iss>
 TER
-CreateOffer::checkAcceptAsset(
+CreateOfferHelper<TPays, TGets>::checkAcceptAsset(
     ReadView const& view,
     ApplyFlags const flags,
     AccountID const id,
     beast::Journal const j,
-    Issue const& issue)
+    Iss const& issue)
 {
-    // Only valid for custom currencies
-    assert(!isXRP(issue.currency));
-
-    auto const issuerAccount = view.read(keylet::account(issue.account));
-
-    if (!issuerAccount)
+    if constexpr (std::is_same_v<Iss, Issue>)
     {
-        JLOG(j.debug())
-            << "delay: can't receive IOUs from non-existent issuer: "
-            << to_string(issue.account);
+        // Only valid for custom currencies
+        assert(!isXRP(issue.currency));
 
-        return (flags & tapRETRY) ? TER{terNO_ACCOUNT} : TER{tecNO_ISSUER};
-    }
+        auto const issuerAccount = view.read(keylet::account(issue.account));
 
-    // This code is attached to the DepositPreauth amendment as a matter of
-    // convenience.  The change is not significant enough to deserve its
-    // own amendment.
-    if (view.rules().enabled(featureDepositPreauth) && (issue.account == id))
-        // An account can always accept its own issuance.
-        return tesSUCCESS;
-
-    if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
-    {
-        auto const trustLine =
-            view.read(keylet::line(id, issue.account, issue.currency));
-
-        if (!trustLine)
-        {
-            return (flags & tapRETRY) ? TER{terNO_LINE} : TER{tecNO_LINE};
-        }
-
-        // Entries have a canonical representation, determined by a
-        // lexicographical "greater than" comparison employing strict weak
-        // ordering. Determine which entry we need to access.
-        bool const canonical_gt(id > issue.account);
-
-        bool const is_authorized(
-            (*trustLine)[sfFlags] & (canonical_gt ? lsfLowAuth : lsfHighAuth));
-
-        if (!is_authorized)
+        if (!issuerAccount)
         {
             JLOG(j.debug())
-                << "delay: can't receive IOUs from issuer without auth.";
+                << "delay: can't receive IOUs from non-existent issuer: "
+                << to_string(issue.account);
 
-            return (flags & tapRETRY) ? TER{terNO_AUTH} : TER{tecNO_AUTH};
+            return (flags & tapRETRY) ? TER{terNO_ACCOUNT} : TER{tecNO_ISSUER};
         }
-    }
 
-    return tesSUCCESS;
-}
+        // This code is attached to the DepositPreauth amendment as a matter of
+        // convenience.  The change is not significant enough to deserve its
+        // own amendment.
+        if (view.rules().enabled(featureDepositPreauth) &&
+            (issue.account == id))
+            // An account can always accept its own issuance.
+            return tesSUCCESS;
 
-bool
-CreateOffer::dry_offer(ApplyView& view, Offer const& offer)
-{
-    if (offer.fully_consumed())
-        return true;
-    auto const amount = accountFunds(
-        view,
-        offer.owner(),
-        offer.amount().out,
-        fhZERO_IF_FROZEN,
-        ctx_.app.journal("View"));
-    return (amount <= beast::zero);
-}
-
-std::pair<bool, Quality>
-CreateOffer::select_path(
-    bool have_direct,
-    OfferStream const& direct,
-    bool have_bridge,
-    OfferStream const& leg1,
-    OfferStream const& leg2)
-{
-    // If we don't have any viable path, why are we here?!
-    assert(have_direct || have_bridge);
-
-    // If there's no bridged path, the direct is the best by default.
-    if (!have_bridge)
-        return std::make_pair(true, direct.tip().quality());
-
-    Quality const bridged_quality(
-        composed_quality(leg1.tip().quality(), leg2.tip().quality()));
-
-    if (have_direct)
-    {
-        // We compare the quality of the composed quality of the bridged
-        // offers and compare it against the direct offer to pick the best.
-        Quality const direct_quality(direct.tip().quality());
-
-        if (bridged_quality < direct_quality)
-            return std::make_pair(true, direct_quality);
-    }
-
-    // Either there was no direct offer, or it didn't have a better quality
-    // than the bridge.
-    return std::make_pair(false, bridged_quality);
-}
-
-bool
-CreateOffer::reachedOfferCrossingLimit(Taker const& taker) const
-{
-    auto const crossings =
-        taker.get_direct_crossings() + (2 * taker.get_bridge_crossings());
-
-    // The crossing limit is part of the Ripple protocol and
-    // changing it is a transaction-processing change.
-    return crossings >= 850;
-}
-
-std::pair<TER, Amounts>
-CreateOffer::bridged_cross(
-    Taker& taker,
-    ApplyView& view,
-    ApplyView& view_cancel,
-    NetClock::time_point const when)
-{
-    auto const& takerAmount = taker.original_offer();
-
-    assert(!isXRP(takerAmount.in) && !isXRP(takerAmount.out));
-
-    if (isXRP(takerAmount.in) || isXRP(takerAmount.out))
-        Throw<std::logic_error>("Bridging with XRP and an endpoint.");
-
-    OfferStream offers_direct(
-        view,
-        view_cancel,
-        Book(taker.issue_in(), taker.issue_out()),
-        when,
-        stepCounter_,
-        j_);
-
-    OfferStream offers_leg1(
-        view,
-        view_cancel,
-        Book(taker.issue_in(), xrpIssue()),
-        when,
-        stepCounter_,
-        j_);
-
-    OfferStream offers_leg2(
-        view,
-        view_cancel,
-        Book(xrpIssue(), taker.issue_out()),
-        when,
-        stepCounter_,
-        j_);
-
-    TER cross_result = tesSUCCESS;
-
-    // Note the subtle distinction here: self-offers encountered in the
-    // bridge are taken, but self-offers encountered in the direct book
-    // are not.
-    bool have_bridge = offers_leg1.step() && offers_leg2.step();
-    bool have_direct = step_account(offers_direct, taker);
-    int count = 0;
-
-    auto viewJ = ctx_.app.journal("View");
-
-    // Modifying the order or logic of the operations in the loop will cause
-    // a protocol breaking change.
-    while (have_direct || have_bridge)
-    {
-        bool leg1_consumed = false;
-        bool leg2_consumed = false;
-        bool direct_consumed = false;
-
-        auto const [use_direct, quality] = select_path(
-            have_direct, offers_direct, have_bridge, offers_leg1, offers_leg2);
-
-        // We are always looking at the best quality; we are done with
-        // crossing as soon as we cross the quality boundary.
-        if (taker.reject(quality))
-            break;
-
-        count++;
-
-        if (use_direct)
+        if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
         {
-            if (auto stream = j_.debug())
+            auto const trustLine =
+                view.read(keylet::line(id, issue.account, issue.currency));
+
+            if (!trustLine)
             {
-                stream << count << " Direct:";
-                stream << "  offer: " << offers_direct.tip();
-                stream << "     in: " << offers_direct.tip().amount().in;
-                stream << "    out: " << offers_direct.tip().amount().out;
-                stream << "  owner: " << offers_direct.tip().owner();
-                stream << "  funds: "
-                       << accountFunds(
-                              view,
-                              offers_direct.tip().owner(),
-                              offers_direct.tip().amount().out,
-                              fhIGNORE_FREEZE,
-                              viewJ);
+                return (flags & tapRETRY) ? TER{terNO_LINE} : TER{tecNO_LINE};
             }
 
-            cross_result = taker.cross(offers_direct.tip());
+            // Entries have a canonical representation, determined by a
+            // lexicographical "greater than" comparison employing strict weak
+            // ordering. Determine which entry we need to access.
+            bool const canonical_gt(id > issue.account);
 
-            JLOG(j_.debug()) << "Direct Result: " << transToken(cross_result);
+            bool const is_authorized(
+                (*trustLine)[sfFlags] &
+                (canonical_gt ? lsfLowAuth : lsfHighAuth));
 
-            if (dry_offer(view, offers_direct.tip()))
+            if (!is_authorized)
             {
-                direct_consumed = true;
-                have_direct = step_account(offers_direct, taker);
-            }
-        }
-        else
-        {
-            if (auto stream = j_.debug())
-            {
-                auto const owner1_funds_before = accountFunds(
-                    view,
-                    offers_leg1.tip().owner(),
-                    offers_leg1.tip().amount().out,
-                    fhIGNORE_FREEZE,
-                    viewJ);
+                JLOG(j.debug())
+                    << "delay: can't receive IOUs from issuer without auth.";
 
-                auto const owner2_funds_before = accountFunds(
-                    view,
-                    offers_leg2.tip().owner(),
-                    offers_leg2.tip().amount().out,
-                    fhIGNORE_FREEZE,
-                    viewJ);
-
-                stream << count << " Bridge:";
-                stream << " offer1: " << offers_leg1.tip();
-                stream << "     in: " << offers_leg1.tip().amount().in;
-                stream << "    out: " << offers_leg1.tip().amount().out;
-                stream << "  owner: " << offers_leg1.tip().owner();
-                stream << "  funds: " << owner1_funds_before;
-                stream << " offer2: " << offers_leg2.tip();
-                stream << "     in: " << offers_leg2.tip().amount().in;
-                stream << "    out: " << offers_leg2.tip().amount().out;
-                stream << "  owner: " << offers_leg2.tip().owner();
-                stream << "  funds: " << owner2_funds_before;
-            }
-
-            cross_result = taker.cross(offers_leg1.tip(), offers_leg2.tip());
-
-            JLOG(j_.debug()) << "Bridge Result: " << transToken(cross_result);
-
-            if (view.rules().enabled(fixTakerDryOfferRemoval))
-            {
-                // have_bridge can be true the next time 'round only if
-                // neither of the OfferStreams are dry.
-                leg1_consumed = dry_offer(view, offers_leg1.tip());
-                if (leg1_consumed)
-                    have_bridge &= offers_leg1.step();
-
-                leg2_consumed = dry_offer(view, offers_leg2.tip());
-                if (leg2_consumed)
-                    have_bridge &= offers_leg2.step();
-            }
-            else
-            {
-                // This old behavior may leave an empty offer in the book for
-                // the second leg.
-                if (dry_offer(view, offers_leg1.tip()))
-                {
-                    leg1_consumed = true;
-                    have_bridge = (have_bridge && offers_leg1.step());
-                }
-                if (dry_offer(view, offers_leg2.tip()))
-                {
-                    leg2_consumed = true;
-                    have_bridge = (have_bridge && offers_leg2.step());
-                }
+                return (flags & tapRETRY) ? TER{terNO_AUTH} : TER{tecNO_AUTH};
             }
         }
 
-        if (cross_result != tesSUCCESS)
-        {
-            cross_result = tecFAILED_PROCESSING;
-            break;
-        }
-
-        if (taker.done())
-        {
-            JLOG(j_.debug()) << "The taker reports he's done during crossing!";
-            break;
-        }
-
-        if (reachedOfferCrossingLimit(taker))
-        {
-            JLOG(j_.debug()) << "The offer crossing limit has been exceeded!";
-            break;
-        }
-
-        // Postcondition: If we aren't done, then we *must* have consumed at
-        //                least one offer fully.
-        assert(direct_consumed || leg1_consumed || leg2_consumed);
-
-        if (!direct_consumed && !leg1_consumed && !leg2_consumed)
-            Throw<std::logic_error>(
-                "bridged crossing: nothing was fully consumed.");
+        return tesSUCCESS;
     }
-
-    return std::make_pair(cross_result, taker.remaining_offer());
-}
-
-std::pair<TER, Amounts>
-CreateOffer::direct_cross(
-    Taker& taker,
-    ApplyView& view,
-    ApplyView& view_cancel,
-    NetClock::time_point const when)
-{
-    OfferStream offers(
-        view,
-        view_cancel,
-        Book(taker.issue_in(), taker.issue_out()),
-        when,
-        stepCounter_,
-        j_);
-
-    TER cross_result(tesSUCCESS);
-    int count = 0;
-
-    bool have_offer = step_account(offers, taker);
-
-    // Modifying the order or logic of the operations in the loop will cause
-    // a protocol breaking change.
-    while (have_offer)
+    else
     {
-        bool direct_consumed = false;
-        auto& offer(offers.tip());
+        auto const issuerAccount =
+            view.read(keylet::account(issue.getIssuer()));
 
-        // We are done with crossing as soon as we cross the quality boundary
-        if (taker.reject(offer.quality()))
-            break;
-
-        count++;
-
-        if (auto stream = j_.debug())
+        if (!issuerAccount)
         {
-            stream << count << " Direct:";
-            stream << "  offer: " << offer;
-            stream << "     in: " << offer.amount().in;
-            stream << "    out: " << offer.amount().out;
-            stream << "quality: " << offer.quality();
-            stream << "  owner: " << offer.owner();
-            stream << "  funds: "
-                   << accountFunds(
-                          view,
-                          offer.owner(),
-                          offer.amount().out,
-                          fhIGNORE_FREEZE,
-                          ctx_.app.journal("View"));
+            JLOG(j.debug())
+                << "delay: can't receive MPTs from non-existent issuer: "
+                << to_string(issue.getIssuer());
+
+            return (flags & tapRETRY) ? TER{terNO_ACCOUNT} : TER{tecNO_ISSUER};
         }
 
-        cross_result = taker.cross(offer);
+        if (issue.getIssuer() == id)
+            // An account can always accept its own issuance.
+            return tesSUCCESS;
 
-        JLOG(j_.debug()) << "Direct Result: " << transToken(cross_result);
-
-        if (dry_offer(view, offer))
-        {
-            direct_consumed = true;
-            have_offer = step_account(offers, taker);
-        }
-
-        if (cross_result != tesSUCCESS)
-        {
-            cross_result = tecFAILED_PROCESSING;
-            break;
-        }
-
-        if (taker.done())
-        {
-            JLOG(j_.debug()) << "The taker reports he's done during crossing!";
-            break;
-        }
-
-        if (reachedOfferCrossingLimit(taker))
-        {
-            JLOG(j_.debug()) << "The offer crossing limit has been exceeded!";
-            break;
-        }
-
-        // Postcondition: If we aren't done, then we *must* have consumed the
-        //                offer on the books fully!
-        assert(direct_consumed);
-
-        if (!direct_consumed)
-            Throw<std::logic_error>(
-                "direct crossing: nothing was fully consumed.");
-    }
-
-    return std::make_pair(cross_result, taker.remaining_offer());
-}
-
-// Step through the stream for as long as possible, skipping any offers
-// that are from the taker or which cross the taker's threshold.
-// Return false if the is no offer in the book, true otherwise.
-bool
-CreateOffer::step_account(OfferStream& stream, Taker const& taker)
-{
-    while (stream.step())
-    {
-        auto const& offer = stream.tip();
-
-        // This offer at the tip crosses the taker's threshold. We're done.
-        if (taker.reject(offer.quality()))
-            return true;
-
-        // This offer at the tip is not from the taker. We're done.
-        if (offer.owner() != taker.account())
-            return true;
-    }
-
-    // We ran out of offers. Can't advance.
-    return false;
-}
-
-// Fill as much of the offer as possible by consuming offers
-// already on the books. Return the status and the amount of
-// the offer to left unfilled.
-std::pair<TER, Amounts>
-CreateOffer::takerCross(
-    Sandbox& sb,
-    Sandbox& sbCancel,
-    Amounts const& takerAmount)
-{
-    NetClock::time_point const when = sb.parentCloseTime();
-
-    beast::WrappedSink takerSink(j_, "Taker ");
-
-    Taker taker(
-        cross_type_,
-        sb,
-        account_,
-        takerAmount,
-        ctx_.tx.getFlags(),
-        beast::Journal(takerSink));
-
-    // If the taker is unfunded before we begin crossing
-    // there's nothing to do - just return an error.
-    //
-    // We check this in preclaim, but when selling XRP
-    // charged fees can cause a user's available balance
-    // to go to 0 (by causing it to dip below the reserve)
-    // so we check this case again.
-    if (taker.unfunded())
-    {
-        JLOG(j_.debug()) << "Not crossing: taker is unfunded.";
-        return {tecUNFUNDED_OFFER, takerAmount};
-    }
-
-    try
-    {
-        if (cross_type_ == CrossType::IouToIou)
-            return bridged_cross(taker, sb, sbCancel, when);
-
-        return direct_cross(taker, sb, sbCancel, when);
-    }
-    catch (std::exception const& e)
-    {
-        JLOG(j_.error()) << "Exception during offer crossing: " << e.what();
-        return {tecINTERNAL, taker.remaining_offer()};
+        return requireAuth(view, issue, id);
     }
 }
 
-std::pair<TER, Amounts>
-CreateOffer::flowCross(
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
+std::pair<TER, TAmounts<TGets, TPays>>
+CreateOfferHelper<TPays, TGets>::flowCross(
     PaymentSandbox& psb,
     PaymentSandbox& psbCancel,
-    Amounts const& takerAmount)
+    TAmounts<TGets, TPays> const& takerAmount)
 {
     try
     {
@@ -682,8 +334,14 @@ CreateOffer::flowCross(
         // We check this in preclaim, but when selling XRP charged fees can
         // cause a user's available balance to go to 0 (by causing it to dip
         // below the reserve) so we check this case again.
-        STAmount const inStartBalance =
-            accountFunds(psb, account_, takerAmount.in, fhZERO_IF_FROZEN, j_);
+        TGets const inStartBalance = accountFunds(
+            psb,
+            account_,
+            takerAmount.in,
+            fhZERO_IF_FROZEN,
+            ahZERO_IF_UNAUTHORIZED,
+            j_);
+
         if (inStartBalance <= beast::zero)
         {
             // The account balance can't cover even part of the offer.
@@ -695,8 +353,8 @@ CreateOffer::flowCross(
         // gateway takes its cut without any special consent from the
         // offer taker.  Set sendMax to allow for the gateway's cut.
         Rate gatewayXferRate{QUALITY_ONE};
-        STAmount sendMax = takerAmount.in;
-        if (!sendMax.native() && (account_ != sendMax.getIssuer()))
+        TGets sendMax = takerAmount.in;
+        if (!isNative(sendMax) && (account_ != sendMax.getIssuer()))
         {
             gatewayXferRate = transferRate(psb, sendMax.getIssuer());
             if (gatewayXferRate.value != QUALITY_ONE)
@@ -728,14 +386,14 @@ CreateOffer::flowCross(
         // additional path with XRP as the intermediate between two books.
         // This second path we have to build ourselves.
         STPathSet paths;
-        if (!takerAmount.in.native() && !takerAmount.out.native())
+        if (!isNative(takerAmount.in) && !isNative(takerAmount.out))
         {
             STPath path;
             path.emplace_back(std::nullopt, xrpCurrency(), std::nullopt);
             paths.emplace_back(std::move(path));
         }
         // Special handling for the tfSell flag.
-        STAmount deliver = takerAmount.out;
+        TPays deliver = takerAmount.out;
         OfferCrossing offerCrossing = OfferCrossing::yes;
         if (txFlags & tfSell)
         {
@@ -743,9 +401,9 @@ CreateOffer::flowCross(
             // We are selling, so we will accept *more* than the offer
             // specified.  Since we don't know how much they might offer,
             // we allow delivery of the largest possible amount.
-            if (deliver.native())
-                deliver = STAmount{STAmount::cMaxNative};
-            else
+            if (isNative(deliver))
+                deliver = TPays{STAmount::cMaxNative};
+            else if constexpr (std::is_same_v<TPays, STAmount>)
                 // We can't use the maximum possible currency here because
                 // there might be a gateway transfer rate to account for.
                 // Since the transfer rate cannot exceed 200%, we use 1/2
@@ -754,12 +412,15 @@ CreateOffer::flowCross(
                     takerAmount.out.issue(),
                     STAmount::cMaxValue / 2,
                     STAmount::cMaxOffset};
+            else
+                deliver =
+                    STMPTAmount{takerAmount.out.issue(), maxMPTokenAmount / 2};
         }
-
+#pragma message("##### FIX FLOW ##### ")
         // Call the payment engine's flow() to do the actual work.
         auto const result = flow(
             psb,
-            deliver,
+            STAmount{},  // deliver,
             account_,
             account_,
             paths,
@@ -768,7 +429,7 @@ CreateOffer::flowCross(
             true,                       // owner pays transfer fee
             offerCrossing,
             threshold,
-            sendMax,
+            STAmount{},  // sendMax,
             j_);
 
         // If stale offers were found remove them.
@@ -784,8 +445,13 @@ CreateOffer::flowCross(
         auto afterCross = takerAmount;  // If !tesSUCCESS offer unchanged
         if (isTesSuccess(result.result()))
         {
-            STAmount const takerInBalance = accountFunds(
-                psb, account_, takerAmount.in, fhZERO_IF_FROZEN, j_);
+            TGets const takerInBalance = accountFunds(
+                psb,
+                account_,
+                takerAmount.in,
+                fhZERO_IF_FROZEN,
+                ahZERO_IF_UNAUTHORIZED,
+                j_);
 
             if (takerInBalance <= beast::zero)
             {
@@ -809,7 +475,7 @@ CreateOffer::flowCross(
                     // Note that we must ignore the portion of the
                     // actualAmountIn that may have been consumed by a
                     // gateway's transfer rate.
-                    STAmount nonGatewayAmountIn = result.actualAmountIn;
+                    TGets nonGatewayAmountIn = result.actualAmountIn;
                     if (gatewayXferRate.value != QUALITY_ONE)
                         nonGatewayAmountIn = divideRound(
                             result.actualAmountIn,
@@ -868,29 +534,10 @@ CreateOffer::flowCross(
     return {tecINTERNAL, takerAmount};
 }
 
-std::pair<TER, Amounts>
-CreateOffer::cross(Sandbox& sb, Sandbox& sbCancel, Amounts const& takerAmount)
-{
-    if (sb.rules().enabled(featureFlowCross))
-    {
-        PaymentSandbox psbFlow{&sb};
-        PaymentSandbox psbCancelFlow{&sbCancel};
-        auto const ret = flowCross(psbFlow, psbCancelFlow, takerAmount);
-        psbFlow.apply(sb);
-        psbCancelFlow.apply(sbCancel);
-        return ret;
-    }
-
-    Sandbox sbTaker{&sb};
-    Sandbox sbCancelTaker{&sbCancel};
-    auto const ret = takerCross(sbTaker, sbCancelTaker, takerAmount);
-    sbTaker.apply(sb);
-    sbCancelTaker.apply(sbCancel);
-    return ret;
-}
-
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
+template <ValidSerialAmountType T>
 std::string
-CreateOffer::format_amount(STAmount const& amount)
+CreateOfferHelper<TPays, TGets>::format_amount(T const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
@@ -898,22 +545,42 @@ CreateOffer::format_amount(STAmount const& amount)
     return txt;
 }
 
-void
-CreateOffer::preCompute()
+TxConsequences
+CreateOffer::makeTxConsequences(PreflightContext const& ctx)
 {
-    cross_type_ = CrossType::IouToIou;
-    bool const pays_xrp = ctx_.tx.getFieldAmount(sfTakerPays).native();
-    bool const gets_xrp = ctx_.tx.getFieldAmount(sfTakerGets).native();
-    if (pays_xrp && !gets_xrp)
-        cross_type_ = CrossType::IouToXrp;
-    else if (gets_xrp && !pays_xrp)
-        cross_type_ = CrossType::XrpToIou;
-
-    return Transactor::preCompute();
+    return std::visit(
+        [&]<typename TPays, typename TGets>(TPays const&, TGets const&) {
+            return CreateOfferHelper<TPays, TGets>::makeTxConsequences(ctx);
+        },
+        ctx.tx[sfTakerPays].getValue(),
+        ctx.tx[sfTakerGets].getValue());
 }
 
+NotTEC
+CreateOffer::preflight(PreflightContext const& ctx)
+{
+    return std::visit(
+        [&]<typename TPays, typename TGets>(TPays const&, TGets const&) {
+            return CreateOfferHelper<TPays, TGets>::preflight(ctx);
+        },
+        ctx.tx[sfTakerPays].getValue(),
+        ctx.tx[sfTakerGets].getValue());
+}
+
+TER
+CreateOffer::preclaim(PreclaimContext const& ctx)
+{
+    return std::visit(
+        [&]<typename TPays, typename TGets>(TPays const&, TGets const&) {
+            return CreateOfferHelper<TPays, TGets>::preclaim(ctx);
+        },
+        ctx.tx[sfTakerPays].getValue(),
+        ctx.tx[sfTakerGets].getValue());
+}
+
+template <ValidSerialAmountType TPays, ValidSerialAmountType TGets>
 std::pair<TER, bool>
-CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
+CreateOfferHelper<TPays, TGets>::applyGuts(Sandbox& sb, Sandbox& sbCancel)
 {
     using beast::zero;
 
@@ -924,12 +591,12 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bFillOrKill(uTxFlags & tfFillOrKill);
     bool const bSell(uTxFlags & tfSell);
 
-    auto saTakerPays = ctx_.tx[sfTakerPays];
-    auto saTakerGets = ctx_.tx[sfTakerGets];
+    auto saTakerPays = get<TPays>(ctx_.tx[sfTakerPays]);
+    auto saTakerGets = get<TGets>(ctx_.tx[sfTakerGets]);
 
     auto const cancelSequence = ctx_.tx[~sfOfferSequence];
 
-    // Note that we we use the value from the sequence or ticket as the
+    // Note that we use the value from the sequence or ticket as the
     // offer sequence.  For more explanation see comments in SeqProxy.h.
     auto const offerSequence = ctx_.tx.getSeqProxy().value();
 
@@ -1023,12 +690,12 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         }
 
         // We reverse pays and gets because during crossing we are taking.
-        Amounts const takerAmount(saTakerGets, saTakerPays);
+        TAmounts const takerAmount(saTakerGets, saTakerPays);
 
         // The amount of the offer that is unfilled after crossing has been
         // performed. It may be equal to the original amount (didn't cross),
         // empty (fully crossed), or something in-between.
-        Amounts place_offer;
+        TAmounts<TGets, TPays> place_offer;
 
         JLOG(j_.debug()) << "Attempting cross: "
                          << to_string(takerAmount.in.issue()) << " -> "
@@ -1042,7 +709,14 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             stream << "    out: " << format_amount(takerAmount.out);
         }
 
-        std::tie(result, place_offer) = cross(sb, sbCancel, takerAmount);
+        {
+            PaymentSandbox psbFlow{&sb};
+            PaymentSandbox psbCancelFlow{&sbCancel};
+            std::tie(result, place_offer) =
+                flowCross(psbFlow, psbCancelFlow, takerAmount);
+            psbFlow.apply(sb);
+            psbCancelFlow.apply(sbCancel);
+        }
 
         // We expect the implementation of cross to succeed
         // or give a tec.
@@ -1140,7 +814,7 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         XRPAmount reserve =
             sb.fees().accountReserve(sleCreator->getFieldU32(sfOwnerCount) + 1);
 
-        if (mPriorBalance < reserve)
+        if (priorBalance_ < reserve)
         {
             // If we are here, the signing account had an insufficient reserve
             // *prior* to our processing. If something actually crossed, then
@@ -1185,11 +859,27 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        sle->setFieldH160(sfTakerPaysCurrency, saTakerPays.issue().currency);
-        sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
-        sle->setFieldH160(sfTakerGetsCurrency, saTakerGets.issue().currency);
-        sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
-        sle->setFieldU64(sfExchangeRate, uRate);
+        if constexpr (std::is_same_v<TPays, STAmount>)
+        {
+            sle->setFieldH160(
+                sfTakerPaysCurrency, saTakerPays.issue().currency);
+            sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
+        }
+        else
+        {
+            sle->setFieldH192(sfTakerPaysMPT, saTakerPays.issue().getMptID());
+        }
+        if constexpr (std::is_same_v<TGets, STAmount>)
+        {
+            sle->setFieldH160(
+                sfTakerGetsCurrency, saTakerGets.issue().currency);
+            sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
+            sle->setFieldU64(sfExchangeRate, uRate);
+        }
+        else
+        {
+            sle->setFieldH192(sfTakerGetsMPT, saTakerGets.issue().getMptID());
+        }
     });
 
     if (!bookNode)
@@ -1234,12 +924,25 @@ CreateOffer::doApply()
     // if the order isn't going to be placed, to avoid wasting the work we did.
     Sandbox sbCancel(&ctx_.view());
 
-    auto const result = applyGuts(sb, sbCancel);
+    auto const result = std::visit(
+        [&]<typename TPays, typename TGets>(
+            TPays const& takerPays, TGets const& takerGets) {
+            CreateOfferHelper<TPays, TGets> helper(
+                ctx_, account_, mPriorBalance);
+            return helper.applyGuts(sb, sbCancel);
+        },
+        ctx_.tx[sfTakerPays].getValue(),
+        ctx_.tx[sfTakerGets].getValue());
     if (result.second)
         sb.apply(ctx_.rawView());
     else
         sbCancel.apply(ctx_.rawView());
     return result.first;
 }
+
+template class CreateOfferHelper<STAmount, STMPTAmount>;
+template class CreateOfferHelper<STAmount, STAmount>;
+template class CreateOfferHelper<STMPTAmount, STAmount>;
+template class CreateOfferHelper<STMPTAmount, STMPTAmount>;
 
 }  // namespace ripple

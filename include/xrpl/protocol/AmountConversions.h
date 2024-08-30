@@ -22,11 +22,18 @@
 
 #include <xrpl/basics/IOUAmount.h>
 #include <xrpl/basics/XRPAmount.h>
+#include <xrpl/protocol/Protocol.h>
 #include <xrpl/protocol/STAmount.h>
+#include <xrpl/protocol/STMPTAmount.h>
 
 #include <type_traits>
 
 namespace ripple {
+
+template <typename Amnt, typename Iss>
+concept ValidAmountIssue = (std::is_same_v<Amnt, STMPTAmount> &&
+                            std::is_same_v<Iss, MPTIssue>) ||
+    (!std::is_same_v<Amnt, STMPTAmount> && std::is_same_v<Iss, Issue>);
 
 inline STAmount
 toSTAmount(IOUAmount const& iou, Issue const& iss)
@@ -61,6 +68,12 @@ toSTAmount(XRPAmount const& xrp, Issue const& iss)
 {
     assert(isXRP(iss.account) && isXRP(iss.currency));
     return toSTAmount(xrp);
+}
+
+inline STAmount
+toSTAmount(STMPTAmount const& amount)
+{
+    return STAmount{noIssue(), amount.value()};
 }
 
 template <class T>
@@ -122,31 +135,42 @@ toAmount<XRPAmount>(XRPAmount const& amt)
     return amt;
 }
 
-template <typename T>
+template <typename T, typename Iss>
+    requires ValidAmountIssue<T, Iss>
 T
 toAmount(
-    Issue const& issue,
+    Iss const& issue,
     Number const& n,
     Number::rounding_mode mode = Number::getround())
 {
-    saveNumberRoundMode rm(Number::getround());
-    if (isXRP(issue))
-        Number::setround(mode);
-
-    if constexpr (std::is_same_v<IOUAmount, T>)
-        return IOUAmount(n);
-    else if constexpr (std::is_same_v<XRPAmount, T>)
-        return XRPAmount(static_cast<std::int64_t>(n));
-    else if constexpr (std::is_same_v<STAmount, T>)
+    if constexpr (std::is_same_v<Iss, Issue>)
     {
+        saveNumberRoundMode rm(Number::getround());
         if (isXRP(issue))
-            return STAmount(issue, static_cast<std::int64_t>(n));
-        return STAmount(issue, n.mantissa(), n.exponent());
+            Number::setround(mode);
+
+        if constexpr (std::is_same_v<IOUAmount, T>)
+            return IOUAmount(n);
+        else if constexpr (std::is_same_v<XRPAmount, T>)
+            return XRPAmount(static_cast<std::int64_t>(n));
+        else if constexpr (std::is_same_v<STAmount, T>)
+        {
+            if (isXRP(issue))
+                return STAmount(issue, static_cast<std::int64_t>(n));
+            return STAmount(issue, n.mantissa(), n.exponent());
+        }
+        else
+        {
+            constexpr bool alwaysFalse = !std::is_same_v<T, T>;
+            static_assert(alwaysFalse, "Unsupported type for toAmount");
+        }
     }
     else
     {
-        constexpr bool alwaysFalse = !std::is_same_v<T, T>;
-        static_assert(alwaysFalse, "Unsupported type for toAmount");
+        saveNumberRoundMode rm(mode);
+        if (n > maxMPTokenAmount)
+            Throw<std::runtime_error>("MPT overflow");
+        return STMPTAmount{issue, static_cast<std::int64_t>(n)};
     }
 }
 

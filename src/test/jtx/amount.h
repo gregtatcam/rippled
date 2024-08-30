@@ -129,12 +129,12 @@ public:
         return amount_;
     }
 
-    operator STAmount const &() const
+    operator STAmount const&() const
     {
         return get<STAmount>(amount_);
     }
 
-    operator STEitherAmount const &() const
+    operator STEitherAmount const&() const
     {
         return amount_;
     }
@@ -142,7 +142,7 @@ public:
     operator AnyAmount() const;
 };
 
-template <ValidAmountType A>
+template <ValidSerialAmountType A>
 A const&
 get(PrettyAmount const& pa)
 {
@@ -226,7 +226,8 @@ struct XRP_t
     /** @} */
 
     /** Returns None-of-XRP */
-    None operator()(none_t) const
+    None
+    operator()(none_t) const
     {
         return {xrpIssue()};
     }
@@ -349,7 +350,8 @@ public:
     // STAmount operator()(char const* s) const;
 
     /** Returns None-of-Issue */
-    None operator()(none_t) const
+    None
+    operator()(none_t) const
     {
         return {issue()};
     }
@@ -401,7 +403,8 @@ public:
     }
 
     template <class T>
-    requires(sizeof(T) >= sizeof(int) && std::is_arithmetic_v<T>) STMPTAmount
+        requires(sizeof(T) >= sizeof(int) && std::is_arithmetic_v<T>)
+    STMPTAmount
     operator()(T v) const
     {
         return amountFromString(mptID, std::to_string(v));

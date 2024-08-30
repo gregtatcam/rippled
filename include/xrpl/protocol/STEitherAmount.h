@@ -20,17 +20,19 @@
 #ifndef RIPPLE_PROTOCOL_STEITHERAMOUNT_H_INCLUDED
 #define RIPPLE_PROTOCOL_STEITHERAMOUNT_H_INCLUDED
 
+#include <xrpl/protocol/CommonConstraints.h>
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/STMPTAmount.h>
 
 namespace ripple {
 
-template <typename TAmnt>
-concept ValidAmountType =
-    std::is_same_v<TAmnt, STAmount> || std::is_same_v<TAmnt, STMPTAmount>;
+// Currency or MPT issuance ID
+template <typename T>
+concept ValidAssetType =
+    std::is_same_v<T, Currency> || std::is_same_v<T, uint192>;
 
 template <typename T>
-concept EitherAmountType = std::is_same_v<T, STEitherAmount> ||
+concept ValidSTEitherAmountType = std::is_same_v<T, STEitherAmount> ||
     std::is_same_v<T, std::optional<STEitherAmount>>;
 
 class STEitherAmount : public STBase, public CountedObject<STEitherAmount>
@@ -110,11 +112,11 @@ public:
     int
     signum() const noexcept;
 
-    template <ValidAmountType T>
+    template <ValidSerialAmountType T>
     T const&
     get() const;
 
-    template <ValidAmountType T>
+    template <ValidSerialAmountType T>
     T&
     get();
 
@@ -125,7 +127,7 @@ private:
     move(std::size_t n, void* buf) override;
 };
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 T const&
 STEitherAmount::get() const
 {
@@ -134,7 +136,7 @@ STEitherAmount::get() const
     Throw<std::logic_error>("Invalid STEitherAmount conversion");
 }
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 T&
 STEitherAmount::get()
 {
@@ -143,7 +145,7 @@ STEitherAmount::get()
     Throw<std::logic_error>("Invalid STEitherAmount conversion");
 }
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 decltype(auto)
 get(auto&& amount)
 {
@@ -174,6 +176,16 @@ get(auto&& amount)
         bool const alwaysFalse = !std::is_same_v<T, T>;
         static_assert(alwaysFalse, "Invalid STEitherAmount conversion");
     }
+}
+
+template <ValidIssueType Iss>
+Iss const&
+get(STEitherAmount const& amount)
+{
+    if constexpr (std::is_same_v<Iss, Issue>)
+        return get<STAmount>(amount).issue();
+    else
+        return get<STMPTAmount>(amount).issue();
 }
 
 STEitherAmount
@@ -208,7 +220,7 @@ operator!=(STEitherAmount const& lhs, STEitherAmount const& rhs)
     return !operator==(lhs, rhs);
 }
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 bool
 isMPT(T const& amount)
 {
@@ -218,7 +230,7 @@ isMPT(T const& amount)
         return false;
 }
 
-template <EitherAmountType T>
+template <ValidSTEitherAmountType T>
 bool
 isMPT(T const& amount)
 {
@@ -228,19 +240,114 @@ isMPT(T const& amount)
         return amount && amount->isMPT();
 }
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 bool
 isIssue(T const& amount)
 {
     return !isMPT(amount);
 }
 
-inline bool
+inline constexpr bool
 isXRP(STEitherAmount const& amount)
 {
     if (amount.isIssue())
         return isXRP(get<STAmount>(amount));
     return false;
+}
+
+template <ValidSerialAmountType T>
+bool
+isNative(T const& amount)
+{
+    if constexpr (std::is_same_v<T, STAmount>)
+        return amount.native();
+    else
+        return false;
+}
+
+template <ValidAssetType A1, ValidAssetType A2>
+bool
+sameAsset(A1 const& a1, A2 const& a2)
+{
+    if constexpr (std::is_same_v<A1, A2>)
+        return a1 == a2;
+    else
+        return false;
+}
+
+template <ValidIssueType I1, ValidIssueType I2>
+bool
+sameAsset(I1 const& i1, I2 const& i2)
+{
+    if constexpr (std::is_same_v<I1, I2>)
+        return i1 == i2;
+    else
+        return false;
+}
+
+struct BadAsset
+{
+    BadAsset()
+    {
+    }
+    bool
+    operator==(Currency const& c) const
+    {
+        return badCurrency() == c;
+    }
+    bool
+    operator==(uint192 const& mpt) const
+    {
+        return noMPT() == mpt;
+    }
+};
+
+BadAsset const&
+badAsset()
+{
+    static BadAsset badAsset;
+    return badAsset;
+}
+
+// clang-format off
+template <typename A1, typename A2>
+    requires(
+        (std::is_same_v<A1, STMPTAmount> && std::is_same_v<A2, STAmount>) ||
+        (std::is_same_v<A1, STAmount> && std::is_same_v<A2, STMPTAmount>) ||
+        (std::is_same_v<A1, STMPTAmount> && std::is_same_v<A2, STMPTAmount>))
+std::uint64_t getRate(A1 const& offerOut, A2 const& offerIn)
+{
+    if constexpr (
+        std::is_same_v<A1, STMPTAmount> && std::is_same_v<A2, STAmount>)
+        return getRate(STAmount{noIssue(), offerOut.value(), 0}, offerIn);
+    else if constexpr (
+        std::is_same_v<A1, STAmount> && std::is_same_v<A2, STMPTAmount>)
+        return getRate(offerOut, STAmount{noIssue(), offerIn.value(), 0});
+    else
+        return getRate(
+            STAmount{noIssue(), offerOut.value(), 0},
+            STAmount{noIssue(), offerIn.value(), 0});
+}
+// clang-format on
+
+template <typename T1, typename T2, ValidIssueType Iss>
+    requires ValidAmountIssueComboType<T1, T2, Iss> decltype(auto)
+divide(T1 const& num, T2 const& den, Iss const& issue)
+{
+    if constexpr (std::is_same_v<Iss, Issue>)
+        return toAmount<STAmount>(issue, num / den);
+    else
+        return toAmount<STMPTAmount>(issue, num / den);
+}
+
+template <typename T1, typename T2, ValidIssueType Iss>
+    requires ValidAmountIssueComboType<T1, T2, Iss> decltype(auto)
+multiply(T1 const& v1, T2 const& v2, Iss const& issue)
+{
+    if constexpr (std::is_same_v<Iss, Issue>)
+        return toAmount<STAmount>(issue, v1 * v2);
+    else
+        return toAmount<STMPTAmount>(issue, v1 * v2);
 }
 
 }  // namespace ripple

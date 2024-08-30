@@ -31,12 +31,38 @@
 
 namespace ripple {
 
+template <typename T>
+    requires(
+        std::is_same_v<T, STAmount> || std::is_same_v<T, XRPAmount> ||
+        std::is_same_v<T, IOUAmount> || std::is_same_v<T, STMPTAmount> ||
+        std::is_same_v<T, MPTAmount>)
+struct RelatedIssueType
+{
+    using issue_type = std::conditional_t<
+        std::is_same_v<T, STMPTAmount> || std::is_same_v<T, MPTAmount>,
+        MPTIssue,
+        Issue>;
+};
+
+template <typename T>
+    requires(
+        std::is_same_v<T, STAmount> || std::is_same_v<T, XRPAmount> ||
+        std::is_same_v<T, IOUAmount> || std::is_same_v<T, STMPTAmount> ||
+        std::is_same_v<T, MPTAmount>)
+struct RelatedAmountType
+{
+    using amount_type = std::conditional_t<
+        std::is_same_v<T, STMPTAmount> || std::is_same_v<T, MPTAmount>,
+        STMPTAmount,
+        STAmount>;
+};
+
 template <class TIn, class TOut>
 class TOfferBase
 {
 protected:
-    Issue issIn_;
-    Issue issOut_;
+    RelatedIssueType<TIn>::issue_type issIn_;
+    RelatedIssueType<TOut>::issue_type issOut_;
 };
 
 template <>
@@ -46,6 +72,8 @@ public:
     explicit TOfferBase() = default;
 };
 
+// TIn and TOut can be any of: STAmount, STMPTAmount(?), IOUAmount, XRPAmount,
+// MPTAmount
 template <class TIn = STAmount, class TOut = STAmount>
 class TOffer : private TOfferBase<TIn, TOut>
 {
@@ -183,8 +211,10 @@ TOffer<TIn, TOut>::TOffer(SLE::pointer const& entry, Quality quality)
     , m_quality(quality)
     , m_account(m_entry->getAccountID(sfAccount))
 {
-    auto const tp = m_entry->getFieldAmount(sfTakerPays);
-    auto const tg = m_entry->getFieldAmount(sfTakerGets);
+    auto const tp = get<typename RelatedAmountType<TIn>::amount_type>(
+        m_entry->getFieldAmount(sfTakerPays));
+    auto const tg = get<typename RelatedAmountType<TOut>::amount_type>(
+        m_entry->getFieldAmount(sfTakerGets));
     m_amounts.in = toAmount<TIn>(tp);
     m_amounts.out = toAmount<TOut>(tg);
     this->issIn_ = tp.issue();
@@ -199,8 +229,8 @@ inline TOffer<STAmount, STAmount>::TOffer(
     , m_quality(quality)
     , m_account(m_entry->getAccountID(sfAccount))
     , m_amounts(
-          m_entry->getFieldAmount(sfTakerPays),
-          m_entry->getFieldAmount(sfTakerGets))
+          get<STAmount>(m_entry->getFieldAmount(sfTakerPays)),
+          get<STAmount>(m_entry->getFieldAmount(sfTakerGets)))
 {
 }
 

@@ -134,10 +134,14 @@ public:
                     Json::Value bobOffer =
                         ledgerEntryOffer(env, bob, bobOfferSeq);
 
-                    STAmount const reducedTakerGets = amountFromJson(
-                        sfTakerGets, bobOffer[jss::node][sfTakerGets.jsonName]);
-                    STAmount const reducedTakerPays = amountFromJson(
-                        sfTakerPays, bobOffer[jss::node][sfTakerPays.jsonName]);
+                    STAmount const reducedTakerGets =
+                        get<STAmount>(amountFromJson(
+                            sfTakerGets,
+                            bobOffer[jss::node][sfTakerGets.jsonName]));
+                    STAmount const reducedTakerPays =
+                        get<STAmount>(amountFromJson(
+                            sfTakerPays,
+                            bobOffer[jss::node][sfTakerPays.jsonName]));
                     STAmount const bobGot =
                         env.balance(bob) + bobsFee - bobInitialBalance;
                     BEAST_EXPECT(reducedTakerPays < newOffer.in);
@@ -290,12 +294,14 @@ public:
                     Json::Value aliceOffer =
                         ledgerEntryOffer(env, alice, aliceOfferSeq);
 
-                    STAmount const reducedTakerGets = amountFromJson(
-                        sfTakerGets,
-                        aliceOffer[jss::node][sfTakerGets.jsonName]);
-                    STAmount const reducedTakerPays = amountFromJson(
-                        sfTakerPays,
-                        aliceOffer[jss::node][sfTakerPays.jsonName]);
+                    STAmount const reducedTakerGets =
+                        get<STAmount>(amountFromJson(
+                            sfTakerGets,
+                            aliceOffer[jss::node][sfTakerGets.jsonName]));
+                    STAmount const reducedTakerPays =
+                        get<STAmount>(amountFromJson(
+                            sfTakerPays,
+                            aliceOffer[jss::node][sfTakerPays.jsonName]));
                     STAmount const aliceGot =
                         env.balance(alice) - aliceInitialBalance;
                     BEAST_EXPECT(reducedTakerPays < inLedger.in);
@@ -612,10 +618,10 @@ public:
     Amounts
     jsonOfferToAmounts(Json::Value const& json)
     {
-        STAmount const in =
-            amountFromJson(sfTakerPays, json[sfTakerPays.jsonName]);
-        STAmount const out =
-            amountFromJson(sfTakerGets, json[sfTakerGets.jsonName]);
+        STAmount const in = get<STAmount>(
+            amountFromJson(sfTakerPays, json[sfTakerPays.jsonName]));
+        STAmount const out = get<STAmount>(
+            amountFromJson(sfTakerGets, json[sfTakerGets.jsonName]));
         return {in, out};
     }
 

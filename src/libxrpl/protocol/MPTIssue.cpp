@@ -54,4 +54,10 @@ to_json(MPTIssue const& issue)
     return jv;
 }
 
+std::string
+to_string(MPTIssue const& issue)
+{
+    return to_string(issue.getMptID());
+}
+
 }  // namespace ripple

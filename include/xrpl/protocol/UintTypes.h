@@ -82,7 +82,7 @@ noMPT();
 Currency const&
 badCurrency();
 
-inline bool
+inline constexpr bool
 isXRP(Currency const& c)
 {
     return c == beast::zero;

@@ -366,6 +366,22 @@ accountFunds(
         j);
 }
 
+STMPTAmount
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    STMPTAmount const& saDefault,
+    FreezeHandling freezeHandling,
+    AuthHandling zeroIfUnauthorized,
+    beast::Journal j)
+{
+    if (saDefault.getIssuer() == id)
+        return saDefault;
+
+    return accountHolds(
+        view, id, saDefault.issue(), freezeHandling, zeroIfUnauthorized, j);
+}
+
 // Prevent ownerCount from wrapping under error conditions.
 //
 // adjustment allows the ownerCount to be adjusted up or down in multiple steps.

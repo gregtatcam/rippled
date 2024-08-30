@@ -219,6 +219,8 @@ CONSTRUCT_TYPED_SFIELD(sfTakerGetsIssuer,       "TakerGetsIssuer",      UINT160,
 
 // 192-bit (common)
 CONSTRUCT_TYPED_SFIELD(sfMPTokenIssuanceID,     "MPTokenIssuanceID",    UINT192,    1);
+CONSTRUCT_TYPED_SFIELD(sfTakerPaysMPT,          "TakerPaysMPT",         UINT192,    2);
+CONSTRUCT_TYPED_SFIELD(sfTakerGetsMPT,          "TakerGetsMPT",         UINT192,    3);
 
 // 256-bit (common)
 CONSTRUCT_TYPED_SFIELD(sfLedgerHash,            "LedgerHash",           UINT256,    1);
@@ -260,8 +262,8 @@ CONSTRUCT_TYPED_SFIELD(sfHookSetTxnID,          "HookSetTxnID",         UINT256,
 CONSTRUCT_TYPED_SFIELD(sfAmount,                "Amount",               EITHER_AMOUNT,     1);
 CONSTRUCT_TYPED_SFIELD(sfBalance,               "Balance",              AMOUNT,     2);
 CONSTRUCT_TYPED_SFIELD(sfLimitAmount,           "LimitAmount",          AMOUNT,     3);
-CONSTRUCT_TYPED_SFIELD(sfTakerPays,             "TakerPays",            AMOUNT,     4);
-CONSTRUCT_TYPED_SFIELD(sfTakerGets,             "TakerGets",            AMOUNT,     5);
+CONSTRUCT_TYPED_SFIELD(sfTakerPays,             "TakerPays",            EITHER_AMOUNT,     4);
+CONSTRUCT_TYPED_SFIELD(sfTakerGets,             "TakerGets",            EITHER_AMOUNT,     5);
 CONSTRUCT_TYPED_SFIELD(sfLowLimit,              "LowLimit",             AMOUNT,     6);
 CONSTRUCT_TYPED_SFIELD(sfHighLimit,             "HighLimit",            AMOUNT,     7);
 CONSTRUCT_TYPED_SFIELD(sfFee,                   "Fee",                  AMOUNT,     8);

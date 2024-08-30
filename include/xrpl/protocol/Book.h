@@ -21,7 +21,9 @@
 #define RIPPLE_PROTOCOL_BOOK_H_INCLUDED
 
 #include <xrpl/basics/CountedObject.h>
+#include <xrpl/protocol/CommonConstraints.h>
 #include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/MPTIssue.h>
 #include <boost/utility/base_from_member.hpp>
 
 namespace ripple {
@@ -33,14 +35,15 @@ namespace ripple {
 class Book final : public CountedObject<Book>
 {
 public:
-    Issue in;
-    Issue out;
+    std::variant<Issue, MPTIssue> in;
+    std::variant<Issue, MPTIssue> out;
 
     Book()
     {
     }
 
-    Book(Issue const& in_, Issue const& out_) : in(in_), out(out_)
+    template <typename TIn, typename TOut>
+    Book(TIn const& in_, TOut const& out_) : in(in_), out(out_)
     {
     }
 };
@@ -59,7 +62,8 @@ void
 hash_append(Hasher& h, Book const& b)
 {
     using beast::hash_append;
-    hash_append(h, b.in, b.out);
+    std::visit(
+        [&](auto&& in, auto&& out) { hash_append(h, in, out); }, b.in, b.out);
 }
 
 Book
@@ -79,9 +83,23 @@ operator==(Book const& lhs, Book const& rhs)
 [[nodiscard]] inline constexpr std::weak_ordering
 operator<=>(Book const& lhs, Book const& rhs)
 {
-    if (auto const c{lhs.in <=> rhs.in}; c != 0)
-        return c;
-    return lhs.out <=> rhs.out;
+    return std::visit(
+        [&]<typename LIn, typename LOut, typename RIn, typename ROut>(
+            LIn&& lin, LOut&& lout, RIn& rin, ROut&& rout) {
+            if constexpr (
+                std::is_same_v<LIn, RIn> && std::is_same_v<LOut, ROut>)
+            {
+                if (auto const c{lin <=> rin}; c != 0)
+                    return c;
+                return lout <=> rout;
+            }
+            else
+                return std::weak_ordering::less;
+        },
+        lhs.in,
+        lhs.out,
+        rhs.in,
+        rhs.out);
 }
 /** @} */
 
@@ -119,15 +137,36 @@ public:
     }
 };
 
+template <>
+struct hash<ripple::MPTIssue>
+{
+public:
+    explicit hash() = default;
+    using value_type = std::size_t;
+    using argument_type = ripple::MPTIssue;
+
+    value_type
+    operator()(argument_type const& value) const
+    {
+        return ::beast::uhash<>{}(value.getMptID());
+    }
+};
+
 //------------------------------------------------------------------------------
 
 template <>
 struct hash<ripple::Book>
 {
 private:
-    using hasher = std::hash<ripple::Issue>;
-
-    hasher m_hasher;
+    template <ripple::ValidIssueType Iss>
+    struct hasher
+    {
+        std::size_t
+        operator()(Iss const& issue) const
+        {
+            return hash<Iss>{}(issue);
+        }
+    };
 
 public:
     explicit hash() = default;
@@ -138,9 +177,14 @@ public:
     value_type
     operator()(argument_type const& value) const
     {
-        value_type result(m_hasher(value.in));
-        boost::hash_combine(result, m_hasher(value.out));
-        return result;
+        return std::visit(
+            [&]<typename TIn, typename TOut>(TIn const& in, TOut const& out) {
+                value_type result(hasher<TIn>()(in));
+                boost::hash_combine(result, hasher<TOut>()(out));
+                return result;
+            },
+            value.in,
+            value.out);
     }
 };
 

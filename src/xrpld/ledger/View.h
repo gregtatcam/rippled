@@ -85,6 +85,12 @@ enum AuthHandling { ahIGNORE_AUTH, ahZERO_IF_UNAUTHORIZED };
 [[nodiscard]] bool
 isGlobalFrozen(ReadView const& view, AccountID const& issuer);
 
+[[nodiscard]] inline bool
+isGlobalFrozen(ReadView const& view, Issue const& issue)
+{
+    return isGlobalFrozen(view, issue.account);
+}
+
 [[nodiscard]] bool
 isGlobalFrozen(ReadView const& view, MPTIssue const& mpt);
 
@@ -167,6 +173,32 @@ accountFunds(
     STAmount const& saDefault,
     FreezeHandling freezeHandling,
     beast::Journal j);
+
+[[nodiscard]] STMPTAmount
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    STMPTAmount const& saDefault,
+    FreezeHandling freezeHandling,
+    AuthHandling zeroIfUnauthorized,
+    beast::Journal j);
+
+template <ValidSerialAmountType T>
+[[nodiscard]] T
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    T const& saDefault,
+    FreezeHandling freezeHandling,
+    AuthHandling zeroIfUnauthorized,
+    beast::Journal j)
+{
+    if constexpr (std::is_same_v<T, STAmount>)
+        return accountFunds(view, id, saDefault, freezeHandling, j);
+    else
+        return accountFunds(
+            view, id, saDefault, freezeHandling, zeroIfUnauthorized, j);
+}
 
 // Return the account's liquid (not reserved) XRP.  Generally prefer
 // calling accountHolds() over this interface.  However, this interface

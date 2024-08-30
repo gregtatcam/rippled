@@ -224,7 +224,7 @@ NoBadOffers::visitEntry(
     std::shared_ptr<SLE const> const& before,
     std::shared_ptr<SLE const> const& after)
 {
-    auto isBad = [](STAmount const& pays, STAmount const& gets) {
+    auto isBad = [](STEitherAmount const& pays, STEitherAmount const& gets) {
         // An offer should never be negative
         if (pays < beast::zero)
             return true;

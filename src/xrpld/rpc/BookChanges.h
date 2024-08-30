@@ -40,12 +40,12 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
     std::map<
         std::string,
         std::tuple<
-            STAmount,  // side A volume
-            STAmount,  // side B volume
-            STAmount,  // high rate
-            STAmount,  // low rate
-            STAmount,  // open rate
-            STAmount   // close rate
+            STEitherAmount,  // side A volume
+            STEitherAmount,  // side B volume
+            STAmount,        // high rate
+            STAmount,        // low rate
+            STAmount,        // open rate
+            STAmount         // close rate
             >>
         tally;
 
@@ -107,65 +107,84 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
 
             // compute the difference in gets and pays actually
             // affected onto the offer
-            STAmount deltaGets = finalFields.getFieldAmount(sfTakerGets) -
-                previousFields.getFieldAmount(sfTakerGets);
-            STAmount deltaPays = finalFields.getFieldAmount(sfTakerPays) -
-                previousFields.getFieldAmount(sfTakerPays);
+            std::visit(
+                [&]<typename TPays, typename TGets>(
+                    TPays const& takerPays, TGets const& takerGets) {
+                    TGets deltaGets = takerGets -
+                        get<TGets>(previousFields.getFieldAmount(sfTakerGets));
+                    TPays deltaPays = takerPays -
+                        get<TPays>(previousFields.getFieldAmount(sfTakerPays));
 
-            std::string g{to_string(deltaGets.issue())};
-            std::string p{to_string(deltaPays.issue())};
+                    std::string constexpr g{to_string(deltaGets.issue())};
+                    std::string constexpr p{to_string(deltaPays.issue())};
 
-            bool const noswap =
-                isXRP(deltaGets) ? true : (isXRP(deltaPays) ? false : (g < p));
+                    bool constexpr noswap = isXRP(deltaGets)
+                        ? true
+                        : (isXRP(deltaPays) ? false : (g < p));
 
-            STAmount first = noswap ? deltaGets : deltaPays;
-            STAmount second = noswap ? deltaPays : deltaGets;
+                    TGets first = [&]() {
+                        if (std::is_same_v<TPays, TGets>)
+                            return noswap ? deltaGets : deltaPays;
+                        else
+                            return deltaGets;
+                    }();
+                    TPays second = [&]() {
+                        if (std::is_same_v<TPays, TGets>)
+                            return noswap ? deltaPays : deltaGets;
+                        else
+                            return deltaPays;
+                    }();
 
-            // defensively programmed, should (probably) never happen
-            if (second == beast::zero)
-                continue;
+                    // defensively programmed, should (probably) never happen
+                    if (second == beast::zero)
+                        return;
 
-            STAmount rate = divide(first, second, noIssue());
+                    STAmount rate = divide(first, second, noIssue());
 
-            if (first < beast::zero)
-                first = -first;
+                    if (first < beast::zero)
+                        first = -first;
 
-            if (second < beast::zero)
-                second = -second;
+                    if (second < beast::zero)
+                        second = -second;
 
-            std::stringstream ss;
-            if (noswap)
-                ss << g << "|" << p;
-            else
-                ss << p << "|" << g;
+                    std::stringstream ss;
+                    if (noswap)
+                        ss << g << "|" << p;
+                    else
+                        ss << p << "|" << g;
 
-            std::string key{ss.str()};
+                    std::string key{ss.str()};
 
-            if (tally.find(key) == tally.end())
-                tally[key] = {
-                    first,   // side A vol
-                    second,  // side B vol
-                    rate,    // high
-                    rate,    // low
-                    rate,    // open
-                    rate     // close
-                };
-            else
-            {
-                // increment volume
-                auto& entry = tally[key];
+                    if (tally.find(key) == tally.end())
+                        tally[key] = {
+                            first,   // side A vol
+                            second,  // side B vol
+                            rate,    // high
+                            rate,    // low
+                            rate,    // open
+                            rate     // close
+                        };
+                    else
+                    {
+                        // increment volume
+                        auto& entry = tally[key];
 
-                std::get<0>(entry) += first;   // side A vol
-                std::get<1>(entry) += second;  // side B vol
+                        std::get<0>(entry) = get<TGets>(std::get<0>(entry)) +
+                            first;  // side A vol
+                        std::get<1>(entry) = get<TPays>(std::get<1>(entry)) +
+                            second;  // side B vol
 
-                if (std::get<2>(entry) < rate)  // high
-                    std::get<2>(entry) = rate;
+                        if (std::get<2>(entry) < rate)  // high
+                            std::get<2>(entry) = rate;
 
-                if (std::get<3>(entry) > rate)  // low
-                    std::get<3>(entry) = rate;
+                        if (std::get<3>(entry) > rate)  // low
+                            std::get<3>(entry) = rate;
 
-                std::get<5>(entry) = rate;  // close
-            }
+                        std::get<5>(entry) = rate;  // close
+                    }
+                },
+                finalFields.getFieldAmount(sfTakerPays).getValue(),
+                finalFields.getFieldAmount(sfTakerGets).getValue());
         }
     }
 
@@ -182,23 +201,38 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
     {
         Json::Value& inner = jvObj[jss::changes].append(Json::objectValue);
 
-        STAmount volA = std::get<0>(entry.second);
-        STAmount volB = std::get<1>(entry.second);
+        std::visit(
+            [&]<typename TGets, typename TPays>(
+                TGets const& volA, TPays const& volB) {
+                inner[jss::currency_a] =
+                    (isXRP(volA) ? "XRP_drops" : to_string(volA.issue()));
+                inner[jss::currency_b] =
+                    (isXRP(volB) ? "XRP_drops" : to_string(volB.issue()));
 
-        inner[jss::currency_a] =
-            (isXRP(volA) ? "XRP_drops" : to_string(volA.issue()));
-        inner[jss::currency_b] =
-            (isXRP(volB) ? "XRP_drops" : to_string(volB.issue()));
+                inner[jss::volume_a] = [&]() {
+                    if constexpr (std::is_same_v<TGets, STAmount>)
+                        return (
+                            isXRP(volA) ? to_string(volA.xrp())
+                                        : to_string(volA.iou()));
+                    else
+                        return to_string(volA.value());
+                }();
+                inner[jss::volume_b] = [&]() {
+                    if constexpr (std::is_same_v<TGets, STAmount>)
+                        return (
+                            isXRP(volB) ? to_string(volB.xrp())
+                                        : to_string(volB.iou()));
+                    else
+                        return to_string(volB.value());
+                }();
 
-        inner[jss::volume_a] =
-            (isXRP(volA) ? to_string(volA.xrp()) : to_string(volA.iou()));
-        inner[jss::volume_b] =
-            (isXRP(volB) ? to_string(volB.xrp()) : to_string(volB.iou()));
-
-        inner[jss::high] = to_string(std::get<2>(entry.second).iou());
-        inner[jss::low] = to_string(std::get<3>(entry.second).iou());
-        inner[jss::open] = to_string(std::get<4>(entry.second).iou());
-        inner[jss::close] = to_string(std::get<5>(entry.second).iou());
+                inner[jss::high] = to_string(std::get<2>(entry.second).iou());
+                inner[jss::low] = to_string(std::get<3>(entry.second).iou());
+                inner[jss::open] = to_string(std::get<4>(entry.second).iou());
+                inner[jss::close] = to_string(std::get<5>(entry.second).iou());
+            },
+            std::get<1>(entry.second).getValue(),
+            std::get<0>(entry.second).getValue());
     }
 
     return jvObj;

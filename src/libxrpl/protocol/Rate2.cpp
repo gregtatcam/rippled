@@ -78,6 +78,23 @@ multiplyRound(STAmount const& amount, Rate const& rate, bool roundUp)
     return mulRound(amount, detail::as_amount(rate), amount.issue(), roundUp);
 }
 
+STMPTAmount
+multiplyRound(STMPTAmount const& amount, Rate const& rate, bool roundUp)
+{
+    assert(rate.value != 0);
+
+    if (rate == parityRate)
+        return amount;
+
+    saveNumberRoundMode g(
+        roundUp ? Number::rounding_mode::upward : Number::getround());
+
+    return STMPTAmount{
+        amount.issue(),
+        static_cast<std::int64_t>(
+            amount.value() * Number{detail::as_amount(rate)})};
+}
+
 STAmount
 multiplyRound(
     STAmount const& amount,
@@ -93,6 +110,16 @@ multiplyRound(
     }
 
     return mulRound(amount, detail::as_amount(rate), issue, roundUp);
+}
+
+STMPTAmount
+multiplyRound(
+    STMPTAmount const& amount,
+    Rate const& rate,
+    MPTIssue const& issue,
+    bool roundUp)
+{
+    return multiplyRound(STMPTAmount{issue, amount.value()}, rate, roundUp);
 }
 
 STAmount

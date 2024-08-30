@@ -23,6 +23,7 @@
 #include <xrpld/app/paths/RippleCalc.h>
 #include <xrpld/app/paths/detail/Steps.h>
 #include <xrpl/protocol/Quality.h>
+#include <xrpld/app/paths/AMMContext.h>
 
 namespace ripple {
 
@@ -31,6 +32,33 @@ namespace detail {
 struct FlowDebugInfo;
 }
 }  // namespace path
+
+namespace detail {
+
+template <ValidSerialAmountType A>
+using issueType = std::conditional_t<std::is_same_v<A, STAmount>, Issue, MPTIssue>;
+
+template <ValidSerialAmountType TDel, ValidSerialAmountType TMax, typename FlowResult>
+auto
+finishFlow(
+        PaymentSandbox &sb,
+        issueType<TDel> const &srcIssue,
+        issueType<TMax> const &dstIssue,
+        FlowResult &&f) {
+    typename path::RippleCalc<TDel, TMax>::Output result;
+    if (f.ter == tesSUCCESS)
+        f.sandbox->apply(sb);
+    else
+        result.removableOffers = std::move(f.removableOffers);
+
+    result.setResult(f.ter);
+    result.actualAmountIn = toSTAmount(f.in, srcIssue);
+    result.actualAmountOut = toSTAmount(f.out, dstIssue);
+
+    return result;
+};
+
+}
 
 /**
   Make a payment from the src account to the dst account
@@ -52,21 +80,162 @@ struct FlowDebugInfo;
   @param flowDebugInfo If non-null a pointer to FlowDebugInfo for debugging
   @return Actual amount in and out, and the result code
 */
-path::RippleCalc::Output
+template <ValidSerialAmountType TDel, typename TMax>
+path::RippleCalc<TDel, TMax>::Output
 flow(
-    PaymentSandbox& view,
-    STAmount const& deliver,
-    AccountID const& src,
-    AccountID const& dst,
-    STPathSet const& paths,
-    bool defaultPaths,
-    bool partialPayment,
-    bool ownerPaysTransferFee,
-    OfferCrossing offerCrossing,
-    std::optional<Quality> const& limitQuality,
-    std::optional<STAmount> const& sendMax,
-    beast::Journal j,
-    path::detail::FlowDebugInfo* flowDebugInfo = nullptr);
+        PaymentSandbox& sb,
+        TDel const& deliver,
+        AccountID const& src,
+        AccountID const& dst,
+        STPathSet const& paths,
+        bool defaultPaths,
+        bool partialPayment,
+        bool ownerPaysTransferFee,
+        OfferCrossing offerCrossing,
+        std::optional<Quality> const& limitQuality,
+        TMax const& sendMax,
+        beast::Journal j,
+        path::detail::FlowDebugInfo* flowDebugInfo = nullptr)
+{
+    auto const srcIssue = [&] {
+        if (sendMax)
+            return sendMax->issue();
+        if (!isXRP(deliver.issue().currency))
+            return Issue(deliver.issue().currency, src);
+        return xrpIssue();
+    }();
+
+    auto const dstIssue = deliver.issue();
+
+    std::optional<Issue> sendMaxIssue;
+    if (sendMax)
+        sendMaxIssue = sendMax->issue();
+
+    AMMContext ammContext(src, false);
+
+    // convert the paths to a collection of strands. Each strand is the
+    // collection of account->account steps and book steps that may be used in
+    // this payment.
+    auto [toStrandsTer, strands] = toStrands(
+            sb,
+            src,
+            dst,
+            dstIssue,
+            limitQuality,
+            sendMaxIssue,
+            paths,
+            defaultPaths,
+            ownerPaysTransferFee,
+            offerCrossing,
+            ammContext,
+            j);
+
+    if (toStrandsTer != tesSUCCESS)
+    {
+        typename path::RippleCalc<TDel, TMax>::Output result;
+        result.setResult(toStrandsTer);
+        return result;
+    }
+
+    ammContext.setMultiPath(strands.size() > 1);
+
+    if (j.trace())
+    {
+        j.trace() << "\nsrc: " << src << "\ndst: " << dst
+                  << "\nsrcIssue: " << srcIssue << "\ndstIssue: " << dstIssue;
+        j.trace() << "\nNumStrands: " << strands.size();
+        for (auto const& curStrand : strands)
+        {
+            j.trace() << "NumSteps: " << curStrand.size();
+            for (auto const& step : curStrand)
+            {
+                j.trace() << '\n' << *step << '\n';
+            }
+        }
+    }
+
+    const bool srcIsXRP = isXRP(srcIssue);
+    const bool dstIsXRP = isXRP(dstIssue);
+
+    auto const asDeliver = toAmountSpec(deliver);
+
+    // The src account may send either xrp or iou. The dst account may receive
+    // either xrp or iou. Since XRP and IOU amounts are represented by different
+    // types, use templates to tell `flow` about the amount types.
+    if (srcIsXRP && dstIsXRP)
+    {
+        return detail::finishFlow(
+                sb,
+                srcIssue,
+                dstIssue,
+                flow<XRPAmount, XRPAmount>(
+                        sb,
+                        strands,
+                        asDeliver.xrp,
+                        partialPayment,
+                        offerCrossing,
+                        limitQuality,
+                        sendMax,
+                        j,
+                        ammContext,
+                        flowDebugInfo));
+    }
+
+    if (srcIsXRP && !dstIsXRP)
+    {
+        return detail::finishFlow(
+                sb,
+                srcIssue,
+                dstIssue,
+                flow<XRPAmount, IOUAmount>(
+                        sb,
+                        strands,
+                        asDeliver.iou,
+                        partialPayment,
+                        offerCrossing,
+                        limitQuality,
+                        sendMax,
+                        j,
+                        ammContext,
+                        flowDebugInfo));
+    }
+
+    if (!srcIsXRP && dstIsXRP)
+    {
+        return detail::finishFlow(
+                sb,
+                srcIssue,
+                dstIssue,
+                flow<IOUAmount, XRPAmount>(
+                        sb,
+                        strands,
+                        asDeliver.xrp,
+                        partialPayment,
+                        offerCrossing,
+                        limitQuality,
+                        sendMax,
+                        j,
+                        ammContext,
+                        flowDebugInfo));
+    }
+
+    assert(!srcIsXRP && !dstIsXRP);
+    return detail::finishFlow(
+            sb,
+            srcIssue,
+            dstIssue,
+            flow<IOUAmount, IOUAmount>(
+                    sb,
+                    strands,
+                    asDeliver.iou,
+                    partialPayment,
+                    offerCrossing,
+                    limitQuality,
+                    sendMax,
+                    j,
+                    ammContext,
+                    flowDebugInfo));
+}
 
 }  // namespace ripple
 

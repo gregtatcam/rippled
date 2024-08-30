@@ -27,10 +27,16 @@ namespace {
 bool
 checkIssuers(ReadView const& view, Book const& book)
 {
-    auto issuerExists = [](ReadView const& view, Issue const& iss) -> bool {
-        return isXRP(iss.account) || view.read(keylet::account(iss.account));
+    auto issuerExists = [](ReadView const& view, auto const& iss) -> bool {
+        return isXRP(iss.getIssuer()) ||
+            view.read(keylet::account(iss.getIssuer()));
     };
-    return issuerExists(view, book.in) && issuerExists(view, book.out);
+    return std::visit(
+        [&](auto&& in, auto&& out) {
+            return issuerExists(view, in) && issuerExists(view, out);
+        },
+        book.in,
+        book.out);
 }
 }  // namespace
 

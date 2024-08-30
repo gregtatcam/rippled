@@ -60,14 +60,33 @@ operator!=(MPTIssue const& lhs, MPTIssue const& rhs)
     return !(lhs.mptID_ == rhs.mptID_);
 }
 
-inline bool
+inline constexpr bool
 isXRP(MPTID const&)
 {
     return false;
 }
 
+// Always true, unlike isConsistent(Issue),
+// which checks currency/account consistency
+inline bool
+isConsistent(MPTIssue const&)
+{
+    return true;
+}
+
 Json::Value
 to_json(MPTIssue const& issue);
+
+std::string
+to_string(MPTIssue const& issue);
+
+template <class Hasher>
+void
+hash_append(Hasher& h, MPTIssue const& issue)
+{
+    using ::beast::hash_append;
+    hash_append(h, issue.getMptID());
+}
 
 }  // namespace ripple
 

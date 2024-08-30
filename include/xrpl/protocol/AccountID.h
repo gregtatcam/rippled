@@ -22,7 +22,7 @@
 
 #include <xrpl/protocol/tokens.h>
 // VFALCO Uncomment when the header issues are resolved
-//#include <ripple/protocol/PublicKey.h>
+// #include <ripple/protocol/PublicKey.h>
 #include <xrpl/basics/UnorderedContainers.h>
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/json/json_value.h>
@@ -87,7 +87,7 @@ bool
 to_issuer(AccountID&, std::string const&);
 
 // DEPRECATED Should be checking the currency or native flag
-inline bool
+inline constexpr bool
 isXRP(AccountID const& c)
 {
     return c == beast::zero;

@@ -530,6 +530,8 @@ extern SF_UINT160 const sfTakerGetsIssuer;
 
 // 192-bit (common)
 extern SF_UINT192 const sfMPTokenIssuanceID;
+extern SF_UINT192 const sfTakerPaysMPT;
+extern SF_UINT192 const sfTakerGetsMPT;
 
 // 256-bit (common)
 extern SF_UINT256 const sfLedgerHash;
@@ -570,8 +572,8 @@ extern SF_UINT256 const sfHookSetTxnID;
 extern SF_EITHER_AMOUNT const sfAmount;
 extern SF_AMOUNT const sfBalance;
 extern SF_AMOUNT const sfLimitAmount;
-extern SF_AMOUNT const sfTakerPays;
-extern SF_AMOUNT const sfTakerGets;
+extern SF_EITHER_AMOUNT const sfTakerPays;
+extern SF_EITHER_AMOUNT const sfTakerGets;
 extern SF_AMOUNT const sfLowLimit;
 extern SF_AMOUNT const sfHighLimit;
 extern SF_AMOUNT const sfFee;

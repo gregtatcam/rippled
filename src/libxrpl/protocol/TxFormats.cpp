@@ -75,8 +75,8 @@ TxFormats::TxFormats()
     add(jss::OfferCreate,
         ttOFFER_CREATE,
         {
-            {sfTakerPays, soeREQUIRED},
-            {sfTakerGets, soeREQUIRED},
+            {sfTakerPays, soeREQUIRED, soeMPTSupported},
+            {sfTakerGets, soeREQUIRED, soeMPTSupported},
             {sfExpiration, soeOPTIONAL},
             {sfOfferSequence, soeOPTIONAL},
         },

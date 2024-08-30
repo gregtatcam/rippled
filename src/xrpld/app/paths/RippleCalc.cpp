@@ -26,9 +26,10 @@
 
 namespace ripple {
 namespace path {
-
-RippleCalc::Output
-RippleCalc::rippleCalculate(
+#if 0
+template <ValidSerialAmountType TDel, typename TMax>
+RippleCalc<TDel, TMax>::Output
+RippleCalc<TDel, TMax>::rippleCalculate(
     PaymentSandbox& view,
 
     // Compute paths using this ledger entry set.  Up to caller to actually
@@ -38,13 +39,13 @@ RippleCalc::rippleCalculate(
     //      XRP: xrpAccount()
     //  non-XRP: uSrcAccountID (for any issuer) or another account with
     //           trust node.
-    STAmount const& saMaxAmountReq,  // --> -1 = no limit.
+    TMax const& saMaxAmountReq,  // --> -1 = no limit.
 
     // Issuer:
     //      XRP: xrpAccount()
     //  non-XRP: uDstAccountID (for any issuer) or another account with
     //           trust node.
-    STAmount const& saDstAmountReq,
+    TDel const& saDstAmountReq,
 
     AccountID const& uDstAccountID,
     AccountID const& uSrcAccountID,
@@ -117,7 +118,7 @@ RippleCalc::rippleCalculate(
             JLOG(j.error()) << "Exception from flow: " << e.what();
 
             // return a tec so the tx is stored
-            path::RippleCalc::Output exceptResult;
+            path::RippleCalc<TDel, TMax>::Output exceptResult;
             exceptResult.setResult(tecINTERNAL);
             return exceptResult;
         }
@@ -133,6 +134,7 @@ RippleCalc::rippleCalculate(
     flowSB.apply(view);
     return flowOut;
 }
+#endif
 
 }  // namespace path
 }  // namespace ripple

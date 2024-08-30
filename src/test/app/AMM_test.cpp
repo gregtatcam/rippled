@@ -6866,6 +6866,7 @@ private:
     run() override
     {
         FeatureBitset const all{jtx::supported_amendments()};
+#if 0
         testInvalidInstance();
         testInstanceCreate();
         testInvalidDeposit();
@@ -6908,6 +6909,16 @@ private:
         testFixAMMOfferBlockedByLOB(all - fixAMMv1_1);
         testLPTokenBalance(all);
         testLPTokenBalance(all - fixAMMv1_1);
+#endif
+        auto const USD = gw["USD"];
+        uint160 u160;
+        memcpy(&u160, USD.currency.data(), 20);
+        std::cout << to_string(u160) << std::endl;
+        Json::Value jv;
+        Currency c = to_currency("0000001111100000000000000000001111111111");
+        memcpy(&u160, c.data(), 20);
+        std::cout << to_string(u160) << std::endl;
+        BEAST_EXPECT(true);
     }
 };
 

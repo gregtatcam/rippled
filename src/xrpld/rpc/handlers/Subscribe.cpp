@@ -250,55 +250,117 @@ doSubscribe(RPC::JsonContext& context)
             Json::Value taker_pays = j[jss::taker_pays];
             Json::Value taker_gets = j[jss::taker_gets];
 
-            // Parse mandatory currency.
-            if (!taker_pays.isMember(jss::currency) ||
-                !to_currency(
-                    book.in.currency, taker_pays[jss::currency].asString()))
+            if (!taker_pays.isMember(jss::currency) &&
+                !taker_pays.isMember(jss::mpt_issuance_id))
             {
                 JLOG(context.j.info()) << "Bad taker_pays currency.";
                 return rpcError(rpcSRC_CUR_MALFORMED);
             }
 
-            // Parse optional issuer.
-            if (((taker_pays.isMember(jss::issuer)) &&
-                 (!taker_pays[jss::issuer].isString() ||
-                  !to_issuer(
-                      book.in.account, taker_pays[jss::issuer].asString())))
-                // Don't allow illegal issuers.
-                || (!book.in.currency != !book.in.account) ||
-                noAccount() == book.in.account)
+            if (taker_pays.isMember(jss::currency))
             {
-                JLOG(context.j.info()) << "Bad taker_pays issuer.";
-                return rpcError(rpcSRC_ISR_MALFORMED);
+                Issue in;
+                // Parse mandatory currency.
+                if (!to_currency(
+                        in.currency, taker_pays[jss::currency].asString()))
+                {
+                    JLOG(context.j.info()) << "Bad taker_pays currency.";
+                    return rpcError(rpcSRC_CUR_MALFORMED);
+                }
+
+                // Parse optional issuer.
+                if (((taker_pays.isMember(jss::issuer)) &&
+                     (!taker_pays[jss::issuer].isString() ||
+                      !to_issuer(
+                          in.account, taker_pays[jss::issuer].asString())))
+                    // Don't allow illegal issuers.
+                    || (!in.currency != !in.account) ||
+                    noAccount() == in.account)
+                {
+                    JLOG(context.j.info()) << "Bad taker_pays issuer.";
+                    return rpcError(rpcSRC_ISR_MALFORMED);
+                }
+                book.in = in;
+            }
+            else
+            {
+                uint192 u192;
+                if (!u192.parseHex(taker_pays[jss::mpt_issuance_id].asString()))
+                {
+                    JLOG(context.j.info()) << "Bad taker_pays mpt_issuance_id.";
+                    return rpcError(rpcSRC_CUR_MALFORMED);
+                }
+                book.in = MPTIssue{u192};
             }
 
-            // Parse mandatory currency.
-            if (!taker_gets.isMember(jss::currency) ||
-                !to_currency(
-                    book.out.currency, taker_gets[jss::currency].asString()))
+            if (!taker_gets.isMember(jss::currency) &&
+                !taker_gets.isMember(jss::mpt_issuance_id))
             {
-                JLOG(context.j.info()) << "Bad taker_gets currency.";
+                JLOG(context.j.info()) << "Bad taker_gets currency or mpt.";
                 return rpcError(rpcDST_AMT_MALFORMED);
             }
 
-            // Parse optional issuer.
-            if (((taker_gets.isMember(jss::issuer)) &&
-                 (!taker_gets[jss::issuer].isString() ||
-                  !to_issuer(
-                      book.out.account, taker_gets[jss::issuer].asString())))
-                // Don't allow illegal issuers.
-                || (!book.out.currency != !book.out.account) ||
-                noAccount() == book.out.account)
+            if (taker_gets.isMember(jss::currency))
             {
-                JLOG(context.j.info()) << "Bad taker_gets issuer.";
-                return rpcError(rpcDST_ISR_MALFORMED);
+                Issue out;
+                // Parse mandatory currency.
+                if (!taker_gets.isMember(jss::currency) ||
+                    !to_currency(
+                        out.currency, taker_gets[jss::currency].asString()))
+                {
+                    JLOG(context.j.info()) << "Bad taker_gets currency.";
+                    return rpcError(rpcDST_AMT_MALFORMED);
+                }
+
+                // Parse optional issuer.
+                if (((taker_gets.isMember(jss::issuer)) &&
+                     (!taker_gets[jss::issuer].isString() ||
+                      !to_issuer(
+                          out.account, taker_gets[jss::issuer].asString())))
+                    // Don't allow illegal issuers.
+                    || (!out.currency != !out.account) ||
+                    noAccount() == out.account)
+                {
+                    JLOG(context.j.info()) << "Bad taker_gets issuer.";
+                    return rpcError(rpcDST_ISR_MALFORMED);
+                }
+            }
+            else
+            {
+                uint192 u192;
+                if (!u192.parseHex(taker_gets[jss::mpt_issuance_id].asString()))
+                {
+                    JLOG(context.j.info()) << "Bad taker_gets mpt_issuance_id.";
+                    return rpcError(rpcDST_AMT_MALFORMED);
+                }
+                book.out = MPTIssue{u192};
             }
 
-            if (book.in.currency == book.out.currency &&
-                book.in.account == book.out.account)
+            if (auto const err = std::visit(
+                    [&]<typename TIn, typename TOut>(TIn&& in, TOut&& out) {
+                        if constexpr (
+                            std::is_same_v<TIn, Issue> &&
+                            std::is_same_v<TOut, Issue>)
+                        {
+                            if (in.currency == out.currency &&
+                                in.account == out.account)
+                                return rpcError(rpcBAD_MARKET);
+                        }
+                        else if constexpr (
+                            std::is_same_v<TIn, MPTIssue> &&
+                            std::is_same_v<TOut, MPTIssue>)
+                        {
+                            if (in.getMptID() == out.getMptID())
+                                return rpcError(rpcBAD_MARKET);
+                        }
+                        return Json::Value::null;
+                    },
+                    book.in,
+                    book.out);
+                err != Json::Value::null)
             {
                 JLOG(context.j.info()) << "taker_gets same as taker_pays.";
-                return rpcError(rpcBAD_MARKET);
+                return err;
             }
 
             std::optional<AccountID> takerID;

@@ -28,7 +28,7 @@
 
 namespace ripple {
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 static NotTEC
 preflightHelper(PreflightContext const& ctx);
 
@@ -92,7 +92,7 @@ preflightHelper<STMPTAmount>(PreflightContext const& ctx)
     return preflight2(ctx);
 }
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 static TER
 preclaimHelper(PreclaimContext const& ctx);
 
@@ -198,7 +198,7 @@ preclaimHelper<STMPTAmount>(PreclaimContext const& ctx)
     return tesSUCCESS;
 }
 
-template <ValidAmountType T>
+template <ValidSerialAmountType T>
 static TER
 applyHelper(ApplyContext& ctx);
 

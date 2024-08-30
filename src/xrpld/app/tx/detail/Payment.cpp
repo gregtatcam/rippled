@@ -29,7 +29,7 @@
 
 namespace ripple {
 
-template <ValidAmountType TDel>
+template <ValidSerialAmountType TDel>
 static TxConsequences
 makeTxConsequencesHelper(PreflightContext const& ctx);
 
@@ -57,7 +57,7 @@ makeTxConsequencesHelper<STMPTAmount>(PreflightContext const& ctx)
     return TxConsequences{ctx.tx, beast::zero};
 }
 
-template <ValidAmountType TDel>
+template <ValidSerialAmountType TDel>
 static NotTEC
 preflightHelper(PreflightContext const& ctx);
 
@@ -294,7 +294,7 @@ preflightHelper<STMPTAmount>(PreflightContext const& ctx)
     return preflight2(ctx);
 }
 
-template <ValidAmountType TDel>
+template <ValidSerialAmountType TDel>
 static TER
 preclaimHelper(
     PreclaimContext const& ctx,
@@ -428,7 +428,7 @@ preclaimHelper<STMPTAmount>(
     return tesSUCCESS;
 }
 
-template <ValidAmountType TDel>
+template <ValidSerialAmountType TDel>
 static TER
 applyHelper(
     ApplyContext& ctx,
@@ -530,18 +530,18 @@ applyHelper<STAmount>(
             }
         }
 
-        path::RippleCalc::Input rcInput;
+        path::RippleCalc<STAmount, STAmount>::Input rcInput;
         rcInput.partialPaymentAllowed = partialPaymentAllowed;
         rcInput.defaultPathsAllowed = defaultPathsAllowed;
         rcInput.limitQuality = limitQuality;
         rcInput.isLedgerOpen = ctx.view().open();
 
-        path::RippleCalc::Output rc;
+        path::RippleCalc<STAmount, STAmount>::Output rc;
         {
             PaymentSandbox pv(&ctx.view());
             JLOG(ctx.journal.debug()) << "Entering RippleCalc in payment: "
                                       << ctx.tx.getTransactionID();
-            rc = path::RippleCalc::rippleCalculate(
+            rc = path::RippleCalc<STAmount, STAmount>::rippleCalculate(
                 pv,
                 maxSourceAmount,
                 saDstAmount,

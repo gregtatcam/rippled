@@ -507,7 +507,7 @@ getRate(STAmount const& offerOut, STAmount const& offerIn);
 
 //------------------------------------------------------------------------------
 
-inline bool
+inline constexpr bool
 isXRP(STAmount const& amount)
 {
     return isXRP(amount.issue().currency);

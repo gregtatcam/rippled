@@ -29,19 +29,20 @@ namespace test {
 
 /** Count offer
  */
-inline std::size_t
+template <ValidIssueType IIn, ValidIssueType IOut>
+std::size_t
 countOffers(
     jtx::Env& env,
     jtx::Account const& account,
-    Issue const& takerPays,
-    Issue const& takerGets)
+    IIn const& takerPays,
+    IOut const& takerGets)
 {
     size_t count = 0;
     forEachItem(
         *env.current(), account, [&](std::shared_ptr<SLE const> const& sle) {
             if (sle->getType() == ltOFFER &&
-                sle->getFieldAmount(sfTakerPays).issue() == takerPays &&
-                sle->getFieldAmount(sfTakerGets).issue() == takerGets)
+                get<IIn>(sle->getFieldAmount(sfTakerPays)) == takerPays &&
+                get<IOut>(sle->getFieldAmount(sfTakerGets)) == takerGets)
                 ++count;
         });
     return count;
@@ -51,8 +52,8 @@ inline std::size_t
 countOffers(
     jtx::Env& env,
     jtx::Account const& account,
-    STAmount const& takerPays,
-    STAmount const& takerGets)
+    STEitherAmount const& takerPays,
+    STEitherAmount const& takerGets)
 {
     size_t count = 0;
     forEachItem(

@@ -437,6 +437,9 @@ public:
     template <class Tag>
     void
     setFieldH160(SField const& field, base_uint<160, Tag> const& v);
+    template <class Tag>
+    void
+    setFieldH192(SField const& field, base_uint<192, Tag> const& v);
 
     STObject&
     peekFieldObject(SField const& field);
@@ -1203,6 +1206,25 @@ STObject::setFieldH160(SField const& field, base_uint<160, Tag> const& v)
         rf = makeFieldPresent(field);
 
     using Bits = STBitString<160>;
+    if (auto cf = dynamic_cast<Bits*>(rf))
+        cf->setValue(v);
+    else
+        Throw<std::runtime_error>("Wrong field type");
+}
+
+template <class Tag>
+void
+STObject::setFieldH192(SField const& field, base_uint<192, Tag> const& v)
+{
+    STBase* rf = getPField(field, true);
+
+    if (!rf)
+        throwFieldNotFound(field);
+
+    if (rf->getSType() == STI_NOTPRESENT)
+        rf = makeFieldPresent(field);
+
+    using Bits = STBitString<192>;
     if (auto cf = dynamic_cast<Bits*>(rf))
         cf->setValue(v);
     else

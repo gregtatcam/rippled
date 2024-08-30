@@ -4810,7 +4810,8 @@ public:
                     offers.emplace(
                         (*sle)[sfSequence],
                         std::make_pair(
-                            (*sle)[sfTakerPays], (*sle)[sfTakerGets]));
+                            get<STAmount>((*sle)[sfTakerPays]),
+                            get<STAmount>((*sle)[sfTakerGets])));
             });
 
         // first offer

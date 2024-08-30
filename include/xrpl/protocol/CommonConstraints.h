@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2012, 2013 Ripple Labs Inc.
+    Copyright (c) 2024 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -17,48 +17,34 @@
 */
 //==============================================================================
 
-#include <xrpl/protocol/Book.h>
+#ifndef RIPPLE_PROTOCOL_COMMONCONSTRAINTS_H_INCLUDED
+#define RIPPLE_PROTOCOL_COMMONCONSTRAINTS_H_INCLUDED
+
+#include <type_traits>
 
 namespace ripple {
 
-bool
-isConsistent(Book const& book)
-{
-    return std::visit(
-        [&](auto&& in, auto&& out) {
-            bool constexpr same = std::is_same_v<decltype(in), decltype(out)>;
-            return isConsistent(in) && isConsistent(out) &&
-                (!same || book.in != book.out);
-        },
-        book.in,
-        book.out);
-}
+class STAmount;
+class STMPTAmount;
+class Issue;
+class MPTIssue;
 
-std::string
-to_string(Book const& book)
-{
-    return std::visit(
-        [&](auto&& in, auto&& out) {
-            return to_string(in) + "->" + to_string(out);
-        },
-        book.in,
-        book.out);
-}
+// clang-format off
+template <typename TAmnt>
+concept ValidSerialAmountType =
+    std::is_same_v<TAmnt, STAmount> || std::is_same_v<TAmnt, STMPTAmount>;
 
-std::ostream&
-operator<<(std::ostream& os, Book const& x)
-{
-    os << to_string(x);
-    return os;
-}
+template <typename Iss>
+concept ValidIssueType =
+    std::is_same_v<Iss, Issue> || std::is_same_v<Iss, MPTIssue>;
 
-Book
-reversed(Book const& book)
-{
-    return std::visit(
-        [&](auto const& in, auto const& out) { return Book(out, in); },
-        book.in,
-        book.out);
-}
+template <typename Amnt1, typename Amnt2, typename Iss>
+concept ValidAmountIssueComboType =
+    (std::is_same_v<Amnt1, STMPTAmount> || std::is_same_v<Amnt2, STMPTAmount> ||
+     (std::is_same_v<Amnt1, STAmount> && std::is_same_v<Amnt2, STAmount> &&
+      std::is_same_v<Iss, MPTIssue>));
+// clang-format on
 
 }  // namespace ripple
+
+#endif  // RIPPLE_PROTOCOL_COMMONCONSTRAINTS_H_INCLUDED

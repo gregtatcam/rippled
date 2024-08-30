@@ -34,6 +34,7 @@
 
 namespace ripple {
 
+#if 0
 template <class FlowResult>
 static auto
 finishFlow(
@@ -55,10 +56,11 @@ finishFlow(
     return result;
 };
 
-path::RippleCalc::Output
+template <ValidSerialAmountType TDel, ValidSerialAmountType TMax>
+path::RippleCalc<TDel, TMax>::Output
 flow(
     PaymentSandbox& sb,
-    STAmount const& deliver,
+    TDel const& deliver,
     AccountID const& src,
     AccountID const& dst,
     STPathSet const& paths,
@@ -67,7 +69,7 @@ flow(
     bool ownerPaysTransferFee,
     OfferCrossing offerCrossing,
     std::optional<Quality> const& limitQuality,
-    std::optional<STAmount> const& sendMax,
+    std::optional<TMax> const& sendMax,
     beast::Journal j,
     path::detail::FlowDebugInfo* flowDebugInfo)
 {
@@ -210,5 +212,6 @@ flow(
             ammContext,
             flowDebugInfo));
 }
+#endif
 
 }  // namespace ripple
