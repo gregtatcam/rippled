@@ -22,6 +22,7 @@
 
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/STMPTAmount.h>
+#include <xrpl/protocol/STVariant.h>
 
 namespace ripple {
 
@@ -33,7 +34,7 @@ template <typename T>
 concept EitherAmountType = std::is_same_v<T, STEitherAmount> ||
     std::is_same_v<T, std::optional<STEitherAmount>>;
 
-class STEitherAmount : public STBase, public CountedObject<STEitherAmount>
+class STEitherAmount : public STVariant<STAmount, STMPTAmount>
 {
 private:
     std::variant<STAmount, STMPTAmount> amount_;
@@ -55,29 +56,12 @@ public:
     STEitherAmount&
     operator=(XRPAmount const&);
 
+    // STBase
     SerializedTypeID
     getSType() const override;
 
-    std::string
-    getFullText() const override;
-
-    std::string
-    getText() const override;
-
-    Json::Value getJson(JsonOptions) const override;
-
-    void
-    setJson(Json::Value&) const;
-
-    void
-    add(Serializer& s) const override;
-
     bool
-    isEquivalent(const STBase& t) const override;
-
-    bool
-    isDefault() const override;
-
+    isEquivalent(STBase const&) const override;
     //------------------------------------------------------------------------------
 
     bool
@@ -88,12 +72,6 @@ public:
 
     STEitherAmount const&
     value() const;
-
-    std::variant<STAmount, STMPTAmount> const&
-    getValue() const;
-
-    std::variant<STAmount, STMPTAmount>&
-    getValue();
 
     AccountID
     getIssuer() const;
@@ -110,13 +88,10 @@ public:
     int
     signum() const noexcept;
 
-    template <ValidAmountType T>
-    T const&
-    get() const;
-
-    template <ValidAmountType T>
-    T&
-    get();
+protected:
+    // VariantBase
+    void
+    decode(SerialIter& sit) override;
 
 private:
     STBase*
@@ -124,24 +99,6 @@ private:
     STBase*
     move(std::size_t n, void* buf) override;
 };
-
-template <ValidAmountType T>
-T const&
-STEitherAmount::get() const
-{
-    if (std::holds_alternative<T>(amount_))
-        return std::get<T>(amount_);
-    Throw<std::logic_error>("Invalid STEitherAmount conversion");
-}
-
-template <ValidAmountType T>
-T&
-STEitherAmount::get()
-{
-    if (std::holds_alternative<T>(amount_))
-        return std::get<T>(amount_);
-    Throw<std::logic_error>("Invalid STEitherAmount conversion");
-}
 
 template <ValidAmountType T>
 decltype(auto)

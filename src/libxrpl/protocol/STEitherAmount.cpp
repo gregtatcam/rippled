@@ -28,17 +28,12 @@
 namespace ripple {
 
 STEitherAmount::STEitherAmount(SerialIter& sit, SField const& name)
-    : STBase(name)
+    : STVariant(name)
 {
-    auto const u8 = sit.peek8();
-    if (((static_cast<std::uint64_t>(u8) << 56) & STAmount::cNotNative) == 0 &&
-        (u8 & STMPTAmount::cMPToken) != 0)
-        amount_.emplace<STMPTAmount>(sit);
-    else
-        amount_.emplace<STAmount>(sit);
 }
 
-STEitherAmount::STEitherAmount(XRPAmount const& amount) : amount_{amount}
+STEitherAmount::STEitherAmount(XRPAmount const& amount)
+    : STVariant(sfGeneric), amount_{amount}
 {
 }
 
@@ -47,17 +42,28 @@ STEitherAmount::STEitherAmount(STAmount const& amount) : amount_{amount}
 }
 
 STEitherAmount::STEitherAmount(SField const& name, STAmount const& amount)
-    : STBase(name), amount_{amount}
+    : amount_{amount}
 {
 }
 
 STEitherAmount::STEitherAmount(SField const& name, STMPTAmount const& amount)
-    : STBase(name), amount_{amount}
+    : STVariant(name), amount_{amount}
 {
 }
 
 STEitherAmount::STEitherAmount(STMPTAmount const& amount) : amount_{amount}
 {
+}
+
+void
+STEitherAmount::decode(SerialIter& sit)
+{
+    auto const u8 = sit.peek8();
+    if (((static_cast<std::uint64_t>(u8) << 56) & STAmount::cNotNative) == 0 &&
+        (u8 & STMPTAmount::cMPToken) != 0)
+        amount_.emplace<STMPTAmount>(sit);
+    else
+        amount_.emplace<STAmount>(sit);
 }
 
 STEitherAmount&
@@ -87,36 +93,6 @@ STEitherAmount::getSType() const
     return STI_AMOUNT;
 }
 
-std::string
-STEitherAmount::getFullText() const
-{
-    return std::visit([&](auto&& a) { return a.getFullText(); }, amount_);
-}
-
-std::string
-STEitherAmount::getText() const
-{
-    return std::visit([&](auto&& a) { return a.getText(); }, amount_);
-}
-
-Json::Value STEitherAmount::getJson(JsonOptions) const
-{
-    return std::visit(
-        [&](auto&& a) { return a.getJson(JsonOptions::none); }, amount_);
-}
-
-void
-STEitherAmount::setJson(Json::Value& jv) const
-{
-    std::visit([&](auto&& a) { a.setJson(jv); }, amount_);
-}
-
-void
-STEitherAmount::add(Serializer& s) const
-{
-    std::visit([&](auto&& a) { a.add(s); }, amount_);
-}
-
 bool
 STEitherAmount::isEquivalent(const STBase& t) const
 {
@@ -124,11 +100,6 @@ STEitherAmount::isEquivalent(const STBase& t) const
     return v && *this == *v;
 }
 
-bool
-STEitherAmount::isDefault() const
-{
-    return std::visit([&](auto&& a) { return a.isDefault(); }, amount_);
-}
 //------------------------------------------------------------------------------
 bool
 STEitherAmount::isMPT() const
@@ -169,18 +140,6 @@ STEitherAmount const&
 STEitherAmount::value() const
 {
     return *this;
-}
-
-std::variant<STAmount, STMPTAmount> const&
-STEitherAmount::getValue() const
-{
-    return amount_;
-}
-
-std::variant<STAmount, STMPTAmount>&
-STEitherAmount::getValue()
-{
-    return amount_;
 }
 
 AccountID

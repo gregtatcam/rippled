@@ -30,18 +30,38 @@
 namespace ripple {
 namespace detail {
 
-template<typename T, typename... Ts>
-constexpr bool contains() { return std::disjunction_v<std::is_same<T, Ts>...>; }
+template <typename T, typename... Ts>
+constexpr bool
+contains()
+{
+    return std::disjunction_v<std::is_same<T, Ts>...>;
+}
 
 template <typename T, typename... Ts>
-concept ValidAlts = contains<T, Ts ...>();
+concept ValidAlts = requires() { contains<T, Ts...>(); };
 
-} // namespace detail
+}  // namespace detail
 
-template <typename ... Alts>
-class STVariant : public STBase, CountedObject<STVariant<Alts ...>> {
-    std::variant<Alts ...> alternatives_;
-    SerializedTypeID const sid_;
+class VariantBase
+{
+protected:
+    VariantBase() = default;
+    ~VariantBase() = default;
+    VariantBase(VariantBase const&) = default;
+    VariantBase&
+    operator=(VariantBase const&) = default;
+    virtual void
+    decode(SerialIter& sit) = 0;
+};
+
+template <typename... Alts>
+class STVariant : public STBase,
+                  public CountedObject<STVariant<Alts...>>,
+                  public VariantBase
+{
+protected:
+    std::variant<Alts...> alternatives_;
+
 public:
     template <detail::ValidAlts T>
     STVariant(SField const& name, T const& arg);
@@ -55,14 +75,15 @@ public:
 
     template <detail::ValidAlts T>
     T&
-    get() const;
+    get();
 
     // STBase
-    SerializedTypeID
-    getSType() const override;
 
     std::string
     getText() const override;
+
+    std::string
+    getFullText() const override;
 
     Json::Value getJson(JsonOptions) const override;
 
@@ -70,114 +91,125 @@ public:
     add(Serializer& s) const override;
 
     bool
-    isEquivalent(const STBase& t) const override;
-
-    bool
     isDefault() const override;
 
+    //---------------------------------
+
+    void
+    setJson(Json::Value&) const;
+
+    auto const&
+    getValue() const;
+
+    auto&
+    getValue();
+
 private:
-    static std::unique_ptr<STCurrency>
-    construct(SerialIter&, SField const& name);
-
-    STBase*
-    copy(std::size_t n, void* buf) const override;
-    STBase*
-    move(std::size_t n, void* buf) override;
-
     friend class detail::STVar;
 };
 
-template <typename ... Alts>
+template <typename... Alts>
 template <detail::ValidAlts T>
-STVariant<Alts ...>::STVariant(SField const& name, T const& arg)
-: STBase(name)
-, alternatives_(arg)
+STVariant<Alts...>::STVariant(SField const& name, T const& arg)
+    : STBase(name), alternatives_(arg)
 {
 }
 
-template <typename ... Alts>
-STVariant<Alts ...>::STVariant(SField const& name)
-: STBase(name)
+template <typename... Alts>
+STVariant<Alts...>::STVariant(SField const& name) : STBase(name)
 {
 }
 
-template <typename ... Alts>
-STVariant<Alts ...>::STVariant(SerialIter& sit, SField const& name)
-: STBase(name)
+template <typename... Alts>
+STVariant<Alts...>::STVariant(SerialIter& sit, SField const& name)
+    : STBase(name)
 {
-    std::visit([&]<typename A>(A&& a) {
-        alternatives_ =
-    }, alternatives_);
+    decode(sit);
 }
 
-template <typename ... Alts>
+template <typename... Alts>
 template <detail::ValidAlts T>
 T const&
-STVariant<Alts ...>::get() const
+STVariant<Alts...>::get() const
 {
+    if (!std::holds_alternative<T>(alternatives_))
+        Throw<std::runtime_error>("The variant doesn't hold alternative");
+    return std::get<T>(alternatives_);
 }
 
-template <typename ... Alts>
+template <typename... Alts>
 template <detail::ValidAlts T>
 T&
-STVariant<Alts ...>::get() const
+STVariant<Alts...>::get()
 {
+    if (!std::holds_alternative<T>(alternatives_))
+        Throw<std::runtime_error>("The variant doesn't hold alternative");
+    return std::get<T>(alternatives_);
 }
 
 // STBase
-template <typename ... Alts>
-SerializedTypeID
-STVariant<Alts ...>::getSType() const
-{
-}
 
-template <typename ... Alts>
+template <typename... Alts>
 std::string
-STVariant<Alts ...>::getText() const
+STVariant<Alts...>::getText() const
 {
+    return std::visit([&](auto&& alt) { return alt.getText(); }, alternatives_);
 }
 
-template <typename ... Alts>
-Json::Value STVariant<Alts ...>::getJson(JsonOptions) const
+template <typename... Alts>
+std::string
+STVariant<Alts...>::getFullText() const
 {
+    return std::visit(
+        [&](auto&& alt) { return alt.getFullText(); }, alternatives_);
 }
 
-template <typename ... Alts>
+template <typename... Alts>
+Json::Value
+STVariant<Alts...>::getJson(JsonOptions) const
+{
+    return std::visit(
+        [&](auto&& alt) { return alt.getJson(JsonOptions::none); },
+        alternatives_);
+}
+
+template <typename... Alts>
 void
-STVariant<Alts ...>::add(Serializer& s) const
+STVariant<Alts...>::add(Serializer& s) const
 {
+    std::visit([&](auto&& alt) { alt.add(s); }, alternatives_);
 }
 
-template <typename ... Alts>
+template <typename... Alts>
 bool
-STVariant<Alts...>::isEquivalent(const STBase& t) const
+STVariant<Alts...>::isDefault() const
 {
+    return std::visit(
+        [&](auto&& alt) { return alt.isDefault(); }, alternatives_);
 }
 
-template <typename ... Alts>
-bool
-STVariant<Alts ...>::isDefault() const
+template <typename... Alts>
+void
+STVariant<Alts...>::setJson(Json::Value& jv) const
 {
+    return std::visit(
+        [&](auto&& alt) { return alt.setJson(jv); }, alternatives_);
 }
 
-template <typename ... Alts>
-std::unique_ptr<STCurrency>
-STVariant<Alts ...>::construct(SerialIter&, SField const& name)
+template <typename... Alts>
+auto const&
+STVariant<Alts...>::getValue() const
 {
+    return alternatives_;
 }
 
-template <typename ... Alts>
-STBase*
-STVariant<Alts ...>::copy(std::size_t n, void* buf) const
+template <typename... Alts>
+auto&
+STVariant<Alts...>::getValue()
 {
+    return alternatives_;
 }
 
-template <typename ... Alts>
-STBase*
-STVariant<Alts ...>::move(std::size_t n, void* buf)
-{
-}
+}  // namespace ripple
 
-} // namespace ripple
-
-#endif // RIPPLE_PROTOCOL_STVARIANT_H_INCLUDED
+#endif  // RIPPLE_PROTOCOL_STVARIANT_H_INCLUDED
