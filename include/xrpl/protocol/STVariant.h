@@ -38,7 +38,10 @@ contains()
 }
 
 template <typename T, typename... Ts>
-concept ValidAlts = requires() { contains<T, Ts...>(); };
+concept ValidAlts = requires()
+{
+    contains<T, Ts...>();
+};
 
 }  // namespace detail
 
@@ -165,8 +168,7 @@ STVariant<Alts...>::getFullText() const
 }
 
 template <typename... Alts>
-Json::Value
-STVariant<Alts...>::getJson(JsonOptions) const
+Json::Value STVariant<Alts...>::getJson(JsonOptions) const
 {
     return std::visit(
         [&](auto&& alt) { return alt.getJson(JsonOptions::none); },
