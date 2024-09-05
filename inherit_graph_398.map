@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classripple_1_1NetworkValidatedLedgers.html" title="This datastructure is used to keep track of the sequence of the most recent ledger validated by the n..." alt="" coords="5,5,188,45"/>
+<area shape="rect" id="node1" href="$classripple_1_1NodeStore_1_1Scheduler.html" title="Scheduling for asynchronous backend activity." alt="" coords="5,35,148,75"/>
+<area shape="rect" id="node2" href="$classripple_1_1NodeStore_1_1DummyScheduler.html" title="Simple NodeStore Scheduler that just peforms the tasks synchronously." alt="" coords="224,5,367,45"/>
+<area shape="rect" id="node3" href="$classripple_1_1NodeStoreScheduler.html" title="A NodeStore::Scheduler which uses the JobQueue." alt="" coords="196,70,395,95"/>
 </map>

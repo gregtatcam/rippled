@@ -1,4 +1,0 @@
-<map id="beast::test::fail_counter" name="beast::test::fail_counter">
-<area shape="rect" id="node1" title="A countdown to simulated failure." alt="" coords="5,93,181,119"/>
-<area shape="rect" id="node2" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/size_t.html" title=" " alt="" coords="49,5,137,31"/>
-</map>

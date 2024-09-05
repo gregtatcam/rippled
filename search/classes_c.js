@@ -94,7 +94,7 @@ var searchData=
   ['memoryfactory_91',['MemoryFactory',['../classripple_1_1NodeStore_1_1MemoryFactory.html',1,'ripple::NodeStore']]],
   ['memotype_92',['memotype',['../classripple_1_1test_1_1jtx_1_1memotype.html',1,'ripple::test::jtx']]],
   ['mersenne_5ftwister_5fengine_93',['mersenne_twister_engine',['http://en.cppreference.com/w/cpp/numeric/random/mersenne_twister_engine.html',1,'std']]],
-  ['message_94',['Message',['../classripple_1_1Message.html',1,'ripple::Message'],['../classripple_1_1PeerFinder_1_1Sim_1_1Message.html',1,'ripple::PeerFinder::Sim::Message']]],
+  ['message_94',['Message',['../classripple_1_1Message.html',1,'ripple']]],
   ['messageheader_95',['MessageHeader',['../structripple_1_1detail_1_1MessageHeader.html',1,'ripple::detail']]],
   ['messages_96',['messages',['http://en.cppreference.com/w/cpp/locale/messages.html',1,'std']]],
   ['messages_5fbase_97',['messages_base',['http://en.cppreference.com/w/cpp/locale/messages_base.html',1,'std']]],

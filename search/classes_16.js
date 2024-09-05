@@ -37,7 +37,7 @@ var searchData=
   ['wofstream_34',['wofstream',['http://en.cppreference.com/w/cpp/io/basic_ofstream.html',1,'std']]],
   ['work_35',['Work',['../classripple_1_1detail_1_1Work.html',1,'ripple::detail']]],
   ['work_36',['work',['../classripple_1_1io__list_1_1work.html',1,'ripple::io_list']]],
-  ['work_37',['Work',['../classripple_1_1PeerFinder_1_1Sim_1_1FunctionQueue_1_1Work.html',1,'ripple::PeerFinder::Sim::FunctionQueue::Work&lt; Function &gt;'],['../structripple_1_1ResolverAsioImpl_1_1Work.html',1,'ripple::ResolverAsioImpl::Work']]],
+  ['work_37',['Work',['../structripple_1_1ResolverAsioImpl_1_1Work.html',1,'ripple::ResolverAsioImpl']]],
   ['workbase_38',['WorkBase',['../classripple_1_1detail_1_1WorkBase.html',1,'ripple::detail']]],
   ['workbase_3c_20workplain_20_3e_39',['WorkBase&lt; WorkPlain &gt;',['../classripple_1_1detail_1_1WorkBase.html',1,'ripple::detail']]],
   ['workbase_3c_20workssl_20_3e_40',['WorkBase&lt; WorkSSL &gt;',['../classripple_1_1detail_1_1WorkBase.html',1,'ripple::detail']]],

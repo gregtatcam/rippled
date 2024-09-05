@@ -5,6 +5,5 @@ var searchData=
   ['consensus_2',['Consensus',['../md_xrpld_consensus_README.html',1,'']]],
   ['consensus_20and_20validation_3',['Consensus and Validation',['../md____w_rippled_rippled_docs_consensus.html',1,'']]],
   ['consensus_20simulation_20framework_4',['Consensus Simulation Framework',['../md_test_csf_README.html',1,'']]],
-  ['continuous_20integration_20_28ci_29_20scripts_5',['Continuous Integration (CI) Scripts',['../md____w_rippled_rippled_bin_ci_README.html',1,'']]],
-  ['contributing_6',['CONTRIBUTING',['../md____w_rippled_rippled_CONTRIBUTING.html',1,'']]]
+  ['contributing_5',['CONTRIBUTING',['../md____w_rippled_rippled_CONTRIBUTING.html',1,'']]]
 ];

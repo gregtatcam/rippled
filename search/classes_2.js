@@ -209,7 +209,7 @@ var searchData=
   ['counter_206',['Counter',['../classbeast_1_1insight_1_1Counter.html',1,'beast::insight::Counter'],['../classripple_1_1CountedObjects_1_1Counter.html',1,'ripple::CountedObjects::Counter']]],
   ['counterdata_207',['CounterData',['../structripple_1_1NetworkOPsImp_1_1StateAccounting_1_1CounterData.html',1,'ripple::NetworkOPsImp::StateAccounting']]],
   ['counterimpl_208',['CounterImpl',['../classbeast_1_1insight_1_1CounterImpl.html',1,'beast::insight']]],
-  ['counters_209',['Counters',['../structripple_1_1NetworkOPsImp_1_1StateAccounting_1_1Counters.html',1,'ripple::NetworkOPsImp::StateAccounting::Counters'],['../structripple_1_1NodeStore_1_1Backend_1_1Counters.html',1,'ripple::NodeStore::Backend::Counters&lt; T &gt;'],['../structripple_1_1perf_1_1PerfLogImp_1_1Counters.html',1,'ripple::perf::PerfLogImp::Counters']]],
+  ['counters_209',['Counters',['../structripple_1_1NetworkOPsImp_1_1StateAccounting_1_1Counters.html',1,'ripple::NetworkOPsImp::StateAccounting::Counters'],['../structripple_1_1perf_1_1PerfLogImp_1_1Counters.html',1,'ripple::perf::PerfLogImp::Counters']]],
   ['countminmax_210',['CountMinMax',['../structripple_1_1RelationalDatabase_1_1CountMinMax.html',1,'ripple::RelationalDatabase']]],
   ['counts_211',['Counts',['../classripple_1_1PeerFinder_1_1Counts.html',1,'ripple::PeerFinder']]],
   ['cout_212',['cout',['http://en.cppreference.com/w/cpp/io/cout.html',1,'std']]],

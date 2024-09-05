@@ -233,9 +233,6 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a6692b0758fc43e2d78520ff5e699e8b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1NodeStore_1_1DatabaseNodeImp.html#a6692b0758fc43e2d78520ff5e699e8b1">for_each</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; void(<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1NodeObject.html">NodeObject</a> &gt;)&gt; f) override</td></tr>
 <tr class="memdesc:a6692b0758fc43e2d78520ff5e699e8b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Visit every object in the database This is usually called during import.  <a href="classripple_1_1NodeStore_1_1DatabaseNodeImp.html#a6692b0758fc43e2d78520ff5e699e8b1">More...</a><br /></td></tr>
 <tr class="separator:a6692b0758fc43e2d78520ff5e699e8b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adeba83456e325491812595234ffd70ad"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1NodeStore_1_1Backend_1_1Counters.html">Backend::Counters</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1NodeStore_1_1DatabaseNodeImp.html#adeba83456e325491812595234ffd70ad">getCounters</a> () const override</td></tr>
-<tr class="memdesc:adeba83456e325491812595234ffd70ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve backend read and write stats.  <a href="classripple_1_1NodeStore_1_1DatabaseNodeImp.html#adeba83456e325491812595234ffd70ad">More...</a><br /></td></tr>
-<tr class="separator:adeba83456e325491812595234ffd70ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c4180512ff87a967de8091a019dc9f9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1NodeStore_1_1Database.html#a7c4180512ff87a967de8091a019dc9f9">threadEntry</a> ()</td></tr>
 <tr class="separator:a7c4180512ff87a967de8091a019dc9f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -839,38 +836,6 @@ Private Attributes</h2></td></tr>
 <p>Implements <a class="el" href="classripple_1_1NodeStore_1_1Database.html#a2b5174a0ffb315030b96815d6ac86eaf">ripple::NodeStore::Database</a>.</p>
 
 <p class="definition">Definition at line <a class="el" href="DatabaseNodeImp_8h_source.html#l00149">149</a> of file <a class="el" href="DatabaseNodeImp_8h_source.html">DatabaseNodeImp.h</a>.</p>
-
-</div>
-</div>
-<a id="adeba83456e325491812595234ffd70ad" name="adeba83456e325491812595234ffd70ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adeba83456e325491812595234ffd70ad">&#9670;&#160;</a></span>getCounters()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structripple_1_1NodeStore_1_1Backend_1_1Counters.html">Backend::Counters</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> &gt; &gt; ripple::NodeStore::DatabaseNodeImp::getCounters </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">private</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Retrieve backend read and write stats. </p>
-<dl class="section note"><dt>Note</dt><dd>The Counters struct is specific to and only used by CassandraBackend. </dd></dl>
-
-<p>Reimplemented from <a class="el" href="classripple_1_1NodeStore_1_1Database.html#a140374f40f5689f069b367ea80e943da">ripple::NodeStore::Database</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="DatabaseNodeImp_8h_source.html#l00155">155</a> of file <a class="el" href="DatabaseNodeImp_8h_source.html">DatabaseNodeImp.h</a>.</p>
 
 </div>
 </div>

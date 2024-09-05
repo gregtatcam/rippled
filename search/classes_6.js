@@ -19,14 +19,10 @@ var searchData=
   ['groups_16',['Groups',['../classbeast_1_1insight_1_1Groups.html',1,'beast::insight']]],
   ['groupsimp_17',['GroupsImp',['../classbeast_1_1insight_1_1detail_1_1GroupsImp.html',1,'beast::insight::detail']]],
   ['grpccontext_18',['GRPCContext',['../structripple_1_1RPC_1_1GRPCContext.html',1,'ripple::RPC']]],
-  ['grpcledgerclient_19',['GrpcLedgerClient',['../classripple_1_1test_1_1ReportingETL__test_1_1GrpcLedgerClient.html',1,'ripple::test::ReportingETL_test']]],
-  ['grpcledgerdataclient_20',['GrpcLedgerDataClient',['../classripple_1_1test_1_1ReportingETL__test_1_1GrpcLedgerDataClient.html',1,'ripple::test::ReportingETL_test']]],
-  ['grpcledgerdiffclient_21',['GrpcLedgerDiffClient',['../classripple_1_1test_1_1ReportingETL__test_1_1GrpcLedgerDiffClient.html',1,'ripple::test::ReportingETL_test']]],
-  ['grpcledgerentryclient_22',['GrpcLedgerEntryClient',['../classripple_1_1test_1_1ReportingETL__test_1_1GrpcLedgerEntryClient.html',1,'ripple::test::ReportingETL_test']]],
-  ['grpcserver_23',['GRPCServer',['../classripple_1_1GRPCServer.html',1,'ripple']]],
-  ['grpcserverimpl_24',['GRPCServerImpl',['../classripple_1_1GRPCServerImpl.html',1,'ripple']]],
-  ['grpctestclientbase_25',['GRPCTestClientBase',['../structripple_1_1test_1_1GRPCTestClientBase.html',1,'ripple::test']]],
-  ['gslice_26',['gslice',['http://en.cppreference.com/w/cpp/numeric/valarray/gslice.html',1,'std']]],
-  ['gslice_5farray_27',['gslice_array',['http://en.cppreference.com/w/cpp/numeric/valarray/gslice_array.html',1,'std']]],
-  ['guard_28',['Guard',['../classripple_1_1Number_1_1Guard.html',1,'ripple::Number']]]
+  ['grpcserver_19',['GRPCServer',['../classripple_1_1GRPCServer.html',1,'ripple']]],
+  ['grpcserverimpl_20',['GRPCServerImpl',['../classripple_1_1GRPCServerImpl.html',1,'ripple']]],
+  ['grpctestclientbase_21',['GRPCTestClientBase',['../structripple_1_1test_1_1GRPCTestClientBase.html',1,'ripple::test']]],
+  ['gslice_22',['gslice',['http://en.cppreference.com/w/cpp/numeric/valarray/gslice.html',1,'std']]],
+  ['gslice_5farray_23',['gslice_array',['http://en.cppreference.com/w/cpp/numeric/valarray/gslice_array.html',1,'std']]],
+  ['guard_24',['Guard',['../classripple_1_1Number_1_1Guard.html',1,'ripple::Number']]]
 ];

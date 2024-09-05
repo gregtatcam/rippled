@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['pipe_0',['pipe',['../classbeast_1_1test_1_1pipe_1_1stream.html#a521f9a9b27a8f53270ceb24792516254',1,'beast::test::pipe::stream']]]
+  ['rcltxset_0',['RCLTxSet',['../classripple_1_1RCLTxSet_1_1MutableTxSet.html#ae77e0f98f13b953d575d7872bf6e1186',1,'ripple::RCLTxSet::MutableTxSet']]],
+  ['stvar_1',['STVar',['../classripple_1_1STInteger.html#aa19bf94528b7060c0be2bce480531c68',1,'ripple::STInteger']]]
 ];
