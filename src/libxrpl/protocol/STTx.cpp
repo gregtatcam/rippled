@@ -143,7 +143,7 @@ STTx::getMentionedAccounts() const
         }
         else if (auto samt = dynamic_cast<STAmount const*>(&it))
         {
-            if (samt->isIssue())
+            if (samt->holds<Issue>())
             {
                 auto const& issuer = samt->getIssuer();
                 if (!isXRP(issuer))
@@ -534,26 +534,44 @@ isMemoOkay(STObject const& st, std::string& reason)
     return true;
 }
 
-// Ensure all account fields are 160-bits and that MPT amount is only passed
-// to Payment or Clawback tx (until MPT is supported in more tx)
+// Ensure all account fields are 160-bits
 static bool
-isAccountAndMPTFieldOkay(STObject const& st)
+isAccountFieldOkay(STObject const& st)
 {
-    auto const txType = st[~sfTransactionType];
-    static std::unordered_set<TxType> const mptAmountTx{ttPAYMENT, ttCLAWBACK};
-    bool const isMPTAmountAllowed = txType &&
-        (mptAmountTx.find(safe_cast<TxType>(*txType)) != mptAmountTx.end());
     for (int i = 0; i < st.getCount(); ++i)
     {
         auto t = dynamic_cast<STAccount const*>(st.peekAtPIndex(i));
         if (t && t->isDefault())
             return false;
-        auto amt = dynamic_cast<STAmount const*>(st.peekAtPIndex(i));
-        if (amt && amt->isMPT() && !isMPTAmountAllowed)
-            return false;
     }
 
     return true;
+}
+
+static bool
+invalidMPTAmountInTx(STObject const& tx)
+{
+    auto const txType = tx[~sfTransactionType];
+    if (!txType)
+        return false;
+    if (auto const* item =
+            TxFormats::getInstance().findByType(safe_cast<TxType>(*txType)))
+    {
+        for (auto const& e : item->getSOTemplate())
+        {
+            if (tx.isFieldPresent(e.sField()) && e.supportMPT() != soeMPTNone)
+            {
+                if (auto const& field = tx.peekAtField(e.sField());
+                    field.getSType() == STI_AMOUNT &&
+                    static_cast<STAmount const&>(field).holds<MPTIssue>())
+                {
+                    if (e.supportMPT() == soeMPTNotSupported)
+                        return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 bool
@@ -562,9 +580,9 @@ passesLocalChecks(STObject const& st, std::string& reason)
     if (!isMemoOkay(st, reason))
         return false;
 
-    if (!isAccountAndMPTFieldOkay(st))
+    if (!isAccountFieldOkay(st))
     {
-        reason = "An account or MPT field is invalid.";
+        reason = "An account field is invalid.";
         return false;
     }
 
@@ -573,6 +591,13 @@ passesLocalChecks(STObject const& st, std::string& reason)
         reason = "Cannot submit pseudo transactions.";
         return false;
     }
+
+    if (invalidMPTAmountInTx(st))
+    {
+        reason = "Amount can not be MPT.";
+        return false;
+    }
+
     return true;
 }
 

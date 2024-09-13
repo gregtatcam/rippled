@@ -60,10 +60,10 @@ class mptpay
 private:
     MPTTester const& tester_;
     Account const& account_;
-    std::uint64_t const amount_;
+    std::int64_t const amount_;
 
 public:
-    mptpay(MPTTester& tester, Account const& account, std::uint64_t amount)
+    mptpay(MPTTester& tester, Account const& account, std::int64_t amount)
         : tester_(tester), account_(account), amount_(amount)
     {
     }
@@ -97,7 +97,7 @@ struct MPTConstr
 
 struct MPTCreate
 {
-    std::optional<std::uint64_t> maxAmt = std::nullopt;
+    std::optional<std::int64_t> maxAmt = std::nullopt;
     std::optional<std::uint8_t> assetScale = std::nullopt;
     std::optional<std::uint16_t> transferFee = std::nullopt;
     std::optional<std::string> metadata = std::nullopt;
@@ -111,7 +111,7 @@ struct MPTCreate
 struct MPTDestroy
 {
     AccountP issuer = nullptr;
-    std::optional<uint192> id = std::nullopt;
+    std::optional<MPTID> id = std::nullopt;
     std::optional<std::uint32_t> ownerCount = std::nullopt;
     std::optional<std::uint32_t> holderCount = std::nullopt;
     std::optional<std::uint32_t> flags = std::nullopt;
@@ -122,7 +122,7 @@ struct MPTAuthorize
 {
     AccountP account = nullptr;
     AccountP holder = nullptr;
-    std::optional<uint192> id = std::nullopt;
+    std::optional<MPTID> id = std::nullopt;
     std::optional<std::uint32_t> ownerCount = std::nullopt;
     std::optional<std::uint32_t> holderCount = std::nullopt;
     std::optional<std::uint32_t> flags = std::nullopt;
@@ -133,7 +133,7 @@ struct MPTSet
 {
     AccountP account = nullptr;
     AccountP holder = nullptr;
-    std::optional<uint192> id = std::nullopt;
+    std::optional<MPTID> id = std::nullopt;
     std::optional<std::uint32_t> ownerCount = std::nullopt;
     std::optional<std::uint32_t> holderCount = std::nullopt;
     std::optional<std::uint32_t> flags = std::nullopt;
@@ -145,9 +145,8 @@ class MPTTester
     Env& env_;
     Account const& issuer_;
     std::unordered_map<std::string, AccountP> const holders_;
-    std::optional<uint192> id_;
+    std::optional<MPTID> id_;
     std::optional<uint256> issuanceKey_;
-    std::optional<ripple::MPT> mpt_;
     bool close_;
 
 public:
@@ -166,11 +165,11 @@ public:
     set(MPTSet const& set = {});
 
     [[nodiscard]] bool
-    checkMPTokenAmount(Account const& holder, std::uint64_t expectedAmount)
+    checkMPTokenAmount(Account const& holder, std::int64_t expectedAmount)
         const;
 
     [[nodiscard]] bool
-    checkMPTokenOutstandingAmount(std::uint64_t expectedAmount) const;
+    checkMPTokenOutstandingAmount(std::int64_t expectedAmount) const;
 
     [[nodiscard]] bool
     checkFlags(uint32_t const expectedFlags, AccountP holder = nullptr) const;
@@ -186,18 +185,18 @@ public:
     void
     pay(Account const& src,
         Account const& dest,
-        std::uint64_t amount,
+        std::int64_t amount,
         std::optional<TER> err = std::nullopt);
 
     void
     claw(
         Account const& issuer,
         Account const& holder,
-        std::uint64_t amount,
+        std::int64_t amount,
         std::optional<TER> err = std::nullopt);
 
     PrettyAmount
-    mpt(std::uint64_t amount) const;
+    mpt(std::int64_t amount) const;
 
     uint256 const&
     issuanceKey() const
@@ -206,14 +205,14 @@ public:
         return *issuanceKey_;
     }
 
-    uint192 const&
+    MPTID const&
     issuanceID() const
     {
         assert(id_);
         return *id_;
     }
 
-    std::uint64_t
+    std::int64_t
     getAmount(Account const& account) const;
 
 private:

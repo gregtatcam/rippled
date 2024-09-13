@@ -103,61 +103,61 @@ JSS(MPTokenIssuanceDestroy);  // transaction type.
 JSS(MPTokenAuthorize);        // transaction type.
 JSS(MPTokenIssuanceSet);      // transaction type.
 JSS(MPTokenIssuanceID);       // in: MPTokenIssuanceDestroy, MPTokenAuthorize
-JSS(NetworkID);            // field.
-JSS(NFTokenBurn);          // transaction type.
-JSS(NFTokenMint);          // transaction type.
-JSS(NFTokenOffer);         // ledger type.
-JSS(NFTokenAcceptOffer);   // transaction type.
-JSS(NFTokenCancelOffer);   // transaction type.
-JSS(NFTokenCreateOffer);   // transaction type.
-JSS(NFTokenPage);          // ledger type.
-JSS(LedgerStateFix);       // transaction type.
-JSS(LPTokenOut);           // in: AMM Liquidity Provider deposit tokens
-JSS(LPTokenIn);            // in: AMM Liquidity Provider withdraw tokens
-JSS(LPToken);              // out: AMM Liquidity Provider tokens info
-JSS(Offer);                // ledger type.
-JSS(OfferCancel);          // transaction type.
-JSS(OfferCreate);          // transaction type.
-JSS(OfferSequence);        // field.
-JSS(Oracle);               // ledger type.
-JSS(OracleDelete);         // transaction type.
-JSS(OracleDocumentID);     // field
-JSS(OracleSet);            // transaction type.
-JSS(Owner);                // field
-JSS(Paths);                // in/out: TransactionSign
-JSS(PayChannel);           // ledger type.
-JSS(Payment);              // transaction type.
-JSS(PaymentChannelClaim);  // transaction type.
-JSS(PaymentChannelCreate);               // transaction type.
-JSS(PaymentChannelFund);                 // transaction type.
-JSS(PriceDataSeries);                    // field.
-JSS(PriceData);                          // field.
-JSS(Provider);                           // field.
-JSS(QuoteAsset);                         // in: Oracle.
-JSS(RippleState);                        // ledger type.
-JSS(SLE_hit_rate);                       // out: GetCounts.
-JSS(SetFee);                             // transaction type.
-JSS(UNLModify);                          // transaction type.
-JSS(Scale);                              // field.
-JSS(SettleDelay);                        // in: TransactionSign
-JSS(SendMax);                            // in: TransactionSign
-JSS(Sequence);                           // in/out: TransactionSign; field.
-JSS(SetFlag);                            // field.
-JSS(SetRegularKey);                      // transaction type.
-JSS(SignerList);                         // ledger type.
-JSS(SignerListSet);                      // transaction type.
-JSS(SigningPubKey);                      // field.
-JSS(TakerGets);                          // field.
-JSS(TakerPays);                          // field.
-JSS(Ticket);                             // ledger type.
-JSS(TicketCreate);                       // transaction type.
-JSS(TxnSignature);                       // field.
-JSS(TradingFee);                         // in/out: AMM trading fee
-JSS(TransactionType);                    // in: TransactionSign.
-JSS(TransferRate);                       // in: TransferRate.
-JSS(TrustSet);                           // transaction type.
-JSS(URI);                                // field.
-JSS(VoteSlots);                          // out: AMM Vote
+JSS(NetworkID);               // field.
+JSS(NFTokenBurn);             // transaction type.
+JSS(NFTokenMint);             // transaction type.
+JSS(NFTokenOffer);            // ledger type.
+JSS(NFTokenAcceptOffer);      // transaction type.
+JSS(NFTokenCancelOffer);      // transaction type.
+JSS(NFTokenCreateOffer);      // transaction type.
+JSS(NFTokenPage);             // ledger type.
+JSS(LedgerStateFix);          // transaction type.
+JSS(LPTokenOut);              // in: AMM Liquidity Provider deposit tokens
+JSS(LPTokenIn);               // in: AMM Liquidity Provider withdraw tokens
+JSS(LPToken);                 // out: AMM Liquidity Provider tokens info
+JSS(Offer);                   // ledger type.
+JSS(OfferCancel);             // transaction type.
+JSS(OfferCreate);             // transaction type.
+JSS(OfferSequence);           // field.
+JSS(Oracle);                  // ledger type.
+JSS(OracleDelete);            // transaction type.
+JSS(OracleDocumentID);        // field
+JSS(OracleSet);               // transaction type.
+JSS(Owner);                   // field
+JSS(Paths);                   // in/out: TransactionSign
+JSS(PayChannel);              // ledger type.
+JSS(Payment);                 // transaction type.
+JSS(PaymentChannelClaim);     // transaction type.
+JSS(PaymentChannelCreate);    // transaction type.
+JSS(PaymentChannelFund);      // transaction type.
+JSS(PriceDataSeries);         // field.
+JSS(PriceData);               // field.
+JSS(Provider);                // field.
+JSS(QuoteAsset);              // in: Oracle.
+JSS(RippleState);             // ledger type.
+JSS(SLE_hit_rate);            // out: GetCounts.
+JSS(SetFee);                  // transaction type.
+JSS(UNLModify);               // transaction type.
+JSS(Scale);                   // field.
+JSS(SettleDelay);             // in: TransactionSign
+JSS(SendMax);                 // in: TransactionSign
+JSS(Sequence);                // in/out: TransactionSign; field.
+JSS(SetFlag);                 // field.
+JSS(SetRegularKey);           // transaction type.
+JSS(SignerList);              // ledger type.
+JSS(SignerListSet);           // transaction type.
+JSS(SigningPubKey);           // field.
+JSS(TakerGets);               // field.
+JSS(TakerPays);               // field.
+JSS(Ticket);                  // ledger type.
+JSS(TicketCreate);            // transaction type.
+JSS(TxnSignature);            // field.
+JSS(TradingFee);              // in/out: AMM trading fee
+JSS(TransactionType);         // in: TransactionSign.
+JSS(TransferRate);            // in: TransferRate.
+JSS(TrustSet);                // transaction type.
+JSS(URI);                     // field.
+JSS(VoteSlots);               // out: AMM Vote
 JSS(XChainAddAccountCreateAttestation);  // transaction type.
 JSS(XChainAddClaimAttestation);          // transaction type.
 JSS(XChainAccountCreateCommit);          // transaction type.

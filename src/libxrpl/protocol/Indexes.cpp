@@ -137,10 +137,10 @@ getTicketIndex(AccountID const& account, SeqProxy ticketSeq)
     return getTicketIndex(account, ticketSeq.value());
 }
 
-uint192
+MPTID
 getMptID(AccountID const& account, std::uint32_t sequence)
 {
-    uint192 u;
+    MPTID u;
     sequence = boost::endian::native_to_big(sequence);
     memcpy(u.data(), &sequence, sizeof(sequence));
     memcpy(u.data() + sizeof(sequence), account.data(), sizeof(account));
@@ -470,29 +470,16 @@ mptIssuance(AccountID const& issuer, std::uint32_t seq) noexcept
 }
 
 Keylet
-mptIssuance(ripple::MPT const& mpt) noexcept
-{
-    return mptIssuance(mpt.second, mpt.first);
-}
-
-Keylet
-mptIssuance(uint192 const& mpt) noexcept
+mptIssuance(MPTID const& id) noexcept
 {
     return {
-        ltMPTOKEN_ISSUANCE, indexHash(LedgerNameSpace::MPTOKEN_ISSUANCE, mpt)};
+        ltMPTOKEN_ISSUANCE, indexHash(LedgerNameSpace::MPTOKEN_ISSUANCE, id)};
 }
 
 Keylet
-mptoken(uint192 const& issuanceID, AccountID const& holder) noexcept
+mptoken(MPTID const& issuanceID, AccountID const& holder) noexcept
 {
     return mptoken(mptIssuance(issuanceID).key, holder);
-}
-
-Keylet
-mptoken(MPT const& mptID, AccountID const& holder) noexcept
-{
-    return mptoken(
-        mptIssuance(getMptID(mptID.second, mptID.first)).key, holder);
 }
 
 Keylet

@@ -115,6 +115,12 @@ noIssue()
     return issue;
 }
 
+inline bool
+isXRP(Issue const& issue)
+{
+    return issue == xrpIssue();
+}
+
 }  // namespace ripple
 
 #endif

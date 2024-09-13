@@ -17,61 +17,69 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_PROTOCOL_MPTISSUE_H_INCLUDED
-#define RIPPLE_PROTOCOL_MPTISSUE_H_INCLUDED
-
-#include <xrpl/protocol/AccountID.h>
-#include <xrpl/protocol/UintTypes.h>
+#include <xrpl/basics/MPTAmount.h>
 
 namespace ripple {
 
-class MPTIssue
+MPTAmount&
+MPTAmount::operator+=(MPTAmount const& other)
 {
-private:
-    MPTID mptID_;
-
-public:
-    MPTIssue() = default;
-
-    MPTIssue(MPTID const& id);
-
-    AccountID const&
-    getIssuer() const;
-
-    MPTID const&
-    getMptID() const;
-
-    friend constexpr bool
-    operator==(MPTIssue const& lhs, MPTIssue const& rhs);
-
-    friend constexpr bool
-    operator!=(MPTIssue const& lhs, MPTIssue const& rhs);
-};
-
-constexpr bool
-operator==(MPTIssue const& lhs, MPTIssue const& rhs)
-{
-    return lhs.mptID_ == rhs.mptID_;
+    value_ += other.value();
+    return *this;
 }
 
-constexpr bool
-operator!=(MPTIssue const& lhs, MPTIssue const& rhs)
+MPTAmount&
+MPTAmount::operator-=(MPTAmount const& other)
 {
-    return !(lhs.mptID_ == rhs.mptID_);
+    value_ -= other.value();
+    return *this;
 }
 
-inline bool
-isXRP(MPTID const&)
+MPTAmount
+MPTAmount::operator-() const
 {
-    return false;
+    return MPTAmount{-value_};
+}
+
+bool
+MPTAmount::operator==(MPTAmount const& other) const
+{
+    return value_ == other.value_;
+}
+
+bool
+MPTAmount::operator==(value_type other) const
+{
+    return value_ == other;
+}
+
+bool
+MPTAmount::operator<(MPTAmount const& other) const
+{
+    return value_ < other.value_;
 }
 
 Json::Value
-to_json(MPTIssue const& issue);
+MPTAmount::jsonClipped() const
+{
+    static_assert(
+        std::is_signed_v<value_type> && std::is_integral_v<value_type>,
+        "Expected MPTAmount to be a signed integral type");
 
-std::string
-to_string(MPTIssue const& mpt);
+    constexpr auto min = std::numeric_limits<Json::Int>::min();
+    constexpr auto max = std::numeric_limits<Json::Int>::max();
+
+    if (value_ < min)
+        return min;
+    if (value_ > max)
+        return max;
+    return static_cast<Json::Int>(value_);
+}
+
+MPTAmount
+MPTAmount::minPositiveAmount()
+{
+    return MPTAmount{1};
+}
 
 }  // namespace ripple
-
-#endif  // RIPPLE_PROTOCOL_MPTISSUE_H_INCLUDED

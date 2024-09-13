@@ -213,7 +213,7 @@ inline Number::Number(XRPAmount const& x) : Number{x.drops()}
 {
 }
 
-inline Number::Number(MPTAmount const& x) : Number{x.mpt()}
+inline Number::Number(MPTAmount const& x) : Number{x.value()}
 {
 }
 

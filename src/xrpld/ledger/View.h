@@ -235,7 +235,7 @@ forEachItemAfter(
 transferRate(ReadView const& view, AccountID const& issuer);
 
 [[nodiscard]] Rate
-transferRateMPT(ReadView const& view, MPT const& id);
+transferRate(ReadView const& view, MPTID const& id);
 
 /** Returns `true` if the directory is empty
     @param key The key of the directory

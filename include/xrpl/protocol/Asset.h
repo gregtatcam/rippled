@@ -26,10 +26,15 @@
 
 namespace ripple {
 
+template <typename TIss>
+concept ValidIssueType =
+    std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>;
+
 class Asset
 {
 private:
-    std::variant<Issue, MPTIssue> asset_;
+    using value_type = std::variant<Issue, MPTIssue>;
+    value_type issue_;
 
 public:
     Asset() = default;
@@ -38,9 +43,7 @@ public:
 
     Asset(MPTIssue const& mpt);
 
-    Asset(MPT const& mpt);
-
-    Asset(uint192 const& mptID);
+    Asset(MPTID const& mpt);
 
     explicit operator Issue() const;
 
@@ -49,26 +52,26 @@ public:
     AccountID const&
     getIssuer() const;
 
-    constexpr Issue const&
-    issue() const;
+    template <ValidIssueType TIss>
+    constexpr TIss const&
+    get() const;
 
-    Issue&
-    issue();
+    template <ValidIssueType TIss>
+    TIss&
+    get();
 
-    constexpr MPTIssue const&
-    mptIssue() const;
-
-    MPTIssue&
-    mptIssue();
-
+    template <ValidIssueType TIss>
     constexpr bool
-    isMPT() const;
-
-    constexpr bool
-    isIssue() const;
+    holds() const;
 
     std::string
     getText() const;
+
+    constexpr value_type const&
+    value() const;
+
+    void
+    setJson(Json::Value& jv) const;
 
     friend constexpr bool
     operator==(Asset const& lhs, Asset const& rhs);
@@ -77,42 +80,50 @@ public:
     operator!=(Asset const& lhs, Asset const& rhs);
 };
 
+template <ValidIssueType TIss>
 constexpr bool
-Asset::isMPT() const
+Asset::holds() const
 {
-    return std::holds_alternative<MPTIssue>(asset_);
+    return std::holds_alternative<TIss>(issue_);
 }
 
-constexpr bool
-Asset::isIssue() const
+template <ValidIssueType TIss>
+constexpr TIss const&
+Asset::get() const
 {
-    return std::holds_alternative<Issue>(asset_);
+    if (!std::holds_alternative<TIss>(issue_))
+        Throw<std::logic_error>("Asset is not a requested issue");
+    return std::get<TIss>(issue_);
 }
 
-constexpr Issue const&
-Asset::issue() const
+template <ValidIssueType TIss>
+TIss&
+Asset::get()
 {
-    if (!std::holds_alternative<Issue>(asset_))
-        Throw<std::logic_error>("Asset is not Issue");
-    return std::get<Issue>(asset_);
+    if (!std::holds_alternative<TIss>(issue_))
+        Throw<std::logic_error>("Asset is not a requested issue");
+    return std::get<TIss>(issue_);
 }
 
-constexpr MPTIssue const&
-Asset::mptIssue() const
+constexpr Asset::value_type const&
+Asset::value() const
 {
-    if (!std::holds_alternative<MPTIssue>(asset_))
-        Throw<std::logic_error>("Asset is not MPT");
-    return std::get<MPTIssue>(asset_);
+    return issue_;
 }
 
 constexpr bool
 operator==(Asset const& lhs, Asset const& rhs)
 {
-    if (lhs.isIssue() != rhs.isIssue())
-        Throw<std::logic_error>("Assets are not comparable");
-    if (lhs.isIssue())
-        return lhs.issue() == rhs.issue();
-    return lhs.mptIssue() == lhs.mptIssue();
+    return std::visit(
+        [&]<typename TLhs, typename TRhs>(
+            TLhs const& issLhs, TRhs const& issRhs) {
+            if constexpr (std::is_same_v<TLhs, TRhs>)
+                return issLhs == issRhs;
+            else
+                return false;
+        },
+        lhs.issue_,
+        rhs.issue_);
 }
 
 constexpr bool
@@ -121,14 +132,14 @@ operator!=(Asset const& lhs, Asset const& rhs)
     return !(lhs == rhs);
 }
 
+inline bool
+isXRP(Asset const& asset)
+{
+    return asset.holds<Issue>() && isXRP(asset.get<Issue>());
+}
+
 std::string
 to_string(Asset const& asset);
-
-std::string
-to_string(MPTIssue const& mpt);
-
-std::string
-to_string(MPT const& mpt);
 
 bool
 validJSONAsset(Json::Value const& jv);

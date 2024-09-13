@@ -23,96 +23,70 @@
 
 namespace ripple {
 
-Asset::Asset(Issue const& issue) : asset_(issue)
+Asset::Asset(Issue const& issue) : issue_(issue)
 {
 }
 
-Asset::Asset(MPTIssue const& mpt) : asset_(mpt)
+Asset::Asset(MPTIssue const& mpt) : issue_(mpt)
 {
 }
 
-Asset::Asset(MPT const& mpt) : asset_(MPTIssue{mpt})
+Asset::Asset(MPTID const& mpt) : issue_(MPTIssue{mpt})
 {
 }
 
 Asset::operator Issue() const
 {
-    return issue();
+    return get<Issue>();
 }
 
 Asset::operator MPTIssue() const
 {
-    return mptIssue();
+    return get<MPTIssue>();
 }
 
 AccountID const&
 Asset::getIssuer() const
 {
-    if (isIssue())
-        return issue().getIssuer();
-    return mptIssue().getIssuer();
-}
-
-Asset::Asset(uint192 const& u)
-{
-    std::uint32_t sequence;
-    AccountID account;
-    memcpy(&sequence, u.data(), sizeof(sequence));
-    sequence = boost::endian::big_to_native(sequence);
-    memcpy(account.data(), u.data() + sizeof(sequence), sizeof(AccountID));
-    asset_ = std::make_pair(sequence, account);
-}
-
-Issue&
-Asset::issue()
-{
-    if (!std::holds_alternative<Issue>(asset_))
-        Throw<std::logic_error>("Asset is not Issue");
-    return std::get<Issue>(asset_);
-}
-
-MPTIssue&
-Asset::mptIssue()
-{
-    if (!std::holds_alternative<MPTIssue>(asset_))
-        Throw<std::logic_error>("Asset is not MPT");
-    return std::get<MPTIssue>(asset_);
+    if (holds<Issue>())
+        return get<Issue>().getIssuer();
+    return get<MPTIssue>().getIssuer();
 }
 
 std::string
 Asset::getText() const
 {
-    if (isIssue())
-        return issue().getText();
-    return to_string(mptIssue().getMptID());
+    if (holds<Issue>())
+        return get<Issue>().getText();
+    return to_string(get<MPTIssue>().getMptID());
+}
+
+void
+Asset::setJson(Json::Value& jv) const
+{
+    if (holds<MPTIssue>())
+        jv[jss::mpt_issuance_id] = to_string(get<MPTIssue>().getMptID());
+    else
+    {
+        jv[jss::currency] = to_string(get<Issue>().currency);
+        jv[jss::issuer] = to_string(get<Issue>().account);
+    }
 }
 
 std::string
 to_string(Asset const& asset)
 {
-    if (asset.isIssue())
-        return to_string(asset.issue());
-    return to_string(asset.mptIssue().getMptID());
-}
-
-std::string
-to_string(MPTIssue const& mptIssue)
-{
-    return to_string(mptIssue.getMptID());
-}
-
-std::string
-to_string(MPT const& mpt)
-{
-    return to_string(getMptID(mpt.second, mpt.first));
+    if (asset.holds<Issue>())
+        return to_string(asset.get<Issue>());
+    return to_string(asset.get<MPTIssue>().getMptID());
 }
 
 bool
 validJSONAsset(Json::Value const& jv)
 {
-    return (jv.isMember(jss::currency) && !jv.isMember(jss::mpt_issuance_id)) ||
-        (!jv.isMember(jss::currency) && !jv.isMember(jss::issuer) &&
-         jv.isMember(jss::mpt_issuance_id));
+    if (jv.isMember(jss::mpt_issuance_id))
+        return !(jv.isMember(jss::currency) || jv.isMember(jss::issuer));
+    return jv.isMember(jss::currency);
 }
 
 }  // namespace ripple

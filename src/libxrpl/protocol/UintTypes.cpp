@@ -125,13 +125,6 @@ noCurrency()
     return currency;
 }
 
-MPT const&
-noMPT()
-{
-    static MPT const mpt{0, noAccount()};
-    return mpt;
-}
-
 Currency const&
 badCurrency()
 {

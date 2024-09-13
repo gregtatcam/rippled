@@ -366,14 +366,14 @@ class MPT
 {
 public:
     std::string name;
-    ripple::MPT mptID;
+    ripple::MPTID mptID;
 
-    MPT(std::string const& n, ripple::MPT const& mptID_)
+    MPT(std::string const& n, ripple::MPTID const& mptID_)
         : name(n), mptID(mptID_)
     {
     }
 
-    ripple::MPT const&
+    ripple::MPTID const&
     mpt() const
     {
         return mptID;
@@ -384,7 +384,7 @@ public:
         This allows passing an MPT
         value where an Issue is expected.
     */
-    operator ripple::MPT() const
+    operator ripple::MPTID() const
     {
         return mpt();
     }

@@ -94,8 +94,7 @@ MPTTester::create(const MPTCreate& arg)
 {
     if (issuanceKey_)
         Throw<std::runtime_error>("MPT can't be reused");
-    mpt_ = std::make_pair(env_.seq(issuer_), issuer_.id());
-    id_ = getMptID(issuer_.id(), mpt_->first);
+    id_ = getMptID(issuer_.id(), env_.seq(issuer_));
     issuanceKey_ = keylet::mptIssuance(*id_).key;
     Json::Value jv;
     jv[sfAccount.jsonName] = issuer_.human();
@@ -119,7 +118,6 @@ MPTTester::create(const MPTCreate& arg)
 
         id_.reset();
         issuanceKey_.reset();
-        mpt_.reset();
     }
     else if (arg.flags)
         env_.require(mptflags(*this, *arg.flags));
@@ -278,7 +276,7 @@ MPTTester::forObject(
 [[nodiscard]] bool
 MPTTester::checkMPTokenAmount(
     Account const& holder_,
-    std::uint64_t expectedAmount) const
+    std::int64_t expectedAmount) const
 {
     return forObject(
         [&](SLEP const& sle) { return expectedAmount == (*sle)[sfMPTAmount]; },
@@ -286,7 +284,7 @@ MPTTester::checkMPTokenAmount(
 }
 
 [[nodiscard]] bool
-MPTTester::checkMPTokenOutstandingAmount(std::uint64_t expectedAmount) const
+MPTTester::checkMPTokenOutstandingAmount(std::int64_t expectedAmount) const
 {
     return forObject([&](SLEP const& sle) {
         return expectedAmount == (*sle)[sfOutstandingAmount];
@@ -303,10 +301,10 @@ void
 MPTTester::pay(
     Account const& src,
     Account const& dest,
-    std::uint64_t amount,
+    std::int64_t amount,
     std::optional<TER> err)
 {
-    assert(mpt_);
+    assert(id_);
     auto const srcAmt = getAmount(src);
     auto const destAmt = getAmount(dest);
     auto const outstnAmt = getAmount(issuer_);
@@ -330,15 +328,15 @@ MPTTester::pay(
     }
     else
     {
-        STAmount const saAmount = {*mpt_, amount};
+        STAmount const saAmount = {*id_, amount};
         STAmount const saActual =
-            multiply(saAmount, transferRateMPT(*env_.current(), *mpt_));
+            multiply(saAmount, transferRate(*env_.current(), *id_));
         // Sender pays the transfer fee if any
-        env_.require(mptpay(*this, src, srcAmt - saActual.mpt().mpt()));
+        env_.require(mptpay(*this, src, srcAmt - saActual.mpt().value()));
         env_.require(mptpay(*this, dest, destAmt + amount));
         // Outstanding amount is reduced by the transfer fee if any
         env_.require(mptpay(
-            *this, issuer_, outstnAmt - (saActual - saAmount).mpt().mpt()));
+            *this, issuer_, outstnAmt - (saActual - saAmount).mpt().value()));
     }
 }
 
@@ -346,10 +344,10 @@ void
 MPTTester::claw(
     Account const& issuer,
     Account const& holder,
-    std::uint64_t amount,
+    std::int64_t amount,
     std::optional<TER> err)
 {
-    assert(mpt_);
+    assert(id_);
     auto const issuerAmt = getAmount(issuer);
     auto const holderAmt = getAmount(holder);
     if (err)
@@ -368,13 +366,13 @@ MPTTester::claw(
 }
 
 PrettyAmount
-MPTTester::mpt(std::uint64_t amount) const
+MPTTester::mpt(std::int64_t amount) const
 {
-    assert(mpt_);
-    return ripple::test::jtx::MPT(issuer_.name(), *mpt_)(amount);
+    assert(id_);
+    return ripple::test::jtx::MPT(issuer_.name(), *id_)(amount);
 }
 
-std::uint64_t
+std::int64_t
 MPTTester::getAmount(Account const& account) const
 {
     assert(issuanceKey_);
@@ -396,12 +394,13 @@ std::uint32_t
 MPTTester::getFlags(ripple::test::jtx::AccountP holder) const
 {
     std::uint32_t flags = 0;
-    assert(forObject(
-        [&](SLEP const& sle) {
-            flags = sle->getFlags();
-            return true;
-        },
-        holder));
+    if (!forObject(
+            [&](SLEP const& sle) {
+                flags = sle->getFlags();
+                return true;
+            },
+            holder))
+        Throw<std::runtime_error>("Failed to get the flags");
     return flags;
 }
 

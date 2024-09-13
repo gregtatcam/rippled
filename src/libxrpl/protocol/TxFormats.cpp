@@ -162,7 +162,7 @@ TxFormats::TxFormats()
         ttPAYMENT,
         {
             {sfDestination, soeREQUIRED},
-            {sfAmount, soeREQUIRED},
+            {sfAmount, soeREQUIRED, soeMPTSupported},
             {sfSendMax, soeOPTIONAL},
             {sfPaths, soeDEFAULT},
             {sfInvoiceID, soeOPTIONAL},
@@ -377,7 +377,7 @@ TxFormats::TxFormats()
     add(jss::Clawback,
         ttCLAWBACK,
         {
-            {sfAmount, soeREQUIRED},
+            {sfAmount, soeREQUIRED, soeMPTSupported},
             {sfMPTokenHolder, soeOPTIONAL},
         },
         commonFields);

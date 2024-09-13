@@ -180,7 +180,7 @@ isGlobalFrozen(ReadView const& view, AccountID const& issuer)
 bool
 isGlobalFrozen(ReadView const& view, MPTIssue const& mpt)
 {
-    if (auto const sle = view.read(keylet::mptIssuance(mpt.mpt())))
+    if (auto const sle = view.read(keylet::mptIssuance(mpt.getMptID())))
         return sle->getFlags() & lsfMPTLocked;
     return false;
 }
@@ -211,7 +211,7 @@ isIndividualFrozen(
     AccountID const& account,
     MPTIssue const& mpt)
 {
-    if (auto const sle = view.read(keylet::mptoken(mpt.mpt(), account)))
+    if (auto const sle = view.read(keylet::mptoken(mpt.getMptID(), account)))
         return sle->getFlags() & lsfMPTLocked;
     return false;
 }
@@ -316,7 +316,7 @@ accountHolds(
 {
     STAmount amount;
 
-    auto const sleMpt = view.read(keylet::mptoken(issue.mpt(), account));
+    auto const sleMpt = view.read(keylet::mptoken(issue.getMptID(), account));
     if (!sleMpt)
         amount.clear(issue);
     else if (zeroIfFrozen == fhZERO_IF_FROZEN && isFrozen(view, account, issue))
@@ -564,7 +564,7 @@ transferRate(ReadView const& view, AccountID const& issuer)
 }
 
 Rate
-transferRateMPT(ReadView const& view, MPT const& id)
+transferRate(ReadView const& view, MPTID const& id)
 {
     auto const sle = view.read(keylet::mptIssuance(id));
 
@@ -1235,7 +1235,7 @@ accountSend(
     }
     else
     {
-        assert(saAmount >= beast::zero && !saAmount.isMPT());
+        assert(saAmount >= beast::zero && !saAmount.holds<MPTIssue>());
     }
 
     /* If we aren't sending anything or if the sender is the same as the
@@ -1352,10 +1352,25 @@ rippleSendMPT(
 
     if (uSenderID == issuer || uReceiverID == issuer || issuer == noAccount())
     {
+        // if sender is issuer, check that the new OutstandingAmount will not
+        // exceed MaximumAmount
+        if (uSenderID == issuer)
+        {
+            auto const mptID =
+                keylet::mptIssuance(saAmount.get<MPTIssue>().getMptID());
+            auto const sle = view.peek(mptID);
+            if (!sle)
+                return tecMPT_ISSUANCE_NOT_FOUND;
+
+            if (sle->getFieldU64(sfOutstandingAmount) + saAmount.mpt().value() >
+                (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount))
+                return tecMPT_MAX_AMOUNT_EXCEEDED;
+        }
+
         // Direct send: redeeming IOUs and/or sending own IOUs.
         auto const ter =
             rippleMPTCredit(view, uSenderID, uReceiverID, saAmount, j);
-        if (view.rules().enabled(featureDeletableAccounts) && ter != tesSUCCESS)
+        if (ter != tesSUCCESS)
             return ter;
         saActual = saAmount;
         return tesSUCCESS;
@@ -1363,14 +1378,13 @@ rippleSendMPT(
 
     // Sending 3rd party MPTs: transit.
     if (auto const sle =
-            view.read(keylet::mptIssuance(saAmount.mptIssue().mpt())))
+            view.read(keylet::mptIssuance(saAmount.get<MPTIssue>().getMptID())))
     {
         saActual = (waiveFee == WaiveTransferFee::Yes)
             ? saAmount
             : multiply(
                   saAmount,
-                  transferRateMPT(
-                      view, static_cast<MPT>(saAmount.mptIssue().mpt())));
+                  transferRate(view, saAmount.get<MPTIssue>().getMptID()));
 
         JLOG(j.debug()) << "rippleSend> " << to_string(uSenderID) << " - > "
                         << to_string(uReceiverID)
@@ -1381,8 +1395,8 @@ rippleSendMPT(
                 rippleMPTCredit(view, issuer, uReceiverID, saAmount, j);
             terResult != tesSUCCESS)
             return terResult;
-        else
-            return rippleMPTCredit(view, uSenderID, issuer, saActual, j);
+
+        return rippleMPTCredit(view, uSenderID, issuer, saActual, j);
     }
 
     return tecINTERNAL;
@@ -1397,7 +1411,7 @@ accountSendMPT(
     beast::Journal j,
     WaiveTransferFee waiveFee)
 {
-    assert(saAmount >= beast::zero && saAmount.isMPT());
+    assert(saAmount >= beast::zero && saAmount.holds<MPTIssue>());
 
     /* If we aren't sending anything or if the sender is the same as the
      * receiver then we don't need to do anything.
@@ -1695,7 +1709,7 @@ requireAuth(ReadView const& view, Issue const& issue, AccountID const& account)
 TER
 requireAuth(ReadView const& view, MPTIssue const& mpt, AccountID const& account)
 {
-    auto const mptID = keylet::mptIssuance(mpt.mpt());
+    auto const mptID = keylet::mptIssuance(mpt.getMptID());
     if (auto const sle = view.read(mptID);
         sle && sle->getFieldU32(sfFlags) & lsfMPTRequireAuth)
     {
@@ -1715,7 +1729,7 @@ canTransfer(
     AccountID const& from,
     AccountID const& to)
 {
-    auto const mptID = keylet::mptIssuance(mpt.mpt());
+    auto const mptID = keylet::mptIssuance(mpt.getMptID());
     if (auto const sle = view.read(mptID);
         sle && !(sle->getFieldU32(sfFlags) & lsfMPTCanTransfer))
     {
@@ -1858,19 +1872,17 @@ rippleMPTCredit(
     STAmount saAmount,
     beast::Journal j)
 {
-    auto const mptID = keylet::mptIssuance(saAmount.mptIssue().mpt());
+    auto const mptID = keylet::mptIssuance(saAmount.get<MPTIssue>().getMptID());
     auto const issuer = saAmount.getIssuer();
+    if (!view.exists(mptID))
+        return tecMPT_ISSUANCE_NOT_FOUND;
     if (uSenderID == issuer)
     {
         if (auto sle = view.peek(mptID))
         {
             sle->setFieldU64(
                 sfOutstandingAmount,
-                sle->getFieldU64(sfOutstandingAmount) + saAmount.mpt().mpt());
-
-            if (sle->getFieldU64(sfOutstandingAmount) >
-                (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount))
-                return tecMPT_MAX_AMOUNT_EXCEEDED;
+                sle->getFieldU64(sfOutstandingAmount) + saAmount.mpt().value());
 
             view.update(sle);
         }
@@ -1883,7 +1895,7 @@ rippleMPTCredit(
         if (auto sle = view.peek(mptokenID))
         {
             auto const amt = sle->getFieldU64(sfMPTAmount);
-            auto const pay = saAmount.mpt().mpt();
+            auto const pay = saAmount.mpt().value();
             if (amt >= pay)
             {
                 if (amt == pay)
@@ -1895,6 +1907,8 @@ rippleMPTCredit(
             else
                 return tecINSUFFICIENT_FUNDS;
         }
+        else
+            return tecNO_AUTH;
     }
 
     if (uReceiverID == issuer)
@@ -1902,7 +1916,7 @@ rippleMPTCredit(
         if (auto sle = view.peek(mptID))
         {
             auto const outstanding = sle->getFieldU64(sfOutstandingAmount);
-            auto const redeem = saAmount.mpt().mpt();
+            auto const redeem = saAmount.mpt().value();
             if (outstanding >= redeem)
             {
                 sle->setFieldU64(sfOutstandingAmount, outstanding - redeem);
@@ -1921,9 +1935,11 @@ rippleMPTCredit(
         {
             sle->setFieldU64(
                 sfMPTAmount,
-                sle->getFieldU64(sfMPTAmount) + saAmount.mpt().mpt());
+                sle->getFieldU64(sfMPTAmount) + saAmount.mpt().value());
             view.update(sle);
         }
+        else
+            return tecNO_AUTH;
     }
     return tesSUCCESS;
 }

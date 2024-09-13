@@ -35,7 +35,7 @@
 namespace ripple {
 
 template <typename A>
-concept AssetType = std::is_same_v<A, Issue> || std::is_same_v<A, MPT> ||
+concept AssetType = std::is_same_v<A, Issue> || std::is_same_v<A, MPTID> ||
     std::is_same_v<A, Asset> || std::is_convertible_v<A, Issue> ||
     std::is_convertible_v<A, Asset>;
 
@@ -188,14 +188,9 @@ public:
     bool
     native() const noexcept;
 
-    bool
-    isMPT() const noexcept;
-
-    bool
-    isIssue() const noexcept;
-
-    bool
-    isIOU() const noexcept;
+    template <ValidIssueType TIss>
+    constexpr bool
+    holds() const noexcept;
 
     std::string
     getTypeName() const noexcept;
@@ -209,11 +204,12 @@ public:
     Asset const&
     asset() const;
 
+    template <ValidIssueType TIss>
+    constexpr TIss const&
+    get() const;
+
     Issue const&
     issue() const;
-
-    MPTIssue const&
-    mptIssue() const;
 
     // These three are deprecated
     Currency const&
@@ -273,7 +269,7 @@ public:
     clear(Issue const& issue);
 
     void
-    clear(MPT const& mpt);
+    clear(MPTID const& mpt);
 
     void
     setIssuer(AccountID const& uIssuer);
@@ -469,9 +465,9 @@ STAmount::STAmount(MPTAmount const& amount, A const& asset)
     , mIsNegative(amount < beast::zero)
 {
     if (mIsNegative)
-        mValue = unsafe_cast<std::uint64_t>(-amount.mpt());
+        mValue = unsafe_cast<std::uint64_t>(-amount.value());
     else
-        mValue = unsafe_cast<std::uint64_t>(amount.mpt());
+        mValue = unsafe_cast<std::uint64_t>(amount.value());
 
     canonicalize();
 }
@@ -521,22 +517,11 @@ STAmount::native() const noexcept
     return mIsNative;
 }
 
-inline bool
-STAmount::isMPT() const noexcept
+template <ValidIssueType TIss>
+constexpr bool
+STAmount::holds() const noexcept
 {
-    return mAsset.isMPT();
-}
-
-inline bool
-STAmount::isIssue() const noexcept
-{
-    return mAsset.isIssue();
-}
-
-inline bool
-STAmount::isIOU() const noexcept
-{
-    return mAsset.isIssue() && !mIsNative;
+    return mAsset.holds<TIss>();
 }
 
 inline bool
@@ -557,22 +542,23 @@ STAmount::asset() const
     return mAsset;
 }
 
+template <ValidIssueType TIss>
+constexpr TIss const&
+STAmount::get() const
+{
+    return mAsset.get<TIss>();
+}
+
 inline Issue const&
 STAmount::issue() const
 {
-    return mAsset.issue();
-}
-
-inline MPTIssue const&
-STAmount::mptIssue() const
-{
-    return mAsset.mptIssue();
+    return get<Issue>();
 }
 
 inline Currency const&
 STAmount::getCurrency() const
 {
-    return mAsset.issue().currency;
+    return mAsset.get<Issue>().currency;
 }
 
 inline AccountID const&
@@ -590,9 +576,9 @@ STAmount::signum() const noexcept
 inline STAmount
 STAmount::zeroed() const
 {
-    if (mAsset.isIssue())
-        return STAmount(mAsset.issue());
-    return STAmount(mAsset.mptIssue());
+    if (mAsset.holds<Issue>())
+        return STAmount(mAsset.get<Issue>());
+    return STAmount(mAsset.get<MPTIssue>());
 }
 
 inline STAmount::operator bool() const noexcept
@@ -604,7 +590,7 @@ inline STAmount::operator Number() const
 {
     if (mIsNative)
         return xrp();
-    if (mAsset.isMPT())
+    if (mAsset.holds<MPTIssue>())
         return mpt();
     return iou();
 }
@@ -643,10 +629,10 @@ STAmount::clear()
 inline void
 STAmount::clear(STAmount const& saTmpl)
 {
-    if (saTmpl.isMPT())
-        clear(saTmpl.mAsset.mptIssue());
+    if (saTmpl.holds<MPTIssue>())
+        clear(saTmpl.get<MPTIssue>());
     else
-        clear(saTmpl.issue());
+        clear(saTmpl.get<Issue>());
 }
 
 inline void
@@ -657,7 +643,7 @@ STAmount::clear(Issue const& issue)
 }
 
 inline void
-STAmount::clear(MPT const& mpt)
+STAmount::clear(MPTID const& mpt)
 {
     mAsset = mpt;
     clear();
@@ -666,8 +652,8 @@ STAmount::clear(MPT const& mpt)
 inline void
 STAmount::setIssuer(AccountID const& uIssuer)
 {
-    mAsset.issue().account = uIssuer;
-    setIssue(mAsset.issue());
+    mAsset.get<Issue>().account = uIssuer;
+    setIssue(mAsset.get<Issue>());
 }
 
 inline STAmount const&
@@ -780,13 +766,7 @@ getRate(STAmount const& offerOut, STAmount const& offerIn);
 inline bool
 isXRP(STAmount const& amount)
 {
-    return amount.isIssue() && isXRP(amount.issue().currency);
-}
-
-inline bool
-isMPT(STAmount const& amount)
-{
-    return amount.isMPT();
+    return isXRP(amount.asset());
 }
 
 // Since `canonicalize` does not have access to a ledger, this is needed to put

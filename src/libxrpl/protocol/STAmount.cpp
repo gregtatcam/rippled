@@ -82,7 +82,7 @@ getSNValue(STAmount const& amount)
 static std::int64_t
 getMPTValue(STAmount const& amount)
 {
-    if (!amount.isMPT())
+    if (!amount.holds<MPTIssue>())
         Throw<std::runtime_error>("amount is not native!");
 
     auto ret = static_cast<std::int64_t>(amount.mantissa());
@@ -98,37 +98,39 @@ getMPTValue(STAmount const& amount)
 static bool
 areComparable(STAmount const& v1, STAmount const& v2)
 {
-    return (v1.isMPT() && v2.isMPT() &&
-            v1.asset().mptIssue() == v2.asset().mptIssue()) ||
-        (v1.isIssue() && v1.native() == v2.native() &&
-         v1.issue().currency == v2.issue().currency);
+    if (v1.holds<Issue>() && v2.holds<Issue>())
+        return v1.native() == v2.native() &&
+            v1.get<Issue>().currency == v2.get<Issue>().currency;
+    if (v1.holds<MPTIssue>() && v2.holds<MPTIssue>())
+        return v1.get<MPTIssue>() == v2.get<MPTIssue>();
+    return false;
 }
 
 STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
 {
-    // TODO MPT make sure backward compatible
-
     std::uint64_t value = sit.get64();
-    // TODO must fix serialization for IOU, it incorrectly sets cMPToken
-    bool isMPT = (value & cMPToken) && !(value & cIssuedCurrency);
 
     // native or MPT
-    if ((value & cIssuedCurrency) == 0 || isMPT)
+    if ((value & cIssuedCurrency) == 0)
     {
-        if (isMPT)
+        if ((value & cMPToken) != 0)
         {
-            // mAsset = std::make_pair(
-            //     sit.get32(), static_cast<AccountID>(sit.get160()));
+            // is MPT
+            mOffset = 0;
+            mIsNative = false;
+            mIsNegative = (value & cPositive) == 0;
+            mValue = (value << 8) | sit.get8();
             mAsset = sit.get192();
+            return;
         }
-        else
-            mAsset = xrpIssue();
+        // else is XRP
+        mAsset = xrpIssue();
         // positive
         if ((value & cPositive) != 0)
         {
             mValue = value & cValueMask;
             mOffset = 0;
-            mIsNative = !isMPT;
+            mIsNative = true;
             mIsNegative = false;
             return;
         }
@@ -139,7 +141,7 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
 
         mValue = value & cValueMask;
         mOffset = 0;
-        mIsNative = !isMPT;
+        mIsNative = true;
         mIsNegative = true;
         return;
     }
@@ -284,7 +286,7 @@ STAmount::xrp() const
 IOUAmount
 STAmount::iou() const
 {
-    if (mIsNative || isMPT())
+    if (mIsNative || holds<MPTIssue>())
         Throw<std::logic_error>("Cannot return native STAmount as IOUAmount");
 
     auto mantissa = static_cast<std::int64_t>(mValue);
@@ -299,10 +301,10 @@ STAmount::iou() const
 MPTAmount
 STAmount::mpt() const
 {
-    if (!isMPT())
+    if (!holds<MPTIssue>())
         Throw<std::logic_error>("Cannot return STAmount as MPTAmount");
 
-    auto value = static_cast<MPTAmount::mpt_type>(mValue);
+    auto value = static_cast<MPTAmount::value_type>(mValue);
 
     if (mIsNegative)
         value = -value;
@@ -366,8 +368,8 @@ operator+(STAmount const& v1, STAmount const& v2)
     // TODO
     if (v1.native())
         return {v1.getFName(), getSNValue(v1) + getSNValue(v2)};
-    if (v1.isMPT())
-        return {v1.mAsset, v1.mpt().mpt() + v2.mpt().mpt()};
+    if (v1.holds<MPTIssue>())
+        return {v1.mAsset, v1.mpt().value() + v2.mpt().value()};
 
     if (getSTNumberSwitchover())
     {
@@ -476,13 +478,7 @@ STAmount::setJson(Json::Value& elem) const
         // It is an error for currency or issuer not to be specified for valid
         // json.
         elem[jss::value] = getText();
-        if (mAsset.isMPT())
-            elem[jss::mpt_issuance_id] = to_string(mAsset.mptIssue());
-        else
-        {
-            elem[jss::currency] = to_string(mAsset.issue().currency);
-            elem[jss::issuer] = to_string(mAsset.issue().account);
-        }
+        mAsset.setJson(elem);
     }
     else
     {
@@ -528,7 +524,7 @@ STAmount::getText() const
     bool const scientific(
         (mOffset != 0) && ((mOffset < -25) || (mOffset > -5)));
 
-    if (mIsNative || mAsset.isMPT() || scientific)
+    if (mIsNative || mAsset.holds<MPTIssue>() || scientific)
     {
         ret.append(raw_value);
 
@@ -607,7 +603,6 @@ Json::Value STAmount::getJson(JsonOptions) const
 void
 STAmount::add(Serializer& s) const
 {
-    // TODO MPT make sure backward compatible
     if (mIsNative)
     {
         assert(mOffset == 0);
@@ -617,34 +612,30 @@ STAmount::add(Serializer& s) const
         else
             s.add64(mValue);
     }
+    else if (mAsset.holds<MPTIssue>())
+    {
+        auto u8 = static_cast<unsigned char>(cMPToken >> 56);
+        if (!mIsNegative)
+            u8 |= static_cast<unsigned char>(cPositive >> 56);
+        s.add8(u8);
+        s.add64(mValue);
+        s.addBitString(mAsset.get<MPTIssue>().getMptID());
+    }
     else
     {
-        if (mAsset.isMPT())
-        {
-            if (mIsNegative)
-                s.add64(mValue | cMPToken);
-            else
-                s.add64(mValue | cMPToken | cPositive);
-            auto const& mptIssue = mAsset.mptIssue();
-            s.addBitString(mptIssue.getMptID());
-        }
-        else
-        {
-            if (*this == beast::zero)
-                s.add64(cIssuedCurrency);
-            else if (mIsNegative)  // 512 = not native
-                s.add64(
-                    mValue |
-                    (static_cast<std::uint64_t>(mOffset + 512 + 97)
-                     << (64 - 10)));
-            else  // 256 = positive
-                s.add64(
-                    mValue |
-                    (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
-                     << (64 - 10)));
-            s.addBitString(mAsset.issue().currency);
-            s.addBitString(mAsset.issue().account);
-        }
+        if (*this == beast::zero)
+            s.add64(cIssuedCurrency);
+        else if (mIsNegative)  // 512 = not native
+            s.add64(
+                mValue |
+                (static_cast<std::uint64_t>(mOffset + 512 + 97) << (64 - 10)));
+        else  // 256 = positive
+            s.add64(
+                mValue |
+                (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
+                 << (64 - 10)));
+        s.addBitString(mAsset.get<Issue>().currency);
+        s.addBitString(mAsset.get<Issue>().account);
     }
 }
 
@@ -682,7 +673,7 @@ STAmount::isDefault() const
 void
 STAmount::canonicalize()
 {
-    if (isXRP(*this) || mAsset.isMPT())
+    if (isXRP(*this) || mAsset.holds<MPTIssue>())
     {
         // native currency amounts should always have an offset of zero
         mIsNative = isXRP(*this);
@@ -717,8 +708,8 @@ STAmount::canonicalize()
             else
             {
                 MPTAmount c{num};
-                mIsNegative = c.mpt() < 0;
-                mValue = mIsNegative ? -c.mpt() : c.mpt();
+                mIsNegative = c.value() < 0;
+                mValue = mIsNegative ? -c.value() : c.value();
             }
             mOffset = 0;
         }
@@ -736,17 +727,28 @@ STAmount::canonicalize()
                 {
                     // N.B. do not move the overflow check to after the
                     // multiplication
-                    if (mValue > cMaxNativeN)
-                        Throw<std::runtime_error>(
-                            "Native currency amount out of range");
+                    if (isXRP(*this))
+                    {
+                        if (mValue > cMaxNativeN)
+                            Throw<std::runtime_error>(
+                                "Native currency amount out of range");
+                    }
+                    else if (mValue > maxMPTokenAmount)
+                        Throw<std::runtime_error>("MPT amount out of range");
                 }
                 mValue *= 10;
                 --mOffset;
             }
         }
 
-        if (mValue > cMaxNativeN)
-            Throw<std::runtime_error>("Native currency amount out of range");
+        if (isXRP(*this))
+        {
+            if (mValue > cMaxNativeN)
+                Throw<std::runtime_error>(
+                    "Native currency amount out of range");
+        }
+        else if (mValue > maxMPTokenAmount)
+            Throw<std::runtime_error>("MPT amount out of range");
 
         return;
     }
@@ -861,8 +863,9 @@ amountFromString(Asset const& asset, std::string const& amount)
     bool negative = (match[1].matched && (match[1] == "-"));
 
     // Can't specify XRP using fractional representation
-    if (isXRP(asset) && match[3].matched)
-        Throw<std::runtime_error>("XRP must be specified in integral drops.");
+    if ((isXRP(asset) || asset.holds<MPTIssue>()) && match[3].matched)
+        Throw<std::runtime_error>(
+            "XRP and MPT must be specified as integral amount.");
 
     std::uint64_t mantissa;
     int exponent;
@@ -1167,7 +1170,7 @@ divide(STAmount const& num, STAmount const& den, Asset const& asset)
     int numOffset = num.exponent();
     int denOffset = den.exponent();
 
-    if (num.native() || num.isMPT())
+    if (num.native() || num.holds<MPTIssue>())
     {
         while (numVal < STAmount::cMinValue)
         {
@@ -1177,7 +1180,7 @@ divide(STAmount const& num, STAmount const& den, Asset const& asset)
         }
     }
 
-    if (den.native() || den.isMPT())
+    if (den.native() || den.holds<MPTIssue>())
     {
         while (denVal < STAmount::cMinValue)
         {
@@ -1219,7 +1222,7 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
 
         return STAmount(v1.getFName(), minV * maxV);
     }
-    if (v1.isMPT() && v2.isMPT() && asset.isMPT())
+    if (v1.holds<MPTIssue>() && v2.holds<MPTIssue>() && asset.holds<MPTIssue>())
     {
         std::uint64_t const minV = getMPTValue(v1) < getMPTValue(v2)
             ? getMPTValue(v1)
@@ -1245,8 +1248,7 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
     int offset1 = v1.exponent();
     int offset2 = v2.exponent();
 
-    // TODO MPT
-    if (v1.native() || v1.isMPT())
+    if (v1.native() || v1.holds<MPTIssue>())
     {
         while (value1 < STAmount::cMinValue)
         {
@@ -1255,7 +1257,7 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
         }
     }
 
-    if (v2.native() || v2.isMPT())
+    if (v2.native() || v2.holds<MPTIssue>())
     {
         while (value2 < STAmount::cMinValue)
         {
@@ -1430,8 +1432,8 @@ mulRoundImpl(
 
         return STAmount(v1.getFName(), minV * maxV);
     }
-    // TODO MPT
-    if (v1.isMPT() && v2.isMPT() && asset.isMPT())
+
+    if (v1.holds<MPTIssue>() && v2.holds<MPTIssue>() && asset.holds<MPTIssue>())
     {
         std::uint64_t minV = (getMPTValue(v1) < getMPTValue(v2))
             ? getMPTValue(v1)
@@ -1452,8 +1454,7 @@ mulRoundImpl(
     std::uint64_t value1 = v1.mantissa(), value2 = v2.mantissa();
     int offset1 = v1.exponent(), offset2 = v2.exponent();
 
-    // TODO MPT
-    if (v1.native() || v1.isMPT())
+    if (v1.native() || v1.holds<MPTIssue>())
     {
         while (value1 < STAmount::cMinValue)
         {
@@ -1462,8 +1463,7 @@ mulRoundImpl(
         }
     }
 
-    // TODO MPT
-    if (v2.native() || v2.isMPT())
+    if (v2.native() || v2.holds<MPTIssue>())
     {
         while (value2 < STAmount::cMinValue)
         {
@@ -1557,8 +1557,7 @@ divRoundImpl(
     std::uint64_t numVal = num.mantissa(), denVal = den.mantissa();
     int numOffset = num.exponent(), denOffset = den.exponent();
 
-    // TODO MPT
-    if (num.native() || num.isMPT())
+    if (num.native() || num.holds<MPTIssue>())
     {
         while (numVal < STAmount::cMinValue)
         {
@@ -1567,8 +1566,7 @@ divRoundImpl(
         }
     }
 
-    // TODO MPT
-    if (den.native() || den.isMPT())
+    if (den.native() || den.holds<MPTIssue>())
     {
         while (denVal < STAmount::cMinValue)
         {
@@ -1592,10 +1590,9 @@ divRoundImpl(
 
     int offset = numOffset - denOffset - 17;
 
-    // TODO MPT
     if (resultNegative != roundUp)
         canonicalizeRound(
-            isXRP(asset) /*|| issue.isMPT()*/, amount, offset, roundUp);
+            isXRP(asset) || asset.holds<MPTIssue>(), amount, offset, roundUp);
 
     STAmount result = [&]() {
         // If appropriate, tell Number the rounding mode we are using.
@@ -1609,7 +1606,7 @@ divRoundImpl(
 
     if (roundUp && !resultNegative && !result)
     {
-        if (isXRP(asset) || asset.isMPT())
+        if (isXRP(asset) || asset.holds<MPTIssue>())
         {
             // return the smallest value above zero
             amount = 1;

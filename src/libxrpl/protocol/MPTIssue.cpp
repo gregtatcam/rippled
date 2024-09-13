@@ -19,35 +19,42 @@
 
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/MPTIssue.h>
+#include <xrpl/protocol/jss.h>
 
 namespace ripple {
 
-MPTIssue::MPTIssue(MPT const& mpt) : mpt_(mpt)
+MPTIssue::MPTIssue(MPTID const& id) : mptID_(id)
 {
 }
 
 AccountID const&
 MPTIssue::getIssuer() const
 {
-    return mpt_.second;
+    // copy from id skipping the sequence
+    AccountID const* account = reinterpret_cast<AccountID const*>(
+        mptID_.data() + sizeof(std::uint32_t));
+
+    return *account;
 }
 
-MPT const&
-MPTIssue::mpt() const
-{
-    return mpt_;
-}
-
-MPT&
-MPTIssue::mpt()
-{
-    return mpt_;
-}
-
-uint192
+MPTID const&
 MPTIssue::getMptID() const
 {
-    return ripple::getMptID(mpt_.second, mpt_.first);
+    return mptID_;
+}
+
+Json::Value
+to_json(MPTIssue const& issue)
+{
+    Json::Value jv;
+    jv[jss::mpt_issuance_id] = to_string(issue.getMptID());
+    return jv;
+}
+
+std::string
+to_string(MPTIssue const& mptIssue)
+{
+    return to_string(mptIssue.getMptID());
 }
 
 }  // namespace ripple

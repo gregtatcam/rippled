@@ -46,12 +46,6 @@ public:
     explicit NodeIDTag() = default;
 };
 
-class MPTTag
-{
-public:
-    explicit MPTTag() = default;
-};
-
 }  // namespace detail
 
 /** Directory is an index into the directory of offer books.
@@ -65,7 +59,7 @@ using Currency = base_uint<160, detail::CurrencyTag>;
 using NodeID = base_uint<160, detail::NodeIDTag>;
 
 /** MPT is a 192-bit hash representing MPTID. */
-using MPT = std::pair<std::uint32_t, AccountID>;
+using MPTID = base_uint<192>;
 
 /** XRP currency. */
 Currency const&
@@ -74,10 +68,6 @@ xrpCurrency();
 /** A placeholder for empty currencies. */
 Currency const&
 noCurrency();
-
-/** A placeholder for empty MPTID. */
-MPT const&
-noMPT();
 
 /** We deliberately disallow the currency that looks like "XRP" because too
     many people were using it instead of the correct XRP currency. */

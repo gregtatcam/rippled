@@ -41,10 +41,10 @@ class MPTAmount : private boost::totally_ordered<MPTAmount>,
                   private boost::additive<MPTAmount, std::int64_t>
 {
 public:
-    using mpt_type = std::int64_t;
+    using value_type = std::int64_t;
 
 protected:
-    mpt_type mpt_;
+    value_type value_;
 
 public:
     MPTAmount() = default;
@@ -52,165 +52,104 @@ public:
     constexpr MPTAmount&
     operator=(MPTAmount const& other) = default;
 
-    constexpr MPTAmount(beast::Zero) : mpt_(0)
-    {
-    }
+    constexpr explicit MPTAmount(value_type value);
 
-    constexpr explicit MPTAmount(mpt_type value) : mpt_(value)
-    {
-    }
-
-    constexpr MPTAmount& operator=(beast::Zero)
-    {
-        mpt_ = 0;
-        return *this;
-    }
+    constexpr MPTAmount& operator=(beast::Zero);
 
     MPTAmount&
-    operator=(mpt_type value)
-    {
-        mpt_ = value;
-        return *this;
-    }
-
-    constexpr MPTAmount
-    operator*(mpt_type const& rhs) const
-    {
-        return MPTAmount{mpt_ * rhs};
-    }
-
-    friend constexpr MPTAmount
-    operator*(mpt_type lhs, MPTAmount const& rhs)
-    {
-        // multiplication is commutative
-        return rhs * lhs;
-    }
+    operator+=(MPTAmount const& other);
 
     MPTAmount&
-    operator+=(MPTAmount const& other)
-    {
-        mpt_ += other.mpt();
-        return *this;
-    }
-
-    MPTAmount&
-    operator-=(MPTAmount const& other)
-    {
-        mpt_ -= other.mpt();
-        return *this;
-    }
-
-    MPTAmount&
-    operator+=(mpt_type const& rhs)
-    {
-        mpt_ += rhs;
-        return *this;
-    }
-
-    MPTAmount&
-    operator-=(mpt_type const& rhs)
-    {
-        mpt_ -= rhs;
-        return *this;
-    }
-
-    MPTAmount&
-    operator*=(mpt_type const& rhs)
-    {
-        mpt_ *= rhs;
-        return *this;
-    }
+    operator-=(MPTAmount const& other);
 
     MPTAmount
-    operator-() const
-    {
-        return MPTAmount{-mpt_};
-    }
+    operator-() const;
 
     bool
-    operator==(MPTAmount const& other) const
-    {
-        return mpt_ == other.mpt_;
-    }
+    operator==(MPTAmount const& other) const;
 
     bool
-    operator==(mpt_type other) const
-    {
-        return mpt_ == other;
-    }
+    operator==(value_type other) const;
 
     bool
-    operator<(MPTAmount const& other) const
-    {
-        return mpt_ < other.mpt_;
-    }
+    operator<(MPTAmount const& other) const;
 
     /** Returns true if the amount is not zero */
-    explicit constexpr operator bool() const noexcept
-    {
-        return mpt_ != 0;
-    }
+    explicit constexpr operator bool() const noexcept;
 
     /** Return the sign of the amount */
     constexpr int
-    signum() const noexcept
-    {
-        return (mpt_ < 0) ? -1 : (mpt_ ? 1 : 0);
-    }
+    signum() const noexcept;
 
     Json::Value
-    jsonClipped() const
-    {
-        static_assert(
-            std::is_signed_v<mpt_type> && std::is_integral_v<mpt_type>,
-            "Expected MPTAmount to be a signed integral type");
-
-        constexpr auto min = std::numeric_limits<Json::Int>::min();
-        constexpr auto max = std::numeric_limits<Json::Int>::max();
-
-        if (mpt_ < min)
-            return min;
-        if (mpt_ > max)
-            return max;
-        return static_cast<Json::Int>(mpt_);
-    }
+    jsonClipped() const;
 
     /** Returns the underlying value. Code SHOULD NOT call this
         function unless the type has been abstracted away,
         e.g. in a templated function.
     */
-    constexpr mpt_type
-    mpt() const
-    {
-        return mpt_;
-    }
+    constexpr value_type
+    value() const;
 
     friend std::istream&
-    operator>>(std::istream& s, MPTAmount& val)
-    {
-        s >> val.mpt_;
-        return s;
-    }
+    operator>>(std::istream& s, MPTAmount& val);
 
     static MPTAmount
-    minPositiveAmount()
-    {
-        return MPTAmount{1};
-    }
+    minPositiveAmount();
 };
+
+constexpr MPTAmount::MPTAmount(value_type value) : value_(value)
+{
+}
+
+constexpr MPTAmount& MPTAmount::operator=(beast::Zero)
+{
+    value_ = 0;
+    return *this;
+}
+
+/** Returns true if the amount is not zero */
+constexpr MPTAmount::operator bool() const noexcept
+{
+    return value_ != 0;
+}
+
+/** Return the sign of the amount */
+constexpr int
+MPTAmount::signum() const noexcept
+{
+    return (value_ < 0) ? -1 : (value_ ? 1 : 0);
+}
+
+/** Returns the underlying value. Code SHOULD NOT call this
+    function unless the type has been abstracted away,
+    e.g. in a templated function.
+*/
+constexpr MPTAmount::value_type
+MPTAmount::value() const
+{
+    return value_;
+}
+
+inline std::istream&
+operator>>(std::istream& s, MPTAmount& val)
+{
+    s >> val.value_;
+    return s;
+}
 
 // Output MPTAmount as just the value.
 template <class Char, class Traits>
 std::basic_ostream<Char, Traits>&
 operator<<(std::basic_ostream<Char, Traits>& os, const MPTAmount& q)
 {
-    return os << q.mpt();
+    return os << q.value();
 }
 
 inline std::string
 to_string(MPTAmount const& amount)
 {
-    return std::to_string(amount.mpt());
+    return std::to_string(amount.value());
 }
 
 inline MPTAmount
@@ -225,8 +164,8 @@ mulRatio(
     if (!den)
         Throw<std::runtime_error>("division by zero");
 
-    int128_t const amt128(amt.mpt());
-    auto const neg = amt.mpt() < 0;
+    int128_t const amt128(amt.value());
+    auto const neg = amt.value() < 0;
     auto const m = amt128 * num;
     auto r = m / den;
     if (m % den)
@@ -236,9 +175,9 @@ mulRatio(
         if (neg && !roundUp)
             r -= 1;
     }
-    if (r > std::numeric_limits<MPTAmount::mpt_type>::max())
+    if (r > std::numeric_limits<MPTAmount::value_type>::max())
         Throw<std::overflow_error>("XRP mulRatio overflow");
-    return MPTAmount(r.convert_to<MPTAmount::mpt_type>());
+    return MPTAmount(r.convert_to<MPTAmount::value_type>());
 }
 
 }  // namespace ripple
