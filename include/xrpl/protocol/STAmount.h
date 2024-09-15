@@ -59,7 +59,6 @@ private:
     Asset mAsset;
     mantissa_type mValue;
     exponent_type mOffset;
-    bool mIsNative;  // A shorthand for isXRP(mIssue).
     bool mIsNegative;
 
 public:
@@ -97,7 +96,6 @@ public:
         A const& asset,
         mantissa_type mantissa,
         exponent_type exponent,
-        bool native,
         bool negative,
         unchecked);
 
@@ -106,7 +104,6 @@ public:
         A const& asset,
         mantissa_type mantissa,
         exponent_type exponent,
-        bool native,
         bool negative,
         unchecked);
 
@@ -115,24 +112,15 @@ public:
     STAmount(
         SField const& name,
         A const& asset,
-        mantissa_type mantissa,
-        exponent_type exponent,
-        bool native,
-        bool negative);
+        mantissa_type mantissa = 0,
+        exponent_type exponent = 0,
+        bool negative = false);
 
     STAmount(SField const& name, std::int64_t mantissa);
 
     STAmount(
         SField const& name,
         std::uint64_t mantissa = 0,
-        bool negative = false);
-
-    template <AssetType A>
-    STAmount(
-        SField const& name,
-        A const& asset,
-        std::uint64_t mantissa = 0,
-        int exponent = 0,
         bool negative = false);
 
     explicit STAmount(std::uint64_t mantissa = 0, bool negative = false);
@@ -168,11 +156,9 @@ public:
     STAmount(A const& asset, int mantissa, int exponent = 0);
 
     // Legacy support for new-style amounts
-    template <AssetType A>
-    STAmount(IOUAmount const& amount, A const& asset);
+    STAmount(IOUAmount const& amount, Issue const& issue);
     STAmount(XRPAmount const& amount);
-    template <AssetType A>
-    STAmount(MPTAmount const& amount, A const& asset);
+    STAmount(MPTAmount const& amount, MPTIssue const& issue);
     operator Number() const;
 
     //--------------------------------------------------------------------------
@@ -264,7 +250,7 @@ public:
     void
     setIssuer(AccountID const& uIssuer);
 
-    /** Set the Issue for this amount and update mIsNative. */
+    /** Set the Issue for this amount. */
     void
     setIssue(Asset const& asset);
 
@@ -301,10 +287,6 @@ public:
     MPTAmount
     mpt() const;
 
-    template <AssetType A>
-    void
-    setAsset(A const& a, bool native);
-
 private:
     static std::unique_ptr<STAmount>
     construct(SerialIter&, SField const& name);
@@ -329,31 +311,19 @@ private:
 };
 
 template <AssetType A>
-void
-STAmount::setAsset(const A& asset, bool native)
-{
-    if (native)
-        mAsset = xrpIssue();
-    else
-        mAsset = asset;
-}
-
-template <AssetType A>
 STAmount::STAmount(
     SField const& name,
     A const& asset,
     mantissa_type mantissa,
     exponent_type exponent,
-    bool native,
     bool negative,
     unchecked)
     : STBase(name)
+    , mAsset(asset)
     , mValue(mantissa)
     , mOffset(exponent)
-    , mIsNative(native)
     , mIsNegative(negative)
 {
-    setAsset(asset, native);
 }
 
 template <AssetType A>
@@ -361,33 +331,10 @@ STAmount::STAmount(
     A const& asset,
     mantissa_type mantissa,
     exponent_type exponent,
-    bool native,
     bool negative,
     unchecked)
-    : mValue(mantissa)
-    , mOffset(exponent)
-    , mIsNative(native)
-    , mIsNegative(negative)
+    : mAsset(asset), mValue(mantissa), mOffset(exponent), mIsNegative(negative)
 {
-    setAsset(asset, native);
-}
-
-template <AssetType A>
-STAmount::STAmount(
-    SField const& name,
-    A const& asset,
-    mantissa_type mantissa,
-    exponent_type exponent,
-    bool native,
-    bool negative)
-    : STBase(name)
-    , mValue(mantissa)
-    , mOffset(exponent)
-    , mIsNative(native)
-    , mIsNegative(negative)
-{
-    setAsset(asset, native);
-    canonicalize();
 }
 
 template <AssetType A>
@@ -432,11 +379,9 @@ STAmount::STAmount(A const& asset, int mantissa, int exponent)
 }
 
 // Legacy support for new-style amounts
-template <AssetType A>
-STAmount::STAmount(IOUAmount const& amount, A const& asset)
-    : mAsset(asset)
+inline STAmount::STAmount(IOUAmount const& amount, Issue const& issue)
+    : mAsset(issue)
     , mOffset(amount.exponent())
-    , mIsNative(false)
     , mIsNegative(amount < beast::zero)
 {
     if (mIsNegative)
@@ -447,12 +392,8 @@ STAmount::STAmount(IOUAmount const& amount, A const& asset)
     canonicalize();
 }
 
-template <AssetType A>
-STAmount::STAmount(MPTAmount const& amount, A const& asset)
-    : mAsset(asset)
-    , mOffset(0)
-    , mIsNative(false)
-    , mIsNegative(amount < beast::zero)
+inline STAmount::STAmount(MPTAmount const& amount, MPTIssue const& issue)
+    : mAsset(issue), mOffset(0), mIsNegative(amount < beast::zero)
 {
     if (mIsNegative)
         mValue = unsafe_cast<std::uint64_t>(-amount.value());
@@ -504,7 +445,7 @@ STAmount::exponent() const noexcept
 inline bool
 STAmount::native() const noexcept
 {
-    return mIsNative;
+    return isXRP(mAsset);
 }
 
 template <ValidIssueType TIss>
@@ -578,7 +519,7 @@ inline STAmount::operator bool() const noexcept
 
 inline STAmount::operator Number() const
 {
-    if (mIsNative)
+    if (native())
         return xrp();
     if (mAsset.holds<MPTIssue>())
         return mpt();
@@ -610,7 +551,7 @@ STAmount::clear()
 {
     // The -100 is used to allow 0 to sort less than a small positive values
     // which have a negative exponent.
-    mOffset = mIsNative ? 0 : -100;
+    mOffset = native() ? 0 : -100;
     mValue = 0;
     mIsNegative = false;
 }
@@ -626,7 +567,6 @@ inline void
 STAmount::setIssuer(AccountID const& uIssuer)
 {
     mAsset.get<Issue>().account = uIssuer;
-    setIssue(mAsset.get<Issue>());
 }
 
 inline STAmount const&
