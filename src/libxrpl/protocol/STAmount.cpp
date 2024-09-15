@@ -431,9 +431,9 @@ operator-(STAmount const& v1, STAmount const& v2)
 std::uint64_t const STAmount::uRateOne = getRate(STAmount(1), STAmount(1));
 
 void
-STAmount::setIssue(Issue const& issue)
+STAmount::setIssue(Asset const& asset)
 {
-    mAsset = issue;
+    mAsset = asset;
     mIsNative = isXRP(*this);
 }
 
@@ -1241,7 +1241,10 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
     }
 
     if (getSTNumberSwitchover())
-        return {IOUAmount{Number{v1} * Number{v2}}, asset};
+    {
+        auto const r = Number{v1} * Number{v2};
+        return STAmount{asset, r.mantissa(), r.exponent()};
+    }
 
     std::uint64_t value1 = v1.mantissa();
     std::uint64_t value2 = v2.mantissa();

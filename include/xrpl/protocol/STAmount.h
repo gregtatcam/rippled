@@ -35,9 +35,8 @@
 namespace ripple {
 
 template <typename A>
-concept AssetType = std::is_same_v<A, Issue> || std::is_same_v<A, MPTID> ||
-    std::is_same_v<A, Asset> || std::is_convertible_v<A, Issue> ||
-    std::is_convertible_v<A, Asset>;
+concept AssetType = std::is_same_v<A, Asset> ||
+    std::is_convertible_v<A, Issue> || std::is_convertible_v<A, MPTIssue>;
 
 // Internal form:
 // 1: If amount is zero, then value is zero and offset is -100
@@ -192,9 +191,6 @@ public:
     constexpr bool
     holds() const noexcept;
 
-    std::string
-    getTypeName() const noexcept;
-
     bool
     negative() const noexcept;
 
@@ -263,20 +259,14 @@ public:
 
     // Zero while copying currency and issuer.
     void
-    clear(STAmount const& saTmpl);
-
-    void
-    clear(Issue const& issue);
-
-    void
-    clear(MPTID const& mpt);
+    clear(Asset const& asset);
 
     void
     setIssuer(AccountID const& uIssuer);
 
     /** Set the Issue for this amount and update mIsNative. */
     void
-    setIssue(Issue const& issue);
+    setIssue(Asset const& asset);
 
     //--------------------------------------------------------------------------
     //
@@ -625,27 +615,10 @@ STAmount::clear()
     mIsNegative = false;
 }
 
-// Zero while copying currency and issuer.
 inline void
-STAmount::clear(STAmount const& saTmpl)
+STAmount::clear(Asset const& asset)
 {
-    if (saTmpl.holds<MPTIssue>())
-        clear(saTmpl.get<MPTIssue>());
-    else
-        clear(saTmpl.get<Issue>());
-}
-
-inline void
-STAmount::clear(Issue const& issue)
-{
-    setIssue(issue);
-    clear();
-}
-
-inline void
-STAmount::clear(MPTID const& mpt)
-{
-    mAsset = mpt;
+    setIssue(asset);
     clear();
 }
 
