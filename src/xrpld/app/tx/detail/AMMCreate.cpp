@@ -50,7 +50,7 @@ AMMCreate::preflight(PreflightContext const& ctx)
     auto const amount = ctx.tx[sfAmount];
     auto const amount2 = ctx.tx[sfAmount2];
 
-    if (amount.issue() == amount2.issue())
+    if (amount.get<Issue>() == amount2.get<Issue>())
     {
         JLOG(ctx.j.debug())
             << "AMM Instance: tokens can not have the same currency/issuer.";
@@ -93,32 +93,33 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     auto const amount2 = ctx.tx[sfAmount2];
 
     // Check if AMM already exists for the token pair
-    if (auto const ammKeylet = keylet::amm(amount.issue(), amount2.issue());
+    if (auto const ammKeylet =
+            keylet::amm(amount.get<Issue>(), amount2.get<Issue>());
         ctx.view.read(ammKeylet))
     {
         JLOG(ctx.j.debug()) << "AMM Instance: ltAMM already exists.";
         return tecDUPLICATE;
     }
 
-    if (auto const ter = requireAuth(ctx.view, amount.issue(), accountID);
+    if (auto const ter = requireAuth(ctx.view, amount.get<Issue>(), accountID);
         ter != tesSUCCESS)
     {
-        JLOG(ctx.j.debug())
-            << "AMM Instance: account is not authorized, " << amount.issue();
+        JLOG(ctx.j.debug()) << "AMM Instance: account is not authorized, "
+                            << amount.get<Issue>();
         return ter;
     }
 
-    if (auto const ter = requireAuth(ctx.view, amount2.issue(), accountID);
+    if (auto const ter = requireAuth(ctx.view, amount2.get<Issue>(), accountID);
         ter != tesSUCCESS)
     {
-        JLOG(ctx.j.debug())
-            << "AMM Instance: account is not authorized, " << amount2.issue();
+        JLOG(ctx.j.debug()) << "AMM Instance: account is not authorized, "
+                            << amount2.get<Issue>();
         return ter;
     }
 
     // Globally or individually frozen
-    if (isFrozen(ctx.view, accountID, amount.issue()) ||
-        isFrozen(ctx.view, accountID, amount2.issue()))
+    if (isFrozen(ctx.view, accountID, amount.get<Issue>()) ||
+        isFrozen(ctx.view, accountID, amount2.get<Issue>()))
     {
         JLOG(ctx.j.debug()) << "AMM Instance: involves frozen asset.";
         return tecFROZEN;
@@ -135,8 +136,8 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
         return false;
     };
 
-    if (noDefaultRipple(ctx.view, amount.issue()) ||
-        noDefaultRipple(ctx.view, amount2.issue()))
+    if (noDefaultRipple(ctx.view, amount.get<Issue>()) ||
+        noDefaultRipple(ctx.view, amount2.get<Issue>()))
     {
         JLOG(ctx.j.debug()) << "AMM Instance: DefaultRipple not set";
         return terNO_RIPPLE;
@@ -154,11 +155,11 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     auto insufficientBalance = [&](STAmount const& asset) {
         if (isXRP(asset))
             return xrpBalance < asset;
-        return accountID != asset.issue().account &&
+        return accountID != asset.get<Issue>().account &&
             accountHolds(
                 ctx.view,
                 accountID,
-                asset.issue(),
+                asset.get<Issue>(),
                 FreezeHandling::fhZERO_IF_FROZEN,
                 ctx.j) < asset;
     };
@@ -172,7 +173,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
 
     auto isLPToken = [&](STAmount const& amount) -> bool {
         if (auto const sle =
-                ctx.view.read(keylet::account(amount.issue().account)))
+                ctx.view.read(keylet::account(amount.get<Issue>().account)))
             return sle->isFieldPresent(sfAMMID);
         return false;
     };
@@ -196,9 +197,10 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
         return tesSUCCESS;
     };
 
-    if (auto const ter = clawbackDisabled(amount.issue()); ter != tesSUCCESS)
+    if (auto const ter = clawbackDisabled(amount.get<Issue>());
+        ter != tesSUCCESS)
         return ter;
-    return clawbackDisabled(amount2.issue());
+    return clawbackDisabled(amount2.get<Issue>());
 }
 
 static std::pair<TER, bool>
@@ -211,7 +213,8 @@ applyCreate(
     auto const amount = ctx_.tx[sfAmount];
     auto const amount2 = ctx_.tx[sfAmount2];
 
-    auto const ammKeylet = keylet::amm(amount.issue(), amount2.issue());
+    auto const ammKeylet =
+        keylet::amm(amount.get<Issue>(), amount2.get<Issue>());
 
     // Mitigate same account exists possibility
     auto const ammAccount = [&]() -> Expected<AccountID, TER> {
@@ -235,7 +238,9 @@ applyCreate(
 
     // LP Token already exists. (should not happen)
     auto const lptIss = ammLPTIssue(
-        amount.issue().currency, amount2.issue().currency, *ammAccount);
+        amount.get<Issue>().currency,
+        amount2.get<Issue>().currency,
+        *ammAccount);
     if (sb.read(keylet::line(*ammAccount, lptIss)))
     {
         JLOG(j_.error()) << "AMM Instance: LP Token already exists.";
@@ -273,7 +278,8 @@ applyCreate(
     auto ammSle = std::make_shared<SLE>(ammKeylet);
     ammSle->setAccountID(sfAccount, *ammAccount);
     ammSle->setFieldAmount(sfLPTokenBalance, lpTokens);
-    auto const& [issue1, issue2] = std::minmax(amount.issue(), amount2.issue());
+    auto const& [issue1, issue2] =
+        std::minmax(amount.get<Issue>(), amount2.get<Issue>());
     ammSle->setFieldIssue(sfAsset, STIssue{sfAsset, issue1});
     ammSle->setFieldIssue(sfAsset2, STIssue{sfAsset2, issue2});
     // AMM creator gets the auction slot and the voting slot.
@@ -316,7 +322,7 @@ applyCreate(
         if (!isXRP(amount))
         {
             if (SLE::pointer sleRippleState =
-                    sb.peek(keylet::line(*ammAccount, amount.issue()));
+                    sb.peek(keylet::line(*ammAccount, amount.get<Issue>()));
                 !sleRippleState)
                 return tecINTERNAL;
             else
@@ -356,8 +362,10 @@ applyCreate(
                 !bookExisted)
                 ctx_.app.getOrderBookDB().addOrderBook(book);
         };
-    addOrderBook(amount.issue(), amount2.issue(), getRate(amount2, amount));
-    addOrderBook(amount2.issue(), amount.issue(), getRate(amount, amount2));
+    addOrderBook(
+        amount.get<Issue>(), amount2.get<Issue>(), getRate(amount2, amount));
+    addOrderBook(
+        amount2.get<Issue>(), amount.get<Issue>(), getRate(amount, amount2));
 
     return {res, res == tesSUCCESS};
 }

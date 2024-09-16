@@ -109,10 +109,11 @@ AMMWithdraw::preflight(PreflightContext const& ctx)
         return res;
     }
 
-    if (amount && amount2 && amount->issue() == amount2->issue())
+    if (amount && amount2 && amount->get<Issue>() == amount2->get<Issue>())
     {
-        JLOG(ctx.j.debug()) << "AMM Withdraw: invalid tokens, same issue."
-                            << amount->issue() << " " << amount2->issue();
+        JLOG(ctx.j.debug())
+            << "AMM Withdraw: invalid tokens, same issue."
+            << amount->get<Issue>() << " " << amount2->get<Issue>();
         return temBAD_AMM_TOKENS;
     }
 
@@ -187,8 +188,8 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
     auto const expected = ammHolds(
         ctx.view,
         *ammSle,
-        amount ? amount->issue() : std::optional<Issue>{},
-        amount2 ? amount2->issue() : std::optional<Issue>{},
+        amount ? amount->get<Issue>() : std::optional<Issue>{},
+        amount2 ? amount2->get<Issue>() : std::optional<Issue>{},
         FreezeHandling::fhIGNORE_FREEZE,
         ctx.j);
     if (!expected)
@@ -218,15 +219,15 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
                 return tecAMM_BALANCE;
             }
             if (auto const ter =
-                    requireAuth(ctx.view, amount->issue(), accountID))
+                    requireAuth(ctx.view, amount->get<Issue>(), accountID))
             {
                 JLOG(ctx.j.debug())
                     << "AMM Withdraw: account is not authorized, "
-                    << amount->issue();
+                    << amount->get<Issue>();
                 return ter;
             }
             // AMM account or currency frozen
-            if (isFrozen(ctx.view, ammAccountID, amount->issue()))
+            if (isFrozen(ctx.view, ammAccountID, amount->get<Issue>()))
             {
                 JLOG(ctx.j.debug())
                     << "AMM Withdraw: AMM account or currency is frozen, "
@@ -234,11 +235,11 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
                 return tecFROZEN;
             }
             // Account frozen
-            if (isIndividualFrozen(ctx.view, accountID, amount->issue()))
+            if (isIndividualFrozen(ctx.view, accountID, amount->get<Issue>()))
             {
                 JLOG(ctx.j.debug()) << "AMM Withdraw: account is frozen, "
                                     << to_string(accountID) << " "
-                                    << to_string(amount->issue().currency);
+                                    << to_string(amount->get<Issue>().currency);
                 return tecFROZEN;
             }
         }
@@ -262,7 +263,8 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
         return tecAMM_BALANCE;
     }
 
-    if (lpTokensWithdraw && lpTokensWithdraw->issue() != lpTokens.issue())
+    if (lpTokensWithdraw &&
+        lpTokensWithdraw->get<Issue>() != lpTokens.get<Issue>())
     {
         JLOG(ctx.j.debug()) << "AMM Withdraw: invalid LPTokens.";
         return temBAD_AMM_TOKENS;
@@ -275,7 +277,7 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
     }
 
     if (auto const ePrice = ctx.tx[~sfEPrice];
-        ePrice && ePrice->issue() != lpTokens.issue())
+        ePrice && ePrice->get<Issue>() != lpTokens.get<Issue>())
     {
         JLOG(ctx.j.debug()) << "AMM Withdraw: invalid EPrice.";
         return temBAD_AMM_TOKENS;
@@ -315,7 +317,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
     if (sb.rules().enabled(fixAMMv1_1))
     {
         if (auto const res =
-                isOnlyLiquidityProvider(sb, lpTokens.issue(), account_);
+                isOnlyLiquidityProvider(sb, lpTokens.get<Issue>(), account_);
             !res)
             return {res.error(), false};
         else if (res.value())
@@ -340,8 +342,8 @@ AMMWithdraw::applyGuts(Sandbox& sb)
     auto const expected = ammHolds(
         sb,
         *ammSle,
-        amount ? amount->issue() : std::optional<Issue>{},
-        amount2 ? amount2->issue() : std::optional<Issue>{},
+        amount ? amount->get<Issue>() : std::optional<Issue>{},
+        amount2 ? amount2->get<Issue>() : std::optional<Issue>{},
         FreezeHandling::fhZERO_IF_FROZEN,
         ctx_.journal);
     if (!expected)
@@ -463,7 +465,7 @@ AMMWithdraw::withdraw(
     auto const expected = ammHolds(
         view,
         *ammSle,
-        amountWithdraw.issue(),
+        amountWithdraw.get<Issue>(),
         std::nullopt,
         FreezeHandling::fhZERO_IF_FROZEN,
         j_);
@@ -590,7 +592,7 @@ AMMWithdraw::withdraw(
         view,
         account_,
         lpTokensWithdrawActual,
-        lpTokensWithdrawActual.issue(),
+        lpTokensWithdrawActual.get<Issue>(),
         ctx_.journal);
     if (res != tesSUCCESS)
     {
@@ -631,9 +633,9 @@ AMMWithdraw::equalWithdrawTokens(
 
         auto const frac = divide(lpTokensWithdraw, lptAMMBalance, noIssue());
         auto const withdrawAmount =
-            multiply(amountBalance, frac, amountBalance.issue());
+            multiply(amountBalance, frac, amountBalance.get<Issue>());
         auto const withdraw2Amount =
-            multiply(amount2Balance, frac, amount2Balance.issue());
+            multiply(amount2Balance, frac, amount2Balance.get<Issue>());
         // LP is making equal withdrawal by tokens but the requested amount
         // of LP tokens is likely too small and results in one-sided pool
         // withdrawal due to round off. Fail so the user withdraws
@@ -705,9 +707,9 @@ AMMWithdraw::equalWithdrawLimit(
             ammAccount,
             amountBalance,
             amount,
-            toSTAmount(amount2.issue(), amount2Withdraw),
+            toSTAmount(amount2.get<Issue>(), amount2Withdraw),
             lptAMMBalance,
-            toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac),
+            toSTAmount(lptAMMBalance.get<Issue>(), lptAMMBalance * frac),
             tfee);
     frac = Number{amount2} / amount2Balance;
     auto const amountWithdraw = amountBalance * frac;
@@ -716,10 +718,10 @@ AMMWithdraw::equalWithdrawLimit(
         view,
         ammAccount,
         amountBalance,
-        toSTAmount(amount.issue(), amountWithdraw),
+        toSTAmount(amount.get<Issue>(), amountWithdraw),
         amount2,
         lptAMMBalance,
-        toSTAmount(lptAMMBalance.issue(), lptAMMBalance * frac),
+        toSTAmount(lptAMMBalance.get<Issue>(), lptAMMBalance * frac),
         tfee);
 }
 
@@ -831,7 +833,8 @@ AMMWithdraw::singleWithdrawEPrice(
         (lptAMMBalance * f - ae);
     if (tokens <= 0)
         return {tecAMM_FAILED, STAmount{}};
-    auto const amountWithdraw = toSTAmount(amount.issue(), tokens / ePrice);
+    auto const amountWithdraw =
+        toSTAmount(amount.get<Issue>(), tokens / ePrice);
     if (amount == beast::zero || amountWithdraw >= amount)
         return withdraw(
             view,
@@ -840,7 +843,7 @@ AMMWithdraw::singleWithdrawEPrice(
             amountWithdraw,
             std::nullopt,
             lptAMMBalance,
-            toSTAmount(lptAMMBalance.issue(), tokens),
+            toSTAmount(lptAMMBalance.get<Issue>(), tokens),
             tfee);
 
     return {tecAMM_FAILED, STAmount{}};

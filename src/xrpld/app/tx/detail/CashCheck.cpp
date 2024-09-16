@@ -70,7 +70,7 @@ CashCheck::preflight(PreflightContext const& ctx)
         return temBAD_AMOUNT;
     }
 
-    if (badCurrency() == value.getCurrency())
+    if (badCurrency() == value.get<Issue>().getCurrency())
     {
         JLOG(ctx.j.warn()) << "Malformed transaction: Bad currency.";
         return temBAD_CURRENCY;
@@ -141,8 +141,8 @@ CashCheck::preclaim(PreclaimContext const& ctx)
         }(ctx.tx)};
 
         STAmount const sendMax = sleCheck->at(sfSendMax);
-        Currency const currency{value.getCurrency()};
-        if (currency != sendMax.getCurrency())
+        Currency const currency{value.get<Issue>().getCurrency()};
+        if (currency != sendMax.get<Issue>().getCurrency())
         {
             JLOG(ctx.j.warn()) << "Check cash does not match check currency.";
             return temMALFORMED;
@@ -341,13 +341,13 @@ CashCheck::doApply()
             // exceed 200%, we use 1/2 maxValue as our limit.
             STAmount const flowDeliver{
                 optDeliverMin ? STAmount(
-                                    optDeliverMin->issue(),
+                                    optDeliverMin->get<Issue>(),
                                     STAmount::cMaxValue / 2,
                                     STAmount::cMaxOffset)
                               : ctx_.tx.getFieldAmount(sfAmount)};
 
             // If a trust line does not exist yet create one.
-            Issue const& trustLineIssue = flowDeliver.issue();
+            Issue const& trustLineIssue = flowDeliver.get<Issue>();
             AccountID const issuer = flowDeliver.getIssuer();
             AccountID const truster = issuer == account_ ? srcId : account_;
             Keylet const trustLineKey = keylet::line(truster, trustLineIssue);
@@ -377,9 +377,10 @@ CashCheck::doApply()
                     return tecNO_LINE_INSUF_RESERVE;
                 }
 
-                Currency const currency = flowDeliver.getCurrency();
-                STAmount initialBalance(flowDeliver.issue());
-                initialBalance.setIssuer(noAccount());
+                Currency const currency =
+                    flowDeliver.get<Issue>().getCurrency();
+                STAmount initialBalance(flowDeliver.get<Issue>());
+                initialBalance.get<Issue>().setIssuer(noAccount());
 
                 // clang-format off
                 if (TER const ter = trustCreate(

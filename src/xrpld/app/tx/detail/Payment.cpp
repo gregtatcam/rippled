@@ -84,13 +84,13 @@ preflightHelper<Issue>(PreflightContext const& ctx)
         maxSourceAmount = saDstAmount;
     else
         maxSourceAmount = STAmount(
-            Issue{saDstAmount.getCurrency(), account},
+            Issue{saDstAmount.get<Issue>().getCurrency(), account},
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);
 
-    auto const& uSrcCurrency = maxSourceAmount.getCurrency();
-    auto const& uDstCurrency = saDstAmount.getCurrency();
+    auto const& uSrcCurrency = maxSourceAmount.get<Issue>().getCurrency();
+    auto const& uDstCurrency = saDstAmount.get<Issue>().getCurrency();
 
     // isZero() is XRP.  FIX!
     bool const bXRPDirect = uSrcCurrency.isZero() && uDstCurrency.isZero();
@@ -189,7 +189,7 @@ preflightHelper<Issue>(PreflightContext const& ctx)
                 << " amount. " << dMin.getFullText();
             return temBAD_AMOUNT;
         }
-        if (dMin.issue() != saDstAmount.issue())
+        if (dMin.get<Issue>() != saDstAmount.get<Issue>())
         {
             JLOG(j.trace())
                 << "Malformed transaction: Dst issue differs "
@@ -438,7 +438,7 @@ applyHelper<Issue>(
         maxSourceAmount = saDstAmount;
     else
         maxSourceAmount = STAmount(
-            Issue{saDstAmount.getCurrency(), account},
+            Issue{saDstAmount.get<Issue>().getCurrency(), account},
             saDstAmount.mantissa(),
             saDstAmount.exponent(),
             saDstAmount < beast::zero);

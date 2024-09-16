@@ -284,7 +284,7 @@ accountHolds(
             // Put balance in account terms.
             amount.negate();
         }
-        amount.setIssuer(issuer);
+        amount.get<Issue>().setIssuer(issuer);
     }
     JLOG(j.trace()) << "accountHolds:"
                     << " account=" << to_string(account)
@@ -360,7 +360,7 @@ accountFunds(
     return accountHolds(
         view,
         id,
-        saDefault.getCurrency(),
+        saDefault.get<Issue>().getCurrency(),
         saDefault.getIssuer(),
         freezeHandling,
         j);
@@ -901,7 +901,8 @@ trustCreate(
     sleRippleState->setFieldAmount(
         bSetHigh ? sfLowLimit : sfHighLimit,
         STAmount(Issue{
-            saBalance.getCurrency(), bSetDst ? uSrcAccountID : uDstAccountID}));
+            saBalance.get<Issue>().getCurrency(),
+            bSetDst ? uSrcAccountID : uDstAccountID}));
 
     if (uQualityIn)
         sleRippleState->setFieldU32(
@@ -1035,7 +1036,7 @@ rippleCredit(
     beast::Journal j)
 {
     AccountID const& issuer = saAmount.getIssuer();
-    Currency const& currency = saAmount.getCurrency();
+    Currency const& currency = saAmount.get<Issue>().getCurrency();
 
     // Make sure issuer is involved.
     assert(!bCheckIssuer || uSenderID == issuer || uReceiverID == issuer);
@@ -1137,7 +1138,7 @@ rippleCredit(
     STAmount const saReceiverLimit(Issue{currency, uReceiverID});
     STAmount saBalance{saAmount};
 
-    saBalance.setIssuer(noAccount());
+    saBalance.get<Issue>().setIssuer(noAccount());
 
     JLOG(j.debug()) << "rippleCredit: "
                        "create line: "
@@ -1489,7 +1490,7 @@ issueIOU(
     assert(!isXRP(account) && !isXRP(issue.account));
 
     // Consistency check
-    assert(issue == amount.issue());
+    assert(issue == amount.get<Issue>());
 
     // Can't send to self!
     assert(issue.account != account);
@@ -1549,7 +1550,7 @@ issueIOU(
     STAmount const limit(Issue{issue.currency, account});
     STAmount final_balance = amount;
 
-    final_balance.setIssuer(noAccount());
+    final_balance.get<Issue>().setIssuer(noAccount());
 
     auto const receiverAccount = view.peek(keylet::account(account));
     if (!receiverAccount)
@@ -1585,7 +1586,7 @@ redeemIOU(
     assert(!isXRP(account) && !isXRP(issue.account));
 
     // Consistency check
-    assert(issue == amount.issue());
+    assert(issue == amount.get<Issue>());
 
     // Can't send to self!
     assert(issue.account != account);

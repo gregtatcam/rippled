@@ -45,6 +45,12 @@ public:
     AccountID const&
     getIssuer() const;
 
+    void
+    setIssuer(AccountID const& issuer);
+
+    Currency const&
+    getCurrency() const;
+
     std::string
     getText() const;
 };

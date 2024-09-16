@@ -90,7 +90,7 @@ divide(STAmount const& amount, Rate const& rate)
     if (rate == parityRate)
         return amount;
 
-    return divide(amount, detail::as_amount(rate), amount.issue());
+    return divide(amount, detail::as_amount(rate), amount.get<Issue>());
 }
 
 STAmount
@@ -101,7 +101,8 @@ divideRound(STAmount const& amount, Rate const& rate, bool roundUp)
     if (rate == parityRate)
         return amount;
 
-    return divRound(amount, detail::as_amount(rate), amount.issue(), roundUp);
+    return divRound(
+        amount, detail::as_amount(rate), amount.get<Issue>(), roundUp);
 }
 
 STAmount

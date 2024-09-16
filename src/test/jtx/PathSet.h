@@ -40,8 +40,8 @@ countOffers(
     forEachItem(
         *env.current(), account, [&](std::shared_ptr<SLE const> const& sle) {
             if (sle->getType() == ltOFFER &&
-                sle->getFieldAmount(sfTakerPays).issue() == takerPays &&
-                sle->getFieldAmount(sfTakerGets).issue() == takerGets)
+                sle->getFieldAmount(sfTakerPays).get<Issue>() == takerPays &&
+                sle->getFieldAmount(sfTakerGets).get<Issue>() == takerGets)
                 ++count;
         });
     return count;

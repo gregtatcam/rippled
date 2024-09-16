@@ -526,8 +526,8 @@ NoXRPTrustLines::visitEntry(
         // relying on .native() just in case native somehow
         // were systematically incorrect
         xrpTrustLine_ =
-            after->getFieldAmount(sfLowLimit).issue() == xrpIssue() ||
-            after->getFieldAmount(sfHighLimit).issue() == xrpIssue();
+            after->getFieldAmount(sfLowLimit).get<Issue>() == xrpIssue() ||
+            after->getFieldAmount(sfHighLimit).get<Issue>() == xrpIssue();
     }
 }
 
@@ -922,7 +922,12 @@ ValidClawback::finalize(
             STAmount const& amount = tx.getFieldAmount(sfAmount);
             AccountID const& holder = amount.getIssuer();
             STAmount const holderBalance = accountHolds(
-                view, holder, amount.getCurrency(), issuer, fhIGNORE_FREEZE, j);
+                view,
+                holder,
+                amount.get<Issue>().getCurrency(),
+                issuer,
+                fhIGNORE_FREEZE,
+                j);
 
             if (holderBalance.signum() < 0)
             {

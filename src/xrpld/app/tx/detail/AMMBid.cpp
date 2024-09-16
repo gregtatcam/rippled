@@ -123,7 +123,7 @@ AMMBid::preclaim(PreclaimContext const& ctx)
 
     if (bidMin)
     {
-        if (bidMin->issue() != lpTokens.issue())
+        if (bidMin->get<Issue>() != lpTokens.get<Issue>())
         {
             JLOG(ctx.j.debug()) << "AMM Bid: Invalid LPToken.";
             return temBAD_AMM_TOKENS;
@@ -138,7 +138,7 @@ AMMBid::preclaim(PreclaimContext const& ctx)
     auto const bidMax = ctx.tx[~sfBidMax];
     if (bidMax)
     {
-        if (bidMax->issue() != lpTokens.issue())
+        if (bidMax->get<Issue>() != lpTokens.get<Issue>())
         {
             JLOG(ctx.j.debug()) << "AMM Bid: Invalid LPToken.";
             return temBAD_AMM_TOKENS;
@@ -222,7 +222,7 @@ applyBid(
         else if (auctionSlot.isFieldPresent(sfDiscountedFee))
             auctionSlot.makeFieldAbsent(sfDiscountedFee);
         auctionSlot.setFieldAmount(
-            sfPrice, toSTAmount(lpTokens.issue(), minPrice));
+            sfPrice, toSTAmount(lpTokens.get<Issue>(), minPrice));
         if (ctx_.tx.isFieldPresent(sfAuthAccounts))
             auctionSlot.setFieldArray(
                 sfAuthAccounts, ctx_.tx.getFieldArray(sfAuthAccounts));
@@ -230,7 +230,7 @@ applyBid(
             auctionSlot.makeFieldAbsent(sfAuthAccounts);
         // Burn the remaining bid amount
         auto const saBurn = adjustLPTokens(
-            lptAMMBalance, toSTAmount(lptAMMBalance.issue(), burn), false);
+            lptAMMBalance, toSTAmount(lptAMMBalance.get<Issue>(), burn), false);
         if (saBurn >= lptAMMBalance)
         {
             // This error case should never occur.
@@ -239,8 +239,8 @@ applyBid(
                 << lptAMMBalance;
             return tecINTERNAL;
         }
-        auto res =
-            redeemIOU(sb, account_, saBurn, lpTokens.issue(), ctx_.journal);
+        auto res = redeemIOU(
+            sb, account_, saBurn, lpTokens.get<Issue>(), ctx_.journal);
         if (res != tesSUCCESS)
         {
             JLOG(ctx_.journal.debug()) << "AMM Bid: failed to redeem.";
@@ -337,7 +337,7 @@ applyBid(
             sb,
             account_,
             auctionSlot[sfAccount],
-            toSTAmount(lpTokens.issue(), refund),
+            toSTAmount(lpTokens.get<Issue>(), refund),
             ctx_.journal);
         if (res != tesSUCCESS)
         {

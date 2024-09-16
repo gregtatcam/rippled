@@ -191,7 +191,7 @@ ammAccountHolds(
         auto amount = (*sle)[sfBalance];
         if (ammAccountID > issue.account)
             amount.negate();
-        amount.setIssuer(issue.account);
+        amount.get<Issue>().setIssuer(issue.account);
         return amount;
     }
 
@@ -396,8 +396,8 @@ isOnlyLiquidityProvider(
             auto const highLimit = sle->getFieldAmount(sfHighLimit);
             auto const isLPTrustline = lowLimit.getIssuer() == lpAccount ||
                 highLimit.getIssuer() == lpAccount;
-            auto const isLPTokenTrustline =
-                lowLimit.issue() == ammIssue || highLimit.issue() == ammIssue;
+            auto const isLPTokenTrustline = lowLimit.get<Issue>() == ammIssue ||
+                highLimit.get<Issue>() == ammIssue;
 
             // Liquidity Provider trustline
             if (isLPTrustline)

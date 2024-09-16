@@ -237,7 +237,7 @@ checkPayment(
         {
             // If no SendMax, default to Amount with sender as issuer.
             sendMax = amount;
-            sendMax.setIssuer(srcAddressID);
+            sendMax.get<Issue>().setIssuer(srcAddressID);
         }
 
         if (sendMax.native() && amount.native())
@@ -258,8 +258,8 @@ checkPayment(
                         ledger, app.journal("RippleLineCache")),
                     srcAddressID,
                     *dstAccountID,
-                    sendMax.issue().currency,
-                    sendMax.issue().account,
+                    sendMax.get<Issue>().currency,
+                    sendMax.get<Issue>().account,
                     amount,
                     std::nullopt,
                     app);
@@ -270,7 +270,10 @@ checkPayment(
                     STPath fullLiquidityPath;
                     STPathSet paths;
                     result = pf.getBestPaths(
-                        4, fullLiquidityPath, paths, sendMax.issue().account);
+                        4,
+                        fullLiquidityPath,
+                        paths,
+                        sendMax.get<Issue>().account);
                 }
             }
 

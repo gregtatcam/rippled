@@ -28,7 +28,7 @@ format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    txt += to_string(amount.get<Issue>().currency);
     return txt;
 }
 
@@ -47,8 +47,8 @@ BasicTaker::BasicTaker(
     , sell_(flags & tfSell)
     , original_(amount)
     , remaining_(amount)
-    , issue_in_(remaining_.in.issue())
-    , issue_out_(remaining_.out.issue())
+    , issue_in_(remaining_.in.get<Issue>())
+    , issue_out_(remaining_.out.get<Issue>())
     , m_rate_in(rate_in)
     , m_rate_out(rate_out)
     , cross_type_(cross_type)
@@ -177,14 +177,14 @@ BasicTaker::original_offer() const
 static STAmount
 qual_div(STAmount const& amount, Quality const& quality, STAmount const& output)
 {
-    auto result = divide(amount, quality.rate(), output.issue());
+    auto result = divide(amount, quality.rate(), output.get<Issue>());
     return std::min(result, output);
 }
 
 static STAmount
 qual_mul(STAmount const& amount, Quality const& quality, STAmount const& output)
 {
-    auto result = multiply(amount, quality.rate(), output.issue());
+    auto result = multiply(amount, quality.rate(), output.get<Issue>());
     return std::min(result, output);
 }
 
@@ -559,8 +559,8 @@ Taker::Taker(
     , direct_crossings_(0)
     , bridge_crossings_(0)
 {
-    assert(issue_in() == offer.in.issue());
-    assert(issue_out() == offer.out.issue());
+    assert(issue_in() == offer.in.get<Issue>());
+    assert(issue_out() == offer.out.get<Issue>());
 
     if (auto stream = journal_.debug())
     {
@@ -692,12 +692,12 @@ Taker::fill(BasicTaker::Flow const& flow, Offer& offer)
         assert(!isXRP(flow.order.in));
 
         if (result == tesSUCCESS)
-            result =
-                redeemIOU(account(), flow.issuers.in, flow.issuers.in.issue());
+            result = redeemIOU(
+                account(), flow.issuers.in, flow.issuers.in.get<Issue>());
 
         if (result == tesSUCCESS)
-            result =
-                issueIOU(offer.owner(), flow.order.in, flow.order.in.issue());
+            result = issueIOU(
+                offer.owner(), flow.order.in, flow.order.in.get<Issue>());
     }
     else
     {
@@ -714,11 +714,11 @@ Taker::fill(BasicTaker::Flow const& flow, Offer& offer)
 
         if (result == tesSUCCESS)
             result = redeemIOU(
-                offer.owner(), flow.issuers.out, flow.issuers.out.issue());
+                offer.owner(), flow.issuers.out, flow.issuers.out.get<Issue>());
 
         if (result == tesSUCCESS)
-            result =
-                issueIOU(account(), flow.order.out, flow.order.out.issue());
+            result = issueIOU(
+                account(), flow.order.out, flow.order.out.get<Issue>());
     }
     else
     {
@@ -753,11 +753,11 @@ Taker::fill(
     {
         if (result == tesSUCCESS)
             result = redeemIOU(
-                account(), flow1.issuers.in, flow1.issuers.in.issue());
+                account(), flow1.issuers.in, flow1.issuers.in.get<Issue>());
 
         if (result == tesSUCCESS)
-            result =
-                issueIOU(leg1.owner(), flow1.order.in, flow1.order.in.issue());
+            result = issueIOU(
+                leg1.owner(), flow1.order.in, flow1.order.in.get<Issue>());
     }
 
     // leg1 to leg2: bridging over XRP
@@ -769,11 +769,13 @@ Taker::fill(
     {
         if (result == tesSUCCESS)
             result = redeemIOU(
-                leg2.owner(), flow2.issuers.out, flow2.issuers.out.issue());
+                leg2.owner(),
+                flow2.issuers.out,
+                flow2.issuers.out.get<Issue>());
 
         if (result == tesSUCCESS)
-            result =
-                issueIOU(account(), flow2.order.out, flow2.order.out.issue());
+            result = issueIOU(
+                account(), flow2.order.out, flow2.order.out.get<Issue>());
     }
 
     if (result == tesSUCCESS)
