@@ -2156,8 +2156,8 @@ class Check_test : public beast::unit_test::suite
                             return;
 
                         BEAST_EXPECT(
-                            offerAmount.issue().account ==
-                            checkAmount.issue().account);
+                            offerAmount.get<Issue>().account ==
+                            checkAmount.get<Issue>().account);
                         BEAST_EXPECT(
                             offerAmount.negative() == checkAmount.negative());
                         BEAST_EXPECT(

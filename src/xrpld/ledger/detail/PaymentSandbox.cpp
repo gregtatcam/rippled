@@ -52,7 +52,7 @@ DeferredCredits::credit(
     assert(sender != receiver);
     assert(!amount.negative());
 
-    auto const k = makeKey(sender, receiver, amount.getCurrency());
+    auto const k = makeKey(sender, receiver, amount.get<Issue>().getCurrency());
     auto i = credits_.find(k);
     if (i == credits_.end())
     {
@@ -185,7 +185,7 @@ PaymentSandbox::balanceHook(
     magnitudes, (B+C)-C may not equal B.
     */
 
-    auto const currency = amount.getCurrency();
+    auto const currency = amount.get<Issue>().getCurrency();
 
     auto delta = amount.zeroed();
     auto lastBal = amount;
@@ -206,7 +206,7 @@ PaymentSandbox::balanceHook(
     // to compute usable balance just slightly above what the ledger
     // calculates (but always less than the actual balance).
     auto adjustedAmt = std::min({amount, lastBal - delta, minBal});
-    adjustedAmt.setIssuer(amount.getIssuer());
+    adjustedAmt.get<Issue>().setIssuer(amount.getIssuer());
 
     if (isXRP(issuer) && adjustedAmt < beast::zero)
         // A calculated negative XRP balance is not an error case. Consider a
@@ -368,7 +368,7 @@ PaymentSandbox::balanceChanges(ReadView const& view) const
         }
         // The following are now set, put them in the map
         auto delta = newBalance - oldBalance;
-        auto const cur = newBalance.getCurrency();
+        auto const cur = newBalance.get<Issue>().getCurrency();
         result[std::make_tuple(lowID, highID, cur)] = delta;
         auto r = result.emplace(std::make_tuple(lowID, lowID, cur), delta);
         if (r.second)

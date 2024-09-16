@@ -2302,19 +2302,21 @@ public:
         jtx::Account const& account,
         jtx::PrettyAmount const& expectBalance)
     {
-        auto const sleTrust =
-            env.le(keylet::line(account.id(), expectBalance.value().issue()));
+        auto const sleTrust = env.le(
+            keylet::line(account.id(), expectBalance.value().get<Issue>()));
         BEAST_EXPECT(sleTrust);
         if (sleTrust)
         {
-            Issue const issue = expectBalance.value().issue();
+            Issue const issue = expectBalance.value().get<Issue>();
             bool const accountLow = account.id() < issue.account;
 
             STAmount low{issue};
             STAmount high{issue};
 
-            low.setIssuer(accountLow ? account.id() : issue.account);
-            high.setIssuer(accountLow ? issue.account : account.id());
+            low.get<Issue>().setIssuer(
+                accountLow ? account.id() : issue.account);
+            high.get<Issue>().setIssuer(
+                accountLow ? issue.account : account.id());
 
             BEAST_EXPECT(sleTrust->getFieldAmount(sfLowLimit) == low);
             BEAST_EXPECT(sleTrust->getFieldAmount(sfHighLimit) == high);

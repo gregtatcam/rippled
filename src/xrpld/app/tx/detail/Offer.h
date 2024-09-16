@@ -187,8 +187,8 @@ TOffer<TIn, TOut>::TOffer(SLE::pointer const& entry, Quality quality)
     auto const tg = m_entry->getFieldAmount(sfTakerGets);
     m_amounts.in = toAmount<TIn>(tp);
     m_amounts.out = toAmount<TOut>(tg);
-    this->issIn_ = tp.issue();
-    this->issOut_ = tg.issue();
+    this->issIn_ = tp.get<Issue>();
+    this->issOut_ = tg.get<Issue>();
 }
 
 template <>
@@ -300,7 +300,7 @@ template <>
 inline Issue const&
 TOffer<STAmount, STAmount>::issueIn() const
 {
-    return m_amounts.in.issue();
+    return m_amounts.in.get<Issue>();
 }
 
 template <class TIn, class TOut>
@@ -314,7 +314,7 @@ template <>
 inline Issue const&
 TOffer<STAmount, STAmount>::issueOut() const
 {
-    return m_amounts.out.issue();
+    return m_amounts.out.get<Issue>();
 }
 
 template <class TIn, class TOut>

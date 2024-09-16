@@ -98,10 +98,10 @@ CreateOffer::preflight(PreflightContext const& ctx)
     }
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
+    auto const& uPaysCurrency = saTakerPays.get<Issue>().getCurrency();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
-    auto const& uGetsCurrency = saTakerGets.getCurrency();
+    auto const& uGetsCurrency = saTakerGets.get<Issue>().getCurrency();
 
     if (uPaysCurrency == uGetsCurrency && uPaysIssuerID == uGetsIssuerID)
     {
@@ -134,7 +134,7 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     auto saTakerGets = ctx.tx[sfTakerGets];
 
     auto const& uPaysIssuerID = saTakerPays.getIssuer();
-    auto const& uPaysCurrency = saTakerPays.getCurrency();
+    auto const& uPaysCurrency = saTakerPays.get<Issue>().getCurrency();
 
     auto const& uGetsIssuerID = saTakerGets.getIssuer();
 
@@ -704,7 +704,7 @@ CreateOffer::flowCross(
                 sendMax = multiplyRound(
                     takerAmount.in,
                     gatewayXferRate,
-                    takerAmount.in.issue(),
+                    takerAmount.in.get<Issue>(),
                     true);
             }
         }
@@ -751,7 +751,7 @@ CreateOffer::flowCross(
                 // Since the transfer rate cannot exceed 200%, we use 1/2
                 // maxValue for our limit.
                 deliver = STAmount{
-                    takerAmount.out.issue(),
+                    takerAmount.out.get<Issue>(),
                     STAmount::cMaxValue / 2,
                     STAmount::cMaxOffset};
         }
@@ -814,7 +814,7 @@ CreateOffer::flowCross(
                         nonGatewayAmountIn = divideRound(
                             result.actualAmountIn,
                             gatewayXferRate,
-                            takerAmount.in.issue(),
+                            takerAmount.in.get<Issue>(),
                             true);
 
                     afterCross.in -= nonGatewayAmountIn;
@@ -836,11 +836,14 @@ CreateOffer::flowCross(
                             return divRoundStrict(
                                 afterCross.in,
                                 rate,
-                                takerAmount.out.issue(),
+                                takerAmount.out.get<Issue>(),
                                 false);
 
                         return divRound(
-                            afterCross.in, rate, takerAmount.out.issue(), true);
+                            afterCross.in,
+                            rate,
+                            takerAmount.out.get<Issue>(),
+                            true);
                     }();
                 }
                 else
@@ -853,7 +856,10 @@ CreateOffer::flowCross(
                     if (afterCross.out < beast::zero)
                         afterCross.out.clear();
                     afterCross.in = mulRound(
-                        afterCross.out, rate, takerAmount.in.issue(), true);
+                        afterCross.out,
+                        rate,
+                        takerAmount.in.get<Issue>(),
+                        true);
                 }
             }
         }
@@ -894,7 +900,7 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    txt += to_string(amount.get<Issue>().currency);
     return txt;
 }
 
@@ -1006,12 +1012,14 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             if (bSell)
             {
                 // this is a sell, round taker pays
-                saTakerPays = multiply(saTakerGets, rate, saTakerPays.issue());
+                saTakerPays =
+                    multiply(saTakerGets, rate, saTakerPays.get<Issue>());
             }
             else
             {
                 // this is a buy, round taker gets
-                saTakerGets = divide(saTakerPays, rate, saTakerGets.issue());
+                saTakerGets =
+                    divide(saTakerPays, rate, saTakerGets.get<Issue>());
             }
             if (!saTakerGets || !saTakerPays)
             {
@@ -1031,8 +1039,8 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         Amounts place_offer;
 
         JLOG(j_.debug()) << "Attempting cross: "
-                         << to_string(takerAmount.in.issue()) << " -> "
-                         << to_string(takerAmount.out.issue());
+                         << to_string(takerAmount.in.get<Issue>()) << " -> "
+                         << to_string(takerAmount.out.get<Issue>());
 
         if (auto stream = j_.trace())
         {
@@ -1064,8 +1072,8 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             return {result, true};
         }
 
-        assert(saTakerGets.issue() == place_offer.in.issue());
-        assert(saTakerPays.issue() == place_offer.out.issue());
+        assert(saTakerGets.get<Issue>() == place_offer.in.get<Issue>());
+        assert(saTakerPays.get<Issue>() == place_offer.out.get<Issue>());
 
         if (takerAmount != place_offer)
             crossed = true;
@@ -1174,10 +1182,11 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     // Update owner count.
     adjustOwnerCount(sb, sleCreator, 1, viewJ);
 
-    JLOG(j_.trace()) << "adding to book: " << to_string(saTakerPays.issue())
-                     << " : " << to_string(saTakerGets.issue());
+    JLOG(j_.trace()) << "adding to book: "
+                     << to_string(saTakerPays.get<Issue>()) << " : "
+                     << to_string(saTakerGets.get<Issue>());
 
-    Book const book{saTakerPays.issue(), saTakerGets.issue()};
+    Book const book{saTakerPays.get<Issue>(), saTakerGets.get<Issue>()};
 
     // Add offer to order book, using the original rate
     // before any crossing occured.
@@ -1185,10 +1194,12 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        sle->setFieldH160(sfTakerPaysCurrency, saTakerPays.issue().currency);
-        sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.issue().account);
-        sle->setFieldH160(sfTakerGetsCurrency, saTakerGets.issue().currency);
-        sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
+        sle->setFieldH160(
+            sfTakerPaysCurrency, saTakerPays.get<Issue>().currency);
+        sle->setFieldH160(sfTakerPaysIssuer, saTakerPays.get<Issue>().account);
+        sle->setFieldH160(
+            sfTakerGetsCurrency, saTakerGets.get<Issue>().currency);
+        sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.get<Issue>().account);
         sle->setFieldU64(sfExchangeRate, uRate);
     });
 

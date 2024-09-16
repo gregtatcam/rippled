@@ -339,8 +339,8 @@ struct BalanceTransfer
         STAmount const& reward,
         bool check_payer = true)
     {
-        auto reward_cost =
-            multiply(reward, STAmount(reward_accounts.size()), reward.issue());
+        auto reward_cost = multiply(
+            reward, STAmount(reward_accounts.size()), reward.get<Issue>());
         return check_most_balances(amt, reward) &&
             (!check_payer || payor_.diff() == -(reward_cost + txFees_));
     }
@@ -1670,7 +1670,7 @@ struct XChain_test : public beast::unit_test::suite,
             BEAST_EXPECT(!scEnv.claimID(jvb, 1));  // claim id deleted
 
             BEAST_EXPECT(transfer.has_happened(
-                amt, divide(reward, STAmount(3), reward.issue())));
+                amt, divide(reward, STAmount(3), reward.get<Issue>())));
         }
 
         // 4,4 => should succeed
@@ -1695,7 +1695,7 @@ struct XChain_test : public beast::unit_test::suite,
                 return result;
             }();
             STAmount const split_reward_ =
-                divide(reward, STAmount(signers_.size()), reward.issue());
+                divide(reward, STAmount(signers_.size()), reward.get<Issue>());
 
             mcEnv.tx(create_bridge(mcDoor, jvb)).close();
 
@@ -1748,7 +1748,7 @@ struct XChain_test : public beast::unit_test::suite,
             BEAST_EXPECT(!scEnv.claimID(jvb, claimID));  // claim id deleted
 
             BEAST_EXPECT(transfer.has_happened(
-                amt, divide(reward, STAmount(2), reward.issue())));
+                amt, divide(reward, STAmount(2), reward.get<Issue>())));
         }
 
         // 1,2 => should fail
@@ -4455,7 +4455,7 @@ private:
             STAmount amt,
             std::uint64_t divisor = 1)
         {
-            if (amt.issue() != xrpIssue())
+            if (amt.get<Issue>() != xrpIssue())
                 return;
             auto it = accounts.find(acct);
             if (it == accounts.end())
@@ -4469,22 +4469,23 @@ private:
                     (divisor == 1 ? amt
                                   : divide(
                                         amt,
-                                        STAmount(amt.issue(), divisor),
-                                        amt.issue()));
+                                        STAmount(amt.get<Issue>(), divisor),
+                                        amt.get<Issue>()));
             }
         }
 
         void
         spend(jtx::Account const& acct, STAmount amt, std::uint64_t times = 1)
         {
-            if (amt.issue() != xrpIssue())
+            if (amt.get<Issue>() != xrpIssue())
                 return;
             receive(
                 acct,
-                times == 1
-                    ? -amt
-                    : -multiply(
-                          amt, STAmount(amt.issue(), times), amt.issue()));
+                times == 1 ? -amt
+                           : -multiply(
+                                 amt,
+                                 STAmount(amt.get<Issue>(), times),
+                                 amt.get<Issue>()));
         }
 
         void
@@ -4712,7 +4713,8 @@ private:
                 assert(cr.claim_id - 1 == counters.claim_count);
 
                 auto r = cr.reward;
-                auto reward = divide(r, STAmount(num_attestors), r.issue());
+                auto reward =
+                    divide(r, STAmount(num_attestors), r.get<Issue>());
 
                 for (auto i : signers)
                     st.receive(bridge_.signers[i].account, reward);
@@ -4797,7 +4799,7 @@ private:
             ChainStateTrack& st = srcState();
             jtx::Account const& srcdoor = srcDoor();
 
-            if (xfer.amt.issue() != xrpIssue())
+            if (xfer.amt.get<Issue>() != xrpIssue())
             {
                 st.env.tx(pay(srcdoor, xfer.from, xfer.amt));
                 st.spendFee(srcdoor);
@@ -4818,7 +4820,7 @@ private:
         distribute_reward(ChainStateTrack& st)
         {
             auto r = bridge_.reward;
-            auto reward = divide(r, STAmount(bridge_.quorum), r.issue());
+            auto reward = divide(r, STAmount(bridge_.quorum), r.get<Issue>());
 
             for (size_t i = 0; i < num_signers; ++i)
             {

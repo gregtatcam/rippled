@@ -390,7 +390,8 @@ public:
     }
 
     template <class T>
-    requires(sizeof(T) >= sizeof(int) && std::is_arithmetic_v<T>) PrettyAmount
+    requires(sizeof(T) >= sizeof(int) && std::is_arithmetic_v<T>)
+    PrettyAmount
     operator()(T v) const
     {
         // VFALCO NOTE Should throw if the
@@ -458,7 +459,7 @@ struct AnyAmount
     {
         if (!is_any)
             return;
-        value.setIssuer(id);
+        value.get<Issue>().setIssuer(id);
     }
 };
 

@@ -30,7 +30,8 @@ largestAmount(STAmount const& amt)
     if (amt.native())
         return INITIAL_XRP;
 
-    return STAmount(amt.issue(), STAmount::cMaxValue, STAmount::cMaxOffset);
+    return STAmount(
+        amt.get<Issue>(), STAmount::cMaxValue, STAmount::cMaxOffset);
 }
 
 inline STAmount

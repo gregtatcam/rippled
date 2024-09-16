@@ -26,7 +26,7 @@ namespace jtx {
 void
 balance::operator()(Env& env) const
 {
-    if (isXRP(value_.issue()))
+    if (isXRP(value_.get<Issue>()))
     {
         auto const sle = env.le(account_);
         if (none_)
@@ -40,7 +40,8 @@ balance::operator()(Env& env) const
     }
     else
     {
-        auto const sle = env.le(keylet::line(account_.id(), value_.issue()));
+        auto const sle =
+            env.le(keylet::line(account_.id(), value_.get<Issue>()));
         if (none_)
         {
             env.test.expect(!sle);
@@ -48,8 +49,8 @@ balance::operator()(Env& env) const
         else if (env.test.expect(sle))
         {
             auto amount = sle->getFieldAmount(sfBalance);
-            amount.setIssuer(value_.issue().account);
-            if (account_.id() > value_.issue().account)
+            amount.get<Issue>().setIssuer(value_.get<Issue>().account);
+            if (account_.id() > value_.get<Issue>().account)
                 amount.negate();
             env.test.expect(amount == value_);
         }

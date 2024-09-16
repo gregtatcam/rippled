@@ -36,6 +36,18 @@ Issue::getIssuer() const
     return account;
 }
 
+void
+Issue::setIssuer(AccountID const& accnt)
+{
+    account = accnt;
+}
+
+Currency const&
+Issue::getCurrency() const
+{
+    return currency;
+}
+
 std::string
 Issue::getText() const
 {

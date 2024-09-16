@@ -250,7 +250,7 @@ class TheoreticalQuality_test : public beast::unit_test::suite
 
         auto const sendMaxIssue = [&rcp]() -> std::optional<Issue> {
             if (rcp.sendMax)
-                return rcp.sendMax->issue();
+                return rcp.sendMax->get<Issue>();
             return std::nullopt;
         }();
 
@@ -260,7 +260,7 @@ class TheoreticalQuality_test : public beast::unit_test::suite
             sb,
             rcp.srcAccount,
             rcp.dstAccount,
-            rcp.dstAmt.issue(),
+            rcp.dstAmt.get<Issue>(),
             /*limitQuality*/ std::nullopt,
             sendMaxIssue,
             rcp.paths,

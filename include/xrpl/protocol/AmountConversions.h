@@ -184,7 +184,7 @@ getIssue(T const& amt)
     else if constexpr (std::is_same_v<XRPAmount, T>)
         return xrpIssue();
     else if constexpr (std::is_same_v<STAmount, T>)
-        return amt.issue();
+        return amt.template get<Issue>();
     else
     {
         constexpr bool alwaysFalse = !std::is_same_v<T, T>;

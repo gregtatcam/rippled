@@ -128,11 +128,11 @@ private:
 
         // Make sure asset comparison works.
         BEAST_EXPECT(
-            STIssue(sfAsset, STAmount(XRP(2'000)).issue()) ==
-            STIssue(sfAsset, STAmount(XRP(2'000)).issue()));
+            STIssue(sfAsset, STAmount(XRP(2'000)).get<Issue>()) ==
+            STIssue(sfAsset, STAmount(XRP(2'000)).get<Issue>()));
         BEAST_EXPECT(
-            STIssue(sfAsset, STAmount(XRP(2'000)).issue()) !=
-            STIssue(sfAsset, STAmount(USD(2'000)).issue()));
+            STIssue(sfAsset, STAmount(XRP(2'000)).get<Issue>()) !=
+            STIssue(sfAsset, STAmount(USD(2'000)).get<Issue>()));
     }
 
     void

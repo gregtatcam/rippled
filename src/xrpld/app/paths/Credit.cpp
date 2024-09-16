@@ -39,11 +39,11 @@ creditLimit(
     {
         result = sleRippleState->getFieldAmount(
             account < issuer ? sfLowLimit : sfHighLimit);
-        result.setIssuer(account);
+        result.get<Issue>().setIssuer(account);
     }
 
     assert(result.getIssuer() == account);
-    assert(result.getCurrency() == currency);
+    assert(result.get<Issue>().getCurrency() == currency);
     return result;
 }
 
@@ -73,11 +73,11 @@ creditBalance(
         result = sleRippleState->getFieldAmount(sfBalance);
         if (account < issuer)
             result.negate();
-        result.setIssuer(account);
+        result.get<Issue>().setIssuer(account);
     }
 
     assert(result.getIssuer() == account);
-    assert(result.getCurrency() == currency);
+    assert(result.get<Issue>().getCurrency() == currency);
     return result;
 }
 

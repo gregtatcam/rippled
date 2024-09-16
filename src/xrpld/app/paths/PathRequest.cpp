@@ -313,11 +313,12 @@ PathRequest::parseJson(Json::Value const& jvParams)
         return PFR_PJ_INVALID;
     }
 
-    convert_all_ = saDstAmount == STAmount(saDstAmount.issue(), 1u, 0, true);
+    convert_all_ =
+        saDstAmount == STAmount(saDstAmount.get<Issue>(), 1u, 0, true);
 
-    if ((saDstAmount.getCurrency().isZero() &&
+    if ((saDstAmount.get<Issue>().getCurrency().isZero() &&
          saDstAmount.getIssuer().isNonZero()) ||
-        (saDstAmount.getCurrency() == badCurrency()) ||
+        (saDstAmount.get<Issue>().getCurrency() == badCurrency()) ||
         (!convert_all_ && saDstAmount <= beast::zero))
     {
         jvStatus = rpcError(rpcDST_AMT_MALFORMED);
@@ -335,11 +336,11 @@ PathRequest::parseJson(Json::Value const& jvParams)
 
         saSendMax.emplace();
         if (!amountFromJsonNoThrow(*saSendMax, jvParams[jss::send_max]) ||
-            (saSendMax->getCurrency().isZero() &&
+            (saSendMax->get<Issue>().getCurrency().isZero() &&
              saSendMax->getIssuer().isNonZero()) ||
-            (saSendMax->getCurrency() == badCurrency()) ||
+            (saSendMax->get<Issue>().getCurrency() == badCurrency()) ||
             (*saSendMax <= beast::zero &&
-             *saSendMax != STAmount(saSendMax->issue(), 1u, 0, true)))
+             *saSendMax != STAmount(saSendMax->get<Issue>(), 1u, 0, true)))
         {
             jvStatus = rpcError(rpcSENDMAX_MALFORMED);
             return PFR_PJ_INVALID;
@@ -396,7 +397,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
             if (saSendMax)
             {
                 // If the currencies don't match, ignore the source currency.
-                if (srcCurrencyID == saSendMax->getCurrency())
+                if (srcCurrencyID == saSendMax->get<Issue>().getCurrency())
                 {
                     // If neither is the source and they are not equal, then the
                     // source issuer is illegal.
@@ -501,7 +502,7 @@ PathRequest::findPaths(
     auto sourceCurrencies = sciSourceCurrencies;
     if (sourceCurrencies.empty() && saSendMax)
     {
-        sourceCurrencies.insert(saSendMax->issue());
+        sourceCurrencies.insert(saSendMax->get<Issue>());
     }
     if (sourceCurrencies.empty())
     {
@@ -509,7 +510,7 @@ PathRequest::findPaths(
         bool const sameAccount = *raSrcAccount == *raDstAccount;
         for (auto const& c : currencies)
         {
-            if (!sameAccount || c != saDstAmount.getCurrency())
+            if (!sameAccount || c != saDstAmount.get<Issue>().getCurrency())
             {
                 if (sourceCurrencies.size() >= RPC::Tuning::max_auto_src_cur)
                     return false;
@@ -619,7 +620,7 @@ PathRequest::findPaths(
         if (rc.result() == tesSUCCESS)
         {
             Json::Value jvEntry(Json::objectValue);
-            rc.actualAmountIn.setIssuer(sourceAccount);
+            rc.actualAmountIn.get<Issue>().setIssuer(sourceAccount);
             jvEntry[jss::source_amount] =
                 rc.actualAmountIn.getJson(JsonOptions::none);
             jvEntry[jss::paths_computed] = ps.getJson(JsonOptions::none);

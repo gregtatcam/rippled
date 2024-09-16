@@ -112,8 +112,8 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
             STAmount deltaPays = finalFields.getFieldAmount(sfTakerPays) -
                 previousFields.getFieldAmount(sfTakerPays);
 
-            std::string g{to_string(deltaGets.issue())};
-            std::string p{to_string(deltaPays.issue())};
+            std::string g{to_string(deltaGets.get<Issue>())};
+            std::string p{to_string(deltaPays.get<Issue>())};
 
             bool const noswap =
                 isXRP(deltaGets) ? true : (isXRP(deltaPays) ? false : (g < p));
@@ -186,9 +186,9 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
         STAmount volB = std::get<1>(entry.second);
 
         inner[jss::currency_a] =
-            (isXRP(volA) ? "XRP_drops" : to_string(volA.issue()));
+            (isXRP(volA) ? "XRP_drops" : to_string(volA.get<Issue>()));
         inner[jss::currency_b] =
-            (isXRP(volB) ? "XRP_drops" : to_string(volB.issue()));
+            (isXRP(volB) ? "XRP_drops" : to_string(volB.get<Issue>()));
 
         inner[jss::volume_a] =
             (isXRP(volA) ? to_string(volA.xrp()) : to_string(volA.iou()));

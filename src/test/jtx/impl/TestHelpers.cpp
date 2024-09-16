@@ -67,7 +67,7 @@ stpath_append_one(STPath& st, STPathElement const& pe)
 bool
 equal(STAmount const& sa1, STAmount const& sa2)
 {
-    return sa1 == sa2 && sa1.issue().account == sa2.issue().account;
+    return sa1 == sa2 && sa1.get<Issue>().account == sa2.get<Issue>().account;
 }
 
 // Issue path element
@@ -103,9 +103,9 @@ expectLine(
     STAmount const& value,
     bool defaultLimits)
 {
-    if (auto const sle = env.le(keylet::line(account, value.issue())))
+    if (auto const sle = env.le(keylet::line(account, value.get<Issue>())))
     {
-        Issue const issue = value.issue();
+        Issue const issue = value.get<Issue>();
         bool const accountLow = account < issue.account;
 
         bool expectDefaultTrustLine = true;
@@ -114,15 +114,15 @@ expectLine(
             STAmount low{issue};
             STAmount high{issue};
 
-            low.setIssuer(accountLow ? account : issue.account);
-            high.setIssuer(accountLow ? issue.account : account);
+            low.get<Issue>().setIssuer(accountLow ? account : issue.account);
+            high.get<Issue>().setIssuer(accountLow ? issue.account : account);
 
             expectDefaultTrustLine = sle->getFieldAmount(sfLowLimit) == low &&
                 sle->getFieldAmount(sfHighLimit) == high;
         }
 
         auto amount = sle->getFieldAmount(sfBalance);
-        amount.setIssuer(value.issue().account);
+        amount.get<Issue>().setIssuer(value.get<Issue>().account);
         if (!accountLow)
             amount.negate();
         return amount == value && expectDefaultTrustLine;

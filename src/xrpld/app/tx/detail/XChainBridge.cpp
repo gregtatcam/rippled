@@ -679,7 +679,7 @@ finalizeClaimHelper(
                 saveNumberRoundMode _{Number::setround(round_mode)};
 
                 STAmount const den{rewardAccounts.size()};
-                return divide(rewardPool, den, rewardPool.issue());
+                return divide(rewardPool, den, rewardPool.get<Issue>());
             }();
             STAmount distributed = rewardPool.zeroed();
             for (auto const& rewardAccount : rewardAccounts)
@@ -1234,7 +1234,7 @@ attestationPreflight(PreflightContext const& ctx)
         return temXCHAIN_BAD_PROOF;
     auto const expectedIssue =
         bridgeSpec.issue(STXChainBridge::srcChain(att->wasLockingChainSend));
-    if (att->sendingAmount.issue() != expectedIssue)
+    if (att->sendingAmount.template get<Issue>() != expectedIssue)
         return temXCHAIN_BAD_PROOF;
 
     return preflight2(ctx);
@@ -1679,8 +1679,8 @@ XChainClaim::preflight(PreflightContext const& ctx)
     auto const amount = ctx.tx[sfAmount];
 
     if (amount.signum() <= 0 ||
-        (amount.issue() != bridgeSpec.lockingChainIssue() &&
-         amount.issue() != bridgeSpec.issuingChainIssue()))
+        (amount.get<Issue>() != bridgeSpec.lockingChainIssue() &&
+         amount.get<Issue>() != bridgeSpec.issuingChainIssue()))
     {
         return temBAD_AMOUNT;
     }
@@ -1723,12 +1723,12 @@ XChainClaim::preclaim(PreclaimContext const& ctx)
 
         if (isLockingChain)
         {
-            if (bridgeSpec.lockingChainIssue() != thisChainAmount.issue())
+            if (bridgeSpec.lockingChainIssue() != thisChainAmount.get<Issue>())
                 return tecXCHAIN_BAD_TRANSFER_ISSUE;
         }
         else
         {
-            if (bridgeSpec.issuingChainIssue() != thisChainAmount.issue())
+            if (bridgeSpec.issuingChainIssue() != thisChainAmount.get<Issue>())
                 return tecXCHAIN_BAD_TRANSFER_ISSUE;
         }
     }
@@ -1919,8 +1919,8 @@ XChainCommit::preflight(PreflightContext const& ctx)
     if (amount.signum() <= 0 || !isLegalNet(amount))
         return temBAD_AMOUNT;
 
-    if (amount.issue() != bridgeSpec.lockingChainIssue() &&
-        amount.issue() != bridgeSpec.issuingChainIssue())
+    if (amount.get<Issue>() != bridgeSpec.lockingChainIssue() &&
+        amount.get<Issue>() != bridgeSpec.issuingChainIssue())
         return temBAD_ISSUER;
 
     return preflight2(ctx);
@@ -1959,12 +1959,12 @@ XChainCommit::preclaim(PreclaimContext const& ctx)
 
     if (isLockingChain)
     {
-        if (bridgeSpec.lockingChainIssue() != ctx.tx[sfAmount].issue())
+        if (bridgeSpec.lockingChainIssue() != ctx.tx[sfAmount].get<Issue>())
             return tecXCHAIN_BAD_TRANSFER_ISSUE;
     }
     else
     {
-        if (bridgeSpec.issuingChainIssue() != ctx.tx[sfAmount].issue())
+        if (bridgeSpec.issuingChainIssue() != ctx.tx[sfAmount].get<Issue>())
             return tecXCHAIN_BAD_TRANSFER_ISSUE;
     }
 
@@ -2191,7 +2191,7 @@ XChainCreateAccountCommit::preflight(PreflightContext const& ctx)
     if (reward.signum() < 0 || !reward.native())
         return temBAD_AMOUNT;
 
-    if (reward.issue() != amount.issue())
+    if (reward.get<Issue>() != amount.get<Issue>())
         return temBAD_AMOUNT;
 
     return preflight2(ctx);
@@ -2224,7 +2224,7 @@ XChainCreateAccountCommit::preclaim(PreclaimContext const& ctx)
     if (amount < *minCreateAmount)
         return tecXCHAIN_INSUFF_CREATE_AMOUNT;
 
-    if (minCreateAmount->issue() != amount.issue())
+    if (minCreateAmount->get<Issue>() != amount.get<Issue>())
         return tecXCHAIN_BAD_TRANSFER_ISSUE;
 
     AccountID const thisDoor = (*sleBridge)[sfAccount];
@@ -2247,7 +2247,7 @@ XChainCreateAccountCommit::preclaim(PreclaimContext const& ctx)
     STXChainBridge::ChainType const dstChain =
         STXChainBridge::otherChain(srcChain);
 
-    if (bridgeSpec.issue(srcChain) != ctx.tx[sfAmount].issue())
+    if (bridgeSpec.issue(srcChain) != ctx.tx[sfAmount].get<Issue>())
         return tecXCHAIN_BAD_TRANSFER_ISSUE;
 
     if (!isXRP(bridgeSpec.issue(dstChain)))

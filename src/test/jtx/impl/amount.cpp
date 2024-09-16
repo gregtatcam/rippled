@@ -36,12 +36,12 @@ operator<<(std::ostream&& os,
     if (amount.is_any)
     {
         os << amount.value.getText() << "/" <<
-            to_string(amount.value.issue().currency) <<
+            to_string(amount.value.get<Issue>().currency) <<
                 "*";
         return os;
     }
     os << amount.value.getText() << "/" <<
-        to_string(amount.value.issue().currency) <<
+        to_string(amount.value.get<Issue>().currency) <<
             "(" << amount.name() << ")";
     return os;
 }
@@ -94,8 +94,8 @@ operator<<(std::ostream& os, PrettyAmount const& amount)
     else
     {
         os << amount.value().getText() << "/"
-           << to_string(amount.value().issue().currency) << "(" << amount.name()
-           << ")";
+           << to_string(amount.value().get<Issue>().currency) << "("
+           << amount.name() << ")";
     }
     return os;
 }

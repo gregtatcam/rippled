@@ -73,17 +73,17 @@ flow(
 {
     Issue const srcIssue = [&] {
         if (sendMax)
-            return sendMax->issue();
-        if (!isXRP(deliver.issue().currency))
-            return Issue(deliver.issue().currency, src);
+            return sendMax->get<Issue>();
+        if (!isXRP(deliver.get<Issue>().currency))
+            return Issue(deliver.get<Issue>().currency, src);
         return xrpIssue();
     }();
 
-    Issue const dstIssue = deliver.issue();
+    Issue const dstIssue = deliver.get<Issue>();
 
     std::optional<Issue> sendMaxIssue;
     if (sendMax)
-        sendMaxIssue = sendMax->issue();
+        sendMaxIssue = sendMax->get<Issue>();
 
     AMMContext ammContext(src, false);
 

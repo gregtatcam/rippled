@@ -198,11 +198,11 @@ public:
                  mantissaReduce += 20'000'000ull)
             {
                 STAmount aliceUSD{
-                    bobsOffer.out.issue(),
+                    bobsOffer.out.get<Issue>(),
                     bobsOffer.out.mantissa() - mantissaReduce,
                     bobsOffer.out.exponent()};
                 STAmount aliceXRP{
-                    bobsOffer.in.issue(), bobsOffer.in.mantissa() - 1};
+                    bobsOffer.in.get<Issue>(), bobsOffer.in.mantissa() - 1};
                 Amounts alicesOffer{aliceUSD, aliceXRP};
                 blockedCount += exerciseOfferPair(alicesOffer, bobsOffer);
             }
@@ -356,11 +356,11 @@ public:
                  mantissaReduce += 20'000'000ull)
             {
                 STAmount bobUSD{
-                    aliceOffer.out.issue(),
+                    aliceOffer.out.get<Issue>(),
                     aliceOffer.out.mantissa() - mantissaReduce,
                     aliceOffer.out.exponent()};
                 STAmount bobXRP{
-                    aliceOffer.in.issue(), aliceOffer.in.mantissa() - 1};
+                    aliceOffer.in.get<Issue>(), aliceOffer.in.mantissa() - 1};
                 Amounts bobsOffer{bobUSD, bobXRP};
 
                 blockedCount += exerciseOfferPair(aliceOffer, bobsOffer);
@@ -724,7 +724,7 @@ public:
                     if (badRate == 0)
                     {
                         STAmount const tweakedTakerGets(
-                            aliceReducedOffer.in.issue(),
+                            aliceReducedOffer.in.get<Issue>(),
                             aliceReducedOffer.in.mantissa() + 1,
                             aliceReducedOffer.in.exponent(),
                             aliceReducedOffer.in.negative());
@@ -763,7 +763,7 @@ public:
             unsigned int blockedCount = 0;
             {
                 STAmount increaseGets = USD(0);
-                STAmount const step(increaseGets.issue(), 1, -8);
+                STAmount const step(increaseGets.get<Issue>(), 1, -8);
                 for (unsigned int i = 0; i < loopCount; ++i)
                 {
                     blockedCount += exerciseOfferTrio(

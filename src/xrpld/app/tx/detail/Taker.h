@@ -128,14 +128,14 @@ private:
     Rate
     in_rate(AccountID const& from, AccountID const& to) const
     {
-        return effective_rate(m_rate_in, original_.in.issue(), from, to);
+        return effective_rate(m_rate_in, original_.in.get<Issue>(), from, to);
     }
 
     // The transfer rate for the output currency between the given accounts
     Rate
     out_rate(AccountID const& from, AccountID const& to) const
     {
-        return effective_rate(m_rate_out, original_.out.issue(), from, to);
+        return effective_rate(m_rate_out, original_.out.get<Issue>(), from, to);
     }
 
 public:
