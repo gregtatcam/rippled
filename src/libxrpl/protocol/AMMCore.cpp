@@ -39,12 +39,23 @@ ammAccountID(
 }
 
 Currency
-ammLPTCurrency(Currency const& cur1, Currency const& cur2)
+ammLPTCurrency(Asset const& issue1, Asset const& issue2)
 {
     // AMM LPToken is 0x03 plus 19 bytes of the hash
     std::int32_t constexpr AMMCurrencyCode = 0x03;
-    auto const [minC, maxC] = std::minmax(cur1, cur2);
-    auto const hash = sha512Half(minC, maxC);
+    auto const [minI, maxI] = std::minmax(issue1, issue2);
+    uint256 const hash = std::visit(
+        [](auto&& issue1_, auto&& issue2_) {
+            auto fromIss = []<typename T>(T const& iss) {
+                if constexpr (std::is_same_v<T, Issue>)
+                    return iss.currency;
+                if constexpr (std::is_same_v<T, MPTIssue>)
+                    return iss.getMptID();
+            };
+            return sha512Half(fromIss(issue1_), fromIss(issue2_));
+        },
+        minI.value(),
+        maxI.value());
     Currency currency;
     *currency.begin() = AMMCurrencyCode;
     std::copy(
@@ -54,21 +65,24 @@ ammLPTCurrency(Currency const& cur1, Currency const& cur2)
 
 Issue
 ammLPTIssue(
-    Currency const& cur1,
-    Currency const& cur2,
+    Asset const& issue1,
+    Asset const& issue2,
     AccountID const& ammAccountID)
 {
-    return Issue(ammLPTCurrency(cur1, cur2), ammAccountID);
+    return Issue(ammLPTCurrency(issue1, issue2), ammAccountID);
 }
 
 NotTEC
 invalidAMMAsset(
-    Issue const& issue,
-    std::optional<std::pair<Issue, Issue>> const& pair)
+    Asset const& issue,
+    std::optional<std::pair<Asset, Asset>> const& pair)
 {
-    if (badCurrency() == issue.currency)
+    if (issue.holds<MPTIssue>() &&
+        issue.get<MPTIssue>().getIssuer() == beast::zero)
+        return temBAD_MPT;
+    if (issue.holds<Issue>() && badCurrency() == issue.get<Issue>().currency)
         return temBAD_CURRENCY;
-    if (isXRP(issue) && issue.account.isNonZero())
+    if (isXRP(issue) && issue.getIssuer().isNonZero())
         return temBAD_ISSUER;
     if (pair && issue != pair->first && issue != pair->second)
         return temBAD_AMM_TOKENS;
@@ -77,9 +91,9 @@ invalidAMMAsset(
 
 NotTEC
 invalidAMMAssetPair(
-    Issue const& issue1,
-    Issue const& issue2,
-    std::optional<std::pair<Issue, Issue>> const& pair)
+    Asset const& issue1,
+    Asset const& issue2,
+    std::optional<std::pair<Asset, Asset>> const& pair)
 {
     if (issue1 == issue2)
         return temBAD_AMM_TOKENS;
@@ -93,10 +107,10 @@ invalidAMMAssetPair(
 NotTEC
 invalidAMMAmount(
     STAmount const& amount,
-    std::optional<std::pair<Issue, Issue>> const& pair,
+    std::optional<std::pair<Asset, Asset>> const& pair,
     bool validZero)
 {
-    if (auto const res = invalidAMMAsset(amount.issue(), pair))
+    if (auto const res = invalidAMMAsset(amount.asset(), pair))
         return res;
     if (amount < beast::zero || (!validZero && amount == beast::zero))
         return temBAD_AMOUNT;

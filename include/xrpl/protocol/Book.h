@@ -21,7 +21,7 @@
 #define RIPPLE_PROTOCOL_BOOK_H_INCLUDED
 
 #include <xrpl/basics/CountedObject.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/Asset.h>
 #include <boost/utility/base_from_member.hpp>
 
 namespace ripple {
@@ -33,14 +33,14 @@ namespace ripple {
 class Book final : public CountedObject<Book>
 {
 public:
-    Issue in;
-    Issue out;
+    Asset in;
+    Asset out;
 
     Book()
     {
     }
 
-    Book(Issue const& in_, Issue const& out_) : in(in_), out(out_)
+    Book(Asset const& in_, Asset const& out_) : in(in_), out(out_)
     {
     }
 };
@@ -119,6 +119,47 @@ public:
     }
 };
 
+template <>
+struct hash<ripple::Asset>
+    : private boost::base_from_member<std::hash<ripple::Currency>, 0>,
+      private boost::base_from_member<std::hash<ripple::AccountID>, 1>,
+      private boost::base_from_member<std::hash<ripple::MPTID>, 2>
+{
+private:
+    using currency_hash_type =
+        boost::base_from_member<std::hash<ripple::Currency>, 0>;
+    using issuer_hash_type =
+        boost::base_from_member<std::hash<ripple::AccountID>, 1>;
+    using mpt_hash_type = boost::base_from_member<std::hash<ripple::MPTID>, 2>;
+
+public:
+    explicit hash() = default;
+
+    using value_type = std::size_t;
+    using argument_type = ripple::Asset;
+
+    value_type
+    operator()(argument_type const& issue) const
+    {
+        return std::visit([&]<ripple::ValidIssueType TIss>(TIss const& issue_) {
+            if constexpr (std::is_same_v<TIss, ripple::Issue>)
+            {
+                value_type result(
+                    currency_hash_type::member(issue_.currency));
+                if (!isXRP(issue_.currency))
+                    boost::hash_combine(
+                        result, issuer_hash_type::member(issue_.account));
+                return result;
+            }
+            else if constexpr (std::is_same_v<TIss, ripple::MPTIssue>)
+            {
+                value_type result(mpt_hash_type::member(issue_.getMptID()));
+                return result;
+            }
+        }, issue.value());
+    }
+};
+
 //------------------------------------------------------------------------------
 
 template <>
@@ -156,6 +197,16 @@ struct hash<ripple::Issue> : std::hash<ripple::Issue>
     explicit hash() = default;
 
     using Base = std::hash<ripple::Issue>;
+    // VFALCO NOTE broken in vs2012
+    // using Base::Base; // inherit ctors
+};
+
+template <>
+struct hash<ripple::Asset> : std::hash<ripple::Asset>
+{
+    explicit hash() = default;
+
+    using Base = std::hash<ripple::Asset>;
     // VFALCO NOTE broken in vs2012
     // using Base::Base; // inherit ctors
 };

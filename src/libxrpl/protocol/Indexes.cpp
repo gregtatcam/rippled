@@ -396,16 +396,42 @@ nft_sells(uint256 const& id) noexcept
 Keylet
 amm(Asset const& issue1, Asset const& issue2) noexcept
 {
-    if (!issue1.holds<Issue>() || !issue2.holds<Issue>())
-        Throw<std::runtime_error>("Asset doesn't hold issue");
-    auto const& [minI, maxI] =
-        std::minmax(issue1.get<Issue>(), issue2.get<Issue>());
-    return amm(indexHash(
-        LedgerNameSpace::AMM,
-        minI.account,
-        minI.currency,
-        maxI.account,
-        maxI.currency));
+    auto const& [minA, maxA] = std::minmax(issue1, issue2);
+    return std::visit(
+        []<ValidIssueType TIss1, ValidIssueType TIss2>(
+            TIss1 const& issue1_, TIss2 const& issue2_) {
+            if constexpr (
+                std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, Issue>)
+                return amm(indexHash(
+                    LedgerNameSpace::AMM,
+                    issue1_.account,
+                    issue1_.currency,
+                    issue2_.account,
+                    issue2_.currency));
+            else if constexpr (
+                std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, MPTIssue>)
+                return amm(indexHash(
+                    LedgerNameSpace::AMM,
+                    issue1_.account,
+                    issue1_.currency,
+                    issue2_.getMptID()));
+            else if constexpr (
+                std::is_same_v<TIss1, MPTIssue> && std::is_same_v<TIss2, Issue>)
+                return amm(indexHash(
+                    LedgerNameSpace::AMM,
+                    issue1_.getMptID(),
+                    issue2_.account,
+                    issue2_.currency));
+            else if constexpr (
+                std::is_same_v<TIss1, MPTIssue> &&
+                std::is_same_v<TIss2, MPTIssue>)
+                return amm(indexHash(
+                    LedgerNameSpace::AMM,
+                    issue1_.getMptID(),
+                    issue2_.getMptID()));
+        },
+        issue1.value(),
+        issue2.value());
 }
 
 Keylet

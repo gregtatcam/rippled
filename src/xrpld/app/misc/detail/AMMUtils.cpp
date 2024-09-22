@@ -29,15 +29,16 @@ std::pair<STAmount, STAmount>
 ammPoolHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Issue const& issue1,
-    Issue const& issue2,
+    Asset const& issue1,
+    Asset const& issue2,
     FreezeHandling freezeHandling,
+    AuthHandling authHandling,
     beast::Journal const j)
 {
-    auto const assetInBalance =
-        accountHolds(view, ammAccountID, issue1, freezeHandling, j);
-    auto const assetOutBalance =
-        accountHolds(view, ammAccountID, issue2, freezeHandling, j);
+    auto const assetInBalance = accountHolds(
+        view, ammAccountID, issue1, freezeHandling, authHandling, j);
+    auto const assetOutBalance = accountHolds(
+        view, ammAccountID, issue2, freezeHandling, authHandling, j);
     return std::make_pair(assetInBalance, assetOutBalance);
 }
 
@@ -45,14 +46,15 @@ Expected<std::tuple<STAmount, STAmount, STAmount>, TER>
 ammHolds(
     ReadView const& view,
     SLE const& ammSle,
-    std::optional<Issue> const& optIssue1,
-    std::optional<Issue> const& optIssue2,
+    std::optional<Asset> const& optIssue1,
+    std::optional<Asset> const& optIssue2,
     FreezeHandling freezeHandling,
+    AuthHandling authHandling,
     beast::Journal const j)
 {
-    auto const issues = [&]() -> std::optional<std::pair<Issue, Issue>> {
-        auto const issue1 = ammSle[sfAsset].get<Issue>();
-        auto const issue2 = ammSle[sfAsset2].get<Issue>();
+    auto const issues = [&]() -> std::optional<std::pair<Asset, Asset>> {
+        auto const issue1 = ammSle[sfAsset];
+        auto const issue2 = ammSle[sfAsset2];
         if (optIssue1 && optIssue2)
         {
             if (invalidAMMAssetPair(
@@ -71,8 +73,8 @@ ammHolds(
         }
         auto const singleIssue =
             [&issue1, &issue2, &j](
-                Issue checkIssue,
-                const char* label) -> std::optional<std::pair<Issue, Issue>> {
+                Asset checkIssue,
+                const char* label) -> std::optional<std::pair<Asset, Asset>> {
             if (checkIssue == issue1)
                 return std::make_optional(std::make_pair(issue1, issue2));
             else if (checkIssue == issue2)
@@ -97,21 +99,22 @@ ammHolds(
     }();
     if (!issues)
         return Unexpected(tecAMM_INVALID_TOKENS);
-    auto const [asset1, asset2] = ammPoolHolds(
+    auto const [amount1, amount2] = ammPoolHolds(
         view,
         ammSle.getAccountID(sfAccount),
         issues->first,
         issues->second,
         freezeHandling,
+        authHandling,
         j);
-    return std::make_tuple(asset1, asset2, ammSle[sfLPTokenBalance]);
+    return std::make_tuple(amount1, amount2, ammSle[sfLPTokenBalance]);
 }
 
 STAmount
 ammLPHolds(
     ReadView const& view,
-    Currency const& cur1,
-    Currency const& cur2,
+    Asset const& issue1,
+    Asset const& issue2,
     AccountID const& ammAccount,
     AccountID const& lpAccount,
     beast::Journal const j)
@@ -119,7 +122,7 @@ ammLPHolds(
     return accountHolds(
         view,
         lpAccount,
-        ammLPTCurrency(cur1, cur2),
+        ammLPTCurrency(issue1, issue2),
         ammAccount,
         FreezeHandling::fhZERO_IF_FROZEN,
         j);
@@ -134,8 +137,8 @@ ammLPHolds(
 {
     return ammLPHolds(
         view,
-        ammSle[sfAsset].get<Issue>().currency,
-        ammSle[sfAsset2].get<Issue>().currency,
+        ammSle[sfAsset],
+        ammSle[sfAsset2],
         ammSle[sfAccount],
         lpAccount,
         j);
@@ -176,22 +179,37 @@ STAmount
 ammAccountHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Issue const& issue)
+    Asset const& issue)
 {
+    if (issue.holds<MPTIssue>())
+        return accountHolds(
+            view,
+            ammAccountID,
+            issue.get<MPTIssue>(),
+            FreezeHandling::fhIGNORE_FREEZE,
+            AuthHandling::ahIGNORE_AUTH,
+            beast::Journal(beast::Journal::getNullSink()));
+    // Should be accountHolds for Asset for both?
     if (isXRP(issue))
     {
         if (auto const sle = view.read(keylet::account(ammAccountID)))
             return (*sle)[sfBalance];
     }
-    else if (auto const sle = view.read(
-                 keylet::line(ammAccountID, issue.account, issue.currency));
+    else if (auto const sle = view.read(keylet::line(
+                 ammAccountID,
+                 issue.get<Issue>().account,
+                 issue.get<Issue>().currency));
              sle &&
-             !isFrozen(view, ammAccountID, issue.currency, issue.account))
+             !isFrozen(
+                 view,
+                 ammAccountID,
+                 issue.get<Issue>().currency,
+                 issue.get<Issue>().account))
     {
         auto amount = (*sle)[sfBalance];
-        if (ammAccountID > issue.account)
+        if (ammAccountID > issue.get<Issue>().account)
             amount.negate();
-        amount.setIssuer(issue.account);
+        amount.setIssuer(issue.get<Issue>().account);
         return amount;
     }
 
@@ -247,16 +265,16 @@ deleteAMMTrustLines(
 TER
 deleteAMMAccount(
     Sandbox& sb,
-    Issue const& asset,
-    Issue const& asset2,
+    Asset const& issue,
+    Asset const& issue2,
     beast::Journal j)
 {
-    auto ammSle = sb.peek(keylet::amm(asset, asset2));
+    auto ammSle = sb.peek(keylet::amm(issue, issue2));
     if (!ammSle)
     {
         // LCOV_EXCL_START
         JLOG(j.error()) << "deleteAMMAccount: AMM object does not exist "
-                        << asset << " " << asset2;
+                        << issue << " " << issue2;
         return tecINTERNAL;
         // LCOV_EXCL_STOP
     }
@@ -276,6 +294,37 @@ deleteAMMAccount(
             deleteAMMTrustLines(sb, ammAccountID, maxDeletableAMMTrustLines, j);
         ter != tesSUCCESS)
         return ter;
+
+    auto checkDeleteMPToken = [&](Asset const& issue_) -> TER {
+        if (issue_.holds<MPTIssue>())
+        {
+            auto const mptIssuanceID =
+                keylet::mptIssuance(issue_.get<MPTIssue>().getMptID());
+            auto const mptokenKey =
+                keylet::mptoken(mptIssuanceID.key, ammAccountID);
+
+            auto const sleMpt = sb.peek(mptokenKey);
+            if (!sleMpt)
+                return tecINTERNAL;
+
+            if (!sb.dirRemove(
+                    keylet::ownerDir(ammAccountID),
+                    (*sleMpt)[sfOwnerNode],
+                    sleMpt->key(),
+                    false))
+                return tecINTERNAL;
+
+            sb.erase(sleMpt);
+        }
+
+        return tesSUCCESS;
+    };
+
+    if (auto const err = checkDeleteMPToken(issue))
+        return err;
+
+    if (auto const err = checkDeleteMPToken(issue2))
+        return err;
 
     auto const ownerDirKeylet = keylet::ownerDir(ammAccountID);
     if (!sb.dirRemove(

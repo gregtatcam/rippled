@@ -184,6 +184,7 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
         std::nullopt,
         std::nullopt,
         FreezeHandling::fhIGNORE_FREEZE,
+        AuthHandling::ahIGNORE_AUTH,
         ctx.j);
     if (!expected)
         return expected.error();  // LCOV_EXCL_LINE
@@ -354,6 +355,7 @@ AMMDeposit::applyGuts(Sandbox& sb)
         amount ? amount->issue() : std::optional<Issue>{},
         amount2 ? amount2->issue() : std::optional<Issue>{},
         FreezeHandling::fhZERO_IF_FROZEN,
+        AuthHandling::ahIGNORE_AUTH,
         ctx_.journal);
     if (!expected)
         return {expected.error(), false};  // LCOV_EXCL_LINE

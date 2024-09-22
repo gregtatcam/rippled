@@ -502,6 +502,7 @@ REGISTER_FIX    (fixNFTokenPageLinks,           Supported::yes, VoteBehavior::De
 // invariants expected to be included under it are complete.
 REGISTER_FEATURE(InvariantsV1_1,                Supported::no, VoteBehavior::DefaultNo);
 REGISTER_FEATURE(MPTokensV1,                    Supported::yes, VoteBehavior::DefaultNo);
+REGISTER_FEATURE(MPTokensV2,                    Supported::yes, VoteBehavior::DefaultNo);
 
 // The following amendments are obsolete, but must remain supported
 // because they could potentially get enabled.

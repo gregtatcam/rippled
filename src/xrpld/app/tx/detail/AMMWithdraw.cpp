@@ -190,6 +190,7 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
         amount ? amount->issue() : std::optional<Issue>{},
         amount2 ? amount2->issue() : std::optional<Issue>{},
         FreezeHandling::fhIGNORE_FREEZE,
+        AuthHandling::ahIGNORE_AUTH,
         ctx.j);
     if (!expected)
         return expected.error();
@@ -343,6 +344,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         amount ? amount->issue() : std::optional<Issue>{},
         amount2 ? amount2->issue() : std::optional<Issue>{},
         FreezeHandling::fhZERO_IF_FROZEN,
+        AuthHandling::ahIGNORE_AUTH,
         ctx_.journal);
     if (!expected)
         return {expected.error(), false};
@@ -469,6 +471,7 @@ AMMWithdraw::withdraw(
         amountWithdraw.issue(),
         std::nullopt,
         FreezeHandling::fhZERO_IF_FROZEN,
+        AuthHandling::ahIGNORE_AUTH,
         j_);
     if (!expected)
         return {expected.error(), STAmount{}};

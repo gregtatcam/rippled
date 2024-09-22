@@ -347,6 +347,24 @@ accountHolds(
 }
 
 STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& issue,
+    FreezeHandling zeroIfFrozen,
+    AuthHandling zeroIfUnauthorized,
+    beast::Journal j)
+{
+    return invokeForAsset(issue, [&]<typename TIss>(TIss const& issue_) {
+        if constexpr (std::is_same_v<TIss, Issue>)
+            return accountHolds(view, account, issue_, zeroIfFrozen, j);
+        else
+            return accountHolds(
+                view, account, issue_, zeroIfFrozen, zeroIfUnauthorized, j);
+    });
+}
+
+STAmount
 accountFunds(
     ReadView const& view,
     AccountID const& id,

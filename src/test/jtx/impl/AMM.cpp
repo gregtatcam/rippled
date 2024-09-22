@@ -42,8 +42,8 @@ static IOUAmount
 initialTokens(STAmount const& asset1, STAmount const& asset2)
 {
     auto const product = number(asset1) * number(asset2);
-    return (IOUAmount)(
-        product.mantissa() >= 0 ? root2(product) : root2(-product));
+    return (IOUAmount)(product.mantissa() >= 0 ? root2(product)
+                                               : root2(-product));
 }
 
 AMM::AMM(
@@ -63,7 +63,7 @@ AMM::AMM(
     , creatorAccount_(account)
     , asset1_(asset1)
     , asset2_(asset2)
-    , ammID_(keylet::amm(asset1_.issue(), asset2_.issue()).key)
+    , ammID_(keylet::amm(asset1_.asset(), asset2_.asset()).key)
     , initialLPTokens_(initialTokens(asset1, asset2))
     , log_(log)
     , doClose_(close)
@@ -73,10 +73,8 @@ AMM::AMM(
     , msig_(ms)
     , fee_(fee)
     , ammAccount_(create(tfee, flags, seq, ter))
-    , lptIssue_(ripple::ammLPTIssue(
-          asset1_.issue().currency,
-          asset2_.issue().currency,
-          ammAccount_))
+    , lptIssue_(
+          ripple::ammLPTIssue(asset1_.asset(), asset2_.asset(), ammAccount_))
 {
 }
 
@@ -218,6 +216,7 @@ AMM::balances(
             issue1,
             issue2,
             FreezeHandling::fhIGNORE_FREEZE,
+            AuthHandling::ahIGNORE_AUTH,
             env_.journal);
         auto const lptAMMBalance = account
             ? ammLPHolds(*env_.current(), *amm, *account, env_.journal)

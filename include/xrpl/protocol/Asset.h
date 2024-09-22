@@ -51,9 +51,11 @@ public:
 
     Asset(MPTID const& mpt);
 
-    explicit operator Issue() const;
+    explicit
+    operator Issue() const;
 
-    explicit operator MPTIssue() const;
+    explicit
+    operator MPTIssue() const;
 
     AccountID const&
     getIssuer() const;
@@ -87,6 +89,9 @@ public:
 
     friend constexpr bool
     operator<(Asset const& lhs, Asset const& rhs);
+
+    friend constexpr std::weak_ordering
+    operator<=>(Asset const& lhs, Asset const& rhs);
 };
 
 template <ValidIssueType TIss>
@@ -156,10 +161,36 @@ operator<(Asset const& lhs, Asset const& rhs)
         rhs.issue_);
 }
 
+constexpr std::weak_ordering
+operator<=>(Asset const& lhs, Asset const& rhs)
+{
+    return std::visit(
+        []<ValidIssueType TLhs, ValidIssueType TRhs>(
+            TLhs const& lhs_, TRhs const& rhs_) {
+            if constexpr (std::is_same_v<TLhs, TRhs>)
+                return lhs_ <=> rhs_;
+            else if constexpr (
+                std::is_same_v<TLhs, Issue> && std::is_same_v<TRhs, MPTIssue>)
+                return std::weak_ordering::greater;
+            else
+                return std::weak_ordering::less;
+        },
+        lhs.value(),
+        rhs.value());
+}
+
 inline bool
 isXRP(Asset const& asset)
 {
     return asset.holds<Issue>() && isXRP(asset.get<Issue>());
+}
+
+template <typename Cb>
+decltype(auto)
+invokeForAsset(Asset const& asset, Cb&& f)
+{
+    return std::visit(
+        [&](auto const& issue) { return f(issue); }, asset.value());
 }
 
 std::string
@@ -167,6 +198,9 @@ to_string(Asset const& asset);
 
 bool
 validJSONAsset(Json::Value const& jv);
+
+std::ostream&
+operator<<(std::ostream& os, Asset const& x);
 
 }  // namespace ripple
 
