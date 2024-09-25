@@ -141,22 +141,27 @@ public:
     value_type
     operator()(argument_type const& issue) const
     {
-        return std::visit([&]<ripple::ValidIssueType TIss>(TIss const& issue_) {
-            if constexpr (std::is_same_v<TIss, ripple::Issue>)
-            {
-                value_type result(
-                    currency_hash_type::member(issue_.currency));
-                if (!isXRP(issue_.currency))
-                    boost::hash_combine(
-                        result, issuer_hash_type::member(issue_.account));
-                return result;
-            }
-            else if constexpr (std::is_same_v<TIss, ripple::MPTIssue>)
-            {
-                value_type result(mpt_hash_type::member(issue_.getMptID()));
-                return result;
-            }
-        }, issue.value());
+        return std::visit(
+            [&]<ripple::ValidIssueType TIss>(TIss const& issue_) {
+                if constexpr (std::is_same_v<TIss, ripple::Issue>)
+                {
+                    value_type result(currency_hash_type::member(
+                        issue.get<ripple::Issue>().currency));
+                    if (!isXRP(issue.get<ripple::Issue>().currency))
+                        boost::hash_combine(
+                            result,
+                            issuer_hash_type::member(
+                                issue.get<ripple::Issue>().account));
+                    return result;
+                }
+                else if constexpr (std::is_same_v<TIss, ripple::MPTIssue>)
+                {
+                    value_type result(mpt_hash_type::member(
+                        issue.get<ripple::MPTIssue>().getMptID()));
+                    return result;
+                }
+            },
+            issue.value());
     }
 };
 
@@ -166,7 +171,7 @@ template <>
 struct hash<ripple::Book>
 {
 private:
-    using hasher = std::hash<ripple::Issue>;
+    using hasher = std::hash<ripple::Asset>;
 
     hasher m_hasher;
 
@@ -207,8 +212,6 @@ struct hash<ripple::Asset> : std::hash<ripple::Asset>
     explicit hash() = default;
 
     using Base = std::hash<ripple::Asset>;
-    // VFALCO NOTE broken in vs2012
-    // using Base::Base; // inherit ctors
 };
 
 template <>

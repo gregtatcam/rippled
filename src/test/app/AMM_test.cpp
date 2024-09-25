@@ -6161,7 +6161,7 @@ private:
                                     takerGets};
                             }
                             auto const takerPays = toAmount<STAmount>(
-                                getIssue(poolIn), Number{1, -10} * poolIn);
+                                getAsset(poolIn), Number{1, -10} * poolIn);
                             return Amounts{
                                 takerPays,
                                 swapAssetIn(

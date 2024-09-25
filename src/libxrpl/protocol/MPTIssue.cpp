@@ -27,6 +27,11 @@ MPTIssue::MPTIssue(MPTID const& id) : mptID_(id)
 {
 }
 
+MPTIssue::MPTIssue(AccountID const& account, std::uint32_t sequence)
+    : MPTIssue(ripple::getMptID(account, sequence))
+{
+}
+
 AccountID const&
 MPTIssue::getIssuer() const
 {

@@ -323,7 +323,11 @@ CreateOffer::flowCross(
         if (!takerAmount.in.native() && !takerAmount.out.native())
         {
             STPath path;
-            path.emplace_back(std::nullopt, xrpCurrency(), std::nullopt);
+            path.emplace_back(
+                std::nullopt,
+                xrpCurrency(),
+                std::nullopt,
+                STPathElement::PathAssetTag{});
             paths.emplace_back(std::move(path));
         }
         // Special handling for the tfSell flag.

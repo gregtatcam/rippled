@@ -33,7 +33,10 @@
 #include <xrpl/protocol/RPCErr.h>
 #include <xrpl/protocol/nftPageMask.h>
 #include <xrpl/resource/Fees.h>
+
 #include <boost/algorithm/string/case_conv.hpp>
+
+#include <format>
 #include <regex>
 
 namespace ripple {
@@ -1129,5 +1132,149 @@ getLedgerByContext(RPC::JsonContext& context)
     return RPC::make_error(
         rpcNOT_READY, "findCreate failed to return an inbound ledger");
 }
+
+Expected<Asset, JSONAssetError>
+parseJSONBookAsset(Json::Value const& jv, std::string const& name)
+{
+    if (!jv.isMember(name))
+        return Unexpected(JSONAssetError::MissingField);
+    auto const field = jv[name];
+    if (field.isObjectOrNull())
+        return Unexpected(JSONAssetError::NullObject);
+    if (field.isMember(jss::mpt_issuance_id) &&
+        (field.isMember(jss::currency) || field.isMember(jss::issuer)))
+        return Unexpected(JSONAssetError::Malformed);
+    if (!field.isMember(jss::currency))
+        return Unexpected(JSONAssetError::MissingFieldCurr);
+
+    if (field.isMember(jss::currency))
+    {
+        Issue issue = xrpIssue();
+        // Parse mandatory currency.
+        if (!field[jss::currency].isString())
+            return Unexpected(JSONAssetError::ExpectedFieldCurr);
+        if (!to_currency(issue.currency, field[jss::currency].asString()))
+            return Unexpected(JSONAssetError::MalformedCurr);
+
+        // Parse optional issuer.
+        if (field.isMember(jss::issuer))
+        {
+            if (!field[jss::issuer].isString())
+                return Unexpected(JSONAssetError::ExpectedFieldIssr);
+            if (!to_issuer(issue.account, field[jss::issuer].asString()))
+                return Unexpected(JSONAssetError::MalformedIssr);
+            if (issue.account == noAccount())
+                return Unexpected(JSONAssetError::NoIssuer);
+            if (isXRP(issue.currency) && !isXRP(issue.account))
+                return Unexpected(JSONAssetError::UnneededIssuer);
+            if (!isXRP(issue.currency) && isXRP(issue.account))
+                return Unexpected(JSONAssetError::BadIssuer);
+        }
+
+        return issue;
+    }
+    else
+    {
+        MPTID u;
+        if (!u.parseHex(field.asString()))
+            return Unexpected(JSONAssetError::BadMPT);
+        return u;
+    }
+}
+
+Json::Value
+getSubscribeParseError(
+    RPC::JSONAssetError err,
+    std::string const& field,
+    error_code_i currError,
+    error_code_i issrError,
+    beast::Journal j)
+{
+    switch (err)
+    {
+        case RPC::JSONAssetError::MissingField:
+        case RPC::JSONAssetError::NullObject:
+            return rpcError(rpcINVALID_PARAMS);
+        case RPC::JSONAssetError::ExpectedFieldCurr:
+        case RPC::JSONAssetError::MissingFieldCurr:
+        case RPC::JSONAssetError::MalformedCurr:
+        case RPC::JSONAssetError::Malformed: {
+            JLOG(j.info()) << std::format("Bad {} currency.", field);
+            return rpcError(currError);
+        }
+        case RPC::JSONAssetError::ExpectedFieldIssr:
+        case RPC::JSONAssetError::MalformedIssr:
+        case RPC::JSONAssetError::NoIssuer:
+        case RPC::JSONAssetError::UnneededIssuer:
+        case RPC::JSONAssetError::BadIssuer: {
+            JLOG(j.info()) << std::format("Bad {} issuer.", field);
+            return rpcError(issrError);
+            case RPC::JSONAssetError::BadMPT:
+                return rpcError(currError);
+        }
+    }
+}
+
+Json::Value
+getBookOffersParseError(
+    RPC::JSONAssetError err,
+    std::string const& field,
+    error_code_i currError,
+    error_code_i issrError,
+    beast::Journal j)
+{
+    switch (err)
+    {
+        case RPC::JSONAssetError::MissingField:
+            return RPC::missing_field_error(field);
+        case RPC::JSONAssetError::NullObject:
+            return RPC::object_field_error(field);
+        case RPC::JSONAssetError::MissingFieldCurr:
+        case RPC::JSONAssetError::Malformed:
+            return RPC::missing_field_error(std::format("{}.currency", field));
+        case RPC::JSONAssetError::ExpectedFieldCurr:
+            return RPC::expected_field_error(
+                std::format("{}.currency", field), "string");
+        case RPC::JSONAssetError::MalformedCurr: {
+            JLOG(j.info()) << std::format("Bad {} currency.", field);
+            return RPC::make_error(
+                currError,
+                std::format(
+                    "Invalid field '{}.currency', bad currency.", field));
+        }
+        case RPC::JSONAssetError::ExpectedFieldIssr:
+            return RPC::expected_field_error(
+                std::format("{}.issuer", field), "string");
+        case RPC::JSONAssetError::MalformedIssr:
+            return RPC::make_error(
+                issrError,
+                std::format("Invalid field '{}.issuer', bad issuer.", field));
+        case RPC::JSONAssetError::NoIssuer:
+            return RPC::make_error(
+                issrError,
+                std::format(
+                    "Invalid field '{}.issuer', bad issuer account one.",
+                    field));
+        case RPC::JSONAssetError::UnneededIssuer:
+            return RPC::make_error(
+                issrError,
+                std::format(
+                    "Unneeded field '{}.issuer' for "
+                    "XRP currency specification.",
+                    field));
+        case RPC::JSONAssetError::BadIssuer:
+            return RPC::make_error(
+                issrError,
+                std::format(
+                    "Invalid field '{}.issuer', expected non-XRP issuer.",
+                    field));
+        case RPC::JSONAssetError::BadMPT:
+            return RPC::make_error(
+                issrError,
+                std::format(
+                    "Invalid field '{}.mpt_issuance_id', bad MPTID.", field));
+    }
+}
+
 }  // namespace RPC
 }  // namespace ripple

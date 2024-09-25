@@ -37,8 +37,7 @@ public:
     static constexpr ConsequencesFactoryType ConsequencesFactory{Custom};
 
     /** Construct a Transactor subclass that creates an offer in the ledger. */
-    explicit CreateOffer(ApplyContext& ctx)
-        : Transactor(ctx)
+    explicit CreateOffer(ApplyContext& ctx) : Transactor(ctx)
     {
     }
 

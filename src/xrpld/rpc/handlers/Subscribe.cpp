@@ -234,62 +234,31 @@ doSubscribe(RPC::JsonContext& context)
 
         for (auto& j : context.params[jss::books])
         {
-            if (!j.isObject() || !j.isMember(jss::taker_pays) ||
-                !j.isMember(jss::taker_gets) ||
-                !j[jss::taker_pays].isObjectOrNull() ||
-                !j[jss::taker_gets].isObjectOrNull())
-                return rpcError(rpcINVALID_PARAMS);
-
             Book book;
-            Json::Value taker_pays = j[jss::taker_pays];
-            Json::Value taker_gets = j[jss::taker_gets];
 
-            // Parse mandatory currency.
-            if (!taker_pays.isMember(jss::currency) ||
-                !to_currency(
-                    book.in.currency, taker_pays[jss::currency].asString()))
-            {
-                JLOG(context.j.info()) << "Bad taker_pays currency.";
-                return rpcError(rpcSRC_CUR_MALFORMED);
-            }
+            auto const takerPaysRes =
+                RPC::parseJSONBookAsset(j, jss::taker_pays.c_str());
+            if (!takerPaysRes)
+                return getSubscribeParseError(
+                    takerPaysRes.error(),
+                    jss::taker_pays.c_str(),
+                    rpcSRC_CUR_MALFORMED,
+                    rpcSRC_ISR_MALFORMED,
+                    context.j);
+            book.in = *takerPaysRes;
 
-            // Parse optional issuer.
-            if (((taker_pays.isMember(jss::issuer)) &&
-                 (!taker_pays[jss::issuer].isString() ||
-                  !to_issuer(
-                      book.in.account, taker_pays[jss::issuer].asString())))
-                // Don't allow illegal issuers.
-                || (!book.in.currency != !book.in.account) ||
-                noAccount() == book.in.account)
-            {
-                JLOG(context.j.info()) << "Bad taker_pays issuer.";
-                return rpcError(rpcSRC_ISR_MALFORMED);
-            }
+            auto const takerGetsRes =
+                RPC::parseJSONBookAsset(j, jss::taker_gets.c_str());
+            if (!takerGetsRes)
+                return getSubscribeParseError(
+                    takerGetsRes.error(),
+                    jss::taker_gets.c_str(),
+                    rpcDST_AMT_MALFORMED,
+                    rpcDST_ISR_MALFORMED,
+                    context.j);
+            book.out = *takerGetsRes;
 
-            // Parse mandatory currency.
-            if (!taker_gets.isMember(jss::currency) ||
-                !to_currency(
-                    book.out.currency, taker_gets[jss::currency].asString()))
-            {
-                JLOG(context.j.info()) << "Bad taker_gets currency.";
-                return rpcError(rpcDST_AMT_MALFORMED);
-            }
-
-            // Parse optional issuer.
-            if (((taker_gets.isMember(jss::issuer)) &&
-                 (!taker_gets[jss::issuer].isString() ||
-                  !to_issuer(
-                      book.out.account, taker_gets[jss::issuer].asString())))
-                // Don't allow illegal issuers.
-                || (!book.out.currency != !book.out.account) ||
-                noAccount() == book.out.account)
-            {
-                JLOG(context.j.info()) << "Bad taker_gets issuer.";
-                return rpcError(rpcDST_ISR_MALFORMED);
-            }
-
-            if (book.in.currency == book.out.currency &&
-                book.in.account == book.out.account)
+            if (book.in == book.out)
             {
                 JLOG(context.j.info()) << "taker_gets same as taker_pays.";
                 return rpcError(rpcBAD_MARKET);

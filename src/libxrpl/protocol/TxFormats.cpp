@@ -75,8 +75,8 @@ TxFormats::TxFormats()
     add(jss::OfferCreate,
         ttOFFER_CREATE,
         {
-            {sfTakerPays, soeREQUIRED},
-            {sfTakerGets, soeREQUIRED},
+            {sfTakerPays, soeREQUIRED, soeMPTSupported},
+            {sfTakerGets, soeREQUIRED, soeMPTSupported},
             {sfExpiration, soeOPTIONAL},
             {sfOfferSequence, soeOPTIONAL},
         },
@@ -85,8 +85,8 @@ TxFormats::TxFormats()
     add(jss::AMMCreate,
         ttAMM_CREATE,
         {
-            {sfAmount, soeREQUIRED},
-            {sfAmount2, soeREQUIRED},
+            {sfAmount, soeREQUIRED, soeMPTSupported},
+            {sfAmount2, soeREQUIRED, soeMPTSupported},
             {sfTradingFee, soeREQUIRED},
         },
         commonFields);
@@ -96,8 +96,8 @@ TxFormats::TxFormats()
         {
             {sfAsset, soeREQUIRED},
             {sfAsset2, soeREQUIRED},
-            {sfAmount, soeOPTIONAL},
-            {sfAmount2, soeOPTIONAL},
+            {sfAmount, soeOPTIONAL, soeMPTSupported},
+            {sfAmount2, soeOPTIONAL, soeMPTSupported},
             {sfEPrice, soeOPTIONAL},
             {sfLPTokenOut, soeOPTIONAL},
             {sfTradingFee, soeOPTIONAL},
@@ -109,8 +109,8 @@ TxFormats::TxFormats()
         {
             {sfAsset, soeREQUIRED},
             {sfAsset2, soeREQUIRED},
-            {sfAmount, soeOPTIONAL},
-            {sfAmount2, soeOPTIONAL},
+            {sfAmount, soeOPTIONAL, soeMPTSupported},
+            {sfAmount2, soeOPTIONAL, soeMPTSupported},
             {sfEPrice, soeOPTIONAL},
             {sfLPTokenIn, soeOPTIONAL},
         },
@@ -163,11 +163,11 @@ TxFormats::TxFormats()
         {
             {sfDestination, soeREQUIRED},
             {sfAmount, soeREQUIRED, soeMPTSupported},
-            {sfSendMax, soeOPTIONAL},
+            {sfSendMax, soeOPTIONAL, soeMPTSupported},
             {sfPaths, soeDEFAULT},
             {sfInvoiceID, soeOPTIONAL},
             {sfDestinationTag, soeOPTIONAL},
-            {sfDeliverMin, soeOPTIONAL},
+            {sfDeliverMin, soeOPTIONAL, soeMPTSupported},
         },
         commonFields);
 
@@ -287,7 +287,7 @@ TxFormats::TxFormats()
         ttCHECK_CREATE,
         {
             {sfDestination, soeREQUIRED},
-            {sfSendMax, soeREQUIRED},
+            {sfSendMax, soeREQUIRED, soeMPTSupported},
             {sfExpiration, soeOPTIONAL},
             {sfDestinationTag, soeOPTIONAL},
             {sfInvoiceID, soeOPTIONAL},
@@ -298,8 +298,8 @@ TxFormats::TxFormats()
         ttCHECK_CASH,
         {
             {sfCheckID, soeREQUIRED},
-            {sfAmount, soeOPTIONAL},
-            {sfDeliverMin, soeOPTIONAL},
+            {sfAmount, soeOPTIONAL, soeMPTSupported},
+            {sfDeliverMin, soeOPTIONAL, soeMPTSupported},
         },
         commonFields);
 

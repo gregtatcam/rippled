@@ -21,20 +21,11 @@
 #define RIPPLE_PROTOCOL_ASSET_H_INCLUDED
 
 #include <xrpl/basics/base_uint.h>
+#include <xrpl/protocol/Concepts.h>
 #include <xrpl/protocol/Issue.h>
 #include <xrpl/protocol/MPTIssue.h>
 
 namespace ripple {
-
-class Asset;
-
-template <typename TIss>
-concept ValidIssueType =
-    std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>;
-
-template <typename A>
-concept AssetType = std::is_same_v<A, Asset> ||
-    std::is_convertible_v<A, Issue> || std::is_convertible_v<A, MPTIssue>;
 
 class Asset
 {
@@ -51,11 +42,9 @@ public:
 
     Asset(MPTID const& mpt);
 
-    explicit
-    operator Issue() const;
+    explicit operator Issue() const;
 
-    explicit
-    operator MPTIssue() const;
+    explicit operator MPTIssue() const;
 
     AccountID const&
     getIssuer() const;
@@ -185,12 +174,45 @@ isXRP(Asset const& asset)
     return asset.holds<Issue>() && isXRP(asset.get<Issue>());
 }
 
-template <typename Cb>
-decltype(auto)
-invokeForAsset(Asset const& asset, Cb&& f)
+inline bool
+isConsistent(Asset const& issue)
 {
     return std::visit(
-        [&](auto const& issue) { return f(issue); }, asset.value());
+        [&]<typename TIss>(TIss const& issue_) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return isConsistent(issue_);
+            else
+                return true;
+        },
+        issue.value());
+}
+
+inline bool
+validAsset(Asset const& issue)
+{
+    return std::visit(
+        [&]<typename TIss>(TIss const& issue_) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return isConsistent(issue_) && issue_.currency != badCurrency();
+            else
+                return true;
+        },
+        issue.value());
+}
+
+template <class Hasher>
+void
+hash_append(Hasher& h, Asset const& r)
+{
+    using beast::hash_append;
+    std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                hash_append(h, issue.currency, issue.account);
+            else
+                hash_append(h, issue.getMptID());
+        },
+        r.value());
 }
 
 std::string

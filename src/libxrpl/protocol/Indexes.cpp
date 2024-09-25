@@ -96,12 +96,37 @@ getBookBase(Book const& book)
 {
     assert(isConsistent(book));
 
-    auto const index = indexHash(
-        LedgerNameSpace::BOOK_DIR,
-        book.in.currency,
-        book.out.currency,
-        book.in.account,
-        book.out.account);
+    auto const index = std::visit(
+        [&]<ValidIssueType TIn, ValidIssueType TOut>(
+            TIn const& in, TOut const& out) {
+            if constexpr (
+                std::is_same_v<TIn, Issue> && std::is_same_v<TOut, Issue>)
+                return indexHash(
+                    LedgerNameSpace::BOOK_DIR,
+                    in.currency,
+                    out.currency,
+                    in.account,
+                    out.account);
+            else if constexpr (
+                std::is_same_v<TIn, Issue> && std::is_same_v<TOut, MPTIssue>)
+                return indexHash(
+                    LedgerNameSpace::BOOK_DIR,
+                    in.currency,
+                    out.getMptID(),
+                    in.account);
+            else if constexpr (
+                std::is_same_v<TIn, MPTIssue> && std::is_same_v<TOut, Issue>)
+                return indexHash(
+                    LedgerNameSpace::BOOK_DIR,
+                    in.getMptID(),
+                    out.currency,
+                    out.account);
+            else
+                return indexHash(
+                    LedgerNameSpace::BOOK_DIR, in.getMptID(), out.getMptID());
+        },
+        book.in.value(),
+        book.out.value());
 
     // Return with quality 0.
     auto k = keylet::quality({ltDIR_NODE, index}, 0);
@@ -430,8 +455,8 @@ amm(Asset const& issue1, Asset const& issue2) noexcept
                     issue1_.getMptID(),
                     issue2_.getMptID()));
         },
-        issue1.value(),
-        issue2.value());
+        minA.value(),
+        maxA.value());
 }
 
 Keylet

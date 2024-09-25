@@ -57,7 +57,7 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
         // MPT
         if (noAccount() == account)
         {
-            uint192 mptID;
+            MPTID mptID;
             std::uint32_t sequence = sit.get32();
             memcpy(mptID.data(), &sequence, sizeof(sequence));
             memcpy(

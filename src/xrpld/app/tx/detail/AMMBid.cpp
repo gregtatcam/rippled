@@ -37,6 +37,11 @@ AMMBid::preflight(PreflightContext const& ctx)
     if (!ammEnabled(ctx.rules))
         return temDISABLED;
 
+    if (!ctx.rules.enabled(featureMPTokensV2) &&
+        (ctx.tx[sfAsset].holds<MPTIssue>() ||
+         ctx.tx[sfAsset2].holds<MPTIssue>()))
+        return temDISABLED;
+
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;
 
@@ -46,8 +51,7 @@ AMMBid::preflight(PreflightContext const& ctx)
         return temINVALID_FLAG;
     }
 
-    if (auto const res = invalidAMMAssetPair(
-            ctx.tx[sfAsset].get<Issue>(), ctx.tx[sfAsset2].get<Issue>()))
+    if (auto const res = invalidAMMAssetPair(ctx.tx[sfAsset], ctx.tx[sfAsset2]))
     {
         JLOG(ctx.j.debug()) << "AMM Bid: Invalid asset pair.";
         return res;

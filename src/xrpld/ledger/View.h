@@ -104,11 +104,24 @@ isIndividualFrozen(
     return isIndividualFrozen(view, account, issue.currency, issue.account);
 }
 
-[[nodiscard]] inline bool
+[[nodiscard]] bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
     MPTIssue const& mpt);
+
+[[nodiscard]] inline bool
+isIndividualFrozen(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& asset)
+{
+    return std::visit(
+        [&](auto const& issue) {
+            return isIndividualFrozen(view, account, issue);
+        },
+        asset.value());
+}
 
 [[nodiscard]] bool
 isFrozen(
@@ -125,6 +138,14 @@ isFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
 
 [[nodiscard]] bool
 isFrozen(ReadView const& view, AccountID const& account, MPTIssue const& mpt);
+
+[[nodiscard]] inline bool
+isFrozen(ReadView const& view, AccountID const& account, Asset const& asset)
+{
+    return std::visit(
+        [&](auto const& issue) { return isFrozen(view, account, issue); },
+        asset.value());
+}
 
 // Returns the amount an account can spend without going into debt.
 //
@@ -175,6 +196,15 @@ accountFunds(
     AccountID const& id,
     STAmount const& saDefault,
     FreezeHandling freezeHandling,
+    beast::Journal j);
+
+[[nodiscard]] STAmount
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    STAmount const& saDefault,
+    FreezeHandling freezeHandling,
+    AuthHandling authHandling,
     beast::Journal j);
 
 // Return the account's liquid (not reserved) XRP.  Generally prefer
@@ -517,6 +547,17 @@ requireAuth(
     ReadView const& view,
     MPTIssue const& mpt,
     AccountID const& account);
+[[nodiscard]] TER inline requireAuth(
+    ReadView const& view,
+    Asset const& asset,
+    AccountID const& account)
+{
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue_) {
+            return requireAuth(view, issue_, account);
+        },
+        asset.value());
+}
 
 /** Check if the destination account is allowed
  *  to receive MPT. Return tecNO_AUTH if it doesn't

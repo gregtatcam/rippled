@@ -22,6 +22,7 @@
 
 #include <xrpl/basics/IOUAmount.h>
 #include <xrpl/basics/XRPAmount.h>
+#include <xrpl/protocol/Protocol.h>
 #include <xrpl/protocol/STAmount.h>
 
 #include <type_traits>
@@ -29,8 +30,9 @@
 namespace ripple {
 
 inline STAmount
-toSTAmount(IOUAmount const& iou, Issue const& iss)
+toSTAmount(IOUAmount const& iou, Asset const& iss)
 {
+    assert(iss.holds<Issue>());
     bool const isNeg = iou.signum() < 0;
     std::uint64_t const umant = isNeg ? -iou.mantissa() : iou.mantissa();
     return STAmount(iss, umant, iou.exponent(), isNeg, STAmount::unchecked());
@@ -51,10 +53,23 @@ toSTAmount(XRPAmount const& xrp)
 }
 
 inline STAmount
-toSTAmount(XRPAmount const& xrp, Issue const& iss)
+toSTAmount(XRPAmount const& xrp, Asset const& iss)
 {
-    assert(isXRP(iss.account) && isXRP(iss.currency));
+    assert(isXRP(iss));
     return toSTAmount(xrp);
+}
+
+inline STAmount
+toSTAmount(MPTAmount const& mpt)
+{
+    return STAmount(mpt, noMPT());
+}
+
+inline STAmount
+toSTAmount(MPTAmount const& mpt, Asset const& iss)
+{
+    assert(iss.holds<MPTIssue>());
+    return STAmount(mpt, iss.get<MPTIssue>());
 }
 
 template <class T>
@@ -94,6 +109,19 @@ toAmount<XRPAmount>(STAmount const& amt)
     return XRPAmount(sMant);
 }
 
+template <>
+inline MPTAmount
+toAmount<MPTAmount>(STAmount const& amt)
+{
+    assert(amt.mantissa() < std::numeric_limits<std::int64_t>::max());
+    assert(amt.holds<MPTIssue>());
+    bool const isNeg = amt.negative();
+    std::int64_t const sMant =
+        isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
+
+    return MPTAmount(sMant);
+}
+
 template <class T>
 T
 toAmount(IOUAmount const& amt) = delete;
@@ -116,10 +144,21 @@ toAmount<XRPAmount>(XRPAmount const& amt)
     return amt;
 }
 
+template <class T>
+T
+toAmount(MPTAmount const& amt) = delete;
+
+template <>
+inline MPTAmount
+toAmount<MPTAmount>(MPTAmount const& amt)
+{
+    return amt;
+}
+
 template <typename T>
 T
 toAmount(
-    Issue const& issue,
+    Asset const& issue,
     Number const& n,
     Number::rounding_mode mode = Number::getround())
 {
@@ -131,6 +170,8 @@ toAmount(
         return IOUAmount(n);
     else if constexpr (std::is_same_v<XRPAmount, T>)
         return XRPAmount(static_cast<std::int64_t>(n));
+    else if constexpr (std::is_same_v<MPTAmount, T>)
+        return MPTAmount(static_cast<std::int64_t>(n));
     else if constexpr (std::is_same_v<STAmount, T>)
     {
         if (isXRP(issue))
@@ -146,18 +187,31 @@ toAmount(
 
 template <typename T>
 T
-toMaxAmount(Issue const& issue)
+toMaxAmount(Asset const& issue)
 {
     if constexpr (std::is_same_v<IOUAmount, T>)
         return IOUAmount(STAmount::cMaxValue, STAmount::cMaxOffset);
     else if constexpr (std::is_same_v<XRPAmount, T>)
         return XRPAmount(static_cast<std::int64_t>(STAmount::cMaxNativeN));
+    else if constexpr (std::is_same_v<MPTAmount, T>)
+        return MPTAmount(maxMPTokenAmount);
     else if constexpr (std::is_same_v<STAmount, T>)
     {
-        if (isXRP(issue))
-            return STAmount(
-                issue, static_cast<std::int64_t>(STAmount::cMaxNativeN));
-        return STAmount(issue, STAmount::cMaxValue, STAmount::cMaxOffset);
+        return std::visit(
+            []<ValidIssueType TIss>(TIss const& issue_) {
+                if constexpr (std::is_same_v<TIss, Issue>)
+                {
+                    if (isXRP(issue_))
+                        return STAmount(
+                            issue_,
+                            static_cast<std::int64_t>(STAmount::cMaxNativeN));
+                    return STAmount(
+                        issue_, STAmount::cMaxValue, STAmount::cMaxOffset);
+                }
+                else
+                    return STAmount(issue_, maxMPTokenAmount);
+            },
+            issue.value());
     }
     else
     {
@@ -168,7 +222,7 @@ toMaxAmount(Issue const& issue)
 
 inline STAmount
 toSTAmount(
-    Issue const& issue,
+    Asset const& issue,
     Number const& n,
     Number::rounding_mode mode = Number::getround())
 {
@@ -176,15 +230,17 @@ toSTAmount(
 }
 
 template <typename T>
-Issue
-getIssue(T const& amt)
+Asset
+getAsset(T const& amt)
 {
     if constexpr (std::is_same_v<IOUAmount, T>)
         return noIssue();
     else if constexpr (std::is_same_v<XRPAmount, T>)
         return xrpIssue();
+    else if constexpr (std::is_same_v<MPTAmount, T>)
+        return noMPT();
     else if constexpr (std::is_same_v<STAmount, T>)
-        return amt.issue();
+        return amt.asset();
     else
     {
         constexpr bool alwaysFalse = !std::is_same_v<T, T>;
@@ -200,6 +256,8 @@ get(STAmount const& a)
         return a.iou();
     else if constexpr (std::is_same_v<XRPAmount, T>)
         return a.xrp();
+    else if constexpr (std::is_same_v<MPTAmount, T>)
+        return a.mpt();
     else if constexpr (std::is_same_v<STAmount, T>)
         return a;
     else

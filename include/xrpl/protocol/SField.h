@@ -484,6 +484,8 @@ extern SF_UINT160 const sfTakerGetsIssuer;
 
 // 192-bit (common)
 extern SF_UINT192 const sfMPTokenIssuanceID;
+extern SF_UINT192 const sfTakerGetsMPT;
+extern SF_UINT192 const sfTakerPaysMPT;
 
 // 256-bit (common)
 extern SF_UINT256 const sfLedgerHash;

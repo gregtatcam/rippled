@@ -225,6 +225,7 @@ enum TERcodes : TERUnderlyingType {
     terQUEUED,       // Transaction is being held in TxQ until fee drops
     terPRE_TICKET,   // Ticket is not yet in ledger but might be on its way
     terNO_AMM,       // AMM doesn't exist for the asset pair
+    terNO_MPT,       // MPT doesn't exist for the asset pair
 };
 
 //------------------------------------------------------------------------------
@@ -441,8 +442,7 @@ public:
     }
 
     // Conversion to bool.
-    explicit
-    operator bool() const
+    explicit operator bool() const
     {
         return code_ != tesSUCCESS;
     }

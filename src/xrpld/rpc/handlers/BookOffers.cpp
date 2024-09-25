@@ -47,118 +47,29 @@ doBookOffers(RPC::JsonContext& context)
     if (!lpLedger)
         return jvResult;
 
-    if (!context.params.isMember(jss::taker_pays))
-        return RPC::missing_field_error(jss::taker_pays);
+    Book book;
 
-    if (!context.params.isMember(jss::taker_gets))
-        return RPC::missing_field_error(jss::taker_gets);
-
-    Json::Value const& taker_pays = context.params[jss::taker_pays];
-    Json::Value const& taker_gets = context.params[jss::taker_gets];
-
-    if (!taker_pays.isObjectOrNull())
-        return RPC::object_field_error(jss::taker_pays);
-
-    if (!taker_gets.isObjectOrNull())
-        return RPC::object_field_error(jss::taker_gets);
-
-    if (!taker_pays.isMember(jss::currency))
-        return RPC::missing_field_error("taker_pays.currency");
-
-    if (!taker_pays[jss::currency].isString())
-        return RPC::expected_field_error("taker_pays.currency", "string");
-
-    if (!taker_gets.isMember(jss::currency))
-        return RPC::missing_field_error("taker_gets.currency");
-
-    if (!taker_gets[jss::currency].isString())
-        return RPC::expected_field_error("taker_gets.currency", "string");
-
-    Currency pay_currency;
-
-    if (!to_currency(pay_currency, taker_pays[jss::currency].asString()))
-    {
-        JLOG(context.j.info()) << "Bad taker_pays currency.";
-        return RPC::make_error(
+    auto const takerPaysRes =
+        RPC::parseJSONBookAsset(context.params, jss::taker_pays.c_str());
+    if (!takerPaysRes)
+        return getBookOffersParseError(
+            takerPaysRes.error(),
+            jss::taker_pays.c_str(),
             rpcSRC_CUR_MALFORMED,
-            "Invalid field 'taker_pays.currency', bad currency.");
-    }
+            rpcSRC_ISR_MALFORMED,
+            context.j);
+    book.in = *takerPaysRes;
 
-    Currency get_currency;
-
-    if (!to_currency(get_currency, taker_gets[jss::currency].asString()))
-    {
-        JLOG(context.j.info()) << "Bad taker_gets currency.";
-        return RPC::make_error(
+    auto const takerGetsRes =
+        RPC::parseJSONBookAsset(context.params, jss::taker_gets.c_str());
+    if (!takerGetsRes)
+        return getBookOffersParseError(
+            takerGetsRes.error(),
+            jss::taker_gets.c_str(),
             rpcDST_AMT_MALFORMED,
-            "Invalid field 'taker_gets.currency', bad currency.");
-    }
-
-    AccountID pay_issuer;
-
-    if (taker_pays.isMember(jss::issuer))
-    {
-        if (!taker_pays[jss::issuer].isString())
-            return RPC::expected_field_error("taker_pays.issuer", "string");
-
-        if (!to_issuer(pay_issuer, taker_pays[jss::issuer].asString()))
-            return RPC::make_error(
-                rpcSRC_ISR_MALFORMED,
-                "Invalid field 'taker_pays.issuer', bad issuer.");
-
-        if (pay_issuer == noAccount())
-            return RPC::make_error(
-                rpcSRC_ISR_MALFORMED,
-                "Invalid field 'taker_pays.issuer', bad issuer account one.");
-    }
-    else
-    {
-        pay_issuer = xrpAccount();
-    }
-
-    if (isXRP(pay_currency) && !isXRP(pay_issuer))
-        return RPC::make_error(
-            rpcSRC_ISR_MALFORMED,
-            "Unneeded field 'taker_pays.issuer' for "
-            "XRP currency specification.");
-
-    if (!isXRP(pay_currency) && isXRP(pay_issuer))
-        return RPC::make_error(
-            rpcSRC_ISR_MALFORMED,
-            "Invalid field 'taker_pays.issuer', expected non-XRP issuer.");
-
-    AccountID get_issuer;
-
-    if (taker_gets.isMember(jss::issuer))
-    {
-        if (!taker_gets[jss::issuer].isString())
-            return RPC::expected_field_error("taker_gets.issuer", "string");
-
-        if (!to_issuer(get_issuer, taker_gets[jss::issuer].asString()))
-            return RPC::make_error(
-                rpcDST_ISR_MALFORMED,
-                "Invalid field 'taker_gets.issuer', bad issuer.");
-
-        if (get_issuer == noAccount())
-            return RPC::make_error(
-                rpcDST_ISR_MALFORMED,
-                "Invalid field 'taker_gets.issuer', bad issuer account one.");
-    }
-    else
-    {
-        get_issuer = xrpAccount();
-    }
-
-    if (isXRP(get_currency) && !isXRP(get_issuer))
-        return RPC::make_error(
             rpcDST_ISR_MALFORMED,
-            "Unneeded field 'taker_gets.issuer' for "
-            "XRP currency specification.");
-
-    if (!isXRP(get_currency) && isXRP(get_issuer))
-        return RPC::make_error(
-            rpcDST_ISR_MALFORMED,
-            "Invalid field 'taker_gets.issuer', expected non-XRP issuer.");
+            context.j);
+    book.out = *takerGetsRes;
 
     std::optional<AccountID> takerID;
     if (context.params.isMember(jss::taker))
@@ -171,7 +82,7 @@ doBookOffers(RPC::JsonContext& context)
             return RPC::invalid_field_error(jss::taker);
     }
 
-    if (pay_currency == get_currency && pay_issuer == get_issuer)
+    if (book.in == book.out)
     {
         JLOG(context.j.info()) << "taker_gets same as taker_pays.";
         return RPC::make_error(rpcBAD_MARKET);
@@ -189,7 +100,7 @@ doBookOffers(RPC::JsonContext& context)
 
     context.netOps.getBookPage(
         lpLedger,
-        {{pay_currency, pay_issuer}, {get_currency, get_issuer}},
+        book,
         takerID ? *takerID : beast::zero,
         bProof,
         limit,

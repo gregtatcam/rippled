@@ -119,7 +119,7 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
             mOffset = 0;
             mIsNegative = (value & cPositive) == 0;
             mValue = (value << 8) | sit.get8();
-            mAsset = sit.get192();
+            mAsset = static_cast<MPTID>(sit.get192());
             return;
         }
         // else is XRP
@@ -958,7 +958,7 @@ amountFromJson(SField const& name, Json::Value const& v)
         if (isMPT)
         {
             // sequence (32 bits) + account (160 bits)
-            uint192 u;
+            MPTID u;
             if (!u.parseHex(currencyOrMPTID.asString()))
                 Throw<std::runtime_error>("invalid MPTokenIssuanceID");
             asset = u;

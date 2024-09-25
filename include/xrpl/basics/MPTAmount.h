@@ -49,6 +49,7 @@ protected:
 public:
     MPTAmount() = default;
     constexpr MPTAmount(MPTAmount const& other) = default;
+    constexpr MPTAmount(beast::Zero);
     constexpr MPTAmount&
     operator=(MPTAmount const& other) = default;
 
@@ -100,6 +101,11 @@ public:
 
 constexpr MPTAmount::MPTAmount(value_type value) : value_(value)
 {
+}
+
+constexpr MPTAmount::MPTAmount(beast::Zero)
+{
+    *this = beast::zero;
 }
 
 constexpr MPTAmount& MPTAmount::operator=(beast::Zero)

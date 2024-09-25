@@ -651,7 +651,7 @@ doLedgerEntry(RPC::JsonContext& context)
                 context.params[jss::mpt_issuance];
             if (unparsedMPTIssuanceID.isString())
             {
-                uint192 mptIssuanceID;
+                MPTID mptIssuanceID;
                 if (!mptIssuanceID.parseHex(unparsedMPTIssuanceID.asString()))
                 {
                     uNodeIndex = beast::zero;
@@ -691,7 +691,7 @@ doLedgerEntry(RPC::JsonContext& context)
                         context.params[jss::mptoken][jss::mpt_issuance_id]
                             .asString();
 
-                    uint192 mptIssuanceID;
+                    MPTID mptIssuanceID;
                     if (!mptIssuanceID.parseHex(mptIssuanceIdStr))
                         Throw<std::runtime_error>(
                             "Cannot parse mpt_issuance_id");

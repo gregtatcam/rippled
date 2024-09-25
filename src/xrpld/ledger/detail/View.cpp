@@ -355,13 +355,15 @@ accountHolds(
     AuthHandling zeroIfUnauthorized,
     beast::Journal j)
 {
-    return invokeForAsset(issue, [&]<typename TIss>(TIss const& issue_) {
-        if constexpr (std::is_same_v<TIss, Issue>)
-            return accountHolds(view, account, issue_, zeroIfFrozen, j);
-        else
-            return accountHolds(
-                view, account, issue_, zeroIfFrozen, zeroIfUnauthorized, j);
-    });
+    return std::visit(
+        [&]<typename TIss>(TIss const& issue_) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return accountHolds(view, account, issue_, zeroIfFrozen, j);
+            else
+                return accountHolds(
+                    view, account, issue_, zeroIfFrozen, zeroIfUnauthorized, j);
+        },
+        issue.value());
 }
 
 STAmount
@@ -382,6 +384,22 @@ accountFunds(
         saDefault.getIssuer(),
         freezeHandling,
         j);
+}
+
+STAmount
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    STAmount const& saDefault,
+    FreezeHandling freezeHandling,
+    AuthHandling authHandling,
+    beast::Journal j)
+{
+    if (!saDefault.native() && saDefault.getIssuer() == id)
+        return saDefault;
+
+    return accountHolds(
+        view, id, saDefault.asset(), freezeHandling, authHandling, j);
 }
 
 // Prevent ownerCount from wrapping under error conditions.

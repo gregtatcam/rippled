@@ -1006,7 +1006,11 @@ struct PayStrand_test : public beast::unit_test::suite
 
             // alice -> USD/XRP -> bob
             STPath path;
-            path.emplace_back(std::nullopt, xrpCurrency(), std::nullopt);
+            path.emplace_back(
+                std::nullopt,
+                xrpCurrency(),
+                std::nullopt,
+                STPathElement::PathAssetTag{});
 
             auto [ter, strand] = toStrand(
                 *env.current(),

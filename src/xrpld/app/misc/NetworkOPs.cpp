@@ -4104,8 +4104,8 @@ NetworkOPsImp::getBookPage(
 
     ReadView const& view = *lpLedger;
 
-    bool const bGlobalFreeze = isGlobalFrozen(view, book.out.account) ||
-        isGlobalFrozen(view, book.in.account);
+    bool const bGlobalFreeze = isGlobalFrozen(view, book.out.getIssuer()) ||
+        isGlobalFrozen(view, book.in.getIssuer());
 
     bool bDone = false;
     bool bDirectAdvance = true;
@@ -4115,7 +4115,7 @@ NetworkOPsImp::getBookPage(
     unsigned int uBookEntry;
     STAmount saDirRate;
 
-    auto const rate = transferRate(view, book.out.account);
+    auto const rate = transferRate(view, book.out.getIssuer());
     auto viewJ = app_.journal("View");
 
     while (!bDone && iLimit-- > 0)
@@ -4163,7 +4163,7 @@ NetworkOPsImp::getBookPage(
                 STAmount saOwnerFunds;
                 bool firstOwnerOffer(true);
 
-                if (book.out.account == uOfferOwnerID)
+                if (book.out.getIssuer() == uOfferOwnerID)
                 {
                     // If an offer is selling issuer's own IOUs, it is fully
                     // funded.
@@ -4192,9 +4192,9 @@ NetworkOPsImp::getBookPage(
                         saOwnerFunds = accountHolds(
                             view,
                             uOfferOwnerID,
-                            book.out.currency,
-                            book.out.account,
+                            book.out,
                             fhZERO_IF_FROZEN,
+                            ahZERO_IF_UNAUTHORIZED,
                             viewJ);
 
                         if (saOwnerFunds < beast::zero)
@@ -4214,9 +4214,9 @@ NetworkOPsImp::getBookPage(
 
                 if (rate != parityRate
                     // Have a tranfer fee.
-                    && uTakerID != book.out.account
+                    && uTakerID != book.out.getIssuer()
                     // Not taking offers of own IOUs.
-                    && book.out.account != uOfferOwnerID)
+                    && book.out.getIssuer() != uOfferOwnerID)
                 // Offer owner not issuing ownfunds
                 {
                     // Need to charge a transfer fee to offer owner.

@@ -176,6 +176,10 @@ struct XRP_t
     {
         return xrpIssue();
     }
+    operator Asset() const
+    {
+        return xrpIssue();
+    }
 
     /** Returns an amount of XRP as PrettyAmount,
         which is trivially convertable to STAmount
@@ -385,6 +389,10 @@ public:
         value where an MPTIssue is expected.
     */
     operator ripple::MPTIssue() const
+    {
+        return mpt();
+    }
+    operator ripple::Asset() const
     {
         return mpt();
     }

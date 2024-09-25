@@ -35,6 +35,8 @@ public:
 
     MPTIssue(MPTID const& id);
 
+    MPTIssue(AccountID const& account, std::uint32_t sequence);
+
     AccountID const&
     getIssuer() const;
 
@@ -46,6 +48,9 @@ public:
 
     friend constexpr bool
     operator!=(MPTIssue const& lhs, MPTIssue const& rhs);
+
+    friend constexpr bool
+    operator<(MPTIssue const& lhs, MPTIssue const& rhs);
 };
 
 constexpr bool
@@ -60,10 +65,31 @@ operator!=(MPTIssue const& lhs, MPTIssue const& rhs)
     return !(lhs.mptID_ == rhs.mptID_);
 }
 
+constexpr bool
+operator<(MPTIssue const& lhs, MPTIssue const& rhs)
+{
+    return lhs.mptID_ < rhs.mptID_;
+}
+
 inline bool
 isXRP(MPTID const&)
 {
     return false;
+}
+
+inline AccountID const&
+getMPTIssuer(MPTID const& mptid)
+{
+    AccountID const* accountId = reinterpret_cast<AccountID const*>(
+        mptid.data() + sizeof(std::uint32_t));
+    return *accountId;
+}
+
+inline MPTID
+noMPT()
+{
+    static MPTIssue mpt{noAccount(), 0};
+    return mpt.getMptID();
 }
 
 Json::Value
@@ -73,5 +99,15 @@ std::string
 to_string(MPTIssue const& mpt);
 
 }  // namespace ripple
+
+namespace std {
+
+template <>
+struct hash<ripple::MPTID> : ripple::MPTID::hasher
+{
+    explicit hash() = default;
+};
+
+}  // namespace std
 
 #endif  // RIPPLE_PROTOCOL_MPTISSUE_H_INCLUDED
