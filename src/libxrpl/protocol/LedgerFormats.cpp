@@ -68,6 +68,8 @@ LedgerFormats::LedgerFormats()
             {sfTakerPaysIssuer,      soeOPTIONAL},  // order book directories
             {sfTakerGetsCurrency,    soeOPTIONAL},  // order book directories
             {sfTakerGetsIssuer,      soeOPTIONAL},  // order book directories
+            {sfTakerPaysMPT,         soeOPTIONAL},  // order book directories
+            {sfTakerGetsMPT,         soeOPTIONAL},  // order book directories
             {sfExchangeRate,         soeOPTIONAL},  // order book directories
             {sfIndexes,              soeREQUIRED},
             {sfRootIndex,            soeREQUIRED},

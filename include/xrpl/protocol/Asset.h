@@ -84,6 +84,9 @@ public:
 
     friend constexpr bool
     equalCurrencyOrMPTID(Asset const& lhs, Asset const& rhs);
+
+    friend constexpr bool
+    equalCurrency(Currency const& lhs, Asset const& rhs);
 };
 
 template <ValidIssueType TIss>
@@ -189,6 +192,12 @@ equalCurrencyOrMPTID(Asset const& lhs, Asset const& rhs)
         },
         lhs.value(),
         rhs.value());
+}
+
+constexpr bool
+equalCurrency(Currency const& lhs, Asset const& rhs)
+{
+    return rhs.holds<Issue>() && rhs.get<Issue>().currency == lhs;
 }
 
 inline bool
