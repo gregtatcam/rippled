@@ -1059,18 +1059,27 @@ class MPToken_test : public beast::unit_test::suite
         using namespace test::jtx;
 
         std::set<std::string> txWithAmounts;
+        std::set<std::string> supportedTx = {
+            jss::Clawback.c_str(),
+            jss::SetFee.c_str(),
+            jss::Payment.c_str(),
+            jss::OfferCreate.c_str(),
+            jss::Payment.c_str(),
+            jss::AMMCreate.c_str(),
+            jss::CheckCreate.c_str(),
+            jss::CheckCash.c_str()};
         for (auto const& format : TxFormats::getInstance())
         {
             for (auto const& e : format.getSOTemplate())
             {
                 // Transaction has amount fields.
-                // Exclude Clawback, which only supports sfAmount and is checked
-                // in the transactor for amendment enable/disable. Exclude
-                // pseudo-transaction SetFee. Don't consider the Fee field since
+                // Exclude transactions supporting MPT.
+                // Exclude pseudo-transaction SetFee.
+                // Don't consider the Fee field since
                 // it's included in every transaction.
                 if (e.supportMPT() != soeMPTNone &&
                     e.sField().getName() != jss::Fee &&
-                    format.getName() != jss::Clawback &&
+                    !supportedTx.contains(format.getName()) &&
                     format.getName() != jss::SetFee)
                 {
                     txWithAmounts.insert(format.getName());
@@ -1111,22 +1120,6 @@ class MPToken_test : public beast::unit_test::suite
             // All transactions with sfAmount, which don't support MPT
             // and transactions with amount fields, which can't be MPT
 
-            // AMMCreate
-            auto ammCreate = [&](SField const& field) {
-                Json::Value jv;
-                jv[jss::TransactionType] = jss::AMMCreate;
-                jv[jss::Account] = alice.human();
-                jv[jss::Amount] = (field.fieldName == sfAmount.fieldName)
-                    ? mpt.getJson(JsonOptions::none)
-                    : "100000000";
-                jv[jss::Amount2] = (field.fieldName == sfAmount2.fieldName)
-                    ? mpt.getJson(JsonOptions::none)
-                    : "100000000";
-                jv[jss::TradingFee] = 0;
-                test(jv);
-            };
-            ammCreate(sfAmount);
-            ammCreate(sfAmount2);
             // AMMDeposit
             auto ammDeposit = [&](SField const& field) {
                 Json::Value jv;
@@ -1138,11 +1131,8 @@ class MPToken_test : public beast::unit_test::suite
                 jv[jss::Flags] = tfSingleAsset;
                 test(jv);
             };
-            ammDeposit(sfAmount);
             for (SField const& field :
-                 {std::ref(sfAmount2),
-                  std::ref(sfEPrice),
-                  std::ref(sfLPTokenOut)})
+                 {std::ref(sfEPrice), std::ref(sfLPTokenOut)})
                 ammDeposit(field);
             // AMMWithdraw
             auto ammWithdraw = [&](SField const& field) {
@@ -1155,11 +1145,8 @@ class MPToken_test : public beast::unit_test::suite
                 jv[field.fieldName] = mpt.getJson(JsonOptions::none);
                 test(jv);
             };
-            ammWithdraw(sfAmount);
             for (SField const& field :
-                 {std::ref(sfAmount2),
-                  std::ref(sfEPrice),
-                  std::ref(sfLPTokenIn)})
+                 {std::ref(sfEPrice), std::ref(sfLPTokenIn)})
                 ammWithdraw(field);
             // AMMBid
             auto ammBid = [&](SField const& field) {
@@ -1173,26 +1160,6 @@ class MPToken_test : public beast::unit_test::suite
             };
             ammBid(sfBidMin);
             ammBid(sfBidMax);
-            // CheckCash
-            auto checkCash = [&](SField const& field) {
-                Json::Value jv;
-                jv[jss::TransactionType] = jss::CheckCash;
-                jv[jss::Account] = alice.human();
-                jv[sfCheckID.fieldName] = to_string(uint256{1});
-                jv[field.fieldName] = mpt.getJson(JsonOptions::none);
-                test(jv);
-            };
-            checkCash(sfAmount);
-            checkCash(sfDeliverMin);
-            // CheckCreate
-            {
-                Json::Value jv;
-                jv[jss::TransactionType] = jss::CheckCreate;
-                jv[jss::Account] = alice.human();
-                jv[jss::Destination] = carol.human();
-                jv[jss::SendMax] = mpt.getJson(JsonOptions::none);
-                test(jv);
-            }
             // EscrowCreate
             {
                 Json::Value jv;
@@ -1200,11 +1167,6 @@ class MPToken_test : public beast::unit_test::suite
                 jv[jss::Account] = alice.human();
                 jv[jss::Destination] = carol.human();
                 jv[jss::Amount] = mpt.getJson(JsonOptions::none);
-                test(jv);
-            }
-            // OfferCreate
-            {
-                Json::Value const jv = offer(alice, USD(100), mpt);
                 test(jv);
             }
             // PaymentChannelCreate
@@ -1236,21 +1198,6 @@ class MPToken_test : public beast::unit_test::suite
                 jv[jss::Amount] = mpt.getJson(JsonOptions::none);
                 test(jv);
             }
-            // Payment
-            auto payment = [&](SField const& field) {
-                Json::Value jv;
-                jv[jss::TransactionType] = jss::Payment;
-                jv[jss::Account] = alice.human();
-                jv[jss::Destination] = carol.human();
-                jv[jss::Amount] = mpt.getJson(JsonOptions::none);
-                if (field == sfSendMax)
-                    jv[jss::SendMax] = mpt.getJson(JsonOptions::none);
-                else
-                    jv[jss::DeliverMin] = mpt.getJson(JsonOptions::none);
-                test(jv);
-            };
-            payment(sfSendMax);
-            payment(sfDeliverMin);
             // NFTokenCreateOffer
             {
                 Json::Value jv;

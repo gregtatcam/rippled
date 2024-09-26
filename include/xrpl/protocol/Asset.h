@@ -81,6 +81,9 @@ public:
 
     friend constexpr std::weak_ordering
     operator<=>(Asset const& lhs, Asset const& rhs);
+
+    friend constexpr bool
+    equalCurrencyOrMPTID(Asset const& lhs, Asset const& rhs);
 };
 
 template <ValidIssueType TIss>
@@ -163,6 +166,26 @@ operator<=>(Asset const& lhs, Asset const& rhs)
                 return std::weak_ordering::greater;
             else
                 return std::weak_ordering::less;
+        },
+        lhs.value(),
+        rhs.value());
+}
+
+constexpr bool
+equalCurrencyOrMPTID(Asset const& lhs, Asset const& rhs)
+{
+    return std::visit(
+        [&]<typename TLhs, typename TRhs>(
+            TLhs const& issLhs, TRhs const& issRhs) {
+            if constexpr (
+                std::is_same_v<TLhs, Issue> && std::is_same_v<TRhs, Issue>)
+                return issLhs.currency == issRhs.currency;
+            else if constexpr (
+                std::is_same_v<TLhs, MPTIssue> &&
+                std::is_same_v<TRhs, MPTIssue>)
+                return issLhs.getMptID() == issRhs.getMptID();
+            else
+                return false;
         },
         lhs.value(),
         rhs.value());

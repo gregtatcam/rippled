@@ -268,52 +268,6 @@ keypairForSignature(
     Json::Value const& params,
     Json::Value& error,
     unsigned int apiVersion = apiVersionIfUnspecified);
-
-enum class JSONAssetError {
-    MissingField,
-    NullObject,
-    Malformed,
-    MissingFieldCurr,
-    ExpectedFieldCurr,
-    ExpectedFieldIssr,
-    MalformedCurr,
-    MalformedIssr,
-    NoIssuer,
-    UnneededIssuer,
-    BadIssuer,
-    BadMPT
-};
-
-Expected<Asset, JSONAssetError>
-parseJSONBookAsset(Json::Value const& field, std::string const& name);
-
-Json::Value
-getSubscribeParseError(
-    RPC::JSONAssetError err,
-    std::string const& field,
-    error_code_i currError,
-    error_code_i issrError,
-    beast::Journal j);
-
-inline Json::Value
-getUnsubscribeParseError(
-    RPC::JSONAssetError err,
-    std::string const& field,
-    error_code_i currError,
-    error_code_i issrError,
-    beast::Journal j)
-{
-    return getSubscribeParseError(err, field, currError, issrError, j);
-}
-
-Json::Value
-getBookOffersParseError(
-    RPC::JSONAssetError err,
-    std::string const& field,
-    error_code_i currError,
-    error_code_i issrError,
-    beast::Journal j);
-
 }  // namespace RPC
 }  // namespace ripple
 

@@ -1435,7 +1435,6 @@ struct Flow_test : public beast::unit_test::suite
 
         using namespace jtx;
         auto const sa = supported_amendments();
-        testWithFeats(sa - featureFlowCross);
         testWithFeats(sa);
         testEmptyStrand(sa);
     }
@@ -1448,11 +1447,8 @@ struct Flow_manual_test : public Flow_test
     {
         using namespace jtx;
         auto const all = supported_amendments();
-        FeatureBitset const flowCross{featureFlowCross};
         FeatureBitset const f1513{fix1513};
 
-        testWithFeats(all - flowCross - f1513);
-        testWithFeats(all - flowCross);
         testWithFeats(all - f1513);
         testWithFeats(all);
 

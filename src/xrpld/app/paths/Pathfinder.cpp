@@ -1254,7 +1254,8 @@ Pathfinder::addLink(
                 if (!currentPath.hasSeen(
                         xrpAccount(), book.out, book.out.getIssuer()) &&
                     !issueMatchesOrigin(book.out) &&
-                    (!bDestOnly || book.out == mDstAmount.asset()))
+                    (!bDestOnly ||
+                     equalCurrencyOrMPTID(book.out, mDstAmount.asset())))
                 {
                     STPath newPath(currentPath);
 
@@ -1313,13 +1314,13 @@ Pathfinder::addLink(
 
                         if (hasEffectiveDestination &&
                             book.out.getIssuer() == mDstAccount &&
-                            book.out == mDstAmount.asset())
+                            equalCurrencyOrMPTID(book.out, mDstAmount.asset()))
                         {
                             // We skipped a required issuer
                         }
                         else if (
                             book.out.getIssuer() == mEffectiveDst &&
-                            book.out == mDstAmount.asset())
+                            equalCurrencyOrMPTID(book.out, mDstAmount.asset()))
                         {  // with the destination account, this path is
                            // complete
                             JLOG(j_.trace())

@@ -243,11 +243,8 @@ public:
     {
         using namespace jtx;
         auto const sa = supported_amendments();
-        for (auto feature : {sa - featureFlowCross, sa})
-        {
-            testGWB(feature);
-            testGWBApiVersions(feature);
-        }
+        testGWB(sa);
+        testGWBApiVersions(sa);
 
         testGWBOverflow();
     }

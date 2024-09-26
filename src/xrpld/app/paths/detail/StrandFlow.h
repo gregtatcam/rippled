@@ -828,7 +828,7 @@ flow(
     JLOG(j.trace()) << "Total flow: in: " << to_string(actualIn)
                     << " out: " << to_string(actualOut);
 
-    /* flowCross doesn't handle offer crossing with tfFillOrKill flag correctly.
+    /* Offer crossing with tfFillOrKill flag is not handled correctly.
      * 1. If tfFillOrKill is set then the owner must receive the full
      *   TakerPays. We reverse pays and gets because during crossing
      *   we are taking, therefore the owner must deliver the full TakerPays and

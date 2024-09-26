@@ -105,7 +105,7 @@ maxAmount()
     else if constexpr (std::is_same_v<T, STAmount>)
         return STAmount(STAmount::cMaxValue / 2, STAmount::cMaxOffset);
     else if constexpr (std::is_same_v<T, MPTAmount>)
-        return MPTAmount(STAmount::cMaxNative);
+        return MPTAmount(maxMPTokenAmount);
 }
 
 template <typename T>
