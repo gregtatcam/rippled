@@ -98,6 +98,9 @@ to_json(MPTIssue const& issue);
 std::string
 to_string(MPTIssue const& mpt);
 
+std::ostream&
+operator<<(std::ostream& os, MPTIssue const& x);
+
 }  // namespace ripple
 
 namespace std {

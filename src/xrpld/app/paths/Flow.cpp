@@ -74,11 +74,11 @@ flow(
     Asset const srcAsset = [&]() -> Asset {
         if (sendMax)
             return sendMax->asset();
+        if (isXRP(deliver))
+            return xrpIssue();
         if (deliver.holds<Issue>())
-            return Issue(deliver.issue().currency, src);
-        if (deliver.holds<MPTIssue>())
-            return deliver.asset();
-        return xrpIssue();
+            return Issue(deliver.get<Issue>().currency, src);
+        return deliver.asset();
     }();
 
     Asset const dstAsset = deliver.asset();
@@ -134,12 +134,12 @@ flow(
         std::variant<XRPAmount const*, MPTAmount const*, IOUAmount const*>;
     auto getTypedAmt = [&](Asset const& iss) -> Var {
         static auto xrp = XRPAmount{};
-        static auto cft = MPTAmount{};
+        static auto mpt = MPTAmount{};
         static auto iou = IOUAmount{};
         if (isXRP(iss))
             return &xrp;
         if (iss.holds<MPTIssue>())
-            return &cft;
+            return &mpt;
         return &iou;
     };
 

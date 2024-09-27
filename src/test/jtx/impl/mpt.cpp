@@ -80,6 +80,17 @@ MPTTester::MPTTester(Env& env, Account const& issuer, MPTConstr const& arg)
     }
 }
 
+MPTTester::operator MPTIssue() const
+{
+    return issuanceID();
+}
+
+MPT
+MPTTester::operator[](std::string const& name) const
+{
+    return MPT(name, issuanceID());
+}
+
 void
 MPTTester::create(const MPTCreate& arg)
 {

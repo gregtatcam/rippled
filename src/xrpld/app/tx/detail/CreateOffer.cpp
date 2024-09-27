@@ -217,7 +217,7 @@ CreateOffer::checkAcceptAsset(
     Asset const& asset)
 {
     // Only valid for custom currencies
-    assert(!isXRP(issue.currency));
+    assert(!isXRP(asset));
 
     auto const issuerAccount = view.read(keylet::account(asset.getIssuer()));
 

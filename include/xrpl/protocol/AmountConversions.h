@@ -113,8 +113,7 @@ template <>
 inline MPTAmount
 toAmount<MPTAmount>(STAmount const& amt)
 {
-    assert(amt.mantissa() < std::numeric_limits<std::int64_t>::max());
-    assert(amt.holds<MPTIssue>());
+    assert(amt.holds<MPTIssue>() && amt.mantissa() <= maxMPTokenAmount);
     bool const isNeg = amt.negative();
     std::int64_t const sMant =
         isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();

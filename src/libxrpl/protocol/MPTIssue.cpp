@@ -62,4 +62,11 @@ to_string(MPTIssue const& mptIssue)
     return to_string(mptIssue.getMptID());
 }
 
+std::ostream&
+operator<<(std::ostream& os, MPTIssue const& x)
+{
+    os << to_string(x);
+    return os;
+}
+
 }  // namespace ripple

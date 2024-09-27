@@ -314,7 +314,7 @@ accountHolds(
     AuthHandling zeroIfUnauthorized,
     beast::Journal j)
 {
-    STAmount amount;
+    STAmount amount{issue};
 
     auto const sleMpt = view.read(keylet::mptoken(issue.getMptID(), account));
     if (!sleMpt)
@@ -1405,7 +1405,7 @@ rippleSendMPT(
 
         // Direct send: redeeming IOUs and/or sending own IOUs.
         auto const ter =
-            rippleMPTCredit(view, uSenderID, uReceiverID, saAmount, j);
+            rippleCreditMPT(view, uSenderID, uReceiverID, saAmount, false, j);
         if (ter != tesSUCCESS)
             return ter;
         saActual = saAmount;
@@ -1428,11 +1428,11 @@ rippleSendMPT(
                         << " cost=" << saActual.getFullText();
 
         if (auto const terResult =
-                rippleMPTCredit(view, issuer, uReceiverID, saAmount, j);
+                rippleCreditMPT(view, issuer, uReceiverID, saAmount, true, j);
             terResult != tesSUCCESS)
             return terResult;
 
-        return rippleMPTCredit(view, uSenderID, issuer, saActual, j);
+        return rippleCreditMPT(view, uSenderID, issuer, saActual, true, j);
     }
 
     return tecINTERNAL;
@@ -1901,13 +1901,18 @@ deleteAMMTrustLine(
 }
 
 TER
-rippleMPTCredit(
+rippleCreditMPT(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
-    STAmount saAmount,
+    STAmount const& saAmount,
+    bool checkIssuer,
     beast::Journal j)
 {
+    assert(saAmount.holds<MPTIssue>());
+    assert(
+        !checkIssuer || uSenderID == saAmount.getIssuer() ||
+        uReceiverID == saAmount.getIssuer());
     auto const mptID = keylet::mptIssuance(saAmount.get<MPTIssue>().getMptID());
     auto const issuer = saAmount.getIssuer();
     if (!view.exists(mptID))

@@ -482,16 +482,17 @@ rippleCredit(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
-    const STAmount& saAmount,
+    STAmount const& saAmount,
     bool bCheckIssuer,
     beast::Journal j);
 
 [[nodiscard]] TER
-rippleMPTCredit(
+rippleCreditMPT(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
-    STAmount saAmount,
+    STAmount const& saAmount,
+    bool checkIssuer,
     beast::Journal j);
 
 [[nodiscard]] TER
@@ -499,7 +500,7 @@ accountSend(
     ApplyView& view,
     AccountID const& from,
     AccountID const& to,
-    const STAmount& saAmount,
+    STAmount const& saAmount,
     beast::Journal j,
     WaiveTransferFee waiveFee = WaiveTransferFee::No);
 
@@ -508,7 +509,7 @@ accountSendMPT(
     ApplyView& view,
     AccountID const& from,
     AccountID const& to,
-    const STAmount& saAmount,
+    STAmount const& saAmount,
     beast::Journal j,
     WaiveTransferFee waiveFee = WaiveTransferFee::No);
 

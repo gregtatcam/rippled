@@ -742,10 +742,10 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.pay(alice, bob, 100);
 
             // Pay to another holder
-            mptAlice.pay(bob, carol, 101, tecINSUFFICIENT_FUNDS);
+            mptAlice.pay(bob, carol, 101, tecPATH_PARTIAL);
 
             // Pay to the issuer
-            mptAlice.pay(bob, alice, 101, tecINSUFFICIENT_FUNDS);
+            mptAlice.pay(bob, alice, 101, tecPATH_PARTIAL);
         }
 
         // MPT is locked
@@ -805,7 +805,11 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.pay(alice, bob, 100);
 
             // issuer tries to exceed max amount
-            mptAlice.pay(alice, bob, 1, tecMPT_MAX_AMOUNT_EXCEEDED);
+            auto const MPTA = mptAlice["MPTA"];
+            mptAlice.pay(alice, bob, 1, tecPATH_PARTIAL);
+            env(pay(alice, bob, MPTA(1)),
+                txflags(tfPartialPayment),
+                ter(tecPATH_DRY));
         }
 
         // Issuer fails trying to send more than the default maximum
@@ -823,7 +827,7 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.pay(alice, bob, maxMPTokenAmount);
 
             // issuer tries to exceed max amount
-            mptAlice.pay(alice, bob, 1, tecMPT_MAX_AMOUNT_EXCEEDED);
+            mptAlice.pay(alice, bob, 1, tecPATH_PARTIAL);
         }
 
         // Can't pay negative amount
@@ -878,23 +882,24 @@ class MPToken_test : public beast::unit_test::suite
             // Payment between the holder and the issuer, no transfer fee.
             mptAlice.pay(alice, bob, 1'000);
 
-            // Payment between the holders. The sender doesn't have
-            // enough funds to cover the transfer fee.
-            mptAlice.pay(bob, carol, 1'000);
+            // Payment between the holders. The sender has to include sendmax
+            // to cover the transfer fee.
+            auto const MPTA = mptAlice["MPTA"];
+            env(pay(bob, carol, MPTA(1'000)), ter(tecPATH_PARTIAL));
+            env(pay(bob, carol, MPTA(1'000)), sendmax(MPTA(1'100)));
 
-            // Payment between the holders. The sender pays 10% transfer fee.
-            mptAlice.pay(bob, carol, 100);
+            // Payment between the holders. The sender has to include sendmax
+            // to cover the transfer fee.
+            env(pay(bob, carol, MPTA(100)), ter(tecPATH_PARTIAL));
+            env(pay(bob, carol, MPTA(100)), sendmax(MPTA(110)));
         }
 
         // Test that non-issuer cannot send to each other if MPTCanTransfer
         // isn't set
         {
             Env env(*this, features);
-            Account const alice{"alice"};
-            Account const bob{"bob"};
-            Account const cindy{"cindy"};
 
-            MPTTester mptAlice(env, alice, {.holders = {&bob, &cindy}});
+            MPTTester mptAlice(env, alice, {.holders = {&bob, &carol}});
 
             // alice creates issuance without MPTCanTransfer
             mptAlice.create({.ownerCount = 1, .holderCount = 0});
@@ -903,14 +908,14 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.authorize({.account = &bob});
 
             // cindy creates a MPToken
-            mptAlice.authorize({.account = &cindy});
+            mptAlice.authorize({.account = &carol});
 
             // alice pays bob 100 tokens
             mptAlice.pay(alice, bob, 100);
 
             // bob tries to send cindy 10 tokens, but fails because canTransfer
             // is off
-            mptAlice.pay(bob, cindy, 10, tecNO_AUTH);
+            mptAlice.pay(bob, carol, 10, tecNO_AUTH);
 
             // bob can send back to alice(issuer) just fine
             mptAlice.pay(bob, alice, 10);
@@ -919,8 +924,6 @@ class MPToken_test : public beast::unit_test::suite
         // MPT is disabled
         {
             Env env{*this, features - featureMPTokensV1};
-            Account const alice("alice");
-            Account const bob("bob");
 
             env.fund(XRP(1'000), alice);
             env.fund(XRP(1'000), bob);
@@ -932,8 +935,6 @@ class MPToken_test : public beast::unit_test::suite
         // MPT is disabled, unsigned request
         {
             Env env{*this, features - featureMPTokensV1};
-            Account const alice("alice");  // issuer
-            Account const carol("carol");
             auto const USD = alice["USD"];
 
             env.fund(XRP(1'000), alice);
@@ -951,8 +952,6 @@ class MPToken_test : public beast::unit_test::suite
         // Invalid combination of send, sendMax, deliverMin
         {
             Env env{*this, features};
-            Account const alice("alice");
-            Account const carol("carol");
 
             MPTTester mptAlice(env, alice, {.holders = {&carol}});
 
@@ -960,21 +959,22 @@ class MPToken_test : public beast::unit_test::suite
 
             mptAlice.authorize({.account = &carol});
 
+            env.disableFeature(featureMPTokensV2);
+
             // sendMax and DeliverMin are valid XRP amount,
             // but is invalid combination with MPT amount
-            env(pay(alice, carol, mptAlice.mpt(100)),
+            auto const MPTA = mptAlice["MPTA"];
+            env(pay(alice, carol, MPTA(100)),
                 sendmax(XRP(100)),
                 ter(temMALFORMED));
-            env(pay(alice, carol, mptAlice.mpt(100)),
+            env(pay(alice, carol, MPTA(100)),
                 delivermin(XRP(100)),
                 ter(temMALFORMED));
         }
 
         // build_path is invalid if MPT
         {
-            Env env{*this, features};
-            Account const alice("alice");
-            Account const carol("carol");
+            Env env{*this, features - featureMPTokensV2};
 
             MPTTester mptAlice(env, alice, {.holders = {&bob, &carol}});
 
@@ -1007,7 +1007,7 @@ class MPToken_test : public beast::unit_test::suite
             // alice destroys issuance
             mptAlice.destroy({.ownerCount = 0});
 
-            // alice tries to send bob fund after issuance is destroy, should
+            // alice tries to send bob fund after issuance is destroyed, should
             // fail.
             mptAlice.pay(alice, bob, 100, tecMPT_ISSUANCE_NOT_FOUND);
         }
@@ -1033,9 +1033,6 @@ class MPToken_test : public beast::unit_test::suite
         // be able to transfer the max amount to someone else
         {
             Env env{*this, features};
-            Account const alice("alice");
-            Account const carol("bob");
-            Account const bob("carol");
 
             MPTTester mptAlice(env, alice, {.holders = {&bob, &carol}});
 

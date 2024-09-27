@@ -152,6 +152,11 @@ class MPTTester
 public:
     MPTTester(Env& env, Account const& issuer, MPTConstr const& constr = {});
 
+    operator MPTIssue() const;
+
+    MPT
+    operator[](std::string const& name) const;
+
     void
     create(MPTCreate const& arg = MPTCreate{});
 

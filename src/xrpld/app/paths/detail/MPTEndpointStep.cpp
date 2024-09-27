@@ -40,11 +40,13 @@ class MPTEndpointStep
 protected:
     AccountID const src_;
     AccountID const dst_;
-    MPTIssue mptIssue_;
+    MPTIssue const mptIssue_;
 
     // Charge transfer fees when the prev step redeems
     Step const* const prevStep_ = nullptr;
     bool const isLast_;
+    // Used by maxFlow's last step.
+    bool const isDirectBetweenHolders_;
     beast::Journal const j_;
 
     struct Cache
@@ -100,6 +102,11 @@ public:
         , mptIssue_(mpt)
         , prevStep_(ctx.prevStep)
         , isLast_(ctx.isLast)
+        , isDirectBetweenHolders_(
+              ctx.prevStep && !ctx.prevStep->bookStepBook() && ctx.isLast &&
+              ctx.strandDeliver.holds<MPTIssue>() &&
+              mptIssue_ == ctx.strandDeliver.get<MPTIssue>() &&
+              dst_ == ctx.strandDst)
         , j_(ctx.j)
     {
     }
@@ -239,7 +246,7 @@ public:
 
     bool verifyPrevStepDebtDirection(DebtDirection) const
     {
-        // A payment doesn't care whether or not prevStepRedeems.
+        // A payment doesn't care regardless of prevStepRedeems.
         return true;
     }
 
@@ -367,12 +374,12 @@ DirectMPTPaymentStep::check(
     // Since this is a payment a MPToken must be present.  Perform all
     // MPToken related checks.
     if (!ctx.view.exists(keylet::mptIssuance(mptIssue_.getMptID())))
-        return tecOBJECT_NOT_FOUND;
+        return tecMPT_ISSUANCE_NOT_FOUND;
     if (src_ != mptIssue_.getIssuer())
     {
         auto const mptokenID = keylet::mptoken(mptIssue_.getMptID(), src_);
         if (!ctx.view.exists(mptokenID))
-            return tecOBJECT_NOT_FOUND;
+            return tecNO_AUTH;
 
         if (auto const ter = requireAuth(ctx.view, mptIssue_, src_);
             ter != tesSUCCESS)
@@ -383,7 +390,7 @@ DirectMPTPaymentStep::check(
     {
         auto const mptokenID = keylet::mptoken(mptIssue_.getMptID(), dst_);
         if (!ctx.view.exists(mptokenID))
-            return tecOBJECT_NOT_FOUND;
+            return tecNO_AUTH;
 
         if (auto const ter = requireAuth(ctx.view, mptIssue_, dst_);
             ter != tesSUCCESS)
@@ -397,6 +404,11 @@ DirectMPTPaymentStep::check(
         if (isFrozen(ctx.view, src_, mptIssue_) ||
             isFrozen(ctx.view, ctx.strandDst, mptIssue_))
             return tecMPT_LOCKED;
+
+        if (auto const ter =
+                canTransfer(ctx.view, mptIssue_, src_, ctx.strandDst);
+            ter != tesSUCCESS)
+            return ter;
     }
 
     return tesSUCCESS;
@@ -416,11 +428,20 @@ template <class TDerived>
 std::pair<MPTAmount, DebtDirection>
 MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
-    if (src_ != mptIssue_.getIssuer())
+    // If direct payment between the holders then the outstanding amount balance
+    // doesn't change and the max flow is the available balance of the source
+    // account.
+    if (src_ != mptIssue_.getIssuer() ||
+        (prevStep_ != nullptr && isDirectBetweenHolders_))
     {
+        assert(!prevStep_ || prevStep_->directStepSrcAcct().has_value());
+        auto const account =
+            prevStep_ != nullptr ? *(prevStep_->directStepSrcAcct()) : src_;
         auto const srcOwed = toAmount<MPTAmount>(accountHolds(
-            sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_));
+            sb, account, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_));
 
+        if (src_ == mptIssue_.getIssuer())
+            return {srcOwed, DebtDirection::issues};
         return {srcOwed, DebtDirection::redeems};
     }
 
@@ -429,7 +450,7 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
         std::int64_t const max =
             [&]() {
                 auto const max = sle->getFieldU64(sfMaximumAmount);
-                return max > 0 ? max : STAmount::cMaxNativeN;  // TODO MPT
+                return max > 0 ? max : maxMPTokenAmount;
             }() -
             sle->getFieldU64(sfOutstandingAmount);
         return {MPTAmount{max}, DebtDirection::issues};
@@ -496,8 +517,13 @@ MPTEndpointStep<TDerived>::revImp(
         MPTAmount const in =
             mulRatio(srcToDst, srcQOut, QUALITY_ONE, /*roundUp*/ true);
         cache_.emplace(in, srcToDst, srcToDst, srcDebtDir);
-        auto const ter = accountSendMPT(
-            sb, src_, dst_, toSTAmount(srcToDst, srcToDstIss), j_);
+        auto const ter = rippleCreditMPT(
+            sb,
+            src_,
+            dst_,
+            toSTAmount(srcToDst, srcToDstIss),
+            /*checkIssuer*/ true,
+            j_);
         (void)ter;
         JLOG(j_.trace()) << "MPTEndpointStep::rev: Non-limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
@@ -514,8 +540,13 @@ MPTEndpointStep<TDerived>::revImp(
         mulRatio(maxSrcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
     cache_.emplace(in, maxSrcToDst, actualOut, srcDebtDir);
 
-    auto const ter = rippleMPTCredit(
-        sb, src_, dst_, toSTAmount(maxSrcToDst, srcToDstIss), j_);
+    auto const ter = rippleCreditMPT(
+        sb,
+        src_,
+        dst_,
+        toSTAmount(maxSrcToDst, srcToDstIss),
+        /*checkIssuer*/ true,
+        j_);
     (void)ter;
     JLOG(j_.trace()) << "MPTEndpointStep::rev: Limiting"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -612,8 +643,13 @@ MPTEndpointStep<TDerived>::fwdImp(
         MPTAmount const out =
             mulRatio(srcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
         setCacheLimiting(in, srcToDst, out, srcDebtDir);
-        auto const ter = rippleMPTCredit(
-            sb, src_, dst_, toSTAmount(cache_->srcToDst, srcToDstIss), j_);
+        auto const ter = rippleCreditMPT(
+            sb,
+            src_,
+            dst_,
+            toSTAmount(cache_->srcToDst, srcToDstIss),
+            /*checkIssuer*/ true,
+            j_);
         (void)ter;
         JLOG(j_.trace()) << "MPTEndpointStep::fwd: Non-limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
@@ -629,8 +665,13 @@ MPTEndpointStep<TDerived>::fwdImp(
         MPTAmount const out =
             mulRatio(maxSrcToDst, dstQIn, QUALITY_ONE, /*roundUp*/ false);
         setCacheLimiting(actualIn, maxSrcToDst, out, srcDebtDir);
-        auto const ter = rippleMPTCredit(
-            sb, src_, dst_, toSTAmount(cache_->srcToDst, srcToDstIss), j_);
+        auto const ter = rippleCreditMPT(
+            sb,
+            src_,
+            dst_,
+            toSTAmount(cache_->srcToDst, srcToDstIss),
+            /*checkIssuer*/ true,
+            j_);
         (void)ter;
         JLOG(j_.trace()) << "MPTEndpointStep::rev: Limiting"
                          << " srcRedeems: " << redeems(srcDebtDir)
