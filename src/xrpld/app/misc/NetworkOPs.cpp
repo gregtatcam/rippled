@@ -2981,13 +2981,14 @@ NetworkOPsImp::transJson(
         auto const amount = transaction->getFieldAmount(sfTakerGets);
 
         // If the offer create is not self funded then add the owner balance
-        if (account != amount.issue().account)
+        if (account != amount.getIssuer())
         {
             auto const ownerFunds = accountFunds(
                 *ledger,
                 account,
                 amount,
                 fhIGNORE_FREEZE,
+                ahIGNORE_AUTH,
                 app_.journal("View"));
             jvObj[jss::transaction][jss::owner_funds] = ownerFunds.getText();
         }
@@ -4239,7 +4240,7 @@ NetworkOPsImp::getBookPage(
                     std::min(
                         saTakerPays,
                         multiply(
-                            saTakerGetsFunded, saDirRate, saTakerPays.issue()))
+                            saTakerGetsFunded, saDirRate, saTakerPays.asset()))
                         .setJson(jvOffer[jss::taker_pays_funded]);
                 }
 
@@ -4390,7 +4391,7 @@ NetworkOPsImp::getBookPage(
                 // going on here?
                 std::min(
                     saTakerPays,
-                    multiply(saTakerGetsFunded, saDirRate, saTakerPays.issue()))
+                    multiply(saTakerGetsFunded, saDirRate, saTakerPays.asset()))
                     .setJson(jvOffer[jss::taker_pays_funded]);
             }
 

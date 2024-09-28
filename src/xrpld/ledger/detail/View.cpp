@@ -1262,6 +1262,10 @@ accountSend(
     beast::Journal j,
     WaiveTransferFee waiveFee)
 {
+    if (saAmount.holds<MPTIssue>())
+        return accountSendMPT(
+            view, uSenderID, uReceiverID, saAmount, j, waiveFee);
+
     if (view.rules().enabled(fixAMMv1_1))
     {
         if (saAmount < beast::zero)

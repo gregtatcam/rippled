@@ -921,8 +921,23 @@ ValidClawback::finalize(
             AccountID const issuer = tx.getAccountID(sfAccount);
             STAmount const& amount = tx.getFieldAmount(sfAmount);
             AccountID const& holder = amount.getIssuer();
-            STAmount const holderBalance = accountHolds(
-                view, holder, amount.getCurrency(), issuer, fhIGNORE_FREEZE, j);
+            STAmount const holderBalance = [&]() {
+                if (amount.holds<Issue>())
+                    return accountHolds(
+                        view,
+                        holder,
+                        amount.get<Issue>().currency,
+                        issuer,
+                        fhIGNORE_FREEZE,
+                        j);
+                return accountHolds(
+                    view,
+                    holder,
+                    amount.get<MPTIssue>(),
+                    fhIGNORE_FREEZE,
+                    ahIGNORE_AUTH,
+                    j);
+            }();
 
             if (holderBalance.signum() < 0)
             {

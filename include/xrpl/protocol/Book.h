@@ -120,6 +120,27 @@ public:
 };
 
 template <>
+struct hash<ripple::MPTIssue>
+    : private boost::base_from_member<std::hash<ripple::MPTID>, 0>
+{
+private:
+    using id_hash_type = boost::base_from_member<std::hash<ripple::MPTID>, 0>;
+
+public:
+    explicit hash() = default;
+
+    using value_type = std::size_t;
+    using argument_type = ripple::MPTIssue;
+
+    value_type
+    operator()(argument_type const& value) const
+    {
+        value_type result(id_hash_type::member(value.getMptID()));
+        return result;
+    }
+};
+
+template <>
 struct hash<ripple::Asset>
     : private boost::base_from_member<std::hash<ripple::Currency>, 0>,
       private boost::base_from_member<std::hash<ripple::AccountID>, 1>,
@@ -204,6 +225,14 @@ struct hash<ripple::Issue> : std::hash<ripple::Issue>
     using Base = std::hash<ripple::Issue>;
     // VFALCO NOTE broken in vs2012
     // using Base::Base; // inherit ctors
+};
+
+template <>
+struct hash<ripple::MPTIssue> : std::hash<ripple::MPTIssue>
+{
+    explicit hash() = default;
+
+    using Base = std::hash<ripple::MPTIssue>;
 };
 
 template <>

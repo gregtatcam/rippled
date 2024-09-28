@@ -49,8 +49,8 @@ public:
     friend constexpr bool
     operator!=(MPTIssue const& lhs, MPTIssue const& rhs);
 
-    friend constexpr bool
-    operator<(MPTIssue const& lhs, MPTIssue const& rhs);
+    friend constexpr std::weak_ordering
+    operator<=>(MPTIssue const& lhs, MPTIssue const& rhs);
 };
 
 constexpr bool
@@ -65,10 +65,12 @@ operator!=(MPTIssue const& lhs, MPTIssue const& rhs)
     return !(lhs.mptID_ == rhs.mptID_);
 }
 
-constexpr bool
-operator<(MPTIssue const& lhs, MPTIssue const& rhs)
+constexpr std::weak_ordering
+operator<=>(MPTIssue const& lhs, MPTIssue const& rhs)
 {
-    return lhs.mptID_ < rhs.mptID_;
+    if (auto const c{lhs.mptID_ <=> rhs.mptID_}; c != 0)
+        return c;
+    return lhs.mptID_ <=> rhs.mptID_;
 }
 
 inline bool
@@ -90,6 +92,14 @@ noMPT()
 {
     static MPTIssue mpt{noAccount(), 0};
     return mpt.getMptID();
+}
+
+template <class Hasher>
+void
+hash_append(Hasher& h, MPTIssue const& r)
+{
+    using beast::hash_append;
+    hash_append(h, r.getMptID());
 }
 
 Json::Value

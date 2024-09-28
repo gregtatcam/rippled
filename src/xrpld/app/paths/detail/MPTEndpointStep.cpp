@@ -887,7 +887,34 @@ MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
         JLOG(j_.warn()) << "MPTEndpointStep: MPT can only be an endpoint";
         return terNO_RIPPLE;
     }
+#if 0
+    { // TODO MPT is this needed? this step can only be an endpoint.
+        // it can outout mpt or it can have mpt as an input
+        // two MPT endpoint steps can also be connected
+        if (ctx.seenBookOuts.count(mptIssue_)) {
+            if (!ctx.prevStep) {
+                assert(0);  // prev seen book without a prev step!?!
+                return temBAD_PATH_LOOP;
+            }
 
+            // This is OK if the previous step is a book step that outputs this
+            // issue
+            if (auto book = ctx.prevStep->bookStepBook()) {
+                if (book->out.holds<MPTIssue>() &&
+                    book->out.get<MPTIssue>() != mptIssue_)
+                    return temBAD_PATH_LOOP;
+            }
+        }
+
+        if (!ctx.seenDirectAssets[0].insert(mptIssue_).second ||
+            !ctx.seenDirectAssets[1].insert(mptIssue_).second) {
+            JLOG(j_.debug())
+                << "DirectStepI: loop detected: Index: " << ctx.strandSize
+                << ' ' << *this;
+            return temBAD_PATH_LOOP;
+        }
+    }
+#endif
     return static_cast<TDerived const*>(this)->check(ctx, sleSrc);
 }
 

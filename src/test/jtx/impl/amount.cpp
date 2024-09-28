@@ -123,6 +123,13 @@ operator<<(std::ostream& os, IOU const& iou)
     return os;
 }
 
+std::ostream&
+operator<<(std::ostream& os, MPT const& mpt)
+{
+    os << to_string(mpt.mptID);
+    return os;
+}
+
 any_t const any{};
 
 }  // namespace jtx

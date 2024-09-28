@@ -316,7 +316,7 @@ CreateOffer::flowCross(
                 sendMax = multiplyRound(
                     takerAmount.in,
                     gatewayXferRate,
-                    takerAmount.in.issue(),
+                    takerAmount.in.asset(),
                     true);
             }
         }
@@ -507,7 +507,10 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    txt += to_string(amount.issue().currency);
+    if (amount.holds<Issue>())
+        txt += to_string(amount.get<Issue>().currency);
+    else
+        txt += to_string(amount.get<MPTIssue>());
     return txt;
 }
 
@@ -630,8 +633,8 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         Amounts place_offer;
 
         JLOG(j_.debug()) << "Attempting cross: "
-                         << to_string(takerAmount.in.issue()) << " -> "
-                         << to_string(takerAmount.out.issue());
+                         << to_string(takerAmount.in.asset()) << " -> "
+                         << to_string(takerAmount.out.asset());
 
         if (auto stream = j_.trace())
         {
@@ -799,8 +802,9 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         if (saTakerGets.holds<Issue>())
         {
             sle->setFieldH160(
-                sfTakerGetsCurrency, saTakerGets.issue().currency);
-            sle->setFieldH160(sfTakerGetsIssuer, saTakerGets.issue().account);
+                sfTakerGetsCurrency, saTakerGets.get<Issue>().currency);
+            sle->setFieldH160(
+                sfTakerGetsIssuer, saTakerGets.get<Issue>().account);
         }
         else
         {

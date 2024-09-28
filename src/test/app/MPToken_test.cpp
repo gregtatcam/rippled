@@ -1596,6 +1596,145 @@ class MPToken_test : public beast::unit_test::suite
         }
     }
 
+    void
+    testOfferCrossing(FeatureBitset features)
+    {
+        testcase("Offer Crossing");
+        using namespace test::jtx;
+        Account const gw = Account("gw");
+        Account const alice = Account("alice");
+        Account const carol = Account("carol");
+        auto const USD = gw["USD"];
+
+        // MPTokenV2 is disabled
+        {
+            Env env{*this, features - featureMPTokensV2};
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
+
+            mpt.create({.ownerCount = 1, .holderCount = 0});
+
+            mpt.authorize({.account = &alice});
+            mpt.pay(gw, alice, 200);
+
+            mpt.authorize({.account = &carol});
+            mpt.pay(gw, carol, 200);
+
+            env(offer(alice, XRP(100), mpt.mpt(101)), ter(temDISABLED));
+            env.close();
+        }
+
+        // XRP/MPT
+        {
+            Env env{*this, features};
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
+
+            mpt.create({.ownerCount = 1, .holderCount = 0});
+            auto const MPTA = mpt["MPTA"];
+
+            mpt.authorize({.account = &alice});
+            mpt.pay(gw, alice, 200);
+
+            mpt.authorize({.account = &carol});
+            mpt.pay(gw, carol, 200);
+
+            env(offer(alice, XRP(100), MPTA(101)));
+            env.close();
+            BEAST_EXPECT(
+                expectOffers(env, alice, 1, {{Amounts{XRP(100), MPTA(101)}}}));
+
+            env(offer(carol, MPTA(101), XRP(100)));
+            env.close();
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(expectOffers(env, carol, 0));
+            BEAST_EXPECT(mpt.checkMPTokenOutstandingAmount(400));
+            BEAST_EXPECT(mpt.checkMPTokenAmount(alice, 99));
+            BEAST_EXPECT(mpt.checkMPTokenAmount(carol, 301));
+        }
+
+        // IOU/MPT
+        {
+            Env env{*this, features};
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
+
+            mpt.create({.ownerCount = 1, .holderCount = 0});
+            auto const MPTA = mpt["MPTA"];
+
+            env(trust(alice, USD(2'000)));
+            env(pay(gw, alice, USD(1'000)));
+            env.close();
+
+            env(trust(carol, USD(2'000)));
+            env(pay(gw, carol, USD(1'000)));
+            env.close();
+
+            mpt.authorize({.account = &alice});
+            mpt.pay(gw, alice, 200);
+
+            mpt.authorize({.account = &carol});
+            mpt.pay(gw, carol, 200);
+
+            env(offer(alice, USD(100), MPTA(101)));
+            env.close();
+            BEAST_EXPECT(
+                expectOffers(env, alice, 1, {{Amounts{USD(100), MPTA(101)}}}));
+
+            env(offer(carol, MPTA(101), USD(100)));
+            env.close();
+
+            BEAST_EXPECT(env.balance(alice, USD) == USD(1'100));
+            BEAST_EXPECT(env.balance(carol, USD) == USD(900));
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(expectOffers(env, carol, 0));
+            BEAST_EXPECT(mpt.checkMPTokenOutstandingAmount(400));
+            BEAST_EXPECT(mpt.checkMPTokenAmount(alice, 99));
+            BEAST_EXPECT(mpt.checkMPTokenAmount(carol, 301));
+        }
+
+        // MPT/MPT
+        {
+            Env env{*this, features};
+
+            MPTTester mpt1(env, gw, {.holders = {&alice, &carol}});
+            mpt1.create({.ownerCount = 1, .holderCount = 0});
+            auto const MPT1 = mpt1["MPT1"];
+
+            MPTTester mpt2(
+                env, gw, {.holders = {&alice, &carol}, .fund = false});
+            mpt2.create({.ownerCount = 2, .holderCount = 0});
+            auto const MPT2 = mpt2["MPT2"];
+
+            mpt1.authorize({.account = &alice});
+            mpt1.authorize({.account = &carol});
+            mpt1.pay(gw, alice, 200);
+            mpt1.pay(gw, carol, 200);
+
+            mpt2.authorize({.account = &alice});
+            mpt2.authorize({.account = &carol});
+            mpt2.pay(gw, alice, 200);
+            mpt2.pay(gw, carol, 200);
+
+            env(offer(alice, MPT2(100), MPT1(101)));
+            env.close();
+            BEAST_EXPECT(
+                expectOffers(env, alice, 1, {{Amounts{MPT2(100), MPT1(101)}}}));
+
+            env(offer(carol, MPT1(101), MPT2(100)));
+            env.close();
+
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(expectOffers(env, carol, 0));
+            BEAST_EXPECT(mpt1.checkMPTokenOutstandingAmount(400));
+            BEAST_EXPECT(mpt1.checkMPTokenAmount(alice, 99));
+            BEAST_EXPECT(mpt1.checkMPTokenAmount(carol, 301));
+            BEAST_EXPECT(mpt2.checkMPTokenOutstandingAmount(400));
+            BEAST_EXPECT(mpt2.checkMPTokenAmount(alice, 300));
+            BEAST_EXPECT(mpt2.checkMPTokenAmount(carol, 100));
+        }
+    }
+
 public:
     void
     run() override
@@ -1631,6 +1770,9 @@ public:
 
         // Test parsed MPTokenIssuanceID in API response metadata
         testTxJsonMetaFields(all);
+
+        // Test offer crossing
+        testOfferCrossing(all);
     }
 };
 

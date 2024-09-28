@@ -76,9 +76,6 @@ public:
     friend constexpr bool
     operator!=(Asset const& lhs, Asset const& rhs);
 
-    friend constexpr bool
-    operator<(Asset const& lhs, Asset const& rhs);
-
     friend constexpr std::weak_ordering
     operator<=>(Asset const& lhs, Asset const& rhs);
 
@@ -139,21 +136,6 @@ constexpr bool
 operator!=(Asset const& lhs, Asset const& rhs)
 {
     return !(lhs == rhs);
-}
-
-constexpr bool
-operator<(Asset const& lhs, Asset const& rhs)
-{
-    return std::visit(
-        [&]<typename TLhs, typename TRhs>(
-            TLhs const& issLhs, TRhs const& issRhs) {
-            if constexpr (std::is_same_v<TLhs, TRhs>)
-                return issLhs < issRhs;
-            else
-                return false;
-        },
-        lhs.issue_,
-        rhs.issue_);
 }
 
 constexpr std::weak_ordering
@@ -240,9 +222,9 @@ hash_append(Hasher& h, Asset const& r)
     std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
             if constexpr (std::is_same_v<TIss, Issue>)
-                hash_append(h, issue.currency, issue.account);
+                hash_append(h, issue);
             else
-                hash_append(h, issue.getMptID());
+                hash_append(h, issue);
         },
         r.value());
 }
