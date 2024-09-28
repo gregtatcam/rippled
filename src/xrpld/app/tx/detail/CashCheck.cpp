@@ -38,6 +38,14 @@ CashCheck::preflight(PreflightContext const& ctx)
     if (!ctx.rules.enabled(featureChecks))
         return temDISABLED;
 
+    auto isMPT = [&](TypedField<STAmount> const& field) {
+        return ctx.tx.isFieldPresent(field) && ctx.tx[field].holds<MPTIssue>();
+    };
+
+    if (!ctx.rules.enabled(featureMPTokensV2) &&
+        (isMPT(sfAmount) || isMPT(sfDeliverMin)))
+        return temDISABLED;
+
     NotTEC const ret{preflight1(ctx)};
     if (!isTesSuccess(ret))
         return ret;
@@ -70,7 +78,7 @@ CashCheck::preflight(PreflightContext const& ctx)
         return temBAD_AMOUNT;
     }
 
-    if (badCurrency() == value.getCurrency())
+    if (equalCurrency(badCurrency(), value.asset()))
     {
         JLOG(ctx.j.warn()) << "Malformed transaction: Bad currency.";
         return temBAD_CURRENCY;
@@ -141,8 +149,7 @@ CashCheck::preclaim(PreclaimContext const& ctx)
         }(ctx.tx)};
 
         STAmount const sendMax = sleCheck->at(sfSendMax);
-        Currency const currency{value.getCurrency()};
-        if (currency != sendMax.getCurrency())
+        if (!equalCurrencyOrMPTID(value.asset(), sendMax.asset()))
         {
             JLOG(ctx.j.warn()) << "Check cash does not match check currency.";
             return temMALFORMED;
@@ -167,6 +174,7 @@ CashCheck::preclaim(PreclaimContext const& ctx)
                 sleCheck->at(sfAccount),
                 value,
                 fhZERO_IF_FROZEN,
+                ahIGNORE_AUTH,
                 ctx.j)};
 
             // Note that src will have one reserve's worth of additional XRP
@@ -187,62 +195,89 @@ CashCheck::preclaim(PreclaimContext const& ctx)
         // An issuer can always accept their own currency.
         if (!value.native() && (value.getIssuer() != dstId))
         {
-            auto const sleTrustLine =
-                ctx.view.read(keylet::line(dstId, issuerId, currency));
-
-            if (!sleTrustLine &&
-                !ctx.view.rules().enabled(featureCheckCashMakesTrustLine))
+            Currency const currency{value.get<Issue>().currency};
+            if (value.holds<Issue>())
             {
-                JLOG(ctx.j.warn())
-                    << "Cannot cash check for IOU without trustline.";
-                return tecNO_LINE;
-            }
+                auto const sleTrustLine =
+                    ctx.view.read(keylet::line(dstId, issuerId, currency));
 
-            auto const sleIssuer = ctx.view.read(keylet::account(issuerId));
-            if (!sleIssuer)
-            {
-                JLOG(ctx.j.warn())
-                    << "Can't receive IOUs from non-existent issuer: "
-                    << to_string(issuerId);
-                return tecNO_ISSUER;
-            }
-
-            if (sleIssuer->at(sfFlags) & lsfRequireAuth)
-            {
-                if (!sleTrustLine)
-                {
-                    // We can only create a trust line if the issuer does not
-                    // have requireAuth set.
-                    return tecNO_AUTH;
-                }
-
-                // Entries have a canonical representation, determined by a
-                // lexicographical "greater than" comparison employing strict
-                // weak ordering. Determine which entry we need to access.
-                bool const canonical_gt(dstId > issuerId);
-
-                bool const is_authorized(
-                    sleTrustLine->at(sfFlags) &
-                    (canonical_gt ? lsfLowAuth : lsfHighAuth));
-
-                if (!is_authorized)
+                if (!sleTrustLine &&
+                    !ctx.view.rules().enabled(featureCheckCashMakesTrustLine))
                 {
                     JLOG(ctx.j.warn())
-                        << "Can't receive IOUs from issuer without auth.";
-                    return tecNO_AUTH;
+                        << "Cannot cash check for IOU without trustline.";
+                    return tecNO_LINE;
+                }
+
+                auto const sleIssuer = ctx.view.read(keylet::account(issuerId));
+                if (!sleIssuer)
+                {
+                    JLOG(ctx.j.warn())
+                        << "Can't receive IOUs from non-existent issuer: "
+                        << to_string(issuerId);
+                    return tecNO_ISSUER;
+                }
+
+                if (sleIssuer->at(sfFlags) & lsfRequireAuth)
+                {
+                    if (!sleTrustLine)
+                    {
+                        // We can only create a trust line if the issuer does
+                        // not have requireAuth set.
+                        return tecNO_AUTH;
+                    }
+
+                    // Entries have a canonical representation, determined by a
+                    // lexicographical "greater than" comparison employing
+                    // strict weak ordering. Determine which entry we need to
+                    // access.
+                    bool const canonical_gt(dstId > issuerId);
+
+                    bool const is_authorized(
+                        sleTrustLine->at(sfFlags) &
+                        (canonical_gt ? lsfLowAuth : lsfHighAuth));
+
+                    if (!is_authorized)
+                    {
+                        JLOG(ctx.j.warn())
+                            << "Can't receive IOUs from issuer without auth.";
+                        return tecNO_AUTH;
+                    }
+                }
+
+                // The trustline from source to issuer does not need to
+                // be checked for freezing, since we already verified that the
+                // source has sufficient non-frozen funds available.
+
+                // However, the trustline from destination to issuer may not
+                // be frozen.
+                if (isFrozen(ctx.view, dstId, currency, issuerId))
+                {
+                    JLOG(ctx.j.warn())
+                        << "Cashing a check to a frozen trustline.";
+                    return tecFROZEN;
                 }
             }
-
-            // The trustline from source to issuer does not need to
-            // be checked for freezing, since we already verified that the
-            // source has sufficient non-frozen funds available.
-
-            // However, the trustline from destination to issuer may not
-            // be frozen.
-            if (isFrozen(ctx.view, dstId, currency, issuerId))
+            else
             {
-                JLOG(ctx.j.warn()) << "Cashing a check to a frozen trustline.";
-                return tecFROZEN;
+                // MPT TODO
+                auto const sleIssuer = ctx.view.read(keylet::account(issuerId));
+                if (!sleIssuer)
+                {
+                    JLOG(ctx.j.warn())
+                        << "Can't receive MPTs from non-existent issuer: "
+                        << to_string(issuerId);
+                    return tecNO_ISSUER;
+                }
+
+                if (requireAuth(ctx.view, value.get<MPTIssue>(), dstId))
+                    return tecFROZEN;
+
+                if (isFrozen(ctx.view, dstId, value.asset().get<MPTIssue>()))
+                {
+                    JLOG(ctx.j.warn()) << "Cashing a check to a frozen MPT.";
+                    return tecFROZEN;
+                }
             }
         }
     }
@@ -339,103 +374,151 @@ CashCheck::doApply()
             // maximum possible currency because there might be a gateway
             // transfer rate to account for.  Since the transfer rate cannot
             // exceed 200%, we use 1/2 maxValue as our limit.
+            auto const maxDeliverMin = [&]() {
+                if (optDeliverMin->holds<Issue>())
+                    return STAmount(
+                        optDeliverMin->asset(),
+                        STAmount::cMaxValue / 2,
+                        STAmount::cMaxOffset);
+                return STAmount(optDeliverMin->asset(), maxMPTokenAmount / 2);
+            };
             STAmount const flowDeliver{
-                optDeliverMin ? STAmount(
-                                    optDeliverMin->issue(),
-                                    STAmount::cMaxValue / 2,
-                                    STAmount::cMaxOffset)
+                optDeliverMin ? maxDeliverMin()
                               : ctx_.tx.getFieldAmount(sfAmount)};
-
-            // If a trust line does not exist yet create one.
-            Issue const& trustLineIssue = flowDeliver.issue();
-            AccountID const issuer = flowDeliver.getIssuer();
-            AccountID const truster = issuer == account_ ? srcId : account_;
-            Keylet const trustLineKey = keylet::line(truster, trustLineIssue);
-            bool const destLow = issuer > account_;
 
             bool const checkCashMakesTrustLine =
                 psb.rules().enabled(featureCheckCashMakesTrustLine);
 
-            if (checkCashMakesTrustLine && !psb.exists(trustLineKey))
+            std::optional<std::function<void()>> trustlineCb;
+            auto fixupCb = [&]() {
+                if (trustlineCb)
+                    (*trustlineCb)();
+            };
+            if (flowDeliver.holds<Issue>())
             {
-                // 1. Can the check casher meet the reserve for the trust line?
-                // 2. Create trust line between destination (this) account
-                //    and the issuer.
-                // 3. Apply correct noRipple settings on trust line.  Use...
-                //     a. this (destination) account and
-                //     b. issuing account (not sending account).
+                // If a trust line does not exist yet create one.
+                Issue const& trustLineIssue = flowDeliver.get<Issue>();
+                AccountID const issuer = flowDeliver.getIssuer();
+                AccountID const truster = issuer == account_ ? srcId : account_;
+                Keylet const trustLineKey =
+                    keylet::line(truster, trustLineIssue);
+                bool const destLow = issuer > account_;
 
-                auto const sleDst = psb.peek(keylet::account(account_));
-
-                // Can the account cover the trust line's reserve?
-                if (std::uint32_t const ownerCount = {sleDst->at(sfOwnerCount)};
-                    mPriorBalance < psb.fees().accountReserve(ownerCount + 1))
+                if (checkCashMakesTrustLine && !psb.exists(trustLineKey))
                 {
-                    JLOG(j_.trace()) << "Trust line does not exist. "
-                                        "Insufficent reserve to create line.";
+                    // 1. Can the check casher meet the reserve for the trust
+                    // line?
+                    // 2. Create trust line between destination (this) account
+                    //    and the issuer.
+                    // 3. Apply correct noRipple settings on trust line.  Use...
+                    //     a. this (destination) account and
+                    //     b. issuing account (not sending account).
 
-                    return tecNO_LINE_INSUF_RESERVE;
+                    auto const sleDst = psb.peek(keylet::account(account_));
+
+                    // Can the account cover the trust line's reserve?
+                    if (std::uint32_t const ownerCount = {sleDst->at(
+                            sfOwnerCount)};
+                        mPriorBalance <
+                        psb.fees().accountReserve(ownerCount + 1))
+                    {
+                        JLOG(j_.trace())
+                            << "Trust line does not exist. "
+                               "Insufficent reserve to create line.";
+
+                        return tecNO_LINE_INSUF_RESERVE;
+                    }
+
+                    Currency const currency =
+                        flowDeliver.asset().get<Issue>().currency;
+                    STAmount initialBalance(flowDeliver.asset());
+                    initialBalance.setIssuer(noAccount());
+
+                    // clang-format off
+                    if (TER const ter = trustCreate(
+                                psb,                            // payment sandbox
+                                destLow,                        // is dest low?
+                                issuer,                         // source
+                                account_,                       // destination
+                                trustLineKey.key,               // ledger index
+                                sleDst,                         // Account to add to
+                                false,                          // authorize account
+                                (sleDst->getFlags() & lsfDefaultRipple) == 0,
+                                false,                          // freeze trust line
+                                initialBalance,                 // zero initial balance
+                                Issue(currency, account_),      // limit of zero
+                                0,                              // quality in
+                                0,                              // quality out
+                                viewJ);                         // journal
+                            !isTesSuccess(ter)) {
+                        return ter;
+                    }
+                    // clang-format on
+
+                    psb.update(sleDst);
+
+                    // Note that we _don't_ need to be careful about destroying
+                    // the trust line if the check cashing fails.  The
+                    // transaction machinery will automatically clean it up.
                 }
 
-                Currency const currency = flowDeliver.getCurrency();
-                STAmount initialBalance(flowDeliver.issue());
-                initialBalance.setIssuer(noAccount());
+                // Since the destination is signing the check, they clearly want
+                // the funds even if their new total funds would exceed the
+                // limit on their trust line.  So we tweak the trust line limits
+                // before calling flow and then restore the trust line limits
+                // afterwards.
+                auto const sleTrustLine = psb.peek(trustLineKey);
+                if (!sleTrustLine)
+                    return tecNO_LINE;
 
-                // clang-format off
-                if (TER const ter = trustCreate(
-                        psb,                            // payment sandbox
-                        destLow,                        // is dest low?
-                        issuer,                         // source
-                        account_,                       // destination
-                        trustLineKey.key,               // ledger index
-                        sleDst,                         // Account to add to
-                        false,                          // authorize account
-                        (sleDst->getFlags() & lsfDefaultRipple) == 0,
-                        false,                          // freeze trust line
-                        initialBalance,                 // zero initial balance
-                        Issue(currency, account_),      // limit of zero
-                        0,                              // quality in
-                        0,                              // quality out
-                        viewJ);                         // journal
-                    !isTesSuccess(ter))
+                SF_AMOUNT const& tweakedLimit =
+                    destLow ? sfLowLimit : sfHighLimit;
+                STAmount const savedLimit = sleTrustLine->at(tweakedLimit);
+
+                // Make sure the tweaked limits are restored when we leave
+                // scope.
+                trustlineCb =
+                    [&psb, &trustLineKey, &tweakedLimit, &savedLimit]() {
+                        if (auto const sleTrustLine = psb.peek(trustLineKey))
+                            sleTrustLine->at(tweakedLimit) = savedLimit;
+                    };
+
+                if (checkCashMakesTrustLine)
                 {
-                    return ter;
+                    // Set the trust line limit to the highest possible value
+                    // while flow runs.
+                    STAmount const bigAmount(
+                        trustLineIssue,
+                        STAmount::cMaxValue,
+                        STAmount::cMaxOffset);
+                    sleTrustLine->at(tweakedLimit) = bigAmount;
                 }
-                // clang-format on
-
-                psb.update(sleDst);
-
-                // Note that we _don't_ need to be careful about destroying
-                // the trust line if the check cashing fails.  The transaction
-                // machinery will automatically clean it up.
             }
-
-            // Since the destination is signing the check, they clearly want
-            // the funds even if their new total funds would exceed the limit
-            // on their trust line.  So we tweak the trust line limits before
-            // calling flow and then restore the trust line limits afterwards.
-            auto const sleTrustLine = psb.peek(trustLineKey);
-            if (!sleTrustLine)
-                return tecNO_LINE;
-
-            SF_AMOUNT const& tweakedLimit = destLow ? sfLowLimit : sfHighLimit;
-            STAmount const savedLimit = sleTrustLine->at(tweakedLimit);
-
-            // Make sure the tweaked limits are restored when we leave scope.
-            scope_exit fixup(
-                [&psb, &trustLineKey, &tweakedLimit, &savedLimit]() {
-                    if (auto const sleTrustLine = psb.peek(trustLineKey))
-                        sleTrustLine->at(tweakedLimit) = savedLimit;
-                });
-
-            if (checkCashMakesTrustLine)
+            else if (account_ != flowDeliver.getIssuer())
             {
-                // Set the trust line limit to the highest possible value
-                // while flow runs.
-                STAmount const bigAmount(
-                    trustLineIssue, STAmount::cMaxValue, STAmount::cMaxOffset);
-                sleTrustLine->at(tweakedLimit) = bigAmount;
+                // Create MPT if it doesn't exist
+                auto const mptokenKey = keylet::mptoken(
+                    flowDeliver.get<MPTIssue>().getMptID(), account_);
+                if (!psb.exists(mptokenKey))
+                {
+                    auto const ownerNode = psb.dirInsert(
+                        keylet::ownerDir(account_),
+                        mptokenKey,
+                        describeOwnerDir(account_));
+
+                    if (!ownerNode)
+                        return tecDIR_FULL;
+
+                    auto mptoken = std::make_shared<SLE>(mptokenKey);
+                    (*mptoken)[sfAccount] = account_;
+                    (*mptoken)[sfMPTokenIssuanceID] =
+                        flowDeliver.get<MPTIssue>().getMptID();
+                    (*mptoken)[sfFlags] = 0;
+                    (*mptoken)[sfOwnerNode] = *ownerNode;
+                    psb.insert(mptoken);
+                }
             }
+            scope_exit fixup(fixupCb);
 
             // Let flow() do the heavy lifting on a check for an IOU.
             auto const result = flow(
@@ -467,14 +550,16 @@ CashCheck::doApply()
                         << "flow did not produce DeliverMin.";
                     return tecPATH_PARTIAL;
                 }
-                if (doFix1623 && !checkCashMakesTrustLine)
+                if (doFix1623 && !checkCashMakesTrustLine &&
+                    optDeliverMin->holds<Issue>())
                     // Set the delivered_amount metadata.
                     ctx_.deliver(result.actualAmountOut);
             }
 
             // Set the delivered amount metadata in all cases, not just
             // for DeliverMin.
-            if (checkCashMakesTrustLine)
+            if (checkCashMakesTrustLine ||
+                result.actualAmountOut.holds<MPTIssue>())
                 ctx_.deliver(result.actualAmountOut);
 
             sleCheck = psb.peek(keylet::check(ctx_.tx[sfCheckID]));

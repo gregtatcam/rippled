@@ -146,11 +146,10 @@ flow(
     // The src account may send either xrp,iou,mpt. The dst account may receive
     // either xrp,iou,mpt. Since XRP, IOU, and MPT amounts are represented by
     // different types, use templates to tell `flow` about the amount types.
-    path::RippleCalc::Output result;
-    std::visit(
+    return std::visit(
         [&, &strands_ = strands]<typename TIn, typename TOut>(
             TIn const*&&, TOut const*&&) {
-            result = finishFlow(
+            return finishFlow(
                 sb,
                 srcAsset,
                 dstAsset,
@@ -168,7 +167,6 @@ flow(
         },
         getTypedAmt(srcAsset),
         getTypedAmt(dstAsset));
-    return result;
 }
 
 }  // namespace ripple

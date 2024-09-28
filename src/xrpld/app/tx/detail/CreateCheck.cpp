@@ -34,6 +34,10 @@ CreateCheck::preflight(PreflightContext const& ctx)
     if (!ctx.rules.enabled(featureChecks))
         return temDISABLED;
 
+    if (!ctx.rules.enabled(featureMPTokensV2) &&
+        ctx.tx[sfSendMax].holds<MPTIssue>())
+        return temDISABLED;
+
     NotTEC const ret{preflight1(ctx)};
     if (!isTesSuccess(ret))
         return ret;
@@ -60,7 +64,7 @@ CreateCheck::preflight(PreflightContext const& ctx)
             return temBAD_AMOUNT;
         }
 
-        if (badCurrency() == sendMax.getCurrency())
+        if (equalCurrency(badCurrency(), sendMax.asset()))
         {
             JLOG(ctx.j.warn()) << "Malformed transaction: Bad currency.";
             return temBAD_CURRENCY;
@@ -120,39 +124,54 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                 JLOG(ctx.j.warn()) << "Creating a check for frozen asset";
                 return tecFROZEN;
             }
-            // If this account has a trustline for the currency, that
-            // trustline may not be frozen.
-            //
-            // Note that we DO allow create check for a currency that the
-            // account does not yet have a trustline to.
-            AccountID const srcId{ctx.tx.getAccountID(sfAccount)};
-            if (issuerId != srcId)
+            if (sendMax.holds<Issue>())
             {
-                // Check if the issuer froze the line
-                auto const sleTrust = ctx.view.read(
-                    keylet::line(srcId, issuerId, sendMax.getCurrency()));
-                if (sleTrust &&
-                    sleTrust->isFlag(
-                        (issuerId > srcId) ? lsfHighFreeze : lsfLowFreeze))
+                // If this account has a trustline for the currency, that
+                // trustline may not be frozen.
+                //
+                // Note that we DO allow create check for a currency that the
+                // account does not yet have a trustline to.
+                AccountID const srcId{ctx.tx.getAccountID(sfAccount)};
+                if (issuerId != srcId)
                 {
-                    JLOG(ctx.j.warn())
-                        << "Creating a check for frozen trustline.";
-                    return tecFROZEN;
+                    // Check if the issuer froze the line
+                    auto const sleTrust = ctx.view.read(keylet::line(
+                        srcId, issuerId, sendMax.get<Issue>().currency));
+                    if (sleTrust &&
+                        sleTrust->isFlag(
+                            (issuerId > srcId) ? lsfHighFreeze : lsfLowFreeze))
+                    {
+                        JLOG(ctx.j.warn())
+                            << "Creating a check for frozen trustline.";
+                        return tecFROZEN;
+                    }
+                }
+                if (issuerId != dstId)
+                {
+                    // Check if dst froze the line.
+                    auto const sleTrust = ctx.view.read(keylet::line(
+                        issuerId, dstId, sendMax.get<Issue>().currency));
+                    if (sleTrust &&
+                        sleTrust->isFlag(
+                            (dstId > issuerId) ? lsfHighFreeze : lsfLowFreeze))
+                    {
+                        JLOG(ctx.j.warn()) << "Creating a check for "
+                                              "destination frozen trustline.";
+                        return tecFROZEN;
+                    }
                 }
             }
-            if (issuerId != dstId)
+            else
             {
-                // Check if dst froze the line.
-                auto const sleTrust = ctx.view.read(
-                    keylet::line(issuerId, dstId, sendMax.getCurrency()));
-                if (sleTrust &&
-                    sleTrust->isFlag(
-                        (dstId > issuerId) ? lsfHighFreeze : lsfLowFreeze))
-                {
-                    JLOG(ctx.j.warn())
-                        << "Creating a check for destination frozen trustline.";
+                auto const& mptIssue = sendMax.get<MPTIssue>();
+                auto const& srcId = ctx.tx[sfAccount];
+                // TODO MPT
+                if (srcId != mptIssue.getIssuer() &&
+                    isFrozen(ctx.view, srcId, mptIssue))
                     return tecFROZEN;
-                }
+                if (dstId != mptIssue.getIssuer() &&
+                    isFrozen(ctx.view, dstId, mptIssue))
+                    return tecFROZEN;
             }
         }
     }
