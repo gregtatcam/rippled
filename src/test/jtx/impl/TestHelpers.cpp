@@ -55,7 +55,11 @@ checkArraySize(Json::Value const& val, unsigned int size)
 void
 stpath_append_one(STPath& st, Account const& account)
 {
-    st.push_back(STPathElement({account.id(), std::nullopt, std::nullopt}));
+    st.push_back(STPathElement(
+        {account.id(),
+         std::nullopt,
+         std::nullopt,
+         STPathElement::PathAssetTag{}}));
 }
 
 void
@@ -77,8 +81,162 @@ IPE(Issue const& iss)
     return STPathElement(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         xrpAccount(),
-        iss.currency,
+        PathAsset{iss.currency},
         iss.account);
+}
+STPathElement
+IPE(MPTIssue const& iss)
+{
+    return STPathElement(
+        STPathElement::typeMPT | STPathElement::typeIssuer,
+        xrpAccount(),
+        PathAsset{iss.getMptID()},
+        iss.getIssuer());
+}
+
+Json::Value
+rpf(jtx::Account const& src,
+    jtx::Account const& dst,
+    STAmount const& dstAmount,
+    std::optional<STAmount> const& sendMax,
+    std::optional<Currency> const& srcCurrency)
+{
+    Json::Value jv = Json::objectValue;
+    jv[jss::command] = "ripple_path_find";
+    jv[jss::source_account] = toBase58(src);
+    jv[jss::destination_account] = toBase58(dst);
+    jv[jss::destination_amount] = dstAmount.getJson(JsonOptions::none);
+    if (sendMax)
+        jv[jss::send_max] = sendMax->getJson(JsonOptions::none);
+    if (srcCurrency)
+    {
+        auto& sc = jv[jss::source_currencies] = Json::arrayValue;
+        Json::Value j = Json::objectValue;
+        j[jss::currency] = to_string(srcCurrency.value());
+        sc.append(j);
+    }
+
+    return jv;
+}
+
+jtx::Env
+pathTestEnv(beast::unit_test::suite& suite)
+{
+    // These tests were originally written with search parameters that are
+    // different from the current defaults. This function creates an env
+    // with the search parameters that the tests were written for.
+    using namespace jtx;
+    return Env(suite, envconfig([](std::unique_ptr<Config> cfg) {
+                   cfg->PATH_SEARCH_OLD = 7;
+                   cfg->PATH_SEARCH = 7;
+                   cfg->PATH_SEARCH_MAX = 10;
+                   return cfg;
+               }));
+}
+
+Json::Value
+find_paths_request(
+    jtx::Env& env,
+    jtx::Account const& src,
+    jtx::Account const& dst,
+    STAmount const& saDstAmount,
+    std::optional<STAmount> const& saSendMax,
+    std::optional<Currency> const& saSrcCurrency)
+{
+    using namespace jtx;
+
+    auto& app = env.app();
+    Resource::Charge loadType = Resource::feeReferenceRPC;
+    Resource::Consumer c;
+
+    RPC::JsonContext context{
+        {env.journal,
+         app,
+         loadType,
+         app.getOPs(),
+         app.getLedgerMaster(),
+         c,
+         Role::USER,
+         {},
+         {},
+         RPC::apiVersionIfUnspecified},
+        {},
+        {}};
+
+    Json::Value params = Json::objectValue;
+    params[jss::command] = "ripple_path_find";
+    params[jss::source_account] = toBase58(src);
+    params[jss::destination_account] = toBase58(dst);
+    params[jss::destination_amount] = saDstAmount.getJson(JsonOptions::none);
+    if (saSendMax)
+        params[jss::send_max] = saSendMax->getJson(JsonOptions::none);
+    if (saSrcCurrency)
+    {
+        auto& sc = params[jss::source_currencies] = Json::arrayValue;
+        Json::Value j = Json::objectValue;
+        j[jss::currency] = to_string(saSrcCurrency.value());
+        sc.append(j);
+    }
+
+    Json::Value result;
+    gate g;
+    app.getJobQueue().postCoro(jtCLIENT, "RPC-Client", [&](auto const& coro) {
+        context.params = std::move(params);
+        context.coro = coro;
+        RPC::doCommand(context, result);
+        g.signal();
+    });
+
+    using namespace std::chrono_literals;
+    using namespace beast::unit_test;
+    g.wait_for(5s);
+    return result;
+}
+
+std::tuple<STPathSet, STAmount, STAmount>
+find_paths(
+    jtx::Env& env,
+    jtx::Account const& src,
+    jtx::Account const& dst,
+    STAmount const& saDstAmount,
+    std::optional<STAmount> const& saSendMax,
+    std::optional<Currency> const& saSrcCurrency)
+{
+    Json::Value result = find_paths_request(
+        env, src, dst, saDstAmount, saSendMax, saSrcCurrency);
+    if (result.isMember(jss::error))
+        return std::make_tuple(STPathSet{}, STAmount{}, STAmount{});
+
+    STAmount da;
+    if (result.isMember(jss::destination_amount))
+        da = amountFromJson(sfGeneric, result[jss::destination_amount]);
+
+    STAmount sa;
+    STPathSet paths;
+    if (result.isMember(jss::alternatives))
+    {
+        auto const& alts = result[jss::alternatives];
+        if (alts.size() > 0)
+        {
+            auto const& path = alts[0u];
+
+            if (path.isMember(jss::source_amount))
+                sa = amountFromJson(sfGeneric, path[jss::source_amount]);
+
+            if (path.isMember(jss::destination_amount))
+                da = amountFromJson(sfGeneric, path[jss::destination_amount]);
+
+            if (path.isMember(jss::paths_computed))
+            {
+                Json::Value p;
+                p["Paths"] = path[jss::paths_computed];
+                STParsedJSONObject po("generic", p);
+                paths = po.object->getFieldPathSet(sfPaths);
+            }
+        }
+    }
+
+    return std::make_tuple(std::move(paths), std::move(sa), std::move(da));
 }
 
 /******************************************************************************/

@@ -20,6 +20,7 @@
 #include <test/jtx.h>
 #include <test/jtx/AMM.h>
 #include <test/jtx/AMMTest.h>
+#include <test/jtx/TestHelpers.h>
 #include <test/jtx/trust.h>
 #include <test/jtx/xchain_bridge.h>
 #include <xrpl/protocol/Feature.h>
@@ -807,9 +808,9 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.pay(alice, bob, 100);
 
             // issuer tries to exceed max amount
-            auto const MPTA = mptAlice["MPTA"];
+            auto const MPT = mptAlice["MPT"];
             mptAlice.pay(alice, bob, 1, tecPATH_PARTIAL);
-            env(pay(alice, bob, MPTA(1)),
+            env(pay(alice, bob, MPT(1)),
                 txflags(tfPartialPayment),
                 ter(tecPATH_DRY));
         }
@@ -886,14 +887,14 @@ class MPToken_test : public beast::unit_test::suite
 
             // Payment between the holders. The sender has to include sendmax
             // to cover the transfer fee.
-            auto const MPTA = mptAlice["MPTA"];
-            env(pay(bob, carol, MPTA(1'000)), ter(tecPATH_PARTIAL));
-            env(pay(bob, carol, MPTA(1'000)), sendmax(MPTA(1'100)));
+            auto const MPT = mptAlice["MPT"];
+            env(pay(bob, carol, MPT(1'000)), ter(tecPATH_PARTIAL));
+            env(pay(bob, carol, MPT(1'000)), sendmax(MPT(1'100)));
 
             // Payment between the holders. The sender has to include sendmax
             // to cover the transfer fee.
-            env(pay(bob, carol, MPTA(100)), ter(tecPATH_PARTIAL));
-            env(pay(bob, carol, MPTA(100)), sendmax(MPTA(110)));
+            env(pay(bob, carol, MPT(100)), ter(tecPATH_PARTIAL));
+            env(pay(bob, carol, MPT(100)), sendmax(MPT(110)));
         }
 
         // Test that non-issuer cannot send to each other if MPTCanTransfer
@@ -965,11 +966,11 @@ class MPToken_test : public beast::unit_test::suite
 
             // sendMax and DeliverMin are valid XRP amount,
             // but is invalid combination with MPT amount
-            auto const MPTA = mptAlice["MPTA"];
-            env(pay(alice, carol, MPTA(100)),
+            auto const MPT = mptAlice["MPT"];
+            env(pay(alice, carol, MPT(100)),
                 sendmax(XRP(100)),
                 ter(temMALFORMED));
-            env(pay(alice, carol, MPTA(100)),
+            env(pay(alice, carol, MPT(100)),
                 delivermin(XRP(100)),
                 ter(temMALFORMED));
         }
@@ -1614,7 +1615,8 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
 
             mpt.authorize({.account = &alice});
             mpt.pay(gw, alice, 200);
@@ -1632,8 +1634,9 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
-            auto const MPTA = mpt["MPTA"];
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
             mpt.pay(gw, alice, 200);
@@ -1641,12 +1644,12 @@ class MPToken_test : public beast::unit_test::suite
             mpt.authorize({.account = &carol});
             mpt.pay(gw, carol, 200);
 
-            env(offer(alice, XRP(100), MPTA(101)));
+            env(offer(alice, XRP(100), MPT(101)));
             env.close();
             BEAST_EXPECT(
-                expectOffers(env, alice, 1, {{Amounts{XRP(100), MPTA(101)}}}));
+                expectOffers(env, alice, 1, {{Amounts{XRP(100), MPT(101)}}}));
 
-            env(offer(carol, MPTA(101), XRP(100)));
+            env(offer(carol, MPT(101), XRP(100)));
             env.close();
             BEAST_EXPECT(expectOffers(env, alice, 0));
             BEAST_EXPECT(expectOffers(env, carol, 0));
@@ -1661,8 +1664,9 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
-            auto const MPTA = mpt["MPTA"];
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
 
             env(trust(alice, USD(2'000)));
             env(pay(gw, alice, USD(1'000)));
@@ -1678,12 +1682,12 @@ class MPToken_test : public beast::unit_test::suite
             mpt.authorize({.account = &carol});
             mpt.pay(gw, carol, 200);
 
-            env(offer(alice, USD(100), MPTA(101)));
+            env(offer(alice, USD(100), MPT(101)));
             env.close();
             BEAST_EXPECT(
-                expectOffers(env, alice, 1, {{Amounts{USD(100), MPTA(101)}}}));
+                expectOffers(env, alice, 1, {{Amounts{USD(100), MPT(101)}}}));
 
-            env(offer(carol, MPTA(101), USD(100)));
+            env(offer(carol, MPT(101), USD(100)));
             env.close();
 
             BEAST_EXPECT(env.balance(alice, USD) == USD(1'100));
@@ -1700,12 +1704,14 @@ class MPToken_test : public beast::unit_test::suite
             Env env{*this, features};
 
             MPTTester mpt1(env, gw, {.holders = {&alice, &carol}});
-            mpt1.create({.ownerCount = 1, .holderCount = 0});
+            mpt1.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
             auto const MPT1 = mpt1["MPT1"];
 
             MPTTester mpt2(
                 env, gw, {.holders = {&alice, &carol}, .fund = false});
-            mpt2.create({.ownerCount = 2, .holderCount = 0});
+            mpt2.create(
+                {.ownerCount = 2, .holderCount = 0, .flags = tfMPTCanTransfer});
             auto const MPT2 = mpt2["MPT2"];
 
             mpt1.authorize({.account = &alice});
@@ -1753,7 +1759,8 @@ class MPToken_test : public beast::unit_test::suite
             Env env{*this, features};
             MPTTester mpt(env, gw, {.holders = {&alice, &carol, &bob}});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -1764,12 +1771,12 @@ class MPToken_test : public beast::unit_test::suite
 
             mpt.authorize({.account = &bob});
 
-            env(offer(alice, XRP(100), mpt.mpt(101)));
+            env(offer(alice, XRP(100), MPT(101)));
             env.close();
-            BEAST_EXPECT(expectOffers(
-                env, alice, 1, {{Amounts{XRP(100), mpt.mpt(101)}}}));
+            BEAST_EXPECT(
+                expectOffers(env, alice, 1, {{Amounts{XRP(100), MPT(101)}}}));
 
-            env(pay(carol, bob, mpt.mpt(101)),
+            env(pay(carol, bob, MPT(101)),
                 test::jtx::path(~MPT),
                 sendmax(XRP(100)),
                 txflags(tfPartialPayment));
@@ -1780,14 +1787,15 @@ class MPToken_test : public beast::unit_test::suite
             BEAST_EXPECT(mpt.checkMPTokenAmount(alice, 99));
             BEAST_EXPECT(mpt.checkMPTokenAmount(bob, 101));
         }
-        return;
+
         // MPT/IOU
         {
             Env env{*this, features};
 
             MPTTester mpt(env, gw, {.holders = {&alice, &carol, &bob}});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
             auto const MPT = mpt["MPT"];
 
             env(trust(alice, USD(2'000)));
@@ -1806,12 +1814,12 @@ class MPToken_test : public beast::unit_test::suite
 
             mpt.authorize({.account = &bob});
 
-            env(offer(alice, USD(100), mpt.mpt(101)));
+            env(offer(alice, USD(100), MPT(101)));
             env.close();
-            BEAST_EXPECT(expectOffers(
-                env, alice, 1, {{Amounts{USD(100), mpt.mpt(101)}}}));
+            BEAST_EXPECT(
+                expectOffers(env, alice, 1, {{Amounts{USD(100), MPT(101)}}}));
 
-            env(pay(carol, bob, mpt.mpt(101)),
+            env(pay(carol, bob, MPT(101)),
                 test::jtx::path(~MPT),
                 sendmax(USD(100)),
                 txflags(tfPartialPayment));
@@ -1830,7 +1838,9 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.holders = {&alice, &carol, &bob}});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
 
             env(trust(alice, USD(2'000)), txflags(tfClearNoRipple));
             env(pay(gw, alice, USD(1'000)));
@@ -1838,19 +1848,19 @@ class MPToken_test : public beast::unit_test::suite
             env.close();
 
             mpt.authorize({.account = &alice});
-            env(pay(gw, alice, mpt.mpt(200)));
+            env(pay(gw, alice, MPT(200)));
 
             mpt.authorize({.account = &carol});
-            env(pay(gw, carol, mpt.mpt(200)));
+            env(pay(gw, carol, MPT(200)));
 
-            env(offer(alice, mpt.mpt(101), USD(100)));
+            env(offer(alice, MPT(101), USD(100)));
             env.close();
-            BEAST_EXPECT(expectOffers(
-                env, alice, 1, {{Amounts{mpt.mpt(101), USD(100)}}}));
+            BEAST_EXPECT(
+                expectOffers(env, alice, 1, {{Amounts{MPT(101), USD(100)}}}));
 
             env(pay(carol, bob, USD(100)),
                 test::jtx::path(~USD),
-                sendmax(mpt.mpt(101)),
+                sendmax(MPT(101)),
                 txflags(tfPartialPayment | tfNoRippleDirect));
             env.close();
 
@@ -1867,12 +1877,15 @@ class MPToken_test : public beast::unit_test::suite
             Env env{*this, features};
 
             MPTTester mpt1(env, gw, {.holders = {&alice, &carol, &bob}});
-            mpt1.create({.ownerCount = 1, .holderCount = 0});
+            mpt1.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
             auto const MPT1 = mpt1["MPT1"];
 
             MPTTester mpt2(
                 env, gw, {.holders = {&alice, &carol, &bob}, .fund = false});
-            mpt2.create({.ownerCount = 2, .holderCount = 0});
+            mpt2.create(
+                {.ownerCount = 2, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT2 = mpt2["MPT2"];
 
             mpt1.authorize({.account = &alice});
             mpt1.pay(gw, alice, 200);
@@ -1883,14 +1896,14 @@ class MPToken_test : public beast::unit_test::suite
 
             mpt1.authorize({.account = &bob});
 
-            env(offer(alice, mpt2.mpt(100), mpt1.mpt(101)));
+            env(offer(alice, MPT2(100), MPT1(101)));
             env.close();
-            BEAST_EXPECT(expectOffers(
-                env, alice, 1, {{Amounts{mpt2.mpt(100), mpt1.mpt(101)}}}));
+            BEAST_EXPECT(
+                expectOffers(env, alice, 1, {{Amounts{MPT2(100), MPT1(101)}}}));
 
-            env(pay(carol, bob, mpt1.mpt(101)),
+            env(pay(carol, bob, MPT1(101)),
                 test::jtx::path(~MPT1),
-                sendmax(mpt2.mpt(100)),
+                sendmax(MPT2(100)),
                 txflags(tfPartialPayment));
             env.close();
 
@@ -1909,23 +1922,24 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.fund = false});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
             mpt.authorize({.account = &bob});
             mpt.pay(gw, alice, 10'100);
 
-            AMM amm(env, alice, XRP(10'000), mpt.mpt(10'100));
+            AMM amm(env, alice, XRP(10'000), MPT(10'100));
 
-            env(pay(carol, bob, mpt.mpt(100)),
+            env(pay(carol, bob, MPT(100)),
                 test::jtx::path(~MPT),
                 sendmax(XRP(100)),
                 txflags(tfPartialPayment | tfNoRippleDirect));
             env.close();
 
             BEAST_EXPECT(
-                amm.expectBalances(XRP(10'100), mpt.mpt(10'000), amm.tokens()));
+                amm.expectBalances(XRP(10'100), MPT(10'000), amm.tokens()));
             BEAST_EXPECT(mpt.checkMPTokenAmount(bob, 100));
         }
 
@@ -1937,23 +1951,24 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.fund = false});
 
-            mpt.create({.ownerCount = 1, .holderCount = 0});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
             mpt.authorize({.account = &bob});
             mpt.pay(gw, alice, 10'100);
 
-            AMM amm(env, alice, USD(10'000), mpt.mpt(10'100));
+            AMM amm(env, alice, USD(10'000), MPT(10'100));
 
-            env(pay(carol, bob, mpt.mpt(100)),
+            env(pay(carol, bob, MPT(100)),
                 test::jtx::path(~MPT),
                 sendmax(USD(100)),
                 txflags(tfPartialPayment | tfNoRippleDirect));
             env.close();
 
             BEAST_EXPECT(
-                amm.expectBalances(USD(10'100), mpt.mpt(10'000), amm.tokens()));
+                amm.expectBalances(USD(10'100), MPT(10'000), amm.tokens()));
             BEAST_EXPECT(mpt.checkMPTokenAmount(bob, 100));
         }
 
@@ -1964,30 +1979,31 @@ class MPToken_test : public beast::unit_test::suite
             env.close();
 
             MPTTester mpt1(env, gw, {.fund = false});
-            mpt1.create();
+            mpt1.create({.flags = tfMPTCanTransfer});
             auto const MPT1 = mpt1["MPT1"];
             mpt1.authorize({.account = &alice});
             mpt1.authorize({.account = &bob});
             mpt1.pay(gw, alice, 10'100);
 
             MPTTester mpt2(env, gw, {.fund = false});
-            mpt2.create();
+            mpt2.create({.flags = tfMPTCanTransfer});
+            auto const MPT2 = mpt2["MPT1"];
             mpt2.authorize({.account = &alice});
             mpt2.authorize({.account = &bob});
             mpt2.authorize({.account = &carol});
             mpt2.pay(gw, alice, 10'100);
             mpt2.pay(gw, carol, 100);
 
-            AMM amm(env, alice, mpt2.mpt(10'000), mpt1.mpt(10'100));
+            AMM amm(env, alice, MPT2(10'000), MPT1(10'100));
 
-            env(pay(carol, bob, mpt1.mpt(100)),
+            env(pay(carol, bob, MPT1(100)),
                 test::jtx::path(~MPT1),
-                sendmax(mpt2.mpt(100)),
+                sendmax(MPT2(100)),
                 txflags(tfPartialPayment | tfNoRippleDirect));
             env.close();
 
-            BEAST_EXPECT(amm.expectBalances(
-                mpt2.mpt(10'100), mpt1.mpt(10'000), amm.tokens()));
+            BEAST_EXPECT(
+                amm.expectBalances(MPT2(10'100), MPT1(10'000), amm.tokens()));
             BEAST_EXPECT(mpt1.checkMPTokenAmount(bob, 100));
         }
 
@@ -2009,7 +2025,7 @@ class MPToken_test : public beast::unit_test::suite
 
             auto createMPT = [&]() -> std::pair<MPTTester, MPT> {
                 MPTTester mpt(env, gw, {.fund = false});
-                mpt.create();
+                mpt.create({.flags = tfMPTCanTransfer});
                 mpt.authorize({.account = &alice});
                 mpt.pay(gw, alice, 2'000);
                 return {mpt, mpt["MPT"]};
@@ -2019,13 +2035,13 @@ class MPToken_test : public beast::unit_test::suite
             auto const [mpt2, MPT2] = createMPT();
             auto const [mpt3, MPT3] = createMPT();
 
-            env(offer(alice, EUR(100), mpt1.mpt(101)));
-            env(offer(alice, mpt1.mpt(101), mpt2.mpt(102)));
-            env(offer(alice, mpt2.mpt(102), USD(103)));
+            env(offer(alice, EUR(100), MPT1(101)));
+            env(offer(alice, MPT1(101), MPT2(102)));
+            env(offer(alice, MPT2(102), USD(103)));
             env(offer(alice, USD(103), CRN(104)));
             env.close();
-            AMM amm(env, alice, CRN(1'000), mpt3.mpt(1'104));
-            env(offer(alice, mpt3.mpt(104), YAN(100)));
+            AMM amm(env, alice, CRN(1'000), MPT3(1'104));
+            env(offer(alice, MPT3(104), YAN(100)));
 
             env(pay(carol, bob, YAN(100)),
                 test::jtx::path(~MPT1, ~MPT2, ~USD, ~CRN, ~MPT3, ~YAN),
@@ -2035,8 +2051,218 @@ class MPToken_test : public beast::unit_test::suite
 
             BEAST_EXPECT(env.balance(bob, YAN) == YAN(1'100));
             BEAST_EXPECT(
-                amm.expectBalances(CRN(1'104), mpt3.mpt(1'000), amm.tokens()));
+                amm.expectBalances(CRN(1'104), MPT3(1'000), amm.tokens()));
             BEAST_EXPECT(expectOffers(env, alice, 0));
+        }
+    }
+
+    void
+    testPath(FeatureBitset features)
+    {
+        testcase("Path");
+        using namespace test::jtx;
+        Account const gw{"gw"};
+        Account const gw1{"gw1"};
+        Account const alice{"alice"};
+        Account const carol{"carol"};
+        Account const bob{"bob"};
+        Account const dan{"dan"};
+        auto const USD = gw["USD"];
+        auto const EUR = gw1["EUR"];
+
+        // MPT can be a mpt end point step or a book-step
+
+        // Direct MPT payment
+        {
+            Env env = pathTestEnv(*this);
+
+            MPTTester mpt(env, gw, {.holders = {&dan, &carol}});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+            mpt.authorize({.account = &dan});
+            mpt.authorize({.account = &carol});
+            mpt.pay(gw, carol, 200);
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, MPT(-1));
+            BEAST_EXPECT(srcAmt == MPT(200));
+            BEAST_EXPECT(dstAmt == MPT(200));
+            // Direct payment, no path
+            BEAST_EXPECT(pathSet.empty());
+        }
+
+        // Cross-asset payment via XRP/MPT offer (one step)
+        {
+            Env env = pathTestEnv(*this);
+
+            env.fund(XRP(1'000), carol);
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &dan}});
+
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+
+            mpt.authorize({.account = &alice});
+            mpt.authorize({.account = &dan});
+            mpt.pay(gw, alice, 200);
+
+            env(offer(alice, XRP(100), MPT(100)));
+            env.close();
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, MPT(-1));
+            BEAST_EXPECT(srcAmt == XRP(100));
+            BEAST_EXPECT(dstAmt == MPT(100));
+            // This path is consistent with XRP/IOU.
+            BEAST_EXPECT(same(pathSet, stpath(IPE(mpt.issuanceID()))));
+        }
+
+        // Cross-asset payment via IOU/MPT offer (one step)
+        {
+            Env env = pathTestEnv(*this);
+
+            env.fund(XRP(1'000), carol);
+            env.fund(XRP(1'000), gw);
+
+            MPTTester mpt(env, gw1, {.holders = {&alice, &dan}});
+
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+
+            mpt.authorize({.account = &alice});
+            mpt.authorize({.account = &dan});
+            mpt.pay(gw1, alice, 200);
+
+            env(trust(alice, USD(400)));
+            env(trust(carol, USD(400)));
+            env(pay(gw, carol, USD(200)));
+
+            env(offer(alice, USD(100), MPT(100)));
+            env.close();
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, MPT(-1));
+            BEAST_EXPECT(srcAmt == USD(100));
+            BEAST_EXPECT(dstAmt == MPT(100));
+            // This path is consistent with IOU1/gw1 / IOU/gw
+            BEAST_EXPECT(same(pathSet, stpath(gw, IPE(mpt.issuanceID()))));
+        }
+
+        // Cross-asset payment via MPT1/MPT offer (one step)
+        {
+            Env env = pathTestEnv(*this);
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &dan}});
+            MPTTester mpt1(env, gw1, {.holders = {&carol}});
+
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+            mpt1.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT1 = mpt1["MPT1"];
+
+            mpt.authorize({.account = &alice});
+            mpt.authorize({.account = &dan});
+            mpt.pay(gw, alice, 200);
+
+            mpt1.authorize({.account = &carol});
+            mpt1.authorize({.account = &alice});
+            mpt1.pay(gw1, carol, 200);
+
+            env(offer(alice, MPT1(100), MPT(100)));
+            env.close();
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, MPT(-1));
+            BEAST_EXPECT(srcAmt == MPT1(100));
+            BEAST_EXPECT(dstAmt == MPT(100));
+            // This path is consistent with IOU1/gw / IOU/gw path -
+            // [gw1, IOU/gw], except for gw1. This is due to no MPT rippling
+            BEAST_EXPECT(same(pathSet, stpath(IPE(mpt.issuanceID()))));
+        }
+
+        // Cross-asset payment via offers (two steps)
+        {
+            Env env = pathTestEnv(*this);
+
+            env.fund(XRP(1'000), carol);
+            env.fund(XRP(1'000), dan);
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &bob}});
+
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+
+            mpt.authorize({.account = &alice});
+            mpt.authorize({.account = &bob});
+            mpt.pay(gw, alice, 200);
+            mpt.pay(gw, bob, 200);
+
+            env(trust(bob, USD(200)));
+            env(pay(gw, bob, USD(100)));
+            env(trust(dan, USD(200)));
+            env(trust(alice, USD(200)));
+
+            env(offer(alice, XRP(100), MPT(100)));
+            env(offer(bob, MPT(100), USD(100)));
+            env.close();
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, USD(-1));
+            BEAST_EXPECT(srcAmt == XRP(100));
+            BEAST_EXPECT(dstAmt == USD(100));
+            // This path is consistent with XRP/ IOU1/gw - IOU1/gw1 / IOU/gw
+            BEAST_EXPECT(
+                same(pathSet, stpath(IPE(mpt.issuanceID()), IPE(USD))));
+        }
+
+        // Cross-asset payment via offers (two steps)
+        // Start/End with mpt/mp1 and book steps in the middle
+        {
+            Env env = pathTestEnv(*this);
+            Account const gw2{"gw2"};
+            env.fund(XRP(1'000), gw2);
+            auto const USD2 = gw2["USD"];
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+            mpt.authorize({.account = &alice});
+            mpt.authorize({.account = &carol});
+            mpt.pay(gw, carol, 200);
+
+            MPTTester mpt1(env, gw1, {.holders = {&bob, &dan}});
+            mpt1.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT1 = mpt1["MPT1"];
+            mpt1.authorize({.account = &bob});
+            mpt1.pay(gw1, bob, 200);
+            mpt1.authorize({.account = &dan});
+
+            env(trust(alice, USD2(400)));
+            env(pay(gw2, alice, USD2(200)));
+            env(trust(bob, USD2(400)));
+
+            env(offer(alice, MPT(100), USD2(100)));
+            env(offer(bob, USD2(100), MPT1(100)));
+            env.close();
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, MPT1(-1));
+            BEAST_EXPECT(srcAmt == MPT(100));
+            BEAST_EXPECT(dstAmt == MPT1(100));
+            // This path is consistent with IOU/gw / IOU/gw2 -
+            // IOU/gw2 / IOU1/gw1 path -
+            // [gw, IOU2/gw2, IOU1/gw1], except for gw.
+            // This is due to no MPT rippling
+            BEAST_EXPECT(
+                same(pathSet, stpath(IPE(USD2), IPE(mpt1.issuanceID()))));
         }
     }
 
@@ -2081,6 +2307,9 @@ public:
 
         // Test cross asset payment
         testCrossAssetPayment(all);
+
+        // Test path finding
+        testPath(all);
     }
 };
 
