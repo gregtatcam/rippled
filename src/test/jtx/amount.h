@@ -154,11 +154,9 @@ operator<<(std::ostream& os, PrettyAmount const& amount);
 // Specifies an order book
 struct BookSpec
 {
-    AccountID account;
-    ripple::Currency currency;
+    ripple::Asset asset;
 
-    BookSpec(AccountID const& account_, ripple::Currency const& currency_)
-        : account(account_), currency(currency_)
+    BookSpec(ripple::Asset const& asset_) : asset(asset_)
     {
     }
 };
@@ -223,7 +221,7 @@ struct XRP_t
     friend BookSpec
     operator~(XRP_t const&)
     {
-        return BookSpec(xrpAccount(), xrpCurrency());
+        return BookSpec(Issue{xrpCurrency(), xrpAccount()});
     }
 };
 
@@ -350,7 +348,7 @@ public:
     friend BookSpec
     operator~(IOU const& iou)
     {
-        return BookSpec(iou.account.id(), iou.currency);
+        return BookSpec(Issue{iou.currency, iou.account.id()});
     }
 };
 
@@ -423,9 +421,7 @@ public:
     friend BookSpec
     operator~(MPT const& mpt)
     {
-        assert(false);
-        Throw<std::logic_error>("MPT is not supported");
-        return BookSpec{beast::zero, noCurrency()};
+        return BookSpec{Asset{mpt}};
     }
 };
 

@@ -88,8 +88,13 @@ void
 path::append_one(BookSpec const& book)
 {
     auto& jv = create();
-    jv["currency"] = to_string(book.currency);
-    jv["issuer"] = toBase58(book.account);
+    if (book.asset.holds<MPTIssue>())
+        jv["mpt_issuance_id"] = to_string(book.asset);
+    else
+    {
+        jv["currency"] = to_string(book.asset.get<Issue>().currency);
+        jv["issuer"] = toBase58(book.asset.getIssuer());
+    }
 }
 
 void
