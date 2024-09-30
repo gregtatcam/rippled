@@ -195,9 +195,9 @@ CashCheck::preclaim(PreclaimContext const& ctx)
         // An issuer can always accept their own currency.
         if (!value.native() && (value.getIssuer() != dstId))
         {
-            Currency const currency{value.get<Issue>().currency};
             if (value.holds<Issue>())
             {
+                Currency const currency{value.get<Issue>().currency};
                 auto const sleTrustLine =
                     ctx.view.read(keylet::line(dstId, issuerId, currency));
 

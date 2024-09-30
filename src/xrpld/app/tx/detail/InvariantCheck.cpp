@@ -1111,7 +1111,7 @@ ValidMPTIssuance::finalize(
                 mptokensCreated_ == 0 && mptokensDeleted_ == 0;
         }
 
-        if (tx.getTxnType() == ttAMM_CREATE)
+        if (tx.getTxnType() == ttAMM_CREATE || tx.getTxnType() == ttCHECK_CASH)
         {
             if (mptIssuancesDeleted_ > 0)
             {
@@ -1129,14 +1129,18 @@ ValidMPTIssuance::finalize(
                                    "succeeded while removing MPTokens";
             }
             // AMM can be created with IOU/MPT or MPT/MPT
-            else if (mptokensCreated_ > 2)
+            else if (
+                (tx.getTxnType() == ttAMM_CREATE && mptokensCreated_ > 2) ||
+                (tx.getTxnType() == ttCHECK_CASH && mptokensCreated_ > 1))
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
                                    "succeeded while creating MPTokens";
             }
 
             return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
-                mptokensCreated_ <= 2 && mptokensDeleted_ == 0;
+                ((tx.getTxnType() == ttAMM_CREATE && mptokensCreated_ <= 2) ||
+                 (tx.getTxnType() == ttCHECK_CASH && mptokensCreated_ <= 1)) &&
+                mptokensDeleted_ == 0;
         }
 
         if (tx.getTxnType() == ttAMM_DELETE ||

@@ -21,6 +21,7 @@
 #include <test/jtx/AMM.h>
 #include <test/jtx/AMMTest.h>
 #include <test/jtx/TestHelpers.h>
+#include <test/jtx/check.h>
 #include <test/jtx/trust.h>
 #include <test/jtx/xchain_bridge.h>
 #include <xrpl/protocol/Feature.h>
@@ -2266,6 +2267,116 @@ class MPToken_test : public beast::unit_test::suite
         }
     }
 
+    void
+    testCheck(FeatureBitset features)
+    {
+        testcase("Check Create/Cash");
+
+        using namespace test::jtx;
+        Account const gw{"gw"};
+        Account const alice{"alice"};
+
+        // MPTokensV2 is disabled
+        {
+            Env env{*this, features - featureMPTokensV2};
+
+            MPTTester mpt(env, gw, {.holders = {&alice}});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+            mpt.authorize({.account = &alice});
+
+            uint256 const checkId{keylet::check(gw, env.seq(gw)).key};
+
+            env(check::create(gw, alice, MPT(100)), ter(temDISABLED));
+            env.close();
+
+            env(check::cash(alice, checkId, MPT(100)), ter(temDISABLED));
+            env.close();
+        }
+
+        // Insufficient funds
+        {
+            Env env{*this, features};
+            Account const carol{"carol"};
+
+            MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+            mpt.authorize({.account = &alice});
+            mpt.pay(gw, alice, 50);
+
+            uint256 const checkId{keylet::check(alice, env.seq(alice)).key};
+
+            // can create
+            env(check::create(alice, carol, MPT(100)));
+            env.close();
+
+            // can't cash since alice only has 50 of MPT
+            env(check::cash(carol, checkId, MPT(100)), ter(tecPATH_PARTIAL));
+            env.close();
+
+            // can cash if DeliverMin is set
+            // carol is not authorized, MPToken is authorized by CheckCash
+            env(check::cash(carol, checkId, check::DeliverMin(MPT(50))));
+            env.close();
+            BEAST_EXPECT(mpt.checkMPTokenAmount(carol, 50));
+            BEAST_EXPECT(mpt.checkMPTokenOutstandingAmount(50));
+        }
+
+        // Exceed max amount
+        {
+            Env env{*this, features};
+
+            MPTTester mpt(env, gw, {.holders = {&alice}});
+            mpt.create(
+                {.maxAmt = "100",
+                 .ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+
+            uint256 const checkId{keylet::check(gw, env.seq(gw)).key};
+
+            // can create
+            env(check::create(gw, alice, MPT(200)));
+            env.close();
+
+            // can't cash since the outstanding amount exceeds max amount
+            env(check::cash(alice, checkId, MPT(200)), ter(tecPATH_PARTIAL));
+            env.close();
+
+            // can cash if DeliverMin is set
+            env(check::cash(alice, checkId, check::DeliverMin(MPT(100))));
+            env.close();
+            BEAST_EXPECT(mpt.checkMPTokenAmount(alice, 100));
+            BEAST_EXPECT(mpt.checkMPTokenOutstandingAmount(100));
+        }
+
+        // Normal create/cash
+        {
+            Env env{*this, features};
+
+            MPTTester mpt(env, gw, {.holders = {&alice}});
+            mpt.create(
+                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+            auto const MPT = mpt["MPT"];
+            mpt.authorize({.account = &alice});
+
+            uint256 const checkId{keylet::check(gw, env.seq(gw)).key};
+
+            env(check::create(gw, alice, MPT(100)));
+            env.close();
+
+            env(check::cash(alice, checkId, MPT(100)));
+            env.close();
+
+            BEAST_EXPECT(mpt.checkMPTokenAmount(alice, 100));
+            BEAST_EXPECT(mpt.checkMPTokenOutstandingAmount(100));
+        }
+    }
+
 public:
     void
     run() override
@@ -2310,6 +2421,9 @@ public:
 
         // Test path finding
         testPath(all);
+
+        // Test checks
+        testCheck(all);
     }
 };
 
