@@ -10,7 +10,7 @@ var searchData=
   ['handlehavetransactions_7',['handleHaveTransactions',['../classripple_1_1PeerImp.html#ad801c27f5645dba3e222ab722e515b6c',1,'ripple::PeerImp']]],
   ['handleheader_8',['handleHeader',['../classripple_1_1HTTPClientImp.html#ab85dbe08db67b66d08563f98573029de',1,'ripple::HTTPClientImp']]],
   ['handlemismatch_9',['handleMismatch',['../classripple_1_1LedgerHistory.html#a8a5ccffa6c8b9c83d07f608b37a20899',1,'ripple::LedgerHistory']]],
-  ['handlenewvalidation_10',['handleNewValidation',['../namespaceripple.html#a5be750120b2129bbf4ec4fccb592de4c',1,'ripple']]],
+  ['handlenewvalidation_10',['handleNewValidation',['../namespaceripple.html#a4ed72df944d1c38ec7309fd896b5fd55',1,'ripple']]],
   ['handler_11',['Handler',['../structripple_1_1test_1_1reduce__relay__test_1_1Handler.html#a37a59962f9d0e094307d5fb8b272438a',1,'ripple::test::reduce_relay_test::Handler']]],
   ['handlerequest_12',['handleRequest',['../classripple_1_1HTTPClientImp.html#a1b3364c288487264b7b136b14d2bc5a8',1,'ripple::HTTPClientImp']]],
   ['handleresolve_13',['handleResolve',['../classripple_1_1HTTPClientImp.html#a3d9cde42636ece6e84b4cc9a8e4b8875',1,'ripple::HTTPClientImp']]],

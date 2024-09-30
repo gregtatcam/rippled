@@ -89,12 +89,14 @@ Collaboration diagram for ripple::DatabaseCon:</div>
 <div class="dyncontent">
 <div class="center"><img src="classripple_1_1DatabaseCon__coll__graph.png" border="0" usemap="#aripple_1_1DatabaseCon_coll__map" alt="Collaboration graph"/></div>
 <map name="aripple_1_1DatabaseCon_coll__map" id="aripple_1_1DatabaseCon_coll__map">
-<area shape="rect" title=" " alt="" coords="800,63,955,88"/>
-<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/thread/recursive_mutex.html" title=" " alt="" coords="491,5,650,31"/>
-<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" title=" " alt="" coords="491,55,651,95"/>
-<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" title=" " alt="" coords="485,119,656,159"/>
+<area shape="rect" title=" " alt="" coords="829,85,984,111"/>
+<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/thread/recursive_mutex.html" title=" " alt="" coords="521,5,679,31"/>
+<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" title=" " alt="" coords="520,55,680,95"/>
+<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" title=" " alt="" coords="515,119,685,159"/>
 <area shape="rect" href="classripple_1_1Checkpointer.html" title=" " alt="" coords="261,127,415,152"/>
 <area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="5,119,212,159"/>
+<area shape="rect" href="classbeast_1_1Journal.html" title="A generic endpoint for log messages." alt="" coords="545,184,655,209"/>
+<area shape="rect" href="classbeast_1_1Journal_1_1Sink.html" title="Abstraction for the underlying message destination." alt="" coords="265,184,411,209"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -107,18 +109,18 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad8cee3cf5e6e6d2554e17d1749ae1652"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
-<tr class="memitem:ad8cee3cf5e6e6d2554e17d1749ae1652"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#ad8cee3cf5e6e6d2554e17d1749ae1652">DatabaseCon</a> (<a class="el" href="structripple_1_1DatabaseCon_1_1Setup.html">Setup</a> const &amp;setup, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL)</td></tr>
-<tr class="separator:ad8cee3cf5e6e6d2554e17d1749ae1652"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44fd8073fe4b229579e4a2a1adff9e0f"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
-<tr class="memitem:a44fd8073fe4b229579e4a2a1adff9e0f"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a44fd8073fe4b229579e4a2a1adff9e0f">DatabaseCon</a> (<a class="el" href="structripple_1_1DatabaseCon_1_1Setup.html">Setup</a> const &amp;setup, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL, <a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">CheckpointerSetup</a> const &amp;checkpointerSetup)</td></tr>
-<tr class="separator:a44fd8073fe4b229579e4a2a1adff9e0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a093ee95b5f758b255bb9125e1760bf17"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
-<tr class="memitem:a093ee95b5f758b255bb9125e1760bf17"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a093ee95b5f758b255bb9125e1760bf17">DatabaseCon</a> (boost::filesystem::path const &amp;dataDir, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL)</td></tr>
-<tr class="separator:a093ee95b5f758b255bb9125e1760bf17"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ded51bb935e69101a80ed5fb640b749"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
-<tr class="memitem:a6ded51bb935e69101a80ed5fb640b749"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a6ded51bb935e69101a80ed5fb640b749">DatabaseCon</a> (boost::filesystem::path const &amp;dataDir, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL, <a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">CheckpointerSetup</a> const &amp;checkpointerSetup)</td></tr>
-<tr class="separator:a6ded51bb935e69101a80ed5fb640b749"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a919c8e53c413ea84d63b98b9023bbcd5"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
+<tr class="memitem:a919c8e53c413ea84d63b98b9023bbcd5"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a919c8e53c413ea84d63b98b9023bbcd5">DatabaseCon</a> (<a class="el" href="structripple_1_1DatabaseCon_1_1Setup.html">Setup</a> const &amp;setup, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</td></tr>
+<tr class="separator:a919c8e53c413ea84d63b98b9023bbcd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72eff6441ba465554f9249db716c5b05"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
+<tr class="memitem:a72eff6441ba465554f9249db716c5b05"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a72eff6441ba465554f9249db716c5b05">DatabaseCon</a> (<a class="el" href="structripple_1_1DatabaseCon_1_1Setup.html">Setup</a> const &amp;setup, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL, <a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">CheckpointerSetup</a> const &amp;checkpointerSetup, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</td></tr>
+<tr class="separator:a72eff6441ba465554f9249db716c5b05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afabcd2070e5b3d3b778e8cf543d80af2"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
+<tr class="memitem:afabcd2070e5b3d3b778e8cf543d80af2"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#afabcd2070e5b3d3b778e8cf543d80af2">DatabaseCon</a> (boost::filesystem::path const &amp;dataDir, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</td></tr>
+<tr class="separator:afabcd2070e5b3d3b778e8cf543d80af2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fa188d261fbfb3fff99453babc500cc"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
+<tr class="memitem:a3fa188d261fbfb3fff99453babc500cc"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a3fa188d261fbfb3fff99453babc500cc">DatabaseCon</a> (boost::filesystem::path const &amp;dataDir, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;dbName, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL, <a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">CheckpointerSetup</a> const &amp;checkpointerSetup, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</td></tr>
+<tr class="separator:a3fa188d261fbfb3fff99453babc500cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a784d46c18b89d5b6a75806ff452f37ef"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a784d46c18b89d5b6a75806ff452f37ef">~DatabaseCon</a> ()</td></tr>
 <tr class="separator:a784d46c18b89d5b6a75806ff452f37ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af95a62803d72bbcc3b53e3de678dd7bd"><td class="memItemLeft" align="right" valign="top">soci::session &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#af95a62803d72bbcc3b53e3de678dd7bd">getSession</a> ()</td></tr>
@@ -130,9 +132,9 @@ Public Member Functions</h2></td></tr>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:a041741f7c254fa37958c92c087a20718"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a041741f7c254fa37958c92c087a20718">setupCheckpointing</a> (<a class="el" href="classripple_1_1JobQueue.html">JobQueue</a> *, <a class="el" href="classripple_1_1Logs.html">Logs</a> &amp;)</td></tr>
 <tr class="separator:a041741f7c254fa37958c92c087a20718"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d08c4551ef3aaf71f9d48ef92d8f9db"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
-<tr class="memitem:a4d08c4551ef3aaf71f9d48ef92d8f9db"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a4d08c4551ef3aaf71f9d48ef92d8f9db">DatabaseCon</a> (boost::filesystem::path const &amp;pPath, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt; const *commonPragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL)</td></tr>
-<tr class="separator:a4d08c4551ef3aaf71f9d48ef92d8f9db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace11a1bd2fd5d29b5339af6d2def3f96"><td class="memTemplParams" colspan="2">template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> N, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> M&gt; </td></tr>
+<tr class="memitem:ace11a1bd2fd5d29b5339af6d2def3f96"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#ace11a1bd2fd5d29b5339af6d2def3f96">DatabaseCon</a> (boost::filesystem::path const &amp;pPath, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt; const *commonPragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;pragma, <a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;initSQL, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</td></tr>
+<tr class="separator:ace11a1bd2fd5d29b5339af6d2def3f96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -142,13 +144,15 @@ Private Attributes</h2></td></tr>
 <tr class="separator:abd4593b4e99431101e953a95b82a0527"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0b7c9ad5a89e29fe9469fbc56c6c2ca"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1Checkpointer.html">Checkpointer</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#ad0b7c9ad5a89e29fe9469fbc56c6c2ca">checkpointer_</a></td></tr>
 <tr class="separator:ad0b7c9ad5a89e29fe9469fbc56c6c2ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a061d6366245e91cb59eebe8853602fd8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1DatabaseCon.html#a061d6366245e91cb59eebe8853602fd8">j_</a></td></tr>
+<tr class="separator:a061d6366245e91cb59eebe8853602fd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00081">81</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00082">82</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ad8cee3cf5e6e6d2554e17d1749ae1652" name="ad8cee3cf5e6e6d2554e17d1749ae1652"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad8cee3cf5e6e6d2554e17d1749ae1652">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[1/5]</span></h2>
+<a id="a919c8e53c413ea84d63b98b9023bbcd5" name="a919c8e53c413ea84d63b98b9023bbcd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a919c8e53c413ea84d63b98b9023bbcd5">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[1/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -170,14 +174,20 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;&#160;</td>
           <td class="paramname"><em>pragma</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>initSQL</em>&#160;</td>
+          <td class="paramname"><em>initSQL</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
+          <td class="paramname"><em>journal</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -187,12 +197,12 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00113">113</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00116">116</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
-<a id="a44fd8073fe4b229579e4a2a1adff9e0f" name="a44fd8073fe4b229579e4a2a1adff9e0f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a44fd8073fe4b229579e4a2a1adff9e0f">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[2/5]</span></h2>
+<a id="a72eff6441ba465554f9249db716c5b05" name="a72eff6441ba465554f9249db716c5b05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72eff6441ba465554f9249db716c5b05">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[2/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -214,7 +224,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;&#160;</td>
           <td class="paramname"><em>pragma</em>, </td>
         </tr>
         <tr>
@@ -227,7 +237,13 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">CheckpointerSetup</a> const &amp;&#160;</td>
-          <td class="paramname"><em>checkpointerSetup</em>&#160;</td>
+          <td class="paramname"><em>checkpointerSetup</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
+          <td class="paramname"><em>journal</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -237,12 +253,12 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00133">133</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00138">138</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
-<a id="a093ee95b5f758b255bb9125e1760bf17" name="a093ee95b5f758b255bb9125e1760bf17"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a093ee95b5f758b255bb9125e1760bf17">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[3/5]</span></h2>
+<a id="afabcd2070e5b3d3b778e8cf543d80af2" name="afabcd2070e5b3d3b778e8cf543d80af2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afabcd2070e5b3d3b778e8cf543d80af2">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[3/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -264,14 +280,20 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;&#160;</td>
           <td class="paramname"><em>pragma</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>initSQL</em>&#160;</td>
+          <td class="paramname"><em>initSQL</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
+          <td class="paramname"><em>journal</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -281,12 +303,12 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00145">145</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00151">151</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
-<a id="a6ded51bb935e69101a80ed5fb640b749" name="a6ded51bb935e69101a80ed5fb640b749"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6ded51bb935e69101a80ed5fb640b749">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[4/5]</span></h2>
+<a id="a3fa188d261fbfb3fff99453babc500cc" name="a3fa188d261fbfb3fff99453babc500cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fa188d261fbfb3fff99453babc500cc">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[4/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -308,7 +330,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;&#160;</td>
           <td class="paramname"><em>pragma</em>, </td>
         </tr>
         <tr>
@@ -321,7 +343,13 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="structripple_1_1DatabaseCon_1_1CheckpointerSetup.html">CheckpointerSetup</a> const &amp;&#160;</td>
-          <td class="paramname"><em>checkpointerSetup</em>&#160;</td>
+          <td class="paramname"><em>checkpointerSetup</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
+          <td class="paramname"><em>journal</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -331,7 +359,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00156">156</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00163">163</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
@@ -354,8 +382,8 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
 
 </div>
 </div>
-<a id="a4d08c4551ef3aaf71f9d48ef92d8f9db" name="a4d08c4551ef3aaf71f9d48ef92d8f9db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d08c4551ef3aaf71f9d48ef92d8f9db">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[5/5]</span></h2>
+<a id="ace11a1bd2fd5d29b5339af6d2def3f96" name="ace11a1bd2fd5d29b5339af6d2def3f96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace11a1bd2fd5d29b5339af6d2def3f96">&#9670;&#160;</a></span>DatabaseCon() <span class="overload">[5/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -380,14 +408,20 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, N &gt; const &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, N &gt; const &amp;&#160;</td>
           <td class="paramname"><em>pragma</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; char const *, M &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>initSQL</em>&#160;</td>
+          <td class="paramname"><em>initSQL</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
+          <td class="paramname"><em>journal</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -402,7 +436,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00186">186</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00201">201</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
@@ -422,7 +456,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00170">170</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00178">178</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
@@ -441,7 +475,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00176">176</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00184">184</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
@@ -479,7 +513,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8cpp_source.html#l00247">247</a> of file <a class="el" href="DatabaseCon_8cpp_source.html">DatabaseCon.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8cpp_source.html#l00277">277</a> of file <a class="el" href="DatabaseCon_8cpp_source.html">DatabaseCon.cpp</a>.</p>
 
 </div>
 </div>
@@ -504,7 +538,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00215">215</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00233">233</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
@@ -528,7 +562,7 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00223">223</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00241">241</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>
@@ -552,7 +586,31 @@ template&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00224">224</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00242">242</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
+
+</div>
+</div>
+<a id="a061d6366245e91cb59eebe8853602fd8" name="a061d6366245e91cb59eebe8853602fd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a061d6366245e91cb59eebe8853602fd8">&#9670;&#160;</a></span>j_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const ripple::DatabaseCon::j_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="DatabaseCon_8h_source.html#l00244">244</a> of file <a class="el" href="DatabaseCon_8h_source.html">DatabaseCon.h</a>.</p>
 
 </div>
 </div>

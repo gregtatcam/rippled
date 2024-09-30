@@ -89,15 +89,24 @@ V1 account_info response</h3>
 <h3><a class="anchor" id="autotoc_md4"></a>
 server_info - network_id</h3>
 <p >The <code>network_id</code> field was added in the <code>server_info</code> response in version 1.5.0 (2019), but it is not returned in <a href="https://xrpl.org/rippled-server-modes.html#reporting-mode">reporting mode</a>.</p>
-<h1><a class="anchor" id="autotoc_md5"></a>
-XRP Ledger server version 2.0.0</h1>
+<h2><a class="anchor" id="autotoc_md5"></a>
+Breaking change in 2.3</h2>
+<ul>
+<li><code>book_changes</code>: If the requested ledger version is not available on this node, a <code>ledgerNotFound</code> error is returned and the node does not attempt to acquire the ledger from the p2p network (as with other non-admin RPCs).</li>
+</ul>
+<p >Admins can still attempt to retrieve old ledgers with the <code>ledger_request</code> RPC.</p>
 <h2><a class="anchor" id="autotoc_md6"></a>
+Addition in 2.3</h2>
+<ul>
+<li><code>book_changes</code>: Returns a <code>validated</code> field in its response, which was missing in prior versions.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md7"></a>
 Additions in 2.2</h2>
 <p >Additions are intended to be non-breaking (because they are purely additive).</p>
 <ul>
 <li><code>feature</code>: A non-admin mode that uses the same formatting as admin RPC, but hides potentially-sensitive data.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md8"></a>
 Additions in 2.0</h2>
 <p >Additions are intended to be non-breaking (because they are purely additive).</p>
 <ul>
@@ -105,10 +114,10 @@ Additions in 2.0</h2>
 <li>In <code>Payment</code> transactions, <code>DeliverMax</code> has been added. This is a replacement for the <code>Amount</code> field, which should not be used. Typically, the <code>delivered_amount</code> (in transaction metadata) should be used. To ease the transition, <code>DeliverMax</code> is present regardless of API version, since adding a field is non-breaking.</li>
 <li>API version 2 has been moved from beta to supported, meaning that it is generally available (regardless of the <code>beta_rpc_api</code> setting).</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md8"></a>
+<h1><a class="anchor" id="autotoc_md9"></a>
 XRP Ledger server version 1.12.0</h1>
 <p ><a href="https://github.com/XRPLF/rippled/releases/tag/1.12.0">Version 1.12.0</a> was released on Sep 6, 2023.</p>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md10"></a>
 Additions in 1.12</h2>
 <p >Additions are intended to be non-breaking (because they are purely additive).</p>
 <ul>
@@ -156,10 +165,10 @@ Additions in 1.12</h2>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md10"></a>
+<h1><a class="anchor" id="autotoc_md11"></a>
 XRP Ledger server version 1.11.0</h1>
 <p ><a href="https://github.com/XRPLF/rippled/releases/tag/1.11.0">Version 1.11.0</a> was released on Jun 20, 2023.</p>
-<h2><a class="anchor" id="autotoc_md11"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 Breaking changes in 1.11</h2>
 <ul>
 <li>Added the ability to mark amendments as obsolete. For the <code>feature</code> admin API, there is a new possible value for the <code>vetoed</code> field. (<a href="https://github.com/XRPLF/rippled/pull/4291">https://github.com/XRPLF/rippled/pull/4291</a>)<ul>
@@ -191,7 +200,7 @@ Breaking changes in 1.11</h2>
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 Additions and bug fixes in 1.11</h2>
 <ul>
 <li>Added <code>nftoken_id</code>, <code>nftoken_ids</code> and <code>offer_id</code> meta fields into NFT <code>tx</code> and <code>account_tx</code> responses. (<a href="https://github.com/XRPLF/rippled/pull/4447">https://github.com/XRPLF/rippled/pull/4447</a>)</li>
@@ -199,25 +208,25 @@ Additions and bug fixes in 1.11</h2>
 <li>Added <code>NFTokenPages</code> to the <code>account_objects</code> RPC. (<a href="https://github.com/XRPLF/rippled/pull/4352">https://github.com/XRPLF/rippled/pull/4352</a>)</li>
 <li>Fixed: <code>marker</code> returned from the <code>account_lines</code> command would not work on subsequent commands. (<a href="https://github.com/XRPLF/rippled/pull/4361">https://github.com/XRPLF/rippled/pull/4361</a>)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md13"></a>
+<h1><a class="anchor" id="autotoc_md14"></a>
 XRP Ledger server version 1.10.0</h1>
 <p ><a href="https://github.com/XRPLF/rippled/releases/tag/1.10.0">Version 1.10.0</a> was released on Mar 14, 2023.</p>
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 Breaking changes in 1.10</h2>
 <ul>
 <li>If the <code>XRPFees</code> feature is enabled, the <code>fee_ref</code> field will be removed from the <a href="https://xrpl.org/subscribe.html#ledger-stream">ledger subscription stream</a>, because it will no longer have any meaning.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md15"></a>
+<h1><a class="anchor" id="autotoc_md16"></a>
 API Version 2</h1>
 <p >API version 2 is introduced in <code>rippled</code> version 2.0. Users can request it explicitly by specifying <code>"api_version" : 2</code>.</p>
-<h3><a class="anchor" id="autotoc_md16"></a>
+<h3><a class="anchor" id="autotoc_md17"></a>
 Removed methods</h3>
 <p >In API version 2, the following deprecated methods are no longer available: (<a href="https://github.com/XRPLF/rippled/pull/4759">https://github.com/XRPLF/rippled/pull/4759</a>)</p>
 <ul>
 <li><code>tx_history</code> - Instead, use other methods such as <code>account_tx</code> or <code>ledger</code> with the <code>transactions</code> field set to <code>true</code>.</li>
 <li><code>ledger_header</code> - Instead, use the <code>ledger</code> method.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md17"></a>
+<h3><a class="anchor" id="autotoc_md18"></a>
 Modifications to JSON transaction element in V2</h3>
 <p >In API version 2, JSON elements for transaction output have been changed and made consistent for all methods which output transactions. (<a href="https://github.com/XRPLF/rippled/pull/4775">https://github.com/XRPLF/rippled/pull/4775</a>) This helps to unify the JSON serialization format of transactions. (<a href="https://github.com/XRPLF/clio/issues/722">https://github.com/XRPLF/clio/issues/722</a>, <a href="https://github.com/XRPLF/rippled/issues/4727">https://github.com/XRPLF/rippled/issues/4727</a>)</p>
 <ul>
@@ -242,7 +251,7 @@ Modifications to JSON transaction element in V2</h3>
 <li><code>subscribe</code> - Renamed transaction element from <code>transaction</code> to <code>tx_json</code>. Changed location of <code>hash</code> and added new elements</li>
 <li><code>sign</code>, <code>sign_for</code>, <code>submit</code> and <code>submit_multisigned</code> - Changed location of <code>hash</code> element.</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md18"></a>
+<h3><a class="anchor" id="autotoc_md19"></a>
 Modification to &lt;tt&gt;Payment&lt;/tt&gt; transaction JSON schema</h3>
 <p >When reading Payments, the <code>Amount</code> field should generally <b>not</b> be used. Instead, use <a href="https://xrpl.org/partial-payments.html#the-delivered_amount-field">delivered_amount</a> to see the amount that the Payment delivered. To clarify its meaning, the <code>Amount</code> field is being renamed to <code>DeliverMax</code>. (<a href="https://github.com/XRPLF/rippled/pull/4733">https://github.com/XRPLF/rippled/pull/4733</a>)</p>
 <ul>
@@ -254,7 +263,7 @@ Modification to &lt;tt&gt;Payment&lt;/tt&gt; transaction JSON schema</h3>
 </ul>
 </li>
 </ul>
-<h3><a class="anchor" id="autotoc_md19"></a>
+<h3><a class="anchor" id="autotoc_md20"></a>
 Modifications to account_info response</h3>
 <ul>
 <li><code>signer_lists</code> is returned in the root of the response. In API version 1, it was nested under <code>account_data</code>. (<a href="https://github.com/XRPLF/rippled/pull/3770">https://github.com/XRPLF/rippled/pull/3770</a>)</li>
@@ -263,7 +272,7 @@ Modifications to account_info response</h3>
 </ul>
 </li>
 </ul>
-<h3><a class="anchor" id="autotoc_md20"></a>
+<h3><a class="anchor" id="autotoc_md21"></a>
 Modifications to &lt;a href="https://xrpl.org/account_tx.html#account_tx" &gt;account_tx&lt;/a&gt; response</h3>
 <ul>
 <li>Using <code>ledger_index_min</code>, <code>ledger_index_max</code>, and <code>ledger_index</code> returns <code>invalidParams</code> because if you use <code>ledger_index_min</code> or <code>ledger_index_max</code>, then it does not make sense to also specify <code>ledger_index</code>. In API version 1, no error was returned. (<a href="https://github.com/XRPLF/rippled/pull/4571">https://github.com/XRPLF/rippled/pull/4571</a>)<ul>
@@ -276,12 +285,12 @@ Modifications to &lt;a href="https://xrpl.org/account_tx.html#account_tx" &gt;ac
 </li>
 <li>Attempting to use a non-boolean value (such as a string) for the <code>binary</code> or <code>forward</code> parameters returns <code>invalidParams</code> (<code>rpcINVALID_PARAMS</code>). Previously, in API version 1, no error was returned. (<a href="https://github.com/XRPLF/rippled/pull/4620">https://github.com/XRPLF/rippled/pull/4620</a>)</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md21"></a>
+<h3><a class="anchor" id="autotoc_md22"></a>
 Modifications to &lt;a href="https://xrpl.org/noripple_check.html#noripple_check" &gt;noripple_check&lt;/a&gt; response</h3>
 <ul>
 <li>Attempting to use a non-boolean value (such as a string) for the <code>transactions</code> parameter returns <code>invalidParams</code> (<code>rpcINVALID_PARAMS</code>). Previously, in API version 1, no error was returned. (<a href="https://github.com/XRPLF/rippled/pull/4620">https://github.com/XRPLF/rippled/pull/4620</a>)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md22"></a>
+<h1><a class="anchor" id="autotoc_md23"></a>
 Unit tests for API changes</h1>
 <p >The following information is useful to developers contributing to this project:</p>
 <p >The purpose of unit tests is to catch bugs and prevent regressions. In general, it often makes sense to create a test function when there is a breaking change to the API. For APIs that have changed in a new API version, the tests should be modified so that both the prior version and the new version are properly tested.</p>
