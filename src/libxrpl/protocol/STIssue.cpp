@@ -92,7 +92,8 @@ STIssue::getText() const
     return asset_.getText();
 }
 
-Json::Value STIssue::getJson(JsonOptions) const
+Json::Value
+STIssue::getJson(JsonOptions) const
 {
     Json::Value jv;
     asset_.setJson(jv);
