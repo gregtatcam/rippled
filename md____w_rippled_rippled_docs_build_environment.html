@@ -77,7 +77,7 @@ $(function() {
 Linux</h2>
 <p >Package ecosystems vary across Linux distributions, so there is no one set of instructions that will work for every Linux user. These instructions are written for Ubuntu 22.04. They are largely copied from the <a href="https://github.com/thejohnfreeman/rippled-docker/blob/master/ubuntu-22.04/install.sh">script</a> used to configure our Docker container for continuous integration. That script handles many more responsibilities. These instructions are just the bare minimum to build one configuration of rippled. You can check that codebase for other Linux distributions and versions. If you cannot find yours there, then we hope that these instructions can at least guide you in the right direction.</p>
 <div class="fragment"><div class="line">apt update</div>
-<div class="line">apt install --yes curl git libssl-dev python3.10-dev python3-pip make g++-11</div>
+<div class="line">apt install --yes curl git libssl-dev python3.10-dev python3-pip make g++-11 libprotobuf-dev protobuf-compiler</div>
 <div class="line"> </div>
 <div class="line">curl --location --remote-name \</div>
 <div class="line">  &quot;https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1.tar.gz&quot;</div>
