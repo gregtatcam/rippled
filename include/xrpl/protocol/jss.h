@@ -78,8 +78,6 @@ JSS(LastLedgerSequence);   // in: TransactionSign; field
 JSS(LastUpdateTime);       // field.
 JSS(LedgerHashes);         // ledger type.
 JSS(LimitAmount);          // field.
-JSS(BidMax);               // in: AMM Bid
-JSS(BidMin);               // in: AMM Bid
 JSS(MPToken);              // ledger type.
 JSS(MPTokenIssuance);      // ledger type.
 JSS(NetworkID);            // field.

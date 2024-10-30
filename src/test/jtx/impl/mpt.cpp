@@ -136,7 +136,6 @@ Account const&
 MPTTester::holder(std::string const& holder_) const
 {
     auto const& it = holders_.find(holder_);
-    assert(it != holders_.cend());
     if (it == holders_.cend())
         Throw<std::runtime_error>("Holder is not found");
     return it->second;

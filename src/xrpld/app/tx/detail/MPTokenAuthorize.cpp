@@ -262,7 +262,6 @@ MPTokenAuthorize::doApply()
          .account = account_,
          .flags = tx.getFlags(),
          .holderID = tx[~sfHolder]});
-         .holderID = tx[~sfMPTokenHolder]});
 }
 
 }  // namespace ripple

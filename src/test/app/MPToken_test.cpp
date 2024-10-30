@@ -671,7 +671,6 @@ class MPToken_test : public beast::unit_test::suite
 
             Json::Value jv;
             jv[jss::secret] = alice.name();
-            jv[jss::tx_json][jss::Fee] = to_string(env.current()->fees().base);
             jv[jss::tx_json] = pay(alice, carol, mpt);
             jv[jss::tx_json][jss::Fee] = to_string(env.current()->fees().base);
             auto const jrr = env.rpc("json", "submit", to_string(jv));
@@ -1409,7 +1408,6 @@ class MPToken_test : public beast::unit_test::suite
                 jv[jss::Flags] = tfSingleAsset;
                 test(jv, field.fieldName);
             };
-            ammDeposit(sfAmount);
             for (SField const& field :
                  {std::ref(sfAmount),
                   std::ref(sfAmount2),
