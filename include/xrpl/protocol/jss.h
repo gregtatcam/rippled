@@ -58,6 +58,8 @@ JSS(AssetPrice);           // in: Oracle
 JSS(AuthAccount);          // in: AMM Auction Slot
 JSS(AuthAccounts);         // in: AMM Auction Slot
 JSS(BaseAsset);            // in: Oracle
+JSS(BidMax);               // in: AMM Bid
+JSS(BidMin);               // in: AMM Bid
 JSS(Bridge);               // ledger type.
 JSS(Check);                // ledger type.
 JSS(ClearFlag);            // field.

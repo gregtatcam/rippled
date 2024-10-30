@@ -39,8 +39,8 @@ concept AssetType =
 
 /* Asset is an abstraction of three different issue types: XRP, IOU, MPT.
  * For historical reasons, two issue types XRP and IOU are wrapped in Issue
- * type. Asset replaces Issue where any issue type is expected. For instance,
- * STAmount replaces Issue with Asset to represent any issue amount.
+ * type. Many functions and classes there were first written for Issue
+ * have been rewritten for Asset.
  */
 class Asset
 {
@@ -193,6 +193,9 @@ to_string(Asset const& asset);
 
 bool
 validJSONAsset(Json::Value const& jv);
+
+Asset
+assetFromJson(Json::Value const& jv);
 
 }  // namespace ripple
 

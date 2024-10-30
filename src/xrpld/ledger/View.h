@@ -89,6 +89,9 @@ isGlobalFrozen(ReadView const& view, AccountID const& issuer);
 isGlobalFrozen(ReadView const& view, MPTIssue const& mptIssue);
 
 [[nodiscard]] bool
+isGlobalFrozen(ReadView const& view, Asset const& asset);
+
+[[nodiscard]] bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
@@ -104,11 +107,24 @@ isIndividualFrozen(
     return isIndividualFrozen(view, account, issue.currency, issue.account);
 }
 
-[[nodiscard]] inline bool
+[[nodiscard]] bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
     MPTIssue const& mptIssue);
+
+[[nodiscard]] inline bool
+isIndividualFrozen(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& asset)
+{
+    return std::visit(
+        [&](auto const& issue) {
+            return isIndividualFrozen(view, account, issue);
+        },
+        asset.value());
+}
 
 [[nodiscard]] bool
 isFrozen(
@@ -129,6 +145,14 @@ isFrozen(
     AccountID const& account,
     MPTIssue const& mptIssue);
 
+[[nodiscard]] inline bool
+isFrozen(ReadView const& view, AccountID const& account, Asset const& asset)
+{
+    return std::visit(
+        [&](auto const& issue) { return isFrozen(view, account, issue); },
+        asset.value());
+}
+
 // Returns the amount an account can spend without going into debt.
 //
 // <-- saAmount: amount of currency held by account. May be negative.
@@ -147,6 +171,15 @@ accountHolds(
     AccountID const& account,
     Issue const& issue,
     FreezeHandling zeroIfFrozen,
+    beast::Journal j);
+
+[[nodiscard]] STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    MPTIssue const& mptIssue,
+    FreezeHandling zeroIfFrozen,
+    AuthHandling zeroIfUnauthorized,
     beast::Journal j);
 
 [[nodiscard]] STAmount
@@ -234,9 +267,19 @@ forEachItemAfter(
     return forEachItemAfter(view, keylet::ownerDir(id), after, hint, limit, f);
 }
 
+/** Returns IOU issuer transfer fee as Rate. Rate specifies
+ * the fee as fractions of 1 billion. For example, 1% transfer rate
+ * is represented as 1,010,000,000.
+ * @param issuer The IOU issuer
+ */
 [[nodiscard]] Rate
 transferRate(ReadView const& view, AccountID const& issuer);
 
+/** Returns MPT transfer fee as Rate. Rate specifies
+ * the fee as fractions of 1 billion. For example, 1% transfer rate
+ * is represented as 1,010,000,000.
+ * @param issuanceID MPTokenIssuanceID of MPTTokenIssuance object
+ */
 [[nodiscard]] Rate
 transferRate(ReadView const& view, MPTID const& issuanceID);
 
@@ -441,6 +484,10 @@ offerDelete(ApplyView& view, std::shared_ptr<SLE> const& sle, beast::Journal j);
 // - Create trust line of needed.
 // --> bCheckIssuer : normally require issuer to be involved.
 // [[nodiscard]] // nodiscard commented out so DirectStep.cpp compiles.
+
+/** Calls static rippleCreditIOU if saAmount represents Issue.
+ * Calls static rippleCreditMPT if saAmount represents MPTIssue.
+ */
 TER
 rippleCredit(
     ApplyView& view,
@@ -450,25 +497,11 @@ rippleCredit(
     bool bCheckIssuer,
     beast::Journal j);
 
-[[nodiscard]] TER
-rippleCreditMPT(
-    ApplyView& view,
-    AccountID const& uSenderID,
-    AccountID const& uReceiverID,
-    STAmount const& saAmount,
-    beast::Journal j);
-
+/** Calls static accountSendIOU if saAmount represents Issue.
+ * Calls static accountSendMPT if saAmount represents MPTIssue.
+ */
 [[nodiscard]] TER
 accountSend(
-    ApplyView& view,
-    AccountID const& from,
-    AccountID const& to,
-    STAmount const& saAmount,
-    beast::Journal j,
-    WaiveTransferFee waiveFee = WaiveTransferFee::No);
-
-[[nodiscard]] TER
-accountSendMPT(
     ApplyView& view,
     AccountID const& from,
     AccountID const& to,
@@ -500,7 +533,7 @@ transferXRP(
     STAmount const& amount,
     beast::Journal j);
 
-/** Check if the account requires authorization.
+/** Check if the account lacks required authorization.
  *   Return tecNO_AUTH or tecNO_LINE if it does
  *   and tesSUCCESS otherwise.
  */

@@ -34,6 +34,11 @@
 
 namespace ripple {
 
+template <typename A>
+concept AssetType =
+    std::is_same_v<A, Asset> || std::is_convertible_v<A, Issue> ||
+    std::is_convertible_v<A, MPTIssue> || std::is_convertible_v<A, MPTID>;
+
 // Internal form:
 // 1: If amount is zero, then value is zero and offset is -100
 // 2: Otherwise:

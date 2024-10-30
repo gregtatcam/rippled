@@ -186,6 +186,19 @@ isGlobalFrozen(ReadView const& view, MPTIssue const& mptIssue)
 }
 
 bool
+isGlobalFrozen(ReadView const& view, Asset const& asset)
+{
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return isGlobalFrozen(view, issue.getIssuer());
+            else
+                return isGlobalFrozen(view, issue);
+        },
+        asset.value());
+}
+
+bool
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
@@ -202,6 +215,18 @@ isIndividualFrozen(
             sle->isFlag((issuer > account) ? lsfHighFreeze : lsfLowFreeze))
             return true;
     }
+    return false;
+}
+
+bool
+isIndividualFrozen(
+    ReadView const& view,
+    AccountID const& account,
+    MPTIssue const& mptIssue)
+{
+    if (auto const sle =
+            view.read(keylet::mptoken(mptIssue.getMptID(), account)))
+        return sle->getFlags() & lsfMPTLocked;
     return false;
 }
 
@@ -559,6 +584,19 @@ transferRate(ReadView const& view, AccountID const& issuer)
 
     if (sle && sle->isFieldPresent(sfTransferRate))
         return Rate{sle->getFieldU32(sfTransferRate)};
+
+    return parityRate;
+}
+
+Rate
+transferRate(ReadView const& view, MPTID const& issuanceID)
+{
+    // fee is 0-50,000 (0-50%), rate is 1,000,000,000-2,000,000,000
+    // For example, if transfer fee is 50% then 10,000 * 50,000 = 500,000
+    // which represents 50% of 1,000,000,000
+    if (auto const sle = view.read(keylet::mptIssuance(issuanceID));
+        sle && sle->isFieldPresent(sfTransferFee))
+        return Rate{1'000'000'000u + 10'000 * sle->getFieldU16(sfTransferFee)};
 
     return parityRate;
 }
@@ -1026,8 +1064,8 @@ offerDelete(ApplyView& view, std::shared_ptr<SLE> const& sle, beast::Journal j)
 // - Redeeming IOUs and/or sending sender's own IOUs.
 // - Create trust line if needed.
 // --> bCheckIssuer : normally require issuer to be involved.
-TER
-rippleCredit(
+static TER
+rippleCreditIOU(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -1065,7 +1103,7 @@ rippleCredit(
 
         saBalance -= saAmount;
 
-        JLOG(j.trace()) << "rippleCredit: " << to_string(uSenderID) << " -> "
+        JLOG(j.trace()) << "rippleCreditIOU: " << to_string(uSenderID) << " -> "
                         << to_string(uReceiverID)
                         << " : before=" << saBefore.getFullText()
                         << " amount=" << saAmount.getFullText()
@@ -1140,7 +1178,7 @@ rippleCredit(
 
     saBalance.setIssuer(noAccount());
 
-    JLOG(j.debug()) << "rippleCredit: "
+    JLOG(j.debug()) << "rippleCreditIOU: "
                        "create line: "
                     << to_string(uSenderID) << " -> " << to_string(uReceiverID)
                     << " : " << saAmount.getFullText();
@@ -1172,7 +1210,7 @@ rippleCredit(
 // --> saAmount: Amount/currency/issuer to deliver to receiver.
 // <-- saActual: Amount actually cost.  Sender pays fees.
 static TER
-rippleSend(
+rippleSendIOU(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -1190,7 +1228,7 @@ rippleSend(
     {
         // Direct send: redeeming IOUs and/or sending own IOUs.
         auto const ter =
-            rippleCredit(view, uSenderID, uReceiverID, saAmount, false, j);
+            rippleCreditIOU(view, uSenderID, uReceiverID, saAmount, false, j);
         if (view.rules().enabled(featureDeletableAccounts) && ter != tesSUCCESS)
             return ter;
         saActual = saAmount;
@@ -1205,21 +1243,22 @@ rippleSend(
         ? saAmount
         : multiply(saAmount, transferRate(view, issuer));
 
-    JLOG(j.debug()) << "rippleSend> " << to_string(uSenderID) << " - > "
+    JLOG(j.debug()) << "rippleSendIOU> " << to_string(uSenderID) << " - > "
                     << to_string(uReceiverID)
                     << " : deliver=" << saAmount.getFullText()
                     << " cost=" << saActual.getFullText();
 
-    TER terResult = rippleCredit(view, issuer, uReceiverID, saAmount, true, j);
+    TER terResult =
+        rippleCreditIOU(view, issuer, uReceiverID, saAmount, true, j);
 
     if (tesSUCCESS == terResult)
-        terResult = rippleCredit(view, uSenderID, issuer, saActual, true, j);
+        terResult = rippleCreditIOU(view, uSenderID, issuer, saActual, true, j);
 
     return terResult;
 }
 
-TER
-accountSend(
+static TER
+accountSendIOU(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -1249,11 +1288,11 @@ accountSend(
     {
         STAmount saActual;
 
-        JLOG(j.trace()) << "accountSend: " << to_string(uSenderID) << " -> "
+        JLOG(j.trace()) << "accountSendIOU: " << to_string(uSenderID) << " -> "
                         << to_string(uReceiverID) << " : "
                         << saAmount.getFullText();
 
-        return rippleSend(
+        return rippleSendIOU(
             view, uSenderID, uReceiverID, saAmount, saActual, j, waiveFee);
     }
 
@@ -1282,9 +1321,9 @@ accountSend(
         if (receiver)
             receiver_bal = receiver->getFieldAmount(sfBalance).getFullText();
 
-        stream << "accountSend> " << to_string(uSenderID) << " (" << sender_bal
-               << ") -> " << to_string(uReceiverID) << " (" << receiver_bal
-               << ") : " << saAmount.getFullText();
+        stream << "accountSendIOU> " << to_string(uSenderID) << " ("
+               << sender_bal << ") -> " << to_string(uReceiverID) << " ("
+               << receiver_bal << ") : " << saAmount.getFullText();
     }
 
     if (sender)
@@ -1328,12 +1367,180 @@ accountSend(
         if (receiver)
             receiver_bal = receiver->getFieldAmount(sfBalance).getFullText();
 
-        stream << "accountSend< " << to_string(uSenderID) << " (" << sender_bal
-               << ") -> " << to_string(uReceiverID) << " (" << receiver_bal
-               << ") : " << saAmount.getFullText();
+        stream << "accountSendIOU< " << to_string(uSenderID) << " ("
+               << sender_bal << ") -> " << to_string(uReceiverID) << " ("
+               << receiver_bal << ") : " << saAmount.getFullText();
     }
 
     return terResult;
+}
+
+static TER
+rippleCreditMPT(
+    ApplyView& view,
+    AccountID const& uSenderID,
+    AccountID const& uReceiverID,
+    STAmount const& saAmount,
+    beast::Journal j)
+{
+    auto const mptID = keylet::mptIssuance(saAmount.get<MPTIssue>().getMptID());
+    auto const issuer = saAmount.getIssuer();
+    auto sleIssuance = view.peek(mptID);
+    if (!sleIssuance)
+        return tecOBJECT_NOT_FOUND;
+    if (uSenderID == issuer)
+    {
+        (*sleIssuance)[sfOutstandingAmount] += saAmount.mpt().value();
+        view.update(sleIssuance);
+    }
+    else
+    {
+        auto const mptokenID = keylet::mptoken(mptID.key, uSenderID);
+        if (auto sle = view.peek(mptokenID))
+        {
+            auto const amt = sle->getFieldU64(sfMPTAmount);
+            auto const pay = saAmount.mpt().value();
+            if (amt < pay)
+                return tecINSUFFICIENT_FUNDS;
+            (*sle)[sfMPTAmount] = amt - pay;
+            view.update(sle);
+        }
+        else
+            return tecNO_AUTH;
+    }
+
+    if (uReceiverID == issuer)
+    {
+        auto const outstanding = sleIssuance->getFieldU64(sfOutstandingAmount);
+        auto const redeem = saAmount.mpt().value();
+        if (outstanding >= redeem)
+        {
+            sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
+            view.update(sleIssuance);
+        }
+        else
+            return tecINTERNAL;
+    }
+    else
+    {
+        auto const mptokenID = keylet::mptoken(mptID.key, uReceiverID);
+        if (auto sle = view.peek(mptokenID))
+        {
+            (*sle)[sfMPTAmount] += saAmount.mpt().value();
+            view.update(sle);
+        }
+        else
+            return tecNO_AUTH;
+    }
+    return tesSUCCESS;
+}
+
+static TER
+rippleSendMPT(
+    ApplyView& view,
+    AccountID const& uSenderID,
+    AccountID const& uReceiverID,
+    STAmount const& saAmount,
+    STAmount& saActual,
+    beast::Journal j,
+    WaiveTransferFee waiveFee)
+{
+    assert(uSenderID != uReceiverID);
+
+    // Safe to get MPT since rippleSendMPT is only called by accountSendMPT
+    auto const issuer = saAmount.getIssuer();
+
+    auto const sle =
+        view.read(keylet::mptIssuance(saAmount.get<MPTIssue>().getMptID()));
+    if (!sle)
+        return tecOBJECT_NOT_FOUND;
+
+    if (uSenderID == issuer || uReceiverID == issuer)
+    {
+        // if sender is issuer, check that the new OutstandingAmount will not
+        // exceed MaximumAmount
+        if (uSenderID == issuer)
+        {
+            auto const sendAmount = saAmount.mpt().value();
+            auto const maximumAmount =
+                sle->at(~sfMaximumAmount).value_or(maxMPTokenAmount);
+            if (sendAmount > maximumAmount ||
+                sle->getFieldU64(sfOutstandingAmount) >
+                    maximumAmount - sendAmount)
+                return tecPATH_DRY;
+        }
+
+        // Direct send: redeeming MPTs and/or sending own MPTs.
+        auto const ter =
+            rippleCreditMPT(view, uSenderID, uReceiverID, saAmount, j);
+        if (ter != tesSUCCESS)
+            return ter;
+        saActual = saAmount;
+        return tesSUCCESS;
+    }
+
+    // Sending 3rd party MPTs: transit.
+    saActual = (waiveFee == WaiveTransferFee::Yes)
+        ? saAmount
+        : multiply(
+              saAmount,
+              transferRate(view, saAmount.get<MPTIssue>().getMptID()));
+
+    JLOG(j.debug()) << "rippleSendMPT> " << to_string(uSenderID) << " - > "
+                    << to_string(uReceiverID)
+                    << " : deliver=" << saAmount.getFullText()
+                    << " cost=" << saActual.getFullText();
+
+    if (auto const terResult =
+            rippleCreditMPT(view, issuer, uReceiverID, saAmount, j);
+        terResult != tesSUCCESS)
+        return terResult;
+
+    return rippleCreditMPT(view, uSenderID, issuer, saActual, j);
+}
+
+static TER
+accountSendMPT(
+    ApplyView& view,
+    AccountID const& uSenderID,
+    AccountID const& uReceiverID,
+    STAmount const& saAmount,
+    beast::Journal j,
+    WaiveTransferFee waiveFee)
+{
+    assert(saAmount >= beast::zero && saAmount.holds<MPTIssue>());
+
+    /* If we aren't sending anything or if the sender is the same as the
+     * receiver then we don't need to do anything.
+     */
+    if (!saAmount || (uSenderID == uReceiverID))
+        return tesSUCCESS;
+
+    STAmount saActual{saAmount.asset()};
+
+    return rippleSendMPT(
+        view, uSenderID, uReceiverID, saAmount, saActual, j, waiveFee);
+}
+
+TER
+accountSend(
+    ApplyView& view,
+    AccountID const& uSenderID,
+    AccountID const& uReceiverID,
+    STAmount const& saAmount,
+    beast::Journal j,
+    WaiveTransferFee waiveFee)
+{
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return accountSendIOU(
+                    view, uSenderID, uReceiverID, saAmount, j, waiveFee);
+            else
+                return accountSendMPT(
+                    view, uSenderID, uReceiverID, saAmount, j, waiveFee);
+        },
+        saAmount.asset().value());
 }
 
 static TER
@@ -1940,6 +2147,32 @@ rippleCreditMPT(
             return tecNO_AUTH;
     }
     return tesSUCCESS;
+}
+
+TER
+rippleCredit(
+    ApplyView& view,
+    AccountID const& uSenderID,
+    AccountID const& uReceiverID,
+    STAmount const& saAmount,
+    bool bCheckIssuer,
+    beast::Journal j)
+{
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+            {
+                return rippleCreditIOU(
+                    view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
+            }
+            else
+            {
+                assert(!bCheckIssuer);
+                return rippleCreditMPT(
+                    view, uSenderID, uReceiverID, saAmount, j);
+            }
+        },
+        saAmount.asset().value());
 }
 
 }  // namespace ripple

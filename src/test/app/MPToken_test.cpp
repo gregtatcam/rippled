@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
   This file is part of rippled: https://github.com/ripple/rippled
-  Copyright (c) 2023 Ripple Labs Inc.
+  Copyright (c) 2024 Ripple Labs Inc.
 
   Permission to use, copy, modify, and/or distribute this software for any
   purpose  with  or without fee is hereby granted, provided that the above
@@ -100,7 +100,7 @@ class MPToken_test : public beast::unit_test::suite
                  .metadata = "test",
                  .err = temMALFORMED});
             mptAlice.create(
-                {.maxAmt = 0x8000'0000'0000'0000,  // 9'223'372'036'854'775'808
+                {.maxAmt = maxMPTokenAmount + 1,  // 9'223'372'036'854'775'808
                  .assetScale = 0,
                  .transferFee = 0,
                  .metadata = "test",
@@ -122,7 +122,7 @@ class MPToken_test : public beast::unit_test::suite
             Env env{*this, features};
             MPTTester mptAlice(env, alice);
             mptAlice.create(
-                {.maxAmt = 0x7FFF'FFFF'FFFF'FFFF,  // 9'223'372'036'854'775'807
+                {.maxAmt = maxMPTokenAmount,  // 9'223'372'036'854'775'807
                  .assetScale = 1,
                  .transferFee = 10,
                  .metadata = "123",
@@ -235,6 +235,8 @@ class MPToken_test : public beast::unit_test::suite
 
             mptAlice.create({.ownerCount = 1});
 
+            // The only valid MPTokenAuthorize flag is tfMPTUnauthorize, which
+            // has a value of 1
             mptAlice.authorize(
                 {.account = bob, .flags = 0x00000002, .err = temINVALID_FLAG});
 
@@ -356,11 +358,13 @@ class MPToken_test : public beast::unit_test::suite
             auto const acctReserve = env.current()->fees().accountReserve(0);
             auto const incReserve = env.current()->fees().increment;
 
+            // 1 drop
+            BEAST_EXPECT(incReserve > XRPAmount(1));
             MPTTester mptAlice1(
                 env,
                 alice,
                 {.holders = {bob},
-                 .xrpHolders = acctReserve + XRP(1).value().xrp()});
+                 .xrpHolders = acctReserve + (incReserve - 1)});
             mptAlice1.create();
 
             MPTTester mptAlice2(env, alice, {.fund = false});
@@ -483,7 +487,8 @@ class MPToken_test : public beast::unit_test::suite
 
             mptAlice.authorize({.account = bob, .holderCount = 1});
 
-            // test invalid flag
+            // test invalid flag - only valid flags are tfMPTLock (1) and Unlock
+            // (2)
             mptAlice.set(
                 {.account = alice,
                  .flags = 0x00000008,
@@ -668,6 +673,7 @@ class MPToken_test : public beast::unit_test::suite
             jv[jss::secret] = alice.name();
             jv[jss::tx_json][jss::Fee] = to_string(env.current()->fees().base);
             jv[jss::tx_json] = pay(alice, carol, mpt);
+            jv[jss::tx_json][jss::Fee] = to_string(env.current()->fees().base);
             auto const jrr = env.rpc("json", "submit", to_string(jv));
             BEAST_EXPECT(jrr[jss::result][jss::engine_result] == "temDISABLED");
         }
@@ -763,14 +769,19 @@ class MPToken_test : public beast::unit_test::suite
         {
             Env env{*this, features};
 
-            MPTTester mptAlice(env, alice, {.holders = {bob}});
+            MPTTester mptAlice(env, alice, {.holders = {bob, carol}});
 
             mptAlice.create({.ownerCount = 1, .holderCount = 0});
             auto const MPT = mptAlice["MPT"];
 
             mptAlice.authorize({.account = bob});
+            mptAlice.authorize({.account = carol});
 
             mptAlice.pay(alice, bob, -1, temBAD_AMOUNT);
+
+            mptAlice.pay(bob, carol, -1, temBAD_AMOUNT);
+
+            mptAlice.pay(bob, alice, -1, temBAD_AMOUNT);
 
             env(pay(alice, bob, MPT(10)), sendmax(MPT(-1)), ter(temBAD_AMOUNT));
         }
@@ -1184,6 +1195,36 @@ class MPToken_test : public beast::unit_test::suite
                 ter(tecPATH_PARTIAL));
         }
 
+        // Pay maximum allowed amount
+        {
+            Env env{*this, features};
+
+            MPTTester mptAlice(env, alice, {.holders = {bob, carol}});
+
+            mptAlice.create(
+                {.maxAmt = maxMPTokenAmount,
+                 .ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer});
+            auto const MPT = mptAlice["MPT"];
+
+            mptAlice.authorize({.account = bob});
+            mptAlice.authorize({.account = carol});
+
+            // issuer sends holder the max amount allowed
+            mptAlice.pay(alice, bob, maxMPTokenAmount);
+            BEAST_EXPECT(
+                mptAlice.checkMPTokenOutstandingAmount(maxMPTokenAmount));
+
+            // payment between the holders
+            mptAlice.pay(bob, carol, maxMPTokenAmount);
+            BEAST_EXPECT(
+                mptAlice.checkMPTokenOutstandingAmount(maxMPTokenAmount));
+            // holder pays back to the issuer
+            mptAlice.pay(carol, alice, maxMPTokenAmount);
+            BEAST_EXPECT(mptAlice.checkMPTokenOutstandingAmount(0));
+        }
+
         // Issuer fails trying to send fund after issuance was destroyed
         {
             Env env{*this, features};
@@ -1291,10 +1332,8 @@ class MPToken_test : public beast::unit_test::suite
             for (auto const& e : format.getSOTemplate())
             {
                 // Transaction has amount fields.
-                // Exclude Clawback, which only supports sfAmount and is checked
-                // in the transactor for amendment enable/disable. Exclude
-                // pseudo-transaction SetFee. Don't consider the Fee field since
-                // it's included in every transaction.
+                // Exclude pseudo-transaction SetFee. Don't consider
+                // the Fee field since it's included in every transaction.
                 if (e.supportMPT() == soeMPTNotSupported &&
                     e.sField().getName() != jss::Fee &&
                     format.getName() != jss::SetFee)
@@ -1336,6 +1375,9 @@ class MPToken_test : public beast::unit_test::suite
                 jv1[jss::tx_json] = jv;
                 jrr = env.rpc("json", "submit", to_string(jv1));
                 BEAST_EXPECT(jrr[jss::result][jss::error] == "invalidParams");
+
+                jrr = env.rpc("json", "sign", to_string(jv1));
+                BEAST_EXPECT(jrr[jss::result][jss::error] == "invalidParams");
             };
             // All transactions with sfAmount, which don't support MPT
             // and transactions with amount fields, which can't be MPT
@@ -1369,7 +1411,8 @@ class MPToken_test : public beast::unit_test::suite
             };
             ammDeposit(sfAmount);
             for (SField const& field :
-                 {std::ref(sfAmount2),
+                 {std::ref(sfAmount),
+                  std::ref(sfAmount2),
                   std::ref(sfEPrice),
                   std::ref(sfLPTokenOut)})
                 ammDeposit(field);
@@ -1607,8 +1650,7 @@ class MPToken_test : public beast::unit_test::suite
     void
     testTxJsonMetaFields(FeatureBitset features)
     {
-        // checks synthetically parsed mptissuanceid from  `tx` response
-        // it checks the parsing logic
+        // checks synthetically injected mptissuanceid from  `tx` response
         testcase("Test synthetic fields from tx response");
 
         using namespace test::jtx;
@@ -1622,13 +1664,18 @@ class MPToken_test : public beast::unit_test::suite
 
         std::string const txHash{
             env.tx()->getJson(JsonOptions::none)[jss::hash].asString()};
-
+        BEAST_EXPECTS(
+            txHash ==
+                "E11F0E0CA14219922B7881F060B9CEE67CFBC87E4049A441ED2AE348FF8FAC"
+                "0E",
+            txHash);
         Json::Value const meta = env.rpc("tx", txHash)[jss::result][jss::meta];
-
+        auto const id = meta[jss::mpt_issuance_id].asString();
         // Expect mpt_issuance_id field
         BEAST_EXPECT(meta.isMember(jss::mpt_issuance_id));
-        BEAST_EXPECT(
-            meta[jss::mpt_issuance_id] == to_string(mptAlice.issuanceID()));
+        BEAST_EXPECT(id == to_string(mptAlice.issuanceID()));
+        BEAST_EXPECTS(
+            id == "00000004AE123A8556F3CF91154711376AFB0F894F832B3D", id);
     }
 
     void
