@@ -62,8 +62,8 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
             memcpy(mptID.data(), &sequence, sizeof(sequence));
             memcpy(
                 mptID.data() + sizeof(sequence),
-                account.data(),
-                sizeof(account));
+                currencyOrAccount.data(),
+                sizeof(currencyOrAccount));
             MPTIssue issue{mptID};
             asset_ = issue;
         }
