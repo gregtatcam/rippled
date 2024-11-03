@@ -475,6 +475,42 @@ public:
         beast::Journal const&);
 };
 
+class ValidAMM
+{
+    // deposit/withdraw params
+    // AMM account
+    std::optional<AccountID> ammAccount_;
+    // LPToken balance after
+    std::optional<STAmount> lptAMMBalance_;
+    // swap params
+    // We don't know which side of the trustline is AMM.
+    // Consequently, we keep
+    // highLimit.issuer: <lowLimit.issue, balance>
+    // and
+    // lowLimit.issuer: <highLimit.issue, balance>.
+    // finalize() figures out which account is AMM by checking the root account
+    // object.
+    using BalanceStore = hash_map<AccountID, hash_map<Issue, STAmount>>;
+    BalanceStore balanceBefore_;
+    BalanceStore balanceAfter_;
+
+public:
+    ValidAMM() = default;
+    void
+    visitEntry(
+        bool,
+        std::shared_ptr<SLE const> const&,
+        std::shared_ptr<SLE const> const&);
+
+    bool
+    finalize(
+        STTx const&,
+        TER const,
+        XRPAmount const,
+        ReadView const&,
+        beast::Journal const&);
+};
+
 // additional invariant checks can be declared above and then added to this
 // tuple
 using InvariantChecks = std::tuple<
@@ -491,7 +527,8 @@ using InvariantChecks = std::tuple<
     ValidNFTokenPage,
     NFTokenCountTracking,
     ValidClawback,
-    ValidMPTIssuance>;
+    ValidMPTIssuance,
+    ValidAMM>;
 
 /**
  * @brief get a tuple of all invariant checks

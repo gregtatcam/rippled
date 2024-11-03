@@ -19,6 +19,8 @@
 
 #include <xrpld/app/tx/detail/InvariantCheck.h>
 
+#include <xrpld/app/misc/AMMHelpers.h>
+#include <xrpld/app/misc/AMMUtils.h>
 #include <xrpld/app/tx/detail/NFTokenUtils.h>
 #include <xrpld/ledger/ReadView.h>
 #include <xrpld/ledger/View.h>
@@ -1118,6 +1120,271 @@ ValidMPTIssuance::finalize(
 
     return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
         mptokensCreated_ == 0 && mptokensDeleted_ == 0;
+}
+
+void
+ValidAMM::visitEntry(
+    bool isDelete,
+    std::shared_ptr<SLE const> const& before,
+    std::shared_ptr<SLE const> const& after)
+{
+    if (!isFeatureEnabled(fixAMMv1_3))
+        return;
+
+    auto set = [&](SLE const& sle,
+                   BalanceStore& balance,
+                   STAmount const& a1,
+                   STAmount const& a2) {
+        STAmount assetBalance = sle[sfBalance];
+        // don't know account/issuer
+        if (assetBalance.negative())
+            assetBalance.negate();
+        // Don't know which side of the trustline is AMM so save both.
+        // finalize() does lookup to figure out the AMM side.
+        balance[a1.getIssuer()][a2.get<Issue>()] = assetBalance;
+        balance[a2.getIssuer()][a1.get<Issue>()] = assetBalance;
+    };
+    auto update = [&](SLE const& sle, BalanceStore& balance) {
+        auto const leType = sle.getType();
+        // XRP side
+        if (leType == ltACCOUNT_ROOT && sle.isFieldPresent(sfAMMID))
+        {
+            balance[sle[sfAccount]][xrpIssue()] = sle[sfBalance];
+        }
+        // IOU side
+        else if (leType == ltRIPPLE_STATE && (sle.getFlags() & lsfAMMNode))
+        {
+            auto const& highLimit = sle.getFieldAmount(sfHighLimit);
+            auto const& lowLimit = sle.getFieldAmount(sfLowLimit);
+            set(sle, balance, highLimit, lowLimit);
+            set(sle, balance, lowLimit, highLimit);
+        }
+    };
+
+    if (!isDelete)
+    {
+        if (after)
+        {
+            if (after->getType() == ltAMM)
+            {
+                ammAccount_ = after->getAccountID(sfAccount);
+                lptAMMBalance_ = after->getFieldAmount(sfLPTokenBalance);
+            }
+            else
+                update(*after, balanceAfter_);
+        }
+        if (before)
+            update(*before, balanceBefore_);
+    }
+}
+
+bool
+ValidAMM::finalize(
+    STTx const& tx,
+    TER const result,
+    XRPAmount const _fee,
+    ReadView const& _view,
+    beast::Journal const& j)
+{
+    if (!_view.rules().enabled(fixAMMv1_3))
+        return true;
+
+    auto positiveBalances = [&](STAmount const& amount,
+                                STAmount const& amount2,
+                                STAmount const& lptAMMBalance,
+                                bool zeroAllowed) {
+        if (zeroAllowed)
+            return amount >= beast::zero && amount2 >= beast::zero &&
+                lptAMMBalance >= beast::zero;
+        return amount > beast::zero && amount2 > beast::zero &&
+            lptAMMBalance > beast::zero;
+    };
+
+    if (result == tesSUCCESS)
+    {
+        auto const txType = tx.getTxnType();
+        if ((txType == ttAMM_DEPOSIT || txType == ttAMM_WITHDRAW ||
+             txType == ttAMM_CLAWBACK) &&
+            ammAccount_)
+        {
+            auto const [amount, amount2] = ammPoolHolds(
+                _view,
+                *ammAccount_,
+                tx[sfAsset],
+                tx[sfAsset2],
+                fhIGNORE_FREEZE,
+                j);
+            // Deposit and Withdrawal invariant:
+            // sqrt(amount * amount2) >= LPTokens
+            // all balances are greater than zero
+            // unless on last withdraw
+            // We allow for a small relative error
+            auto const res = root2(amount * amount2);
+            if (positiveBalances(amount, amount2, *lptAMMBalance_, true) &&
+                (res >= *lptAMMBalance_ ||
+                 (*lptAMMBalance_ != beast::zero &&
+                  withinRelativeDistance(
+                      res, Number{*lptAMMBalance_}, Number{1, -11}))))
+            {
+                // the product is also greater than zero
+                if (*lptAMMBalance_ > beast::zero)
+                    return true;
+                // last withdraw may have resulted in an empty AMM
+                // all balances must be zero
+                if ((txType == ttAMM_WITHDRAW || txType == ttAMM_CLAWBACK) &&
+                    *lptAMMBalance_ == beast::zero && amount == beast::zero &&
+                    amount2 == beast::zero)
+                    return true;
+            }
+
+            std::string const txt =
+                txType == ttAMM_DEPOSIT ? "AMMDeposit" : "AMMWithdraw";
+            JLOG(j.error())
+                << txt << " invariant failed: " << amount << " " << amount2
+                << " " << res << " " << lptAMMBalance_->getText() << " "
+                << ((*lptAMMBalance_ == beast::zero)
+                        ? Number{1}
+                        : ((*lptAMMBalance_ - res) / res));
+            return false;
+        }
+        else if (txType == ttAMM_CREATE)
+        {
+            auto const [amount, amount2] = ammPoolHolds(
+                _view,
+                *ammAccount_,
+                tx[sfAmount].get<Issue>(),
+                tx[sfAmount2].get<Issue>(),
+                fhIGNORE_FREEZE,
+                j);
+            // Create invariant:
+            // sqrt(amount * amount2) == LPTokens
+            // all balances are greater than zero
+            if (positiveBalances(amount, amount2, *lptAMMBalance_, false) &&
+                ammLPTokens(amount, amount2, lptAMMBalance_->issue()) ==
+                    *lptAMMBalance_)
+                return true;
+
+            JLOG(j.error()) << "AMMCreate invariant failed: " << amount << " "
+                            << amount2 << " " << *lptAMMBalance_;
+            return false;
+        }
+        else if (
+            txType == ttPAYMENT || txType == ttOFFER_CREATE ||
+            txType == ttCHECK_CASH)
+        {
+            // LPTokens can't change during payment or invalid number of pools
+            if (lptAMMBalance_ || balanceBefore_.size() != balanceAfter_.size())
+            {
+                // LCOV_EXCL_START
+                JLOG(j.error())
+                    << "AMM swap invariant failed: LPTokens "
+                       "changed or bad balances "
+                    << balanceBefore_.size() << " " << balanceAfter_.size();
+                return false;
+                // LCOV_EXCL_STOP
+            }
+            struct BookKeeping
+            {
+                BalanceStore& balanceAfter_;
+                hash_set<AccountID>& verified_;
+                AccountID const& account_;
+                BookKeeping(
+                    BalanceStore& balance,
+                    hash_set<AccountID>& verified,
+                    AccountID const& account)
+                    : balanceAfter_(balance)
+                    , verified_(verified)
+                    , account_(account)
+                {
+                }
+                ~BookKeeping()
+                {
+                    balanceAfter_.erase(account_);
+                    verified_.insert(account_);
+                }
+            };
+            // Accounts verified to be issuer or AMM accounts and don't need
+            // to be looked up.
+            hash_set<AccountID> verified;
+            for (auto const& [account, assets] : balanceBefore_)
+            {
+                BookKeeping g(balanceAfter_, verified, account);
+                // Account is an issuer or AMM account must have two assets
+                if (verified.contains(account) || assets.size() != 2)
+                    continue;
+                auto it = assets.cbegin();
+                auto const& asset = it->first;
+                auto const& asset2 = (++it)->first;
+                if (auto const amm = _view.read(keylet::amm(asset, asset2)))
+                {
+                    if (account != (*amm)[sfAccount] ||
+                        !balanceAfter_.contains(account) ||
+                        !balanceAfter_[account].contains(asset) ||
+                        !balanceAfter_[account].contains(asset2))
+                    {
+                        // LCOV_EXCL_START
+                        JLOG(j.error()) << "AMM swap invariant failed: "
+                                           "inconsistent assets or accounts "
+                                        << assets.size() << account << " "
+                                        << (*amm)[sfAccount] << " " << asset
+                                        << " " << asset2;
+                        return false;
+                        // LCOV_EXCL_STOP
+                    }
+                    // Since account is AMM account then asset/asset2 have
+                    // issuer accounts, which don't need to be invariant checked
+                    verified.insert(asset.getIssuer());
+                    verified.insert(asset2.getIssuer());
+
+                    Number const productBefore =
+                        balanceBefore_[account][asset] *
+                        balanceBefore_[account][asset2];
+                    auto const& amount = balanceAfter_[account][asset];
+                    auto const& amount2 = balanceAfter_[account][asset2];
+                    Number const productAfter = amount * amount2;
+                    auto const& lptAMMBalance =
+                        amm->getFieldAmount(sfLPTokenBalance);
+                    // Swap invariant:
+                    // amountAfter * amount2After >= amountBefore *
+                    // amount2Before all balances are greater than zero We allow
+                    // for a small relative error
+                    if (!positiveBalances(
+                            amount, amount2, lptAMMBalance, false) ||
+                        !(productAfter >= productBefore ||
+                          withinRelativeDistance(
+                              productBefore, productAfter, Number{1, -7})))
+                    {
+                        JLOG(j.error())
+                            << "AMM swap invariant failed: old balances "
+                            << balanceBefore_[account][asset].getText() << " "
+                            << balanceBefore_[account][asset2].getText()
+                            << " new balances "
+                            << balanceAfter_[account][asset].getText() << " "
+                            << balanceAfter_[account][asset2].getText()
+                            << " lptAMMBalance " << lptAMMBalance.getText()
+                            << " tfee " << (*amm)[sfTradingFee] << " diff "
+                            << (productBefore != Number{0}
+                                    ? to_string(
+                                          (productBefore - productAfter) /
+                                          productBefore)
+                                    : "undefined")
+                            << std::endl;
+                        return false;
+                    }
+                }
+            }
+            if (!balanceAfter_.empty())
+            {
+                // LCOV_EXCL_START
+                JLOG(j.error())
+                    << "AMM swap invariant failed: AMMs not verified";
+                return false;
+                // LCOV_EXCL_STOP
+            }
+        }
+    }
+
+    return true;
 }
 
 }  // namespace ripple

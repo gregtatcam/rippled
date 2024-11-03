@@ -152,6 +152,10 @@ AMMOffer<TIn, TOut>::checkInvariant(
         return false;
     }
 
+    // The invariant check below is moved to InvariantCheck
+    if (isFeatureEnabled(fixAMMv1_3))
+        return true;
+
     Number const product = balances_.in * balances_.out;
     auto const newBalances = TAmounts<TIn, TOut>{
         balances_.in + consumed.in, balances_.out - consumed.out};
