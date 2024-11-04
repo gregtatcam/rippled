@@ -211,18 +211,18 @@
 <area shape="rect" id="node248" href="$classripple_1_1test_1_1handshake__test.html" title=" " alt="" coords="249,268,451,293"/>
 <area shape="rect" id="node249" href="$structripple_1_1test_1_1join__test.html" title=" " alt="" coords="272,317,428,343"/>
 <area shape="rect" id="node250" href="$classripple_1_1test_1_1jtx_1_1AMMTestBase.html" title=" " alt="" coords="287,367,413,407"/>
-<area shape="rect" id="node255" href="$classripple_1_1test_1_1jtx_1_1oracle_1_1GetAggregatePrice__test.html" title=" " alt="" coords="238,431,462,471"/>
-<area shape="rect" id="node256" href="$structripple_1_1test_1_1jtx_1_1oracle_1_1Oracle__test.html" title=" " alt="" coords="278,495,422,535"/>
-<area shape="rect" id="node257" href="$structripple_1_1test_1_1mulDiv__test.html" title=" " alt="" coords="261,560,439,585"/>
-<area shape="rect" id="node258" href="$classripple_1_1test_1_1reduce__relay__test.html" title=" " alt="" coords="278,610,422,650"/>
-<area shape="rect" id="node260" href="$structripple_1_1test_1_1scope__test.html" title=" " alt="" coords="265,675,435,700"/>
-<area shape="rect" id="node261" href="$classripple_1_1test_1_1tagged__integer__test.html" title=" " alt="" coords="277,725,423,765"/>
-<area shape="rect" id="node262" href="$classripple_1_1test_1_1tx__reduce__relay__test.html" title=" " alt="" coords="268,789,432,829"/>
-<area shape="rect" id="node263" href="$classripple_1_1tests_1_1FetchPack__test.html" title=" " alt="" coords="248,853,452,879"/>
-<area shape="rect" id="node264" href="$classripple_1_1tests_1_1SHAMapPathProof__test.html" title=" " alt="" coords="255,903,445,943"/>
-<area shape="rect" id="node265" href="$classripple_1_1tests_1_1SHAMapSync__test.html" title=" " alt="" coords="237,968,463,993"/>
-<area shape="rect" id="node266" href="$classripple_1_1tests_1_1SHAMap__test.html" title=" " alt="" coords="253,1017,447,1043"/>
-<area shape="rect" id="node267" href="$structripple_1_1types__test.html" title=" " alt="" coords="283,1067,417,1092"/>
+<area shape="rect" id="node256" href="$classripple_1_1test_1_1jtx_1_1oracle_1_1GetAggregatePrice__test.html" title=" " alt="" coords="238,431,462,471"/>
+<area shape="rect" id="node257" href="$structripple_1_1test_1_1jtx_1_1oracle_1_1Oracle__test.html" title=" " alt="" coords="278,495,422,535"/>
+<area shape="rect" id="node258" href="$structripple_1_1test_1_1mulDiv__test.html" title=" " alt="" coords="261,560,439,585"/>
+<area shape="rect" id="node259" href="$classripple_1_1test_1_1reduce__relay__test.html" title=" " alt="" coords="278,610,422,650"/>
+<area shape="rect" id="node261" href="$structripple_1_1test_1_1scope__test.html" title=" " alt="" coords="265,675,435,700"/>
+<area shape="rect" id="node262" href="$classripple_1_1test_1_1tagged__integer__test.html" title=" " alt="" coords="277,725,423,765"/>
+<area shape="rect" id="node263" href="$classripple_1_1test_1_1tx__reduce__relay__test.html" title=" " alt="" coords="268,789,432,829"/>
+<area shape="rect" id="node264" href="$classripple_1_1tests_1_1FetchPack__test.html" title=" " alt="" coords="248,853,452,879"/>
+<area shape="rect" id="node265" href="$classripple_1_1tests_1_1SHAMapPathProof__test.html" title=" " alt="" coords="255,903,445,943"/>
+<area shape="rect" id="node266" href="$classripple_1_1tests_1_1SHAMapSync__test.html" title=" " alt="" coords="237,968,463,993"/>
+<area shape="rect" id="node267" href="$classripple_1_1tests_1_1SHAMap__test.html" title=" " alt="" coords="253,1017,447,1043"/>
+<area shape="rect" id="node268" href="$structripple_1_1types__test.html" title=" " alt="" coords="283,1067,417,1092"/>
 <area shape="rect" id="node15" href="$classbeast_1_1aged__map__test.html" title=" " alt="" coords="575,1687,742,1712"/>
 <area shape="rect" id="node16" href="$classbeast_1_1aged__multimap__test.html" title=" " alt="" coords="559,1281,759,1307"/>
 <area shape="rect" id="node17" href="$classbeast_1_1aged__multiset__test.html" title=" " alt="" coords="563,1331,754,1356"/>
@@ -249,9 +249,9 @@
 <area shape="rect" id="node111" href="$classripple_1_1SociDB__test.html" title=" " alt="" coords="586,5232,731,5257"/>
 <area shape="rect" id="node112" href="$classripple_1_1test_1_1TestOutputSuite.html" title=" " alt="" coords="573,5282,744,5322"/>
 <area shape="rect" id="node116" href="$classripple_1_1tests_1_1cluster__test.html" title=" " alt="" coords="567,5084,750,5109"/>
-<area shape="rect" id="node113" href="$classJson_1_1JsonObject__test.html" title=" " alt="" coords="875,5289,1034,5315"/>
-<area shape="rect" id="node114" href="$classJson_1_1JsonWriter__test.html" title=" " alt="" coords="877,5339,1033,5364"/>
-<area shape="rect" id="node115" href="$structJson_1_1Output__test.html" title=" " alt="" coords="888,5240,1021,5265"/>
+<area shape="rect" id="node113" href="$classJson_1_1JsonObject__test.html" title=" " alt="" coords="876,5240,1035,5265"/>
+<area shape="rect" id="node114" href="$classJson_1_1JsonWriter__test.html" title=" " alt="" coords="877,5289,1033,5315"/>
+<area shape="rect" id="node115" href="$structJson_1_1Output__test.html" title=" " alt="" coords="889,5339,1022,5364"/>
 <area shape="rect" id="node166" href="$structripple_1_1test_1_1Flow__manual__test.html" title=" " alt="" coords="593,7673,724,7713"/>
 <area shape="rect" id="node198" href="$classripple_1_1test_1_1OfferAllFeatures__test.html" title=" " alt="" coords="540,9403,777,9428"/>
 <area shape="rect" id="node199" href="$classripple_1_1test_1_1OfferWOFillOrKill__test.html" title=" " alt="" coords="571,9453,746,9493"/>
@@ -263,8 +263,9 @@
 <area shape="rect" id="node234" href="$classripple_1_1test_1_1TxQMetaInfo__test.html" title=" " alt="" coords="551,10851,767,10876"/>
 <area shape="rect" id="node251" href="$classripple_1_1test_1_1AMMInfo__test.html" title=" " alt="" coords="563,404,754,429"/>
 <area shape="rect" id="node252" href="$classripple_1_1test_1_1jtx_1_1AMMTest.html" title=" " alt="" coords="596,339,721,379"/>
-<area shape="rect" id="node253" href="$structripple_1_1test_1_1AMMExtended__test.html" title="Tests of AMM that use offers too." alt="" coords="841,372,1068,397"/>
-<area shape="rect" id="node254" href="$structripple_1_1test_1_1AMM__test.html" title="Basic tests of AMM that do not use offers." alt="" coords="872,323,1037,348"/>
-<area shape="rect" id="node259" href="$classripple_1_1test_1_1reduce__relay__simulate__test.html" title=" " alt="" coords="579,610,738,650"/>
-<area shape="rect" id="node268" href="$structripple_1_1test_1_1jtx_1_1XChainBridgeObjects.html" title=" " alt="" coords="11,11373,170,11413"/>
+<area shape="rect" id="node253" href="$classripple_1_1test_1_1AMMClawback__test.html" title=" " alt="" coords="841,297,1069,323"/>
+<area shape="rect" id="node254" href="$structripple_1_1test_1_1AMMExtended__test.html" title="Tests of AMM that use offers too." alt="" coords="842,347,1069,372"/>
+<area shape="rect" id="node255" href="$structripple_1_1test_1_1AMM__test.html" title="Basic tests of AMM that do not use offers." alt="" coords="873,396,1038,421"/>
+<area shape="rect" id="node260" href="$classripple_1_1test_1_1reduce__relay__simulate__test.html" title=" " alt="" coords="579,610,738,650"/>
+<area shape="rect" id="node269" href="$structripple_1_1test_1_1jtx_1_1XChainBridgeObjects.html" title=" " alt="" coords="11,11373,170,11413"/>
 </map>
