@@ -133,7 +133,7 @@ var searchData=
   ['mptflags_130',['mptflags',['../classripple_1_1test_1_1jtx_1_1mptflags.html',1,'ripple::test::jtx']]],
   ['mptinit_131',['MPTInit',['../structripple_1_1test_1_1jtx_1_1MPTInit.html',1,'ripple::test::jtx']]],
   ['mptissue_132',['MPTIssue',['../classripple_1_1MPTIssue.html',1,'ripple']]],
-  ['mptoken_5ftest_133',['MPToken_test',['../classripple_1_1MPToken__test.html',1,'ripple']]],
+  ['mptoken_5ftest_133',['MPToken_test',['../classripple_1_1test_1_1MPToken__test.html',1,'ripple::test']]],
   ['mptokenauthorize_134',['MPTokenAuthorize',['../classripple_1_1MPTokenAuthorize.html',1,'ripple']]],
   ['mptokenissuancecreate_135',['MPTokenIssuanceCreate',['../classripple_1_1MPTokenIssuanceCreate.html',1,'ripple']]],
   ['mptokenissuancedestroy_136',['MPTokenIssuanceDestroy',['../classripple_1_1MPTokenIssuanceDestroy.html',1,'ripple']]],
