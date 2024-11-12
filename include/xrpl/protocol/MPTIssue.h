@@ -51,7 +51,8 @@ public:
     void
     setJson(Json::Value& jv) const;
 
-    auto operator<=>(MPTIssue const&) const = default;
+    auto
+    operator<=>(MPTIssue const&) const = default;
 
     bool
     native() const
