@@ -418,7 +418,12 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         return {result, false};
 
     auto const res = deleteAMMAccountIfEmpty(
-        sb, ammSle, newLPTokenBalance, ctx_.tx[sfAsset], ctx_.tx[sfAsset2], j_);
+        sb,
+        ammSle,
+        newLPTokenBalance,
+        ctx_.tx[sfAsset].get<Issue>(),
+        ctx_.tx[sfAsset2].get<Issue>(),
+        j_);
     // LCOV_EXCL_START
     if (!res.second)
         return {res.first, false};

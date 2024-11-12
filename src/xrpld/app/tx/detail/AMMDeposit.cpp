@@ -268,10 +268,10 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
             return tesSUCCESS;
         };
 
-        if (auto const ter = checkAsset(ctx.tx[sfAsset]))
+        if (auto const ter = checkAsset(ctx.tx[sfAsset].get<Issue>()))
             return ter;
 
-        if (auto const ter = checkAsset(ctx.tx[sfAsset2]))
+        if (auto const ter = checkAsset(ctx.tx[sfAsset2].get<Issue>()))
             return ter;
     }
 
