@@ -289,51 +289,58 @@ $(function() {
 <div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>                <span class="keywordflow">return</span> <a class="code hl_class" href="classripple_1_1AMMOffer.html">AMMOffer&lt;TIn, TOut&gt;</a>(</div>
 <div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>                    *<span class="keyword">this</span>, *amounts, balances, Quality{*amounts});</div>
 <div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>            }</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        }</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/overflow_error.html">std::overflow_error</a> <span class="keyword">const</span>&amp; e)</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        {</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a49b0713e65bb8e2c51b76fbf16252afe">error</a>()) &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer overflow &quot;</span> &lt;&lt; e.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/error/exception/what.html">what</a>();</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            <span class="keywordflow">if</span> (!view.<a class="code hl_function" href="classripple_1_1ReadView.html#aceb3d74acaae18b238022337e5f250ce">rules</a>().<a class="code hl_function" href="classripple_1_1Rules.html#a1a8388a2b9588aa9446ece92a88e0dd2">enabled</a>(fixAMMOverflowOffer))</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>                <span class="keywordflow">return</span> maxOffer(balances, view.<a class="code hl_function" href="classripple_1_1ReadView.html#aceb3d74acaae18b238022337e5f250ce">rules</a>());</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>            <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>                <span class="keywordflow">return</span> std::nullopt;</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        }</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/exception.html">std::exception</a> <span class="keyword">const</span>&amp; e)</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        {</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a49b0713e65bb8e2c51b76fbf16252afe">error</a>()) &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer exception &quot;</span> &lt;&lt; e.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/error/exception/what.html">what</a>();</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        }</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="keywordflow">return</span> std::nullopt;</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    }();</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="keywordflow">if</span> (offer)</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    {</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <span class="keywordflow">if</span> (offer-&gt;amount().in &gt; beast::zero &amp;&amp;</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>            offer-&gt;amount().out &gt; beast::zero)</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        {</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#abbe082bd27ca0f1d1365af2824e4f85b">trace</a>())</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>                &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer, created &quot;</span></div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>                &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(offer-&gt;amount().in) &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; issueIn_ &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>                &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(offer-&gt;amount().out) &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; issueOut_;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>            <span class="keywordflow">return</span> offer;</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        }</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a49b0713e65bb8e2c51b76fbf16252afe">error</a>()) &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer, failed &quot;</span></div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>                         &lt;&lt; ammContext_.multiPath() &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>                         &lt;&lt; ammContext_.curIters() &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>                         &lt;&lt; (clobQuality ? clobQuality-&gt;rate() : <a class="code hl_class" href="classripple_1_1STAmount.html">STAmount</a>{})</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>                         &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(balances.in) &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>                         &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(balances.out);</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    }</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="keywordflow">return</span> std::nullopt;</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>}</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;STAmount, STAmount&gt;</a>;</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;IOUAmount, IOUAmount&gt;</a>;</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;XRPAmount, IOUAmount&gt;</a>;</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;IOUAmount, XRPAmount&gt;</a>;</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>}  <span class="comment">// namespace ripple</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (view.<a class="code hl_function" href="classripple_1_1ReadView.html#aceb3d74acaae18b238022337e5f250ce">rules</a>().<a class="code hl_function" href="classripple_1_1Rules.html#a1a8388a2b9588aa9446ece92a88e0dd2">enabled</a>(fixAMMv1_2))</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>            {</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>                <span class="keywordflow">if</span> (<span class="keyword">auto</span> <span class="keyword">const</span> maxAMMOffer = maxOffer(balances, view.<a class="code hl_function" href="classripple_1_1ReadView.html#aceb3d74acaae18b238022337e5f250ce">rules</a>());</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>                    maxAMMOffer &amp;&amp;</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>                    Quality{maxAMMOffer-&gt;amount()} &gt; *clobQuality)</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>                    <span class="keywordflow">return</span> maxAMMOffer;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>            }</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        }</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/overflow_error.html">std::overflow_error</a> <span class="keyword">const</span>&amp; e)</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        {</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a49b0713e65bb8e2c51b76fbf16252afe">error</a>()) &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer overflow &quot;</span> &lt;&lt; e.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/error/exception/what.html">what</a>();</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>            <span class="keywordflow">if</span> (!view.<a class="code hl_function" href="classripple_1_1ReadView.html#aceb3d74acaae18b238022337e5f250ce">rules</a>().<a class="code hl_function" href="classripple_1_1Rules.html#a1a8388a2b9588aa9446ece92a88e0dd2">enabled</a>(fixAMMOverflowOffer))</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>                <span class="keywordflow">return</span> maxOffer(balances, view.<a class="code hl_function" href="classripple_1_1ReadView.html#aceb3d74acaae18b238022337e5f250ce">rules</a>());</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>                <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        }</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/exception.html">std::exception</a> <span class="keyword">const</span>&amp; e)</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        {</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a49b0713e65bb8e2c51b76fbf16252afe">error</a>()) &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer exception &quot;</span> &lt;&lt; e.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/error/exception/what.html">what</a>();</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        }</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    }();</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordflow">if</span> (offer)</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    {</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordflow">if</span> (offer-&gt;amount().in &gt; beast::zero &amp;&amp;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            offer-&gt;amount().out &gt; beast::zero)</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        {</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>            JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#abbe082bd27ca0f1d1365af2824e4f85b">trace</a>())</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>                &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer, created &quot;</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>                &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(offer-&gt;amount().in) &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; issueIn_ &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>                &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(offer-&gt;amount().out) &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; issueOut_;</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            <span class="keywordflow">return</span> offer;</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        }</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        JLOG(j_.<a class="code hl_function" href="classbeast_1_1Journal.html#a49b0713e65bb8e2c51b76fbf16252afe">error</a>()) &lt;&lt; <span class="stringliteral">&quot;AMMLiquidity::getOffer, failed &quot;</span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                         &lt;&lt; ammContext_.multiPath() &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>                         &lt;&lt; ammContext_.curIters() &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>                         &lt;&lt; (clobQuality ? clobQuality-&gt;rate() : <a class="code hl_class" href="classripple_1_1STAmount.html">STAmount</a>{})</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>                         &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(balances.in) &lt;&lt; <span class="stringliteral">&quot; &quot;</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>                         &lt;&lt; <a class="code hl_function" href="namespaceripple.html#ac124fe6744b7fe887dec949b56b16d50">to_string</a>(balances.out);</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    }</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>}</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;STAmount, STAmount&gt;</a>;</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;IOUAmount, IOUAmount&gt;</a>;</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;XRPAmount, IOUAmount&gt;</a>;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span><span class="keyword">template</span> <span class="keyword">class </span><a class="code hl_class" href="classripple_1_1AMMLiquidity.html">AMMLiquidity&lt;IOUAmount, XRPAmount&gt;</a>;</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>}  <span class="comment">// namespace ripple</span></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html"><div class="ttname"><a href="classbeast_1_1Journal.html">beast::Journal</a></div><div class="ttdoc">A generic endpoint for log messages.</div><div class="ttdef"><b>Definition:</b> <a href="Journal_8h_source.html#l00058">Journal.h:59</a></div></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html_a49b0713e65bb8e2c51b76fbf16252afe"><div class="ttname"><a href="classbeast_1_1Journal.html#a49b0713e65bb8e2c51b76fbf16252afe">beast::Journal::error</a></div><div class="ttdeci">Stream error() const</div><div class="ttdef"><b>Definition:</b> <a href="Journal_8h_source.html#l00333">Journal.h:333</a></div></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html_a556228cb60bcf405c225d3f64b7b01ae"><div class="ttname"><a href="classbeast_1_1Journal.html#a556228cb60bcf405c225d3f64b7b01ae">beast::Journal::debug</a></div><div class="ttdeci">Stream debug() const</div><div class="ttdef"><b>Definition:</b> <a href="Journal_8h_source.html#l00315">Journal.h:315</a></div></div>

@@ -184,12 +184,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:acf1048871867fae517d6e38c09f9ffd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac65c94e120bdb3957a6951fab2af6c29"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespaceripple.html#adfb760bc3e4ccb79d5d4f6ecff2f1817">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMWithdraw.html#ac65c94e120bdb3957a6951fab2af6c29">preclaim</a> (<a class="el" href="structripple_1_1PreclaimContext.html">PreclaimContext</a> const &amp;ctx)</td></tr>
 <tr class="separator:ac65c94e120bdb3957a6951fab2af6c29"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d34ec1c32df933699eb3dedc40a3dd2"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/tuple.html">std::tuple</a>&lt; <a class="el" href="namespaceripple.html#adfb760bc3e4ccb79d5d4f6ecff2f1817">TER</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMWithdraw.html#a1d34ec1c32df933699eb3dedc40a3dd2">equalWithdrawTokens</a> (<a class="el" href="classripple_1_1Sandbox.html">Sandbox</a> &amp;<a class="el" href="classripple_1_1Transactor.html#a9acc4edc9b8f2a11a27fbcf5e93e2fe2">view</a>, <a class="el" href="namespaceripple.html#abbba3966df1925ac76f6d04c0aa1abe3">SLE</a> const &amp;ammSle, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const account, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;ammAccount, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amountBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amount2Balance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lptAMMBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokens, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokensWithdraw, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a> tfee, <a class="el" href="namespaceripple.html#a17a9a9b903b66e49f5413d82ce79f085">FreezeHandling</a> freezeHanding, <a class="el" href="namespaceripple.html#a0ef1f7396e14a26a1d23238d68149a63">WithdrawAll</a> withdrawAll, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const &amp;journal)</td></tr>
-<tr class="memdesc:a1d34ec1c32df933699eb3dedc40a3dd2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Equal-asset withdrawal (LPTokens) of some AMM instance pools shares represented by the number of LPTokens .  <a href="classripple_1_1AMMWithdraw.html#a1d34ec1c32df933699eb3dedc40a3dd2">More...</a><br /></td></tr>
-<tr class="separator:a1d34ec1c32df933699eb3dedc40a3dd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb95dba7343838e4528f838b5e14368e"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/tuple.html">std::tuple</a>&lt; <a class="el" href="namespaceripple.html#adfb760bc3e4ccb79d5d4f6ecff2f1817">TER</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMWithdraw.html#afb95dba7343838e4528f838b5e14368e">withdraw</a> (<a class="el" href="classripple_1_1Sandbox.html">Sandbox</a> &amp;<a class="el" href="classripple_1_1Transactor.html#a9acc4edc9b8f2a11a27fbcf5e93e2fe2">view</a>, <a class="el" href="namespaceripple.html#abbba3966df1925ac76f6d04c0aa1abe3">SLE</a> const &amp;ammSle, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;ammAccount, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;account, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amountBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amountWithdraw, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt; const &amp;amount2Withdraw, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokensAMMBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokensWithdraw, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a> tfee, <a class="el" href="namespaceripple.html#a17a9a9b903b66e49f5413d82ce79f085">FreezeHandling</a> freezeHandling, <a class="el" href="namespaceripple.html#a0ef1f7396e14a26a1d23238d68149a63">WithdrawAll</a> withdrawAll, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const &amp;journal)</td></tr>
-<tr class="memdesc:afb95dba7343838e4528f838b5e14368e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Withdraw requested assets and token from AMM into LP account.  <a href="classripple_1_1AMMWithdraw.html#afb95dba7343838e4528f838b5e14368e">More...</a><br /></td></tr>
-<tr class="separator:afb95dba7343838e4528f838b5e14368e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64842cf86a14dfe5dcc9019eb55511d0"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/tuple.html">std::tuple</a>&lt; <a class="el" href="namespaceripple.html#adfb760bc3e4ccb79d5d4f6ecff2f1817">TER</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMWithdraw.html#a64842cf86a14dfe5dcc9019eb55511d0">equalWithdrawTokens</a> (<a class="el" href="classripple_1_1Sandbox.html">Sandbox</a> &amp;<a class="el" href="classripple_1_1Transactor.html#a9acc4edc9b8f2a11a27fbcf5e93e2fe2">view</a>, <a class="el" href="namespaceripple.html#abbba3966df1925ac76f6d04c0aa1abe3">SLE</a> const &amp;ammSle, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const account, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;ammAccount, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amountBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amount2Balance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lptAMMBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokens, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokensWithdraw, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a> tfee, <a class="el" href="namespaceripple.html#a17a9a9b903b66e49f5413d82ce79f085">FreezeHandling</a> freezeHanding, <a class="el" href="namespaceripple.html#a0ef1f7396e14a26a1d23238d68149a63">WithdrawAll</a> withdrawAll, <a class="el" href="classripple_1_1XRPAmount.html">XRPAmount</a> const &amp;priorBalance, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const &amp;journal)</td></tr>
+<tr class="memdesc:a64842cf86a14dfe5dcc9019eb55511d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Equal-asset withdrawal (LPTokens) of some AMM instance pools shares represented by the number of LPTokens .  <a href="classripple_1_1AMMWithdraw.html#a64842cf86a14dfe5dcc9019eb55511d0">More...</a><br /></td></tr>
+<tr class="separator:a64842cf86a14dfe5dcc9019eb55511d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1c31e18b3be405513e9e68004e72f09"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/tuple.html">std::tuple</a>&lt; <a class="el" href="namespaceripple.html#adfb760bc3e4ccb79d5d4f6ecff2f1817">TER</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="el" href="classripple_1_1STAmount.html">STAmount</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMWithdraw.html#ad1c31e18b3be405513e9e68004e72f09">withdraw</a> (<a class="el" href="classripple_1_1Sandbox.html">Sandbox</a> &amp;<a class="el" href="classripple_1_1Transactor.html#a9acc4edc9b8f2a11a27fbcf5e93e2fe2">view</a>, <a class="el" href="namespaceripple.html#abbba3966df1925ac76f6d04c0aa1abe3">SLE</a> const &amp;ammSle, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;ammAccount, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;account, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amountBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;amountWithdraw, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt; const &amp;amount2Withdraw, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokensAMMBalance, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokensWithdraw, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a> tfee, <a class="el" href="namespaceripple.html#a17a9a9b903b66e49f5413d82ce79f085">FreezeHandling</a> freezeHandling, <a class="el" href="namespaceripple.html#a0ef1f7396e14a26a1d23238d68149a63">WithdrawAll</a> withdrawAll, <a class="el" href="classripple_1_1XRPAmount.html">XRPAmount</a> const &amp;priorBalance, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const &amp;journal)</td></tr>
+<tr class="memdesc:ad1c31e18b3be405513e9e68004e72f09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Withdraw requested assets and token from AMM into LP account.  <a href="classripple_1_1AMMWithdraw.html#ad1c31e18b3be405513e9e68004e72f09">More...</a><br /></td></tr>
+<tr class="separator:ad1c31e18b3be405513e9e68004e72f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab62952f0d0ed8f24c7a5dddcbbc5c9ae"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="namespaceripple.html#adfb760bc3e4ccb79d5d4f6ecff2f1817">TER</a>, bool &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1AMMWithdraw.html#ab62952f0d0ed8f24c7a5dddcbbc5c9ae">deleteAMMAccountIfEmpty</a> (<a class="el" href="classripple_1_1Sandbox.html">Sandbox</a> &amp;sb, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="namespaceripple.html#abbba3966df1925ac76f6d04c0aa1abe3">SLE</a> &gt; const ammSle, <a class="el" href="classripple_1_1STAmount.html">STAmount</a> const &amp;lpTokenBalance, <a class="el" href="classripple_1_1Issue.html">Issue</a> const &amp;issue1, <a class="el" href="classripple_1_1Issue.html">Issue</a> const &amp;issue2, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const &amp;journal)</td></tr>
 <tr class="separator:ab62952f0d0ed8f24c7a5dddcbbc5c9ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a433ee7a44770c882927f2eedf20e6c71"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespaceripple.html#af99ba2263d2a1e29207c40a35fc9f6b3">NotTEC</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#a433ee7a44770c882927f2eedf20e6c71">checkSeqProxy</a> (<a class="el" href="classripple_1_1ReadView.html">ReadView</a> const &amp;<a class="el" href="classripple_1_1Transactor.html#a9acc4edc9b8f2a11a27fbcf5e93e2fe2">view</a>, <a class="el" href="classripple_1_1STTx.html">STTx</a> const &amp;tx, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
@@ -426,8 +426,8 @@ Static Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a1d34ec1c32df933699eb3dedc40a3dd2" name="a1d34ec1c32df933699eb3dedc40a3dd2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d34ec1c32df933699eb3dedc40a3dd2">&#9670;&#160;</a></span>equalWithdrawTokens() <span class="overload">[1/2]</span></h2>
+<a id="a64842cf86a14dfe5dcc9019eb55511d0" name="a64842cf86a14dfe5dcc9019eb55511d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64842cf86a14dfe5dcc9019eb55511d0">&#9670;&#160;</a></span>equalWithdrawTokens() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -510,6 +510,12 @@ Static Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classripple_1_1XRPAmount.html">XRPAmount</a> const &amp;&#160;</td>
+          <td class="paramname"><em>priorBalance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const &amp;&#160;</td>
           <td class="paramname"><em>journal</em>&#160;</td>
         </tr>
@@ -539,17 +545,18 @@ Static Private Member Functions</h2></td></tr>
     <tr><td class="paramname">lpTokensWithdraw</td><td>amount of tokens to withdraw </td></tr>
     <tr><td class="paramname">tfee</td><td>trading fee in basis points </td></tr>
     <tr><td class="paramname">withdrawAll</td><td>if withdrawing all lptokens </td></tr>
+    <tr><td class="paramname">priorBalance</td><td>balance before fees </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00715">715</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00749">749</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
-<a id="afb95dba7343838e4528f838b5e14368e" name="afb95dba7343838e4528f838b5e14368e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afb95dba7343838e4528f838b5e14368e">&#9670;&#160;</a></span>withdraw() <span class="overload">[1/2]</span></h2>
+<a id="ad1c31e18b3be405513e9e68004e72f09" name="ad1c31e18b3be405513e9e68004e72f09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1c31e18b3be405513e9e68004e72f09">&#9670;&#160;</a></span>withdraw() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -632,6 +639,12 @@ Static Private Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classripple_1_1XRPAmount.html">XRPAmount</a> const &amp;&#160;</td>
+          <td class="paramname"><em>priorBalance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const &amp;&#160;</td>
           <td class="paramname"><em>journal</em>&#160;</td>
         </tr>
@@ -661,12 +674,13 @@ Static Private Member Functions</h2></td></tr>
     <tr><td class="paramname">lpTokensWithdraw</td><td>amount of lptokens to withdraw </td></tr>
     <tr><td class="paramname">tfee</td><td>trading fee in basis points </td></tr>
     <tr><td class="paramname">withdrawAll</td><td>if withdraw all lptokens </td></tr>
+    <tr><td class="paramname">priorBalance</td><td>balance before fees </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00480">480</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00481">481</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -728,7 +742,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00684">684</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00718">718</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -948,7 +962,7 @@ Static Private Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00652">652</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00685">685</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -1046,7 +1060,7 @@ Static Private Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 <p>a = (t/T) * A (5) b = (t/T) * B (6) where A,B: current pool composition T: current balance of outstanding LPTokens a: balance of asset A being withdrawn b: balance of asset B being withdrawn t: balance of LPTokens issued to LP after a successful transaction Use equation 5 to compute t, given the amount in Asset1Out. Let this be Z Use equation 6 to compute the amount of asset2, given Z. Let the computed amount of asset2 be X If X &lt;= amount in Asset2Out: The amount of asset1 to be withdrawn is the one specified in Asset1Out The amount of asset2 to be withdrawn is X The amount of LPTokens redeemed is Z If X&gt; amount in Asset2Out: Use equation 5 to compute t, given the amount in Asset2Out. Let this be Q Use equation 6 to compute the amount of asset1, given Q. Let the computed amount of asset1 be W The amount of asset2 to be withdrawn is the one specified in Asset2Out The amount of asset1 to be withdrawn is W The amount of LPTokens redeemed is Q </p>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00814">814</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00851">851</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -1130,7 +1144,7 @@ Static Private Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 <p>t = T * (c - sqrt(c**2 - 4*R))/2 where R = b/B, c = R*fee + 2 - fee Use equation 7 to compute the t, given the amount in Asset1Out. </p>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00862">862</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00899">899</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -1221,7 +1235,7 @@ Static Private Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 <p>Use equation 8 to compute the amount of asset1, given the redeemed t represented by LPTokens. Let this be Y. If (amount exists for Asset1Out &amp; Y &gt;= amount in Asset1Out) || (amount field does not exist for Asset1Out): The amount of asset out is Y The amount of LPTokens redeemed is LPTokens Equation 8 solves equation 7 </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="classripple_1_1AMMWithdraw.html#a6f66fea4d10c565cbc522980f248eee2" title="Single asset withdrawal (Asset1Out) equivalent to the amount specified in Asset1Out.">singleWithdraw</a> for b. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00898">898</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00935">935</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -1312,7 +1326,7 @@ Static Private Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 <p>a. amount of asset1 if specified (not 0) in Asset1Out specifies the minimum amount of asset1 that the trader is willing to withdraw. b. The effective price of asset traded out does not exceed the amount specified in EPrice The effective price (EP) of a trade is defined as the ratio of the tokens the trader sold or swapped in (Token B) and the token they got in return or swapped out (Token A). EP(B/A) = b/a (III) b = B * (t1**2 + t1*(f - 2))/(t1*f - 1) (8) where t1 = t/T Use equations 8 &amp; III and amount in EPrice to compute the two variables: asset in as LPTokens. Let this be X asset out as that in Asset1Out. Let this be Y If (amount exists for Asset1Out &amp; Y &gt;= amount in Asset1Out) || (amount field does not exist for Asset1Out): The amount of assetOut is given by Y The amount of LPTokens is given by X </p>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00947">947</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00984">984</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -1342,7 +1356,7 @@ Static Private Member Functions</h2></td></tr>
 
 <p>Check from the flags if it's withdraw all. </p>
 
-<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l00992">992</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMWithdraw_8cpp_source.html#l01029">1029</a> of file <a class="el" href="AMMWithdraw_8cpp_source.html">AMMWithdraw.cpp</a>.</p>
 
 </div>
 </div>
@@ -1371,7 +1385,7 @@ Static Private Member Functions</h2></td></tr>
 
 <p>Process the transaction. </p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00838">838</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00852">852</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1469,7 +1483,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00266">266</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00267">267</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1497,7 +1511,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00338">338</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00339">339</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1535,7 +1549,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00193">193</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00194">194</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1563,7 +1577,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00481">481</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00482">482</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1601,7 +1615,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00165">165</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00166">166</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1651,7 +1665,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00386">386</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00387">387</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1678,7 +1692,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00446">446</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00447">447</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1707,7 +1721,7 @@ Static Private Member Functions</h2></td></tr>
 
 <p>Reimplemented in <a class="el" href="classripple_1_1Change.html#a69cd5bf7979d79ffc7d2a7b813ff967e">ripple::Change</a>, <a class="el" href="classripple_1_1CreateOffer.html#a51e243eec385d66e97acbc6b59e6b95c">ripple::CreateOffer</a>, and <a class="el" href="classripple_1_1SetSignerList.html#a81cc900e9e0dc4096c3c8f63c1371ffe">ripple::SetSignerList</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00440">440</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00441">441</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1774,7 +1788,7 @@ Static Private Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00183">183</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00184">184</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1804,7 +1818,7 @@ Static Private Member Functions</h2></td></tr>
 
 <p>Reset the context, discarding any changes made and adjust the fee. </p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00791">791</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00805">805</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1832,7 +1846,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00368">368</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00369">369</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1859,7 +1873,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00246">246</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00247">247</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1887,7 +1901,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00491">491</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00492">492</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1915,7 +1929,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00565">565</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00566">566</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1943,7 +1957,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00831">831</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00845">845</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
