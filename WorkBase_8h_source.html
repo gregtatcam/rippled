@@ -360,30 +360,32 @@ $(function() {
 <div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        <span class="keywordflow">return</span> fail(ec);</div>
 <div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span> </div>
 <div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    close();</div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    assert(cb_);</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    cb_(ec, lastEndpoint_, std::move(res_));</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    cb_ = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>}</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;</div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="keywordtype">void</span></div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno"><a class="line" href="classripple_1_1detail_1_1WorkBase.html#aa5970ed1442d9ec172b4f9f548089f8f">  292</a></span><a class="code hl_function" href="classripple_1_1detail_1_1WorkBase.html#aa5970ed1442d9ec172b4f9f548089f8f">WorkBase&lt;Impl&gt;::close</a>()</div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>{</div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    <span class="keywordflow">if</span> (socket_.is_open())</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    {</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        <a class="code hl_typedef" href="classripple_1_1detail_1_1WorkBase.html#ab71e779cbf5260362f0e72b88e060449">error_code</a> ec;</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        socket_.shutdown(boost::asio::socket_base::shutdown_send, ec);</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>        <span class="keywordflow">if</span> (ec)</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>        socket_.close(ec);</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    }</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>}</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span> </div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>}  <span class="comment">// namespace detail</span></div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    ASSERT(</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        cb_ != <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>        <span class="stringliteral">&quot;ripple::detail::WorkBase::onResponse : callback is set&quot;</span>);</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    cb_(ec, lastEndpoint_, std::move(res_));</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    cb_ = <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>}</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span><span class="keywordtype">void</span></div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno"><a class="line" href="classripple_1_1detail_1_1WorkBase.html#aa5970ed1442d9ec172b4f9f548089f8f">  294</a></span><a class="code hl_function" href="classripple_1_1detail_1_1WorkBase.html#aa5970ed1442d9ec172b4f9f548089f8f">WorkBase&lt;Impl&gt;::close</a>()</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>{</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <span class="keywordflow">if</span> (socket_.is_open())</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    {</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>        <a class="code hl_typedef" href="classripple_1_1detail_1_1WorkBase.html#ab71e779cbf5260362f0e72b88e060449">error_code</a> ec;</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>        socket_.shutdown(boost::asio::socket_base::shutdown_send, ec);</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>        <span class="keywordflow">if</span> (ec)</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        socket_.close(ec);</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    }</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>}</div>
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span> </div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>}  <span class="comment">// namespace ripple</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>}  <span class="comment">// namespace detail</span></div>
 <div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>}  <span class="comment">// namespace ripple</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="abasic_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div></div>
 <div class="ttc" id="abind_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/functional/bind.html">std::bind</a></div><div class="ttdeci">T bind(T... args)</div></div>
 <div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html">ripple::detail::WorkBase</a></div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00040">WorkBase.h:41</a></div></div>
@@ -405,7 +407,7 @@ $(function() {
 <div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_a90a61f92e5950305e7da2e2628329b54"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#a90a61f92e5950305e7da2e2628329b54">ripple::detail::WorkBase::req_</a></div><div class="ttdeci">request_type req_</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00065">WorkBase.h:65</a></div></div>
 <div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_a9b606f6133be9ca540005489df69dc52"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#a9b606f6133be9ca540005489df69dc52">ripple::detail::WorkBase::onResponse</a></div><div class="ttdeci">void onResponse(error_code const &amp;ec)</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00279">WorkBase.h:279</a></div></div>
 <div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_aa0dc5c38ff210dd957ab4a2b9e5b21b6"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#aa0dc5c38ff210dd957ab4a2b9e5b21b6">ripple::detail::WorkBase::endpoint_type</a></div><div class="ttdeci">boost::asio::ip::tcp::endpoint endpoint_type</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00044">WorkBase.h:44</a></div></div>
-<div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_aa5970ed1442d9ec172b4f9f548089f8f"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#aa5970ed1442d9ec172b4f9f548089f8f">ripple::detail::WorkBase::close</a></div><div class="ttdeci">void close()</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00292">WorkBase.h:292</a></div></div>
+<div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_aa5970ed1442d9ec172b4f9f548089f8f"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#aa5970ed1442d9ec172b4f9f548089f8f">ripple::detail::WorkBase::close</a></div><div class="ttdeci">void close()</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00294">WorkBase.h:294</a></div></div>
 <div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_aaeae0dce9809a37fc3ac02282a0c04ba"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#aaeae0dce9809a37fc3ac02282a0c04ba">ripple::detail::WorkBase::onStart</a></div><div class="ttdeci">void onStart()</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00243">WorkBase.h:243</a></div></div>
 <div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_ab12135752c43c529435191891e4dca24"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#ab12135752c43c529435191891e4dca24">ripple::detail::WorkBase::port_</a></div><div class="ttdeci">std::string port_</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00059">WorkBase.h:59</a></div></div>
 <div class="ttc" id="aclassripple_1_1detail_1_1WorkBase_html_ab6c041f493741ae8de70314cbaf69d1c"><div class="ttname"><a href="classripple_1_1detail_1_1WorkBase.html#ab6c041f493741ae8de70314cbaf69d1c">ripple::detail::WorkBase::resolver_type</a></div><div class="ttdeci">boost::asio::ip::tcp::resolver resolver_type</div><div class="ttdef"><b>Definition:</b> <a href="WorkBase_8h_source.html#l00052">WorkBase.h:52</a></div></div>
