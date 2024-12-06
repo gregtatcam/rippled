@@ -103,10 +103,11 @@ public:
         , prevStep_(ctx.prevStep)
         , isLast_(ctx.isLast)
         , isDirectBetweenHolders_(
-              ctx.prevStep && !ctx.prevStep->bookStepBook() && ctx.isLast &&
-              ctx.strandDeliver.holds<MPTIssue>() &&
-              mptIssue_ == ctx.strandDeliver.get<MPTIssue>() &&
-              dst_ == ctx.strandDst)
+              mptIssue_ == ctx.strandDeliver &&
+              ((ctx.isFirst && src != mptIssue_.getIssuer() &&
+                dst_ != mptIssue_.getIssuer()) ||
+               (ctx.prevStep && !ctx.prevStep->bookStepBook() && ctx.isLast &&
+                dst_ == ctx.strandDst)))
         , j_(ctx.j)
     {
     }
@@ -371,14 +372,17 @@ DirectMPTPaymentStep::check(
     StrandContext const& ctx,
     std::shared_ptr<const SLE> const& sleSrc) const
 {
-    // Since this is a payment a MPToken must be present.  Perform all
+    auto const& mptID = mptIssue_.getMptID();
+    // Since this is a payment, MPToken must be present.  Perform all
     // MPToken related checks.
-    if (!ctx.view.exists(keylet::mptIssuance(mptIssue_.getMptID())))
+    if (!ctx.view.exists(keylet::mptIssuance(mptID)))
         return tecMPT_ISSUANCE_NOT_FOUND;
-    if (src_ != mptIssue_.getIssuer())
+
+    auto const& issuer = mptIssue_.getIssuer();
+    if (src_ != issuer)
     {
-        auto const mptokenID = keylet::mptoken(mptIssue_.getMptID(), src_);
-        if (!ctx.view.exists(mptokenID))
+        auto const key = keylet::mptoken(mptID, src_);
+        if (!ctx.view.exists(key))
             return tecNO_AUTH;
 
         if (auto const ter = requireAuth(ctx.view, mptIssue_, src_);
@@ -386,10 +390,10 @@ DirectMPTPaymentStep::check(
             return ter;
     }
 
-    if (dst_ != mptIssue_.getIssuer())
+    if (dst_ != issuer)
     {
-        auto const mptokenID = keylet::mptoken(mptIssue_.getMptID(), dst_);
-        if (!ctx.view.exists(mptokenID))
+        auto const key = keylet::mptoken(mptID, dst_);
+        if (!ctx.view.exists(key))
             return tecNO_AUTH;
 
         if (auto const ter = requireAuth(ctx.view, mptIssue_, dst_);
@@ -397,16 +401,30 @@ DirectMPTPaymentStep::check(
             return ter;
     }
 
-    // Direct MPT payment between holders
-    if (ctx.isFirst && ctx.strandDeliver.holds<MPTIssue>() &&
-        mptIssue_ == ctx.strandDeliver.get<MPTIssue>() && dst_ != ctx.strandDst)
+    // Direct MPT payment
+    if (mptIssue_ == ctx.strandDeliver &&
+        (ctx.isFirst || (ctx.prevStep && !ctx.prevStep->bookStepBook())))
     {
-        if (isFrozen(ctx.view, src_, mptIssue_) ||
-            isFrozen(ctx.view, ctx.strandDst, mptIssue_))
-            return tecMPT_LOCKED;
+        // Between holders
+        if (isDirectBetweenHolders_)
+        {
+            auto const& holder = ctx.isFirst ? src_ : dst_;
+            // Payment between the holders
+            if (isFrozen(ctx.view, holder, mptIssue_))
+                return tecMPT_LOCKED;
 
-        if (auto const ter =
-                canTransfer(ctx.view, mptIssue_, src_, ctx.strandDst);
+            if (auto const ter =
+                    canTransfer(ctx.view, mptIssue_, holder, ctx.strandDst);
+                ter != tesSUCCESS)
+                return ter;
+        }
+    }
+    // Cross-token MPT payment via DEX
+    else
+    {
+        auto const account = ctx.isFirst ? src_ : dst_;
+        if (auto const ter = isMPTDEXAllowed(
+                ctx.view, mptIssue_, account, mptIssue_.getIssuer());
             ter != tesSUCCESS)
             return ter;
     }
@@ -416,9 +434,18 @@ DirectMPTPaymentStep::check(
 
 TER
 DirectMPTOfferCrossingStep::check(
-    StrandContext const&,
+    StrandContext const& ctx,
     std::shared_ptr<const SLE> const&) const
 {
+    auto const& holder = ctx.isFirst ? src_ : dst_;
+    auto const& issuer = mptIssue_.getIssuer();
+    if (holder != issuer)
+    {
+        if (auto const ter =
+                isMPTDEXAllowed(ctx.view, mptIssue_, holder, issuer);
+            ter != tesSUCCESS)
+            return ter;
+    }
     return tesSUCCESS;
 }
 
@@ -873,7 +900,8 @@ MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
         return terNO_ACCOUNT;
     }
 
-    // pure issue/redeem can't be frozen
+    // pure issue/redeem can't be frozen - can this happen? can only be an
+    // endpoint
     if (!(ctx.isLast && ctx.isFirst))
     {
         if (isFrozen(ctx.view, src_, mptIssue_) ||
@@ -887,34 +915,7 @@ MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
         JLOG(j_.warn()) << "MPTEndpointStep: MPT can only be an endpoint";
         return terNO_RIPPLE;
     }
-#if 0
-    { // TODO MPT is this needed? this step can only be an endpoint.
-        // it can outout mpt or it can have mpt as an input
-        // two MPT endpoint steps can also be connected
-        if (ctx.seenBookOuts.count(mptIssue_)) {
-            if (!ctx.prevStep) {
-                assert(0);  // prev seen book without a prev step!?!
-                return temBAD_PATH_LOOP;
-            }
 
-            // This is OK if the previous step is a book step that outputs this
-            // issue
-            if (auto book = ctx.prevStep->bookStepBook()) {
-                if (book->out.holds<MPTIssue>() &&
-                    book->out.get<MPTIssue>() != mptIssue_)
-                    return temBAD_PATH_LOOP;
-            }
-        }
-
-        if (!ctx.seenDirectAssets[0].insert(mptIssue_).second ||
-            !ctx.seenDirectAssets[1].insert(mptIssue_).second) {
-            JLOG(j_.debug())
-                << "DirectStepI: loop detected: Index: " << ctx.strandSize
-                << ' ' << *this;
-            return temBAD_PATH_LOOP;
-        }
-    }
-#endif
     return static_cast<TDerived const*>(this)->check(ctx, sleSrc);
 }
 

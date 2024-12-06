@@ -21,6 +21,7 @@
 
 #include <xrpld/app/misc/AMMHelpers.h>
 #include <xrpld/app/misc/AMMUtils.h>
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/ledger/Sandbox.h>
 #include <xrpld/ledger/View.h>
 #include <xrpl/basics/Number.h>
@@ -307,6 +308,15 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
         if (auto const ter = checkAmount(amount2Balance, amount2Balance))
             return ter;
     }
+
+    if (auto const ter = isMPTTxAllowed(
+            ctx.view, ttAMM_WITHDRAW, ctx.tx[sfAsset], accountID);
+        ter != tesSUCCESS)
+        return ter;
+    if (auto const ter = isMPTTxAllowed(
+            ctx.view, ttAMM_WITHDRAW, ctx.tx[sfAsset2], accountID);
+        ter != tesSUCCESS)
+        return ter;
 
     return tesSUCCESS;
 }

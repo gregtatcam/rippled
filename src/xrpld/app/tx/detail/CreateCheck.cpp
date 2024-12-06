@@ -18,6 +18,7 @@
 //==============================================================================
 
 #include <xrpld/app/ledger/Ledger.h>
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/tx/detail/CreateCheck.h>
 #include <xrpl/basics/Log.h>
 #include <xrpl/protocol/Feature.h>
@@ -180,6 +181,15 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
         JLOG(ctx.j.warn()) << "Creating a check that has already expired.";
         return tecEXPIRED;
     }
+
+    if (auto const ter = isMPTTxAllowed(
+            ctx.view,
+            ttCHECK_CREATE,
+            ctx.tx[sfSendMax].asset(),
+            ctx.tx[sfAccount]);
+        ter != tesSUCCESS)
+        return ter;
+
     return tesSUCCESS;
 }
 

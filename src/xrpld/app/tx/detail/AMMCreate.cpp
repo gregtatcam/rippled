@@ -22,6 +22,7 @@
 #include <xrpld/app/ledger/OrderBookDB.h>
 #include <xrpld/app/misc/AMMHelpers.h>
 #include <xrpld/app/misc/AMMUtils.h>
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/ledger/Sandbox.h>
 #include <xrpld/ledger/View.h>
 #include <xrpl/protocol/AMMCore.h>
@@ -220,14 +221,14 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     if (auto const ter = clawbackDisabled(amount2.asset()); ter != tesSUCCESS)
         return ter;
 
-    auto checkMPT = [&](Asset const& asset) {
-        if (asset.holds<MPTIssue>())
-            return ctx.view.read(keylet::mptIssuance(
-                       asset.get<MPTIssue>().getMptID())) != nullptr;
-        return true;
-    };
-    if (!checkMPT(amount.asset()) || !checkMPT(amount2.asset()))
-        return tecOBJECT_NOT_FOUND;
+    if (auto const ter =
+            isMPTTxAllowed(ctx.view, ttAMM_CREATE, amount.asset(), accountID);
+        ter != tesSUCCESS)
+        return ter;
+    if (auto const ter =
+            isMPTTxAllowed(ctx.view, ttAMM_CREATE, amount2.asset(), accountID);
+        ter != tesSUCCESS)
+        return ter;
 
     return tesSUCCESS;
 }

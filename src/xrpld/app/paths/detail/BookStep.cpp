@@ -18,6 +18,7 @@
 //==============================================================================
 
 #include <xrpld/app/misc/AMMUtils.h>
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/paths/AMMLiquidity.h>
 #include <xrpld/app/paths/AMMOffer.h>
 #include <xrpld/app/paths/detail/FlatSets.h>
@@ -1384,6 +1385,14 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
                     keylet::mptIssuance(book_.in.get<MPTIssue>().getMptID());
                 if (auto const sle = view.read(mptID); !sle)
                     return terNO_MPT;
+
+                if (auto const ter = isMPTDEXAllowed(
+                        view,
+                        book_.in,
+                        book_.in.getIssuer(),
+                        book_.in.getIssuer());
+                    ter != tesSUCCESS)
+                    return ter;
             }
         }
     }

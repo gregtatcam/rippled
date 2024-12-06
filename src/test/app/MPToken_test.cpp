@@ -774,6 +774,7 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.pay(carol, bob, 2, tecMPT_LOCKED);
             // Issuer can send
             mptAlice.pay(alice, bob, 3);
+
             // Holder can send back to issuer
             mptAlice.pay(bob, alice, 4);
 
@@ -970,10 +971,10 @@ class MPToken_test : public beast::unit_test::suite
             auto const MPT = mptAlice["MPT"];
             env(pay(alice, carol, MPT(100)),
                 sendmax(XRP(100)),
-                ter(temMALFORMED));
+                ter(temDISABLED));
             env(pay(alice, carol, MPT(100)),
                 delivermin(XRP(100)),
-                ter(temMALFORMED));
+                ter(temDISABLED));
         }
 
         // build_path is invalid if MPT
@@ -1610,20 +1611,57 @@ class MPToken_test : public beast::unit_test::suite
         Account const carol = Account("carol");
         auto const USD = gw["USD"];
 
+        // Blocking flags
+        for (auto flags :
+             {tfMPTCanLock |
+                  tfMPTCanTransfer,  // locked, issuer and holder fails
+              tfMPTRequireAuth |
+                  tfMPTCanTransfer,  // not authorized, holder fails
+              tfMPTCanTrade,         // can't transfer, holder fails
+              tfMPTCanLock})         // lock mptoken, holder fails
+        {
+            Env env{*this, features};
+
+            MPTTester mpt(env, gw, {.holders = {&alice}});
+
+            auto const lockMPToken =
+                (flags & (tfMPTCanLock | tfMPTCanTransfer)) == tfMPTCanLock;
+            auto const lockMPTIssue =
+                (flags & (tfMPTCanLock | tfMPTCanTransfer)) ==
+                (tfMPTCanLock | tfMPTCanTransfer);
+            flags = lockMPToken ? (flags | tfMPTCanTransfer) : flags;
+
+            mpt.create({.ownerCount = 1, .holderCount = 0, .flags = flags});
+            auto const MPT = mpt["MPT"];
+
+            if ((flags & tfMPTRequireAuth) == 0)
+            {
+                mpt.authorize({.account = &alice});
+                mpt.pay(gw, alice, 200);
+            }
+            if (lockMPToken)
+                mpt.set({.holder = &alice, .flags = tfMPTLock});
+            else if (lockMPTIssue)
+                mpt.set({.flags = tfMPTLock});
+
+            auto const err =
+                flags & tfMPTRequireAuth ? tecUNFUNDED_OFFER : tecNO_PERMISSION;
+
+            env(offer(alice, XRP(100), MPT(101)), ter(err));
+            env.close();
+        }
+
         // MPTokenV2 is disabled
         {
             Env env{*this, features - featureMPTokensV2};
 
-            MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
+            MPTTester mpt(env, gw, {.holders = {&alice}});
 
             mpt.create(
                 {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
 
             mpt.authorize({.account = &alice});
             mpt.pay(gw, alice, 200);
-
-            mpt.authorize({.account = &carol});
-            mpt.pay(gw, carol, 200);
 
             env(offer(alice, XRP(100), mpt.mpt(101)), ter(temDISABLED));
             env.close();
@@ -1636,7 +1674,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -1666,7 +1706,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             env(trust(alice, USD(2'000)));
@@ -1706,13 +1748,17 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt1(env, gw, {.holders = {&alice, &carol}});
             mpt1.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT1 = mpt1["MPT1"];
 
             MPTTester mpt2(
                 env, gw, {.holders = {&alice, &carol}, .fund = false});
             mpt2.create(
-                {.ownerCount = 2, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 2,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT2 = mpt2["MPT2"];
 
             mpt1.authorize({.account = &alice});
@@ -1755,13 +1801,79 @@ class MPToken_test : public beast::unit_test::suite
         Account const bob = Account("bob");
         auto const USD = gw["USD"];
 
+        // Blocking flags
+        for (auto flags :
+             {tfMPTCanLock |
+                  tfMPTCanTransfer,  // locked, issuer and holder fails
+              tfMPTRequireAuth |
+                  tfMPTCanTransfer,  // not authorized, holder fails
+              tfMPTCanTrade,         // can't transfer, holder fails
+              tfMPTCanLock})         // lock mptoken, holder fails
+        {
+            Env env{*this, features};
+
+            MPTTester mpt(env, gw, {.holders = {&alice}});
+
+            auto const lockMPToken =
+                (flags & (tfMPTCanLock | tfMPTCanTransfer)) == tfMPTCanLock;
+            auto const lockMPTIssue =
+                (flags & (tfMPTCanLock | tfMPTCanTransfer)) ==
+                (tfMPTCanLock | tfMPTCanTransfer);
+            flags = lockMPToken ? (flags | tfMPTCanTransfer) : flags;
+
+            mpt.create({.ownerCount = 1, .holderCount = 0, .flags = flags});
+            auto const MPT = mpt["MPT"];
+
+            if ((flags & tfMPTRequireAuth) == 0)
+            {
+                mpt.authorize({.account = &alice});
+                mpt.pay(gw, alice, 200);
+            }
+            if (lockMPToken)
+                mpt.set({.holder = &alice, .flags = tfMPTLock});
+            else if (lockMPTIssue)
+                mpt.set({.flags = tfMPTLock});
+
+            auto const err =
+                flags & tfMPTRequireAuth ? tecUNFUNDED_OFFER : tecNO_PERMISSION;
+
+            env(offer(alice, XRP(100), MPT(101)), ter(err));
+            env.close();
+        }
+
+        // Loop
+        {}
+
+        // MPTokenV2 is disabled
+        {
+            Env env{*this, features - featureMPTokensV2};
+
+            MPTTester mpt(env, gw, {.holders = {&alice}});
+
+            mpt.create(
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT = mpt["MPT"];
+
+            mpt.authorize({.account = &alice});
+
+            env(pay(gw, alice, MPT(101)),
+                test::jtx::path(~MPT),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment),
+                ter(temDISABLED));
+        }
+
         // MPT/XRP
         {
             Env env{*this, features};
             MPTTester mpt(env, gw, {.holders = {&alice, &carol, &bob}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -1796,7 +1908,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.holders = {&alice, &carol, &bob}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             env(trust(alice, USD(2'000)));
@@ -1840,7 +1954,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.holders = {&alice, &carol, &bob}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             env(trust(alice, USD(2'000)), txflags(tfClearNoRipple));
@@ -1879,13 +1995,17 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt1(env, gw, {.holders = {&alice, &carol, &bob}});
             mpt1.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT1 = mpt1["MPT1"];
 
             MPTTester mpt2(
                 env, gw, {.holders = {&alice, &carol, &bob}, .fund = false});
             mpt2.create(
-                {.ownerCount = 2, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 2,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT2 = mpt2["MPT2"];
 
             mpt1.authorize({.account = &alice});
@@ -1924,7 +2044,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.fund = false});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -1953,7 +2075,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.fund = false});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -1980,14 +2104,14 @@ class MPToken_test : public beast::unit_test::suite
             env.close();
 
             MPTTester mpt1(env, gw, {.fund = false});
-            mpt1.create({.flags = tfMPTCanTransfer});
+            mpt1.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT1 = mpt1["MPT1"];
             mpt1.authorize({.account = &alice});
             mpt1.authorize({.account = &bob});
             mpt1.pay(gw, alice, 10'100);
 
             MPTTester mpt2(env, gw, {.fund = false});
-            mpt2.create({.flags = tfMPTCanTransfer});
+            mpt2.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT2 = mpt2["MPT1"];
             mpt2.authorize({.account = &alice});
             mpt2.authorize({.account = &bob});
@@ -2026,7 +2150,7 @@ class MPToken_test : public beast::unit_test::suite
 
             auto createMPT = [&]() -> std::pair<MPTTester, MPT> {
                 MPTTester mpt(env, gw, {.fund = false});
-                mpt.create({.flags = tfMPTCanTransfer});
+                mpt.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
                 mpt.authorize({.account = &alice});
                 mpt.pay(gw, alice, 2'000);
                 return {mpt, mpt["MPT"]};
@@ -2079,7 +2203,9 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.holders = {&dan, &carol}});
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
             mpt.authorize({.account = &dan});
             mpt.authorize({.account = &carol});
@@ -2102,7 +2228,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.holders = {&alice, &dan}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -2130,7 +2258,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw1, {.holders = {&alice, &dan}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -2160,10 +2290,14 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt1(env, gw1, {.holders = {&carol}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
             mpt1.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT1 = mpt1["MPT1"];
 
             mpt.authorize({.account = &alice});
@@ -2196,7 +2330,9 @@ class MPToken_test : public beast::unit_test::suite
             MPTTester mpt(env, gw, {.holders = {&alice, &bob}});
 
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
 
             mpt.authorize({.account = &alice});
@@ -2232,7 +2368,9 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.holders = {&alice, &carol}});
             mpt.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
             mpt.authorize({.account = &alice});
             mpt.authorize({.account = &carol});
@@ -2240,7 +2378,9 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt1(env, gw1, {.holders = {&bob, &dan}});
             mpt1.create(
-                {.ownerCount = 1, .holderCount = 0, .flags = tfMPTCanTransfer});
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT1 = mpt1["MPT1"];
             mpt1.authorize({.account = &bob});
             mpt1.pay(gw1, bob, 200);

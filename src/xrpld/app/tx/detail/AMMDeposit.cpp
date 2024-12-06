@@ -21,6 +21,7 @@
 
 #include <xrpld/app/misc/AMMHelpers.h>
 #include <xrpld/app/misc/AMMUtils.h>
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/ledger/Sandbox.h>
 #include <xrpld/ledger/View.h>
 #include <xrpl/protocol/AMMCore.h>
@@ -347,6 +348,15 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
             return tecINSUF_RESERVE_LINE;
         }
     }
+
+    if (auto const ter =
+            isMPTTxAllowed(ctx.view, ttAMM_DEPOSIT, ctx.tx[sfAsset], accountID);
+        ter != tesSUCCESS)
+        return ter;
+    if (auto const ter = isMPTTxAllowed(
+            ctx.view, ttAMM_DEPOSIT, ctx.tx[sfAsset2], accountID);
+        ter != tesSUCCESS)
+        return ter;
 
     return tesSUCCESS;
 }

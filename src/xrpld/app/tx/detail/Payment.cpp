@@ -56,7 +56,7 @@ Payment::preflight(PreflightContext const& ctx)
         ctx.tx[sfAmount].holds<MPTIssue>() &&
         (ctx.tx.isFieldPresent(sfSendMax) ||
          ctx.tx.isFieldPresent(sfDeliverMin) || ctx.tx.isFieldPresent(sfPaths)))
-        return temMALFORMED;
+        return temDISABLED;
 
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
         return ret;

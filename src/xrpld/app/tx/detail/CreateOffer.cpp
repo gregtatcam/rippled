@@ -18,6 +18,7 @@
 //==============================================================================
 
 #include <xrpld/app/ledger/OrderBookDB.h>
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/paths/Flow.h>
 #include <xrpld/app/tx/detail/CreateOffer.h>
 #include <xrpld/ledger/PaymentSandbox.h>
@@ -160,6 +161,15 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
         JLOG(ctx.j.debug()) << "Offer involves frozen asset";
         return tecFROZEN;
     }
+
+    if (auto const ter =
+            isMPTTxAllowed(ctx.view, ttOFFER_CREATE, saTakerPays.asset(), id);
+        ter != tesSUCCESS)
+        return ter;
+    if (auto const ter =
+            isMPTTxAllowed(ctx.view, ttOFFER_CREATE, saTakerGets.asset(), id);
+        ter != tesSUCCESS)
+        return ter;
 
     if (accountFunds(
             ctx.view,

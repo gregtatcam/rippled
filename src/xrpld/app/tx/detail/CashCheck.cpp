@@ -389,22 +389,19 @@ CashCheck::doApply()
             bool const checkCashMakesTrustLine =
                 psb.rules().enabled(featureCheckCashMakesTrustLine);
 
-            std::optional<std::function<void()>> trustlineCb;
-            auto fixupCb = [&]() {
-                if (trustlineCb)
-                    (*trustlineCb)();
-            };
+            std::optional<Keylet> trustLineKey;
+            STAmount savedLimit;
+            bool destLow = false;
             if (flowDeliver.holds<Issue>())
             {
                 // If a trust line does not exist yet create one.
                 Issue const& trustLineIssue = flowDeliver.get<Issue>();
                 AccountID const issuer = flowDeliver.getIssuer();
                 AccountID const truster = issuer == account_ ? srcId : account_;
-                Keylet const trustLineKey =
-                    keylet::line(truster, trustLineIssue);
-                bool const destLow = issuer > account_;
+                trustLineKey = keylet::line(truster, trustLineIssue);
+                destLow = issuer > account_;
 
-                if (checkCashMakesTrustLine && !psb.exists(trustLineKey))
+                if (checkCashMakesTrustLine && !psb.exists(*trustLineKey))
                 {
                     // 1. Can the check casher meet the reserve for the trust
                     // line?
@@ -440,7 +437,7 @@ CashCheck::doApply()
                                 destLow,                        // is dest low?
                                 issuer,                         // source
                                 account_,                       // destination
-                                trustLineKey.key,               // ledger index
+                                trustLineKey->key,              // ledger index
                                 sleDst,                         // Account to add to
                                 false,                          // authorize account
                                 (sleDst->getFlags() & lsfDefaultRipple) == 0,
@@ -467,21 +464,13 @@ CashCheck::doApply()
                 // limit on their trust line.  So we tweak the trust line limits
                 // before calling flow and then restore the trust line limits
                 // afterwards.
-                auto const sleTrustLine = psb.peek(trustLineKey);
+                auto const sleTrustLine = psb.peek(*trustLineKey);
                 if (!sleTrustLine)
                     return tecNO_LINE;
 
                 SF_AMOUNT const& tweakedLimit =
                     destLow ? sfLowLimit : sfHighLimit;
-                STAmount const savedLimit = sleTrustLine->at(tweakedLimit);
-
-                // Make sure the tweaked limits are restored when we leave
-                // scope.
-                trustlineCb =
-                    [&psb, &trustLineKey, &tweakedLimit, &savedLimit]() {
-                        if (auto const sleTrustLine = psb.peek(trustLineKey))
-                            sleTrustLine->at(tweakedLimit) = savedLimit;
-                    };
+                savedLimit = sleTrustLine->at(tweakedLimit);
 
                 if (checkCashMakesTrustLine)
                 {
@@ -518,7 +507,17 @@ CashCheck::doApply()
                     psb.insert(mptoken);
                 }
             }
-            scope_exit fixup(fixupCb);
+            // Make sure the tweaked limits are restored when we leave
+            // scope.
+            scope_exit fixup([&psb, &trustLineKey, destLow, &savedLimit]() {
+                if (trustLineKey)
+                {
+                    SF_AMOUNT const& tweakedLimit =
+                        destLow ? sfLowLimit : sfHighLimit;
+                    if (auto const sleTrustLine = psb.peek(*trustLineKey))
+                        sleTrustLine->at(tweakedLimit) = savedLimit;
+                }
+            });
 
             // Let flow() do the heavy lifting on a check for an IOU.
             auto const result = flow(
