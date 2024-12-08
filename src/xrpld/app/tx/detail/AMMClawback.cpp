@@ -40,8 +40,12 @@ AMMClawback::preflight(PreflightContext const& ctx)
         return temDISABLED;
 
     std::optional<STAmount> const clawAmount = ctx.tx[~sfAmount];
-    if (!ctx.rules.enabled(featureMPTokensV2) && clawAmount &&
-        clawAmount->holds<MPTIssue>())
+    auto const asset = ctx.tx[sfAsset];
+    auto const asset2 = ctx.tx[sfAsset2];
+
+    if (!ctx.rules.enabled(featureMPTokensV2) &&
+        ((clawAmount && clawAmount->holds<MPTIssue>()) ||
+         asset.holds<MPTIssue>() || asset2.holds<MPTIssue>()))
         return temDISABLED;
 
     if (auto const ret = preflight1(ctx); !isTesSuccess(ret))
@@ -61,9 +65,6 @@ AMMClawback::preflight(PreflightContext const& ctx)
         return temMALFORMED;
     }
 
-    auto const asset = ctx.tx[sfAsset].get<Issue>();
-    auto const asset2 = ctx.tx[sfAsset2].get<Issue>();
-
     if (isXRP(asset))
         return temMALFORMED;
 
@@ -82,7 +83,7 @@ AMMClawback::preflight(PreflightContext const& ctx)
         return temMALFORMED;
     }
 
-    if (clawAmount && clawAmount->get<Issue>() != asset)
+    if (clawAmount && clawAmount->issue() != asset)
     {
         JLOG(ctx.j.trace()) << "AMMClawback: Amount's issuer/currency subfield "
                                "does not match Asset field";
@@ -98,8 +99,8 @@ AMMClawback::preflight(PreflightContext const& ctx)
 TER
 AMMClawback::preclaim(PreclaimContext const& ctx)
 {
-    auto const asset = ctx.tx[sfAsset].get<Issue>();
-    auto const asset2 = ctx.tx[sfAsset2].get<Issue>();
+    auto const asset = ctx.tx[sfAsset];
+    auto const asset2 = ctx.tx[sfAsset2];
     auto const sleIssuer = ctx.view.read(keylet::account(ctx.tx[sfAccount]));
     if (!sleIssuer)
         return terNO_ACCOUNT;  // LCOV_EXCL_LINE

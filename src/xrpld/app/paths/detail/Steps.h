@@ -31,8 +31,6 @@
 #include <boost/container/flat_set.hpp>
 #include <optional>
 
-extern bool gf;
-
 namespace ripple {
 
 class PaymentSandbox;
@@ -519,10 +517,13 @@ public:
 // Check equal with tolerance
 bool
 checkNear(IOUAmount const& expected, IOUAmount const& actual);
+template <typename T>
+    requires(std::is_same_v<T, XRPAmount> || std::is_same_v<T, MPTAmount>)
 bool
-checkNear(XRPAmount const& expected, XRPAmount const& actual);
-bool
-checkNear(MPTAmount const& expected, MPTAmount const& actual);
+checkNear(T const& expected, T const& actual)
+{
+    return expected == actual;
+}
 /// @endcond
 
 /**

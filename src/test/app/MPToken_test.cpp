@@ -1544,9 +1544,6 @@ class MPToken_test : public beast::unit_test::suite
                 jrr = env.rpc("json", "sign", to_string(jv1));
                 BEAST_EXPECT(jrr[jss::result][jss::error] == "invalidParams");
             };
-            auto toSFieldRef = [](SField const& field) {
-                return std::ref(field);
-            };
             auto setMPTFields = [&](SField const& field,
                                     Json::Value& jv,
                                     bool withAmount = true) {
@@ -3130,16 +3127,28 @@ class MPToken_test : public beast::unit_test::suite
             auto const USD = gw["USD"];
             Env env(*this, features);
             fund(env, gw, {alice}, XRP(1'000), {USD(1'000)});
-            MPTTester mpt(env, gw, {.holders = {alice}, .fund = false});
-            mpt.create(
-                {.ownerCount = 1,
-                 .holderCount = 0,
-                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            MPTTester mpt(env, gw, {.fund = false});
+            mpt.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
+            AMM amm(env, gw, MPT(100), XRP(100));
+            amm.deposit(DepositArg{.account = alice, .asset1In = XRP(10)});
+            amm::ammClawback(
+                gw, alice, MPTIssue(mpt.issuanceID()), xrpIssue(), MPT(10));
+        }
+
+        {
+            Account const gw{"gw"};
+            Account const alice{"alice"};
+            auto const USD = gw["USD"];
+            Env env(*this, features);
+            fund(env, gw, {alice}, XRP(1'000), {USD(1'000)});
+            MPTTester mpt(env, gw, {.fund = false});
+            mpt.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
             mpt.authorize({.account = alice});
             mpt.pay(gw, alice, 1'000);
+            auto const MPT = mpt["MPT"];
             AMM amm(env, gw, MPT(100), XRP(100));
-            amm.deposit(DepositArg{.account = alice, .tokens = 100});
+            amm.deposit(DepositArg{.account = alice, .tokens = 10'000});
             amm::ammClawback(
                 gw, alice, MPTIssue(mpt.issuanceID()), xrpIssue(), MPT(10));
         }

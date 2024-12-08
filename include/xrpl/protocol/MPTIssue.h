@@ -53,7 +53,7 @@ public:
     void
     setJson(Json::Value& jv) const;
 
-    auto
+    constexpr std::weak_ordering
     operator<=>(MPTIssue const&) const = default;
 
     bool
@@ -61,30 +61,7 @@ public:
     {
         return false;
     }
-
-    friend constexpr std::weak_ordering
-    operator<=>(MPTIssue const& lhs, MPTIssue const& rhs);
 };
-
-constexpr bool
-operator==(MPTIssue const& lhs, MPTIssue const& rhs)
-{
-    return lhs.mptID_ == rhs.mptID_;
-}
-
-constexpr bool
-operator!=(MPTIssue const& lhs, MPTIssue const& rhs)
-{
-    return !(lhs == rhs);
-}
-
-constexpr std::weak_ordering
-operator<=>(MPTIssue const& lhs, MPTIssue const& rhs)
-{
-    if (auto const c{lhs.mptID_ <=> rhs.mptID_}; c != 0)
-        return c;
-    return lhs.mptID_ <=> rhs.mptID_;
-}
 
 /** MPT is a non-native token.
  */

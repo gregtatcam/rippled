@@ -44,9 +44,6 @@ class STPathElement final : public CountedObject<STPathElement>
     std::size_t hash_value_;
 
 public:
-    struct PathAssetTag
-    {
-    };
     enum Type {
         typeNone = 0x00,
         typeAccount =
@@ -67,32 +64,14 @@ public:
 
     STPathElement(
         std::optional<AccountID> const& account,
-        std::optional<Asset> const& asset,
-        std::optional<AccountID> const& issuer);
-
-    STPathElement(
-        std::optional<AccountID> const& account,
         std::optional<PathAsset> const& asset,
-        std::optional<AccountID> const& issuer,
-        PathAssetTag);
-
-    STPathElement(
-        AccountID const& account,
-        Asset const& asset,
-        AccountID const& issuer,
-        bool forceCurrency = false);
+        std::optional<AccountID> const& issuer);
 
     STPathElement(
         AccountID const& account,
         PathAsset const& asset,
         AccountID const& issuer,
-        bool forceCurrency = false);
-
-    STPathElement(
-        unsigned int uType,
-        AccountID const& account,
-        Asset const& asset,
-        AccountID const& issuer);
+        bool forceAsset = false);
 
     STPathElement(
         unsigned int uType,
@@ -173,12 +152,6 @@ public:
     template <typename... Args>
     void
     emplace_back(Args&&... args);
-
-    bool
-    hasSeen(
-        AccountID const& account,
-        Asset const& asset,
-        AccountID const& issuer) const;
 
     bool
     hasSeen(
@@ -287,21 +260,8 @@ inline STPathElement::STPathElement() : mType(typeNone), is_offer_(true)
 
 inline STPathElement::STPathElement(
     std::optional<AccountID> const& account,
-    std::optional<Asset> const& asset,
-    std::optional<AccountID> const& issuer)
-    : STPathElement(
-          account,
-          PathAsset::toPathAsset(asset),
-          issuer,
-          PathAssetTag{})
-{
-}
-
-inline STPathElement::STPathElement(
-    std::optional<AccountID> const& account,
     std::optional<PathAsset> const& asset,
-    std::optional<AccountID> const& issuer,
-    PathAssetTag)
+    std::optional<AccountID> const& issuer)
     : mType(typeNone)
 {
     if (!account)
@@ -338,22 +298,9 @@ inline STPathElement::STPathElement(
 
 inline STPathElement::STPathElement(
     AccountID const& account,
-    Asset const& asset,
-    AccountID const& issuer,
-    bool forceCurrency)
-    : STPathElement(
-          account,
-          PathAsset::toPathAsset(asset),
-          issuer,
-          forceCurrency)
-{
-}
-
-inline STPathElement::STPathElement(
-    AccountID const& account,
     PathAsset const& asset,
     AccountID const& issuer,
-    bool forceCurrency)
+    bool forceAsset)
     : mType(typeNone)
     , mAccountID(account)
     , mAssetID(asset)
@@ -363,26 +310,13 @@ inline STPathElement::STPathElement(
     if (!is_offer_)
         mType |= typeAccount;
 
-    if (!asset.holds<MPTID>() &&
-        (forceCurrency || !isXRP(mAssetID.get<Currency>())))
-        mType |= typeCurrency;
+    if (forceAsset || !isXRP(mAssetID))
+        mType |= asset.holds<MPTID>() ? typeMPT : typeCurrency;
 
     if (!isXRP(issuer))
         mType |= typeIssuer;
 
-    if (asset.holds<MPTID>())
-        mType |= typeMPT;
-
     hash_value_ = get_hash(*this);
-}
-
-inline STPathElement::STPathElement(
-    unsigned int uType,
-    AccountID const& account,
-    Asset const& asset,
-    AccountID const& issuer)
-    : STPathElement(uType, account, PathAsset::toPathAsset(asset), issuer)
-{
 }
 
 inline STPathElement::STPathElement(
@@ -396,6 +330,8 @@ inline STPathElement::STPathElement(
     , mIssuerID(issuer)
     , is_offer_(isXRP(mAccountID))
 {
+    // uType could be assetType; i.e. either Currency or MPTID.
+    // Get the actual type.
     if (!asset.holds<MPTID>())
         mType = mType & (~Type::typeMPT);
     else if (mAssetID.holds<Currency>() && isXRP(mAssetID.get<Currency>()))

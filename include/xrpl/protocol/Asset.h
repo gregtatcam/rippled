@@ -27,6 +27,15 @@
 
 namespace ripple {
 
+template <typename T>
+    requires(
+        std::is_same_v<T, XRPAmount> || std::is_same_v<T, IOUAmount> ||
+        std::is_same_v<T, MPTAmount>)
+struct AmountType
+{
+    using amount_type = T;
+};
+
 /* Asset is an abstraction of three different issue types: XRP, IOU, MPT.
  * For historical reasons, two issue types XRP and IOU are wrapped in Issue
  * type. Many functions and classes there were first written for Issue
@@ -92,14 +101,14 @@ public:
         return holds<Issue>() && get<Issue>().native();
     }
 
+    std::variant<
+        AmountType<XRPAmount>,
+        AmountType<IOUAmount>,
+        AmountType<MPTAmount>>
+    getAmountType() const;
+
     friend constexpr bool
     operator==(Asset const& lhs, Asset const& rhs);
-
-    friend constexpr bool
-    operator!=(Asset const& lhs, Asset const& rhs);
-
-    friend constexpr bool
-    operator<(Asset const& lhs, Asset const& rhs);
 
     friend constexpr std::weak_ordering
     operator<=>(Asset const& lhs, Asset const& rhs);
@@ -153,27 +162,6 @@ operator==(Asset const& lhs, Asset const& rhs)
             TLhs const& issLhs, TRhs const& issRhs) {
             if constexpr (std::is_same_v<TLhs, TRhs>)
                 return issLhs == issRhs;
-            else
-                return false;
-        },
-        lhs.issue_,
-        rhs.issue_);
-}
-
-constexpr bool
-operator!=(Asset const& lhs, Asset const& rhs)
-{
-    return !(lhs == rhs);
-}
-
-constexpr bool
-operator<(Asset const& lhs, Asset const& rhs)
-{
-    return std::visit(
-        [&]<typename TLhs, typename TRhs>(
-            TLhs const& issLhs, TRhs const& issRhs) {
-            if constexpr (std::is_same_v<TLhs, TRhs>)
-                return issLhs < issRhs;
             else
                 return false;
         },

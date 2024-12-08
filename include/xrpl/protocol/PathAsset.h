@@ -25,6 +25,8 @@
 
 namespace ripple {
 
+/* Represent STPathElement's asset, which can be Currency or MPTID.
+ */
 class PathAsset
 {
 private:
@@ -32,6 +34,7 @@ private:
 
 public:
     PathAsset() = default;
+    // Enables comparing Asset and PathAsset
     PathAsset(Asset const& asset);
     PathAsset(Currency const& currency) : easset_(currency)
     {
@@ -53,12 +56,6 @@ public:
 
     constexpr std::variant<Currency, MPTID> const&
     value() const;
-
-    static PathAsset
-    toPathAsset(Asset const& asset);
-
-    static std::optional<PathAsset>
-    toPathAsset(std::optional<Asset> const& asset);
 
     friend constexpr bool
     operator==(PathAsset const& lhs, PathAsset const& rhs);
@@ -101,7 +98,9 @@ PathAsset::value() const
 constexpr bool
 PathAsset::isXRP() const
 {
-    return holds<Currency>() && get<Currency>() == xrpCurrency();
+    return std::visit(
+        [&]<ValidPathAsset A>(A const& a) { return ripple::isXRP(a); },
+        easset_);
 }
 
 constexpr bool
@@ -138,12 +137,6 @@ to_string(PathAsset const& asset);
 
 std::ostream&
 operator<<(std::ostream& os, PathAsset const& x);
-
-bool
-equalAssets(PathAsset const& asset1, Asset const& asset2);
-
-bool
-equalAssets(Asset const& asset1, PathAsset const& asset2);
 
 }  // namespace ripple
 

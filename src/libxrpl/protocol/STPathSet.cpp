@@ -95,7 +95,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             auto hasMPT = iType & STPathElement::typeMPT;
 
             AccountID account;
-            PathAsset asset{};
+            PathAsset asset;
             AccountID issuer;
 
             if (hasAccount)
@@ -162,15 +162,6 @@ bool
 STPathSet::isDefault() const
 {
     return value.empty();
-}
-
-bool
-STPath::hasSeen(
-    AccountID const& account,
-    Asset const& asset,
-    AccountID const& issuer) const
-{
-    return hasSeen(account, PathAsset::toPathAsset(asset), issuer);
 }
 
 bool

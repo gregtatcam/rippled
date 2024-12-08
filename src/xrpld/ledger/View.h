@@ -542,25 +542,41 @@ transferXRP(
     STAmount const& amount,
     beast::Journal j);
 
+/* Check if MPToken exists:
+ * - StrongAuth - before checking lsfMPTRequireAuth is set
+ * - WeakAuth - after checking if lsfMPTRequireAuth is set
+ */
+enum class MPTAuthType : bool { StrongAuth = true, WeakAuth = false };
+
 /** Check if the account lacks required authorization.
  *   Return tecNO_AUTH or tecNO_LINE if it does
  *   and tesSUCCESS otherwise.
  */
 [[nodiscard]] TER
 requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
+/* If StrongAuth then return tecNO_AUTH if MPToken doesn't exist or
+ * lsfMPTRequireAuth is set and MPToken is not authorized. If WeakAuth then
+ * return tecNO_AUTH if lsfMPTRequireAuth is set and MPToken doesn't exist or is
+ * not authorized.
+ */
 [[nodiscard]] TER
 requireAuth(
     ReadView const& view,
     MPTIssue const& mptIssue,
-    AccountID const& account);
+    AccountID const& account,
+    MPTAuthType authType = MPTAuthType::StrongAuth);
 [[nodiscard]] TER inline requireAuth(
     ReadView const& view,
     Asset const& asset,
-    AccountID const& account)
+    AccountID const& account,
+    MPTAuthType authType = MPTAuthType::StrongAuth)
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue_) {
-            return requireAuth(view, issue_, account);
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return requireAuth(view, issue_, account);
+            else
+                return requireAuth(view, issue_, account, authType);
         },
         asset.value());
 }

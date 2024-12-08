@@ -1867,7 +1867,8 @@ TER
 requireAuth(
     ReadView const& view,
     MPTIssue const& mptIssue,
-    AccountID const& account)
+    AccountID const& account,
+    MPTAuthType authType)
 {
     auto const mptID = keylet::mptIssuance(mptIssue.getMptID());
     auto const sleIssuance = view.read(mptID);
@@ -1885,12 +1886,12 @@ requireAuth(
     auto const sleToken = view.read(mptokenID);
 
     // if account has no MPToken, fail
-    if (!sleToken)
+    if (!sleToken && authType == MPTAuthType::StrongAuth)
         return tecNO_AUTH;
 
     // mptoken must be authorized if issuance enabled requireAuth
     if (sleIssuance->getFieldU32(sfFlags) & lsfMPTRequireAuth &&
-        !(sleToken->getFlags() & lsfMPTAuthorized))
+        (!sleToken || (!(sleToken->getFlags() & lsfMPTAuthorized))))
         return tecNO_AUTH;
 
     return tesSUCCESS;

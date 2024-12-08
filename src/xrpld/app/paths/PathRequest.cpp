@@ -424,7 +424,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
             if (saSendMax)
             {
                 // If the assets don't match, ignore the source asset.
-                if (equalAssets(srcPathAsset, saSendMax->asset()))
+                if (srcPathAsset == saSendMax->asset())
                 {
                     // If neither is the source and they are not equal, then the
                     // source issuer is illegal.
@@ -578,12 +578,7 @@ PathRequest::findPaths(
             << " Trying to find paths: " << STAmount(asset, 1).getFullText();
 
         auto& pathfinder = getPathFinder(
-            cache,
-            pathasset_map,
-            PathAsset::toPathAsset(asset),
-            dst_amount,
-            level,
-            continueCallback);
+            cache, pathasset_map, asset, dst_amount, level, continueCallback);
         if (!pathfinder)
         {
             JLOG(m_journal.debug()) << iIdentifier << " No paths found";

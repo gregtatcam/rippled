@@ -198,6 +198,10 @@ protected:
         return ostr.str();
     }
 
+    Rate
+    rate(ReadView const& view, Asset const& asset, AccountID const& dstAccount)
+        const;
+
 private:
     friend bool
     operator==(BookStep const& lhs, BookStep const& rhs)
@@ -339,21 +343,14 @@ public:
         // (the old code does not charge a fee)
         // Calculate amount that goes to the taker and the amount charged the
         // offer owner
-        auto rate = [&](Asset const& asset) {
-            if (isXRP(asset) || asset.getIssuer() == this->strandDst_)
-                return parityRate;
-            if (asset.holds<Issue>())
-                return transferRate(v, asset.getIssuer());
-            return transferRate(v, asset.get<MPTIssue>().getMptID());
-        };
-
-        auto const trIn =
-            redeems(prevStepDir) ? rate(this->book_.in) : parityRate;
+        auto const trIn = redeems(prevStepDir)
+            ? this->rate(v, this->book_.in, this->strandDst_)
+            : parityRate;
         // Always charge the transfer fee, even if the owner is the issuer,
         // unless the fee is waived
         auto const trOut =
             (this->ownerPaysTransferFee_ && waiveFee == WaiveTransferFee::No)
-            ? rate(this->book_.out)
+            ? this->rate(v, this->book_.out, this->strandDst_)
             : parityRate;
 
         Quality const q1{getRate(STAmount(trOut.value), STAmount(trIn.value))};
@@ -544,14 +541,8 @@ public:
             (this->ammLiquidity_ && this->ammLiquidity_->multiPath()))
             return ofrQ;
 
-        auto rate = [&](AccountID const& id) {
-            if (isXRP(id) || id == this->strandDst_)
-                return parityRate;
-            return transferRate(v, id);
-        };
-
         auto const trIn = redeems(prevStepDir)
-            ? rate(this->book_.in.getIssuer())
+            ? this->rate(v, this->book_.in, this->strandDst_)
             : parityRate;
         // AMM doesn't pay the transfer fee on the out amount
         auto const trOut = parityRate;
@@ -728,19 +719,13 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
     // (the old code does not charge a fee)
     // Calculate amount that goes to the taker and the amount charged the offer
     // owner
-    auto rate = [this, &sb](Asset const& asset) -> std::uint32_t {
-        if (isXRP(asset) || asset.getIssuer() == this->strandDst_)
-            return QUALITY_ONE;
-        if (asset.holds<Issue>())
-            return transferRate(sb, asset.getIssuer()).value;
-        return transferRate(sb, asset.get<MPTIssue>().getMptID()).value;
-    };
-
-    std::uint32_t const trIn =
-        redeems(prevStepDir) ? rate(book_.in) : QUALITY_ONE;
+    std::uint32_t const trIn = redeems(prevStepDir)
+        ? rate(sb, book_.in, this->strandDst_).value
+        : QUALITY_ONE;
     // Always charge the transfer fee, even if the owner is the issuer
-    std::uint32_t const trOut =
-        ownerPaysTransferFee_ ? rate(book_.out) : QUALITY_ONE;
+    std::uint32_t const trOut = ownerPaysTransferFee_
+        ? rate(sb, book_.out, this->strandDst_).value
+        : QUALITY_ONE;
 
     typename FlowOfferStream<TIn, TOut>::StepCounter counter(
         maxOffersToConsume_, j_);
@@ -762,8 +747,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 strandSrc_, strandDst_, offer, ofrQ, offers, offerAttempted))
             return true;
 
-        // Make sure offer owner has authorization to own IOUs from issuer.
-        // An account can always own XRP or their own IOUs.
+        // Make sure offer owner has authorization to own Assets from issuer.
+        // An account can always own XRP or their own Assets.
         if (requireAuth(afView, offer.assetIn(), offer.owner()) != tesSUCCESS)
         {
             // Offer owner not authorized to hold IOU/MPT from issuer.
@@ -1386,9 +1371,9 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
             }
             else
             {
-                auto const mptID =
+                auto const issuanceID =
                     keylet::mptIssuance(book_.in.get<MPTIssue>().getMptID());
-                if (!view.exists(mptID))
+                if (!view.exists(issuanceID))
                     return tecOBJECT_NOT_FOUND;
 
                 if (auto const ter = isMPTDEXAllowed(
@@ -1405,6 +1390,20 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
     return tesSUCCESS;
 }
 
+template <class TIn, class TOut, class TDerived>
+Rate
+BookStep<TIn, TOut, TDerived>::rate(
+    ReadView const& view,
+    Asset const& asset,
+    AccountID const& dstAccount) const
+{
+    if (isXRP(asset) || asset.getIssuer() == dstAccount)
+        return parityRate;
+    if (asset.holds<Issue>())
+        return transferRate(view, asset.getIssuer());
+    return transferRate(view, asset.get<MPTIssue>().getMptID());
+};
+
 //------------------------------------------------------------------------------
 
 namespace test {
@@ -1419,21 +1418,6 @@ equalHelper(Step const& step, ripple::Book const& book)
     return false;
 }
 
-static std::variant<XRPAmount*, MPTAmount*, IOUAmount*>
-getTypedAmt(Asset const& asset)
-{
-    static auto xrp = XRPAmount{};
-    static auto mpt = MPTAmount{};
-    static auto iou = IOUAmount{};
-    if (asset.holds<Issue>())
-    {
-        if (isXRP(asset.get<Issue>().currency))
-            return &xrp;
-        return &iou;
-    }
-    return &mpt;
-}
-
 bool
 bookStepEqual(Step const& step, ripple::Book const& book)
 {
@@ -1442,15 +1426,15 @@ bookStepEqual(Step const& step, ripple::Book const& book)
         UNREACHABLE("ripple::test::bookStepEqual : no XRP to XRP book step");
         return false;  // no such thing as xrp/xrp book step
     }
-    bool ret = false;
-    std::visit(
-        [&]<typename TIn, typename TOut>(TIn*&&, TOut*&&) {
-            ret =
-                equalHelper<TIn, TOut, BookPaymentStep<TIn, TOut>>(step, book);
+    return std::visit(
+        [&]<typename TIn, typename TOut>(TIn const&, TOut const&) {
+            using TIn_ = typename TIn::amount_type;
+            using TOut_ = typename TOut::amount_type;
+            return equalHelper<TIn_, TOut_, BookPaymentStep<TIn_, TOut_>>(
+                step, book);
         },
-        getTypedAmt(book.in),
-        getTypedAmt(book.out));
-    return ret;
+        book.in.getAmountType(),
+        book.out.getAmountType());
 }
 }  // namespace test
 

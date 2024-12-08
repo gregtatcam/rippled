@@ -333,7 +333,7 @@ Pathfinder::findPaths(
         JLOG(j_.debug()) << "non-XRP to XRP payment";
         paymentType = pt_nonXRP_to_XRP;
     }
-    else if (equalAssets(mSrcPathAsset, mDstAmount.asset()))
+    else if (mSrcPathAsset == mDstAmount.asset())
     {
         // non-XRP -> non-XRP - Same currency
         JLOG(j_.debug()) << "non-XRP to non-XRP - same currency";
@@ -729,7 +729,7 @@ Pathfinder::getBestPaths(
 bool
 Pathfinder::issueMatchesOrigin(Asset const& asset)
 {
-    bool matchingAsset = equalAssets(asset, mSrcPathAsset);
+    bool matchingAsset = asset == mSrcPathAsset;
     bool matchingAccount = isXRP(asset) ||
         (mSrcIssuer && asset.getIssuer() == mSrcIssuer) ||
         asset.getIssuer() == mSrcAccount;
@@ -1051,8 +1051,7 @@ Pathfinder::addLink(
             {
                 bool const bRequireAuth(
                     sleEnd->getFieldU32(sfFlags) & lsfRequireAuth);
-                bool const bIsEndAsset(
-                    equalAssets(uEndPathAsset, mDstAmount.asset()));
+                bool const bIsEndAsset(uEndPathAsset == mDstAmount.asset());
                 bool const bIsNoRippleOut(isNoRippleOut(currentPath));
                 bool const bDestOnly(addFlags & afAC_LAST);
 

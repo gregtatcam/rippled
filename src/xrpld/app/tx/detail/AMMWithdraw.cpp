@@ -109,8 +109,8 @@ AMMWithdraw::preflight(PreflightContext const& ctx)
             return temMALFORMED;
     }
 
-    auto const asset = ctx.tx[sfAsset].get<Issue>();
-    auto const asset2 = ctx.tx[sfAsset2].get<Issue>();
+    auto const asset = ctx.tx[sfAsset];
+    auto const asset2 = ctx.tx[sfAsset2];
     if (auto const res = invalidAMMAssetPair(asset, asset2))
     {
         JLOG(ctx.j.debug()) << "AMM Withdraw: Invalid asset pair.";
@@ -226,8 +226,11 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
                     << *amount;
                 return tecAMM_BALANCE;
             }
-            if (auto const ter =
-                    requireAuth(ctx.view, amount->asset(), accountID))
+            if (auto const ter = requireAuth(
+                    ctx.view,
+                    amount->asset(),
+                    accountID,
+                    MPTAuthType::WeakAuth))
             {
                 JLOG(ctx.j.debug())
                     << "AMM Withdraw: account is not authorized, "
@@ -438,12 +441,7 @@ AMMWithdraw::applyGuts(Sandbox& sb)
         return {result, false};
 
     auto const res = deleteAMMAccountIfEmpty(
-        sb,
-        ammSle,
-        newLPTokenBalance,
-        ctx_.tx[sfAsset].get<Issue>(),
-        ctx_.tx[sfAsset2].get<Issue>(),
-        j_);
+        sb, ammSle, newLPTokenBalance, ctx_.tx[sfAsset], ctx_.tx[sfAsset2], j_);
     // LCOV_EXCL_START
     if (!res.second)
         return {res.first, false};
@@ -644,6 +642,61 @@ AMMWithdraw::withdraw(
     if (auto const err = sufficientReserve(amountWithdrawActual.issue()))
         return {err, STAmount{}, STAmount{}, STAmount{}};
 
+    // Create MPToken if doesn't exist
+    // TODO make a library, AMMCreate, AMMAuthorize use almost identical code
+    auto createMPToken = [&](Asset const& asset) -> TER {
+        if (asset.holds<MPTIssue>())
+        {
+            auto const& mptIssue = asset.get<MPTIssue>();
+            auto const issuanceKey = keylet::mptIssuance(mptIssue.getMptID());
+            auto const mptokenKey = keylet::mptoken(issuanceKey.key, account);
+            if (!view.exists(mptokenKey))
+            {
+                if (auto err = requireAuth(
+                        view, mptIssue, account, MPTAuthType::WeakAuth);
+                    err != tesSUCCESS)
+                    return err;
+            }
+
+            auto const sleAcct = view.peek(keylet::account(account));
+            if (!sleAcct)
+                return tefINTERNAL;
+
+            std::uint32_t const uOwnerCount =
+                sleAcct->getFieldU32(sfOwnerCount);
+            XRPAmount const reserveCreate(
+                (uOwnerCount < 2)
+                    ? XRPAmount(beast::zero)
+                    : view.fees().accountReserve(uOwnerCount + 1));
+
+            if (priorBalance < reserveCreate)
+                return tecINSUFFICIENT_RESERVE;
+
+            auto const ownerNode = view.dirInsert(
+                keylet::ownerDir(account),
+                mptokenKey,
+                describeOwnerDir(account));
+
+            if (!ownerNode)
+                return tecDIR_FULL;
+
+            auto mptoken = std::make_shared<SLE>(mptokenKey);
+            (*mptoken)[sfAccount] = account;
+            (*mptoken)[sfMPTokenIssuanceID] = mptIssue.getMptID();
+            (*mptoken)[sfFlags] = 0;
+            (*mptoken)[sfOwnerNode] = *ownerNode;
+            view.insert(mptoken);
+
+            // Update owner count.
+            adjustOwnerCount(view, sleAcct, 1, journal);
+        }
+        return tesSUCCESS;
+    };
+
+    if (auto const res = createMPToken(amountWithdrawActual.asset());
+        res != tesSUCCESS)
+        return {res, STAmount{}, STAmount{}, STAmount{}};
+
     // Withdraw amountWithdraw
     auto res = accountSend(
         view,
@@ -667,6 +720,10 @@ AMMWithdraw::withdraw(
         if (auto const err = sufficientReserve(amount2WithdrawActual->issue());
             err != tesSUCCESS)
             return {err, STAmount{}, STAmount{}, STAmount{}};
+
+        if (auto const res = createMPToken(amountWithdrawActual.asset());
+            res != tesSUCCESS)
+            return {res, STAmount{}, STAmount{}, STAmount{}};
 
         res = accountSend(
             view,

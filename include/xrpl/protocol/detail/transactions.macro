@@ -236,8 +236,8 @@ TRANSACTION(ttCLAWBACK, 30, Clawback, ({
 /** This transaction claws back tokens from an AMM pool. */
 TRANSACTION(ttAMM_CLAWBACK, 31, AMMClawback, ({
     {sfHolder, soeREQUIRED},
-    {sfAsset, soeREQUIRED},
-    {sfAsset2, soeREQUIRED},
+    {sfAsset, soeREQUIRED, soeMPTSupported},
+    {sfAsset2, soeREQUIRED, soeMPTSupported},
     {sfAmount, soeOPTIONAL, soeMPTSupported},
 }))
 
@@ -250,8 +250,8 @@ TRANSACTION(ttAMM_CREATE, 35, AMMCreate, ({
 
 /** This transaction type deposits into an AMM instance */
 TRANSACTION(ttAMM_DEPOSIT, 36, AMMDeposit, ({
-    {sfAsset, soeREQUIRED},
-    {sfAsset2, soeREQUIRED},
+    {sfAsset, soeREQUIRED, soeMPTSupported},
+    {sfAsset2, soeREQUIRED, soeMPTSupported},
     {sfAmount, soeOPTIONAL, soeMPTSupported},
     {sfAmount2, soeOPTIONAL, soeMPTSupported},
     {sfEPrice, soeOPTIONAL},
@@ -261,8 +261,8 @@ TRANSACTION(ttAMM_DEPOSIT, 36, AMMDeposit, ({
 
 /** This transaction type withdraws from an AMM instance */
 TRANSACTION(ttAMM_WITHDRAW, 37, AMMWithdraw, ({
-    {sfAsset, soeREQUIRED},
-    {sfAsset2, soeREQUIRED},
+    {sfAsset, soeREQUIRED, soeMPTSupported},
+    {sfAsset2, soeREQUIRED, soeMPTSupported},
     {sfAmount, soeOPTIONAL, soeMPTSupported},
     {sfAmount2, soeOPTIONAL, soeMPTSupported},
     {sfEPrice, soeOPTIONAL},
@@ -271,15 +271,15 @@ TRANSACTION(ttAMM_WITHDRAW, 37, AMMWithdraw, ({
 
 /** This transaction type votes for the trading fee */
 TRANSACTION(ttAMM_VOTE, 38, AMMVote, ({
-    {sfAsset, soeREQUIRED},
-    {sfAsset2, soeREQUIRED},
+    {sfAsset, soeREQUIRED, soeMPTSupported},
+    {sfAsset2, soeREQUIRED, soeMPTSupported},
     {sfTradingFee, soeREQUIRED},
 }))
 
 /** This transaction type bids for the auction slot */
 TRANSACTION(ttAMM_BID, 39, AMMBid, ({
-    {sfAsset, soeREQUIRED},
-    {sfAsset2, soeREQUIRED},
+    {sfAsset, soeREQUIRED, soeMPTSupported},
+    {sfAsset2, soeREQUIRED, soeMPTSupported},
     {sfBidMin, soeOPTIONAL},
     {sfBidMax, soeOPTIONAL},
     {sfAuthAccounts, soeOPTIONAL},
@@ -287,8 +287,8 @@ TRANSACTION(ttAMM_BID, 39, AMMBid, ({
 
 /** This transaction type deletes AMM in the empty state */
 TRANSACTION(ttAMM_DELETE, 40, AMMDelete, ({
-    {sfAsset, soeREQUIRED},
-    {sfAsset2, soeREQUIRED},
+    {sfAsset, soeREQUIRED, soeMPTSupported},
+    {sfAsset2, soeREQUIRED, soeMPTSupported},
 }))
 
 /** This transactions creates a crosschain sequence number */

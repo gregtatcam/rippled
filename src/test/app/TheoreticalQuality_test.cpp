@@ -71,8 +71,7 @@ struct RippleCalcTestParams
                             *parseBase58<AccountID>(
                                 pe[jss::account].asString()),
                             std::nullopt,
-                            std::nullopt,
-                            STPathElement::PathAssetTag{});
+                            std::nullopt);
                     }
                     else if (
                         pe.isMember(jss::currency) && pe.isMember(jss::issuer))
@@ -86,11 +85,7 @@ struct RippleCalcTestParams
                         else
                             assert(isXRP(*parseBase58<AccountID>(
                                 pe[jss::issuer].asString())));
-                        p.emplace_back(
-                            std::nullopt,
-                            currency,
-                            issuer,
-                            STPathElement::PathAssetTag{});
+                        p.emplace_back(std::nullopt, currency, issuer);
                     }
                     else
                     {

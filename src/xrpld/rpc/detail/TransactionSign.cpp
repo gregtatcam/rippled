@@ -260,8 +260,8 @@ checkPayment(
                         ledger, app.journal("AssetCache")),
                     srcAddressID,
                     *dstAccountID,
-                    sendMax.issue().currency,
-                    sendMax.issue().account,
+                    sendMax.asset(),
+                    sendMax.getIssuer(),
                     amount,
                     std::nullopt,
                     app);
@@ -272,7 +272,7 @@ checkPayment(
                     STPath fullLiquidityPath;
                     STPathSet paths;
                     result = pf.getBestPaths(
-                        4, fullLiquidityPath, paths, sendMax.issue().account);
+                        4, fullLiquidityPath, paths, sendMax.getIssuer());
                 }
             }
 

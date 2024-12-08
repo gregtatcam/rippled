@@ -130,33 +130,22 @@ flow(
         }
     }
 
-    using Var =
-        std::variant<XRPAmount const*, MPTAmount const*, IOUAmount const*>;
-    auto getTypedAmt = [&](Asset const& iss) -> Var {
-        static auto xrp = XRPAmount{};
-        static auto mpt = MPTAmount{};
-        static auto iou = IOUAmount{};
-        if (isXRP(iss))
-            return &xrp;
-        if (iss.holds<MPTIssue>())
-            return &mpt;
-        return &iou;
-    };
-
     // The src account may send either xrp,iou,mpt. The dst account may receive
     // either xrp,iou,mpt. Since XRP, IOU, and MPT amounts are represented by
     // different types, use templates to tell `flow` about the amount types.
     return std::visit(
         [&, &strands_ = strands]<typename TIn, typename TOut>(
-            TIn const*&&, TOut const*&&) {
+            TIn const&, TOut const&) {
+            using TIn_ = typename TIn::amount_type;
+            using TOut_ = typename TOut::amount_type;
             return finishFlow(
                 sb,
                 srcAsset,
                 dstAsset,
-                flow<TIn, TOut>(
+                flow<TIn_, TOut_>(
                     sb,
                     strands_,
-                    get<TOut>(deliver),
+                    get<TOut_>(deliver),
                     partialPayment,
                     offerCrossing,
                     limitQuality,
@@ -165,8 +154,8 @@ flow(
                     ammContext,
                     flowDebugInfo));
         },
-        getTypedAmt(srcAsset),
-        getTypedAmt(dstAsset));
+        srcAsset.getAmountType(),
+        dstAsset.getAmountType());
 }
 
 }  // namespace ripple

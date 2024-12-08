@@ -64,11 +64,7 @@ ownerCount(Env const& env, Account const& account)
 void
 stpath_append_one(STPath& st, Account const& account)
 {
-    st.push_back(STPathElement(
-        {account.id(),
-         std::nullopt,
-         std::nullopt,
-         STPathElement::PathAssetTag{}}));
+    st.push_back(STPathElement({account.id(), std::nullopt, std::nullopt}));
 }
 
 void
@@ -80,7 +76,7 @@ stpath_append_one(STPath& st, STPathElement const& pe)
 bool
 equal(STAmount const& sa1, STAmount const& sa2)
 {
-    return sa1 == sa2 && sa1.issue().account == sa2.issue().account;
+    return sa1 == sa2 && sa1.getIssuer() == sa2.getIssuer();
 }
 
 // Issue path element
@@ -289,7 +285,7 @@ expectLine(
         }
 
         auto amount = sle->getFieldAmount(sfBalance);
-        amount.setIssuer(value.issue().account);
+        amount.setIssuer(value.getIssuer());
         if (!accountLow)
             amount.negate();
         return amount == value && expectDefaultTrustLine;

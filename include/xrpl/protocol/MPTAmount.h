@@ -94,9 +94,6 @@ public:
     constexpr int
     signum() const noexcept;
 
-    Json::Value
-    jsonClipped() const;
-
     /** Returns the underlying value. Code SHOULD NOT call this
         function unless the type has been abstracted away,
         e.g. in a templated function.

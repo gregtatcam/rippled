@@ -108,8 +108,8 @@ AMMDeposit::preflight(PreflightContext const& ctx)
             return temMALFORMED;
     }
 
-    auto const asset = ctx.tx[sfAsset].get<Issue>();
-    auto const asset2 = ctx.tx[sfAsset2].get<Issue>();
+    auto const asset = ctx.tx[sfAsset];
+    auto const asset2 = ctx.tx[sfAsset2];
     if (auto const res = invalidAMMAssetPair(asset, asset2))
     {
         JLOG(ctx.j.debug()) << "AMM Deposit: invalid asset pair.";
@@ -259,7 +259,8 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
         // Check if either of the assets is frozen, AMMDeposit is not allowed
         // if either asset is frozen
         auto checkAsset = [&](Asset const& asset) -> TER {
-            if (auto const ter = requireAuth(ctx.view, asset, accountID))
+            if (auto const ter = requireAuth(
+                    ctx.view, asset, accountID, MPTAuthType::WeakAuth))
             {
                 JLOG(ctx.j.debug())
                     << "AMM Deposit: account is not authorized, " << asset;
@@ -278,10 +279,10 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
             return tesSUCCESS;
         };
 
-        if (auto const ter = checkAsset(ctx.tx[sfAsset].get<Issue>()))
+        if (auto const ter = checkAsset(ctx.tx[sfAsset]))
             return ter;
 
-        if (auto const ter = checkAsset(ctx.tx[sfAsset2].get<Issue>()))
+        if (auto const ter = checkAsset(ctx.tx[sfAsset2]))
             return ter;
     }
 

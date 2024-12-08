@@ -57,18 +57,6 @@ checkNear(IOUAmount const& expected, IOUAmount const& actual)
     return r <= ratTol;
 };
 
-bool
-checkNear(XRPAmount const& expected, XRPAmount const& actual)
-{
-    return expected == actual;
-};
-
-bool
-checkNear(MPTAmount const& expected, MPTAmount const& actual)
-{
-    return expected == actual;
-};
-
 static bool
 isXRPAccount(STPathElement const& pe)
 {
@@ -228,11 +216,7 @@ toStrand(
         if (hasAccount && (pe.getAccountID() == noAccount()))
             return {temBAD_PATH, Strand{}};
 
-        if (hasMPT && (hasCurrency || hasAccount))
-            return {temBAD_PATH, Strand{}};
-
-        if (hasMPT && hasIssuer &&
-            (pe.getIssuerID() != getMPTIssuer(pe.getMPTID())))
+        if (hasMPT && (hasCurrency || hasAccount || hasIssuer))
             return {temBAD_PATH, Strand{}};
     }
 
@@ -242,6 +226,7 @@ toStrand(
             return xrpIssue();
         if (asset.holds<MPTIssue>())
             return asset;
+        // First step ripples from the source to the issuer.
         return Issue{asset.get<Issue>().currency, src};
     }();
 
@@ -255,8 +240,9 @@ toStrand(
     // sendmax and deliver.
     normPath.reserve(4 + path.size());
     {
-        // Implied step: sender of the transaction and either sendmax or deliver
-        // asset
+        // The first step of a path is always implied to be the sender of the
+        // transaction, as defined by the transaction's Account field. The Asset
+        // is either SendMax or Deliver.
         auto const t = [&]() {
             auto const t =
                 STPathElement::typeAccount | STPathElement::typeIssuer;
@@ -266,9 +252,10 @@ toStrand(
         }();
         normPath.emplace_back(t, src, curAsset, curAsset.getIssuer());
 
-        // If transaction includes sendmax with the issuer, which is not
-        // the sender then the issuer is the second implied step, unless
-        // the path starts at address, which is the issuer of sendmax
+        // If transaction includes SendMax with the issuer, which is not
+        // the sender of the transaction, that issuer is implied to be
+        // the second step of the path. Unless the path starts at an address,
+        // which is the issuer of SendMax.
         if (sendMaxAsset && sendMaxAsset->getIssuer() != src &&
             (path.empty() || !path[0].isAccount() ||
              path[0].getAccountID() != sendMaxAsset->getIssuer()))
@@ -294,22 +281,23 @@ toStrand(
             }
         }
 
+        // If the Amount field of the transaction includes an issuer that is not
+        // the same as the Destination of the transaction, that issuer is
+        // implied to be the second-to-last step of the path.
         if (!((normPath.back().isAccount() &&
                normPath.back().getAccountID() == deliver.getIssuer()) ||
               (dst == deliver.getIssuer())))
         {
             normPath.emplace_back(
-                deliver.getIssuer(),
-                std::nullopt,
-                std::nullopt,
-                STPathElement::PathAssetTag{});
+                deliver.getIssuer(), std::nullopt, std::nullopt);
         }
 
+        // Last step of a path is always implied to be the receiver of a
+        // transaction, as defined by the transaction's Destination field.
         if (!normPath.back().isAccount() ||
             normPath.back().getAccountID() != dst)
         {
-            normPath.emplace_back(
-                dst, std::nullopt, std::nullopt, STPathElement::PathAssetTag{});
+            normPath.emplace_back(dst, std::nullopt, std::nullopt);
         }
     }
 
@@ -545,11 +533,7 @@ toStrand(
              curAsset.get<Issue>().currency != deliver.get<Issue>().currency) ||
             (curAsset.holds<MPTIssue>() &&
              curAsset.get<MPTIssue>() != deliver.get<MPTIssue>()))
-        {
-            std::cout << to_string(curAsset) << std::endl;
-            std::cout << to_string(deliver) << std::endl;
             return false;
-        }
         if (curAsset.getIssuer() != deliver.getIssuer() &&
             curAsset.getIssuer() != dst)
             return false;

@@ -657,7 +657,7 @@ parseLeaf(
                         Json::Value const& account = pathEl[jss::account];
                         Json::Value const& asset = pathEl[assetName];
                         Json::Value const& issuer = pathEl[jss::issuer];
-                        bool hasCurrency = false;
+                        bool hasAsset = false;
                         AccountID uAccount, uIssuer;
                         PathAsset uAsset;
 
@@ -697,7 +697,7 @@ parseLeaf(
                                 return ret;
                             }
 
-                            hasCurrency = true;
+                            hasAsset = true;
 
                             if (isMPT)
                             {
@@ -757,7 +757,7 @@ parseLeaf(
                             }
                         }
 
-                        p.emplace_back(uAccount, uAsset, uIssuer, hasCurrency);
+                        p.emplace_back(uAccount, uAsset, uIssuer, hasAsset);
                     }
 
                     tail.push_back(p);

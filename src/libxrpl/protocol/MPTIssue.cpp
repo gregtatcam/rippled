@@ -18,6 +18,7 @@
 //==============================================================================
 
 #include <xrpl/json/json_errors.h>
+#include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/MPTIssue.h>
 #include <xrpl/protocol/jss.h>
 

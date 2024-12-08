@@ -345,8 +345,14 @@ applyCreate(
         // Authorize MPT
         if (amount.holds<MPTIssue>())
         {
-            auto const mptokenKey =
-                keylet::mptoken(amount.get<MPTIssue>().getMptID(), *ammAccount);
+            auto const& mptIssue = amount.get<MPTIssue>();
+            if (auto const err = requireAuth(
+                    ctx_.view(), mptIssue, account_, MPTAuthType::WeakAuth);
+                err != tesSUCCESS)
+                return err;
+
+            auto const& mptID = mptIssue.getMptID();
+            auto const mptokenKey = keylet::mptoken(mptID, *ammAccount);
 
             auto const ownerNode = sb.dirInsert(
                 keylet::ownerDir(*ammAccount),
@@ -358,7 +364,7 @@ applyCreate(
 
             auto mptoken = std::make_shared<SLE>(mptokenKey);
             (*mptoken)[sfAccount] = *ammAccount;
-            (*mptoken)[sfMPTokenIssuanceID] = amount.get<MPTIssue>().getMptID();
+            (*mptoken)[sfMPTokenIssuanceID] = mptID;
             (*mptoken)[sfFlags] = 0;
             (*mptoken)[sfOwnerNode] = *ownerNode;
             sb.insert(mptoken);

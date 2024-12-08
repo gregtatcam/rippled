@@ -22,8 +22,8 @@
 #include <xrpld/app/paths/detail/Steps.h>
 #include <xrpld/ledger/PaymentSandbox.h>
 #include <xrpl/basics/Log.h>
-#include <xrpl/basics/MPTAmount.h>
 #include <xrpl/protocol/Feature.h>
+#include <xrpl/protocol/MPTAmount.h>
 #include <xrpl/protocol/Quality.h>
 
 #include <boost/container/flat_set.hpp>
