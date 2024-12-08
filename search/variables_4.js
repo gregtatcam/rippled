@@ -60,7 +60,7 @@ var searchData=
   ['expires_5f_57',['expires_',['../classripple_1_1test_1_1jtx_1_1token_1_1expiration.html#ad5d2cad75ea578ae4b1b2db83f7e4e6a',1,'ripple::test::jtx::token::expiration']]],
   ['expiresfromnow_58',['expiresFromNow',['../structripple_1_1test_1_1ValidatorSite__test_1_1FetchListConfig.html#a4fc511e1ab246f992ed8cd2ea540c310',1,'ripple::test::ValidatorSite_test::FetchListConfig']]],
   ['expmsg_59',['expMsg',['../structripple_1_1RPC_1_1TxnTestData.html#a437fa66bcecb167a332eda9da14305f3',1,'ripple::RPC::TxnTestData']]],
-  ['exponent_5f_60',['exponent_',['../classripple_1_1IOUAmount.html#aea9cd345c8da57dbbd2372ff434bfb23',1,'ripple::IOUAmount::exponent_()'],['../classripple_1_1Number.html#a62582b28d9183e7618fec0f0458331ab',1,'ripple::Number::exponent_()']]],
+  ['exponent_5f_60',['exponent_',['../classripple_1_1Number.html#a62582b28d9183e7618fec0f0458331ab',1,'ripple::Number::exponent_()'],['../classripple_1_1IOUAmount.html#aea9cd345c8da57dbbd2372ff434bfb23',1,'ripple::IOUAmount::exponent_()']]],
   ['expry_5f_61',['expry_',['../classripple_1_1test_1_1jtx_1_1expiration.html#afda2e656e95cfafb0f8e431840c4ac2d',1,'ripple::test::jtx::expiration']]],
   ['extent_5fv_62',['extent_v',['http://en.cppreference.com/w/cpp/types/extent.html',1,'std::extent_v()'],['http://en.cppreference.com/w/cpp/experimental/type_trait_variable_templates.html',1,'std::experimental::extent_v()']]],
   ['extra_63',['extra',['../classripple_1_1SlabAllocatorSet_1_1SlabConfig.html#ad54951a71724414fb61a7dd990a9f5e5',1,'ripple::SlabAllocatorSet::SlabConfig']]],
