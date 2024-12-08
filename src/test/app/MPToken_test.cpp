@@ -1484,19 +1484,19 @@ class MPToken_test : public beast::unit_test::suite
     void
     testMPTInvalidInTx(FeatureBitset features)
     {
-        testcase("MPT Amount Invalid in Transaction");
+        testcase("MPT Issue Invalid in Transaction");
         using namespace test::jtx;
 
-        // Validate that every transaction with an amount field,
+        // Validate that every transaction with an amount/issue field,
         // which doesn't support MPT, fails.
 
-        // keyed by transaction + amount field
+        // keyed by transaction + amount/issue field
         std::set<std::string> txWithAmounts;
         for (auto const& format : TxFormats::getInstance())
         {
             for (auto const& e : format.getSOTemplate())
             {
-                // Transaction has amount fields.
+                // Transaction has amount/issue fields.
                 // Exclude pseudo-transaction SetFee. Don't consider
                 // the Fee field since it's included in every transaction.
                 if (e.supportMPT() == soeMPTNotSupported &&
@@ -1522,9 +1522,9 @@ class MPToken_test : public beast::unit_test::suite
             env.fund(XRP(1'000), alice);
             env.fund(XRP(1'000), carol);
             auto test = [&](Json::Value const& jv,
-                            std::string const& amtField) {
+                            std::string const& mptField) {
                 txWithAmounts.erase(
-                    jv[jss::TransactionType].asString() + amtField);
+                    jv[jss::TransactionType].asString() + mptField);
 
                 // tx is signed
                 auto jtx = env.jt(jv);
@@ -1544,17 +1544,35 @@ class MPToken_test : public beast::unit_test::suite
                 jrr = env.rpc("json", "sign", to_string(jv1));
                 BEAST_EXPECT(jrr[jss::result][jss::error] == "invalidParams");
             };
-            // All transactions with sfAmount, which don't support MPT
-            // and transactions with amount fields, which can't be MPT
+            auto toSFieldRef = [](SField const& field) {
+                return std::ref(field);
+            };
+            auto setMPTFields = [&](SField const& field,
+                                    Json::Value& jv,
+                                    bool withAmount = true) {
+                jv[jss::Asset] = to_json(xrpIssue());
+                jv[jss::Asset2] = to_json(USD.issue());
+                if (withAmount)
+                    jv[field.fieldName] =
+                        USD(10).value().getJson(JsonOptions::none);
+                if (field == sfAsset)
+                    jv[jss::Asset] = to_json(mpt.get<MPTIssue>());
+                else if (field == sfAsset2)
+                    jv[jss::Asset2] = to_json(mpt.get<MPTIssue>());
+                else
+                    jv[field.fieldName] = mpt.getJson(JsonOptions::none);
+            };
+            // All transactions with sfAmount, which don't support MPT.
+            // Transactions with amount fields, which can't be MPT.
+            // Transactions with issue fields, which can't be MPT.
+
             // AMMDeposit
             auto ammDeposit = [&](SField const& field) {
                 Json::Value jv;
                 jv[jss::TransactionType] = jss::AMMDeposit;
                 jv[jss::Account] = alice.human();
-                jv[jss::Asset] = to_json(xrpIssue());
-                jv[jss::Asset2] = to_json(USD.issue());
-                jv[field.fieldName] = mpt.getJson(JsonOptions::none);
                 jv[jss::Flags] = tfSingleAsset;
+                setMPTFields(field, jv);
                 test(jv, field.fieldName);
             };
             for (SField const& field :
@@ -1565,10 +1583,8 @@ class MPToken_test : public beast::unit_test::suite
                 Json::Value jv;
                 jv[jss::TransactionType] = jss::AMMWithdraw;
                 jv[jss::Account] = alice.human();
-                jv[jss::Asset] = to_json(xrpIssue());
-                jv[jss::Asset2] = to_json(USD.issue());
                 jv[jss::Flags] = tfSingleAsset;
-                jv[field.fieldName] = mpt.getJson(JsonOptions::none);
+                setMPTFields(field, jv);
                 test(jv, field.fieldName);
             };
             for (SField const& field :
@@ -1579,9 +1595,7 @@ class MPToken_test : public beast::unit_test::suite
                 Json::Value jv;
                 jv[jss::TransactionType] = jss::AMMBid;
                 jv[jss::Account] = alice.human();
-                jv[jss::Asset] = to_json(xrpIssue());
-                jv[jss::Asset2] = to_json(USD.issue());
-                jv[field.fieldName] = mpt.getJson(JsonOptions::none);
+                setMPTFields(field, jv);
                 test(jv, field.fieldName);
             };
             ammBid(sfBidMin);

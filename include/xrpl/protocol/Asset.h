@@ -98,6 +98,9 @@ public:
     friend constexpr bool
     operator!=(Asset const& lhs, Asset const& rhs);
 
+    friend constexpr bool
+    operator<(Asset const& lhs, Asset const& rhs);
+
     friend constexpr std::weak_ordering
     operator<=>(Asset const& lhs, Asset const& rhs);
 
@@ -161,6 +164,21 @@ constexpr bool
 operator!=(Asset const& lhs, Asset const& rhs)
 {
     return !(lhs == rhs);
+}
+
+constexpr bool
+operator<(Asset const& lhs, Asset const& rhs)
+{
+    return std::visit(
+        [&]<typename TLhs, typename TRhs>(
+            TLhs const& issLhs, TRhs const& issRhs) {
+            if constexpr (std::is_same_v<TLhs, TRhs>)
+                return issLhs < issRhs;
+            else
+                return false;
+        },
+        lhs.issue_,
+        rhs.issue_);
 }
 
 constexpr bool

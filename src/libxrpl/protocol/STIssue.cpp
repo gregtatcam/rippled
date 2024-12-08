@@ -57,13 +57,13 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
         // MPT
         if (noAccount() == account)
         {
-            MPTID mptID;
+            uint192 mptID;
             std::uint32_t sequence = sit.get32();
             memcpy(mptID.data(), &sequence, sizeof(sequence));
             memcpy(
                 mptID.data() + sizeof(sequence),
-                account.data(),
-                sizeof(account));
+                currencyOrAccount.data(),
+                sizeof(currencyOrAccount));
             MPTIssue issue{mptID};
             asset_ = issue;
         }
@@ -150,7 +150,7 @@ STIssue::move(std::size_t n, void* buf)
 STIssue
 issueFromJson(SField const& name, Json::Value const& v)
 {
-    return STIssue{name, issueFromJson(v)};
+    return STIssue{name, assetFromJson(v)};
 }
 
 }  // namespace ripple

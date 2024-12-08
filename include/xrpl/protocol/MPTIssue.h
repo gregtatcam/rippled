@@ -53,11 +53,8 @@ public:
     void
     setJson(Json::Value& jv) const;
 
-    friend constexpr bool
-    operator==(MPTIssue const& lhs, MPTIssue const& rhs);
-
-    friend constexpr bool
-    operator!=(MPTIssue const& lhs, MPTIssue const& rhs);
+    auto
+    operator<=>(MPTIssue const&) const = default;
 
     bool
     native() const
