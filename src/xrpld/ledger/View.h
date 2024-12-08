@@ -182,6 +182,15 @@ accountHolds(
     AuthHandling zeroIfUnauthorized,
     beast::Journal j);
 
+[[nodiscard]] STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& issue,
+    FreezeHandling zeroIfFrozen,
+    AuthHandling zeroIfUnauthorized,
+    beast::Journal j);
+
 // Returns the amount an account can spend of the currency type saDefault, or
 // returns saDefault if this account is the issuer of the currency in
 // question. Should be used in favor of accountHolds when questioning how much
@@ -193,6 +202,15 @@ accountFunds(
     AccountID const& id,
     STAmount const& saDefault,
     FreezeHandling freezeHandling,
+    beast::Journal j);
+
+[[nodiscard]] STAmount
+accountFunds(
+    ReadView const& view,
+    AccountID const& id,
+    STAmount const& saDefault,
+    FreezeHandling freezeHandling,
+    AuthHandling authHandling,
     beast::Journal j);
 
 // Return the account's liquid (not reserved) XRP.  Generally prefer
@@ -535,6 +553,17 @@ requireAuth(
     ReadView const& view,
     MPTIssue const& mptIssue,
     AccountID const& account);
+[[nodiscard]] TER inline requireAuth(
+    ReadView const& view,
+    Asset const& asset,
+    AccountID const& account)
+{
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue_) {
+            return requireAuth(view, issue_, account);
+        },
+        asset.value());
+}
 
 /** Check if the destination account is allowed
  *  to receive MPT. Return tecNO_AUTH if it doesn't

@@ -926,8 +926,23 @@ ValidClawback::finalize(
             AccountID const issuer = tx.getAccountID(sfAccount);
             STAmount const& amount = tx.getFieldAmount(sfAmount);
             AccountID const& holder = amount.getIssuer();
-            STAmount const holderBalance = accountHolds(
-                view, holder, amount.getCurrency(), issuer, fhIGNORE_FREEZE, j);
+            STAmount const holderBalance = [&]() {
+                if (amount.holds<Issue>())
+                    return accountHolds(
+                        view,
+                        holder,
+                        amount.get<Issue>().currency,
+                        issuer,
+                        fhIGNORE_FREEZE,
+                        j);
+                return accountHolds(
+                    view,
+                    holder,
+                    amount.get<MPTIssue>(),
+                    fhIGNORE_FREEZE,
+                    ahIGNORE_AUTH,
+                    j);
+            }();
 
             if (holderBalance.signum() < 0)
             {
@@ -1099,6 +1114,66 @@ ValidMPTIssuance::finalize(
 
             return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
                 mptokensCreated_ == 0 && mptokensDeleted_ == 0;
+        }
+
+        if (tx.getTxnType() == ttAMM_CREATE || tx.getTxnType() == ttCHECK_CASH)
+        {
+            if (mptIssuancesDeleted_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while removing MPT issuances";
+            }
+            else if (mptIssuancesCreated_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while creating MPT issuances";
+            }
+            else if (mptokensDeleted_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while removing MPTokens";
+            }
+            // AMM can be created with IOU/MPT or MPT/MPT
+            else if (
+                (tx.getTxnType() == ttAMM_CREATE && mptokensCreated_ > 2) ||
+                (tx.getTxnType() == ttCHECK_CASH && mptokensCreated_ > 1))
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while creating MPTokens";
+            }
+
+            return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
+                ((tx.getTxnType() == ttAMM_CREATE && mptokensCreated_ <= 2) ||
+                 (tx.getTxnType() == ttCHECK_CASH && mptokensCreated_ <= 1)) &&
+                mptokensDeleted_ == 0;
+        }
+
+        if (tx.getTxnType() == ttAMM_DELETE ||
+            tx.getTxnType() == ttAMM_WITHDRAW)
+        {
+            if (mptIssuancesDeleted_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while removing MPT issuances";
+            }
+            else if (mptIssuancesCreated_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while creating MPT issuances";
+            }
+            else if (mptokensDeleted_ > 2)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while removing MPTokens";
+            }
+            else if (mptokensCreated_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
+                                   "succeeded while creating MPTokens";
+            }
+
+            return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
+                mptokensCreated_ == 0 && mptokensDeleted_ <= 2;
         }
     }
 

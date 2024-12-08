@@ -1006,7 +1006,11 @@ struct PayStrand_test : public beast::unit_test::suite
 
             // alice -> USD/XRP -> bob
             STPath path;
-            path.emplace_back(std::nullopt, xrpCurrency(), std::nullopt);
+            path.emplace_back(
+                std::nullopt,
+                xrpCurrency(),
+                std::nullopt,
+                STPathElement::PathAssetTag{});
 
             auto [ter, strand] = toStrand(
                 *env.current(),
@@ -1255,13 +1259,10 @@ struct PayStrand_test : public beast::unit_test::suite
     {
         using namespace jtx;
         auto const sa = supported_amendments();
-        testToStrand(sa - featureFlowCross);
         testToStrand(sa);
 
-        testRIPD1373(sa - featureFlowCross);
         testRIPD1373(sa);
 
-        testLoop(sa - featureFlowCross);
         testLoop(sa);
 
         testNoAccount(sa);

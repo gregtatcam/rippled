@@ -21,14 +21,11 @@
 #define RIPPLE_PROTOCOL_ASSET_H_INCLUDED
 
 #include <xrpl/basics/base_uint.h>
+#include <xrpl/protocol/Concepts.h>
 #include <xrpl/protocol/Issue.h>
 #include <xrpl/protocol/MPTIssue.h>
 
 namespace ripple {
-
-template <typename TIss>
-concept ValidIssueType =
-    std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>;
 
 /* Asset is an abstraction of three different issue types: XRP, IOU, MPT.
  * For historical reasons, two issue types XRP and IOU are wrapped in Issue
@@ -58,6 +55,12 @@ public:
     Asset(MPTID const& issuanceID) : issue_(MPTIssue{issuanceID})
     {
     }
+
+    explicit
+    operator Issue() const;
+
+    explicit
+    operator MPTIssue() const;
 
     AccountID const&
     getIssuer() const;
@@ -94,6 +97,9 @@ public:
 
     friend constexpr bool
     operator!=(Asset const& lhs, Asset const& rhs);
+
+    friend constexpr std::weak_ordering
+    operator<=>(Asset const& lhs, Asset const& rhs);
 
     friend constexpr bool
     operator==(Currency const& lhs, Asset const& rhs);
@@ -163,6 +169,24 @@ operator==(Currency const& lhs, Asset const& rhs)
     return rhs.holds<Issue>() && rhs.get<Issue>().currency == lhs;
 }
 
+constexpr std::weak_ordering
+operator<=>(Asset const& lhs, Asset const& rhs)
+{
+    return std::visit(
+        []<ValidIssueType TLhs, ValidIssueType TRhs>(
+            TLhs const& lhs_, TRhs const& rhs_) {
+            if constexpr (std::is_same_v<TLhs, TRhs>)
+                return lhs_ <=> rhs_;
+            else if constexpr (
+                std::is_same_v<TLhs, Issue> && std::is_same_v<TRhs, MPTIssue>)
+                return std::weak_ordering::greater;
+            else
+                return std::weak_ordering::less;
+        },
+        lhs.issue_,
+        rhs.issue_);
+}
+
 constexpr bool
 equalTokens(Asset const& lhs, Asset const& rhs)
 {
@@ -200,6 +224,50 @@ assetFromJson(Json::Value const& jv);
 
 Json::Value
 to_json(Asset const& asset);
+
+inline bool
+isConsistent(Asset const& issue)
+{
+    return std::visit(
+        [&]<typename TIss>(TIss const& issue_) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return isConsistent(issue_);
+            else
+                return true;
+        },
+        issue.value());
+}
+
+inline bool
+validAsset(Asset const& issue)
+{
+    return std::visit(
+        [&]<typename TIss>(TIss const& issue_) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return isConsistent(issue_) && issue_.currency != badCurrency();
+            else
+                return true;
+        },
+        issue.value());
+}
+
+template <class Hasher>
+void
+hash_append(Hasher& h, Asset const& r)
+{
+    using beast::hash_append;
+    std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                hash_append(h, issue);
+            else
+                hash_append(h, issue);
+        },
+        r.value());
+}
+
+std::ostream&
+operator<<(std::ostream& os, Asset const& x);
 
 }  // namespace ripple
 

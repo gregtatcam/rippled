@@ -165,8 +165,8 @@ doAMMInfo(RPC::JsonContext& context)
             return Unexpected(rpcACT_NOT_FOUND);
         if (!issue1 && !issue2)
         {
-            issue1 = (*amm)[sfAsset];
-            issue2 = (*amm)[sfAsset2];
+            issue1 = (*amm)[sfAsset].get<Issue>();
+            issue2 = (*amm)[sfAsset2].get<Issue>();
         }
 
         return ValuesFromContextParams{
@@ -191,6 +191,7 @@ doAMMInfo(RPC::JsonContext& context)
         issue1,
         issue2,
         FreezeHandling::fhIGNORE_FREEZE,
+        AuthHandling::ahIGNORE_AUTH,
         context.j);
     auto const lptAMMBalance = accountID
         ? ammLPHolds(*ledger, *amm, *accountID, context.j)

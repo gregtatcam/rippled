@@ -37,7 +37,9 @@ private:
 public:
     MPTIssue() = default;
 
-    explicit MPTIssue(MPTID const& issuanceID);
+    MPTIssue(MPTID const& issuanceID);
+
+    MPTIssue(std::uint32_t sequence, AccountID const& account);
 
     AccountID const&
     getIssuer() const;
@@ -62,6 +64,9 @@ public:
     {
         return false;
     }
+
+    friend constexpr std::weak_ordering
+    operator<=>(MPTIssue const& lhs, MPTIssue const& rhs);
 };
 
 constexpr bool
@@ -76,12 +81,43 @@ operator!=(MPTIssue const& lhs, MPTIssue const& rhs)
     return !(lhs == rhs);
 }
 
+constexpr std::weak_ordering
+operator<=>(MPTIssue const& lhs, MPTIssue const& rhs)
+{
+    if (auto const c{lhs.mptID_ <=> rhs.mptID_}; c != 0)
+        return c;
+    return lhs.mptID_ <=> rhs.mptID_;
+}
+
 /** MPT is a non-native token.
  */
 inline bool
 isXRP(MPTID const&)
 {
     return false;
+}
+
+inline AccountID const&
+getMPTIssuer(MPTID const& mptid)
+{
+    AccountID const* accountId = reinterpret_cast<AccountID const*>(
+        mptid.data() + sizeof(std::uint32_t));
+    return *accountId;
+}
+
+inline MPTID
+noMPT()
+{
+    static MPTIssue mpt{0, noAccount()};
+    return mpt.getMptID();
+}
+
+template <class Hasher>
+void
+hash_append(Hasher& h, MPTIssue const& r)
+{
+    using beast::hash_append;
+    hash_append(h, r.getMptID());
 }
 
 Json::Value
@@ -93,6 +129,19 @@ to_string(MPTIssue const& mptIssue);
 MPTIssue
 mptIssueFromJson(Json::Value const& jv);
 
+std::ostream&
+operator<<(std::ostream& os, MPTIssue const& x);
+
 }  // namespace ripple
+
+namespace std {
+
+template <>
+struct hash<ripple::MPTID> : ripple::MPTID::hasher
+{
+    explicit hash() = default;
+};
+
+}  // namespace std
 
 #endif  // RIPPLE_PROTOCOL_MPTISSUE_H_INCLUDED
