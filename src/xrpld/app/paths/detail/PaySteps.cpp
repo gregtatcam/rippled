@@ -216,7 +216,11 @@ toStrand(
         if (hasAccount && (pe.getAccountID() == noAccount()))
             return {temBAD_PATH, Strand{}};
 
-        if (hasMPT && (hasCurrency || hasAccount || hasIssuer))
+        if (hasMPT && (hasCurrency || hasAccount))
+            return {temBAD_PATH, Strand{}};
+
+        if (hasMPT && hasIssuer &&
+            (pe.getIssuerID() != getMPTIssuer(pe.getMPTID())))
             return {temBAD_PATH, Strand{}};
     }
 
