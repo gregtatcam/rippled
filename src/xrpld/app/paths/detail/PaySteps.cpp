@@ -84,6 +84,16 @@ toStep(
     if (ctx.isLast && isXRPAccount(*e1) && e2->isAccount())
         return make_XRPEndpointStep(ctx, e2->getAccountID());
 
+    // MPTEndpointStep can happen in following cases:
+    // - Direct payment between an issuer and a holder
+    // - Direct payment between the holders
+    // - Cross-token payment with Amount or SendMax or both MPT
+    // In all cases MPTEndpointStep is always first or last step.
+    // e1/e2 are always account types (see the comments in toStrand()).
+    // curAsset is always MPT.
+    // Note that in the last case the first step could be a book step
+    // if the source is the TakerPays's issuer.
+
     if (e1->isAccount() && e2->isAccount())
     {
         if (curAsset.holds<MPTIssue>())
@@ -273,7 +283,8 @@ toStrand(
 
         {
             // Note that for offer crossing (only) we do use an offer book
-            // even if all that is changing is the Issue/MPTIssue.account.
+            // even if all that is changing is the Issue.account. Note,
+            // that MPTIssue can't change the account.
             STPathElement const& lastAsset =
                 *std::find_if(normPath.rbegin(), normPath.rend(), hasAsset);
             if (lastAsset.getPathAsset() != deliver ||
