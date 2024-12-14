@@ -84,15 +84,20 @@ toStep(
     if (ctx.isLast && isXRPAccount(*e1) && e2->isAccount())
         return make_XRPEndpointStep(ctx, e2->getAccountID());
 
-    // MPTEndpointStep can happen in following cases:
-    // - Direct payment between an issuer and a holder
-    // - Direct payment between the holders
-    // - Cross-token payment with Amount or SendMax or both MPT
-    // In all cases MPTEndpointStep is always first or last step.
-    // e1/e2 are always account types (see the comments in toStrand()).
-    // curAsset is always MPT.
-    // Note that in the last case the first step could be a book step
-    // if the source is the TakerPays's issuer.
+    // MPTEndpointStep is created in following cases:
+    // 1 Direct payment between an issuer and a holder
+    //   e1 is issuer and e2 is holder or vise versa
+    //   There is only one step in this case: holder->issuer or
+    //   issuer->holder
+    // 2 Direct payment between the holders
+    //   e1 is issuer and e2 is holder or vise versa
+    //   There are two steps in this case: holder->issuer->holder1
+    // 3 Cross-token payment with Amount or SendMax or both MPT
+    //   If destination is an issuer then the last step is BookStep,
+    //   otherwise the last step is MPTEndpointStep where e1 is
+    //   the issuer and e2 is the holder.
+    // In all cases MPTEndpointStep is always first or last step,
+    // e1/e2 are always account types, and curAsset is always MPT.
 
     if (e1->isAccount() && e2->isAccount())
     {
@@ -195,8 +200,9 @@ toStrand(
          sendMaxAsset->getIssuer() == beast::zero))
         return {temBAD_PATH, Strand{}};
 
-    for (auto const& pe : path)
+    for (std::size_t i = 0; i < path.size(); ++i)
     {
+        auto const& pe = path[i];
         auto const t = pe.getNodeType();
 
         if ((t & ~STPathElement::typeAll) || !t)
@@ -206,6 +212,7 @@ toStrand(
         bool const hasIssuer = t & STPathElement::typeIssuer;
         bool const hasCurrency = t & STPathElement::typeCurrency;
         bool const hasMPT = t & STPathElement::typeMPT;
+        bool const hasAsset = t & STPathElement::typeAsset;
 
         if (hasAccount && (hasIssuer || hasCurrency))
             return {temBAD_PATH, Strand{}};
@@ -231,6 +238,11 @@ toStrand(
 
         if (hasMPT && hasIssuer &&
             (pe.getIssuerID() != getMPTIssuer(pe.getMPTID())))
+            return {temBAD_PATH, Strand{}};
+
+        // No rippling if MPT
+        if (i > 0 && path[i - 1].hasMPT() &&
+            (hasAccount || (hasIssuer && !hasAsset)))
             return {temBAD_PATH, Strand{}};
     }
 
@@ -264,6 +276,8 @@ toStrand(
                 return t | STPathElement::typeMPT;
             return t | STPathElement::typeCurrency;
         }();
+        // If MPT then the issuer is the actual issuer, it is never the source
+        // account.
         normPath.emplace_back(t, src, curAsset, curAsset.getIssuer());
 
         // If transaction includes SendMax with the issuer, which is not
@@ -283,7 +297,7 @@ toStrand(
 
         {
             // Note that for offer crossing (only) we do use an offer book
-            // even if all that is changing is the Issue.account. Note,
+            // even if all that is changing is the Issue.account. Note
             // that MPTIssue can't change the account.
             STPathElement const& lastAsset =
                 *std::find_if(normPath.rbegin(), normPath.rend(), hasAsset);
@@ -298,7 +312,9 @@ toStrand(
 
         // If the Amount field of the transaction includes an issuer that is not
         // the same as the Destination of the transaction, that issuer is
-        // implied to be the second-to-last step of the path.
+        // implied to be the second-to-last step of the path. If normPath.back
+        // is an offer, which sells MPT then the added path element account is
+        // the MPT's issuer.
         if (!((normPath.back().isAccount() &&
                normPath.back().getAccountID() == deliver.getIssuer()) ||
               (dst == deliver.getIssuer())))
@@ -391,12 +407,15 @@ toStrand(
         else if (cur->hasMPT())
             curAsset = cur->getPathAsset().get<MPTID>();
 
-        auto getImpliedStep = [&](AccountID const& src_,
-                                  AccountID const& dst_,
-                                  Asset const& asset_) {
+        auto getImpliedStep =
+            [&](AccountID const& src_,
+                AccountID const& dst_,
+                Asset const& asset_) -> std::pair<TER, std::unique_ptr<Step>> {
             if (asset_.holds<MPTIssue>())
-                return make_MPTEndpointStep(
-                    ctx(), src_, dst_, asset_.get<MPTIssue>().getMptID());
+            {
+                JLOG(j.error()) << "MPT is invalid with rippling";
+                return {temBAD_PATH, nullptr};
+            }
             return make_DirectStepI(
                 ctx(), src_, dst_, asset_.get<Issue>().currency);
         };
@@ -412,8 +431,10 @@ toStrand(
                 curAsset.getIssuer() != next->getAccountID())
             {
                 if (curAsset.holds<MPTIssue>())
-                    Throw<FlowException>(
-                        tefEXCEPTION, "MPT is invalid with rippling");
+                {
+                    JLOG(j.error()) << "MPT is invalid with rippling";
+                    return {temBAD_PATH, Strand{}};
+                }
                 JLOG(j.trace()) << "Inserting implied account";
                 auto msr = getImpliedStep(
                     cur->getAccountID(), curAsset.getIssuer(), curAsset);
@@ -434,8 +455,10 @@ toStrand(
             if (curAsset.getIssuer() != cur->getAccountID())
             {
                 if (curAsset.holds<MPTIssue>())
-                    Throw<FlowException>(
-                        tefEXCEPTION, "MPT is invalid with rippling");
+                {
+                    JLOG(j.error()) << "MPT is invalid with rippling";
+                    return {temBAD_PATH, Strand{}};
+                }
                 JLOG(j.trace()) << "Inserting implied account before offer";
                 auto msr = getImpliedStep(
                     cur->getAccountID(), curAsset.getIssuer(), curAsset);
@@ -452,6 +475,8 @@ toStrand(
         }
         else if (cur->isOffer() && next->isAccount())
         {
+            // If the offer sells MPT, then next's account is always the issuer.
+            // Therefore, this block never executes if MPT.
             if (curAsset.getIssuer() != next->getAccountID() &&
                 !isXRP(next->getAccountID()))
             {

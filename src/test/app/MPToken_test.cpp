@@ -2432,10 +2432,84 @@ class MPToken_test : public beast::unit_test::suite
 
         // Loop
         {
+            Env env{*this, features};
+            MPTTester mpt(env, gw, {.holders = {carol, bob}});
+
+            mpt.create(
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT = mpt["MPT"];
+
+            mpt.authorize({.account = carol});
+            mpt.pay(gw, carol, 200);
+
+            mpt.authorize({.account = bob});
+
+            // holder to holder
+            env(pay(carol, bob, MPT(1)),
+                test::jtx::path(~MPT, ~USD, ~MPT),
+                sendmax(XRP(1)),
+                txflags(tfPartialPayment),
+                ter(temBAD_PATH_LOOP));
+            env.close();
+
+            // issuer to holder
+            env(pay(gw, bob, MPT(1)),
+                test::jtx::path(~MPT, ~USD, ~MPT),
+                sendmax(XRP(1)),
+                txflags(tfPartialPayment),
+                ter(temBAD_PATH_LOOP));
+            env.close();
+
+            // holder to issuer
+            env(pay(bob, gw, MPT(1)),
+                test::jtx::path(~MPT, ~USD, ~MPT),
+                sendmax(XRP(1)),
+                txflags(tfPartialPayment),
+                ter(temBAD_PATH_LOOP));
+            env.close();
         }
 
         // Rippling
         {
+            Env env{*this, features};
+            MPTTester mpt(env, gw, {.holders = {carol, bob}});
+
+            mpt.create(
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT = mpt["MPT"];
+
+            mpt.authorize({.account = carol});
+            mpt.pay(gw, carol, 200);
+
+            mpt.authorize({.account = bob});
+
+            // holder to holder
+            env(pay(carol, bob, MPT(1)),
+                test::jtx::path(~MPT, gw),
+                sendmax(XRP(1)),
+                txflags(tfPartialPayment),
+                ter(temBAD_PATH));
+            env.close();
+
+            // issuer to holder
+            env(pay(gw, bob, MPT(1)),
+                test::jtx::path(~MPT, carol),
+                sendmax(XRP(1)),
+                txflags(tfPartialPayment),
+                ter(temBAD_PATH));
+            env.close();
+
+            // holder to issuer
+            env(pay(bob, gw, MPT(1)),
+                test::jtx::path(~MPT, carol),
+                sendmax(XRP(1)),
+                txflags(tfPartialPayment),
+                ter(temBAD_PATH));
+            env.close();
         }
 
         // MPTokenV2 is disabled
