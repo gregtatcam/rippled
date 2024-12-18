@@ -233,7 +233,8 @@ template <>
 inline MPTAmount const&
 get<MPTAmount>(EitherAmount const& amt)
 {
-    XRPL_ASSERT(amt.isMPT(), "ripple::get<MPTAmount>(EitherAmount const&) : is MPT");
+    XRPL_ASSERT(
+        amt.isMPT(), "ripple::get<MPTAmount>(EitherAmount const&) : is MPT");
     return amt.mpt();
 }
 

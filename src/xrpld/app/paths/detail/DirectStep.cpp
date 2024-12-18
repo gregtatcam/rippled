@@ -722,7 +722,8 @@ DirectStepI<TDerived>::validFwd(
 
     auto const savCache = *cache_;
 
-    XRPL_ASSERT(!in.native(), "ripple::DirectStepI::validFwd : input is not XRP");
+    XRPL_ASSERT(
+        !in.native(), "ripple::DirectStepI::validFwd : input is not XRP");
 
     auto const [maxSrcToDst, srcDebtDir] =
         static_cast<TDerived const*>(this)->maxFlow(sb, cache_->srcToDst);
