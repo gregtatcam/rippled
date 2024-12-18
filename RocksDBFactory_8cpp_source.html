@@ -353,8 +353,8 @@ $(function() {
 <div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <a class="code hl_enumeration" href="namespaceripple_1_1NodeStore.html#af127c2e4fc73b5d35647147ef45b350c">Status</a></div>
 <div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    fetch(<span class="keywordtype">void</span> <span class="keyword">const</span>* key, <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr&lt;NodeObject&gt;</a>* pObject)<span class="keyword"> override</span></div>
 <div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        ASSERT(</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>            m_db != <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        XRPL_ASSERT(</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>            m_db,</div>
 <div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            <span class="stringliteral">&quot;ripple::NodeStore::RocksDBBackend::fetch : non-null database&quot;</span>);</div>
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>        pObject-&gt;<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr/reset.html">reset</a>();</div>
 <div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
@@ -431,8 +431,8 @@ $(function() {
 <div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>    <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>    storeBatch(Batch <span class="keyword">const</span>&amp; batch)<span class="keyword"> override</span></div>
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>        ASSERT(</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>            m_db != <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>        XRPL_ASSERT(</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>            m_db,</div>
 <div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>            <span class="stringliteral">&quot;ripple::NodeStore::RocksDBBackend::storeBatch : non-null &quot;</span></div>
 <div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>            <span class="stringliteral">&quot;database&quot;</span>);</div>
 <div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        rocksdb::WriteBatch wb;</div>
@@ -466,8 +466,8 @@ $(function() {
 <div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>    <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>    <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/algorithm/for_each.html">for_each</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt;<span class="keywordtype">void</span>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr&lt;NodeObject&gt;</a>)&gt; f)<span class="keyword"> override</span></div>
 <div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span><span class="keyword">    </span>{</div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        ASSERT(</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>            m_db != <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        XRPL_ASSERT(</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>            m_db,</div>
 <div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>            <span class="stringliteral">&quot;ripple::NodeStore::RocksDBBackend::for_each : non-null database&quot;</span>);</div>
 <div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        rocksdb::ReadOptions <span class="keyword">const</span> options;</div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span> </div>

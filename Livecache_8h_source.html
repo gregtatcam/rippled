@@ -487,7 +487,7 @@ $(function() {
 <div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>    <span class="comment">// but we will use it to make connections and hand it out</span></div>
 <div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>    <span class="comment">// when redirecting.</span></div>
 <div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    ASSERT(</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        ep.<a class="code hl_variable" href="structripple_1_1PeerFinder_1_1Endpoint.html#a816bff7055d181e63590a3e6d862b869">hops</a> &lt;= (<a class="code hl_variable" href="namespaceripple_1_1PeerFinder_1_1Tuning.html#ad9120fce3c05559f3eb996f93c8ed9d4">Tuning::maxHops</a> + 1),</div>
 <div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>        <span class="stringliteral">&quot;ripple::PeerFinder::Livecache::insert : maximum input hops&quot;</span>);</div>
 <div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>    <span class="keyword">auto</span> result = m_cache.<a class="code hl_function" href="classbeast_1_1detail_1_1aged__ordered__container.html#ae5c10ce4025892094d3e2f4d677310f0">emplace</a>(ep.<a class="code hl_variable" href="structripple_1_1PeerFinder_1_1Endpoint.html#a5902587981565796078acf3168c19143">address</a>, ep);</div>
@@ -587,7 +587,7 @@ $(function() {
 <div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00533" name="l00533"></a><span class="lineno"><a class="line" href="classripple_1_1PeerFinder_1_1Livecache_1_1hops__t.html#ad20656647e059b3df11aef125304d970">  533</a></span><a class="code hl_function" href="classripple_1_1PeerFinder_1_1Livecache_1_1hops__t.html#ad20656647e059b3df11aef125304d970">Livecache&lt;Allocator&gt;::hops_t::insert</a>(<a class="code hl_struct" href="structripple_1_1PeerFinder_1_1detail_1_1LivecacheBase_1_1Element.html">Element</a>&amp; e)</div>
 <div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span>{</div>
-<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span>    ASSERT(</div>
+<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00536" name="l00536"></a><span class="lineno">  536</span>        e.<a class="code hl_variable" href="structripple_1_1PeerFinder_1_1detail_1_1LivecacheBase_1_1Element.html#a6555929f80d55aae1eea6d5597db39f7">endpoint</a>.<a class="code hl_variable" href="structripple_1_1PeerFinder_1_1Endpoint.html#a816bff7055d181e63590a3e6d862b869">hops</a> &lt;= <a class="code hl_variable" href="namespaceripple_1_1PeerFinder_1_1Tuning.html#ad9120fce3c05559f3eb996f93c8ed9d4">Tuning::maxHops</a> + 1,</div>
 <div class="line"><a id="l00537" name="l00537"></a><span class="lineno">  537</span>        <span class="stringliteral">&quot;ripple::PeerFinder::Livecache::hops_t::insert : maximum input hops&quot;</span>);</div>
 <div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>    <span class="comment">// This has security implications without a shuffle</span></div>
@@ -599,7 +599,7 @@ $(function() {
 <div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00545" name="l00545"></a><span class="lineno"><a class="line" href="classripple_1_1PeerFinder_1_1Livecache_1_1hops__t.html#a6dc77255368499bdd222de8cbbdab87d">  545</a></span><a class="code hl_function" href="classripple_1_1PeerFinder_1_1Livecache_1_1hops__t.html#a6dc77255368499bdd222de8cbbdab87d">Livecache&lt;Allocator&gt;::hops_t::reinsert</a>(<a class="code hl_struct" href="structripple_1_1PeerFinder_1_1detail_1_1LivecacheBase_1_1Element.html">Element</a>&amp; e, <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> numHops)</div>
 <div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>{</div>
-<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    ASSERT(</div>
+<div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>        numHops &lt;= <a class="code hl_variable" href="namespaceripple_1_1PeerFinder_1_1Tuning.html#ad9120fce3c05559f3eb996f93c8ed9d4">Tuning::maxHops</a> + 1,</div>
 <div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>        <span class="stringliteral">&quot;ripple::PeerFinder::Livecache::hops_t::reinsert : maximum hops input&quot;</span>);</div>
 <div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span> </div>

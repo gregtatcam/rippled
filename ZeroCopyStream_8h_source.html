@@ -275,7 +275,7 @@ $(function() {
 <div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00207" name="l00207"></a><span class="lineno"><a class="line" href="classripple_1_1ZeroCopyOutputStream.html#a479b71ded4675116045026abac1cffad">  207</a></span><a class="code hl_function" href="classripple_1_1ZeroCopyOutputStream.html#a479b71ded4675116045026abac1cffad">ZeroCopyOutputStream&lt;Streambuf&gt;::BackUp</a>(<span class="keywordtype">int</span> count)</div>
 <div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>{</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    ASSERT(</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        count &lt;= commit_, <span class="stringliteral">&quot;ripple::ZeroCopyOutputStream::BackUp : valid input&quot;</span>);</div>
 <div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="keyword">auto</span> <span class="keyword">const</span> n = commit_ - count;</div>
 <div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    streambuf_.commit(n);</div>

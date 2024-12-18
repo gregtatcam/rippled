@@ -233,8 +233,8 @@ $(function() {
 <div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>            , <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#ae4182ef751650c53c7335bdb0637d79d">m_repeat</a>(repeat)</div>
 <div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>            , <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#a74ef18fb1ad3ca0f3e82325355cb19ac">m_probe</a>(probe)</div>
 <div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        {</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>            ASSERT(</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>                <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#a74ef18fb1ad3ca0f3e82325355cb19ac">m_probe</a> != <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>            XRPL_ASSERT(</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>                <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#a74ef18fb1ad3ca0f3e82325355cb19ac">m_probe</a>,</div>
 <div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                <span class="stringliteral">&quot;beast::io_latency_probe::sample_op::sample_op : non-null &quot;</span></div>
 <div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                <span class="stringliteral">&quot;probe input&quot;</span>);</div>
 <div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>            <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#a74ef18fb1ad3ca0f3e82325355cb19ac">m_probe</a>-&gt;<a class="code hl_function" href="classbeast_1_1io__latency__probe.html#a4ad793e4145f2062fcbe2a2c25dde6c4">addref</a>();</div>
@@ -246,8 +246,8 @@ $(function() {
 <div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>            , <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#ae4182ef751650c53c7335bdb0637d79d">m_repeat</a>(from.m_repeat)</div>
 <div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>            , <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#a74ef18fb1ad3ca0f3e82325355cb19ac">m_probe</a>(from.m_probe)</div>
 <div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        {</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>            ASSERT(</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>                <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#a74ef18fb1ad3ca0f3e82325355cb19ac">m_probe</a> != <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>            XRPL_ASSERT(</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>                <a class="code hl_variable" href="structbeast_1_1io__latency__probe_1_1sample__op.html#a74ef18fb1ad3ca0f3e82325355cb19ac">m_probe</a>,</div>
 <div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                <span class="stringliteral">&quot;beast::io_latency_probe::sample_op::sample_op(sample_op&amp;&amp;) : &quot;</span></div>
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                <span class="stringliteral">&quot;non-null probe input&quot;</span>);</div>
 <div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>            from.m_probe = <span class="keyword">nullptr</span>;</div>

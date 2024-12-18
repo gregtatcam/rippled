@@ -151,7 +151,7 @@ $(function() {
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="classripple_1_1LoadManager.html#a698d070498451ffce36a31089f49b0c4">   73</a></span><a class="code hl_function" href="classripple_1_1LoadManager.html#a698d070498451ffce36a31089f49b0c4">LoadManager::start</a>()</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>{</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    JLOG(<a class="code hl_variable" href="classripple_1_1LoadManager.html#a90d809c796ff95efdf34777016917d20">journal_</a>.<a class="code hl_function" href="classbeast_1_1Journal.html#a556228cb60bcf405c225d3f64b7b01ae">debug</a>()) &lt;&lt; <span class="stringliteral">&quot;Starting&quot;</span>;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    ASSERT(</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        !<a class="code hl_variable" href="classripple_1_1LoadManager.html#a4699234257f0098dcdb4fd3551ac7d7b">thread_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/thread/thread/joinable.html">joinable</a>(),</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="stringliteral">&quot;ripple::LoadManager::start : thread not joinable&quot;</span>);</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>

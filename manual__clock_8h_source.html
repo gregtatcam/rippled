@@ -129,7 +129,7 @@ $(function() {
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="classbeast_1_1manual__clock.html#a6c1f6332b92420caf58223577dfa195d">   62</a></span>    <a class="code hl_function" href="classbeast_1_1manual__clock.html#a6c1f6332b92420caf58223577dfa195d">set</a>(<a class="code hl_typedef" href="classbeast_1_1abstract__clock.html#a4e16832b0bdf9392c5138bbbde024d8e">time_point</a> <span class="keyword">const</span>&amp; when)</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    {</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        ASSERT(</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            !Clock::is_steady || when &gt;= <a class="code hl_variable" href="classbeast_1_1manual__clock.html#a55192bb52af6bdce8b8dc0eed7ab373f">now_</a>,</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            <span class="stringliteral">&quot;beast::manual_clock::set(time_point) : forward input&quot;</span>);</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <a class="code hl_variable" href="classbeast_1_1manual__clock.html#a55192bb52af6bdce8b8dc0eed7ab373f">now_</a> = when;</div>
@@ -146,7 +146,7 @@ $(function() {
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="classbeast_1_1manual__clock.html#a411c0c02d6680afd003aba5a876d610a">   81</a></span>    <a class="code hl_function" href="classbeast_1_1manual__clock.html#a411c0c02d6680afd003aba5a876d610a">advance</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/duration.html">std::chrono::duration&lt;Rep, Period&gt;</a> <span class="keyword">const</span>&amp; elapsed)</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    {</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        ASSERT(</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            !Clock::is_steady || (<a class="code hl_variable" href="classbeast_1_1manual__clock.html#a55192bb52af6bdce8b8dc0eed7ab373f">now_</a> + elapsed) &gt;= <a class="code hl_variable" href="classbeast_1_1manual__clock.html#a55192bb52af6bdce8b8dc0eed7ab373f">now_</a>,</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            <span class="stringliteral">&quot;beast::manual_clock::advance(duration) : forward input&quot;</span>);</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <a class="code hl_variable" href="classbeast_1_1manual__clock.html#a55192bb52af6bdce8b8dc0eed7ab373f">now_</a> += elapsed;</div>

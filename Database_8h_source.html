@@ -249,7 +249,7 @@ $(function() {
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="classripple_1_1NodeStore_1_1Database.html#a090e39b8c6733b0dc4553f9e8e705605">  247</a></span>    <a class="code hl_function" href="classripple_1_1NodeStore_1_1Database.html#a090e39b8c6733b0dc4553f9e8e705605">storeStats</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> count, <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> sz)</div>
 <div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    {</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        ASSERT(</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>            count &lt;= sz,</div>
 <div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>            <span class="stringliteral">&quot;ripple::NodeStore::Database::storeStats : valid inputs&quot;</span>);</div>
 <div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        <a class="code hl_variable" href="classripple_1_1NodeStore_1_1Database.html#a4dc1dcc2a79b60c2c7de7f1bdf05cecf">storeCount_</a> += count;</div>

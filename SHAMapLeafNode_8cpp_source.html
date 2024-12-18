@@ -106,7 +106,7 @@ $(function() {
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> cowid)</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    : <a class="code hl_class" href="classripple_1_1SHAMapTreeNode.html">SHAMapTreeNode</a>(cowid), item_(<a class="code hl_namespace" href="namespacestd.html">std</a>::move(item))</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    ASSERT(</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <a class="code hl_variable" href="classripple_1_1SHAMapLeafNode.html#a8629b790383fb14f7fab214002e793ee">item_</a>-&gt;size() &gt;= 12,</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="stringliteral">&quot;ripple::SHAMapLeafNode::SHAMapLeafNode(boost::intrusive_ptr&lt;&quot;</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="stringliteral">&quot;SHAMapItem const&gt;, std::uint32_t) : minimum input size&quot;</span>);</div>
@@ -118,7 +118,7 @@ $(function() {
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_class" href="classripple_1_1SHAMapHash.html">SHAMapHash</a> <span class="keyword">const</span>&amp; hash)</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    : <a class="code hl_class" href="classripple_1_1SHAMapTreeNode.html">SHAMapTreeNode</a>(cowid, hash), item_(<a class="code hl_namespace" href="namespacestd.html">std</a>::move(item))</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>{</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    ASSERT(</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <a class="code hl_variable" href="classripple_1_1SHAMapLeafNode.html#a8629b790383fb14f7fab214002e793ee">item_</a>-&gt;size() &gt;= 12,</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="stringliteral">&quot;ripple::SHAMapLeafNode::SHAMapLeafNode(boost::intrusive_ptr&lt;&quot;</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="stringliteral">&quot;SHAMapItem const&gt;, std::uint32_t, SHAMapHash const&amp;) : minimum input &quot;</span></div>
@@ -134,7 +134,7 @@ $(function() {
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keywordtype">bool</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="classripple_1_1SHAMapLeafNode.html#ada83f0df874a2c0050a54daf1d3ea883">   57</a></span><a class="code hl_function" href="classripple_1_1SHAMapLeafNode.html#ada83f0df874a2c0050a54daf1d3ea883">SHAMapLeafNode::setItem</a>(boost::intrusive_ptr&lt;SHAMapItem const&gt; item)</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>{</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    ASSERT(<a class="code hl_variable" href="classripple_1_1SHAMapTreeNode.html#a7f27d867484104446867c0f50adc5ffb">cowid_</a> != 0, <span class="stringliteral">&quot;ripple::SHAMapLeafNode::setItem : nonzero cowid&quot;</span>);</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    XRPL_ASSERT(<a class="code hl_variable" href="classripple_1_1SHAMapTreeNode.html#a7f27d867484104446867c0f50adc5ffb">cowid_</a>, <span class="stringliteral">&quot;ripple::SHAMapLeafNode::setItem : nonzero cowid&quot;</span>);</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <a class="code hl_variable" href="classripple_1_1SHAMapLeafNode.html#a8629b790383fb14f7fab214002e793ee">item_</a> = std::move(item);</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keyword">auto</span> <span class="keyword">const</span> oldHash = <a class="code hl_variable" href="classripple_1_1SHAMapTreeNode.html#a705bca4eb622097a917a3cac5c3a013d">hash_</a>;</div>
@@ -172,13 +172,12 @@ $(function() {
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="classripple_1_1SHAMapLeafNode.html#af777f590d86414bb7a88decd5b001110">   95</a></span><a class="code hl_function" href="classripple_1_1SHAMapLeafNode.html#af777f590d86414bb7a88decd5b001110">SHAMapLeafNode::invariants</a>(<span class="keywordtype">bool</span>)<span class="keyword"> const</span></div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    ASSERT(</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <a class="code hl_variable" href="classripple_1_1SHAMapTreeNode.html#a705bca4eb622097a917a3cac5c3a013d">hash_</a>.<a class="code hl_function" href="classripple_1_1SHAMapHash.html#a6e42edf954f9565ebffd6a9036d6646f">isNonZero</a>(), <span class="stringliteral">&quot;ripple::SHAMapLeafNode::invariants : nonzero hash&quot;</span>);</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    ASSERT(</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        <a class="code hl_variable" href="classripple_1_1SHAMapLeafNode.html#a8629b790383fb14f7fab214002e793ee">item_</a> != <span class="keyword">nullptr</span>, <span class="stringliteral">&quot;ripple::SHAMapLeafNode::invariants : non-null item&quot;</span>);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>}</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}  <span class="comment">// namespace ripple</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    XRPL_ASSERT(<a class="code hl_variable" href="classripple_1_1SHAMapLeafNode.html#a8629b790383fb14f7fab214002e793ee">item_</a>, <span class="stringliteral">&quot;ripple::SHAMapLeafNode::invariants : non-null item&quot;</span>);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>}</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}  <span class="comment">// namespace ripple</span></div>
 <div class="ttc" id="abasic_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div></div>
 <div class="ttc" id="aclassripple_1_1SHAMapHash_html"><div class="ttname"><a href="classripple_1_1SHAMapHash.html">ripple::SHAMapHash</a></div><div class="ttdef"><b>Definition:</b> <a href="SHAMapHash_8h_source.html#l00033">SHAMapHash.h:34</a></div></div>
 <div class="ttc" id="aclassripple_1_1SHAMapHash_html_a6e42edf954f9565ebffd6a9036d6646f"><div class="ttname"><a href="classripple_1_1SHAMapHash.html#a6e42edf954f9565ebffd6a9036d6646f">ripple::SHAMapHash::isNonZero</a></div><div class="ttdeci">bool isNonZero() const</div><div class="ttdef"><b>Definition:</b> <a href="SHAMapHash_8h_source.html#l00059">SHAMapHash.h:59</a></div></div>

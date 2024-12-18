@@ -125,7 +125,7 @@ $(function() {
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <a class="code hl_class" href="classripple_1_1base__uint.html">uint256</a> <span class="keyword">const</span>&amp; finishLedgerHash,</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> totalNumLedgers)</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>{</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    ASSERT(</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        finishLedgerHash.<a class="code hl_function" href="classripple_1_1base__uint.html#ad2bffc75e554b89befbb9388e07392c0">isNonZero</a>() &amp;&amp; totalNumLedgers &gt; 0 &amp;&amp;</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>            totalNumLedgers &lt;= <a class="code hl_variable" href="namespaceripple_1_1LedgerReplayParameters.html#acb5f0aadc77678d28b48e37c5fe120e4">LedgerReplayParameters::MAX_TASK_SIZE</a>,</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="stringliteral">&quot;ripple::LedgerReplayer::replay : valid inputs&quot;</span>);</div>

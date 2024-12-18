@@ -697,7 +697,7 @@ $(function() {
 <div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; name,</div>
 <div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>    <a class="code hl_enumeration" href="namespaceripple.html#a1dcb4cf27e683bd94d11f5322836c689">AmendmentVote</a> vote)<span class="keyword"> const</span></div>
 <div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>    ASSERT(</div>
+<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>        vote != <a class="code hl_enumvalue" href="namespaceripple.html#a1dcb4cf27e683bd94d11f5322836c689a28a39c5d0e09f2b9f423c9864ecf1db8">AmendmentVote::obsolete</a>,</div>
 <div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>        <span class="stringliteral">&quot;ripple::AmendmentTableImpl::persistVote : valid vote input&quot;</span>);</div>
 <div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    <span class="keyword">auto</span> db = <a class="code hl_variable" href="classripple_1_1AmendmentTableImpl.html#a154a5c8e4a4839ec9db272a1b85a7b93">db_</a>.<a class="code hl_function" href="classripple_1_1DatabaseCon.html#a16c6f729c6462f6200b724543f5c67bc">checkoutDb</a>();</div>

@@ -197,7 +197,7 @@ $(function() {
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <a class="code hl_variable" href="classripple_1_1Workers.html#a3e0b864f32dddc4e7680ae1b561eca2e">m_cv</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/thread/condition_variable/wait.html">wait</a>(lk, [<span class="keyword">this</span>] { <span class="keywordflow">return</span> <a class="code hl_variable" href="classripple_1_1Workers.html#aca7a8eb13cf442123f3a4189b27d83f1">m_allPaused</a>; });</div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    lk.unlock();</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    ASSERT(</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <a class="code hl_function" href="classripple_1_1Workers.html#a8cb80967484f0d91c3125e364091d419">numberOfCurrentlyRunningTasks</a>() == 0,</div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        <span class="stringliteral">&quot;ripple::Workers::stop : zero running tasks&quot;</span>);</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>}</div>

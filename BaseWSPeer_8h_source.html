@@ -586,7 +586,7 @@ $(function() {
 <div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00513" name="l00513"></a><span class="lineno"><a class="line" href="classripple_1_1BaseWSPeer.html#a87e742a62b118da78f5e78928ac935c5">  513</a></span><a class="code hl_function" href="classripple_1_1BaseWSPeer.html#a2ab35d37648557f537c72e38fd697fad">BaseWSPeer&lt;Handler, Impl&gt;::fail</a>(<a class="code hl_typedef" href="classripple_1_1BaseWSPeer.html#a0db5a47c295a29b71ab68c392dcf68d7">error_code</a> ec, String <span class="keyword">const</span>&amp; what)</div>
 <div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>{</div>
-<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>    ASSERT(</div>
+<div class="line"><a id="l00515" name="l00515"></a><span class="lineno">  515</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00516" name="l00516"></a><span class="lineno">  516</span>        strand_.running_in_this_thread(),</div>
 <div class="line"><a id="l00517" name="l00517"></a><span class="lineno">  517</span>        <span class="stringliteral">&quot;ripple::BaseWSPeer::fail : strand in this thread&quot;</span>);</div>
 <div class="line"><a id="l00518" name="l00518"></a><span class="lineno">  518</span> </div>

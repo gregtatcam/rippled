@@ -477,12 +477,12 @@ $(function() {
 <div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>    {</div>
 <div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>        <span class="comment">// split the asserts so if one hits, the user can tell which</span></div>
 <div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>        <span class="comment">// without a debugger.</span></div>
-<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>        ASSERT(</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>            value.value() &gt;= 0,</div>
 <div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>            <span class="stringliteral">&quot;ripple::feeunit::mulDivU : minimum value input&quot;</span>);</div>
-<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>        ASSERT(</div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>            mul.value() &gt;= 0, <span class="stringliteral">&quot;ripple::feeunit::mulDivU : minimum mul input&quot;</span>);</div>
-<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>        ASSERT(</div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>            div.value() &gt;= 0, <span class="stringliteral">&quot;ripple::feeunit::mulDivU : minimum div input&quot;</span>);</div>
 <div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>        <span class="keywordflow">return</span> std::nullopt;</div>
 <div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>    }</div>

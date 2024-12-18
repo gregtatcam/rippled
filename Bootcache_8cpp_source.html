@@ -237,7 +237,7 @@ $(function() {
 <div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        ++entry.<a class="code hl_function" href="classripple_1_1PeerFinder_1_1Bootcache_1_1Entry.html#a581be978321271123284c7284fd771c3">valence</a>();</div>
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        m_map.erase(result.first);</div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        result = m_map.insert(<a class="code hl_typedef" href="classripple_1_1PeerFinder_1_1Bootcache.html#a7b29b6612ede739e3df1da76c79ae871">value_type</a>(endpoint, entry));</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        ASSERT(</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>            result.second,</div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            <span class="stringliteral">&quot;ripple:PeerFinder::Bootcache::on_success : endpoint inserted&quot;</span>);</div>
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    }</div>
@@ -265,7 +265,7 @@ $(function() {
 <div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>        --entry.<a class="code hl_function" href="classripple_1_1PeerFinder_1_1Bootcache_1_1Entry.html#a581be978321271123284c7284fd771c3">valence</a>();</div>
 <div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        m_map.erase(result.first);</div>
 <div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        result = m_map.insert(<a class="code hl_typedef" href="classripple_1_1PeerFinder_1_1Bootcache.html#a7b29b6612ede739e3df1da76c79ae871">value_type</a>(endpoint, entry));</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        ASSERT(</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        XRPL_ASSERT(</div>
 <div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>            result.second,</div>
 <div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>            <span class="stringliteral">&quot;ripple:PeerFinder::Bootcache::on_failure : endpoint inserted&quot;</span>);</div>
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    }</div>

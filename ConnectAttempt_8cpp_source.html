@@ -168,7 +168,7 @@ $(function() {
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="classripple_1_1ConnectAttempt.html#af296702d1c6d038fe463a0ee16d3b2b3">   91</a></span><a class="code hl_function" href="classripple_1_1ConnectAttempt.html#af296702d1c6d038fe463a0ee16d3b2b3">ConnectAttempt::close</a>()</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>{</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    ASSERT(</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <a class="code hl_variable" href="classripple_1_1ConnectAttempt.html#a2b410ff2d6433fcee1d5ada37d67da07">strand_</a>.running_in_this_thread(),</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="stringliteral">&quot;ripple::ConnectAttempt::close : strand in this thread&quot;</span>);</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="classripple_1_1ConnectAttempt.html#a4ef879770a2826cc01cc0d2c8923957a">socket_</a>.is_open())</div>

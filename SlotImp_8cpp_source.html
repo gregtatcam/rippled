@@ -142,29 +142,29 @@ $(function() {
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="classripple_1_1PeerFinder_1_1SlotImp.html#a3eaedbc7346bbe3a31a9588dc8506fe9">   64</a></span><a class="code hl_function" href="classripple_1_1PeerFinder_1_1SlotImp.html#ab05ca3e1236ac84b172b6f49fb66de52">SlotImp::state</a>(<a class="code hl_enumeration" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1fe">State</a> state_)</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>{</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="comment">// Must go through activate() to set active state</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    ASSERT(</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        state_ != <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1feac795f97229ae813282d51a668a48df57">active</a>,</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="stringliteral">&quot;ripple::PeerFinder::SlotImp::state : input state is not active&quot;</span>);</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <span class="comment">// The state must be different</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    ASSERT(</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        state_ != <a class="code hl_variable" href="classripple_1_1PeerFinder_1_1SlotImp.html#ad4eeb57b9bf2bc0c62196f2fb89ca902">m_state</a>,</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="stringliteral">&quot;ripple::PeerFinder::SlotImp::state : input state is different from &quot;</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <span class="stringliteral">&quot;current&quot;</span>);</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="comment">// You can&#39;t transition into the initial states</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    ASSERT(</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        state_ != <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1feac87de6c1eb1061049de480db7712dc54">accept</a> &amp;&amp; state_ != <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1feaabad7159e651d717b0c7d100c507d2b2">connect</a>,</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="stringliteral">&quot;ripple::PeerFinder::SlotImp::state : input state is not an initial&quot;</span>);</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="comment">// Can only become connected from outbound connect state</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    ASSERT(</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        state_ != <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1fea488267e5b4e7d9c0602ed78161301ded">connected</a> || (!<a class="code hl_variable" href="classripple_1_1PeerFinder_1_1SlotImp.html#a0114ae91074f0c4ff22fac5d98fe0d60">m_inbound</a> &amp;&amp; <a class="code hl_variable" href="classripple_1_1PeerFinder_1_1SlotImp.html#ad4eeb57b9bf2bc0c62196f2fb89ca902">m_state</a> == <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1feaabad7159e651d717b0c7d100c507d2b2">connect</a>),</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="stringliteral">&quot;ripple::PeerFinder::SlotImp::state : input state is not connected an &quot;</span></div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="stringliteral">&quot;invalid state&quot;</span>);</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="comment">// Can&#39;t gracefully close on an outbound connection attempt</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    ASSERT(</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        state_ != <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1fea6e8b8dbe8eae258de16200a7a3625726">closing</a> || <a class="code hl_variable" href="classripple_1_1PeerFinder_1_1SlotImp.html#ad4eeb57b9bf2bc0c62196f2fb89ca902">m_state</a> != <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1feaabad7159e651d717b0c7d100c507d2b2">connect</a>,</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="stringliteral">&quot;ripple::PeerFinder::SlotImp::state : input state is not closing an &quot;</span></div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <span class="stringliteral">&quot;invalid state&quot;</span>);</div>
@@ -176,7 +176,7 @@ $(function() {
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="classripple_1_1PeerFinder_1_1SlotImp.html#a612a0b488db6ae33b07a725508383636">   98</a></span><a class="code hl_function" href="classripple_1_1PeerFinder_1_1SlotImp.html#a612a0b488db6ae33b07a725508383636">SlotImp::activate</a>(<a class="code hl_typedef" href="classbeast_1_1abstract__clock.html#a4e16832b0bdf9392c5138bbbde024d8e">clock_type::time_point</a> <span class="keyword">const</span>&amp; now)</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>{</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <span class="comment">// Can only become active from the accept or connected state</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    ASSERT(</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <a class="code hl_variable" href="classripple_1_1PeerFinder_1_1SlotImp.html#ad4eeb57b9bf2bc0c62196f2fb89ca902">m_state</a> == <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1feac87de6c1eb1061049de480db7712dc54">accept</a> || <a class="code hl_variable" href="classripple_1_1PeerFinder_1_1SlotImp.html#ad4eeb57b9bf2bc0c62196f2fb89ca902">m_state</a> == <a class="code hl_enumvalue" href="classripple_1_1PeerFinder_1_1Slot.html#aef66a8665535aa45b5b8a628be9bc1fea488267e5b4e7d9c0602ed78161301ded">connected</a>,</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <span class="stringliteral">&quot;ripple::PeerFinder::SlotImp::activate : valid state&quot;</span>);</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>

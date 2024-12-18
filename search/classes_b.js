@@ -90,7 +90,7 @@ var searchData=
   ['loadmanager_87',['LoadManager',['../classripple_1_1LoadManager.html',1,'ripple']]],
   ['loadmonitor_88',['LoadMonitor',['../classripple_1_1LoadMonitor.html',1,'ripple']]],
   ['locale_89',['locale',['http://en.cppreference.com/w/cpp/locale/locale.html',1,'std']]],
-  ['localrandom_90',['LocalRandom',['../structantithesis_1_1LocalRandom.html',1,'antithesis']]],
+  ['localrandom_90',['LocalRandom',['../structantithesis_1_1internal_1_1random_1_1LocalRandom.html',1,'antithesis::internal::random']]],
   ['localtx_91',['LocalTx',['../classripple_1_1LocalTx.html',1,'ripple']]],
   ['localtxs_92',['LocalTxs',['../classripple_1_1LocalTxs.html',1,'ripple']]],
   ['localtxsimp_93',['LocalTxsImp',['../classripple_1_1LocalTxsImp.html',1,'ripple']]],

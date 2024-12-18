@@ -292,7 +292,7 @@ $(function() {
 <div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;uint256&gt;</a></div>
 <div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>FeatureCollections::getRegisteredFeature(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; name)<span class="keyword"> const</span></div>
 <div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    ASSERT(</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        readOnly.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/atomic/atomic/load.html">load</a>(),</div>
 <div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="stringliteral">&quot;ripple::FeatureCollections::getRegisteredFeature : startup completed&quot;</span>);</div>
 <div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    Feature <span class="keyword">const</span>* feature = getByName(name);</div>
@@ -375,7 +375,7 @@ $(function() {
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span><span class="keywordtype">size_t</span></div>
 <div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>FeatureCollections::featureToBitsetIndex(<a class="code hl_typedef" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> <span class="keyword">const</span>&amp; f)<span class="keyword"> const</span></div>
 <div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    ASSERT(</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>        readOnly.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/atomic/atomic/load.html">load</a>(),</div>
 <div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>        <span class="stringliteral">&quot;ripple::FeatureCollections::featureToBitsetIndex : startup completed&quot;</span>);</div>
 <div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
@@ -389,7 +389,7 @@ $(function() {
 <div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><a class="code hl_typedef" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> <span class="keyword">const</span>&amp;</div>
 <div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>FeatureCollections::bitsetIndexToFeature(<span class="keywordtype">size_t</span> i)<span class="keyword"> const</span></div>
 <div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    ASSERT(</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>        readOnly.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/atomic/atomic/load.html">load</a>(),</div>
 <div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        <span class="stringliteral">&quot;ripple::FeatureCollections::bitsetIndexToFeature : startup completed&quot;</span>);</div>
 <div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    Feature <span class="keyword">const</span>&amp; feature = getByIndex(i);</div>
@@ -399,7 +399,7 @@ $(function() {
 <div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div>
 <div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>FeatureCollections::featureToName(<a class="code hl_typedef" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> <span class="keyword">const</span>&amp; f)<span class="keyword"> const</span></div>
 <div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="keyword"></span>{</div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    ASSERT(</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>        readOnly.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/atomic/atomic/load.html">load</a>(),</div>
 <div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>        <span class="stringliteral">&quot;ripple::FeatureCollections::featureToName : startup completed&quot;</span>);</div>
 <div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>    Feature <span class="keyword">const</span>* feature = getByFeature(f);</div>

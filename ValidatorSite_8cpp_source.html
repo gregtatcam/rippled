@@ -489,7 +489,7 @@ $(function() {
 <div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>    }</div>
 <div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span> </div>
 <div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>    <span class="keyword">auto</span> <span class="keyword">const</span> <a class="code hl_enumvalue" href="namespaceripple.html#ad5143ceada01141772ae4aab984f94bda7f5cb74af5d7f4b82200738fdbdc5a45">manifest</a> = body[jss::manifest].<a class="code hl_function" href="classJson_1_1Value.html#ab0d86bf425efefd03513e8dbfaca317b">asString</a>();</div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>    ASSERT(</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>        version == body[jss::version].asUInt(),</div>
 <div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>        <span class="stringliteral">&quot;ripple::ValidatorSite::parseJsonResponse : version match&quot;</span>);</div>
 <div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>    <span class="keyword">auto</span> <span class="keyword">const</span>&amp; uri = <a class="code hl_variable" href="classripple_1_1ValidatorSite.html#a23da2191bf3778f552d18b7c9baf339c">sites_</a>[siteIdx].activeResource-&gt;uri;</div>
@@ -666,8 +666,8 @@ $(function() {
 <div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>                    <span class="keywordflow">case</span> status::temporary_redirect: {</div>
 <div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span>                        <span class="keyword">auto</span> newLocation =</div>
 <div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>                            <a class="code hl_function" href="classripple_1_1ValidatorSite.html#a750210f24bd5f9866d65d3fddd4e0f52">processRedirect</a>(res, siteIdx, lock_sites);</div>
-<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>                        ASSERT(</div>
-<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>                            newLocation != <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>                        XRPL_ASSERT(</div>
+<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>                            newLocation,</div>
 <div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>                            <span class="stringliteral">&quot;ripple::ValidatorSite::onSiteFetch : non-null &quot;</span></div>
 <div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>                            <span class="stringliteral">&quot;validator&quot;</span>);</div>
 <div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>                        <span class="comment">// for perm redirects, also update our starting URI</span></div>

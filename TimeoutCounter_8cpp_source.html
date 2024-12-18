@@ -121,7 +121,7 @@ $(function() {
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    , queueJobParameter_(<a class="code hl_namespace" href="namespacestd.html">std</a>::move(jobParameter))</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    , timer_(app_.getIOService())</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    ASSERT(</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        (<a class="code hl_variable" href="classripple_1_1TimeoutCounter.html#a4cd3ab8d59bc971262ec26d715f8538a">timerInterval_</a> &gt; 10ms) &amp;&amp; (<a class="code hl_variable" href="classripple_1_1TimeoutCounter.html#a4cd3ab8d59bc971262ec26d715f8538a">timerInterval_</a> &lt; 30s),</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <span class="stringliteral">&quot;ripple::TimeoutCounter::TimeoutCounter : interval input inside range&quot;</span>);</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>}</div>

@@ -348,10 +348,10 @@ $(function() {
 <div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> cr;</div>
 <div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> x;</div>
 <div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    ASSERT(length &lt;= 11, <span class="stringliteral">&quot;ripple::RFC1751::extract : maximum length&quot;</span>);</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    ASSERT(start &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::extract : minimum start&quot;</span>);</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    ASSERT(length &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::extract : minimum length&quot;</span>);</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    ASSERT(</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    XRPL_ASSERT(length &lt;= 11, <span class="stringliteral">&quot;ripple::RFC1751::extract : maximum length&quot;</span>);</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    XRPL_ASSERT(start &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::extract : minimum start&quot;</span>);</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    XRPL_ASSERT(length &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::extract : minimum length&quot;</span>);</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        start + length &lt;= 66,</div>
 <div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <span class="stringliteral">&quot;ripple::RFC1751::extract : maximum start + length&quot;</span>);</div>
 <div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
@@ -400,10 +400,10 @@ $(function() {
 <div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> y;</div>
 <div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>    <span class="keywordtype">int</span> shift;</div>
 <div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span> </div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    ASSERT(length &lt;= 11, <span class="stringliteral">&quot;ripple::RFC1751::insert : maximum length&quot;</span>);</div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>    ASSERT(start &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::insert : minimum start&quot;</span>);</div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>    ASSERT(length &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::insert : minimum length&quot;</span>);</div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>    ASSERT(</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    XRPL_ASSERT(length &lt;= 11, <span class="stringliteral">&quot;ripple::RFC1751::insert : maximum length&quot;</span>);</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>    XRPL_ASSERT(start &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::insert : minimum start&quot;</span>);</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>    XRPL_ASSERT(length &gt;= 0, <span class="stringliteral">&quot;ripple::RFC1751::insert : minimum length&quot;</span>);</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>        start + length &lt;= 66,</div>
 <div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        <span class="stringliteral">&quot;ripple::RFC1751::insert : maximum start + length&quot;</span>);</div>
 <div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span> </div>

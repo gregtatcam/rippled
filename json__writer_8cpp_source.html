@@ -148,7 +148,7 @@ $(function() {
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordflow">if</span> (isNegative)</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        *--current = <span class="charliteral">&#39;-&#39;</span>;</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    ASSERT(current &gt;= buffer, <span class="stringliteral">&quot;Json::valueToString(Int) : buffer check&quot;</span>);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    XRPL_ASSERT(current &gt;= buffer, <span class="stringliteral">&quot;Json::valueToString(Int) : buffer check&quot;</span>);</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    <span class="keywordflow">return</span> current;</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>}</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
@@ -158,7 +158,7 @@ $(function() {
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keywordtype">char</span> buffer[32];</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">char</span>* current = buffer + <span class="keyword">sizeof</span>(buffer);</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <a class="code hl_function" href="namespaceJson.html#a0c9ecf21515ffa8092201ad908609dc7">uintToString</a>(value, current);</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    ASSERT(current &gt;= buffer, <span class="stringliteral">&quot;Json::valueToString(UInt) : buffer check&quot;</span>);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    XRPL_ASSERT(current &gt;= buffer, <span class="stringliteral">&quot;Json::valueToString(UInt) : buffer check&quot;</span>);</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">return</span> current;</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
@@ -469,7 +469,7 @@ $(function() {
 <div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        }</div>
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keywordflow">else</span>  <span class="comment">// output on a single line</span></div>
 <div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        {</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>            ASSERT(</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>            XRPL_ASSERT(</div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>                <a class="code hl_variable" href="classJson_1_1StyledWriter.html#a1f905495f0705365af117ec541e29fdf">childValues_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() == size,</div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>                <span class="stringliteral">&quot;Json::StyledWriter::writeArrayValue : child size match&quot;</span>);</div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>            <a class="code hl_variable" href="classJson_1_1StyledWriter.html#ac092c93313e7ab202b13e075d682faea">document_</a> += <span class="stringliteral">&quot;[ &quot;</span>;</div>
@@ -563,7 +563,7 @@ $(function() {
 <div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00486" name="l00486"></a><span class="lineno"><a class="line" href="classJson_1_1StyledWriter.html#acee1c9285519b573cfcb00b7e7f5a809">  486</a></span><a class="code hl_function" href="classJson_1_1StyledWriter.html#acee1c9285519b573cfcb00b7e7f5a809">StyledWriter::unindent</a>()</div>
 <div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>{</div>
-<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>    ASSERT(</div>
+<div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>        <span class="keywordtype">int</span>(<a class="code hl_variable" href="classJson_1_1StyledWriter.html#a98a33f1d4c853a4dbf87ca17499c5830">indentString_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/size.html">size</a>()) &gt;= <a class="code hl_variable" href="classJson_1_1StyledWriter.html#ae911f06042935286c24a9fb23dba78bd">indentSize_</a>,</div>
 <div class="line"><a id="l00490" name="l00490"></a><span class="lineno">  490</span>        <span class="stringliteral">&quot;Json::StyledWriter::unindent : maximum indent size&quot;</span>);</div>
 <div class="line"><a id="l00491" name="l00491"></a><span class="lineno">  491</span>    <a class="code hl_variable" href="classJson_1_1StyledWriter.html#a98a33f1d4c853a4dbf87ca17499c5830">indentString_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/resize.html">resize</a>(<a class="code hl_variable" href="classJson_1_1StyledWriter.html#a98a33f1d4c853a4dbf87ca17499c5830">indentString_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/size.html">size</a>() - <a class="code hl_variable" href="classJson_1_1StyledWriter.html#ae911f06042935286c24a9fb23dba78bd">indentSize_</a>);</div>
@@ -695,7 +695,7 @@ $(function() {
 <div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>        }</div>
 <div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>        <span class="keywordflow">else</span>  <span class="comment">// output on a single line</span></div>
 <div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span>        {</div>
-<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span>            ASSERT(</div>
+<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span>            XRPL_ASSERT(</div>
 <div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span>                <a class="code hl_variable" href="classJson_1_1StyledStreamWriter.html#aafd62e00a401df73fcacb2e410114b3d">childValues_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/container/vector/size.html">size</a>() == size,</div>
 <div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span>                <span class="stringliteral">&quot;Json::StyledStreamWriter::writeArrayValue : child size match&quot;</span>);</div>
 <div class="line"><a id="l00623" name="l00623"></a><span class="lineno">  623</span>            *<a class="code hl_variable" href="classJson_1_1StyledStreamWriter.html#aa6a4be02f654d9105af8fa560b676967">document_</a> &lt;&lt; <span class="stringliteral">&quot;[ &quot;</span>;</div>
@@ -790,7 +790,7 @@ $(function() {
 <div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span><span class="keywordtype">void</span></div>
 <div class="line"><a id="l00713" name="l00713"></a><span class="lineno"><a class="line" href="classJson_1_1StyledStreamWriter.html#a74d8fb9beecd29759d7b79f430386358">  713</a></span><a class="code hl_function" href="classJson_1_1StyledStreamWriter.html#a74d8fb9beecd29759d7b79f430386358">StyledStreamWriter::unindent</a>()</div>
 <div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span>{</div>
-<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>    ASSERT(</div>
+<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span>    XRPL_ASSERT(</div>
 <div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span>        <a class="code hl_variable" href="classJson_1_1StyledStreamWriter.html#af9ebd4487e7f69bd1074e6ce29c7cf02">indentString_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/size.html">size</a>() &gt;= <a class="code hl_variable" href="classJson_1_1StyledStreamWriter.html#a58dc0eaf85c58b83d19d6bba8eead27d">indentation_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/size.html">size</a>(),</div>
 <div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span>        <span class="stringliteral">&quot;Json::StyledStreamWriter::unindent : maximum indent size&quot;</span>);</div>
 <div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span>    <a class="code hl_variable" href="classJson_1_1StyledStreamWriter.html#af9ebd4487e7f69bd1074e6ce29c7cf02">indentString_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/resize.html">resize</a>(<a class="code hl_variable" href="classJson_1_1StyledStreamWriter.html#af9ebd4487e7f69bd1074e6ce29c7cf02">indentString_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/size.html">size</a>() - <a class="code hl_variable" href="classJson_1_1StyledStreamWriter.html#a58dc0eaf85c58b83d19d6bba8eead27d">indentation_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/size.html">size</a>());</div>
