@@ -42,7 +42,7 @@ isMPTAllowed(
     auto const allMPTTx = ammTx || txType == ttOFFER_CREATE ||
         txType == ttCHECK_CREATE || txType == ttCHECK_CASH ||
         txType == ttPAYMENT;
-    ASSERT(allMPTTx || isDEX, "ripple::isMPTAllowed : all MPT tx or DEX");
+    XRPL_ASSERT(allMPTTx || isDEX, "ripple::isMPTAllowed : all MPT tx or DEX");
 
     auto const issuanceKey = keylet::mptIssuance(issuanceID);
     auto const issuanceSle = view.read(issuanceKey);

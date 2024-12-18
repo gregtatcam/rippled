@@ -512,7 +512,7 @@ MPTEndpointStep<TDerived>::revImp(
 
     auto const [srcQOut, dstQIn] =
         qualities(sb, srcDebtDir, StrandDirection::reverse);
-    ASSERT(
+    XRPL_ASSERT(
         static_cast<TDerived const*>(this)->verifyDstQualityIn(dstQIn),
         "MPTEndpointStep<TDerived>::revImp : verify dst quaity in");
 
@@ -634,7 +634,7 @@ MPTEndpointStep<TDerived>::fwdImp(
     boost::container::flat_set<uint256>& /*ofrsToRm*/,
     MPTAmount const& in)
 {
-    ASSERT(cache_, "MPTEndpointStep<TDerived>::fwdImp : valid cache");
+    XRPL_ASSERT(cache_, "MPTEndpointStep<TDerived>::fwdImp : valid cache");
 
     auto const [maxSrcToDst, srcDebtDir] =
         static_cast<TDerived const*>(this)->maxFlow(sb, cache_->srcToDst);
@@ -723,7 +723,7 @@ MPTEndpointStep<TDerived>::validFwd(
 
     auto const savCache = *cache_;
 
-    ASSERT(
+    XRPL_ASSERT(
         !in.native() && !in.isIOU(),
         "MPTEndpoint<TDerived>::validFwd : not XRP or IOU");
 
@@ -789,7 +789,7 @@ MPTEndpointStep<TDerived>::qualitiesSrcIssues(
 {
     // Charge a transfer rate when issuing and previous step redeems
 
-    ASSERT(
+    XRPL_ASSERT(
         static_cast<TDerived const*>(this)->verifyPrevStepDebtDirection(
             prevStepDebtDirection),
         "MPTEndpointStep<TDerived>::qualitiesSrcIssues : verify prev step debt "

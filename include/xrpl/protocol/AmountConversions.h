@@ -32,7 +32,7 @@ namespace ripple {
 inline STAmount
 toSTAmount(IOUAmount const& iou, Asset const& iss)
 {
-    ASSERT(iss.holds<Issue>(), "ripple::toSTAmount : is Issue");
+    XRPL_ASSERT(iss.holds<Issue>(), "ripple::toSTAmount : is Issue");
     bool const isNeg = iou.signum() < 0;
     std::uint64_t const umant = isNeg ? -iou.mantissa() : iou.mantissa();
     return STAmount(iss, umant, iou.exponent(), isNeg, STAmount::unchecked());
@@ -55,7 +55,7 @@ toSTAmount(XRPAmount const& xrp)
 inline STAmount
 toSTAmount(XRPAmount const& xrp, Asset const& iss)
 {
-    ASSERT(isXRP(iss), "ripple::toSTAmount : is XRP");
+    XRPL_ASSERT(isXRP(iss), "ripple::toSTAmount : is XRP");
     return toSTAmount(xrp);
 }
 
@@ -68,7 +68,7 @@ toSTAmount(MPTAmount const& mpt)
 inline STAmount
 toSTAmount(MPTAmount const& mpt, Asset const& iss)
 {
-    ASSERT(iss.holds<MPTIssue>(), "ripple::toSTAmount : is MPT");
+    XRPL_ASSERT(iss.holds<MPTIssue>(), "ripple::toSTAmount : is MPT");
     return STAmount(mpt, iss.get<MPTIssue>());
 }
 
@@ -117,7 +117,7 @@ template <>
 inline MPTAmount
 toAmount<MPTAmount>(STAmount const& amt)
 {
-    ASSERT(
+    XRPL_ASSERT(
         amt.holds<MPTIssue>() && amt.mantissa() <= maxMPTokenAmount,
         "ripple::toAmount<MPTAmount> : maximum mantissa");
     bool const isNeg = amt.negative();

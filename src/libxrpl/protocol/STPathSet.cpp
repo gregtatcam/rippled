@@ -101,7 +101,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             if (hasAccount)
                 account = sit.get160();
 
-            ASSERT(
+            XRPL_ASSERT(
                 !(hasCurrency && hasMPT),
                 "ripple::STPathSet::STPathSet : not has Currency and MPT");
             if (hasCurrency)
@@ -195,7 +195,7 @@ STPath::getJson(JsonOptions) const
         if (iType & STPathElement::typeAccount)
             elem[jss::account] = to_string(it.getAccountID());
 
-        ASSERT(
+        XRPL_ASSERT(
             !(iType & STPathElement::typeCurrency &&
               iType & STPathElement::typeMPT),
             "ripple::STPath::getJson : not type Currency and MPT");
