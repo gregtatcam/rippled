@@ -182,7 +182,7 @@ template <>
 inline IOUAmount const&
 get<IOUAmount>(EitherAmount& amt)
 {
-    ASSERT(amt.isIOU(), "ripple::get<IOUAmount>(EitherAmount&) : is IOU");
+    XRPL_ASSERT(amt.isIOU(), "ripple::get<IOUAmount>(EitherAmount&) : is IOU");
     return amt.iou();
 }
 
@@ -190,7 +190,7 @@ template <>
 inline XRPAmount const&
 get<XRPAmount>(EitherAmount& amt)
 {
-    ASSERT(amt.native(), "ripple::get<XRPAmount>(EitherAmount&) : is XRP");
+    XRPL_ASSERT(amt.native(), "ripple::get<XRPAmount>(EitherAmount&) : is XRP");
     return amt.xrp();
 }
 
@@ -198,7 +198,7 @@ template <>
 inline MPTAmount const&
 get<MPTAmount>(EitherAmount& amt)
 {
-    ASSERT(amt.isMPT(), "ripple::get<MPTAmount>(EitherAmount&) : is MPT");
+    XRPL_ASSERT(amt.isMPT(), "ripple::get<MPTAmount>(EitherAmount&) : is MPT");
     return amt.mpt();
 }
 
@@ -214,7 +214,7 @@ template <>
 inline IOUAmount const&
 get<IOUAmount>(EitherAmount const& amt)
 {
-    ASSERT(
+    XRPL_ASSERT(
         !amt.native(),
         "ripple::get<IOUAmount>(EitherAmount const&) : is not XRP");
     return amt.iou();
@@ -224,7 +224,7 @@ template <>
 inline XRPAmount const&
 get<XRPAmount>(EitherAmount const& amt)
 {
-    ASSERT(
+    XRPL_ASSERT(
         amt.native(), "ripple::get<XRPAmount>(EitherAmount const&) : is XRP");
     return amt.xrp();
 }
@@ -233,14 +233,14 @@ template <>
 inline MPTAmount const&
 get<MPTAmount>(EitherAmount const& amt)
 {
-    ASSERT(amt.isMPT(), "ripple::get<MPTAmount>(EitherAmount const&) : is MPT");
+    XRPL_ASSERT(amt.isMPT(), "ripple::get<MPTAmount>(EitherAmount const&) : is MPT");
     return amt.mpt();
 }
 
 inline AmountSpec
 toAmountSpec(STAmount const& amt)
 {
-    ASSERT(
+    XRPL_ASSERT(
         amt.mantissa() < std::numeric_limits<std::int64_t>::max(),
         "ripple::toAmountSpec(STAmount const&) : maximum mantissa");
     bool const isNeg = amt.negative();
@@ -282,7 +282,7 @@ toAmountSpec(EitherAmount const& ea, std::optional<Currency> const& c)
 {
     AmountSpec r;
     r.currency = c;
-    ASSERT(
+    XRPL_ASSERT(
         ea.native() == r.native(),
         "ripple::toAmountSpec(EitherAmount const&&, std::optional<Currency>) : "
         "matching native");

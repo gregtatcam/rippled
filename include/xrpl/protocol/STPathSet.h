@@ -273,7 +273,7 @@ inline STPathElement::STPathElement(
         is_offer_ = false;
         mAccountID = *account;
         mType |= typeAccount;
-        ASSERT(
+        XRPL_ASSERT(
             mAccountID != noAccount(),
             "ripple::STPathElement::STPathElement : account is set");
     }
@@ -288,7 +288,7 @@ inline STPathElement::STPathElement(
     {
         mIssuerID = *issuer;
         mType |= typeIssuer;
-        ASSERT(
+        XRPL_ASSERT(
             mIssuerID != noAccount(),
             "ripple::STPathElement::STPathElement : issuer is set");
     }

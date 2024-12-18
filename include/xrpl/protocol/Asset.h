@@ -43,8 +43,10 @@ struct AmountType
  */
 class Asset
 {
-private:
+public:
     using value_type = std::variant<Issue, MPTIssue>;
+
+private:
     value_type issue_;
 
 public:
@@ -169,12 +171,6 @@ operator==(Asset const& lhs, Asset const& rhs)
         rhs.issue_);
 }
 
-constexpr bool
-operator==(Currency const& lhs, Asset const& rhs)
-{
-    return rhs.holds<Issue>() && rhs.get<Issue>().currency == lhs;
-}
-
 constexpr std::weak_ordering
 operator<=>(Asset const& lhs, Asset const& rhs)
 {
@@ -182,7 +178,7 @@ operator<=>(Asset const& lhs, Asset const& rhs)
         []<ValidIssueType TLhs, ValidIssueType TRhs>(
             TLhs const& lhs_, TRhs const& rhs_) {
             if constexpr (std::is_same_v<TLhs, TRhs>)
-                return lhs_ <=> rhs_;
+                return std::weak_ordering(lhs_ <=> rhs_);
             else if constexpr (
                 std::is_same_v<TLhs, Issue> && std::is_same_v<TRhs, MPTIssue>)
                 return std::weak_ordering::greater;
@@ -191,6 +187,12 @@ operator<=>(Asset const& lhs, Asset const& rhs)
         },
         lhs.issue_,
         rhs.issue_);
+}
+
+constexpr bool
+operator==(Currency const& lhs, Asset const& rhs)
+{
+    return rhs.holds<Issue>() && rhs.get<Issue>().currency == lhs;
 }
 
 constexpr bool

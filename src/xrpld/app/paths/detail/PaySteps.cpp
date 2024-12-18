@@ -123,7 +123,7 @@ toStep(
         return {temBAD_PATH, std::unique_ptr<Step>{}};
     }
 
-    ASSERT(
+    XRPL_ASSERT(
         (e2->getNodeType() & STPathElement::typeAsset) ||
             (e2->getNodeType() & STPathElement::typeIssuer),
         "ripple::toStep : currency or issuer");
@@ -140,7 +140,7 @@ toStep(
         return {temBAD_PATH, std::unique_ptr<Step>{}};
     }
 
-    ASSERT(e2->isOffer(), "ripple::toStep : is offer");
+    XRPL_ASSERT(e2->isOffer(), "ripple::toStep : is offer");
 
     if (outAsset.isXRP())
     {

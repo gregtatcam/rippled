@@ -243,7 +243,7 @@ OrderBookDB::makeBookListeners(Book const& book)
         ret = std::make_shared<BookListeners>();
 
         mListeners[book] = ret;
-        ASSERT(
+        XRPL_ASSERT(
             getBookListeners(book) == ret,
             "ripple::OrderBookDB::makeBookListeners : result roundtrip lookup");
     }

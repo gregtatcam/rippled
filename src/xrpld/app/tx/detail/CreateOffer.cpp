@@ -226,7 +226,7 @@ CreateOffer::checkAcceptAsset(
     Asset const& asset)
 {
     // Only valid for custom currencies
-    ASSERT(
+    XRPL_ASSERT(
         !isXRP(asset),
         "ripple::CreateOffer::checkAcceptAsset : input is not XRP");
 
@@ -479,7 +479,7 @@ CreateOffer::flowCross(
                     // remaining output.  This too preserves the offer
                     // Quality.
                     afterCross.out -= result.actualAmountOut;
-                    ASSERT(
+                    XRPL_ASSERT(
                         afterCross.out >= beast::zero,
                         "ripple::CreateOffer::flowCross : minimum offer");
                     if (afterCross.out < beast::zero)
@@ -657,7 +657,7 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
 
         // We expect the implementation of cross to succeed
         // or give a tec.
-        ASSERT(
+        XRPL_ASSERT(
             result == tesSUCCESS || isTecClaim(result),
             "ripple::CreateOffer::applyGuts : result is tesSUCCESS or "
             "tecCLAIM");
@@ -678,10 +678,10 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             return {result, true};
         }
 
-        ASSERT(
+        XRPL_ASSERT(
             saTakerGets.asset() == place_offer.in.asset(),
             "ripple::CreateOffer::applyGuts : taker gets issue match");
-        ASSERT(
+        XRPL_ASSERT(
             saTakerPays.asset() == place_offer.out.asset(),
             "ripple::CreateOffer::applyGuts : taker pays issue match");
 
@@ -711,7 +711,7 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         saTakerGets = place_offer.in;
     }
 
-    ASSERT(
+    XRPL_ASSERT(
         saTakerPays > zero && saTakerGets > zero,
         "ripple::CreateOffer::applyGuts : taker pays and gets positive");
 

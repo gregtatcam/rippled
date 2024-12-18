@@ -53,8 +53,11 @@ public:
     void
     setJson(Json::Value& jv) const;
 
-    constexpr std::weak_ordering
-    operator<=>(MPTIssue const&) const = default;
+    friend constexpr bool
+    operator==(MPTIssue const& lhs, MPTIssue const& rhs);
+
+    friend constexpr std::weak_ordering
+    operator<=>(MPTIssue const& lhs, MPTIssue const& rhs);
 
     bool
     native() const
@@ -62,6 +65,18 @@ public:
         return false;
     }
 };
+
+constexpr bool
+operator==(MPTIssue const& lhs, MPTIssue const& rhs)
+{
+    return lhs.mptID_ == rhs.mptID_;
+}
+
+constexpr std::weak_ordering
+operator<=>(MPTIssue const& lhs, MPTIssue const& rhs)
+{
+    return lhs.mptID_ <=> rhs.mptID_;
+}
 
 /** MPT is a non-native token.
  */

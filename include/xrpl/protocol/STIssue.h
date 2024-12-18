@@ -76,6 +76,18 @@ public:
     bool
     isDefault() const override;
 
+    friend constexpr bool
+    operator==(STIssue const& lhs, STIssue const& rhs);
+
+    friend constexpr std::weak_ordering
+    operator<=>(STIssue const& lhs, STIssue const& rhs);
+
+    friend constexpr bool
+    operator==(STIssue const& lhs, Asset const& rhs);
+
+    friend constexpr std::weak_ordering
+    operator<=>(STIssue const& lhs, Asset const& rhs);
+
 private:
     STBase*
     copy(std::size_t n, void* buf) const override;
@@ -101,7 +113,7 @@ template <ValidIssueType TIss>
 bool
 STIssue::holds() const
 {
-    return std::holds_alternative<TIss>(asset_.value());
+    return asset_.holds<TIss>();
 }
 
 template <ValidIssueType TIss>
@@ -129,34 +141,28 @@ STIssue::setIssue(Asset const& asset)
     asset_ = asset;
 }
 
-inline bool
+constexpr bool
 operator==(STIssue const& lhs, STIssue const& rhs)
 {
-    return lhs.value() == rhs.value();
+    return lhs.asset_ == rhs.asset_;
 }
 
-inline bool
-operator!=(STIssue const& lhs, STIssue const& rhs)
+constexpr std::weak_ordering
+operator<=>(STIssue const& lhs, STIssue const& rhs)
 {
-    return !operator==(lhs, rhs);
+    return lhs.asset_ <=> rhs.asset_;
 }
 
-inline bool
-operator<(STIssue const& lhs, STIssue const& rhs)
-{
-    return lhs.value() < rhs.value();
-}
-
-inline bool
+constexpr bool
 operator==(STIssue const& lhs, Asset const& rhs)
 {
-    return lhs.value() == rhs;
+    return lhs.asset_ == rhs;
 }
 
-inline bool
-operator<(STIssue const& lhs, Asset const& rhs)
+constexpr std::weak_ordering
+operator<=>(STIssue const& lhs, Asset const& rhs)
 {
-    return lhs.value() < rhs;
+    return lhs.asset_ <=> rhs;
 }
 
 }  // namespace ripple

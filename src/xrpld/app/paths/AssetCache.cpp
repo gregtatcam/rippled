@@ -77,7 +77,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
                 // to be replaced by the full set. The full set will be built
                 // below, and will be returned, if needed, on subsequent calls
                 // for either value of outgoing.
-                ASSERT(
+                XRPL_ASSERT(
                     size <= totalLineCount_,
                     "ripple::RippleLineCache::getRippleLines : maximum lines");
                 totalLineCount_ -= size;
@@ -99,7 +99,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
 
     if (inserted)
     {
-        ASSERT(
+        XRPL_ASSERT(
             it->second == nullptr,
             "ripple::RippleLineCache::getRippleLines : null lines");
         auto lines =
@@ -112,7 +112,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
         }
     }
 
-    ASSERT(
+    XRPL_ASSERT(
         !it->second || (it->second->size() > 0),
         "ripple::RippleLineCache::getRippleLines : null or nonempty lines");
     auto const size = it->second ? it->second->size() : 0;
