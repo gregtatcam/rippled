@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2020 Ripple Labs Inc.
+    Copyright (c) 2012, 2013 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -17,38 +17,25 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
-#define RIPPLE_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
+#ifndef RIPPLE_APP_PATHS_ACCOUNTCURRENCIES_H_INCLUDED
+#define RIPPLE_APP_PATHS_ACCOUNTCURRENCIES_H_INCLUDED
 
-#include <xrpl/protocol/STAmount.h>
+#include <xrpld/app/paths/AssetCache.h>
+#include <xrpl/protocol/UintTypes.h>
 
 namespace ripple {
 
-inline STAmount
-largestAmount(STAmount const& amt)
-{
-    if (amt.native())
-        return INITIAL_XRP;
+hash_set<PathAsset>
+accountDestAssets(
+    AccountID const& account,
+    std::shared_ptr<AssetCache> const& cache,
+    bool includeXRP);
 
-    if (amt.holds<Issue>())
-        return STAmount(amt.asset(), STAmount::cMaxValue, STAmount::cMaxOffset);
-    return STAmount(amt.asset(), maxMPTokenAmount, 0);
-}
-
-inline STAmount
-convertAmount(STAmount const& amt, bool all)
-{
-    if (!all)
-        return amt;
-
-    return largestAmount(amt);
-};
-
-inline bool
-convertAllCheck(STAmount const& a)
-{
-    return a == largestAmount(a);
-}
+hash_set<PathAsset>
+accountSourceAssets(
+    AccountID const& account,
+    std::shared_ptr<AssetCache> const& lrLedger,
+    bool includeXRP);
 
 }  // namespace ripple
 

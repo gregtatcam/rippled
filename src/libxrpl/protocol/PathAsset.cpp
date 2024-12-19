@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2020 Ripple Labs Inc.
+    Copyright (c) 2024 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -17,39 +17,23 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
-#define RIPPLE_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
-
-#include <xrpl/protocol/STAmount.h>
+#include <xrpl/protocol/Indexes.h>
+#include <xrpl/protocol/PathAsset.h>
 
 namespace ripple {
 
-inline STAmount
-largestAmount(STAmount const& amt)
+std::string
+to_string(PathAsset const& asset)
 {
-    if (amt.native())
-        return INITIAL_XRP;
-
-    if (amt.holds<Issue>())
-        return STAmount(amt.asset(), STAmount::cMaxValue, STAmount::cMaxOffset);
-    return STAmount(amt.asset(), maxMPTokenAmount, 0);
+    return std::visit(
+        [&](auto const& issue) { return to_string(issue); }, asset.value());
 }
 
-inline STAmount
-convertAmount(STAmount const& amt, bool all)
+std::ostream&
+operator<<(std::ostream& os, PathAsset const& x)
 {
-    if (!all)
-        return amt;
-
-    return largestAmount(amt);
-};
-
-inline bool
-convertAllCheck(STAmount const& a)
-{
-    return a == largestAmount(a);
+    os << to_string(x);
+    return os;
 }
 
 }  // namespace ripple
-
-#endif

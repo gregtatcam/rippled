@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2020 Ripple Labs Inc.
+    Copyright (c) 2024 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -17,39 +17,36 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
-#define RIPPLE_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
+#ifndef RIPPLE_APP_MISC_MPTUTILS_H_INLCUDED
+#define RIPPLE_APP_MISC_MPTUTILS_H_INLCUDED
 
-#include <xrpl/protocol/STAmount.h>
+#include <xrpl/protocol/TER.h>
+#include <xrpl/protocol/TxFormats.h>
+#include <xrpl/protocol/UintTypes.h>
 
 namespace ripple {
 
-inline STAmount
-largestAmount(STAmount const& amt)
-{
-    if (amt.native())
-        return INITIAL_XRP;
+class Asset;
+class ReadView;
 
-    if (amt.holds<Issue>())
-        return STAmount(amt.asset(), STAmount::cMaxValue, STAmount::cMaxOffset);
-    return STAmount(amt.asset(), maxMPTokenAmount, 0);
-}
+/* Return true if a transaction is allowed for the specified MPT/account. The
+ * function checks MPTokenIssuance and MPToken objects flags to determine if the
+ * transaction is allowed.
+ */
+TER
+isMPTTxAllowed(
+    ReadView const& v,
+    TxType tx,
+    Asset const& asset,
+    AccountID const& accountID);
 
-inline STAmount
-convertAmount(STAmount const& amt, bool all)
-{
-    if (!all)
-        return amt;
-
-    return largestAmount(amt);
-};
-
-inline bool
-convertAllCheck(STAmount const& a)
-{
-    return a == largestAmount(a);
-}
+TER
+isMPTDEXAllowed(
+    ReadView const& view,
+    Asset const& issuanceID,
+    AccountID const& srcAccount,
+    AccountID const& destAccount);
 
 }  // namespace ripple
 
-#endif
+#endif  // RIPPLE_APP_MISC_MPTUTILS_H_INLCUDED
