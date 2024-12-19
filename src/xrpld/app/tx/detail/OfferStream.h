@@ -86,6 +86,7 @@ protected:
     permRmOffer(uint256 const& offerIndex) = 0;
 
     template <class TTakerPays, class TTakerGets>
+        requires ValidTaker<TTakerPays, TTakerGets>
     bool
     shouldRmSmallIncreasedQOffer() const;
 

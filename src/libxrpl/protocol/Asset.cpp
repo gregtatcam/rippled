@@ -43,6 +43,20 @@ Asset::setJson(Json::Value& jv) const
     std::visit([&](auto&& issue) { issue.setJson(jv); }, issue_);
 }
 
+std::
+    variant<AmountType<XRPAmount>, AmountType<IOUAmount>, AmountType<MPTAmount>>
+    Asset::getAmountType() const
+{
+    static AmountType<XRPAmount> xrp;
+    static AmountType<IOUAmount> iou;
+    static AmountType<MPTAmount> mpt;
+    if (holds<MPTIssue>())
+        return mpt;
+    if (native())
+        return xrp;
+    return iou;
+}
+
 std::string
 to_string(Asset const& asset)
 {
@@ -75,6 +89,16 @@ to_json(Asset const& asset)
 {
     return std::visit(
         [&](auto const& issue) { return to_json(issue); }, asset.value());
+}
+
+std::ostream&
+operator<<(std::ostream& os, Asset const& x)
+{
+    if (x.holds<Issue>())
+        os << x.get<Issue>();
+    else
+        os << x.get<MPTIssue>();
+    return os;
 }
 
 }  // namespace ripple
