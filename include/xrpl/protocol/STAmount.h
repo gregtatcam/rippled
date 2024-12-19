@@ -568,6 +568,8 @@ STAmount::clear(Asset const& asset)
 inline void
 STAmount::setIssuer(AccountID const& uIssuer)
 {
+    if (!mAsset.holds<Issue>())
+        Throw<std::runtime_error>("Can't set issuer for non-Issue");
     mAsset.get<Issue>().account = uIssuer;
 }
 

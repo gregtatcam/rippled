@@ -90,10 +90,16 @@ operator<<(std::ostream& os, PrettyAmount const& amount)
 
         os << to_places(d, 6) << " XRP";
     }
+    else if (amount.value().holds<Issue>())
+    {
+        os << amount.value().getText() << "/"
+           << to_string(amount.value().get<Issue>().currency) << "("
+           << amount.name() << ")";
+    }
     else
     {
         os << amount.value().getText() << "/"
-           << to_string(amount.value().issue().currency) << "(" << amount.name()
+           << to_string(amount.value().get<MPTIssue>()) << "(" << amount.name()
            << ")";
     }
     return os;
@@ -120,6 +126,13 @@ std::ostream&
 operator<<(std::ostream& os, IOU const& iou)
 {
     os << to_string(iou.issue().currency) << "(" << iou.account.name() << ")";
+    return os;
+}
+
+std::ostream&
+operator<<(std::ostream& os, MPT const& mpt)
+{
+    os << to_string(mpt.issuanceID);
     return os;
 }
 

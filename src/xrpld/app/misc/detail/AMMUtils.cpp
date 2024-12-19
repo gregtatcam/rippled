@@ -29,15 +29,16 @@ std::pair<STAmount, STAmount>
 ammPoolHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Issue const& issue1,
-    Issue const& issue2,
+    Asset const& asset1,
+    Asset const& asset2,
     FreezeHandling freezeHandling,
+    AuthHandling authHandling,
     beast::Journal const j)
 {
-    auto const assetInBalance =
-        accountHolds(view, ammAccountID, issue1, freezeHandling, j);
-    auto const assetOutBalance =
-        accountHolds(view, ammAccountID, issue2, freezeHandling, j);
+    auto const assetInBalance = accountHolds(
+        view, ammAccountID, asset1, freezeHandling, authHandling, j);
+    auto const assetOutBalance = accountHolds(
+        view, ammAccountID, asset2, freezeHandling, authHandling, j);
     return std::make_pair(assetInBalance, assetOutBalance);
 }
 
@@ -45,34 +46,35 @@ Expected<std::tuple<STAmount, STAmount, STAmount>, TER>
 ammHolds(
     ReadView const& view,
     SLE const& ammSle,
-    std::optional<Issue> const& optIssue1,
-    std::optional<Issue> const& optIssue2,
+    std::optional<Asset> const& optAsset1,
+    std::optional<Asset> const& optAsset2,
     FreezeHandling freezeHandling,
+    AuthHandling authHandling,
     beast::Journal const j)
 {
-    auto const issues = [&]() -> std::optional<std::pair<Issue, Issue>> {
-        auto const issue1 = ammSle[sfAsset].get<Issue>();
-        auto const issue2 = ammSle[sfAsset2].get<Issue>();
-        if (optIssue1 && optIssue2)
+    auto const issues = [&]() -> std::optional<std::pair<Asset, Asset>> {
+        auto const issue1 = ammSle[sfAsset];
+        auto const issue2 = ammSle[sfAsset2];
+        if (optAsset1 && optAsset2)
         {
             if (invalidAMMAssetPair(
-                    *optIssue1,
-                    *optIssue2,
+                    *optAsset1,
+                    *optAsset2,
                     std::make_optional(std::make_pair(issue1, issue2))))
             {
                 // This error can only be hit if the AMM is corrupted
                 // LCOV_EXCL_START
-                JLOG(j.debug()) << "ammHolds: Invalid optIssue1 or optIssue2 "
-                                << *optIssue1 << " " << *optIssue2;
+                JLOG(j.debug()) << "ammHolds: Invalid optAsset1 or optAsset2 "
+                                << *optAsset1 << " " << *optAsset2;
                 return std::nullopt;
                 // LCOV_EXCL_STOP
             }
-            return std::make_optional(std::make_pair(*optIssue1, *optIssue2));
+            return std::make_optional(std::make_pair(*optAsset1, *optAsset2));
         }
         auto const singleIssue =
             [&issue1, &issue2, &j](
-                Issue checkIssue,
-                const char* label) -> std::optional<std::pair<Issue, Issue>> {
+                Asset checkIssue,
+                const char* label) -> std::optional<std::pair<Asset, Asset>> {
             if (checkIssue == issue1)
                 return std::make_optional(std::make_pair(issue1, issue2));
             else if (checkIssue == issue2)
@@ -84,34 +86,35 @@ ammHolds(
             return std::nullopt;
             // LCOV_EXCL_STOP
         };
-        if (optIssue1)
+        if (optAsset1)
         {
-            return singleIssue(*optIssue1, "optIssue1");
+            return singleIssue(*optAsset1, "optAsset1");
         }
-        else if (optIssue2)
+        else if (optAsset2)
         {
             // Cannot have Amount2 without Amount.
-            return singleIssue(*optIssue2, "optIssue2");  // LCOV_EXCL_LINE
+            return singleIssue(*optAsset2, "optAsset2");  // LCOV_EXCL_LINE
         }
         return std::make_optional(std::make_pair(issue1, issue2));
     }();
     if (!issues)
         return Unexpected(tecAMM_INVALID_TOKENS);
-    auto const [asset1, asset2] = ammPoolHolds(
+    auto const [amount1, amount2] = ammPoolHolds(
         view,
         ammSle.getAccountID(sfAccount),
         issues->first,
         issues->second,
         freezeHandling,
+        authHandling,
         j);
-    return std::make_tuple(asset1, asset2, ammSle[sfLPTokenBalance]);
+    return std::make_tuple(amount1, amount2, ammSle[sfLPTokenBalance]);
 }
 
 STAmount
 ammLPHolds(
     ReadView const& view,
-    Currency const& cur1,
-    Currency const& cur2,
+    Asset const& asset1,
+    Asset const& asset2,
     AccountID const& ammAccount,
     AccountID const& lpAccount,
     beast::Journal const j)
@@ -119,7 +122,7 @@ ammLPHolds(
     return accountHolds(
         view,
         lpAccount,
-        ammLPTCurrency(cur1, cur2),
+        ammLPTCurrency(asset1, asset2),
         ammAccount,
         FreezeHandling::fhZERO_IF_FROZEN,
         j);
@@ -134,8 +137,8 @@ ammLPHolds(
 {
     return ammLPHolds(
         view,
-        ammSle[sfAsset].get<Issue>().currency,
-        ammSle[sfAsset2].get<Issue>().currency,
+        ammSle[sfAsset],
+        ammSle[sfAsset2],
         ammSle[sfAccount],
         lpAccount,
         j);
@@ -177,30 +180,45 @@ STAmount
 ammAccountHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Issue const& issue)
+    Asset const& asset)
 {
-    if (isXRP(issue))
+    if (asset.holds<MPTIssue>())
+        return accountHolds(
+            view,
+            ammAccountID,
+            asset.get<MPTIssue>(),
+            FreezeHandling::fhIGNORE_FREEZE,
+            AuthHandling::ahIGNORE_AUTH,
+            beast::Journal(beast::Journal::getNullSink()));
+    // Should be accountHolds for Asset for both?
+    if (isXRP(asset))
     {
         if (auto const sle = view.read(keylet::account(ammAccountID)))
             return (*sle)[sfBalance];
     }
-    else if (auto const sle = view.read(
-                 keylet::line(ammAccountID, issue.account, issue.currency));
+    else if (auto const sle = view.read(keylet::line(
+                 ammAccountID,
+                 asset.get<Issue>().account,
+                 asset.get<Issue>().currency));
              sle &&
-             !isFrozen(view, ammAccountID, issue.currency, issue.account))
+             !isFrozen(
+                 view,
+                 ammAccountID,
+                 asset.get<Issue>().currency,
+                 asset.get<Issue>().account))
     {
         auto amount = (*sle)[sfBalance];
-        if (ammAccountID > issue.account)
+        if (ammAccountID > asset.get<Issue>().account)
             amount.negate();
-        amount.setIssuer(issue.account);
+        amount.setIssuer(asset.get<Issue>().account);
         return amount;
     }
 
-    return STAmount{issue};
+    return STAmount{asset};
 }
 
 static TER
-deleteAMMTrustLines(
+deleteAMMObjects(
     Sandbox& sb,
     AccountID const& ammAccountID,
     std::uint16_t maxTrustlinesToDelete,
@@ -215,7 +233,13 @@ deleteAMMTrustLines(
             // Skip AMM
             if (nodeType == LedgerEntryType::ltAMM)
                 return {tesSUCCESS, SkipEntry::Yes};
-            // Should only have the trustlines
+
+            if (nodeType == ltMPTOKEN)
+                return {
+                    deleteAMMMPToken(sb, sleItem, ammAccountID, j),
+                    SkipEntry::No};
+
+            // Only the trustlines should remain
             if (nodeType != LedgerEntryType::ltRIPPLE_STATE)
             {
                 // LCOV_EXCL_START
@@ -248,8 +272,8 @@ deleteAMMTrustLines(
 TER
 deleteAMMAccount(
     Sandbox& sb,
-    Issue const& asset,
-    Issue const& asset2,
+    Asset const& asset,
+    Asset const& asset2,
     beast::Journal j)
 {
     auto ammSle = sb.peek(keylet::amm(asset, asset2));
@@ -274,7 +298,7 @@ deleteAMMAccount(
     }
 
     if (auto const ter =
-            deleteAMMTrustLines(sb, ammAccountID, maxDeletableAMMTrustLines, j);
+            deleteAMMObjects(sb, ammAccountID, maxDeletableAMMTrustLines, j);
         ter != tesSUCCESS)
         return ter;
 
@@ -362,6 +386,9 @@ isOnlyLiquidityProvider(
     // For instance, if AMM has two tokens USD and EUR and LP is not the issuer
     // of the tokens then the trustlines are between AMM account and the issuer.
     std::uint8_t nIOUTrustLines = 0;
+    // There are at most two MPT objects, one for each side of the pool.
+    // TODO MPT, check logic with MPT introduction
+    std::uint8_t nMPT = 0;
     // There is only one AMM object
     bool hasAMM = false;
     // AMM LP has at most three trustlines and only one AMM object must exist.
@@ -383,15 +410,21 @@ isOnlyLiquidityProvider(
             auto const sle = view.read(keylet::child(key));
             if (!sle)
                 return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
+            auto const entryType = sle->getFieldU16(sfLedgerEntryType);
             // Only one AMM object
-            if (sle->getFieldU16(sfLedgerEntryType) == ltAMM)
+            if (entryType == ltAMM)
             {
                 if (hasAMM)
                     return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
                 hasAMM = true;
                 continue;
             }
-            if (sle->getFieldU16(sfLedgerEntryType) != ltRIPPLE_STATE)
+            if (entryType == ltMPTOKEN)
+            {
+                ++nMPT;
+                continue;
+            }
+            if (entryType != ltRIPPLE_STATE)
                 return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
             auto const lowLimit = sle->getFieldAmount(sfLowLimit);
             auto const highLimit = sle->getFieldAmount(sfHighLimit);
@@ -421,8 +454,8 @@ isOnlyLiquidityProvider(
         auto const uNodeNext = ownerDir->getFieldU64(sfIndexNext);
         if (uNodeNext == 0)
         {
-            if (nLPTokenTrustLines != 1 || nIOUTrustLines == 0 ||
-                nIOUTrustLines > 2)
+            if (nLPTokenTrustLines != 1 || (nIOUTrustLines == 0 && nMPT == 0) ||
+                (nIOUTrustLines > 2 || nMPT > 2))
                 return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
             return true;
         }

@@ -180,10 +180,13 @@ private:
     std::string
     format_amount(STAmount const& amount)
     {
-        std::string txt = amount.getText();
-        txt += "/";
-        txt += to_string(amount.issue().currency);
-        return txt;
+        if (amount.holds<Issue>())
+            return std::format(
+                "{}/{}",
+                amount.getText(),
+                to_string(amount.get<Issue>().currency));
+        return std::format(
+            "{}/{}", amount.getText(), to_string(amount.get<MPTIssue>()));
     }
 
     void

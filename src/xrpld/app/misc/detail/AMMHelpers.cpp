@@ -49,7 +49,7 @@ lpTokensIn(
     Number const r = asset1Deposit / asset1Balance;
     auto const c = root2(f2 * f2 + r / f1) - f2;
     auto const t = lptAMMBalance * (r - c) / (1 + c);
-    return toSTAmount(lptAMMBalance.issue(), t);
+    return toSTAmount(lptAMMBalance.get<Issue>(), t);
 }
 
 /* Equation 4 solves equation 3 for b:
@@ -79,7 +79,7 @@ ammAssetIn(
     auto const b = 2 * d / t2 - 1 / f1;
     auto const c = d * d - f2 * f2;
     return toSTAmount(
-        asset1Balance.issue(), asset1Balance * solveQuadraticEq(a, b, c));
+        asset1Balance.asset(), asset1Balance * solveQuadraticEq(a, b, c));
 }
 
 /* Equation 7:

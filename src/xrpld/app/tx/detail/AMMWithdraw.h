@@ -154,8 +154,8 @@ public:
         Sandbox& sb,
         std::shared_ptr<SLE> const ammSle,
         STAmount const& lpTokenBalance,
-        Issue const& issue1,
-        Issue const& issue2,
+        Asset const& issue1,
+        Asset const& issue2,
         beast::Journal const& journal);
 
 private:

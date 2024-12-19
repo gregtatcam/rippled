@@ -1008,6 +1008,7 @@ Transactor::operator()()
             removeExpiredNFTokenOffers(
                 view(), expiredNFTokenOffers, ctx_.app.journal("View"));
 
+        // TODO MPT?
         if (result == tecINCOMPLETE)
             removeDeletedTrustLines(
                 view(), removedTrustLines, ctx_.app.journal("View"));

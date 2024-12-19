@@ -191,8 +191,6 @@ public:
         using namespace jtx;
         testAMM([&](AMM& ammAlice, Env&) {
             BEAST_EXPECT(ammAlice.expectAmmRpcInfo(
-                XRP(10000), USD(10000), IOUAmount{10000000, 0}));
-            BEAST_EXPECT(ammAlice.expectAmmRpcInfo(
                 XRP(10000),
                 USD(10000),
                 IOUAmount{10000000, 0},
@@ -200,6 +198,33 @@ public:
                 std::nullopt,
                 ammAlice.ammAccount()));
         });
+
+        {
+            Env env{*this};
+            env.fund(XRP(1'000), gw);
+            MPTTester mpt(env, gw, {.fund = false});
+            mpt.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
+            MPTTester mpt1(env, gw, {.fund = false});
+            mpt1.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT = mpt["MPT"];
+            auto const MPT1 = mpt1["MPT"];
+            std::vector<std::tuple<PrettyAmount, PrettyAmount, IOUAmount>>
+                pools = {
+                    {XRP(100), MPT(100), IOUAmount{100'000}},
+                    {USD(100), MPT(100), IOUAmount{100}},
+                    {MPT(100), MPT1(100), IOUAmount{100}}};
+            for (auto& pool : pools)
+            {
+                AMM amm(env, gw, std::get<0>(pool), std::get<1>(pool));
+                BEAST_EXPECT(amm.expectAmmRpcInfo(
+                    std::get<0>(pool),
+                    std::get<1>(pool),
+                    std::get<2>(pool),
+                    std::nullopt,
+                    std::nullopt,
+                    amm.ammAccount()));
+            }
+        }
     }
 
     void
