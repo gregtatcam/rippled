@@ -368,6 +368,8 @@ applyCreate(
             (*mptoken)[sfFlags] = 0;
             (*mptoken)[sfOwnerNode] = *ownerNode;
             sb.insert(mptoken);
+            // TODO MPT we don't adjust the owner count?
+            // didn't adjust for AMM object
         }
 
         if (auto const res = accountSend(

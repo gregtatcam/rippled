@@ -521,7 +521,7 @@ AMMWithdraw::withdraw(
     auto const expected = ammHolds(
         view,
         ammSle,
-        amountWithdraw.issue(),
+        amountWithdraw.asset(),
         std::nullopt,
         freezeHandling,
         AuthHandling::ahIGNORE_AUTH,  // ???
@@ -615,17 +615,32 @@ AMMWithdraw::withdraw(
         return {tecAMM_BALANCE, STAmount{}, STAmount{}, STAmount{}};
     }
 
-    // Check the reserve in case a trustline has to be created
+    // Check the reserve in case a trustline or MPT has to be created
     bool const enabledFixAMMv1_2 = view.rules().enabled(fixAMMv1_2);
-    auto sufficientReserve = [&](Issue const& issue) -> TER {
-        if (!enabledFixAMMv1_2 || isXRP(issue))
+    // If seated after a call to sufficientReserve() then MPToken must be
+    // authorized
+    std::optional<Keylet> mptokenKey;
+    auto sufficientReserve = [&](Asset const& asset) -> TER {
+        mptokenKey = std::nullopt;
+        if (!enabledFixAMMv1_2 || isXRP(asset))
             return tesSUCCESS;
-        if (!view.exists(keylet::line(account, issue)))
+        bool const isIssue = asset.holds<Issue>();
+        bool const checkReserve = [&] {
+            if (isIssue)
+                return !view.exists(keylet::line(account, asset.get<Issue>()));
+            auto const issuanceKey = keylet::mptIssuance(asset.get<MPTIssue>());
+            mptokenKey = keylet::mptoken(issuanceKey.key, account);
+            if (!view.exists(keylet::mptoken(issuanceKey.key, account)))
+                return true;
+            mptokenKey = std::nullopt;
+            return false;
+        }();
+        if (checkReserve)
         {
-            auto const sleAccount = view.read(keylet::account(account));
+            auto sleAccount = view.peek(keylet::account(account));
             if (!sleAccount)
                 return tecINTERNAL;  // LCOV_EXCL_LINE
-            auto const balance = (*sleAccount)[sfBalance].xrp();
+            STAmount const balance = (*sleAccount)[sfBalance];
             std::uint32_t const ownerCount = sleAccount->at(sfOwnerCount);
 
             // See also SetTrust::doApply()
@@ -633,62 +648,47 @@ AMMWithdraw::withdraw(
                 (ownerCount < 2) ? XRPAmount(beast::zero)
                                  : view.fees().accountReserve(ownerCount + 1));
 
-            if (std::max(priorBalance, balance) < reserve)
+            auto const balance_ =
+                isIssue ? std::max(priorBalance, balance.xrp()) : balance.xrp();
+            if (balance_ < reserve)
                 return tecINSUFFICIENT_RESERVE;
+
+            // Update owner count.
+            if (!isIssue)
+                adjustOwnerCount(view, sleAccount, 1, journal);
         }
         return tesSUCCESS;
     };
 
-    if (auto const err = sufficientReserve(amountWithdrawActual.issue()))
+    if (auto const err = sufficientReserve(amountWithdrawActual.asset()))
         return {err, STAmount{}, STAmount{}, STAmount{}};
 
     // Create MPToken if doesn't exist
     // TODO make a library, AMMCreate, AMMAuthorize use almost identical code
     auto createMPToken = [&](Asset const& asset) -> TER {
-        if (asset.holds<MPTIssue>())
+        // If mptoken is seated then must authorize
+        if (mptokenKey)
         {
             auto const& mptIssue = asset.get<MPTIssue>();
-            auto const issuanceKey = keylet::mptIssuance(mptIssue.getMptID());
-            auto const mptokenKey = keylet::mptoken(issuanceKey.key, account);
-            if (!view.exists(mptokenKey))
-            {
-                if (auto err = requireAuth(
-                        view, mptIssue, account, MPTAuthType::WeakAuth);
-                    err != tesSUCCESS)
-                    return err;
-            }
-
-            auto const sleAcct = view.peek(keylet::account(account));
-            if (!sleAcct)
-                return tefINTERNAL;
-
-            std::uint32_t const uOwnerCount =
-                sleAcct->getFieldU32(sfOwnerCount);
-            XRPAmount const reserveCreate(
-                (uOwnerCount < 2)
-                    ? XRPAmount(beast::zero)
-                    : view.fees().accountReserve(uOwnerCount + 1));
-
-            if (priorBalance < reserveCreate)
-                return tecINSUFFICIENT_RESERVE;
+            if (auto err =
+                    requireAuth(view, mptIssue, account, MPTAuthType::WeakAuth);
+                err != tesSUCCESS)
+                return err;
 
             auto const ownerNode = view.dirInsert(
                 keylet::ownerDir(account),
-                mptokenKey,
+                *mptokenKey,
                 describeOwnerDir(account));
 
             if (!ownerNode)
                 return tecDIR_FULL;
 
-            auto mptoken = std::make_shared<SLE>(mptokenKey);
+            auto mptoken = std::make_shared<SLE>(*mptokenKey);
             (*mptoken)[sfAccount] = account;
             (*mptoken)[sfMPTokenIssuanceID] = mptIssue.getMptID();
             (*mptoken)[sfFlags] = 0;
             (*mptoken)[sfOwnerNode] = *ownerNode;
             view.insert(mptoken);
-
-            // Update owner count.
-            adjustOwnerCount(view, sleAcct, 1, journal);
         }
         return tesSUCCESS;
     };
@@ -717,7 +717,7 @@ AMMWithdraw::withdraw(
     // Withdraw amount2Withdraw
     if (amount2WithdrawActual)
     {
-        if (auto const err = sufficientReserve(amount2WithdrawActual->issue());
+        if (auto const err = sufficientReserve(amount2WithdrawActual->asset());
             err != tesSUCCESS)
             return {err, STAmount{}, STAmount{}, STAmount{}};
 

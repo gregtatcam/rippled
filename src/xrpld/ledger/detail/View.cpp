@@ -2049,6 +2049,25 @@ deleteAMMTrustLine(
 }
 
 TER
+deleteAMMMPToken(
+    ApplyView& view,
+    std::shared_ptr<SLE> sleMpt,
+    AccountID const& ammAccountID,
+    beast::Journal j)
+{
+    if (!view.dirRemove(
+            keylet::ownerDir(ammAccountID),
+            (*sleMpt)[sfOwnerNode],
+            sleMpt->key(),
+            false))
+        return tecINTERNAL;
+
+    view.erase(sleMpt);
+
+    return tesSUCCESS;
+}
+
+TER
 rippleCredit(
     ApplyView& view,
     AccountID const& uSenderID,

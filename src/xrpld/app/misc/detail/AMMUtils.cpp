@@ -218,7 +218,7 @@ ammAccountHolds(
 }
 
 static TER
-deleteAMMTrustLines(
+deleteAMMObjects(
     Sandbox& sb,
     AccountID const& ammAccountID,
     std::uint16_t maxTrustlinesToDelete,
@@ -233,7 +233,13 @@ deleteAMMTrustLines(
             // Skip AMM
             if (nodeType == LedgerEntryType::ltAMM)
                 return {tesSUCCESS, SkipEntry::Yes};
-            // Should only have the trustlines
+
+            if (nodeType == ltMPTOKEN)
+                return {
+                    deleteAMMMPToken(sb, sleItem, ammAccountID, j),
+                    SkipEntry::No};
+
+            // Only the trustlines should remain
             if (nodeType != LedgerEntryType::ltRIPPLE_STATE)
             {
                 // LCOV_EXCL_START
@@ -292,40 +298,9 @@ deleteAMMAccount(
     }
 
     if (auto const ter =
-            deleteAMMTrustLines(sb, ammAccountID, maxDeletableAMMTrustLines, j);
+            deleteAMMObjects(sb, ammAccountID, maxDeletableAMMTrustLines, j);
         ter != tesSUCCESS)
         return ter;
-
-    auto checkDeleteMPToken = [&](Asset const& asset_) -> TER {
-        if (asset_.holds<MPTIssue>())
-        {
-            auto const mptIssuanceID =
-                keylet::mptIssuance(asset_.get<MPTIssue>().getMptID());
-            auto const mptokenKey =
-                keylet::mptoken(mptIssuanceID.key, ammAccountID);
-
-            auto const sleMpt = sb.peek(mptokenKey);
-            if (!sleMpt)
-                return tecINTERNAL;
-
-            if (!sb.dirRemove(
-                    keylet::ownerDir(ammAccountID),
-                    (*sleMpt)[sfOwnerNode],
-                    sleMpt->key(),
-                    false))
-                return tecINTERNAL;
-
-            sb.erase(sleMpt);
-        }
-
-        return tesSUCCESS;
-    };
-
-    if (auto const err = checkDeleteMPToken(asset))
-        return err;
-
-    if (auto const err = checkDeleteMPToken(asset2))
-        return err;
 
     auto const ownerDirKeylet = keylet::ownerDir(ammAccountID);
     if (!sb.dirRemove(
@@ -411,6 +386,9 @@ isOnlyLiquidityProvider(
     // For instance, if AMM has two tokens USD and EUR and LP is not the issuer
     // of the tokens then the trustlines are between AMM account and the issuer.
     std::uint8_t nIOUTrustLines = 0;
+    // There are at most two MPT objects, one for each side of the pool.
+    // TODO MPT, check logic with MPT introduction
+    std::uint8_t nMPT = 0;
     // There is only one AMM object
     bool hasAMM = false;
     // AMM LP has at most three trustlines and only one AMM object must exist.
@@ -432,15 +410,21 @@ isOnlyLiquidityProvider(
             auto const sle = view.read(keylet::child(key));
             if (!sle)
                 return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
+            auto const entryType = sle->getFieldU16(sfLedgerEntryType);
             // Only one AMM object
-            if (sle->getFieldU16(sfLedgerEntryType) == ltAMM)
+            if (entryType == ltAMM)
             {
                 if (hasAMM)
                     return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
                 hasAMM = true;
                 continue;
             }
-            if (sle->getFieldU16(sfLedgerEntryType) != ltRIPPLE_STATE)
+            if (entryType == ltMPTOKEN)
+            {
+                ++nMPT;
+                continue;
+            }
+            if (entryType != ltRIPPLE_STATE)
                 return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
             auto const lowLimit = sle->getFieldAmount(sfLowLimit);
             auto const highLimit = sle->getFieldAmount(sfHighLimit);
@@ -470,8 +454,8 @@ isOnlyLiquidityProvider(
         auto const uNodeNext = ownerDir->getFieldU64(sfIndexNext);
         if (uNodeNext == 0)
         {
-            if (nLPTokenTrustLines != 1 || nIOUTrustLines == 0 ||
-                nIOUTrustLines > 2)
+            if (nLPTokenTrustLines != 1 || (nIOUTrustLines == 0 && nMPT == 0) ||
+                (nIOUTrustLines > 2 || nMPT > 2))
                 return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
             return true;
         }

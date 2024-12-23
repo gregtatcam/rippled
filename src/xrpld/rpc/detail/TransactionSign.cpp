@@ -237,9 +237,10 @@ checkPayment(
         }
         else
         {
-            // If no SendMax, default to Amount with sender as issuer.
+            // If no SendMax, default to Amount with sender as issuer if Issue.
             sendMax = amount;
-            sendMax.setIssuer(srcAddressID);
+            if (sendMax.holds<Issue>())
+                sendMax.setIssuer(srcAddressID);
         }
 
         if (sendMax.native() && amount.native())

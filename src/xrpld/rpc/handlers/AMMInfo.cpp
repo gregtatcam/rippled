@@ -148,9 +148,9 @@ doAMMInfo(RPC::JsonContext& context)
             return Unexpected(rpcINVALID_PARAMS);
 
         XRPL_ASSERT(
-            (issue1.has_value() == issue2.has_value()) &&
-                (issue1.has_value() != ammID.has_value()),
-            "ripple::doAMMInfo : issue1 and issue2 do match");
+            (asset1.has_value() == asset2.has_value()) &&
+                (asset1.has_value() != ammID.has_value()),
+            "ripple::doAMMInfo : asset1 and asset2 do match");
 
         auto const ammKeylet = [&]() {
             if (asset1 && asset2)

@@ -3583,6 +3583,51 @@ class MPToken_test : public beast::unit_test::suite
         }
     }
 
+    void
+    testBasicAMM(FeatureBitset features)
+    {
+        testcase("Basic AMM");
+        using namespace jtx;
+        Account const gw{"gw"};
+        Account const alice{"alice"};
+        Account const carol{"carol"};
+        auto const USD = gw["USD"];
+        Env env{*this};
+
+        fund(env, gw, {alice, carol}, XRP(1'000), {USD(1'000)});
+
+        MPTTester mpt(env, gw, {.fund = false});
+        mpt.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
+        auto const MPT = mpt["MPT"];
+        mpt.authorize({.account = alice});
+        mpt.authorize({.account = carol});
+        mpt.pay(gw, alice, 1'000);
+        mpt.pay(gw, carol, 1'000);
+
+        MPTTester mpt1(env, gw, {.fund = false});
+        mpt1.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
+        auto const MPT1 = mpt1["MPT1"];
+        mpt1.authorize({.account = alice});
+        mpt1.authorize({.account = carol});
+        mpt1.pay(gw, alice, 1'000);
+        mpt1.pay(gw, carol, 1'000);
+
+        std::vector<std::tuple<PrettyAmount, PrettyAmount, IOUAmount>> pools = {
+            {XRP(100), MPT(100), IOUAmount{100'000}},
+            {USD(100), MPT(100), IOUAmount{100}},
+            {MPT(100), MPT1(100), IOUAmount{100}}};
+        for (auto& pool : pools)
+        {
+            AMM amm(env, gw, std::get<0>(pool), std::get<1>(pool));
+            amm.deposit(alice, std::get<2>(pool));
+            amm.deposit(carol, std::get<2>(pool));
+            amm.withdrawAll(alice);
+            amm.withdrawAll(carol);
+            amm.withdrawAll(gw);
+            BEAST_EXPECT(!amm.ammExists());
+        }
+    }
+
 public:
     void
     run() override
@@ -3647,6 +3692,9 @@ public:
 
         // Add AMMClawback
         testAMMClawback(all);
+
+        // Test AMM
+        testBasicAMM(all);
     }
 };
 

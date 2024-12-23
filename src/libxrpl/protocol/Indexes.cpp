@@ -549,11 +549,11 @@ mptIssuance(std::uint32_t seq, AccountID const& issuer) noexcept
 }
 
 Keylet
-mptIssuance(MPTID const& issuanceID) noexcept
+mptIssuance(MPTIssue const& mptIssue) noexcept
 {
     return {
         ltMPTOKEN_ISSUANCE,
-        indexHash(LedgerNameSpace::MPTOKEN_ISSUANCE, issuanceID)};
+        indexHash(LedgerNameSpace::MPTOKEN_ISSUANCE, mptIssue.getMptID())};
 }
 
 Keylet

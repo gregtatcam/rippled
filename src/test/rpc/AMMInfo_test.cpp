@@ -210,7 +210,7 @@ public:
             auto const MPT1 = mpt1["MPT"];
             std::vector<std::tuple<PrettyAmount, PrettyAmount, IOUAmount>>
                 pools = {
-                    {XRP(100), MPT(100), IOUAmount{100000}},
+                    {XRP(100), MPT(100), IOUAmount{100'000}},
                     {USD(100), MPT(100), IOUAmount{100}},
                     {MPT(100), MPT1(100), IOUAmount{100}}};
             for (auto& pool : pools)

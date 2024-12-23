@@ -1007,7 +1007,8 @@ ValidMPTIssuance::finalize(
 {
     if (result == tesSUCCESS)
     {
-        if (tx.getTxnType() == ttMPTOKEN_ISSUANCE_CREATE)
+        auto const txnType = tx.getTxnType();
+        if (txnType == ttMPTOKEN_ISSUANCE_CREATE)
         {
             if (mptIssuancesCreated_ == 0)
             {
@@ -1028,7 +1029,7 @@ ValidMPTIssuance::finalize(
             return mptIssuancesCreated_ == 1 && mptIssuancesDeleted_ == 0;
         }
 
-        if (tx.getTxnType() == ttMPTOKEN_ISSUANCE_DESTROY)
+        if (txnType == ttMPTOKEN_ISSUANCE_DESTROY)
         {
             if (mptIssuancesDeleted_ == 0)
             {
@@ -1049,7 +1050,7 @@ ValidMPTIssuance::finalize(
             return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 1;
         }
 
-        if (tx.getTxnType() == ttMPTOKEN_AUTHORIZE)
+        if (txnType == ttMPTOKEN_AUTHORIZE)
         {
             bool const submittedByIssuer = tx.isFieldPresent(sfHolder);
 
@@ -1089,7 +1090,7 @@ ValidMPTIssuance::finalize(
             return true;
         }
 
-        if (tx.getTxnType() == ttMPTOKEN_ISSUANCE_SET)
+        if (txnType == ttMPTOKEN_ISSUANCE_SET)
         {
             if (mptIssuancesDeleted_ > 0)
             {
@@ -1116,7 +1117,7 @@ ValidMPTIssuance::finalize(
                 mptokensCreated_ == 0 && mptokensDeleted_ == 0;
         }
 
-        if (tx.getTxnType() == ttAMM_CREATE || tx.getTxnType() == ttCHECK_CASH)
+        if (txnType == ttAMM_CREATE || txnType == ttCHECK_CASH)
         {
             if (mptIssuancesDeleted_ > 0)
             {
@@ -1135,21 +1136,20 @@ ValidMPTIssuance::finalize(
             }
             // AMM can be created with IOU/MPT or MPT/MPT
             else if (
-                (tx.getTxnType() == ttAMM_CREATE && mptokensCreated_ > 2) ||
-                (tx.getTxnType() == ttCHECK_CASH && mptokensCreated_ > 1))
+                (txnType == ttAMM_CREATE && mptokensCreated_ > 2) ||
+                (txnType == ttCHECK_CASH && mptokensCreated_ > 1))
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
                                    "succeeded while creating MPTokens";
             }
 
             return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
-                ((tx.getTxnType() == ttAMM_CREATE && mptokensCreated_ <= 2) ||
-                 (tx.getTxnType() == ttCHECK_CASH && mptokensCreated_ <= 1)) &&
+                ((txnType == ttAMM_CREATE && mptokensCreated_ <= 2) ||
+                 (txnType == ttCHECK_CASH && mptokensCreated_ <= 1)) &&
                 mptokensDeleted_ == 0;
         }
 
-        if (tx.getTxnType() == ttAMM_DELETE ||
-            tx.getTxnType() == ttAMM_WITHDRAW)
+        if (txnType == ttAMM_DELETE || txnType == ttAMM_WITHDRAW)
         {
             if (mptIssuancesDeleted_ > 0)
             {
@@ -1166,14 +1166,18 @@ ValidMPTIssuance::finalize(
                 JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
                                    "succeeded while removing MPTokens";
             }
-            else if (mptokensCreated_ > 0)
+            // MPToken can be created if LP withdraws from MPT pool,
+            // and doesn't own MPToken object for this MPT
+            else if (txnType == ttAMM_WITHDRAW && mptokensCreated_ > 1)
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT issuance set "
                                    "succeeded while creating MPTokens";
             }
 
             return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0 &&
-                mptokensCreated_ == 0 && mptokensDeleted_ <= 2;
+                ((txnType == ttAMM_DELETE && mptokensCreated_ == 0) ||
+                 (txnType == ttAMM_WITHDRAW && mptokensCreated_ <= 1)) &&
+                mptokensDeleted_ <= 2;
         }
     }
 
