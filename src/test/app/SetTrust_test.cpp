@@ -331,7 +331,8 @@ public:
 
         // trust amount can't be from invalid issuer
         env(trust_explicit_amt(
-                alice, STAmount{Issue{to_currency("USD"), noAccount()}, 100}),
+                alice,
+                STAmount{IOUIssue{to_currency("USD"), noAccount()}, 100}),
             ter(temDST_NEEDED));
 
         // trust cannot be to self

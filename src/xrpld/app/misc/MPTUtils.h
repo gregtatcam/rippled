@@ -26,7 +26,7 @@
 
 namespace ripple {
 
-class Asset;
+class Issue;
 class ReadView;
 
 /* Return true if a transaction is allowed for the specified MPT/account. The
@@ -37,13 +37,13 @@ TER
 isMPTTxAllowed(
     ReadView const& v,
     TxType tx,
-    Asset const& asset,
+    Issue const& asset,
     AccountID const& accountID);
 
 TER
 isMPTDEXAllowed(
     ReadView const& view,
-    Asset const& issuanceID,
+    Issue const& issuanceID,
     AccountID const& srcAccount,
     AccountID const& destAccount);
 

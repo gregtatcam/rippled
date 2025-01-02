@@ -19,8 +19,8 @@
 
 #include <xrpl/beast/unit_test/suite.h>
 #include <xrpl/protocol/Feature.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/Indexes.h>
-#include <xrpl/protocol/Issue.h>
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STXChainBridge.h>
 #include <xrpl/protocol/Serializer.h>
@@ -126,7 +126,7 @@ struct SEnv
     }
 
     STAmount
-    balance(jtx::Account const& account, Issue const& issue) const
+    balance(jtx::Account const& account, IOUIssue const& issue) const
     {
         return env_.balance(account, issue).value();
     }
@@ -356,9 +356,9 @@ struct BalanceTransfer
 struct BridgeDef
 {
     jtx::Account doorA;
-    Issue issueA;
+    IOUIssue issueA;
     jtx::Account doorB;
-    Issue issueB;
+    IOUIssue issueB;
     STAmount reward;
     STAmount minAccountCreate;
     uint32_t quorum;
@@ -729,7 +729,7 @@ struct XChain_test : public beast::unit_test::suite,
         // - Issuing chain is XRP with issuing chain is the root account.
         // ---------------------------------------------------------------------
         Account a("a"), b("b");
-        Issue ia, ib;
+        IOUIssue ia, ib;
 
         std::tuple lcs{
             std::make_pair(

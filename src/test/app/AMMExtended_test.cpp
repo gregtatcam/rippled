@@ -1351,7 +1351,9 @@ private:
         AMM ammAlice(env, alice, USD(1'000), XRP(1'050));
 
         // Set up authorized trust line for AMM.
-        env(trust(gw, STAmount{Issue{USD.currency, ammAlice.ammAccount()}, 10}),
+        env(trust(
+                gw,
+                STAmount{IOUIssue{USD.currency, ammAlice.ammAccount()}, 10}),
             txflags(tfSetfAuth));
         env.close();
 
@@ -1424,7 +1426,9 @@ private:
         AMM ammAlice(env, alice, USD(1'000), XRP(1'050));
 
         // Set up authorized trust line for AMM.
-        env(trust(gw, STAmount{Issue{USD.currency, ammAlice.ammAccount()}, 10}),
+        env(trust(
+                gw,
+                STAmount{IOUIssue{USD.currency, ammAlice.ammAccount()}, 10}),
             txflags(tfSetfAuth));
         env.close();
 
@@ -2112,12 +2116,12 @@ private:
                 STAmount smax(BTC(61));
                 PaymentSandbox sb(env.current().get(), tapNONE);
                 STPathSet paths;
-                auto IPE = [](Issue const& iss) {
+                auto IPE = [](IOUIssue const& iss) {
                     return STPathElement(
                         STPathElement::typeCurrency | STPathElement::typeIssuer,
                         xrpAccount(),
-                        iss.currency,
-                        iss.account);
+                        iss.getCurrency(),
+                        iss.getIssuer());
                 };
                 {
                     // BTC -> USD
@@ -3539,7 +3543,7 @@ private:
             BEAST_EXPECT(
                 ff[sfHighLimit.fieldName] ==
                 bob["USD"](100).value().getJson(JsonOptions::none));
-            auto amt = STAmount{Issue{to_currency("USD"), noAccount()}, -15}
+            auto amt = STAmount{IOUIssue{to_currency("USD"), noAccount()}, -15}
                            .value()
                            .getJson(JsonOptions::none);
             BEAST_EXPECT(ff[sfBalance.fieldName] == amt);
@@ -3798,7 +3802,7 @@ private:
 
         //    test: AMM line is frozen
         auto const a3am =
-            STAmount{Issue{to_currency("USD"), ammA3.ammAccount()}, 0};
+            STAmount{IOUIssue{to_currency("USD"), ammA3.ammAccount()}, 0};
         env(trust(G1, a3am, tfSetFreeze));
         auto const info = ammA3.ammRpcInfo();
         BEAST_EXPECT(info[jss::amm][jss::asset2_frozen].asBool());

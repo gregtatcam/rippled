@@ -61,9 +61,9 @@ public:
 
     STXChainBridge(
         AccountID const& srcChainDoor,
-        Issue const& srcChainIssue,
+        IOUIssue const& srcChainIssue,
         AccountID const& dstChainDoor,
-        Issue const& dstChainIssue);
+        IOUIssue const& dstChainIssue);
 
     explicit STXChainBridge(Json::Value const& v);
 
@@ -83,19 +83,19 @@ public:
     AccountID const&
     lockingChainDoor() const;
 
-    Issue const&
+    IOUIssue const&
     lockingChainIssue() const;
 
     AccountID const&
     issuingChainDoor() const;
 
-    Issue const&
+    IOUIssue const&
     issuingChainIssue() const;
 
     AccountID const&
     door(ChainType ct) const;
 
-    Issue const&
+    IOUIssue const&
     issue(ChainType ct) const;
 
     SerializedTypeID
@@ -167,10 +167,10 @@ STXChainBridge::lockingChainDoor() const
     return lockingChainDoor_.value();
 };
 
-inline Issue const&
+inline IOUIssue const&
 STXChainBridge::lockingChainIssue() const
 {
-    return lockingChainIssue_.value().get<Issue>();
+    return lockingChainIssue_.value().get<IOUIssue>();
 };
 
 inline AccountID const&
@@ -179,10 +179,10 @@ STXChainBridge::issuingChainDoor() const
     return issuingChainDoor_.value();
 };
 
-inline Issue const&
+inline IOUIssue const&
 STXChainBridge::issuingChainIssue() const
 {
-    return issuingChainIssue_.value().get<Issue>();
+    return issuingChainIssue_.value().get<IOUIssue>();
 };
 
 inline STXChainBridge::value_type const&
@@ -199,7 +199,7 @@ STXChainBridge::door(ChainType ct) const
     return issuingChainDoor();
 }
 
-inline Issue const&
+inline IOUIssue const&
 STXChainBridge::issue(ChainType ct) const
 {
     if (ct == ChainType::locking)

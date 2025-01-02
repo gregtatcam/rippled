@@ -195,8 +195,8 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
     auto const expected = ammHolds(
         ctx.view,
         *ammSle,
-        amount ? amount->asset() : std::optional<Asset>{},
-        amount2 ? amount2->asset() : std::optional<Asset>{},
+        amount ? amount->asset() : std::optional<Issue>{},
+        amount2 ? amount2->asset() : std::optional<Issue>{},
         FreezeHandling::fhIGNORE_FREEZE,
         AuthHandling::ahIGNORE_AUTH,
         ctx.j);
@@ -361,8 +361,8 @@ AMMWithdraw::applyGuts(Sandbox& sb)
     auto const expected = ammHolds(
         sb,
         *ammSle,
-        amount ? amount->asset() : std::optional<Asset>{},
-        amount2 ? amount2->asset() : std::optional<Asset>{},
+        amount ? amount->asset() : std::optional<Issue>{},
+        amount2 ? amount2->asset() : std::optional<Issue>{},
         FreezeHandling::fhZERO_IF_FROZEN,
         AuthHandling::ahIGNORE_AUTH,
         ctx_.journal);
@@ -620,14 +620,15 @@ AMMWithdraw::withdraw(
     // If seated after a call to sufficientReserve() then MPToken must be
     // authorized
     std::optional<Keylet> mptokenKey;
-    auto sufficientReserve = [&](Asset const& asset) -> TER {
+    auto sufficientReserve = [&](Issue const& asset) -> TER {
         mptokenKey = std::nullopt;
         if (!enabledFixAMMv1_2 || isXRP(asset))
             return tesSUCCESS;
-        bool const isIssue = asset.holds<Issue>();
+        bool const isIssue = asset.holds<IOUIssue>();
         bool const checkReserve = [&] {
             if (isIssue)
-                return !view.exists(keylet::line(account, asset.get<Issue>()));
+                return !view.exists(
+                    keylet::line(account, asset.get<IOUIssue>()));
             auto const issuanceKey = keylet::mptIssuance(asset.get<MPTIssue>());
             mptokenKey = keylet::mptoken(issuanceKey.key, account);
             if (!view.exists(keylet::mptoken(issuanceKey.key, account)))
@@ -665,7 +666,7 @@ AMMWithdraw::withdraw(
 
     // Create MPToken if doesn't exist
     // TODO make a library, AMMCreate, AMMAuthorize use almost identical code
-    auto createMPToken = [&](Asset const& asset) -> TER {
+    auto createMPToken = [&](Issue const& asset) -> TER {
         // If mptoken is seated then must authorize
         if (mptokenKey)
         {
@@ -802,8 +803,8 @@ AMMWithdraw::deleteAMMAccountIfEmpty(
     Sandbox& sb,
     std::shared_ptr<SLE> const ammSle,
     STAmount const& lpTokenBalance,
-    Asset const& issue1,
-    Asset const& issue2,
+    Issue const& issue1,
+    Issue const& issue2,
     beast::Journal const& journal)
 {
     TER ter;

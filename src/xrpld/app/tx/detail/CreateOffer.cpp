@@ -223,7 +223,7 @@ CreateOffer::checkAcceptAsset(
     ApplyFlags const flags,
     AccountID const id,
     beast::Journal const j,
-    Asset const& asset)
+    Issue const& asset)
 {
     // Only valid for custom currencies
     XRPL_ASSERT(
@@ -249,12 +249,12 @@ CreateOffer::checkAcceptAsset(
         // An account can always accept its own issuance.
         return tesSUCCESS;
 
-    if (asset.holds<Issue>())
+    if (asset.holds<IOUIssue>())
     {
         if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
         {
             auto const trustLine = view.read(keylet::line(
-                id, asset.getIssuer(), asset.get<Issue>().currency));
+                id, asset.getIssuer(), asset.get<IOUIssue>().getCurrency()));
 
             if (!trustLine)
             {
@@ -316,7 +316,7 @@ CreateOffer::flowCross(
         if (!sendMax.native() && (account_ != sendMax.getIssuer()))
         {
             gatewayXferRate = [&]() {
-                if (sendMax.holds<Issue>())
+                if (sendMax.holds<IOUIssue>())
                     return transferRate(psb, sendMax.getIssuer());
                 else
                     return transferRate(
@@ -516,8 +516,8 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    if (amount.holds<Issue>())
-        txt += to_string(amount.get<Issue>().currency);
+    if (amount.holds<IOUIssue>())
+        txt += to_string(amount.get<IOUIssue>().getCurrency());
     else
         txt += to_string(amount.get<MPTIssue>());
     return txt;
@@ -805,24 +805,24 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     bool const bookExisted = static_cast<bool>(sb.peek(dir));
 
     auto const bookNode = sb.dirAppend(dir, offer_index, [&](SLE::ref sle) {
-        if (saTakerPays.holds<Issue>())
+        if (saTakerPays.holds<IOUIssue>())
         {
             sle->setFieldH160(
-                sfTakerPaysCurrency, saTakerPays.get<Issue>().currency);
+                sfTakerPaysCurrency, saTakerPays.get<IOUIssue>().getCurrency());
             sle->setFieldH160(
-                sfTakerPaysIssuer, saTakerPays.get<Issue>().account);
+                sfTakerPaysIssuer, saTakerPays.get<IOUIssue>().getIssuer());
         }
         else
         {
             sle->setFieldH192(
                 sfTakerPaysMPT, saTakerPays.get<MPTIssue>().getMptID());
         }
-        if (saTakerGets.holds<Issue>())
+        if (saTakerGets.holds<IOUIssue>())
         {
             sle->setFieldH160(
-                sfTakerGetsCurrency, saTakerGets.get<Issue>().currency);
+                sfTakerGetsCurrency, saTakerGets.get<IOUIssue>().getCurrency());
             sle->setFieldH160(
-                sfTakerGetsIssuer, saTakerGets.get<Issue>().account);
+                sfTakerGetsIssuer, saTakerGets.get<IOUIssue>().getIssuer());
         }
         else
         {

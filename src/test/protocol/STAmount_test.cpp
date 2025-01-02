@@ -104,7 +104,7 @@ public:
 
         BEAST_EXPECT(!cmp.native());
 
-        BEAST_EXPECT(cmp.issue().currency == res.issue().currency);
+        BEAST_EXPECT(cmp.issue().getCurrency() == res.issue().getCurrency());
 
         if (res != cmp)
         {
@@ -143,7 +143,7 @@ public:
     void
     testSetValue(
         std::string const& value,
-        Issue const& issue,
+        IOUIssue const& issue,
         bool success = true)
     {
         try
@@ -163,7 +163,7 @@ public:
         {
             testcase("set value (native)");
 
-            Issue const xrp(xrpIssue());
+            IOUIssue const xrp(xrpIssue());
 
             // fractional XRP (i.e. drops)
             testSetValue("1", xrp);
@@ -196,7 +196,8 @@ public:
         {
             testcase("set value (iou)");
 
-            Issue const usd(Currency(0x5553440000000000), AccountID(0x4985601));
+            IOUIssue const usd(
+                Currency(0x5553440000000000), AccountID(0x4985601));
 
             testSetValue("1", usd);
             testSetValue("10", usd);
@@ -608,8 +609,8 @@ public:
     {
         testcase("STAmount to XRPAmount conversions");
 
-        Issue const usd{Currency(0x5553440000000000), AccountID(0x4985601)};
-        Issue const xrp{xrpIssue()};
+        IOUIssue const usd{Currency(0x5553440000000000), AccountID(0x4985601)};
+        IOUIssue const xrp{xrpIssue()};
 
         for (std::uint64_t drops = 100000000000000000; drops != 1;
              drops = drops / 10)
@@ -641,8 +642,8 @@ public:
     {
         testcase("STAmount to IOUAmount conversions");
 
-        Issue const usd{Currency(0x5553440000000000), AccountID(0x4985601)};
-        Issue const xrp{xrpIssue()};
+        IOUIssue const usd{Currency(0x5553440000000000), AccountID(0x4985601)};
+        IOUIssue const xrp{xrpIssue()};
 
         for (std::uint64_t dollars = 10000000000; dollars != 1;
              dollars = dollars / 10)

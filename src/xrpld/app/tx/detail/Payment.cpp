@@ -57,7 +57,7 @@ getMaxSourceAmount(
         return dstAmount;
     else
         return STAmount(
-            Issue{dstAmount.get<Issue>().currency, account},
+            IOUIssue{dstAmount.get<IOUIssue>().getCurrency(), account},
             dstAmount.mantissa(),
             dstAmount.exponent(),
             dstAmount < beast::zero);

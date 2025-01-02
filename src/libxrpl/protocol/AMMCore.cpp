@@ -39,7 +39,7 @@ ammAccountID(
 }
 
 Currency
-ammLPTCurrency(Asset const& asset1, Asset const& asset2)
+ammLPTCurrency(Issue const& asset1, Issue const& asset2)
 {
     // AMM LPToken is 0x03 plus 19 bytes of the hash
     std::int32_t constexpr AMMCurrencyCode = 0x03;
@@ -47,8 +47,8 @@ ammLPTCurrency(Asset const& asset1, Asset const& asset2)
     uint256 const hash = std::visit(
         [](auto&& issue1_, auto&& issue2_) {
             auto fromIss = []<typename T>(T const& iss) {
-                if constexpr (std::is_same_v<T, Issue>)
-                    return iss.currency;
+                if constexpr (std::is_same_v<T, IOUIssue>)
+                    return iss.getCurrency();
                 if constexpr (std::is_same_v<T, MPTIssue>)
                     return iss.getMptID();
             };
@@ -63,24 +63,25 @@ ammLPTCurrency(Asset const& asset1, Asset const& asset2)
     return currency;
 }
 
-Issue
+IOUIssue
 ammLPTIssue(
-    Asset const& asset1,
-    Asset const& asset2,
+    Issue const& asset1,
+    Issue const& asset2,
     AccountID const& ammAccountID)
 {
-    return Issue(ammLPTCurrency(asset1, asset2), ammAccountID);
+    return IOUIssue(ammLPTCurrency(asset1, asset2), ammAccountID);
 }
 
 NotTEC
 invalidAMMAsset(
-    Asset const& issue,
-    std::optional<std::pair<Asset, Asset>> const& pair)
+    Issue const& issue,
+    std::optional<std::pair<Issue, Issue>> const& pair)
 {
     if (issue.holds<MPTIssue>() &&
         issue.get<MPTIssue>().getIssuer() == beast::zero)
         return temBAD_MPT;
-    if (issue.holds<Issue>() && badCurrency() == issue.get<Issue>().currency)
+    if (issue.holds<IOUIssue>() &&
+        badCurrency() == issue.get<IOUIssue>().getCurrency())
         return temBAD_CURRENCY;
     if (isXRP(issue) && issue.getIssuer().isNonZero())
         return temBAD_ISSUER;
@@ -91,9 +92,9 @@ invalidAMMAsset(
 
 NotTEC
 invalidAMMAssetPair(
-    Asset const& asset1,
-    Asset const& asset2,
-    std::optional<std::pair<Asset, Asset>> const& pair)
+    Issue const& asset1,
+    Issue const& asset2,
+    std::optional<std::pair<Issue, Issue>> const& pair)
 {
     if (asset1 == asset2)
         return temBAD_AMM_TOKENS;
@@ -107,7 +108,7 @@ invalidAMMAssetPair(
 NotTEC
 invalidAMMAmount(
     STAmount const& amount,
-    std::optional<std::pair<Asset, Asset>> const& pair,
+    std::optional<std::pair<Issue, Issue>> const& pair,
     bool validZero)
 {
     if (auto const res = invalidAMMAsset(amount.asset(), pair))

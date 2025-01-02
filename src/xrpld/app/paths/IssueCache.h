@@ -33,13 +33,13 @@
 namespace ripple {
 
 // Used by Pathfinder
-class AssetCache final : public CountedObject<AssetCache>
+class IssueCache final : public CountedObject<IssueCache>
 {
 public:
-    explicit AssetCache(
+    explicit IssueCache(
         std::shared_ptr<ReadView const> const& l,
         beast::Journal j);
-    ~AssetCache();
+    ~IssueCache();
 
     std::shared_ptr<ReadView const> const&
     getLedger() const

@@ -305,7 +305,7 @@ struct Peer
             scheduler.in(when, std::forward<T>(what));
     }
 
-    // Issue a new event to the collectors
+    // IOUIssue a new event to the collectors
     template <class E>
     void
     issue(E const& event)

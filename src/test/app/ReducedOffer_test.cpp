@@ -622,7 +622,7 @@ public:
     void
     testSellPartialCrossOldXrpIouQChange()
     {
-        // This test case was motivated by Issue #4937.  It recreates
+        // This test case was motivated by IOUIssue #4937.  It recreates
         // the specific failure identified in that issue and samples some other
         // cases in the same vicinity to make sure that the new behavior makes
         // sense.

@@ -159,7 +159,8 @@ target_link_libraries(xrpl.libxrpl
 )
 
 if(xrpld)
-  add_executable(rippled)
+  add_executable(rippled
+          ../include/xrpl/protocol/Issue.h)
   if(unity)
     set_target_properties(rippled PROPERTIES UNITY_BUILD ON)
   endif()

@@ -91,7 +91,7 @@ protected:
     }
 
 public:
-    BookStep(StrandContext const& ctx, Asset const& in, Asset const& out)
+    BookStep(StrandContext const& ctx, Issue const& in, Issue const& out)
         : maxOffersToConsume_(getMaxOffersToConsume(ctx))
         , book_(in, out)
         , strandSrc_(ctx.strandSrc)
@@ -199,7 +199,7 @@ protected:
     }
 
     Rate
-    rate(ReadView const& view, Asset const& asset, AccountID const& dstAccount)
+    rate(ReadView const& view, Issue const& asset, AccountID const& dstAccount)
         const;
 
 private:
@@ -392,8 +392,8 @@ private:
 public:
     BookOfferCrossingStep(
         StrandContext const& ctx,
-        Asset const& in,
-        Asset const& out)
+        Issue const& in,
+        Issue const& out)
         : BookStep<TIn, TOut, BookOfferCrossingStep<TIn, TOut>>(ctx, in, out)
         , defaultPath_(ctx.isDefaultPath)
         , qualityThreshold_(getQuality(ctx.limitQuality))
@@ -1340,7 +1340,7 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
         return temBAD_PATH_LOOP;
     }
 
-    auto issuerExists = [](ReadView const& view, Asset const& iss) -> bool {
+    auto issuerExists = [](ReadView const& view, Issue const& iss) -> bool {
         return isXRP(iss.getIssuer()) ||
             view.read(keylet::account(iss.getIssuer()));
     };
@@ -1358,10 +1358,10 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
             auto const& view = ctx.view;
             auto const& cur = book_.in.getIssuer();
 
-            if (book_.in.holds<Issue>())
+            if (book_.in.holds<IOUIssue>())
             {
-                auto sle = view.read(
-                    keylet::line(*prev, cur, book_.in.get<Issue>().currency));
+                auto sle = view.read(keylet::line(
+                    *prev, cur, book_.in.get<IOUIssue>().getCurrency()));
                 if (!sle)
                     return terNO_LINE;
                 if ((*sle)[sfFlags] &
@@ -1393,12 +1393,12 @@ template <class TIn, class TOut, class TDerived>
 Rate
 BookStep<TIn, TOut, TDerived>::rate(
     ReadView const& view,
-    Asset const& asset,
+    Issue const& asset,
     AccountID const& dstAccount) const
 {
     if (isXRP(asset) || asset.getIssuer() == dstAccount)
         return parityRate;
-    if (asset.holds<Issue>())
+    if (asset.holds<IOUIssue>())
         return transferRate(view, asset.getIssuer());
     return transferRate(view, asset.get<MPTIssue>().getMptID());
 };
@@ -1441,7 +1441,7 @@ bookStepEqual(Step const& step, ripple::Book const& book)
 
 template <class TIn, class TOut>
 static std::pair<TER, std::unique_ptr<Step>>
-make_BookStepHelper(StrandContext const& ctx, Asset const& in, Asset const& out)
+make_BookStepHelper(StrandContext const& ctx, Issue const& in, Issue const& out)
 {
     TER ter = tefINTERNAL;
     std::unique_ptr<Step> r;
@@ -1466,19 +1466,22 @@ make_BookStepHelper(StrandContext const& ctx, Asset const& in, Asset const& out)
 }
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepII(StrandContext const& ctx, Issue const& in, Issue const& out)
+make_BookStepII(
+    StrandContext const& ctx,
+    IOUIssue const& in,
+    IOUIssue const& out)
 {
     return make_BookStepHelper<IOUAmount, IOUAmount>(ctx, in, out);
 }
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepIX(StrandContext const& ctx, Issue const& in)
+make_BookStepIX(StrandContext const& ctx, IOUIssue const& in)
 {
     return make_BookStepHelper<IOUAmount, XRPAmount>(ctx, in, xrpIssue());
 }
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepXI(StrandContext const& ctx, Issue const& out)
+make_BookStepXI(StrandContext const& ctx, IOUIssue const& out)
 {
     return make_BookStepHelper<XRPAmount, IOUAmount>(ctx, xrpIssue(), out);
 }
@@ -1494,13 +1497,19 @@ make_BookStepMM(
 }
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepMI(StrandContext const& ctx, MPTIssue const& in, Issue const& out)
+make_BookStepMI(
+    StrandContext const& ctx,
+    MPTIssue const& in,
+    IOUIssue const& out)
 {
     return make_BookStepHelper<MPTAmount, IOUAmount>(ctx, in, out);
 }
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepIM(StrandContext const& ctx, Issue const& in, MPTIssue const& out)
+make_BookStepIM(
+    StrandContext const& ctx,
+    IOUIssue const& in,
+    MPTIssue const& out)
 {
     return make_BookStepHelper<IOUAmount, MPTAmount>(ctx, in, out);
 }

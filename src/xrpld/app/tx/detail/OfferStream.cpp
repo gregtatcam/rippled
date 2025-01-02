@@ -27,7 +27,7 @@ namespace {
 bool
 checkIssuers(ReadView const& view, Book const& book)
 {
-    auto issuerExists = [](ReadView const& view, Asset const& asset) -> bool {
+    auto issuerExists = [](ReadView const& view, Issue const& asset) -> bool {
         return isXRP(asset.getIssuer()) ||
             view.read(keylet::account(asset.getIssuer()));
     };
@@ -98,7 +98,7 @@ accountFundsHelper(
     ReadView const& view,
     AccountID const& id,
     STAmount const& saDefault,
-    Asset const&,
+    Issue const&,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal j)
@@ -113,7 +113,7 @@ accountFundsHelper(
     ReadView const& view,
     AccountID const& id,
     T const& amtDefault,
-    Asset const& asset,
+    Issue const& asset,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal j)
@@ -131,7 +131,7 @@ accountFundsHelper(
     ReadView const& view,
     AccountID const& id,
     XRPAmount const& amtDefault,
-    Asset const& asset,
+    Issue const& asset,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal j)

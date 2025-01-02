@@ -881,7 +881,7 @@ On supported platforms, see the [instructions on installing or updating `rippled
 
 ### Code Cleanup and Testing
 
-* Replace compare() with the three-way comparison operator in base_uint, Issue and Book by @drlongle in https://github.com/XRPLF/rippled/pull/4411
+* Replace compare() with the three-way comparison operator in base_uint, IOUIssue and Book by @drlongle in https://github.com/XRPLF/rippled/pull/4411
 * Rectify the import paths of boost::function_output_iterator by @ckeshava in https://github.com/XRPLF/rippled/pull/4293
 * Expand Linux test matrix by @thejohnfreeman in https://github.com/XRPLF/rippled/pull/4454
 * Add patched recipe for SOCI by @thejohnfreeman in https://github.com/XRPLF/rippled/pull/4510

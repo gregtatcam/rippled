@@ -117,9 +117,11 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
 
                 if (sle->isFieldPresent(sfTakerPaysCurrency))
                 {
-                    Issue iss;
-                    iss.currency = sle->getFieldH160(sfTakerPaysCurrency);
-                    iss.account = sle->getFieldH160(sfTakerPaysIssuer);
+                    IOUIssue iss;
+                    iss.setCurrency(static_cast<Currency>(
+                        sle->getFieldH160(sfTakerPaysCurrency)));
+                    iss.setIssuer(static_cast<AccountID>(
+                        sle->getFieldH160(sfTakerPaysIssuer)));
                     book.in = iss;
                 }
                 else
@@ -128,9 +130,11 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
                 }
                 if (sle->isFieldPresent(sfTakerGetsCurrency))
                 {
-                    Issue iss;
-                    iss.currency = sle->getFieldH160(sfTakerGetsCurrency);
-                    iss.account = sle->getFieldH160(sfTakerGetsIssuer);
+                    IOUIssue iss;
+                    iss.setCurrency(static_cast<Currency>(
+                        sle->getFieldH160(sfTakerGetsCurrency)));
+                    iss.setIssuer(static_cast<AccountID>(
+                        sle->getFieldH160(sfTakerGetsIssuer)));
                     book.out = iss;
                 }
                 else
@@ -149,7 +153,7 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
             {
                 auto const asset1 = (*sle)[sfAsset];
                 auto const asset2 = (*sle)[sfAsset2];
-                auto addBook = [&](Asset const& in, Asset const& out) {
+                auto addBook = [&](Issue const& in, Issue const& out) {
                     allBooks[in].insert(out);
 
                     if (isXRP(out))
@@ -197,7 +201,7 @@ OrderBookDB::addOrderBook(Book const& book)
 
 // return list of all orderbooks that want this issuerID and currencyID
 std::vector<Book>
-OrderBookDB::getBooksByTakerPays(Asset const& asset)
+OrderBookDB::getBooksByTakerPays(Issue const& asset)
 {
     std::vector<Book> ret;
 
@@ -217,7 +221,7 @@ OrderBookDB::getBooksByTakerPays(Asset const& asset)
 }
 
 int
-OrderBookDB::getBookSize(Asset const& asset)
+OrderBookDB::getBookSize(Issue const& asset)
 {
     std::lock_guard sl(mLock);
     if (auto it = allBooks_.find(asset); it != allBooks_.end())
@@ -226,7 +230,7 @@ OrderBookDB::getBookSize(Asset const& asset)
 }
 
 bool
-OrderBookDB::isBookToXRP(Asset const& asset)
+OrderBookDB::isBookToXRP(Issue const& asset)
 {
     std::lock_guard sl(mLock);
     return xrpBooks_.count(asset) > 0;

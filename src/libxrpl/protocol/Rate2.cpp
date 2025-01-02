@@ -69,11 +69,12 @@ STAmount
 multiplyRound(
     STAmount const& amount,
     Rate const& rate,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     XRPL_ASSERT(
-        rate.value, "ripple::nft::multiplyRound(Issue) : nonzero rate input");
+        rate.value,
+        "ripple::nft::multiplyRound(IOUIssue) : nonzero rate input");
 
     if (rate == parityRate)
     {
@@ -109,11 +110,11 @@ STAmount
 divideRound(
     STAmount const& amount,
     Rate const& rate,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     XRPL_ASSERT(
-        rate.value, "ripple::nft::divideRound(Issue) : nonzero rate input");
+        rate.value, "ripple::nft::divideRound(IOUIssue) : nonzero rate input");
 
     if (rate == parityRate)
         return amount;

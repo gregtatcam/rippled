@@ -25,7 +25,7 @@
 #include <test/jtx/tags.h>
 #include <xrpl/basics/contract.h>
 #include <xrpl/protocol/FeeUnits.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/STAmount.h>
 #include <cstdint>
 #include <ostream>
@@ -56,7 +56,7 @@ struct AnyAmount;
 //
 struct None
 {
-    Issue issue;
+    IOUIssue issue;
 };
 
 //------------------------------------------------------------------------------
@@ -154,9 +154,9 @@ operator<<(std::ostream& os, PrettyAmount const& amount);
 // Specifies an order book
 struct BookSpec
 {
-    ripple::Asset asset;
+    ripple::Issue asset;
 
-    BookSpec(ripple::Asset const& asset_) : asset(asset_)
+    BookSpec(ripple::Issue const& asset_) : asset(asset_)
     {
     }
 };
@@ -168,13 +168,13 @@ struct XRP_t
     /** Implicit conversion to Issue.
 
         This allows passing XRP where
-        an Issue is expected.
+        an IOUIssue is expected.
     */
-    operator Issue() const
+    operator IOUIssue() const
     {
         return xrpIssue();
     }
-    operator Asset() const
+    operator Issue() const
     {
         return xrpIssue();
     }
@@ -222,11 +222,11 @@ struct XRP_t
     friend BookSpec
     operator~(XRP_t const&)
     {
-        return BookSpec(Issue{xrpCurrency(), xrpAccount()});
+        return BookSpec(IOUIssue{xrpCurrency(), xrpAccount()});
     }
 };
 
-/** Converts to XRP Issue or STAmount.
+/** Converts to XRP IOUIssue or STAmount.
 
     Examples:
         XRP         Converts to the XRP Issue
@@ -284,7 +284,7 @@ struct epsilon_t
 
 static epsilon_t const epsilon;
 
-/** Converts to IOU Issue or STAmount.
+/** Converts to IOU IOUIssue or STAmount.
 
     Examples:
         IOU         Converts to the underlying Issue
@@ -302,22 +302,22 @@ public:
     {
     }
 
-    Issue
+    IOUIssue
     issue() const
     {
         return {currency, account.id()};
     }
 
-    /** Implicit conversion to Issue or Asset.
+    /** Implicit conversion to IOUIssue or Issue.
 
         This allows passing an IOU
-        value where an Issue or Asset is expected.
+        value where an IOUIssue or Issue is expected.
     */
-    operator Issue() const
+    operator IOUIssue() const
     {
         return issue();
     }
-    operator Asset() const
+    operator Issue() const
     {
         return issue();
     }
@@ -352,7 +352,7 @@ public:
     friend BookSpec
     operator~(IOU const& iou)
     {
-        return BookSpec(Issue{iou.currency, iou.account.id()});
+        return BookSpec(IOUIssue{iou.currency, iou.account.id()});
     }
 };
 
@@ -361,7 +361,7 @@ operator<<(std::ostream& os, IOU const& iou);
 
 //------------------------------------------------------------------------------
 
-/** Converts to MPT Issue or STAmount.
+/** Converts to MPT IOUIssue or STAmount.
 
     Examples:
         MPT         Converts to the underlying Issue
@@ -394,7 +394,7 @@ public:
     {
         return MPTIssue{issuanceID};
     }
-    operator ripple::Asset() const
+    operator ripple::Issue() const
     {
         return mpt();
     }
@@ -415,7 +415,7 @@ public:
     friend BookSpec
     operator~(MPT const& mpt)
     {
-        return BookSpec{Asset{mpt}};
+        return BookSpec{Issue{mpt}};
     }
 };
 

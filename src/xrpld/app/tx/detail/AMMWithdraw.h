@@ -154,8 +154,8 @@ public:
         Sandbox& sb,
         std::shared_ptr<SLE> const ammSle,
         STAmount const& lpTokenBalance,
-        Asset const& issue1,
-        Asset const& issue2,
+        Issue const& issue1,
+        Issue const& issue2,
         beast::Journal const& journal);
 
 private:
@@ -211,7 +211,7 @@ private:
         STAmount const& lpTokensWithdraw,
         std::uint16_t tfee);
 
-    /** Withdraw both assets (Asset1Out, Asset2Out) with the constraints
+    /** Withdraw both assets (Issue1Out, Asset2Out) with the constraints
      * on the maximum amount of each asset that the trader is willing
      * to withdraw. The trading fee is not charged.
      * @param view
@@ -236,7 +236,7 @@ private:
         STAmount const& amount2,
         std::uint16_t tfee);
 
-    /** Single asset withdrawal (Asset1Out) equivalent to the amount specified
+    /** Single asset withdrawal (Issue1Out) equivalent to the amount specified
      * in Asset1Out. The trading fee is charged.
      * @param view
      * @param ammAccount
@@ -256,7 +256,7 @@ private:
         STAmount const& amount,
         std::uint16_t tfee);
 
-    /** Single asset withdrawal (Asset1Out, LPTokens) proportional
+    /** Single asset withdrawal (Issue1Out, LPTokens) proportional
      * to the share specified by tokens. The trading fee is charged.
      * @param view
      * @param ammAccount
@@ -278,7 +278,7 @@ private:
         STAmount const& lpTokensWithdraw,
         std::uint16_t tfee);
 
-    /** Withdraw single asset (Asset1Out, EPrice) with two constraints.
+    /** Withdraw single asset (Issue1Out, EPrice) with two constraints.
      * The trading fee is charged.
      * @param view
      * @param ammAccount

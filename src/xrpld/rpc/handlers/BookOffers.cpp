@@ -105,7 +105,7 @@ doBookOffers(RPC::JsonContext& context)
                 rpcSRC_CUR_MALFORMED,
                 "Invalid field 'taker_pays.currency', bad currency.");
         }
-        book.in.get<Issue>().currency = pay_currency;
+        book.in.get<IOUIssue>().setCurrency(pay_currency);
     }
 
     if (taker_gets.isMember(jss::currency))
@@ -119,7 +119,7 @@ doBookOffers(RPC::JsonContext& context)
                 rpcDST_AMT_MALFORMED,
                 "Invalid field 'taker_gets.currency', bad currency.");
         }
-        book.out.get<Issue>().currency = get_currency;
+        book.out.get<IOUIssue>().setCurrency(get_currency);
     }
 
     if (taker_pays.isMember(jss::currency))
@@ -147,15 +147,15 @@ doBookOffers(RPC::JsonContext& context)
             pay_issuer = xrpAccount();
         }
 
-        book.in.get<Issue>().account = pay_issuer;
+        book.in.get<IOUIssue>().setIssuer(pay_issuer);
 
-        if (isXRP(book.in.get<Issue>().currency) && !isXRP(pay_issuer))
+        if (isXRP(book.in.get<IOUIssue>().getCurrency()) && !isXRP(pay_issuer))
             return RPC::make_error(
                 rpcSRC_ISR_MALFORMED,
                 "Unneeded field 'taker_pays.issuer' for "
                 "XRP currency specification.");
 
-        if (!isXRP(book.in.get<Issue>().currency) && isXRP(pay_issuer))
+        if (!isXRP(book.in.get<IOUIssue>().getCurrency()) && isXRP(pay_issuer))
             return RPC::make_error(
                 rpcSRC_ISR_MALFORMED,
                 "Invalid field 'taker_pays.issuer', expected non-XRP issuer.");
@@ -195,15 +195,15 @@ doBookOffers(RPC::JsonContext& context)
             get_issuer = xrpAccount();
         }
 
-        book.out.get<Issue>().account = get_issuer;
+        book.out.get<IOUIssue>().setIssuer(get_issuer);
 
-        if (isXRP(book.out.get<Issue>().currency) && !isXRP(get_issuer))
+        if (isXRP(book.out.get<IOUIssue>().getCurrency()) && !isXRP(get_issuer))
             return RPC::make_error(
                 rpcDST_ISR_MALFORMED,
                 "Unneeded field 'taker_gets.issuer' for "
                 "XRP currency specification.");
 
-        if (!isXRP(book.out.get<Issue>().currency) && isXRP(get_issuer))
+        if (!isXRP(book.out.get<IOUIssue>().getCurrency()) && isXRP(get_issuer))
             return RPC::make_error(
                 rpcDST_ISR_MALFORMED,
                 "Invalid field 'taker_gets.issuer', expected non-XRP issuer.");

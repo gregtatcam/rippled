@@ -20,37 +20,37 @@
 #ifndef RIPPLE_APP_PATHASSET_H_INCLUDED
 #define RIPPLE_APP_PATHASSET_H_INCLUDED
 
-#include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Concepts.h>
+#include <xrpl/protocol/Issue.h>
 
 namespace ripple {
 
 /* Represent STPathElement's asset, which can be Currency or MPTID.
  */
-class PathAsset
+class PathIssue
 {
 private:
     std::variant<Currency, MPTID> easset_;
 
 public:
-    PathAsset() = default;
-    // Enables comparing Asset and PathAsset
-    PathAsset(Asset const& asset);
-    PathAsset(Currency const& currency) : easset_(currency)
+    PathIssue() = default;
+    // Enables comparing Asset and PathIssue
+    PathIssue(Issue const& asset);
+    PathIssue(Currency const& currency) : easset_(currency)
     {
     }
-    PathAsset(MPTID const& mpt) : easset_(mpt)
+    PathIssue(MPTID const& mpt) : easset_(mpt)
     {
     }
 
-    template <ValidPathAsset T>
+    template <ValidPathIssue T>
     constexpr bool
     holds() const;
 
     constexpr bool
     isXRP() const;
 
-    template <ValidPathAsset T>
+    template <ValidPathIssue T>
     T const&
     get() const;
 
@@ -58,56 +58,56 @@ public:
     value() const;
 
     friend constexpr bool
-    operator==(PathAsset const& lhs, PathAsset const& rhs);
+    operator==(PathIssue const& lhs, PathIssue const& rhs);
 };
 
-inline PathAsset::PathAsset(Asset const& asset)
+inline PathIssue::PathIssue(Issue const& asset)
 {
     std::visit(
         [&]<typename TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                easset_ = issue.currency;
+            if constexpr (std::is_same_v<TIss, IOUIssue>)
+                easset_ = issue.getCurrency();
             else
                 easset_ = issue.getMptID();
         },
         asset.value());
 }
 
-template <ValidPathAsset T>
+template <ValidPathIssue T>
 constexpr bool
-PathAsset::holds() const
+PathIssue::holds() const
 {
     return std::holds_alternative<T>(easset_);
 }
 
-template <ValidPathAsset T>
+template <ValidPathIssue T>
 T const&
-PathAsset::get() const
+PathIssue::get() const
 {
     if (!holds<T>())
-        Throw<std::runtime_error>("PathAsset doesn't hold requested asset.");
+        Throw<std::runtime_error>("PathIssue doesn't hold requested asset.");
     return std::get<T>(easset_);
 }
 
 constexpr std::variant<Currency, MPTID> const&
-PathAsset::value() const
+PathIssue::value() const
 {
     return easset_;
 }
 
 constexpr bool
-PathAsset::isXRP() const
+PathIssue::isXRP() const
 {
     return std::visit(
-        [&]<ValidPathAsset A>(A const& a) { return ripple::isXRP(a); },
+        [&]<ValidPathIssue A>(A const& a) { return ripple::isXRP(a); },
         easset_);
 }
 
 constexpr bool
-operator==(PathAsset const& lhs, PathAsset const& rhs)
+operator==(PathIssue const& lhs, PathIssue const& rhs)
 {
     return std::visit(
-        []<ValidPathAsset TLhs, ValidPathAsset TRhs>(
+        []<ValidPathIssue TLhs, ValidPathIssue TRhs>(
             TLhs const& lhs_, TRhs const& rhs_) {
             if constexpr (std::is_same_v<TLhs, TRhs>)
                 return lhs_ == rhs_;
@@ -120,23 +120,23 @@ operator==(PathAsset const& lhs, PathAsset const& rhs)
 
 template <typename Hasher>
 void
-hash_append(Hasher& h, PathAsset const& pathAsset)
+hash_append(Hasher& h, PathIssue const& pathAsset)
 {
     std::visit(
         [&]<typename T>(T const& e) { hash_append(h, e); }, pathAsset.value());
 }
 
 inline bool
-isXRP(PathAsset const& asset)
+isXRP(PathIssue const& asset)
 {
     return asset.isXRP();
 }
 
 std::string
-to_string(PathAsset const& asset);
+to_string(PathIssue const& asset);
 
 std::ostream&
-operator<<(std::ostream& os, PathAsset const& x);
+operator<<(std::ostream& os, PathIssue const& x);
 
 }  // namespace ripple
 

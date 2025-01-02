@@ -21,11 +21,11 @@
 #define RIPPLE_APP_PATHS_PATHREQUEST_H_INCLUDED
 
 #include <xrpld/app/ledger/Ledger.h>
-#include <xrpld/app/paths/AssetCache.h>
+#include <xrpld/app/paths/IssueCache.h>
 #include <xrpld/app/paths/Pathfinder.h>
 #include <xrpld/net/InfoSub.h>
 #include <xrpl/json/json_value.h>
-#include <xrpl/protocol/PathAsset.h>
+#include <xrpl/protocol/PathIssue.h>
 #include <xrpl/protocol/UintTypes.h>
 #include <map>
 #include <mutex>
@@ -38,7 +38,7 @@ namespace ripple {
 // A pathfinding request submitted by a client
 // The request issuer must maintain a strong pointer
 
-class AssetCache;
+class IssueCache;
 class PathRequests;
 
 // Return values from parseJson <0 = invalid, >0 = valid
@@ -87,7 +87,7 @@ public:
     updateComplete();
 
     std::pair<bool, Json::Value>
-    doCreate(std::shared_ptr<AssetCache> const&, Json::Value const&);
+    doCreate(std::shared_ptr<IssueCache> const&, Json::Value const&);
 
     Json::Value
     doClose() override;
@@ -99,7 +99,7 @@ public:
     // update jvStatus
     Json::Value
     doUpdate(
-        std::shared_ptr<AssetCache> const&,
+        std::shared_ptr<IssueCache> const&,
         bool fast,
         std::function<bool(void)> const& continueCallback = {});
     InfoSub::pointer
@@ -109,13 +109,13 @@ public:
 
 private:
     bool
-    isValid(std::shared_ptr<AssetCache> const& crCache);
+    isValid(std::shared_ptr<IssueCache> const& crCache);
 
     std::unique_ptr<Pathfinder> const&
     getPathFinder(
-        std::shared_ptr<AssetCache> const&,
-        hash_map<PathAsset, std::unique_ptr<Pathfinder>>&,
-        PathAsset const&,
+        std::shared_ptr<IssueCache> const&,
+        hash_map<PathIssue, std::unique_ptr<Pathfinder>>&,
+        PathIssue const&,
         STAmount const&,
         int const,
         std::function<bool(void)> const&);
@@ -125,7 +125,7 @@ private:
     */
     bool
     findPaths(
-        std::shared_ptr<AssetCache> const&,
+        std::shared_ptr<IssueCache> const&,
         int const,
         Json::Value&,
         std::function<bool(void)> const&);
@@ -153,8 +153,8 @@ private:
     STAmount saDstAmount;
     std::optional<STAmount> saSendMax;
 
-    std::set<Asset> sciSourceAssets;
-    std::map<Asset, STPathSet> mContext;
+    std::set<Issue> sciSourceAssets;
+    std::map<Issue, STPathSet> mContext;
 
     bool convert_all_;
 

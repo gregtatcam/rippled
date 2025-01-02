@@ -1484,7 +1484,7 @@ class MPToken_test : public beast::unit_test::suite
     void
     testMPTInvalidInTx(FeatureBitset features)
     {
-        testcase("MPT Issue Invalid in Transaction");
+        testcase("MPT IOUIssue Invalid in Transaction");
         using namespace test::jtx;
 
         // Validate that every transaction with an amount/issue field,
@@ -2078,14 +2078,14 @@ class MPToken_test : public beast::unit_test::suite
         MPTID const mpt1a = makeMptID(1, gw1);
         MPTID const mpt2 = makeMptID(1, gw2);
         MPTID const mpt3 = makeMptID(2, gw2);
-        Asset const assetCur1Gw1{Issue{cur1, gw1}};
-        Asset const assetCur1Gw1a{Issue{cur1, gw1}};
-        Asset const assetCur2Gw1{Issue{cur2, gw1}};
-        Asset const assetCur2Gw2{Issue{cur2, gw2}};
-        Asset const assetMpt1Gw1{mpt1};
-        Asset const assetMpt1Gw1a{mpt1a};
-        Asset const assetMpt1Gw2{mpt2};
-        Asset const assetMpt2Gw2{mpt3};
+        Issue const assetCur1Gw1{IOUIssue{cur1, gw1}};
+        Issue const assetCur1Gw1a{IOUIssue{cur1, gw1}};
+        Issue const assetCur2Gw1{IOUIssue{cur2, gw1}};
+        Issue const assetCur2Gw2{IOUIssue{cur2, gw2}};
+        Issue const assetMpt1Gw1{mpt1};
+        Issue const assetMpt1Gw1a{mpt1a};
+        Issue const assetMpt1Gw2{mpt2};
+        Issue const assetMpt2Gw2{mpt3};
 
         // Assets holding Issue
         // Currencies are equal regardless of the issuer
@@ -2103,7 +2103,7 @@ class MPToken_test : public beast::unit_test::suite
         BEAST_EXPECT(!equalTokens(assetMpt1Gw1, assetMpt1Gw2));
         BEAST_EXPECT(!equalTokens(assetMpt1Gw2, assetMpt2Gw2));
 
-        // Assets holding Issue and MPTIssue
+        // Assets holding IOUIssue and MPTIssue
         BEAST_EXPECT(!equalTokens(assetCur1Gw1, assetMpt1Gw1));
         BEAST_EXPECT(!equalTokens(assetMpt2Gw2, assetCur2Gw2));
     }
@@ -2113,9 +2113,9 @@ class MPToken_test : public beast::unit_test::suite
     {
         using namespace test::jtx;
         Account const gw{"gw"};
-        Asset const asset1{makeMptID(1, gw)};
-        Asset const asset2{makeMptID(2, gw)};
-        Asset const asset3{makeMptID(3, gw)};
+        Issue const asset1{makeMptID(1, gw)};
+        Issue const asset2{makeMptID(2, gw)};
+        Issue const asset3{makeMptID(3, gw)};
         STAmount const amt1{asset1, 100};
         STAmount const amt2{asset2, 100};
         STAmount const amt3{asset3, 10'000};
@@ -2179,7 +2179,7 @@ class MPToken_test : public beast::unit_test::suite
         }
 
         {
-            testcase("Test Asset from/to Json");
+            testcase("Test Issue from/to Json");
             Json::Value const jv = to_json(asset1);
             BEAST_EXPECT(
                 jv[jss::mpt_issuance_id] == to_string(asset1.get<MPTIssue>()));
@@ -2187,7 +2187,7 @@ class MPToken_test : public beast::unit_test::suite
                 to_string(jv) ==
                 "{\"mpt_issuance_id\":"
                 "\"00000001A407AF5856CCF3C42619DAA925813FC955C72983\"}");
-            BEAST_EXPECT(asset1 == assetFromJson(jv));
+            BEAST_EXPECT(asset1 == issueFromJson(jv));
         }
     }
 
@@ -2382,7 +2382,7 @@ class MPToken_test : public beast::unit_test::suite
     void
     testCrossAssetPayment(FeatureBitset features)
     {
-        testcase("Cross Asset Payment");
+        testcase("Cross Issue Payment");
         using namespace test::jtx;
         Account const gw = Account("gw");
         Account const alice = Account("alice");

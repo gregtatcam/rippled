@@ -35,15 +35,15 @@ public:
 
     virtual ~Resolver() = 0;
 
-    /** Issue an asynchronous stop request. */
+    /** IOUIssue an asynchronous stop request. */
     virtual void
     stop_async() = 0;
 
-    /** Issue a synchronous stop request. */
+    /** IOUIssue a synchronous stop request. */
     virtual void
     stop() = 0;
 
-    /** Issue a synchronous start request. */
+    /** IOUIssue a synchronous start request. */
     virtual void
     start() = 0;
 

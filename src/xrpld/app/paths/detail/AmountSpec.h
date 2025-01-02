@@ -261,8 +261,8 @@ toAmountSpec(STAmount const& amt)
     else
     {
         result.amount = IOUAmount(sMant, amt.exponent());
-        result.issuer = amt.get<Issue>().account;
-        result.currency = amt.get<Issue>().currency;
+        result.issuer = amt.get<IOUIssue>().getIssuer();
+        result.currency = amt.get<IOUIssue>().getCurrency();
     }
 
     return result;
@@ -273,7 +273,7 @@ toEitherAmount(STAmount const& amt)
 {
     if (isXRP(amt))
         return EitherAmount{amt.xrp()};
-    else if (amt.holds<Issue>())
+    else if (amt.holds<IOUIssue>())
         return EitherAmount{amt.iou()};
     return EitherAmount(amt.mpt());
 }

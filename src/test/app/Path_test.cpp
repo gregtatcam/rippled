@@ -576,7 +576,7 @@ public:
     void
     issues_path_negative_issue()
     {
-        testcase("path negative: Issue #5");
+        testcase("path negative: IOUIssue #5");
         using namespace jtx;
         Env env = pathTestEnv();
         env.fund(XRP(10000), "alice", "bob", "carol", "dan");

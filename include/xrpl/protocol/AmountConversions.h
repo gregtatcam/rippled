@@ -30,9 +30,9 @@
 namespace ripple {
 
 inline STAmount
-toSTAmount(IOUAmount const& iou, Asset const& asset)
+toSTAmount(IOUAmount const& iou, Issue const& asset)
 {
-    XRPL_ASSERT(asset.holds<Issue>(), "ripple::toSTAmount : is Issue");
+    XRPL_ASSERT(asset.holds<IOUIssue>(), "ripple::toSTAmount : is Issue");
     bool const isNeg = iou.signum() < 0;
     std::uint64_t const umant = isNeg ? -iou.mantissa() : iou.mantissa();
     return STAmount(asset, umant, iou.exponent(), isNeg, STAmount::unchecked());
@@ -53,7 +53,7 @@ toSTAmount(XRPAmount const& xrp)
 }
 
 inline STAmount
-toSTAmount(XRPAmount const& xrp, Asset const& asset)
+toSTAmount(XRPAmount const& xrp, Issue const& asset)
 {
     XRPL_ASSERT(isXRP(asset), "ripple::toSTAmount : is XRP");
     return toSTAmount(xrp);
@@ -66,7 +66,7 @@ toSTAmount(MPTAmount const& mpt)
 }
 
 inline STAmount
-toSTAmount(MPTAmount const& mpt, Asset const& asset)
+toSTAmount(MPTAmount const& mpt, Issue const& asset)
 {
     XRPL_ASSERT(asset.holds<MPTIssue>(), "ripple::toSTAmount : is MPT");
     return STAmount(mpt, asset.get<MPTIssue>());
@@ -163,7 +163,7 @@ toAmount<MPTAmount>(MPTAmount const& amt)
 template <typename T>
 T
 toAmount(
-    Asset const& asset,
+    Issue const& asset,
     Number const& n,
     Number::rounding_mode mode = Number::getround())
 {
@@ -192,7 +192,7 @@ toAmount(
 
 template <typename T>
 T
-toMaxAmount(Asset const& asset)
+toMaxAmount(Issue const& asset)
 {
     if constexpr (std::is_same_v<IOUAmount, T>)
         return IOUAmount(STAmount::cMaxValue, STAmount::cMaxOffset);
@@ -204,7 +204,7 @@ toMaxAmount(Asset const& asset)
     {
         return std::visit(
             []<ValidIssueType TIss>(TIss const& issue_) {
-                if constexpr (std::is_same_v<TIss, Issue>)
+                if constexpr (std::is_same_v<TIss, IOUIssue>)
                 {
                     if (isXRP(issue_))
                         return STAmount(
@@ -227,7 +227,7 @@ toMaxAmount(Asset const& asset)
 
 inline STAmount
 toSTAmount(
-    Asset const& asset,
+    Issue const& asset,
     Number const& n,
     Number::rounding_mode mode = Number::getround())
 {
@@ -235,7 +235,7 @@ toSTAmount(
 }
 
 template <typename T>
-Asset
+Issue
 getAsset(T const& amt)
 {
     if constexpr (std::is_same_v<IOUAmount, T>)

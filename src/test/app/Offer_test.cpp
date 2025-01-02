@@ -57,15 +57,17 @@ class OfferBaseUtil_test : public beast::unit_test::suite
     static auto
     getBookOffers(
         jtx::Env& env,
-        Issue const& taker_pays,
-        Issue const& taker_gets)
+        IOUIssue const& taker_pays,
+        IOUIssue const& taker_gets)
     {
         Json::Value jvbp;
         jvbp[jss::ledger_index] = "current";
-        jvbp[jss::taker_pays][jss::currency] = to_string(taker_pays.currency);
-        jvbp[jss::taker_pays][jss::issuer] = to_string(taker_pays.account);
-        jvbp[jss::taker_gets][jss::currency] = to_string(taker_gets.currency);
-        jvbp[jss::taker_gets][jss::issuer] = to_string(taker_gets.account);
+        jvbp[jss::taker_pays][jss::currency] =
+            to_string(taker_pays.getCurrency());
+        jvbp[jss::taker_pays][jss::issuer] = to_string(taker_pays.getIssuer());
+        jvbp[jss::taker_gets][jss::currency] =
+            to_string(taker_gets.getCurrency());
+        jvbp[jss::taker_gets][jss::issuer] = to_string(taker_gets.getIssuer());
         return env.rpc("json", "book_offers", to_string(jvbp))[jss::result];
     }
 
@@ -2215,7 +2217,7 @@ public:
     void
     testGatewayCrossCurrency(FeatureBitset features)
     {
-        testcase("Client Issue #535: Gateway Cross Currency");
+        testcase("Client IOUIssue #535: Gateway Cross Currency");
 
         using namespace jtx;
 
@@ -2300,14 +2302,14 @@ public:
         BEAST_EXPECT(sleTrust);
         if (sleTrust)
         {
-            Issue const issue = expectBalance.value().issue();
-            bool const accountLow = account.id() < issue.account;
+            IOUIssue const issue = expectBalance.value().issue();
+            bool const accountLow = account.id() < issue.getIssuer();
 
             STAmount low{issue};
             STAmount high{issue};
 
-            low.setIssuer(accountLow ? account.id() : issue.account);
-            high.setIssuer(accountLow ? issue.account : account.id());
+            low.setIssuer(accountLow ? account.id() : issue.getIssuer());
+            high.setIssuer(accountLow ? issue.getIssuer() : account.id());
 
             BEAST_EXPECT(sleTrust->getFieldAmount(sfLowLimit) == low);
             BEAST_EXPECT(sleTrust->getFieldAmount(sfHighLimit) == high);
@@ -4489,7 +4491,7 @@ public:
         env(trust(coldEU, EUR(0), mm, tfSetfAuth));
         env.close();
 
-        // Issue currency from cold wallets to hot and market maker
+        // IOUIssue currency from cold wallets to hot and market maker
         env(pay(coldUS, hotUS, USD(5000000)));
         env(pay(coldEU, hotEU, EUR(5000000)));
         env(pay(coldUS, mm, USD(5000000)));

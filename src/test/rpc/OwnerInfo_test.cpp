@@ -124,7 +124,7 @@ class OwnerInfo_test : public beast::unit_test::suite
 
         BEAST_EXPECT(
             lines[0u][sfBalance.fieldName] ==
-            (STAmount{Issue{to_currency("CNY"), noAccount()}, 0}
+            (STAmount{IOUIssue{to_currency("CNY"), noAccount()}, 0}
                  .value()
                  .getJson(JsonOptions::none)));
         BEAST_EXPECT(
@@ -136,7 +136,7 @@ class OwnerInfo_test : public beast::unit_test::suite
 
         BEAST_EXPECT(
             lines[1u][sfBalance.fieldName] ==
-            (STAmount{Issue{to_currency("USD"), noAccount()}, 0}
+            (STAmount{IOUIssue{to_currency("USD"), noAccount()}, 0}
                  .value()
                  .getJson(JsonOptions::none)));
         BEAST_EXPECT(
@@ -169,7 +169,7 @@ class OwnerInfo_test : public beast::unit_test::suite
 
         BEAST_EXPECT(
             lines[0u][sfBalance.fieldName] ==
-            (STAmount{Issue{to_currency("CNY"), noAccount()}, -50}
+            (STAmount{IOUIssue{to_currency("CNY"), noAccount()}, -50}
                  .value()
                  .getJson(JsonOptions::none)));
         BEAST_EXPECT(
@@ -181,7 +181,7 @@ class OwnerInfo_test : public beast::unit_test::suite
 
         BEAST_EXPECT(
             lines[1u][sfBalance.fieldName] ==
-            (STAmount{Issue{to_currency("USD"), noAccount()}, -50}
+            (STAmount{IOUIssue{to_currency("USD"), noAccount()}, -50}
                  .value()
                  .getJson(JsonOptions::none)));
         BEAST_EXPECT(

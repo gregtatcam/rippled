@@ -66,8 +66,8 @@ public:
         });
 
         std::vector<std::tuple<
-            std::optional<Issue>,
-            std::optional<Issue>,
+            std::optional<IOUIssue>,
+            std::optional<IOUIssue>,
             TestAccount,
             bool>> const invalidParams = {
             {xrpIssue(), std::nullopt, None, false},
@@ -135,8 +135,8 @@ public:
         });
 
         std::vector<std::tuple<
-            std::optional<Issue>,
-            std::optional<Issue>,
+            std::optional<IOUIssue>,
+            std::optional<IOUIssue>,
             TestAccount,
             bool>> const invalidParamsBadAccount = {
             {xrpIssue(), std::nullopt, None, false},
@@ -310,9 +310,9 @@ public:
                         auctionSlot[jss::price][jss::value].asString() ==
                             "5600" &&
                         auctionSlot[jss::price][jss::currency].asString() ==
-                            to_string(ammAlice.lptIssue().currency) &&
+                            to_string(ammAlice.lptIssue().getCurrency()) &&
                         auctionSlot[jss::price][jss::issuer].asString() ==
-                            to_string(ammAlice.lptIssue().account));
+                            to_string(ammAlice.lptIssue().getIssuer()));
                 }
                 catch (std::exception const& e)
                 {

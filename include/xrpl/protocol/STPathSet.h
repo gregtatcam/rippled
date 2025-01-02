@@ -23,8 +23,8 @@
 #include <xrpl/basics/CountedObject.h>
 #include <xrpl/beast/utility/instrumentation.h>
 #include <xrpl/json/json_value.h>
-#include <xrpl/protocol/Asset.h>
-#include <xrpl/protocol/PathAsset.h>
+#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/PathIssue.h>
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STBase.h>
 #include <xrpl/protocol/UintTypes.h>
@@ -37,7 +37,7 @@ class STPathElement final : public CountedObject<STPathElement>
 {
     unsigned int mType;
     AccountID mAccountID;
-    PathAsset mAssetID;
+    PathIssue mAssetID;
     AccountID mIssuerID;
 
     bool is_offer_;
@@ -64,19 +64,19 @@ public:
 
     STPathElement(
         std::optional<AccountID> const& account,
-        std::optional<PathAsset> const& asset,
+        std::optional<PathIssue> const& asset,
         std::optional<AccountID> const& issuer);
 
     STPathElement(
         AccountID const& account,
-        PathAsset const& asset,
+        PathIssue const& asset,
         AccountID const& issuer,
         bool forceAsset = false);
 
     STPathElement(
         unsigned int uType,
         AccountID const& account,
-        PathAsset const& asset,
+        PathIssue const& asset,
         AccountID const& issuer);
 
     auto
@@ -108,8 +108,8 @@ public:
     AccountID const&
     getAccountID() const;
 
-    PathAsset const&
-    getPathAsset() const;
+    PathIssue const&
+    getPathIssue() const;
 
     Currency const&
     getCurrency() const;
@@ -156,7 +156,7 @@ public:
     bool
     hasSeen(
         AccountID const& account,
-        PathAsset const& asset,
+        PathIssue const& asset,
         AccountID const& issuer) const;
 
     Json::Value getJson(JsonOptions) const;
@@ -260,7 +260,7 @@ inline STPathElement::STPathElement() : mType(typeNone), is_offer_(true)
 
 inline STPathElement::STPathElement(
     std::optional<AccountID> const& account,
-    std::optional<PathAsset> const& asset,
+    std::optional<PathIssue> const& asset,
     std::optional<AccountID> const& issuer)
     : mType(typeNone)
 {
@@ -298,7 +298,7 @@ inline STPathElement::STPathElement(
 
 inline STPathElement::STPathElement(
     AccountID const& account,
-    PathAsset const& asset,
+    PathIssue const& asset,
     AccountID const& issuer,
     bool forceAsset)
     : mType(typeNone)
@@ -322,7 +322,7 @@ inline STPathElement::STPathElement(
 inline STPathElement::STPathElement(
     unsigned int uType,
     AccountID const& account,
-    PathAsset const& asset,
+    PathIssue const& asset,
     AccountID const& issuer)
     : mType(uType)
     , mAccountID(account)
@@ -395,8 +395,8 @@ STPathElement::getAccountID() const
     return mAccountID;
 }
 
-inline PathAsset const&
-STPathElement::getPathAsset() const
+inline PathIssue const&
+STPathElement::getPathIssue() const
 {
     return mAssetID;
 }

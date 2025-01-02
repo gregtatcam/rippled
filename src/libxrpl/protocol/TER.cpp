@@ -69,7 +69,7 @@ transResults()
         MAKE_ERROR(tecNO_AUTH,                       "Not authorized to hold asset."),
         MAKE_ERROR(tecNO_LINE,                       "No such line."),
         MAKE_ERROR(tecINSUFF_FEE,                    "Insufficient balance to pay fee."),
-        MAKE_ERROR(tecFROZEN,                        "Asset is frozen."),
+        MAKE_ERROR(tecFROZEN,                        "Issue is frozen."),
         MAKE_ERROR(tecNO_TARGET,                     "Target account does not exist."),
         MAKE_ERROR(tecNO_PERMISSION,                 "No permission to perform requested operation."),
         MAKE_ERROR(tecNO_ENTRY,                      "No matching entry found."),

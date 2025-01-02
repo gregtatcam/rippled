@@ -646,7 +646,7 @@ parseLeaf(
                             pathEl.isMember(jss::mpt_issuance_id))
                         {
                             error = RPC::make_error(
-                                rpcINVALID_PARAMS, "Invalid Asset.");
+                                rpcINVALID_PARAMS, "Invalid Issue.");
                             return ret;
                         }
 
@@ -657,9 +657,9 @@ parseLeaf(
                         Json::Value const& account = pathEl[jss::account];
                         Json::Value const& asset = pathEl[assetName];
                         Json::Value const& issuer = pathEl[jss::issuer];
-                        bool hasAsset = false;
+                        bool hasIssue = false;
                         AccountID uAccount, uIssuer;
-                        PathAsset uAsset;
+                        PathIssue uIssue;
 
                         if (account)
                         {
@@ -697,7 +697,7 @@ parseLeaf(
                                 return ret;
                             }
 
-                            hasAsset = true;
+                            hasIssue = true;
 
                             if (isMPT)
                             {
@@ -708,7 +708,7 @@ parseLeaf(
                                         element_name, assetName.c_str());
                                     return ret;
                                 }
-                                uAsset = u;
+                                uIssue = u;
                                 if (getMPTIssuer(u) == beast::zero)
                                 {
                                     error = invalid_data(
@@ -729,7 +729,7 @@ parseLeaf(
                                         return ret;
                                     }
                                 }
-                                uAsset = currency;
+                                uIssue = currency;
                             }
                         }
 
@@ -757,7 +757,7 @@ parseLeaf(
                             }
                         }
 
-                        p.emplace_back(uAccount, uAsset, uIssuer, hasAsset);
+                        p.emplace_back(uAccount, uIssue, uIssuer, hasIssue);
                     }
 
                     tail.push_back(p);

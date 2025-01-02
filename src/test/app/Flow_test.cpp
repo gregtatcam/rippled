@@ -448,12 +448,12 @@ struct Flow_test : public beast::unit_test::suite
                 STAmount smax(BTC(61));
                 PaymentSandbox sb(env.current().get(), tapNONE);
                 STPathSet paths;
-                auto IPE = [](Issue const& iss) {
+                auto IPE = [](IOUIssue const& iss) {
                     return STPathElement(
                         STPathElement::typeCurrency | STPathElement::typeIssuer,
                         xrpAccount(),
-                        iss.currency,
-                        iss.account);
+                        iss.getCurrency(),
+                        iss.getIssuer());
                 };
                 {
                     // BTC -> USD

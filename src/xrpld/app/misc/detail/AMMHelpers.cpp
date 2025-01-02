@@ -25,7 +25,7 @@ STAmount
 ammLPTokens(
     STAmount const& asset1,
     STAmount const& asset2,
-    Issue const& lptIssue)
+    IOUIssue const& lptIssue)
 {
     auto const tokens = root2(asset1 * asset2);
     return toSTAmount(lptIssue, tokens);
@@ -49,7 +49,7 @@ lpTokensIn(
     Number const r = asset1Deposit / asset1Balance;
     auto const c = root2(f2 * f2 + r / f1) - f2;
     auto const t = lptAMMBalance * (r - c) / (1 + c);
-    return toSTAmount(lptAMMBalance.get<Issue>(), t);
+    return toSTAmount(lptAMMBalance.get<IOUIssue>(), t);
 }
 
 /* Equation 4 solves equation 3 for b:

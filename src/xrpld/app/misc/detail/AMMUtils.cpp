@@ -29,8 +29,8 @@ std::pair<STAmount, STAmount>
 ammPoolHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Asset const& asset1,
-    Asset const& asset2,
+    Issue const& asset1,
+    Issue const& asset2,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal const j)
@@ -46,13 +46,13 @@ Expected<std::tuple<STAmount, STAmount, STAmount>, TER>
 ammHolds(
     ReadView const& view,
     SLE const& ammSle,
-    std::optional<Asset> const& optAsset1,
-    std::optional<Asset> const& optAsset2,
+    std::optional<Issue> const& optAsset1,
+    std::optional<Issue> const& optAsset2,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal const j)
 {
-    auto const issues = [&]() -> std::optional<std::pair<Asset, Asset>> {
+    auto const issues = [&]() -> std::optional<std::pair<Issue, Issue>> {
         auto const issue1 = ammSle[sfAsset];
         auto const issue2 = ammSle[sfAsset2];
         if (optAsset1 && optAsset2)
@@ -73,8 +73,8 @@ ammHolds(
         }
         auto const singleIssue =
             [&issue1, &issue2, &j](
-                Asset checkIssue,
-                const char* label) -> std::optional<std::pair<Asset, Asset>> {
+                Issue checkIssue,
+                const char* label) -> std::optional<std::pair<Issue, Issue>> {
             if (checkIssue == issue1)
                 return std::make_optional(std::make_pair(issue1, issue2));
             else if (checkIssue == issue2)
@@ -113,8 +113,8 @@ ammHolds(
 STAmount
 ammLPHolds(
     ReadView const& view,
-    Asset const& asset1,
-    Asset const& asset2,
+    Issue const& asset1,
+    Issue const& asset2,
     AccountID const& ammAccount,
     AccountID const& lpAccount,
     beast::Journal const j)
@@ -180,7 +180,7 @@ STAmount
 ammAccountHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Asset const& asset)
+    Issue const& asset)
 {
     if (asset.holds<MPTIssue>())
         return accountHolds(
@@ -190,7 +190,7 @@ ammAccountHolds(
             FreezeHandling::fhIGNORE_FREEZE,
             AuthHandling::ahIGNORE_AUTH,
             beast::Journal(beast::Journal::getNullSink()));
-    // Should be accountHolds for Asset for both?
+    // Should be accountHolds for Issue for both?
     if (isXRP(asset))
     {
         if (auto const sle = view.read(keylet::account(ammAccountID)))
@@ -198,19 +198,19 @@ ammAccountHolds(
     }
     else if (auto const sle = view.read(keylet::line(
                  ammAccountID,
-                 asset.get<Issue>().account,
-                 asset.get<Issue>().currency));
+                 asset.get<IOUIssue>().getIssuer(),
+                 asset.get<IOUIssue>().getCurrency()));
              sle &&
              !isFrozen(
                  view,
                  ammAccountID,
-                 asset.get<Issue>().currency,
-                 asset.get<Issue>().account))
+                 asset.get<IOUIssue>().getCurrency(),
+                 asset.get<IOUIssue>().getIssuer()))
     {
         auto amount = (*sle)[sfBalance];
-        if (ammAccountID > asset.get<Issue>().account)
+        if (ammAccountID > asset.get<IOUIssue>().getIssuer())
             amount.negate();
-        amount.setIssuer(asset.get<Issue>().account);
+        amount.setIssuer(asset.get<IOUIssue>().getIssuer());
         return amount;
     }
 
@@ -272,8 +272,8 @@ deleteAMMObjects(
 TER
 deleteAMMAccount(
     Sandbox& sb,
-    Asset const& asset,
-    Asset const& asset2,
+    Issue const& asset,
+    Issue const& asset2,
     beast::Journal j)
 {
     auto ammSle = sb.peek(keylet::amm(asset, asset2));
@@ -331,7 +331,7 @@ initializeFeeAuctionVote(
     ApplyView& view,
     std::shared_ptr<SLE>& ammSle,
     AccountID const& account,
-    Issue const& lptIssue,
+    IOUIssue const& lptIssue,
     std::uint16_t tfee)
 {
     auto const& rules = view.rules();
@@ -376,7 +376,7 @@ initializeFeeAuctionVote(
 Expected<bool, TER>
 isOnlyLiquidityProvider(
     ReadView const& view,
-    Issue const& ammIssue,
+    IOUIssue const& ammIssue,
     AccountID const& lpAccount)
 {
     // Liquidity Provider (LP) must have one LPToken trustline
@@ -396,7 +396,7 @@ isOnlyLiquidityProvider(
     // there are more than one LP. Ten pages should be sufficient to include
     // five objects.
     std::uint8_t limit = 10;
-    auto const root = keylet::ownerDir(ammIssue.account);
+    auto const root = keylet::ownerDir(ammIssue.getIssuer());
     auto currentIndex = root;
 
     // Iterate over AMM owner directory objects.

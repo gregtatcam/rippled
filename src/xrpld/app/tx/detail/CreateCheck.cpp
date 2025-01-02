@@ -125,7 +125,7 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                 JLOG(ctx.j.warn()) << "Creating a check for frozen asset";
                 return tecFROZEN;
             }
-            if (sendMax.holds<Issue>())
+            if (sendMax.holds<IOUIssue>())
             {
                 // If this account has a trustline for the currency, that
                 // trustline may not be frozen.
@@ -137,7 +137,9 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                 {
                     // Check if the issuer froze the line
                     auto const sleTrust = ctx.view.read(keylet::line(
-                        srcId, issuerId, sendMax.get<Issue>().currency));
+                        srcId,
+                        issuerId,
+                        sendMax.get<IOUIssue>().getCurrency()));
                     if (sleTrust &&
                         sleTrust->isFlag(
                             (issuerId > srcId) ? lsfHighFreeze : lsfLowFreeze))
@@ -151,7 +153,9 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                 {
                     // Check if dst froze the line.
                     auto const sleTrust = ctx.view.read(keylet::line(
-                        issuerId, dstId, sendMax.get<Issue>().currency));
+                        issuerId,
+                        dstId,
+                        sendMax.get<IOUIssue>().getCurrency()));
                     if (sleTrust &&
                         sleTrust->isFlag(
                             (dstId > issuerId) ? lsfHighFreeze : lsfLowFreeze))

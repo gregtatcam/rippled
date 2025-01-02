@@ -239,7 +239,7 @@ checkPayment(
         {
             // If no SendMax, default to Amount with sender as issuer if Issue.
             sendMax = amount;
-            if (sendMax.holds<Issue>())
+            if (sendMax.holds<IOUIssue>())
                 sendMax.setIssuer(srcAddressID);
         }
 
@@ -257,8 +257,8 @@ checkPayment(
             if (auto ledger = app.openLedger().current())
             {
                 Pathfinder pf(
-                    std::make_shared<AssetCache>(
-                        ledger, app.journal("AssetCache")),
+                    std::make_shared<IssueCache>(
+                        ledger, app.journal("IssueCache")),
                     srcAddressID,
                     *dstAccountID,
                     sendMax.asset(),

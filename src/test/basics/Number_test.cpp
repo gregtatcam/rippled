@@ -700,7 +700,7 @@ public:
     test_toSTAmount()
     {
         NumberSO stNumberSO{true};
-        Issue const issue;
+        IOUIssue const issue;
         Number const n{7'518'783'80596, -5};
         saveNumberRoundMode const save{Number::setround(Number::to_nearest)};
         auto res2 = STAmount{issue, n.mantissa(), n.exponent()};

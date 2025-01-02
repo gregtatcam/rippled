@@ -352,7 +352,7 @@ operator==(Strand const& lhs, Strand const& rhs)
 
    @param src Account that is sending assets
    @param dst Account that is receiving assets
-   @param deliver Asset the dst account will receive
+   @param deliver Issue the dst account will receive
    (if issuer of deliver == dst, then accept any issuer)
    @param sendMax Optional asset to send.
    @param path Liquidity sources to use for this strand of the payment. The path
@@ -364,8 +364,8 @@ std::pair<TER, STPath>
 normalizePath(
     AccountID const& src,
     AccountID const& dst,
-    Asset const& deliver,
-    std::optional<Asset> const& sendMaxAsset,
+    Issue const& deliver,
+    std::optional<Issue> const& sendMaxAsset,
     STPath const& path);
 
 /**
@@ -374,7 +374,7 @@ normalizePath(
    @param sb view for trust lines, balances, and attributes like auth and freeze
    @param src Account that is sending assets
    @param dst Account that is receiving assets
-   @param deliver Asset the dst account will receive
+   @param deliver Issue the dst account will receive
                   (if issuer of deliver == dst, then accept any issuer)
    @param limitQuality Offer crossing BookSteps use this value in an
                        optimization.  If, during direct offer crossing, the
@@ -396,9 +396,9 @@ toStrand(
     ReadView const& sb,
     AccountID const& src,
     AccountID const& dst,
-    Asset const& deliver,
+    Issue const& deliver,
     std::optional<Quality> const& limitQuality,
-    std::optional<Asset> const& sendMaxAsset,
+    std::optional<Issue> const& sendMaxAsset,
     STPath const& path,
     bool ownerPaysTransferFee,
     OfferCrossing offerCrossing,
@@ -412,7 +412,7 @@ toStrand(
    @param sb View for trust lines, balances, and attributes like auth and freeze
    @param src Account that is sending assets
    @param dst Account that is receiving assets
-   @param deliver Asset the dst account will receive
+   @param deliver Issue the dst account will receive
                   (if issuer of deliver == dst, then accept any issuer)
    @param limitQuality Offer crossing BookSteps use this value in an
                        optimization.  If, during direct offer crossing, the
@@ -435,9 +435,9 @@ toStrands(
     ReadView const& sb,
     AccountID const& src,
     AccountID const& dst,
-    Asset const& deliver,
+    Issue const& deliver,
     std::optional<Quality> const& limitQuality,
-    std::optional<Asset> const& sendMax,
+    std::optional<Issue> const& sendMax,
     STPathSet const& paths,
     bool addDefaultPath,
     bool ownerPaysTransferFee,
@@ -446,7 +446,7 @@ toStrands(
     beast::Journal j);
 
 /// @cond INTERNAL
-template <StepAsset TIn, StepAsset TOut, class TDerived>
+template <StepIssue TIn, StepIssue TOut, class TDerived>
 struct StepImp : public Step
 {
     explicit StepImp() = default;
@@ -534,7 +534,7 @@ struct StrandContext
     ReadView const& view;                       ///< Current ReadView
     AccountID const strandSrc;                  ///< Strand source account
     AccountID const strandDst;                  ///< Strand destination account
-    Asset const strandDeliver;                  ///< Asset strand delivers
+    Issue const strandDeliver;                  ///< Issue strand delivers
     std::optional<Quality> const limitQuality;  ///< Worst accepted quality
     bool const isFirst;               ///< true if Step is first in Strand
     bool const isLast = false;        ///< true if Step is last in Strand
@@ -552,11 +552,11 @@ struct StrandContext
         at most twice: once as a src and once as a dst (hence the two element
        array). The strandSrc and strandDst will only show up once each.
     */
-    std::array<boost::container::flat_set<Asset>, 2>& seenDirectAssets;
+    std::array<boost::container::flat_set<Issue>, 2>& seenDirectAssets;
     /** A strand may not include an offer that output the same issue more
         than once
     */
-    boost::container::flat_set<Asset>& seenBookOuts;
+    boost::container::flat_set<Issue>& seenBookOuts;
     AMMContext& ammContext;
     beast::Journal const j;
 
@@ -568,15 +568,15 @@ struct StrandContext
         // replicates the source or destination.
         AccountID const& strandSrc_,
         AccountID const& strandDst_,
-        Asset const& strandDeliver_,
+        Issue const& strandDeliver_,
         std::optional<Quality> const& limitQuality_,
         bool isLast_,
         bool ownerPaysTransferFee_,
         OfferCrossing offerCrossing_,
         bool isDefaultPath_,
-        std::array<boost::container::flat_set<Asset>, 2>&
+        std::array<boost::container::flat_set<Issue>, 2>&
             seenDirectAssets_,  ///< For detecting currency loops
-        boost::container::flat_set<Asset>&
+        boost::container::flat_set<Issue>&
             seenBookOuts_,  ///< For detecting book loops
         AMMContext& ammContext_,
         beast::Journal j_);  ///< Journal for logging
@@ -614,13 +614,16 @@ make_MPTEndpointStep(
     MPTID const& a);
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepII(StrandContext const& ctx, Issue const& in, Issue const& out);
+make_BookStepII(
+    StrandContext const& ctx,
+    IOUIssue const& in,
+    IOUIssue const& out);
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepIX(StrandContext const& ctx, Issue const& in);
+make_BookStepIX(StrandContext const& ctx, IOUIssue const& in);
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepXI(StrandContext const& ctx, Issue const& out);
+make_BookStepXI(StrandContext const& ctx, IOUIssue const& out);
 
 std::pair<TER, std::unique_ptr<Step>>
 make_XRPEndpointStep(StrandContext const& ctx, AccountID const& acc);
@@ -638,10 +641,16 @@ std::pair<TER, std::unique_ptr<Step>>
 make_BookStepXM(StrandContext const& ctx, MPTIssue const& out);
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepMI(StrandContext const& ctx, MPTIssue const& in, Issue const& out);
+make_BookStepMI(
+    StrandContext const& ctx,
+    MPTIssue const& in,
+    IOUIssue const& out);
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepIM(StrandContext const& ctx, Issue const& in, MPTIssue const& out);
+make_BookStepIM(
+    StrandContext const& ctx,
+    IOUIssue const& in,
+    MPTIssue const& out);
 
 template <class InAmt, class OutAmt>
 bool

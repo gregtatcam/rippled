@@ -21,7 +21,7 @@
 #define RIPPLE_APP_PATHS_PATHREQUESTS_H_INCLUDED
 
 #include <xrpld/app/main/Application.h>
-#include <xrpld/app/paths/AssetCache.h>
+#include <xrpld/app/paths/IssueCache.h>
 #include <xrpld/app/paths/PathRequest.h>
 #include <xrpld/core/Job.h>
 #include <atomic>
@@ -54,7 +54,7 @@ public:
     bool
     requestsPending() const;
 
-    std::shared_ptr<AssetCache>
+    std::shared_ptr<IssueCache>
     getAssetCache(
         std::shared_ptr<ReadView const> const& ledger,
         bool authoritative);
@@ -111,8 +111,8 @@ private:
     // Track all requests
     std::vector<PathRequest::wptr> requests_;
 
-    // Use a AssetCache
-    std::weak_ptr<AssetCache> assetCache_;
+    // Use a IssueCache
+    std::weak_ptr<IssueCache> assetCache_;
 
     std::atomic<int> mLastIdentifier;
 

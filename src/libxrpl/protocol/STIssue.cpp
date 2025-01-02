@@ -71,9 +71,7 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
         }
         else
         {
-            Issue issue;
-            issue.currency = currencyOrAccount;
-            issue.account = account;
+            IOUIssue issue{static_cast<Currency>(currencyOrAccount), account};
             if (!isConsistent(issue))
                 Throw<std::runtime_error>(
                     "invalid issue: currency and account native mismatch");
@@ -105,12 +103,12 @@ STIssue::getJson(JsonOptions) const
 void
 STIssue::add(Serializer& s) const
 {
-    if (holds<Issue>())
+    if (holds<IOUIssue>())
     {
-        auto const& issue = asset_.get<Issue>();
-        s.addBitString(issue.currency);
-        if (!isXRP(issue.currency))
-            s.addBitString(issue.account);
+        auto const& issue = asset_.get<IOUIssue>();
+        s.addBitString(issue.getCurrency());
+        if (!isXRP(issue.getCurrency()))
+            s.addBitString(issue.getIssuer());
     }
     else
     {
@@ -133,7 +131,7 @@ STIssue::isEquivalent(const STBase& t) const
 bool
 STIssue::isDefault() const
 {
-    return holds<Issue>() && asset_.get<Issue>() == xrpIssue();
+    return holds<IOUIssue>() && asset_.get<IOUIssue>() == xrpIssue();
 }
 
 STBase*
@@ -151,7 +149,7 @@ STIssue::move(std::size_t n, void* buf)
 STIssue
 issueFromJson(SField const& name, Json::Value const& v)
 {
-    return STIssue{name, assetFromJson(v)};
+    return STIssue{name, issueFromJson(v)};
 }
 
 }  // namespace ripple

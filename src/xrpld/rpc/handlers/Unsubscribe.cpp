@@ -180,11 +180,12 @@ doUnsubscribe(RPC::JsonContext& context)
 
             if (taker_pays.isMember(jss::currency))
             {
-                Issue issue;
+                Currency currency;
+                AccountID account;
                 // Parse mandatory currency.
                 if (!taker_pays.isMember(jss::currency) ||
                     !to_currency(
-                        issue.currency, taker_pays[jss::currency].asString()))
+                        currency, taker_pays[jss::currency].asString()))
                 {
                     JLOG(context.j.info()) << "Bad taker_pays currency.";
                     return rpcError(rpcSRC_CUR_MALFORMED);
@@ -193,15 +194,15 @@ doUnsubscribe(RPC::JsonContext& context)
                 else if (
                     ((taker_pays.isMember(jss::issuer)) &&
                      (!taker_pays[jss::issuer].isString() ||
-                      !to_issuer(
-                          issue.account, taker_pays[jss::issuer].asString())))
+                      !to_issuer(account, taker_pays[jss::issuer].asString())))
                     // Don't allow illegal issuers.
-                    || !isConsistent(book.in) || noAccount() == issue.account)
+                    || !isConsistent(book.in) || noAccount() == account)
                 {
                     JLOG(context.j.info()) << "Bad taker_pays issuer.";
 
                     return rpcError(rpcSRC_ISR_MALFORMED);
                 }
+                IOUIssue issue{currency, account};
                 book.in = issue;
             }
             else if (taker_pays.isMember(jss::mpt_issuance_id))
@@ -221,11 +222,12 @@ doUnsubscribe(RPC::JsonContext& context)
 
             if (taker_gets.isMember(jss::currency))
             {
-                Issue issue;
+                Currency currency;
+                AccountID account;
                 // Parse mandatory currency.
                 if (!taker_gets.isMember(jss::currency) ||
                     !to_currency(
-                        issue.currency, taker_gets[jss::currency].asString()))
+                        currency, taker_gets[jss::currency].asString()))
                 {
                     JLOG(context.j.info()) << "Bad taker_gets currency.";
 
@@ -235,15 +237,15 @@ doUnsubscribe(RPC::JsonContext& context)
                 else if (
                     ((taker_gets.isMember(jss::issuer)) &&
                      (!taker_gets[jss::issuer].isString() ||
-                      !to_issuer(
-                          issue.account, taker_gets[jss::issuer].asString())))
+                      !to_issuer(account, taker_gets[jss::issuer].asString())))
                     // Don't allow illegal issuers.
-                    || !isConsistent(book.out) || noAccount() == issue.account)
+                    || !isConsistent(book.out) || noAccount() == account)
                 {
                     JLOG(context.j.info()) << "Bad taker_gets issuer.";
 
                     return rpcError(rpcDST_ISR_MALFORMED);
                 }
+                IOUIssue issue{currency, account};
                 book.out = issue;
             }
             else if (taker_gets.isMember(jss::mpt_issuance_id))

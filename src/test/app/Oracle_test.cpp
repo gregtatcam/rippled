@@ -153,7 +153,7 @@ private:
             env.fund(XRP(1'000), owner);
             Oracle oracle(env, {.owner = owner}, false);
 
-            // Asset class or provider not included on create
+            // Issue class or provider not included on create
             oracle.set(CreateArg{
                 .assetClass = std::nullopt,
                 .provider = "provider",
@@ -164,7 +164,7 @@ private:
                 .uri = "URI",
                 .err = ter(temMALFORMED)});
 
-            // Asset class or provider are included on update
+            // Issue class or provider are included on update
             // and don't match the current values
             oracle.set(CreateArg{});
             BEAST_EXPECT(oracle.exists());
@@ -184,7 +184,7 @@ private:
             Oracle oracle(env, {.owner = owner}, false);
 
             // Fields too long
-            // Asset class
+            // Issue class
             std::string assetClass(17, '0');
             oracle.set(
                 CreateArg{.assetClass = assetClass, .err = ter(temMALFORMED)});
@@ -194,7 +194,7 @@ private:
             // URI
             oracle.set(CreateArg{.uri = large, .err = ter(temMALFORMED)});
             // Empty field
-            // Asset class
+            // Issue class
             oracle.set(CreateArg{.assetClass = "", .err = ter(temMALFORMED)});
             // provider
             oracle.set(CreateArg{.provider = "", .err = ter(temMALFORMED)});

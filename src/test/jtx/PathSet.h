@@ -33,8 +33,8 @@ inline std::size_t
 countOffers(
     jtx::Env& env,
     jtx::Account const& account,
-    Asset const& takerPays,
-    Asset const& takerGets)
+    Issue const& takerPays,
+    Issue const& takerGets)
 {
     size_t count = 0;
     forEachItem(
@@ -83,8 +83,8 @@ inline bool
 isOffer(
     jtx::Env& env,
     jtx::Account const& account,
-    Asset const& takerPays,
-    Asset const& takerGets)
+    Issue const& takerPays,
+    Issue const& takerGets)
 {
     return countOffers(env, account, takerPays, takerGets) > 0;
 }
@@ -108,7 +108,7 @@ public:
         addHelper(std::forward<First>(first), std::forward<Rest>(rest)...);
     }
     Path&
-    push_back(Issue const& iss);
+    push_back(IOUIssue const& iss);
     Path&
     push_back(jtx::Account const& acc);
     Path&
@@ -130,13 +130,13 @@ Path::push_back(STPathElement const& pe)
 }
 
 inline Path&
-Path::push_back(Issue const& iss)
+Path::push_back(IOUIssue const& iss)
 {
     path.emplace_back(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         beast::zero,
-        iss.currency,
-        iss.account);
+        iss.getCurrency(),
+        iss.getIssuer());
     return *this;
 }
 

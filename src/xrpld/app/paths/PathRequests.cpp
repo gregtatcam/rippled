@@ -30,10 +30,10 @@
 
 namespace ripple {
 
-/** Get the current AssetCache, updating it if necessary.
+/** Get the current IssueCache, updating it if necessary.
     Get the correct ledger to use.
 */
-std::shared_ptr<AssetCache>
+std::shared_ptr<IssueCache>
 PathRequests::getAssetCache(
     std::shared_ptr<ReadView const> const& ledger,
     bool authoritative)
@@ -60,7 +60,7 @@ PathRequests::getAssetCache(
         // weak_ptr, and will immediately discard it if there are no other
         // references.
         assetCache_ = assetCache =
-            std::make_shared<AssetCache>(ledger, app_.journal("AssetCache"));
+            std::make_shared<IssueCache>(ledger, app_.journal("IssueCache"));
     }
     return assetCache;
 }
@@ -72,7 +72,7 @@ PathRequests::updateAll(std::shared_ptr<ReadView const> const& inLedger)
         app_.getJobQueue().makeLoadEvent(jtPATH_FIND, "PathRequest::updateAll");
 
     std::vector<PathRequest::wptr> requests;
-    std::shared_ptr<AssetCache> cache;
+    std::shared_ptr<IssueCache> cache;
 
     // Get the ledger and cache we should be using
     {
@@ -203,7 +203,7 @@ PathRequests::updateAll(std::shared_ptr<ReadView const> const& inLedger)
 
         // Hold on to the line cache until after the lock is released, so it can
         // be destroyed outside of the lock
-        std::shared_ptr<AssetCache> lastCache;
+        std::shared_ptr<IssueCache> lastCache;
         {
             // Get the latest requests, cache, and ledger for next pass
             std::lock_guard sl(mLock);
@@ -309,7 +309,7 @@ PathRequests::doLegacyPathRequest(
     Json::Value const& request)
 {
     auto cache =
-        std::make_shared<AssetCache>(inLedger, app_.journal("AssetCache"));
+        std::make_shared<IssueCache>(inLedger, app_.journal("IssueCache"));
 
     auto req = std::make_shared<PathRequest>(
         app_, [] {}, consumer, ++mLastIdentifier, *this, mJournal);

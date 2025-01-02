@@ -78,7 +78,7 @@ AMMClawback::preflight(PreflightContext const& ctx)
 
     if (asset.getIssuer() != issuer)
     {
-        JLOG(ctx.j.trace()) << "AMMClawback: Asset's account does not "
+        JLOG(ctx.j.trace()) << "AMMClawback: Issue's account does not "
                                "match Account field.";
         return temMALFORMED;
     }
@@ -86,7 +86,7 @@ AMMClawback::preflight(PreflightContext const& ctx)
     if (clawAmount && clawAmount->issue() != asset)
     {
         JLOG(ctx.j.trace()) << "AMMClawback: Amount's issuer/currency subfield "
-                               "does not match Asset field";
+                               "does not match Issue field";
         return temBAD_AMOUNT;
     }
 
@@ -144,8 +144,8 @@ AMMClawback::applyGuts(Sandbox& sb)
     std::optional<STAmount> const clawAmount = ctx_.tx[~sfAmount];
     AccountID const issuer = ctx_.tx[sfAccount];
     AccountID const holder = ctx_.tx[sfHolder];
-    Asset const asset = ctx_.tx[sfAsset];
-    Asset const asset2 = ctx_.tx[sfAsset2];
+    Issue const asset = ctx_.tx[sfAsset];
+    Issue const asset2 = ctx_.tx[sfAsset2];
 
     auto ammSle = sb.peek(keylet::amm(asset, asset2));
     if (!ammSle)

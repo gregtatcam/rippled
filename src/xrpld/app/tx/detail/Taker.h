@@ -52,8 +52,8 @@ private:
     Amounts remaining_;
 
     // The issuers for the input and output
-    Issue const& issue_in_;
-    Issue const& issue_out_;
+    IOUIssue const& issue_in_;
+    IOUIssue const& issue_out_;
 
     // The rates that will be paid when the input and output currencies are
     // transfered and the currency issuer isn't involved:
@@ -120,7 +120,7 @@ private:
     static Rate
     effective_rate(
         Rate const& rate,
-        Issue const& issue,
+        IOUIssue const& issue,
         AccountID const& from,
         AccountID const& to);
 
@@ -188,15 +188,15 @@ public:
         return cross_type_;
     }
 
-    /** Returns the Issue associated with the input of the offer */
-    Issue const&
+    /** Returns the IOUIssue associated with the input of the offer */
+    IOUIssue const&
     issue_in() const
     {
         return issue_in_;
     }
 
-    /** Returns the Issue associated with the output of the offer */
-    Issue const&
+    /** Returns the IOUIssue associated with the output of the offer */
+    IOUIssue const&
     issue_out() const
     {
         return issue_out_;
@@ -315,13 +315,13 @@ private:
     redeemIOU(
         AccountID const& account,
         STAmount const& amount,
-        Issue const& issue);
+        IOUIssue const& issue);
 
     TER
     issueIOU(
         AccountID const& account,
         STAmount const& amount,
-        Issue const& issue);
+        IOUIssue const& issue);
 
 private:
     // The underlying ledger entry we are dealing with

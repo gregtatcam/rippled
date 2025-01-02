@@ -135,7 +135,7 @@ private:
         std::optional<STAmount> const& deposit2Min,
         std::uint16_t tfee);
 
-    /** Equal asset deposit (Asset1In, Asset2In) with the constraint on
+    /** Equal asset deposit (Issue1In, Asset2In) with the constraint on
      * the maximum amount of both assets that the trader is willing to deposit.
      * The trading fee is not charged.
      * @param view
@@ -161,7 +161,7 @@ private:
         std::optional<STAmount> const& lpTokensDepositMin,
         std::uint16_t tfee);
 
-    /** Single asset deposit (Asset1In) by the amount.
+    /** Single asset deposit (Issue1In) by the amount.
      * The trading fee is charged.
      * @param view
      * @param ammAccount
@@ -182,7 +182,7 @@ private:
         std::optional<STAmount> const& lpTokensDepositMin,
         std::uint16_t tfee);
 
-    /** Single asset deposit (Asset1In, LPTokens) by the tokens.
+    /** Single asset deposit (Issue1In, LPTokens) by the tokens.
      * The trading fee is charged.
      * @param view
      * @param ammAccount
@@ -203,7 +203,7 @@ private:
         STAmount const& lpTokensDeposit,
         std::uint16_t tfee);
 
-    /** Single asset deposit (Asset1In, EPrice) with two constraints.
+    /** Single asset deposit (Issue1In, EPrice) with two constraints.
      * The trading fee is charged.
      * @param view
      * @param ammAccount
@@ -238,7 +238,7 @@ private:
         AccountID const& ammAccount,
         STAmount const& amount,
         STAmount const& amount2,
-        Issue const& lptIssue,
+        IOUIssue const& lptIssue,
         std::uint16_t tfee);
 };
 

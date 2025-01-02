@@ -118,9 +118,9 @@ line(
     Currency const& currency) noexcept;
 
 inline Keylet
-line(AccountID const& id, Issue const& issue) noexcept
+line(AccountID const& id, IOUIssue const& issue) noexcept
 {
-    return line(id, issue.account, issue.currency);
+    return line(id, issue.getIssuer(), issue.getCurrency());
 }
 /** @} */
 
@@ -274,7 +274,7 @@ nft_sells(uint256 const& id) noexcept;
 
 /** AMM entry */
 Keylet
-amm(Asset const& issue1, Asset const& issue2) noexcept;
+amm(Issue const& issue1, Issue const& issue2) noexcept;
 
 Keylet
 amm(uint256 const& amm) noexcept;

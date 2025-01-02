@@ -21,7 +21,7 @@
 #define RIPPLE_TEST_JTX_PATHS_H_INCLUDED
 
 #include <test/jtx/Env.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <type_traits>
 
 namespace ripple {
@@ -32,12 +32,12 @@ namespace jtx {
 class paths
 {
 private:
-    Issue in_;
+    IOUIssue in_;
     int depth_;
     unsigned int limit_;
 
 public:
-    paths(Issue const& in, int depth = 7, unsigned int limit = 4)
+    paths(IOUIssue const& in, int depth = 7, unsigned int limit = 4)
         : in_(in), depth_(depth), limit_(limit)
     {
     }

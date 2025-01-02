@@ -144,15 +144,15 @@ ape(AccountID const& a)
         STPathElement::typeAccount, a, xrpCurrency(), xrpAccount());
 };
 
-// Issue path element
+// IOUIssue path element
 STPathElement
-ipe(Issue const& iss)
+ipe(IOUIssue const& iss)
 {
     return STPathElement(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         xrpAccount(),
-        iss.currency,
-        iss.account);
+        iss.getCurrency(),
+        iss.getIssuer());
 };
 
 // Issuer path element
@@ -642,8 +642,8 @@ struct PayStrand_test : public beast::unit_test::suite
 
         auto test = [&, this](
                         jtx::Env& env,
-                        Issue const& deliver,
-                        std::optional<Issue> const& sendMaxIssue,
+                        IOUIssue const& deliver,
+                        std::optional<IOUIssue> const& sendMaxIssue,
                         STPath const& path,
                         TER expTer,
                         auto&&... expSteps) {
@@ -1185,7 +1185,7 @@ struct PayStrand_test : public beast::unit_test::suite
         env.fund(XRP(10000), alice, bob, gw);
 
         STAmount sendMax{USD.issue(), 100, 1};
-        STAmount noAccountAmount{Issue{USD.currency, noAccount()}, 100, 1};
+        STAmount noAccountAmount{IOUIssue{USD.currency, noAccount()}, 100, 1};
         STAmount deliver;
         AccountID const srcAcc = alice.id();
         AccountID dstAcc = bob.id();

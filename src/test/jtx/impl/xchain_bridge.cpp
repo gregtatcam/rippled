@@ -22,7 +22,7 @@
 #include <test/jtx/Env.h>
 #include <test/jtx/attester.h>
 #include <xrpl/json/json_value.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STBase.h>
 #include <xrpl/protocol/STInteger.h>
@@ -39,9 +39,9 @@ namespace jtx {
 Json::Value
 bridge(
     Account const& lockingChainDoor,
-    Issue const& lockingChainIssue,
+    IOUIssue const& lockingChainIssue,
     Account const& issuingChainDoor,
-    Issue const& issuingChainIssue)
+    IOUIssue const& issuingChainIssue)
 {
     Json::Value jv;
     jv[sfLockingChainDoor.getJsonName()] = lockingChainDoor.human();
@@ -55,9 +55,9 @@ bridge(
 Json::Value
 bridge_rpc(
     Account const& lockingChainDoor,
-    Issue const& lockingChainIssue,
+    IOUIssue const& lockingChainIssue,
     Account const& issuingChainDoor,
-    Issue const& issuingChainIssue)
+    IOUIssue const& issuingChainIssue)
 {
     Json::Value jv;
     jv[sfLockingChainDoor.getJsonName()] = lockingChainDoor.human();

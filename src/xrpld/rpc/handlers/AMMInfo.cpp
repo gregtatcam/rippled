@@ -23,7 +23,7 @@
 #include <xrpld/rpc/detail/RPCHelpers.h>
 #include <xrpl/json/json_value.h>
 #include <xrpl/protocol/AMMCore.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/RPCErr.h>
 #include <grpcpp/support/status.h>
 
@@ -45,12 +45,12 @@ getAccount(Json::Value const& v, Json::Value& result)
     return std::optional<AccountID>(accountID);
 }
 
-Expected<Asset, error_code_i>
+Expected<Issue, error_code_i>
 getAsset(Json::Value const& v, beast::Journal j)
 {
     try
     {
-        return assetFromJson(v);
+        return issueFromJson(v);
     }
     catch (std::runtime_error const& ex)
     {
@@ -84,16 +84,16 @@ doAMMInfo(RPC::JsonContext& context)
     struct ValuesFromContextParams
     {
         std::optional<AccountID> accountID;
-        Asset asset1;
-        Asset asset2;
+        Issue asset1;
+        Issue asset2;
         std::shared_ptr<SLE const> amm;
     };
 
     auto getValuesFromContextParams =
         [&]() -> Expected<ValuesFromContextParams, error_code_i> {
         std::optional<AccountID> accountID;
-        std::optional<Asset> asset1;
-        std::optional<Asset> asset2;
+        std::optional<Issue> asset1;
+        std::optional<Issue> asset2;
         std::optional<uint256> ammID;
 
         constexpr auto invalid = [](Json::Value const& params) -> bool {

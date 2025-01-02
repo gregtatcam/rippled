@@ -67,31 +67,8 @@ getAccountLines(Env& env, Account const& acct)
     return getAccountLines(env, acct.id());
 }
 
-template <typename... IOU>
 Json::Value
-getAccountLines(Env& env, AccountID const& acctId, IOU... ious)
-{
-    auto const jrr = getAccountLines(env, acctId);
-    Json::Value res;
-    for (auto const& line : jrr[jss::lines])
-    {
-        for (auto const& iou : {ious...})
-        {
-            if (line[jss::currency].asString() == to_string(iou.currency))
-            {
-                Json::Value v;
-                v[jss::currency] = line[jss::currency];
-                v[jss::balance] = line[jss::balance];
-                v[jss::limit] = line[jss::limit];
-                v[jss::account] = line[jss::account];
-                res[jss::lines].append(v);
-            }
-        }
-    }
-    if (!res.isNull())
-        return res;
-    return jrr;
-}
+getAccountLines(Env& env, AccountID const& acctId, IOUIssue const& issue);
 
 [[nodiscard]] bool
 checkArraySize(Json::Value const& val, unsigned int size);
@@ -136,9 +113,9 @@ stpathset_append(STPathSet& st, STPath const& p, Args const&... args)
 bool
 equal(STAmount const& sa1, STAmount const& sa2);
 
-// Issue path element
+// IOUIssue path element
 STPathElement
-IPE(Issue const& iss);
+IPE(IOUIssue const& iss);
 
 STPathElement
 IPE(MPTIssue const& iss);
@@ -484,7 +461,7 @@ cpe(Currency const& c);
 
 // All path element
 STPathElement
-allpe(AccountID const& a, Issue const& iss);
+allpe(AccountID const& a, IOUIssue const& iss);
 /***************************************************************/
 
 /* Check */

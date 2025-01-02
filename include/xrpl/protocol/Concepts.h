@@ -27,8 +27,8 @@
 namespace ripple {
 
 class STAmount;
-class Asset;
 class Issue;
+class IOUIssue;
 class MPTIssue;
 class IOUAmount;
 class XRPAmount;
@@ -41,18 +41,18 @@ std::is_same_v<A, STAmount>;
 
 template <typename TIss>
 concept ValidIssueType =
-    std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>;
+    std::is_same_v<TIss, IOUIssue> || std::is_same_v<TIss, MPTIssue>;
 
 template <typename A>
-concept AssetType = std::is_same_v<A, Asset> ||
-    std::is_convertible_v<A, Issue> || std::is_convertible_v<A, MPTIssue>;
+concept IssueType = std::is_same_v<A, Issue> ||
+    std::is_convertible_v<A, IOUIssue> || std::is_convertible_v<A, MPTIssue>;
 
 template <typename A>
-concept StepAsset = !
+concept StepIssue = !
 std::is_same_v<A, STAmount>;
 
 template <typename T>
-concept ValidPathAsset =
+concept ValidPathIssue =
     (std::is_same_v<T, Currency> || std::is_same_v<T, MPTID>);
 
 template <class TTakerPays, class TTakerGets>

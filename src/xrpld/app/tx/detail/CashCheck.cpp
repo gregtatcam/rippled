@@ -195,9 +195,9 @@ CashCheck::preclaim(PreclaimContext const& ctx)
         // An issuer can always accept their own currency.
         if (!value.native() && (value.getIssuer() != dstId))
         {
-            if (value.holds<Issue>())
+            if (value.holds<IOUIssue>())
             {
-                Currency const currency{value.get<Issue>().currency};
+                Currency const currency{value.get<IOUIssue>().getCurrency()};
                 auto const sleTrustLine =
                     ctx.view.read(keylet::line(dstId, issuerId, currency));
 
@@ -389,7 +389,7 @@ CashCheck::doApply()
             // transfer rate to account for.  Since the transfer rate cannot
             // exceed 200%, we use 1/2 maxValue as our limit.
             auto const maxDeliverMin = [&]() {
-                if (optDeliverMin->holds<Issue>())
+                if (optDeliverMin->holds<IOUIssue>())
                     return STAmount(
                         optDeliverMin->asset(),
                         STAmount::cMaxValue / 2,
@@ -406,10 +406,10 @@ CashCheck::doApply()
             std::optional<Keylet> trustLineKey;
             STAmount savedLimit;
             bool destLow = false;
-            if (flowDeliver.holds<Issue>())
+            if (flowDeliver.holds<IOUIssue>())
             {
                 // If a trust line does not exist yet create one.
-                Issue const& trustLineIssue = flowDeliver.get<Issue>();
+                IOUIssue const& trustLineIssue = flowDeliver.get<IOUIssue>();
                 AccountID const issuer = flowDeliver.getIssuer();
                 AccountID const truster = issuer == account_ ? srcId : account_;
                 trustLineKey = keylet::line(truster, trustLineIssue);
@@ -441,7 +441,7 @@ CashCheck::doApply()
                     }
 
                     Currency const currency =
-                        flowDeliver.asset().get<Issue>().currency;
+                        flowDeliver.asset().get<IOUIssue>().getCurrency();
                     STAmount initialBalance(flowDeliver.asset());
                     initialBalance.setIssuer(noAccount());
 
@@ -457,7 +457,7 @@ CashCheck::doApply()
                                 (sleDst->getFlags() & lsfDefaultRipple) == 0,
                                 false,                          // freeze trust line
                                 initialBalance,                 // zero initial balance
-                                Issue(currency, account_),      // limit of zero
+                                IOUIssue(currency, account_),      // limit of zero
                                 0,                              // quality in
                                 0,                              // quality out
                                 viewJ);                         // journal
@@ -564,7 +564,7 @@ CashCheck::doApply()
                     return tecPATH_PARTIAL;
                 }
                 if (doFix1623 && !checkCashMakesTrustLine &&
-                    optDeliverMin->holds<Issue>())
+                    optDeliverMin->holds<IOUIssue>())
                     // Set the delivered_amount metadata.
                     ctx_.deliver(result.actualAmountOut);
             }

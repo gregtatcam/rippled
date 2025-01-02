@@ -927,11 +927,11 @@ ValidClawback::finalize(
             STAmount const& amount = tx.getFieldAmount(sfAmount);
             AccountID const& holder = amount.getIssuer();
             STAmount const holderBalance = [&]() {
-                if (amount.holds<Issue>())
+                if (amount.holds<IOUIssue>())
                     return accountHolds(
                         view,
                         holder,
-                        amount.get<Issue>().currency,
+                        amount.get<IOUIssue>().getCurrency(),
                         issuer,
                         fhIGNORE_FREEZE,
                         j);

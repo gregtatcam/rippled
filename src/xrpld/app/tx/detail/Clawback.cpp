@@ -34,7 +34,7 @@ preflightHelper(PreflightContext const& ctx);
 
 template <>
 NotTEC
-preflightHelper<Issue>(PreflightContext const& ctx)
+preflightHelper<IOUIssue>(PreflightContext const& ctx)
 {
     if (ctx.tx.isFieldPresent(sfHolder))
         return temMALFORMED;
@@ -107,7 +107,7 @@ preclaimHelper(
 
 template <>
 TER
-preclaimHelper<Issue>(
+preclaimHelper<IOUIssue>(
     PreclaimContext const& ctx,
     SLE const& sleIssuer,
     AccountID const& issuer,
@@ -199,8 +199,9 @@ Clawback::preclaim(PreclaimContext const& ctx)
 {
     AccountID const issuer = ctx.tx[sfAccount];
     auto const clawAmount = ctx.tx[sfAmount];
-    AccountID const holder =
-        clawAmount.holds<Issue>() ? clawAmount.getIssuer() : ctx.tx[sfHolder];
+    AccountID const holder = clawAmount.holds<IOUIssue>()
+        ? clawAmount.getIssuer()
+        : ctx.tx[sfHolder];
 
     auto const sleIssuer = ctx.view.read(keylet::account(issuer));
     auto const sleHolder = ctx.view.read(keylet::account(holder));
@@ -224,7 +225,7 @@ applyHelper(ApplyContext& ctx);
 
 template <>
 TER
-applyHelper<Issue>(ApplyContext& ctx)
+applyHelper<IOUIssue>(ApplyContext& ctx)
 {
     AccountID const issuer = ctx.tx[sfAccount];
     STAmount clawAmount = ctx.tx[sfAmount];

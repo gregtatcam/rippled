@@ -38,14 +38,14 @@ AMMOffer<TIn, TOut>::AMMOffer(
 }
 
 template <OfferAmount TIn, OfferAmount TOut>
-Asset const&
+Issue const&
 AMMOffer<TIn, TOut>::assetIn() const
 {
     return ammLiquidity_.assetIn();
 }
 
 template <OfferAmount TIn, OfferAmount TOut>
-Asset const&
+Issue const&
 AMMOffer<TIn, TOut>::assetOut() const
 {
     return ammLiquidity_.assetOut();

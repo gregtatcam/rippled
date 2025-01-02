@@ -35,8 +35,8 @@ template <class TIn, class TOut>
 class TOfferBase
 {
 protected:
-    Asset assetIn_;
-    Asset assetOut_;
+    Issue assetIn_;
+    Issue assetOut_;
 };
 
 template <>
@@ -132,9 +132,9 @@ public:
         return m_entry->key();
     }
 
-    Asset const&
+    Issue const&
     assetIn() const;
-    Asset const&
+    Issue const&
     assetOut() const;
 
     TAmounts<TIn, TOut>
@@ -268,28 +268,28 @@ TOffer<TIn, TOut>::send(Args&&... args)
 }
 
 template <class TIn, class TOut>
-Asset const&
+Issue const&
 TOffer<TIn, TOut>::assetIn() const
 {
     return this->assetIn_;
 }
 
 template <>
-inline Asset const&
+inline Issue const&
 TOffer<STAmount, STAmount>::assetIn() const
 {
     return m_amounts.in.asset();
 }
 
 template <class TIn, class TOut>
-Asset const&
+Issue const&
 TOffer<TIn, TOut>::assetOut() const
 {
     return this->assetOut_;
 }
 
 template <>
-inline Asset const&
+inline Issue const&
 TOffer<STAmount, STAmount>::assetOut() const
 {
     return m_amounts.out.asset();

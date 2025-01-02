@@ -27,7 +27,7 @@
 #include <xrpl/protocol/AmountConversions.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/IOUAmount.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/Quality.h>
 #include <xrpl/protocol/Rules.h>
 #include <xrpl/protocol/STAccount.h>
@@ -60,7 +60,7 @@ STAmount
 ammLPTokens(
     STAmount const& asset1,
     STAmount const& asset2,
-    Issue const& lptIssue);
+    IOUIssue const& lptIssue);
 
 /** Calculate LP Tokens given asset's deposit amount.
  * @param asset1Balance current AMM asset1 balance

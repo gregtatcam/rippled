@@ -122,7 +122,7 @@ class AMMClawback_test : public jtx::AMMTest
                 ter(temMALFORMED));
         }
 
-        // Test if the Asset field matches the Account field.
+        // Test if the Issue field matches the Account field.
         {
             Env env(*this, features);
             Account gw{"gateway"};
@@ -143,18 +143,18 @@ class AMMClawback_test : public jtx::AMMTest
 
             AMM amm(env, gw, XRP(100), USD(100), ter(tesSUCCESS));
 
-            // The Asset's issuer field is alice, while the Account field is gw.
+            // The Issue's issuer field is alice, while the Account field is gw.
             // This should return temMALFORMED because they do not match.
             env(amm::ammClawback(
                     gw,
                     alice,
-                    Issue{gw["USD"].currency, alice.id()},
+                    IOUIssue{gw["USD"].currency, alice.id()},
                     XRP,
                     std::nullopt),
                 ter(temMALFORMED));
         }
 
-        // Test if the Amount field matches the Asset field.
+        // Test if the Amount field matches the Issue field.
         {
             Env env(*this, features);
             Account gw{"gateway"};
@@ -175,7 +175,7 @@ class AMMClawback_test : public jtx::AMMTest
 
             AMM amm(env, gw, XRP(100), USD(100), ter(tesSUCCESS));
 
-            // The Asset's issuer subfield is gw account and Amount's issuer
+            // The Issue's issuer subfield is gw account and Amount's issuer
             // subfield is alice account. Return temBAD_AMOUNT because
             // they do not match.
             env(amm::ammClawback(
@@ -183,7 +183,7 @@ class AMMClawback_test : public jtx::AMMTest
                     alice,
                     USD,
                     XRP,
-                    STAmount{Issue{gw["USD"].currency, alice.id()}, 1}),
+                    STAmount{IOUIssue{gw["USD"].currency, alice.id()}, 1}),
                 ter(temBAD_AMOUNT));
         }
 
@@ -214,7 +214,7 @@ class AMMClawback_test : public jtx::AMMTest
                     alice,
                     USD,
                     XRP,
-                    STAmount{Issue{gw["USD"].currency, gw.id()}, -1}),
+                    STAmount{IOUIssue{gw["USD"].currency, gw.id()}, -1}),
                 ter(temBAD_AMOUNT));
 
             // Return temBAD_AMOUNT if the Amount value is 0.
@@ -223,7 +223,7 @@ class AMMClawback_test : public jtx::AMMTest
                     alice,
                     USD,
                     XRP,
-                    STAmount{Issue{gw["USD"].currency, gw.id()}, 0}),
+                    STAmount{IOUIssue{gw["USD"].currency, gw.id()}, 0}),
                 ter(temBAD_AMOUNT));
         }
 
@@ -1243,7 +1243,7 @@ class AMMClawback_test : public jtx::AMMTest
                 alice,
                 gw2["USD"],
                 gw["USD"],
-                STAmount{Issue{gw2["USD"].currency, gw2.id()}, 500}),
+                STAmount{IOUIssue{gw2["USD"].currency, gw2.id()}, 500}),
             ter(temMALFORMED));
 
         // gw2 clawback 500 gw2[USD] from alice.
@@ -1252,7 +1252,7 @@ class AMMClawback_test : public jtx::AMMTest
                 alice,
                 gw2["USD"],
                 gw["USD"],
-                STAmount{Issue{gw2["USD"].currency, gw2.id()}, 500}),
+                STAmount{IOUIssue{gw2["USD"].currency, gw2.id()}, 500}),
             ter(tesSUCCESS));
         env.close();
         BEAST_EXPECT(amm.expectBalances(

@@ -41,8 +41,8 @@
 #include <xrpl/json/json_value.h>
 #include <xrpl/json/to_string.h>
 #include <xrpl/protocol/Feature.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/Indexes.h>
-#include <xrpl/protocol/Issue.h>
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/STObject.h>
 #include <xrpl/protocol/STTx.h>
@@ -444,7 +444,7 @@ public:
     */
     // VFALCO NOTE This should return a unit-less amount
     PrettyAmount
-    balance(Account const& account, Issue const& issue) const;
+    balance(Account const& account, IOUIssue const& issue) const;
 
     /** Return the number of objects owned by an account.
      * Returns 0 if the account does not exist.

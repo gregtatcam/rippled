@@ -234,8 +234,8 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
         {
             auto const lpIssue = (*ammSle)[sfLPTokenBalance].issue();
             // Adjust the reserve if LP doesn't have LPToken trustline
-            auto const sle = ctx.view.read(
-                keylet::line(accountID, lpIssue.account, lpIssue.currency));
+            auto const sle = ctx.view.read(keylet::line(
+                accountID, lpIssue.getIssuer(), lpIssue.getCurrency()));
             if (xrpLiquid(ctx.view, accountID, !sle, ctx.j) >= deposit)
                 return TER(tesSUCCESS);
             if (sle)
@@ -258,7 +258,7 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
     {
         // Check if either of the assets is frozen, AMMDeposit is not allowed
         // if either asset is frozen
-        auto checkAsset = [&](Asset const& asset) -> TER {
+        auto checkAsset = [&](Issue const& asset) -> TER {
             if (auto const ter = requireAuth(
                     ctx.view, asset, accountID, MPTAuthType::WeakAuth))
             {
@@ -402,8 +402,8 @@ AMMDeposit::applyGuts(Sandbox& sb)
     auto const expected = ammHolds(
         sb,
         *ammSle,
-        amount ? amount->asset() : std::optional<Asset>{},
-        amount2 ? amount2->asset() : std::optional<Asset>{},
+        amount ? amount->asset() : std::optional<Issue>{},
+        amount2 ? amount2->asset() : std::optional<Issue>{},
         FreezeHandling::fhZERO_IF_FROZEN,
         AuthHandling::ahIGNORE_AUTH,
         ctx_.journal);
@@ -540,8 +540,8 @@ AMMDeposit::deposit(
         {
             auto const& lpIssue = lpTokensDeposit.issue();
             // Adjust the reserve if LP doesn't have LPToken trustline
-            auto const sle = view.read(
-                keylet::line(account_, lpIssue.account, lpIssue.currency));
+            auto const sle = view.read(keylet::line(
+                account_, lpIssue.getIssuer(), lpIssue.getCurrency()));
             if (xrpLiquid(view, account_, !sle, j_) >= depositAmount)
                 return tesSUCCESS;
         }
@@ -949,7 +949,7 @@ AMMDeposit::equalDepositInEmptyState(
     AccountID const& ammAccount,
     STAmount const& amount,
     STAmount const& amount2,
-    Issue const& lptIssue,
+    IOUIssue const& lptIssue,
     std::uint16_t tfee)
 {
     return deposit(

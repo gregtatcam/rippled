@@ -19,8 +19,8 @@
 
 #include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/ledger/View.h>
-#include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Indexes.h>
+#include <xrpl/protocol/Issue.h>
 
 namespace ripple {
 
@@ -28,7 +28,7 @@ static TER
 isMPTAllowed(
     ReadView const& view,
     TxType txType,
-    Asset const& asset,
+    Issue const& asset,
     AccountID const& accountID,
     std::optional<AccountID> const& destAccount)
 {
@@ -83,7 +83,7 @@ TER
 isMPTTxAllowed(
     ReadView const& view,
     TxType txType,
-    Asset const& asset,
+    Issue const& asset,
     AccountID const& accountID)
 {
     // use isDEXAllowed for payment/offer crossing
@@ -94,7 +94,7 @@ isMPTTxAllowed(
 TER
 isMPTDEXAllowed(
     ReadView const& view,
-    Asset const& asset,
+    Issue const& asset,
     AccountID const& accountID,
     AccountID const& dest)
 {

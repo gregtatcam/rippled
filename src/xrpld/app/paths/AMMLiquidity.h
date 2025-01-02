@@ -57,8 +57,8 @@ private:
     AMMContext& ammContext_;
     AccountID const ammAccountID_;
     std::uint32_t const tradingFee_;
-    Asset const assetIn_;
-    Asset const assetOut_;
+    Issue const assetIn_;
+    Issue const assetOut_;
     // Initial AMM pool balances
     TAmounts<TIn, TOut> const initialBalances_;
     beast::Journal const j_;
@@ -68,8 +68,8 @@ public:
         ReadView const& view,
         AccountID const& ammAccountID,
         std::uint32_t tradingFee,
-        Asset const& in,
-        Asset const& out,
+        Issue const& in,
+        Issue const& out,
         AMMContext& ammContext,
         beast::Journal j);
     ~AMMLiquidity() = default;
@@ -110,13 +110,13 @@ public:
         return ammContext_;
     }
 
-    Asset const&
+    Issue const&
     assetIn() const
     {
         return assetIn_;
     }
 
-    Asset const&
+    Issue const&
     assetOut() const
     {
         return assetOut_;

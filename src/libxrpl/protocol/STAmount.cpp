@@ -99,9 +99,10 @@ getMPTValue(STAmount const& amount)
 static bool
 areComparable(STAmount const& v1, STAmount const& v2)
 {
-    if (v1.holds<Issue>() && v2.holds<Issue>())
+    if (v1.holds<IOUIssue>() && v2.holds<IOUIssue>())
         return v1.native() == v2.native() &&
-            v1.get<Issue>().currency == v2.get<Issue>().currency;
+            v1.get<IOUIssue>().getCurrency() ==
+            v2.get<IOUIssue>().getCurrency();
     if (v1.holds<MPTIssue>() && v2.holds<MPTIssue>())
         return v1.get<MPTIssue>() == v2.get<MPTIssue>();
     return false;
@@ -120,11 +121,11 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
             mOffset = 0;
             mIsNegative = (value & cPositive) == 0;
             mValue = (value << 8) | sit.get8();
-            mAsset = sit.get192();
+            mIssue = sit.get192();
             return;
         }
         // else is XRP
-        mAsset = xrpIssue();
+        mIssue = xrpIssue();
         // positive
         if ((value & cPositive) != 0)
         {
@@ -144,15 +145,15 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
         return;
     }
 
-    Issue issue;
-    issue.currency = sit.get160();
+    IOUIssue issue;
+    issue.setCurrency(static_cast<Currency>(sit.get160()));
 
-    if (isXRP(issue.currency))
+    if (isXRP(issue.getCurrency()))
         Throw<std::runtime_error>("invalid native currency");
 
-    issue.account = sit.get160();
+    issue.setIssuer(static_cast<AccountID>(sit.get160()));
 
-    if (isXRP(issue.account))
+    if (isXRP(issue.getIssuer()))
         Throw<std::runtime_error>("invalid native account");
 
     // 10 bits for the offset, sign and "not native" flag
@@ -171,7 +172,7 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
             Throw<std::runtime_error>("invalid currency value");
         }
 
-        mAsset = issue;
+        mIssue = issue;
         mValue = value;
         mOffset = offset;
         mIsNegative = isNegative;
@@ -182,7 +183,7 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
     if (offset != 512)
         Throw<std::runtime_error>("invalid currency value");
 
-    mAsset = issue;
+    mIssue = issue;
     mValue = 0;
     mOffset = 0;
     mIsNegative = false;
@@ -190,14 +191,14 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
 }
 
 STAmount::STAmount(SField const& name, std::int64_t mantissa)
-    : STBase(name), mAsset(xrpIssue()), mOffset(0)
+    : STBase(name), mIssue(xrpIssue()), mOffset(0)
 {
     set(mantissa);
 }
 
 STAmount::STAmount(SField const& name, std::uint64_t mantissa, bool negative)
     : STBase(name)
-    , mAsset(xrpIssue())
+    , mIssue(xrpIssue())
     , mValue(mantissa)
     , mOffset(0)
     , mIsNegative(negative)
@@ -210,7 +211,7 @@ STAmount::STAmount(SField const& name, std::uint64_t mantissa, bool negative)
 
 STAmount::STAmount(SField const& name, STAmount const& from)
     : STBase(name)
-    , mAsset(from.mAsset)
+    , mIssue(from.mIssue)
     , mValue(from.mValue)
     , mOffset(from.mOffset)
     , mIsNegative(from.mIsNegative)
@@ -224,7 +225,7 @@ STAmount::STAmount(SField const& name, STAmount const& from)
 //------------------------------------------------------------------------------
 
 STAmount::STAmount(std::uint64_t mantissa, bool negative)
-    : mAsset(xrpIssue())
+    : mIssue(xrpIssue())
     , mValue(mantissa)
     , mOffset(0)
     , mIsNegative(mantissa != 0 && negative)
@@ -236,7 +237,7 @@ STAmount::STAmount(std::uint64_t mantissa, bool negative)
 }
 
 STAmount::STAmount(XRPAmount const& amount)
-    : mAsset(xrpIssue()), mOffset(0), mIsNegative(amount < beast::zero)
+    : mIssue(xrpIssue()), mOffset(0), mIsNegative(amount < beast::zero)
 {
     if (mIsNegative)
         mValue = unsafe_cast<std::uint64_t>(-amount.drops());
@@ -287,7 +288,7 @@ STAmount::xrp() const
 IOUAmount
 STAmount::iou() const
 {
-    if (native() || !holds<Issue>())
+    if (native() || !holds<IOUIssue>())
         Throw<std::logic_error>("Cannot return non-IOU STAmount as IOUAmount");
 
     auto mantissa = static_cast<std::int64_t>(mValue);
@@ -371,7 +372,7 @@ operator+(STAmount const& v1, STAmount const& v2)
     if (v1.native())
         return {v1.getFName(), getSNValue(v1) + getSNValue(v2)};
     if (v1.holds<MPTIssue>())
-        return {v1.mAsset, v1.mpt().value() + v2.mpt().value()};
+        return {v1.mIssue, v1.mpt().value() + v2.mpt().value()};
 
     if (getSTNumberSwitchover())
     {
@@ -433,9 +434,9 @@ operator-(STAmount const& v1, STAmount const& v2)
 std::uint64_t const STAmount::uRateOne = getRate(STAmount(1), STAmount(1));
 
 void
-STAmount::setIssue(Asset const& asset)
+STAmount::setIssue(Issue const& asset)
 {
-    mAsset = asset;
+    mIssue = asset;
 }
 
 // Convert an offer into an index amount so they sort by rate.
@@ -481,7 +482,7 @@ STAmount::setJson(Json::Value& elem) const
         // It is an error for currency or issuer not to be specified for valid
         // json.
         elem[jss::value] = getText();
-        mAsset.setJson(elem);
+        mIssue.setJson(elem);
     }
     else
     {
@@ -507,7 +508,7 @@ STAmount::getFullText() const
     std::string ret;
 
     ret.reserve(64);
-    ret = getText() + "/" + mAsset.getText();
+    ret = getText() + "/" + mIssue.getText();
     return ret;
 }
 
@@ -527,7 +528,7 @@ STAmount::getText() const
     bool const scientific(
         (mOffset != 0) && ((mOffset < -25) || (mOffset > -5)));
 
-    if (native() || mAsset.holds<MPTIssue>() || scientific)
+    if (native() || mIssue.holds<MPTIssue>() || scientific)
     {
         ret.append(raw_value);
 
@@ -620,14 +621,14 @@ STAmount::add(Serializer& s) const
         else
             s.add64(mValue);
     }
-    else if (mAsset.holds<MPTIssue>())
+    else if (mIssue.holds<MPTIssue>())
     {
         auto u8 = static_cast<unsigned char>(cMPToken >> 56);
         if (!mIsNegative)
             u8 |= static_cast<unsigned char>(cPositive >> 56);
         s.add8(u8);
         s.add64(mValue);
-        s.addBitString(mAsset.get<MPTIssue>().getMptID());
+        s.addBitString(mIssue.get<MPTIssue>().getMptID());
     }
     else
     {
@@ -642,8 +643,8 @@ STAmount::add(Serializer& s) const
                 mValue |
                 (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
                  << (64 - 10)));
-        s.addBitString(mAsset.get<Issue>().currency);
-        s.addBitString(mAsset.get<Issue>().account);
+        s.addBitString(mIssue.get<IOUIssue>().getCurrency());
+        s.addBitString(mIssue.get<IOUIssue>().getIssuer());
     }
 }
 
@@ -681,7 +682,7 @@ STAmount::isDefault() const
 void
 STAmount::canonicalize()
 {
-    if (native() || mAsset.holds<MPTIssue>())
+    if (native() || mIssue.holds<MPTIssue>())
     {
         // native and MPT currency amounts should always have an offset of zero
         // log(2^64,10) ~ 19.2
@@ -700,7 +701,7 @@ STAmount::canonicalize()
                 Throw<std::runtime_error>(
                     "Native currency amount out of range");
             // log(maxMPTokenAmount, 10) ~ 18.96
-            if (mAsset.holds<MPTIssue>() && mOffset > 18)
+            if (mIssue.holds<MPTIssue>() && mOffset > 18)
                 Throw<std::runtime_error>("MPT amount out of range");
         }
 
@@ -831,7 +832,7 @@ amountFromQuality(std::uint64_t rate)
 }
 
 STAmount
-amountFromString(Asset const& asset, std::string const& amount)
+amountFromString(Issue const& asset, std::string const& amount)
 {
     static boost::regex const reNumber(
         "^"                       // the beginning of the string
@@ -902,7 +903,7 @@ amountFromJson(SField const& name, Json::Value const& v)
     STAmount::mantissa_type mantissa = 0;
     STAmount::exponent_type exponent = 0;
     bool negative = false;
-    Asset asset;
+    Issue asset;
 
     Json::Value value;
     Json::Value currencyOrMPTID;
@@ -917,7 +918,7 @@ amountFromJson(SField const& name, Json::Value const& v)
     else if (v.isObject())
     {
         if (!validJSONAsset(v))
-            Throw<std::runtime_error>("Invalid Asset's Json specification");
+            Throw<std::runtime_error>("Invalid Issue's Json specification");
 
         value = v[jss::value];
         if (v.isMember(jss::mpt_issuance_id))
@@ -981,12 +982,13 @@ amountFromJson(SField const& name, Json::Value const& v)
         }
         else
         {
-            Issue issue;
-            if (!to_currency(issue.currency, currencyOrMPTID.asString()))
+            Currency currency;
+            AccountID account;
+            if (!to_currency(currency, currencyOrMPTID.asString()))
                 Throw<std::runtime_error>("invalid currency");
-            if (!issuer.isString() ||
-                !to_issuer(issue.account, issuer.asString()))
+            if (!issuer.isString() || !to_issuer(account, issuer.asString()))
                 Throw<std::runtime_error>("invalid issuer");
+            IOUIssue issue{currency, account};
             if (issue.native())
                 Throw<std::runtime_error>("invalid issuer");
             asset = issue;
@@ -1157,7 +1159,7 @@ muldiv_round(
 }
 
 STAmount
-divide(STAmount const& num, STAmount const& den, Asset const& asset)
+divide(STAmount const& num, STAmount const& den, Issue const& asset)
 {
     if (den == beast::zero)
         Throw<std::runtime_error>("division by zero");
@@ -1202,7 +1204,7 @@ divide(STAmount const& num, STAmount const& den, Asset const& asset)
 }
 
 STAmount
-multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
+multiply(STAmount const& v1, STAmount const& v2, Issue const& asset)
 {
     if (v1 == beast::zero || v2 == beast::zero)
         return STAmount(asset);
@@ -1405,7 +1407,7 @@ static STAmount
 mulRoundImpl(
     STAmount const& v1,
     STAmount const& v2,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     if (v1 == beast::zero || v2 == beast::zero)
@@ -1510,7 +1512,7 @@ STAmount
 mulRound(
     STAmount const& v1,
     STAmount const& v2,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     return mulRoundImpl<canonicalizeRound, DontAffectNumberRoundMode>(
@@ -1521,7 +1523,7 @@ STAmount
 mulRoundStrict(
     STAmount const& v1,
     STAmount const& v2,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     return mulRoundImpl<canonicalizeRoundStrict, NumberRoundModeGuard>(
@@ -1535,7 +1537,7 @@ static STAmount
 divRoundImpl(
     STAmount const& num,
     STAmount const& den,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     if (den == beast::zero)
@@ -1617,7 +1619,7 @@ STAmount
 divRound(
     STAmount const& num,
     STAmount const& den,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     return divRoundImpl<DontAffectNumberRoundMode>(num, den, asset, roundUp);
@@ -1627,7 +1629,7 @@ STAmount
 divRoundStrict(
     STAmount const& num,
     STAmount const& den,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp)
 {
     return divRoundImpl<NumberRoundModeGuard>(num, den, asset, roundUp);

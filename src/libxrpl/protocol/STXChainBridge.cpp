@@ -19,8 +19,8 @@
 
 #include <xrpl/protocol/STXChainBridge.h>
 
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/Indexes.h>
-#include <xrpl/protocol/Issue.h>
 #include <xrpl/protocol/PublicKey.h>
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STAccount.h>
@@ -45,9 +45,9 @@ STXChainBridge::STXChainBridge(SField const& name) : STBase{name}
 
 STXChainBridge::STXChainBridge(
     AccountID const& srcChainDoor,
-    Issue const& srcChainIssue,
+    IOUIssue const& srcChainIssue,
     AccountID const& dstChainDoor,
-    Issue const& dstChainIssue)
+    IOUIssue const& dstChainIssue)
     : STBase{sfXChainBridge}
     , lockingChainDoor_{sfLockingChainDoor, srcChainDoor}
     , lockingChainIssue_{sfLockingChainIssue, srcChainIssue}
@@ -130,10 +130,10 @@ STXChainBridge::STXChainBridge(SField const& name, Json::Value const& v)
 
     lockingChainDoor_ = STAccount{sfLockingChainDoor, *lockingChainDoor};
     lockingChainIssue_ =
-        STIssue{sfLockingChainIssue, issueFromJson(lockingChainIssue)};
+        STIssue{sfLockingChainIssue, iouIssueFromJson(lockingChainIssue)};
     issuingChainDoor_ = STAccount{sfIssuingChainDoor, *issuingChainDoor};
     issuingChainIssue_ =
-        STIssue{sfIssuingChainIssue, issueFromJson(issuingChainIssue)};
+        STIssue{sfIssuingChainIssue, iouIssueFromJson(issuingChainIssue)};
 }
 
 STXChainBridge::STXChainBridge(SerialIter& sit, SField const& name)

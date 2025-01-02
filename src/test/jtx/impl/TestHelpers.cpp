@@ -44,6 +44,28 @@ getAccountLines(Env& env, AccountID const& acctId)
     return env.rpc("json", "account_lines", to_string(jv))[jss::result];
 }
 
+Json::Value
+getAccountLines(Env& env, AccountID const& acctId, IOUIssue const& issue)
+{
+    auto const jrr = getAccountLines(env, acctId);
+    Json::Value res;
+    for (auto const& line : jrr[jss::lines])
+    {
+        if (line[jss::currency].asString() == to_string(issue.getCurrency()))
+        {
+            Json::Value v;
+            v[jss::currency] = line[jss::currency];
+            v[jss::balance] = line[jss::balance];
+            v[jss::limit] = line[jss::limit];
+            v[jss::account] = line[jss::account];
+            res[jss::lines].append(v);
+        }
+    }
+    if (!res.isNull())
+        return res;
+    return jrr;
+}
+
 bool
 checkArraySize(Json::Value const& val, unsigned int size)
 {
@@ -79,15 +101,15 @@ equal(STAmount const& sa1, STAmount const& sa2)
     return sa1 == sa2 && sa1.getIssuer() == sa2.getIssuer();
 }
 
-// Issue path element
+// IOUIssue path element
 STPathElement
-IPE(Issue const& iss)
+IPE(IOUIssue const& iss)
 {
     return STPathElement(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         xrpAccount(),
-        PathAsset{iss.currency},
-        iss.account);
+        PathIssue{iss.getCurrency()},
+        iss.getIssuer());
 }
 STPathElement
 IPE(MPTIssue const& iss)
@@ -95,7 +117,7 @@ IPE(MPTIssue const& iss)
     return STPathElement(
         STPathElement::typeMPT | STPathElement::typeIssuer,
         xrpAccount(),
-        PathAsset{iss.getMptID()},
+        PathIssue{iss.getMptID()},
         iss.getIssuer());
 }
 
@@ -268,8 +290,8 @@ expectLine(
 {
     if (auto const sle = env.le(keylet::line(account, value.issue())))
     {
-        Issue const issue = value.issue();
-        bool const accountLow = account < issue.account;
+        IOUIssue const issue = value.issue();
+        bool const accountLow = account < issue.getIssuer();
 
         bool expectDefaultTrustLine = true;
         if (defaultLimits)
@@ -277,8 +299,8 @@ expectLine(
             STAmount low{issue};
             STAmount high{issue};
 
-            low.setIssuer(accountLow ? account : issue.account);
-            high.setIssuer(accountLow ? issue.account : account);
+            low.setIssuer(accountLow ? account : issue.getIssuer());
+            high.setIssuer(accountLow ? issue.getIssuer() : account);
 
             expectDefaultTrustLine = sle->getFieldAmount(sfLowLimit) == low &&
                 sle->getFieldAmount(sfHighLimit) == high;
@@ -536,14 +558,14 @@ cpe(Currency const& c)
 
 // All path element
 STPathElement
-allpe(AccountID const& a, Issue const& iss)
+allpe(AccountID const& a, IOUIssue const& iss)
 {
     return STPathElement(
         STPathElement::typeAccount | STPathElement::typeCurrency |
             STPathElement::typeIssuer,
         a,
-        iss.currency,
-        iss.account);
+        iss.getCurrency(),
+        iss.getIssuer());
 };
 
 }  // namespace jtx

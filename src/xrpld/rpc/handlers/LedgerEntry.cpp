@@ -520,7 +520,7 @@ parseXChainOwnedClaimID(Json::Value const& claim_id, Json::Value& jvResult)
         claim_id[sfLockingChainDoor.getJsonName()].asString());
     auto const issuingChainDoor = parseBase58<AccountID>(
         claim_id[sfIssuingChainDoor.getJsonName()].asString());
-    Issue lockingChainIssue, issuingChainIssue;
+    IOUIssue lockingChainIssue, issuingChainIssue;
     bool valid = lockingChainDoor && issuingChainDoor;
 
     if (valid)
@@ -528,9 +528,9 @@ parseXChainOwnedClaimID(Json::Value const& claim_id, Json::Value& jvResult)
         try
         {
             lockingChainIssue =
-                issueFromJson(claim_id[sfLockingChainIssue.getJsonName()]);
+                iouIssueFromJson(claim_id[sfLockingChainIssue.getJsonName()]);
             issuingChainIssue =
-                issueFromJson(claim_id[sfIssuingChainIssue.getJsonName()]);
+                iouIssueFromJson(claim_id[sfIssuingChainIssue.getJsonName()]);
         }
         catch (std::runtime_error const& ex)
         {
@@ -596,16 +596,16 @@ parseXChainOwnedCreateAccountClaimID(
         claim_id[sfLockingChainDoor.getJsonName()].asString());
     auto const issuingChainDoor = parseBase58<AccountID>(
         claim_id[sfIssuingChainDoor.getJsonName()].asString());
-    Issue lockingChainIssue, issuingChainIssue;
+    IOUIssue lockingChainIssue, issuingChainIssue;
     bool valid = lockingChainDoor && issuingChainDoor;
     if (valid)
     {
         try
         {
             lockingChainIssue =
-                issueFromJson(claim_id[sfLockingChainIssue.getJsonName()]);
+                iouIssueFromJson(claim_id[sfLockingChainIssue.getJsonName()]);
             issuingChainIssue =
-                issueFromJson(claim_id[sfIssuingChainIssue.getJsonName()]);
+                iouIssueFromJson(claim_id[sfIssuingChainIssue.getJsonName()]);
         }
         catch (std::runtime_error const& ex)
         {

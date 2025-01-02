@@ -21,7 +21,7 @@
 #define RIPPLE_PROTOCOL_STISSUE_H_INCLUDED
 
 #include <xrpl/basics/CountedObject.h>
-#include <xrpl/protocol/Asset.h>
+#include <xrpl/protocol/Issue.h>
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STBase.h>
 #include <xrpl/protocol/Serializer.h>
@@ -31,16 +31,16 @@ namespace ripple {
 class STIssue final : public STBase, CountedObject<STIssue>
 {
 private:
-    Asset asset_{xrpIssue()};
+    Issue asset_{xrpIssue()};
 
 public:
-    using value_type = Asset;
+    using value_type = Issue;
 
     STIssue() = default;
 
     explicit STIssue(SerialIter& sit, SField const& name);
 
-    template <AssetType A>
+    template <IssueType A>
     explicit STIssue(SField const& name, A const& issue);
 
     explicit STIssue(SField const& name);
@@ -57,7 +57,7 @@ public:
     value() const noexcept;
 
     void
-    setIssue(Asset const& issue);
+    setIssue(Issue const& issue);
 
     SerializedTypeID
     getSType() const override;
@@ -83,10 +83,10 @@ public:
     operator<=>(STIssue const& lhs, STIssue const& rhs);
 
     friend constexpr bool
-    operator==(STIssue const& lhs, Asset const& rhs);
+    operator==(STIssue const& lhs, Issue const& rhs);
 
     friend constexpr std::weak_ordering
-    operator<=>(STIssue const& lhs, Asset const& rhs);
+    operator<=>(STIssue const& lhs, Issue const& rhs);
 
 private:
     STBase*
@@ -97,11 +97,11 @@ private:
     friend class detail::STVar;
 };
 
-template <AssetType A>
+template <IssueType A>
 STIssue::STIssue(SField const& name, A const& asset)
     : STBase{name}, asset_{asset}
 {
-    if (holds<Issue>() && !isConsistent(asset_.get<Issue>()))
+    if (holds<IOUIssue>() && !isConsistent(asset_.get<IOUIssue>()))
         Throw<std::runtime_error>(
             "Invalid asset: currency and account native mismatch");
 }
@@ -121,7 +121,7 @@ TIss const&
 STIssue::get() const
 {
     if (!holds<TIss>(asset_))
-        Throw<std::runtime_error>("Asset doesn't hold the requested issue");
+        Throw<std::runtime_error>("Issue doesn't hold the requested issue");
     return std::get<TIss>(asset_);
 }
 
@@ -132,9 +132,9 @@ STIssue::value() const noexcept
 }
 
 inline void
-STIssue::setIssue(Asset const& asset)
+STIssue::setIssue(Issue const& asset)
 {
-    if (holds<Issue>() && !isConsistent(asset_.get<Issue>()))
+    if (holds<IOUIssue>() && !isConsistent(asset_.get<IOUIssue>()))
         Throw<std::runtime_error>(
             "Invalid asset: currency and account native mismatch");
 
@@ -154,13 +154,13 @@ operator<=>(STIssue const& lhs, STIssue const& rhs)
 }
 
 constexpr bool
-operator==(STIssue const& lhs, Asset const& rhs)
+operator==(STIssue const& lhs, Issue const& rhs)
 {
     return lhs.asset_ == rhs;
 }
 
 constexpr std::weak_ordering
-operator<=>(STIssue const& lhs, Asset const& rhs)
+operator<=>(STIssue const& lhs, Issue const& rhs)
 {
     return lhs.asset_ <=> rhs;
 }

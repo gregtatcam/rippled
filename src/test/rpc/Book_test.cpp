@@ -28,7 +28,7 @@ namespace test {
 class Book_test : public beast::unit_test::suite
 {
     std::string
-    getBookDir(jtx::Env& env, Issue const& in, Issue const& out)
+    getBookDir(jtx::Env& env, IOUIssue const& in, IOUIssue const& out)
     {
         std::string dir;
         auto uBookBase = getBookBase({in, out});

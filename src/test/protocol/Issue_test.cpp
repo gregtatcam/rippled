@@ -20,7 +20,7 @@
 #include <xrpl/basics/UnorderedContainers.h>
 #include <xrpl/beast/unit_test.h>
 #include <xrpl/protocol/Book.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <map>
 #include <set>
 #include <typeinfo>
@@ -76,7 +76,7 @@ public:
     //--------------------------------------------------------------------------
 
     // Comparison, hash tests for Issue
-    template <class Issue>
+    template <class IOUIssue>
     void
     testIssue()
     {
@@ -87,42 +87,42 @@ public:
         Currency const c3(3);
         AccountID const i3(3);
 
-        BEAST_EXPECT(Issue(c1, i1) != Issue(c2, i1));
-        BEAST_EXPECT(Issue(c1, i1) < Issue(c2, i1));
-        BEAST_EXPECT(Issue(c1, i1) <= Issue(c2, i1));
-        BEAST_EXPECT(Issue(c2, i1) <= Issue(c2, i1));
-        BEAST_EXPECT(Issue(c2, i1) == Issue(c2, i1));
-        BEAST_EXPECT(Issue(c2, i1) >= Issue(c2, i1));
-        BEAST_EXPECT(Issue(c3, i1) >= Issue(c2, i1));
-        BEAST_EXPECT(Issue(c3, i1) > Issue(c2, i1));
-        BEAST_EXPECT(Issue(c1, i1) != Issue(c1, i2));
-        BEAST_EXPECT(Issue(c1, i1) < Issue(c1, i2));
-        BEAST_EXPECT(Issue(c1, i1) <= Issue(c1, i2));
-        BEAST_EXPECT(Issue(c1, i2) <= Issue(c1, i2));
-        BEAST_EXPECT(Issue(c1, i2) == Issue(c1, i2));
-        BEAST_EXPECT(Issue(c1, i2) >= Issue(c1, i2));
-        BEAST_EXPECT(Issue(c1, i3) >= Issue(c1, i2));
-        BEAST_EXPECT(Issue(c1, i3) > Issue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i1) != IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c1, i1) < IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c1, i1) <= IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c2, i1) <= IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c2, i1) == IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c2, i1) >= IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c3, i1) >= IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c3, i1) > IOUIssue(c2, i1));
+        BEAST_EXPECT(IOUIssue(c1, i1) != IOUIssue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i1) < IOUIssue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i1) <= IOUIssue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i2) <= IOUIssue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i2) == IOUIssue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i2) >= IOUIssue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i3) >= IOUIssue(c1, i2));
+        BEAST_EXPECT(IOUIssue(c1, i3) > IOUIssue(c1, i2));
 
-        std::hash<Issue> hash;
+        std::hash<IOUIssue> hash;
 
-        BEAST_EXPECT(hash(Issue(c1, i1)) == hash(Issue(c1, i1)));
-        BEAST_EXPECT(hash(Issue(c1, i2)) == hash(Issue(c1, i2)));
-        BEAST_EXPECT(hash(Issue(c1, i3)) == hash(Issue(c1, i3)));
-        BEAST_EXPECT(hash(Issue(c2, i1)) == hash(Issue(c2, i1)));
-        BEAST_EXPECT(hash(Issue(c2, i2)) == hash(Issue(c2, i2)));
-        BEAST_EXPECT(hash(Issue(c2, i3)) == hash(Issue(c2, i3)));
-        BEAST_EXPECT(hash(Issue(c3, i1)) == hash(Issue(c3, i1)));
-        BEAST_EXPECT(hash(Issue(c3, i2)) == hash(Issue(c3, i2)));
-        BEAST_EXPECT(hash(Issue(c3, i3)) == hash(Issue(c3, i3)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c1, i2)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c1, i3)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c2, i1)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c2, i2)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c2, i3)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c3, i1)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c3, i2)));
-        BEAST_EXPECT(hash(Issue(c1, i1)) != hash(Issue(c3, i3)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) == hash(IOUIssue(c1, i1)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i2)) == hash(IOUIssue(c1, i2)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i3)) == hash(IOUIssue(c1, i3)));
+        BEAST_EXPECT(hash(IOUIssue(c2, i1)) == hash(IOUIssue(c2, i1)));
+        BEAST_EXPECT(hash(IOUIssue(c2, i2)) == hash(IOUIssue(c2, i2)));
+        BEAST_EXPECT(hash(IOUIssue(c2, i3)) == hash(IOUIssue(c2, i3)));
+        BEAST_EXPECT(hash(IOUIssue(c3, i1)) == hash(IOUIssue(c3, i1)));
+        BEAST_EXPECT(hash(IOUIssue(c3, i2)) == hash(IOUIssue(c3, i2)));
+        BEAST_EXPECT(hash(IOUIssue(c3, i3)) == hash(IOUIssue(c3, i3)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c1, i2)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c1, i3)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c2, i1)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c2, i2)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c2, i3)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c3, i1)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c3, i2)));
+        BEAST_EXPECT(hash(IOUIssue(c1, i1)) != hash(IOUIssue(c3, i3)));
     }
 
     template <class Set>
@@ -133,8 +133,8 @@ public:
         AccountID const i1(1);
         Currency const c2(2);
         AccountID const i2(2);
-        Issue const a1(c1, i1);
-        Issue const a2(c2, i2);
+        IOUIssue const a1(c1, i1);
+        IOUIssue const a2(c2, i2);
 
         {
             Set c;
@@ -146,11 +146,11 @@ public:
             if (!BEAST_EXPECT(c.size() == 2))
                 return;
 
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i2)) == 0))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i2)) == 0))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i1)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i1)) == 1))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c2, i2)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c2, i2)) == 1))
                 return;
             if (!BEAST_EXPECT(c.empty()))
                 return;
@@ -166,11 +166,11 @@ public:
             if (!BEAST_EXPECT(c.size() == 2))
                 return;
 
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i2)) == 0))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i2)) == 0))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i1)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i1)) == 1))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c2, i2)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c2, i2)) == 1))
                 return;
             if (!BEAST_EXPECT(c.empty()))
                 return;
@@ -194,8 +194,8 @@ public:
         AccountID const i1(1);
         Currency const c2(2);
         AccountID const i2(2);
-        Issue const a1(c1, i1);
-        Issue const a2(c2, i2);
+        IOUIssue const a1(c1, i1);
+        IOUIssue const a2(c2, i2);
 
         {
             Map c;
@@ -207,11 +207,11 @@ public:
             if (!BEAST_EXPECT(c.size() == 2))
                 return;
 
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i2)) == 0))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i2)) == 0))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i1)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i1)) == 1))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c2, i2)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c2, i2)) == 1))
                 return;
             if (!BEAST_EXPECT(c.empty()))
                 return;
@@ -227,11 +227,11 @@ public:
             if (!BEAST_EXPECT(c.size() == 2))
                 return;
 
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i2)) == 0))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i2)) == 0))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c1, i1)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c1, i1)) == 1))
                 return;
-            if (!BEAST_EXPECT(c.erase(Issue(c2, i2)) == 1))
+            if (!BEAST_EXPECT(c.erase(IOUIssue(c2, i2)) == 1))
                 return;
             if (!BEAST_EXPECT(c.empty()))
                 return;
@@ -241,48 +241,48 @@ public:
     void
     testIssueSets()
     {
-        testcase("std::set <Issue>");
-        testIssueSet<std::set<Issue>>();
+        testcase("std::set <IOUIssue>");
+        testIssueSet<std::set<IOUIssue>>();
 
-        testcase("std::set <Issue>");
-        testIssueSet<std::set<Issue>>();
+        testcase("std::set <IOUIssue>");
+        testIssueSet<std::set<IOUIssue>>();
 
 #if RIPPLE_ASSETS_ENABLE_STD_HASH
-        testcase("std::unordered_set <Issue>");
-        testIssueSet<std::unordered_set<Issue>>();
+        testcase("std::unordered_set <IOUIssue>");
+        testIssueSet<std::unordered_set<IOUIssue>>();
 
-        testcase("std::unordered_set <Issue>");
-        testIssueSet<std::unordered_set<Issue>>();
+        testcase("std::unordered_set <IOUIssue>");
+        testIssueSet<std::unordered_set<IOUIssue>>();
 #endif
 
-        testcase("hash_set <Issue>");
-        testIssueSet<hash_set<Issue>>();
+        testcase("hash_set <IOUIssue>");
+        testIssueSet<hash_set<IOUIssue>>();
 
-        testcase("hash_set <Issue>");
-        testIssueSet<hash_set<Issue>>();
+        testcase("hash_set <IOUIssue>");
+        testIssueSet<hash_set<IOUIssue>>();
     }
 
     void
     testIssueMaps()
     {
-        testcase("std::map <Issue, int>");
-        testIssueMap<std::map<Issue, int>>();
+        testcase("std::map <IOUIssue, int>");
+        testIssueMap<std::map<IOUIssue, int>>();
 
-        testcase("std::map <Issue, int>");
-        testIssueMap<std::map<Issue, int>>();
+        testcase("std::map <IOUIssue, int>");
+        testIssueMap<std::map<IOUIssue, int>>();
 
 #if RIPPLE_ASSETS_ENABLE_STD_HASH
-        testcase("std::unordered_map <Issue, int>");
-        testIssueMap<std::unordered_map<Issue, int>>();
+        testcase("std::unordered_map <IOUIssue, int>");
+        testIssueMap<std::unordered_map<IOUIssue, int>>();
 
-        testcase("std::unordered_map <Issue, int>");
-        testIssueMap<std::unordered_map<Issue, int>>();
+        testcase("std::unordered_map <IOUIssue, int>");
+        testIssueMap<std::unordered_map<IOUIssue, int>>();
 
-        testcase("hash_map <Issue, int>");
-        testIssueMap<hash_map<Issue, int>>();
+        testcase("hash_map <IOUIssue, int>");
+        testIssueMap<hash_map<IOUIssue, int>>();
 
-        testcase("hash_map <Issue, int>");
-        testIssueMap<hash_map<Issue, int>>();
+        testcase("hash_map <IOUIssue, int>");
+        testIssueMap<hash_map<IOUIssue, int>>();
 
 #endif
     }
@@ -301,10 +301,10 @@ public:
         Currency const c3(3);
         AccountID const i3(3);
 
-        Issue a1(c1, i1);
-        Issue a2(c1, i2);
-        Issue a3(c2, i2);
-        Issue a4(c3, i2);
+        IOUIssue a1(c1, i1);
+        IOUIssue a2(c1, i2);
+        IOUIssue a3(c2, i2);
+        IOUIssue a4(c3, i2);
 
         BEAST_EXPECT(Book(a1, a2) != Book(a2, a3));
         BEAST_EXPECT(Book(a1, a2) < Book(a2, a3));
@@ -359,8 +359,8 @@ public:
         AccountID const i1(1);
         Currency const c2(2);
         AccountID const i2(2);
-        Issue const a1(c1, i1);
-        Issue const a2(c2, i2);
+        IOUIssue const a1(c1, i1);
+        IOUIssue const a2(c2, i2);
         Book const b1(a1, a2);
         Book const b2(a2, a1);
 
@@ -422,8 +422,8 @@ public:
         AccountID const i1(1);
         Currency const c2(2);
         AccountID const i2(2);
-        Issue const a1(c1, i1);
-        Issue const a2(c2, i2);
+        IOUIssue const a1(c1, i1);
+        IOUIssue const a2(c2, i2);
         Book const b1(a1, a2);
         Book const b2(a2, a1);
 
@@ -537,10 +537,10 @@ public:
         // ---
 
         testcase("Issue");
-        testIssue<Issue>();
+        testIssue<IOUIssue>();
 
         testcase("Issue");
-        testIssue<Issue>();
+        testIssue<IOUIssue>();
 
         testIssueSets();
         testIssueMaps();

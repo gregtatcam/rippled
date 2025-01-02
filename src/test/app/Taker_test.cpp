@@ -123,31 +123,31 @@ class Taker_test : public beast::unit_test::suite
     };
 
 private:
-    Issue const&
+    IOUIssue const&
     usd() const
     {
-        static Issue const issue(
+        static IOUIssue const issue(
             Currency(0x5553440000000000), AccountID(0x4985601));
         return issue;
     }
 
-    Issue const&
+    IOUIssue const&
     eur() const
     {
-        static Issue const issue(
+        static IOUIssue const issue(
             Currency(0x4555520000000000), AccountID(0x4985602));
         return issue;
     }
 
-    Issue const&
+    IOUIssue const&
     xrp() const
     {
-        static Issue const issue(xrpCurrency(), xrpAccount());
+        static IOUIssue const issue(xrpCurrency(), xrpAccount());
         return issue;
     }
 
     STAmount
-    parse_amount(std::string const& amount, Issue const& issue)
+    parse_amount(std::string const& amount, IOUIssue const& issue)
     {
         return amountFromString(issue, amount);
     }
@@ -155,9 +155,9 @@ private:
     Amounts
     parse_amounts(
         std::string const& amount_in,
-        Issue const& issue_in,
+        IOUIssue const& issue_in,
         std::string const& amount_out,
-        Issue const& issue_out)
+        IOUIssue const& issue_out)
     {
         STAmount const in(parse_amount(amount_in, issue_in));
         STAmount const out(parse_amount(amount_out, issue_out));
@@ -180,11 +180,11 @@ private:
     std::string
     format_amount(STAmount const& amount)
     {
-        if (amount.holds<Issue>())
+        if (amount.holds<IOUIssue>())
             return std::format(
                 "{}/{}",
                 amount.getText(),
-                to_string(amount.get<Issue>().currency));
+                to_string(amount.get<IOUIssue>().getCurrency()));
         return std::format(
             "{}/{}", amount.getText(), to_string(amount.get<MPTIssue>()));
     }
@@ -200,8 +200,8 @@ private:
         cross_attempt_offer const cross,
         std::string const cross_funds,
         cross_attempt_offer const flow,
-        Issue const& issue_in,
-        Issue const& issue_out,
+        IOUIssue const& issue_in,
+        IOUIssue const& issue_out,
         Rate rate_in = parityRate,
         Rate rate_out = parityRate)
     {

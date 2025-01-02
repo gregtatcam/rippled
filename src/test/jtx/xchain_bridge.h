@@ -39,9 +39,9 @@ constexpr std::size_t UT_XCHAIN_DEFAULT_QUORUM = 4;
 Json::Value
 bridge(
     Account const& lockingChainDoor,
-    Issue const& lockingChainIssue,
+    IOUIssue const& lockingChainIssue,
     Account const& issuingChainDoor,
-    Issue const& issuingChainIssue);
+    IOUIssue const& issuingChainIssue);
 
 Json::Value
 bridge_create(

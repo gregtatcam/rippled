@@ -1443,13 +1443,14 @@ XChainCreateBridge::preflight(PreflightContext const& ctx)
         // Issuing account must be the issuer for non-XRP. This is done so the
         // issuing account can't "run out" of wrapped tokens.
         if (bridgeSpec.issuingChainDoor() !=
-            bridgeSpec.issuingChainIssue().account)
+            bridgeSpec.issuingChainIssue().getIssuer())
         {
             return temXCHAIN_BRIDGE_BAD_ISSUES;
         }
     }
 
-    if (bridgeSpec.lockingChainDoor() == bridgeSpec.lockingChainIssue().account)
+    if (bridgeSpec.lockingChainDoor() ==
+        bridgeSpec.lockingChainIssue().getIssuer())
     {
         // If the locking chain door is locking their own asset, in some sense
         // nothing is being locked. Disallow this.
@@ -1481,8 +1482,8 @@ XChainCreateBridge::preclaim(PreclaimContext const& ctx)
 
     if (!isXRP(bridgeSpec.issue(chainType)))
     {
-        auto const sleIssuer =
-            ctx.view.read(keylet::account(bridgeSpec.issue(chainType).account));
+        auto const sleIssuer = ctx.view.read(
+            keylet::account(bridgeSpec.issue(chainType).getIssuer()));
 
         if (!sleIssuer)
             return tecNO_ISSUER;

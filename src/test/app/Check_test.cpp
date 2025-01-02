@@ -1483,9 +1483,9 @@ class Check_test : public beast::unit_test::suite
             // Bad currency.
             if (!amount.native())
             {
-                Issue const badIssue{badCurrency(), amount.getIssuer()};
+                IOUIssue const badIssue{badCurrency(), amount.getIssuer()};
                 STAmount badAmount{amount};
-                badAmount.setIssue(Issue{badCurrency(), amount.getIssuer()});
+                badAmount.setIssue(IOUIssue{badCurrency(), amount.getIssuer()});
                 env(check::cash(bob, chkId, badAmount), ter(temBAD_CURRENCY));
                 env.close();
             }

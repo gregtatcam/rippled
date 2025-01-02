@@ -89,7 +89,7 @@ isGlobalFrozen(ReadView const& view, AccountID const& issuer);
 isGlobalFrozen(ReadView const& view, MPTIssue const& mptIssue);
 
 [[nodiscard]] bool
-isGlobalFrozen(ReadView const& view, Asset const& asset);
+isGlobalFrozen(ReadView const& view, Issue const& asset);
 
 [[nodiscard]] bool
 isIndividualFrozen(
@@ -102,9 +102,10 @@ isIndividualFrozen(
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
-    Issue const& issue)
+    IOUIssue const& issue)
 {
-    return isIndividualFrozen(view, account, issue.currency, issue.account);
+    return isIndividualFrozen(
+        view, account, issue.getCurrency(), issue.getIssuer());
 }
 
 [[nodiscard]] bool
@@ -117,7 +118,7 @@ isIndividualFrozen(
 isIndividualFrozen(
     ReadView const& view,
     AccountID const& account,
-    Asset const& asset)
+    Issue const& asset)
 {
     return std::visit(
         [&](auto const& issue) {
@@ -134,9 +135,9 @@ isFrozen(
     AccountID const& issuer);
 
 [[nodiscard]] inline bool
-isFrozen(ReadView const& view, AccountID const& account, Issue const& issue)
+isFrozen(ReadView const& view, AccountID const& account, IOUIssue const& issue)
 {
-    return isFrozen(view, account, issue.currency, issue.account);
+    return isFrozen(view, account, issue.getCurrency(), issue.getIssuer());
 }
 
 [[nodiscard]] bool
@@ -146,7 +147,7 @@ isFrozen(
     MPTIssue const& mptIssue);
 
 [[nodiscard]] inline bool
-isFrozen(ReadView const& view, AccountID const& account, Asset const& asset)
+isFrozen(ReadView const& view, AccountID const& account, Issue const& asset)
 {
     return std::visit(
         [&](auto const& issue) { return isFrozen(view, account, issue); },
@@ -169,7 +170,7 @@ accountHolds(
 accountHolds(
     ReadView const& view,
     AccountID const& account,
-    Issue const& issue,
+    IOUIssue const& issue,
     FreezeHandling zeroIfFrozen,
     beast::Journal j);
 
@@ -186,7 +187,7 @@ accountHolds(
 accountHolds(
     ReadView const& view,
     AccountID const& account,
-    Asset const& issue,
+    Issue const& issue,
     FreezeHandling zeroIfFrozen,
     AuthHandling zeroIfUnauthorized,
     beast::Journal j);
@@ -523,7 +524,7 @@ issueIOU(
     ApplyView& view,
     AccountID const& account,
     STAmount const& amount,
-    Issue const& issue,
+    IOUIssue const& issue,
     beast::Journal j);
 
 [[nodiscard]] TER
@@ -531,7 +532,7 @@ redeemIOU(
     ApplyView& view,
     AccountID const& account,
     STAmount const& amount,
-    Issue const& issue,
+    IOUIssue const& issue,
     beast::Journal j);
 
 [[nodiscard]] TER
@@ -553,7 +554,10 @@ enum class MPTAuthType : bool { StrongAuth = true, WeakAuth = false };
  *   and tesSUCCESS otherwise.
  */
 [[nodiscard]] TER
-requireAuth(ReadView const& view, Issue const& issue, AccountID const& account);
+requireAuth(
+    ReadView const& view,
+    IOUIssue const& issue,
+    AccountID const& account);
 /* If StrongAuth then return tecNO_AUTH if MPToken doesn't exist or
  * lsfMPTRequireAuth is set and MPToken is not authorized. If WeakAuth then
  * return tecNO_AUTH if lsfMPTRequireAuth is set and MPToken doesn't exist or is
@@ -567,13 +571,13 @@ requireAuth(
     MPTAuthType authType = MPTAuthType::StrongAuth);
 [[nodiscard]] TER inline requireAuth(
     ReadView const& view,
-    Asset const& asset,
+    Issue const& asset,
     AccountID const& account,
     MPTAuthType authType = MPTAuthType::StrongAuth)
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue_) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (std::is_same_v<TIss, IOUIssue>)
                 return requireAuth(view, issue_, account);
             else
                 return requireAuth(view, issue_, account, authType);

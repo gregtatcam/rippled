@@ -109,7 +109,7 @@ class Validations_test : public beast::unit_test::suite
             return toNetClock(c_);
         }
 
-        // Issue a new validation with given sequence number and id and
+        // IOUIssue a new validation with given sequence number and id and
         // with signing and seen times offset from the common clock
         Validation
         validate(

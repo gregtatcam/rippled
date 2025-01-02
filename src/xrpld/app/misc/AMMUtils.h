@@ -39,8 +39,8 @@ std::pair<STAmount, STAmount>
 ammPoolHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Asset const& asset1,
-    Asset const& asset2,
+    Issue const& asset1,
+    Issue const& asset2,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal const j);
@@ -53,8 +53,8 @@ Expected<std::tuple<STAmount, STAmount, STAmount>, TER>
 ammHolds(
     ReadView const& view,
     SLE const& ammSle,
-    std::optional<Asset> const& optAsset1,
-    std::optional<Asset> const& optAsset2,
+    std::optional<Issue> const& optAsset1,
+    std::optional<Issue> const& optAsset2,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal const j);
@@ -64,8 +64,8 @@ ammHolds(
 STAmount
 ammLPHolds(
     ReadView const& view,
-    Asset const& asset1,
-    Asset const& asset2,
+    Issue const& asset1,
+    Issue const& asset2,
     AccountID const& ammAccount,
     AccountID const& lpAccount,
     beast::Journal const j);
@@ -93,7 +93,7 @@ STAmount
 ammAccountHolds(
     ReadView const& view,
     AccountID const& ammAccountID,
-    Asset const& asset);
+    Issue const& asset);
 
 /** Delete trustlines to AMM. If all trustlines are deleted then
  * AMM object and account are deleted. Otherwise tecIMPCOMPLETE is returned.
@@ -101,8 +101,8 @@ ammAccountHolds(
 TER
 deleteAMMAccount(
     Sandbox& view,
-    Asset const& asset,
-    Asset const& asset2,
+    Issue const& asset,
+    Issue const& asset2,
     beast::Journal j);
 
 /** Initialize Auction and Voting slots and set the trading/discounted fee.
@@ -112,7 +112,7 @@ initializeFeeAuctionVote(
     ApplyView& view,
     std::shared_ptr<SLE>& ammSle,
     AccountID const& account,
-    Issue const& lptIssue,
+    IOUIssue const& lptIssue,
     std::uint16_t tfee);
 
 /** Return true if the Liquidity Provider is the only AMM provider, false
@@ -122,7 +122,7 @@ initializeFeeAuctionVote(
 Expected<bool, TER>
 isOnlyLiquidityProvider(
     ReadView const& view,
-    Issue const& ammIssue,
+    IOUIssue const& ammIssue,
     AccountID const& lpAccount);
 
 }  // namespace ripple

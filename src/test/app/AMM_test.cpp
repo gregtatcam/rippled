@@ -673,8 +673,8 @@ private:
 
             // Invalid tokens - bogus currency
             {
-                auto const iss1 = Issue{Currency(0xabc), gw.id()};
-                auto const iss2 = Issue{Currency(0xdef), gw.id()};
+                auto const iss1 = IOUIssue{Currency(0xabc), gw.id()};
+                auto const iss2 = IOUIssue{Currency(0xdef), gw.id()};
                 ammAlice.deposit(
                     alice,
                     1'000,
@@ -937,7 +937,7 @@ private:
                 env(trust(
                     gw,
                     STAmount{
-                        Issue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
+                        IOUIssue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
                     tfSetFreeze));
                 env.close();
                 // Can deposit non-frozen token
@@ -985,7 +985,7 @@ private:
                 env(trust(
                     gw,
                     STAmount{
-                        Issue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
+                        IOUIssue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
                     tfSetFreeze));
                 env.close();
                 // Cannot deposit non-frozen token
@@ -1434,7 +1434,7 @@ private:
         });
 
         // Single deposit with EP not exceeding specified:
-        // 100USD with EP not to exceed 0.1 (AssetIn/TokensOut)
+        // 100USD with EP not to exceed 0.1 (IssueIn/TokensOut)
         testAMM([&](AMM& ammAlice, Env&) {
             ammAlice.deposit(
                 carol, USD(1'000), std::nullopt, STAmount{USD, 1, -1});
@@ -1445,7 +1445,7 @@ private:
         });
 
         // Single deposit with EP not exceeding specified:
-        // 100USD with EP not to exceed 0.002004 (AssetIn/TokensOut)
+        // 100USD with EP not to exceed 0.002004 (IssueIn/TokensOut)
         testAMM([&](AMM& ammAlice, Env&) {
             ammAlice.deposit(
                 carol, USD(100), std::nullopt, STAmount{USD, 2004, -6});
@@ -1456,7 +1456,7 @@ private:
         });
 
         // Single deposit with EP not exceeding specified:
-        // 0USD with EP not to exceed 0.002004 (AssetIn/TokensOut)
+        // 0USD with EP not to exceed 0.002004 (IssueIn/TokensOut)
         testAMM([&](AMM& ammAlice, Env&) {
             ammAlice.deposit(
                 carol, USD(0), std::nullopt, STAmount{USD, 2004, -6});
@@ -1975,7 +1975,8 @@ private:
             // Individually frozen AMM
             env(trust(
                 gw,
-                STAmount{Issue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
+                STAmount{
+                    IOUIssue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
                 tfSetFreeze));
             // Can withdraw non-frozen token
             ammAlice.withdraw(alice, XRP(100));
@@ -2198,7 +2199,7 @@ private:
             env(trust(
                     carol,
                     STAmount{
-                        Issue{EUR.currency, ammAlice.ammAccount()}, 10'000}),
+                        IOUIssue{EUR.currency, ammAlice.ammAccount()}, 10'000}),
                 ter(tecNO_PERMISSION));
             env.close();
             ammAlice.withdrawAll(alice);
@@ -3478,7 +3479,8 @@ private:
         testAMM([&](AMM& ammAlice, Env& env) {
             env(trust(
                 gw,
-                STAmount{Issue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
+                STAmount{
+                    IOUIssue{gw["USD"].currency, ammAlice.ammAccount()}, 0},
                 tfSetFreeze));
             env.close();
             env(pay(alice, carol, USD(1)),
@@ -4662,7 +4664,7 @@ private:
             env(pay(A, C, TSTA(10'000)));
             env(pay(B, C, TSTB(10'000)));
             AMM amm(env, C, TSTA(5'000), TSTB(5'000));
-            auto const ammIss = Issue(TSTA.currency, amm.ammAccount());
+            auto const ammIss = IOUIssue(TSTA.currency, amm.ammAccount());
 
             // Can SetTrust only for AMM LP tokens
             env(trust(D, STAmount{ammIss, 10'000}), ter(tecNO_PERMISSION));
@@ -4787,7 +4789,7 @@ private:
             {features});
 
         // Single deposit with EP not exceeding specified:
-        // 100USD with EP not to exceed 0.1 (AssetIn/TokensOut). 1% fee.
+        // 100USD with EP not to exceed 0.1 (IssueIn/TokensOut). 1% fee.
         testAMM(
             [&](AMM& ammAlice, Env& env) {
                 auto const balance = env.balance(carol, USD);
@@ -4809,7 +4811,7 @@ private:
             {features});
 
         // Single deposit with EP not exceeding specified:
-        // 200USD with EP not to exceed 0.002020 (AssetIn/TokensOut). 1% fee
+        // 200USD with EP not to exceed 0.002020 (IssueIn/TokensOut). 1% fee
         testAMM(
             [&](AMM& ammAlice, Env& env) {
                 auto const balance = env.balance(carol, USD);
@@ -6976,7 +6978,7 @@ private:
             // allowed for clawing back from an AMM account. Please notice the
             // `issuer` subfield represents the account being clawed back, which
             // is confusing.
-            Issue usd(USD.issue().currency, amm.ammAccount());
+            IOUIssue usd(USD.issue().getCurrency(), amm.ammAccount());
             auto amount = amountFromString(usd, "10");
             env(claw(gw, amount), ter(tecAMM_ACCOUNT));
         }

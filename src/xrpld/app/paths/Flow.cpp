@@ -38,8 +38,8 @@ template <class FlowResult>
 static auto
 finishFlow(
     PaymentSandbox& sb,
-    Asset const& srcAsset,
-    Asset const& dstAsset,
+    Issue const& srcAsset,
+    Issue const& dstAsset,
     FlowResult&& f)
 {
     path::RippleCalc::Output result;
@@ -71,19 +71,19 @@ flow(
     beast::Journal j,
     path::detail::FlowDebugInfo* flowDebugInfo)
 {
-    Asset const srcAsset = [&]() -> Asset {
+    Issue const srcAsset = [&]() -> Issue {
         if (sendMax)
             return sendMax->asset();
         if (isXRP(deliver))
             return xrpIssue();
-        if (deliver.holds<Issue>())
-            return Issue(deliver.get<Issue>().currency, src);
+        if (deliver.holds<IOUIssue>())
+            return IOUIssue(deliver.get<IOUIssue>().getCurrency(), src);
         return deliver.asset();
     }();
 
-    Asset const dstAsset = deliver.asset();
+    Issue const dstAsset = deliver.asset();
 
-    std::optional<Asset> sendMaxAsset;
+    std::optional<Issue> sendMaxAsset;
     if (sendMax)
         sendMaxAsset = sendMax->asset();
 

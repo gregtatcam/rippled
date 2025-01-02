@@ -38,7 +38,7 @@ balance::operator()(Env& env) const
             env.test.expect(sle->getFieldAmount(sfBalance) == value_);
         }
     }
-    else if (value_.holds<Issue>())
+    else if (value_.holds<IOUIssue>())
     {
         auto const sle = env.le(keylet::line(account_.id(), value_.issue()));
         if (none_)

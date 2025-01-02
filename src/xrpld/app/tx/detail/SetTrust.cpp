@@ -537,7 +537,7 @@ SetTrust::doApply()
     else
     {
         // Zero balance in currency.
-        STAmount saBalance(Issue{currency, noAccount()});
+        STAmount saBalance(IOUIssue{currency, noAccount()});
 
         auto const k = keylet::line(account_, uDstAccountID, currency);
 

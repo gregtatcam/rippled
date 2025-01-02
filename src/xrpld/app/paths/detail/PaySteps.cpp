@@ -70,13 +70,13 @@ toStep(
     StrandContext const& ctx,
     STPathElement const* e1,
     STPathElement const* e2,
-    Asset const& curAsset)
+    Issue const& curAsset)
 {
     auto& j = ctx.j;
 
     if (ctx.isFirst && e1->isAccount() &&
         (e1->getNodeType() & STPathElement::typeCurrency) &&
-        e1->getPathAsset().isXRP())
+        e1->getPathIssue().isXRP())
     {
         return make_XRPEndpointStep(ctx, e1->getAccountID());
     }
@@ -111,7 +111,7 @@ toStep(
             ctx,
             e1->getAccountID(),
             e2->getAccountID(),
-            curAsset.get<Issue>().currency);
+            curAsset.get<IOUIssue>().getCurrency());
     }
 
     if (e1->isOffer() && e2->isAccount())
@@ -128,7 +128,7 @@ toStep(
             (e2->getNodeType() & STPathElement::typeIssuer),
         "ripple::toStep : currency or issuer");
     auto const outAsset = e2->getNodeType() & STPathElement::typeAsset
-        ? e2->getPathAsset()
+        ? e2->getPathIssue()
         : curAsset;
     auto const outIssuer = e2->getNodeType() & STPathElement::typeIssuer
         ? e2->getIssuerID()
@@ -146,7 +146,7 @@ toStep(
     {
         if (curAsset.holds<MPTIssue>())
             return make_BookStepMX(ctx, curAsset.get<MPTIssue>());
-        return make_BookStepIX(ctx, curAsset.get<Issue>());
+        return make_BookStepIX(ctx, curAsset.get<IOUIssue>());
     }
 
     if (isXRP(curAsset))
@@ -161,15 +161,15 @@ toStep(
             ctx,
             curAsset.get<MPTIssue>(),
             {outAsset.get<Currency>(), outIssuer});
-    if (curAsset.holds<Issue>() && outAsset.holds<MPTID>())
+    if (curAsset.holds<IOUIssue>() && outAsset.holds<MPTID>())
         return make_BookStepIM(
-            ctx, curAsset.get<Issue>(), outAsset.get<MPTID>());
+            ctx, curAsset.get<IOUIssue>(), outAsset.get<MPTID>());
 
     if (curAsset.holds<MPTIssue>())
         return make_BookStepMM(
             ctx, curAsset.get<MPTIssue>(), outAsset.get<MPTID>());
     return make_BookStepII(
-        ctx, curAsset.get<Issue>(), {outAsset.get<Currency>(), outIssuer});
+        ctx, curAsset.get<IOUIssue>(), {outAsset.get<Currency>(), outIssuer});
 }
 
 std::pair<TER, Strand>
@@ -177,9 +177,9 @@ toStrand(
     ReadView const& view,
     AccountID const& src,
     AccountID const& dst,
-    Asset const& deliver,
+    Issue const& deliver,
     std::optional<Quality> const& limitQuality,
-    std::optional<Asset> const& sendMaxAsset,
+    std::optional<Issue> const& sendMaxAsset,
     STPath const& path,
     bool ownerPaysTransferFee,
     OfferCrossing offerCrossing,
@@ -246,14 +246,14 @@ toStrand(
             return {temBAD_PATH, Strand{}};
     }
 
-    Asset curAsset = [&]() -> Asset {
+    Issue curAsset = [&]() -> Issue {
         auto const& asset = sendMaxAsset ? *sendMaxAsset : deliver;
         if (isXRP(asset))
             return xrpIssue();
         if (asset.holds<MPTIssue>())
             return asset;
         // First step ripples from the source to the issuer.
-        return Issue{asset.get<Issue>().currency, src};
+        return IOUIssue{asset.get<IOUIssue>().getCurrency(), src};
     }();
 
     // Currency or MPT
@@ -267,7 +267,7 @@ toStrand(
     normPath.reserve(4 + path.size());
     {
         // The first step of a path is always implied to be the sender of the
-        // transaction, as defined by the transaction's Account field. The Asset
+        // transaction, as defined by the transaction's Account field. The Issue
         // is either SendMax or Deliver.
         auto const t = [&]() {
             auto const t =
@@ -301,7 +301,7 @@ toStrand(
             // that MPTIssue can't change the account.
             STPathElement const& lastAsset =
                 *std::find_if(normPath.rbegin(), normPath.rend(), hasAsset);
-            if (lastAsset.getPathAsset() != deliver ||
+            if (lastAsset.getPathIssue() != deliver ||
                 (offerCrossing &&
                  lastAsset.getIssuerID() != deliver.getIssuer()))
             {
@@ -347,9 +347,9 @@ toStrand(
        at most twice: once as a src and once as a dst (hence the two element
        array). The strandSrc and strandDst will only show up once each.
     */
-    std::array<boost::container::flat_set<Asset>, 2> seenDirectAssets;
+    std::array<boost::container::flat_set<Issue>, 2> seenDirectAssets;
     // A strand may not include the same offer book more than once
-    boost::container::flat_set<Asset> seenBookOuts;
+    boost::container::flat_set<Issue> seenBookOuts;
     seenDirectAssets[0].reserve(normPath.size());
     seenDirectAssets[1].reserve(normPath.size());
     seenBookOuts.reserve(normPath.size());
@@ -386,38 +386,39 @@ toStrand(
 
         // Switch over from MPT to Currency.
         if (curAsset.holds<MPTIssue>() && cur->hasCurrency())
-            curAsset = Issue{};
+            curAsset = IOUIssue{};
 
-        // Can only update the account for Issue since MPTIssue's account
+        // Can only update the account for IOUIssue since MPTIssue's account
         // is immutable as it is part of MPTID
-        if (curAsset.holds<Issue>())
+        if (curAsset.holds<IOUIssue>())
         {
             if (cur->isAccount())
-                curAsset.get<Issue>().account = cur->getAccountID();
+                curAsset.get<IOUIssue>().setIssuer(cur->getAccountID());
             else if (cur->hasIssuer())
-                curAsset.get<Issue>().account = cur->getIssuerID();
+                curAsset.get<IOUIssue>().setIssuer(cur->getIssuerID());
         }
 
         if (cur->hasCurrency())
         {
-            curAsset = Issue{cur->getCurrency(), curAsset.getIssuer()};
+            curAsset = IOUIssue{cur->getCurrency(), curAsset.getIssuer()};
             if (isXRP(curAsset))
-                curAsset.get<Issue>().account = xrpAccount();
+                curAsset.get<IOUIssue>().setIssuer(
+                    xrpAccount());  // TODO XRPIssue
         }
         else if (cur->hasMPT())
-            curAsset = cur->getPathAsset().get<MPTID>();
+            curAsset = cur->getPathIssue().get<MPTID>();
 
         auto getImpliedStep =
             [&](AccountID const& src_,
                 AccountID const& dst_,
-                Asset const& asset_) -> std::pair<TER, std::unique_ptr<Step>> {
+                Issue const& asset_) -> std::pair<TER, std::unique_ptr<Step>> {
             if (asset_.holds<MPTIssue>())
             {
                 JLOG(j.error()) << "MPT is invalid with rippling";
                 return {temBAD_PATH, nullptr};
             }
             return make_DirectStepI(
-                ctx(), src_, dst_, asset_.get<Issue>().currency);
+                ctx(), src_, dst_, asset_.get<IOUIssue>().getCurrency());
         };
 
         if (cur->isAccount() && next->isAccount())
@@ -508,7 +509,7 @@ toStrand(
         }
 
         if (!next->isOffer() && next->hasAsset() &&
-            next->getPathAsset() != curAsset)
+            next->getPathIssue() != curAsset)
         {
             // Should never happen
             UNREACHABLE("ripple::toStrand : offer currency mismatch");
@@ -538,13 +539,13 @@ toStrand(
         };
 
         auto curAcc = src;
-        auto curAsset = [&]() -> Asset {
+        auto curAsset = [&]() -> Issue {
             auto const& asset = sendMaxAsset ? *sendMaxAsset : deliver;
             if (isXRP(asset))
                 return xrpIssue();
             if (asset.holds<MPTIssue>())
                 return asset;
-            return Issue{asset.get<Issue>().currency, src};
+            return IOUIssue{asset.get<IOUIssue>().getCurrency(), src};
         }();
 
         for (auto const& s : result)
@@ -559,18 +560,19 @@ toStrand(
                     return false;
                 curAsset = b->out;
             }
-            else if (curAsset.holds<Issue>())
+            else if (curAsset.holds<IOUIssue>())
             {
-                curAsset.get<Issue>().account = accts.second;
+                curAsset.get<IOUIssue>().setIssuer(accts.second);
             }
 
             curAcc = accts.second;
         }
         if (curAcc != dst)
             return false;
-        if (curAsset.holds<Issue>() != deliver.holds<Issue>() ||
-            (curAsset.holds<Issue>() &&
-             curAsset.get<Issue>().currency != deliver.get<Issue>().currency) ||
+        if (curAsset.holds<IOUIssue>() != deliver.holds<IOUIssue>() ||
+            (curAsset.holds<IOUIssue>() &&
+             curAsset.get<IOUIssue>().getCurrency() !=
+                 deliver.get<IOUIssue>().getCurrency()) ||
             (curAsset.holds<MPTIssue>() &&
              curAsset.get<MPTIssue>() != deliver.get<MPTIssue>()))
             return false;
@@ -595,9 +597,9 @@ toStrands(
     ReadView const& view,
     AccountID const& src,
     AccountID const& dst,
-    Asset const& deliver,
+    Issue const& deliver,
     std::optional<Quality> const& limitQuality,
-    std::optional<Asset> const& sendMax,
+    std::optional<Issue> const& sendMax,
     STPathSet const& paths,
     bool addDefaultPath,
     bool ownerPaysTransferFee,
@@ -710,14 +712,14 @@ StrandContext::StrandContext(
     // replicates the source or destination.
     AccountID const& strandSrc_,
     AccountID const& strandDst_,
-    Asset const& strandDeliver_,
+    Issue const& strandDeliver_,
     std::optional<Quality> const& limitQuality_,
     bool isLast_,
     bool ownerPaysTransferFee_,
     OfferCrossing offerCrossing_,
     bool isDefaultPath_,
-    std::array<boost::container::flat_set<Asset>, 2>& seenDirectAssets_,
-    boost::container::flat_set<Asset>& seenBookOuts_,
+    std::array<boost::container::flat_set<Issue>, 2>& seenDirectAssets_,
+    boost::container::flat_set<Issue>& seenBookOuts_,
     AMMContext& ammContext_,
     beast::Journal j_)
     : view(view_)

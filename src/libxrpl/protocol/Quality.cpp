@@ -67,7 +67,7 @@ Quality::operator--(int)
 }
 
 template <STAmount (
-    *DivRoundFunc)(STAmount const&, STAmount const&, Asset const&, bool)>
+    *DivRoundFunc)(STAmount const&, STAmount const&, Issue const&, bool)>
 static Amounts
 ceil_in_impl(
     Amounts const& amount,
@@ -108,7 +108,7 @@ Quality::ceil_in_strict(
 }
 
 template <STAmount (
-    *MulRoundFunc)(STAmount const&, STAmount const&, Asset const&, bool)>
+    *MulRoundFunc)(STAmount const&, STAmount const&, Issue const&, bool)>
 static Amounts
 ceil_out_impl(
     Amounts const& amount,

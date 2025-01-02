@@ -72,10 +72,10 @@ public:
         return quality_;
     }
 
-    Asset const&
+    Issue const&
     assetIn() const;
 
-    Asset const&
+    Issue const&
     assetOut() const;
 
     AccountID const&

@@ -112,7 +112,7 @@ class Freeze_test : public beast::unit_test::suite
             BEAST_EXPECT(
                 ff[sfHighLimit.fieldName] ==
                 bob["USD"](100).value().getJson(JsonOptions::none));
-            auto amt = STAmount{Issue{to_currency("USD"), noAccount()}, -15}
+            auto amt = STAmount{IOUIssue{to_currency("USD"), noAccount()}, -15}
                            .value()
                            .getJson(JsonOptions::none);
             BEAST_EXPECT(ff[sfBalance.fieldName] == amt);

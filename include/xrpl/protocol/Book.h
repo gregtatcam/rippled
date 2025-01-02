@@ -21,7 +21,7 @@
 #define RIPPLE_PROTOCOL_BOOK_H_INCLUDED
 
 #include <xrpl/basics/CountedObject.h>
-#include <xrpl/protocol/Asset.h>
+#include <xrpl/protocol/Issue.h>
 #include <boost/utility/base_from_member.hpp>
 
 namespace ripple {
@@ -33,14 +33,14 @@ namespace ripple {
 class Book final : public CountedObject<Book>
 {
 public:
-    Asset in;
-    Asset out;
+    Issue in;
+    Issue out;
 
     Book()
     {
     }
 
-    Book(Asset const& in_, Asset const& out_) : in(in_), out(out_)
+    Book(Issue const& in_, Issue const& out_) : in(in_), out(out_)
     {
     }
 };
@@ -92,7 +92,7 @@ operator<=>(Book const& lhs, Book const& rhs)
 namespace std {
 
 template <>
-struct hash<ripple::Issue>
+struct hash<ripple::IOUIssue>
     : private boost::base_from_member<std::hash<ripple::Currency>, 0>,
       private boost::base_from_member<std::hash<ripple::AccountID>, 1>
 {
@@ -106,15 +106,15 @@ public:
     explicit hash() = default;
 
     using value_type = std::size_t;
-    using argument_type = ripple::Issue;
+    using argument_type = ripple::IOUIssue;
 
     value_type
     operator()(argument_type const& value) const
     {
-        value_type result(currency_hash_type::member(value.currency));
-        if (!isXRP(value.currency))
+        value_type result(currency_hash_type::member(value.getCurrency()));
+        if (!isXRP(value.getCurrency()))
             boost::hash_combine(
-                result, issuer_hash_type::member(value.account));
+                result, issuer_hash_type::member(value.getIssuer()));
         return result;
     }
 };
@@ -141,7 +141,7 @@ public:
 };
 
 template <>
-struct hash<ripple::Asset>
+struct hash<ripple::Issue>
     : private boost::base_from_member<std::hash<ripple::Currency>, 0>,
       private boost::base_from_member<std::hash<ripple::AccountID>, 1>,
       private boost::base_from_member<std::hash<ripple::MPTID>, 2>
@@ -157,22 +157,22 @@ public:
     explicit hash() = default;
 
     using value_type = std::size_t;
-    using argument_type = ripple::Asset;
+    using argument_type = ripple::Issue;
 
     value_type
     operator()(argument_type const& issue) const
     {
         return std::visit(
             [&]<ripple::ValidIssueType TIss>(TIss const& issue_) {
-                if constexpr (std::is_same_v<TIss, ripple::Issue>)
+                if constexpr (std::is_same_v<TIss, ripple::IOUIssue>)
                 {
                     value_type result(currency_hash_type::member(
-                        issue.get<ripple::Issue>().currency));
-                    if (!isXRP(issue.get<ripple::Issue>().currency))
+                        issue.get<ripple::IOUIssue>().getCurrency()));
+                    if (!isXRP(issue.get<ripple::IOUIssue>().getCurrency()))
                         boost::hash_combine(
                             result,
                             issuer_hash_type::member(
-                                issue.get<ripple::Issue>().account));
+                                issue.get<ripple::IOUIssue>().getIssuer()));
                     return result;
                 }
                 else if constexpr (std::is_same_v<TIss, ripple::MPTIssue>)
@@ -192,7 +192,7 @@ template <>
 struct hash<ripple::Book>
 {
 private:
-    using hasher = std::hash<ripple::Asset>;
+    using hasher = std::hash<ripple::Issue>;
 
     hasher m_hasher;
 
@@ -218,11 +218,11 @@ public:
 namespace boost {
 
 template <>
-struct hash<ripple::Issue> : std::hash<ripple::Issue>
+struct hash<ripple::IOUIssue> : std::hash<ripple::IOUIssue>
 {
     explicit hash() = default;
 
-    using Base = std::hash<ripple::Issue>;
+    using Base = std::hash<ripple::IOUIssue>;
     // VFALCO NOTE broken in vs2012
     // using Base::Base; // inherit ctors
 };
@@ -236,11 +236,11 @@ struct hash<ripple::MPTIssue> : std::hash<ripple::MPTIssue>
 };
 
 template <>
-struct hash<ripple::Asset> : std::hash<ripple::Asset>
+struct hash<ripple::Issue> : std::hash<ripple::Issue>
 {
     explicit hash() = default;
 
-    using Base = std::hash<ripple::Asset>;
+    using Base = std::hash<ripple::Issue>;
 };
 
 template <>

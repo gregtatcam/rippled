@@ -158,8 +158,8 @@ Json::Value
 AMM::ammRpcInfo(
     std::optional<AccountID> const& account,
     std::optional<std::string> const& ledgerIndex,
-    std::optional<Asset> asset1,
-    std::optional<Asset> asset2,
+    std::optional<Issue> asset1,
+    std::optional<Issue> asset2,
     std::optional<AccountID> const& ammAccount,
     bool ignoreParams,
     unsigned apiVersion) const
@@ -202,8 +202,8 @@ AMM::ammRpcInfo(
 
 std::tuple<STAmount, STAmount, STAmount>
 AMM::balances(
-    Asset const& asset1,
-    Asset const& asset2,
+    Issue const& asset1,
+    Issue const& asset2,
     std::optional<AccountID> const& account) const
 {
     if (auto const amm =
@@ -368,7 +368,7 @@ AMM::expectAmmInfo(
 void
 AMM::setTokens(
     Json::Value& jv,
-    std::optional<std::pair<Asset, Asset>> const& assets)
+    std::optional<std::pair<Issue, Issue>> const& assets)
 {
     if (assets)
     {
@@ -390,7 +390,7 @@ IOUAmount
 AMM::deposit(
     std::optional<Account> const& account,
     Json::Value& jv,
-    std::optional<std::pair<Asset, Asset>> const& assets,
+    std::optional<std::pair<Issue, Issue>> const& assets,
     std::optional<jtx::seq> const& seq,
     std::optional<ter> const& ter)
 {
@@ -458,7 +458,7 @@ AMM::deposit(
     std::optional<STAmount> const& asset2In,
     std::optional<STAmount> const& maxEP,
     std::optional<std::uint32_t> const& flags,
-    std::optional<std::pair<Asset, Asset>> const& assets,
+    std::optional<std::pair<Issue, Issue>> const& assets,
     std::optional<jtx::seq> const& seq,
     std::optional<std::uint16_t> const& tfee,
     std::optional<ter> const& ter)
@@ -518,7 +518,7 @@ AMM::withdraw(
     std::optional<Account> const& account,
     Json::Value& jv,
     std::optional<jtx::seq> const& seq,
-    std::optional<std::pair<Asset, Asset>> const& assets,
+    std::optional<std::pair<Issue, Issue>> const& assets,
     std::optional<ter> const& ter)
 {
     auto const& acct = account ? *account : creatorAccount_;
@@ -582,7 +582,7 @@ AMM::withdraw(
     std::optional<STAmount> const& asset2Out,
     std::optional<IOUAmount> const& maxEP,
     std::optional<std::uint32_t> const& flags,
-    std::optional<std::pair<Asset, Asset>> const& assets,
+    std::optional<std::pair<Issue, Issue>> const& assets,
     std::optional<jtx::seq> const& seq,
     std::optional<ter> const& ter)
 {
@@ -639,7 +639,7 @@ AMM::vote(
     std::uint32_t feeVal,
     std::optional<std::uint32_t> const& flags,
     std::optional<jtx::seq> const& seq,
-    std::optional<std::pair<Asset, Asset>> const& assets,
+    std::optional<std::pair<Issue, Issue>> const& assets,
     std::optional<ter> const& ter)
 {
     Json::Value jv;
@@ -829,8 +829,8 @@ Json::Value
 ammClawback(
     Account const& issuer,
     Account const& holder,
-    Asset const& asset,
-    Asset const& asset2,
+    Issue const& asset,
+    Issue const& asset2,
     std::optional<STAmount> const& amount)
 {
     Json::Value jv;

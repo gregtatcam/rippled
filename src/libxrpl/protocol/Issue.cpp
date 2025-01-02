@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 /*
     This file is part of rippled: https://github.com/ripple/rippled
-    Copyright (c) 2012, 2013 Ripple Labs Inc.
+    Copyright (c) 2024 Ripple Labs Inc.
 
     Permission to use, copy, modify, and/or distribute this software for any
     purpose  with  or without fee is hereby granted, provided that the above
@@ -17,132 +17,87 @@
 */
 //==============================================================================
 
+#include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/Issue.h>
-
-#include <xrpl/json/json_errors.h>
-#include <xrpl/protocol/AccountID.h>
-#include <xrpl/protocol/UintTypes.h>
 #include <xrpl/protocol/jss.h>
 
 namespace ripple {
 
+AccountID const&
+Issue::getIssuer() const
+{
+    return std::visit(
+        [&](auto&& issue) -> AccountID const& { return issue.getIssuer(); },
+        issue_);
+}
+
 std::string
 Issue::getText() const
 {
-    std::string ret;
-
-    ret.reserve(64);
-    ret = to_string(currency);
-
-    if (!isXRP(currency))
-    {
-        ret += "/";
-
-        if (isXRP(account))
-            ret += "0";
-        else if (account == noAccount())
-            ret += "1";
-        else
-            ret += to_string(account);
-    }
-
-    return ret;
+    return std::visit([&](auto&& issue) { return issue.getText(); }, issue_);
 }
 
 void
 Issue::setJson(Json::Value& jv) const
 {
-    jv[jss::currency] = to_string(currency);
-    if (!isXRP(currency))
-        jv[jss::issuer] = toBase58(account);
+    std::visit([&](auto&& issue) { issue.setJson(jv); }, issue_);
 }
 
-bool
-Issue::native() const
+std::
+    variant<AmountType<XRPAmount>, AmountType<IOUAmount>, AmountType<MPTAmount>>
+    Issue::getAmountType() const
 {
-    return *this == xrpIssue();
-}
-
-bool
-isConsistent(Issue const& ac)
-{
-    return isXRP(ac.currency) == isXRP(ac.account);
+    static AmountType<XRPAmount> xrp;
+    static AmountType<IOUAmount> iou;
+    static AmountType<MPTAmount> mpt;
+    if (holds<MPTIssue>())
+        return mpt;
+    if (native())
+        return xrp;
+    return iou;
 }
 
 std::string
-to_string(Issue const& ac)
+to_string(Issue const& asset)
 {
-    if (isXRP(ac.account))
-        return to_string(ac.currency);
-
-    return to_string(ac.account) + "/" + to_string(ac.currency);
+    return std::visit(
+        [&](auto const& issue) { return to_string(issue); }, asset.value());
 }
 
-Json::Value
-to_json(Issue const& is)
+bool
+validJSONAsset(Json::Value const& jv)
 {
-    Json::Value jv;
-    is.setJson(jv);
-    return jv;
+    if (jv.isMember(jss::mpt_issuance_id))
+        return !(jv.isMember(jss::currency) || jv.isMember(jss::issuer));
+    return jv.isMember(jss::currency);
 }
 
 Issue
 issueFromJson(Json::Value const& v)
 {
-    if (!v.isObject())
-    {
+    if (!v.isMember(jss::currency) && !v.isMember(jss::mpt_issuance_id))
         Throw<std::runtime_error>(
-            "issueFromJson can only be specified with an 'object' Json value");
-    }
+            "issueFromJson must contain currency or mpt_issuance_id");
 
-    if (v.isMember(jss::mpt_issuance_id))
-    {
-        Throw<std::runtime_error>(
-            "issueFromJson, Issue should not have mpt_issuance_id");
-    }
+    if (v.isMember(jss::currency))
+        return iouIssueFromJson(v);
+    return mptIssueFromJson(v);
+}
 
-    Json::Value const curStr = v[jss::currency];
-    Json::Value const issStr = v[jss::issuer];
-
-    if (!curStr.isString())
-    {
-        Throw<Json::error>(
-            "issueFromJson currency must be a string Json value");
-    }
-
-    auto const currency = to_currency(curStr.asString());
-    if (currency == badCurrency() || currency == noCurrency())
-    {
-        Throw<Json::error>("issueFromJson currency must be a valid currency");
-    }
-
-    if (isXRP(currency))
-    {
-        if (!issStr.isNull())
-        {
-            Throw<Json::error>("Issue, XRP should not have issuer");
-        }
-        return xrpIssue();
-    }
-
-    if (!issStr.isString())
-    {
-        Throw<Json::error>("issueFromJson issuer must be a string Json value");
-    }
-    auto const issuer = parseBase58<AccountID>(issStr.asString());
-
-    if (!issuer)
-    {
-        Throw<Json::error>("issueFromJson issuer must be a valid account");
-    }
-
-    return Issue{currency, *issuer};
+Json::Value
+to_json(Issue const& asset)
+{
+    return std::visit(
+        [&](auto const& issue) { return to_json(issue); }, asset.value());
 }
 
 std::ostream&
 operator<<(std::ostream& os, Issue const& x)
 {
-    os << to_string(x);
+    if (x.holds<IOUIssue>())
+        os << x.get<IOUIssue>();
+    else
+        os << x.get<MPTIssue>();
     return os;
 }
 

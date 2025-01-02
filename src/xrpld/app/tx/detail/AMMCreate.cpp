@@ -130,7 +130,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
         return tecFROZEN;
     }
 
-    auto noDefaultRipple = [](ReadView const& view, Asset const& asset) {
+    auto noDefaultRipple = [](ReadView const& view, Issue const& asset) {
         if (asset.holds<MPTIssue>() || isXRP(asset))
             return false;
 
@@ -198,7 +198,7 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
 
     // Disallow AMM if the issuer has clawback enabled when featureAMMClawback
     // is not enabled
-    auto clawbackDisabled = [&](Asset const& asset) -> TER {
+    auto clawbackDisabled = [&](Issue const& asset) -> TER {
         if (isXRP(asset))
             return tesSUCCESS;
         if (asset.holds<MPTIssue>())
@@ -382,7 +382,7 @@ applyCreate(
             return res;
 
         // Set AMM flag on AMM trustline
-        if (amount.holds<Issue>() && !isXRP(amount))
+        if (amount.holds<IOUIssue>() && !isXRP(amount))
         {
             if (SLE::pointer sleRippleState =
                     sb.peek(keylet::line(*ammAccount, amount.issue()));
@@ -419,7 +419,7 @@ applyCreate(
                      << ammKeylet.key << " " << lpTokens << " " << amount << " "
                      << amount2;
     auto addOrderBook =
-        [&](Asset const& assetIn, Asset const& assetOut, std::uint64_t uRate) {
+        [&](Issue const& assetIn, Issue const& assetOut, std::uint64_t uRate) {
             Book const book{assetIn, assetOut};
             auto const dir = keylet::quality(keylet::book(book), uRate);
             if (auto const bookExisted = static_cast<bool>(sb.read(dir));

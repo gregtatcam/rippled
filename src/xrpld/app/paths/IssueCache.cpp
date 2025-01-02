@@ -17,13 +17,13 @@
 */
 //==============================================================================
 
-#include <xrpld/app/paths/AssetCache.h>
+#include <xrpld/app/paths/IssueCache.h>
 #include <xrpld/app/paths/TrustLine.h>
 #include <xrpld/ledger/OpenView.h>
 
 namespace ripple {
 
-AssetCache::AssetCache(
+IssueCache::IssueCache(
     std::shared_ptr<ReadView const> const& ledger,
     beast::Journal j)
     : ledger_(ledger), journal_(j)
@@ -31,7 +31,7 @@ AssetCache::AssetCache(
     JLOG(journal_.debug()) << "created for ledger " << ledger_->info().seq;
 }
 
-AssetCache::~AssetCache()
+IssueCache::~IssueCache()
 {
     JLOG(journal_.debug()) << "destroyed for ledger " << ledger_->info().seq
                            << " with " << lines_.size() << " accounts and "
@@ -39,7 +39,7 @@ AssetCache::~AssetCache()
 }
 
 std::shared_ptr<std::vector<PathFindTrustLine>>
-AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
+IssueCache::getRippleLines(AccountID const& accountID, LineDirection direction)
 {
     auto const hash = hasher_(accountID);
     AccountKey key(accountID, direction, hash);
@@ -130,7 +130,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
 }
 
 std::shared_ptr<std::vector<MPTID>> const&
-AssetCache::getMPTs(const ripple::AccountID& account)
+IssueCache::getMPTs(const ripple::AccountID& account)
 {
     std::lock_guard sl(mLock);
 

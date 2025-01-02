@@ -66,7 +66,7 @@ private:
         ApplyFlags const flags,
         AccountID const id,
         beast::Journal const j,
-        Asset const& asset);
+        Issue const& asset);
 
     // Use the payment flow code to perform offer crossing.
     std::pair<TER, Amounts>

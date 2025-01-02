@@ -74,7 +74,7 @@ STAmount
 multiplyRound(
     STAmount const& amount,
     Rate const& rate,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp);
 
 STAmount
@@ -87,7 +87,7 @@ STAmount
 divideRound(
     STAmount const& amount,
     Rate const& rate,
-    Asset const& asset,
+    Issue const& asset,
     bool roundUp);
 
 namespace nft {

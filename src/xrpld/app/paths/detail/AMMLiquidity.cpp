@@ -27,8 +27,8 @@ AMMLiquidity<TIn, TOut>::AMMLiquidity(
     ReadView const& view,
     AccountID const& ammAccountID,
     std::uint32_t tradingFee,
-    Asset const& in,
-    Asset const& out,
+    Issue const& in,
+    Issue const& out,
     AMMContext& ammContext,
     beast::Journal j)
     : ammContext_(ammContext)
@@ -112,7 +112,7 @@ maxAmount()
 
 template <typename T>
 T
-maxOut(T const& out, Asset const& asset)
+maxOut(T const& out, Issue const& asset)
 {
     Number const res = out * Number{99, -2};
     return toAmount<T>(asset, res, Number::rounding_mode::downward);

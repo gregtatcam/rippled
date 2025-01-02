@@ -201,8 +201,9 @@ private:
     static std::int32_t
     computeReserveReduction(StrandContext const& ctx, AccountID const& acc)
     {
-        if (ctx.isFirst && ctx.strandDeliver.holds<Issue>() &&
-            !ctx.view.read(keylet::line(acc, ctx.strandDeliver.get<Issue>())))
+        if (ctx.isFirst && ctx.strandDeliver.holds<IOUIssue>() &&
+            !ctx.view.read(
+                keylet::line(acc, ctx.strandDeliver.get<IOUIssue>())))
             return -1;
         return 0;
     }

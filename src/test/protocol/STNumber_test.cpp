@@ -18,7 +18,7 @@
 //==============================================================================
 
 #include <xrpl/beast/unit_test.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/STNumber.h>
 

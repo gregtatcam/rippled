@@ -518,7 +518,7 @@ DirectStepI<TDerived>::revImp(
         static_cast<TDerived const*>(this)->verifyDstQualityIn(dstQIn),
         "ripple::DirectStepI : valid destination quality");
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
+    IOUIssue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
 
     JLOG(j_.trace()) << "DirectStepI::rev"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -643,7 +643,7 @@ DirectStepI<TDerived>::fwdImp(
     auto const [srcQOut, dstQIn] =
         qualities(sb, srcDebtDir, StrandDirection::forward);
 
-    Issue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
+    IOUIssue const srcToDstIss(currency_, redeems(srcDebtDir) ? dst_ : src_);
 
     JLOG(j_.trace()) << "DirectStepI::fwd"
                      << " srcRedeems: " << redeems(srcDebtDir)
@@ -855,7 +855,7 @@ DirectStepI<TDerived>::qualityUpperBound(
 
         if (isLast_ && dstQIn > QUALITY_ONE)
             dstQIn = QUALITY_ONE;
-        Issue const iss{currency_, src_};
+        IOUIssue const iss{currency_, src_};
         return {
             Quality(getRate(STAmount(iss, srcQOut), STAmount(iss, dstQIn))),
             dir};
@@ -865,7 +865,7 @@ DirectStepI<TDerived>::qualityUpperBound(
         ? qualitiesSrcRedeems(v)
         : qualitiesSrcIssues(v, prevStepDir);
 
-    Issue const iss{currency_, src_};
+    IOUIssue const iss{currency_, src_};
     // Be careful not to switch the parameters to `getRate`. The
     // `getRate(offerOut, offerIn)` function is usually used for offers. It
     // returns offerIn/offerOut. For a direct step, the rate is srcQOut/dstQIn
@@ -923,8 +923,8 @@ DirectStepI<TDerived>::check(StrandContext const& ctx) const
         }
     }
     {
-        Issue const srcIssue{currency_, src_};
-        Issue const dstIssue{currency_, dst_};
+        IOUIssue const srcIssue{currency_, src_};
+        IOUIssue const dstIssue{currency_, dst_};
 
         if (ctx.seenBookOuts.count(srcIssue))
         {
@@ -940,7 +940,7 @@ DirectStepI<TDerived>::check(StrandContext const& ctx) const
             // issue
             if (auto book = ctx.prevStep->bookStepBook())
             {
-                if (book->out.get<Issue>() != srcIssue)
+                if (book->out.get<IOUIssue>() != srcIssue)
                     return temBAD_PATH_LOOP;
             }
         }

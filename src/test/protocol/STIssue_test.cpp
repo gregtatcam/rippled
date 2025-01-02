@@ -34,14 +34,14 @@ public:
         using namespace jtx;
         Account const alice{"alice"};
         auto const USD = alice["USD"];
-        Issue issue;
+        IOUIssue issue;
 
         try
         {
             issue = xrpIssue();
-            issue.account = alice;
-            STIssue stissue(sfAsset, Asset{issue});
-            fail("Inconsistent XRP Issue doesn't fail");
+            issue.setIssuer(alice);
+            STIssue stissue(sfAsset, Issue{issue});
+            fail("Inconsistent XRP IOUIssue doesn't fail");
         }
         catch (...)
         {
@@ -51,9 +51,9 @@ public:
         try
         {
             issue = USD;
-            issue.account = xrpAccount();
-            STIssue stissue(sfAsset, Asset{issue});
-            fail("Inconsistent IOU Issue doesn't fail");
+            issue.setIssuer(xrpAccount());
+            STIssue stissue(sfAsset, Issue{issue});
+            fail("Inconsistent IOU IOUIssue doesn't fail");
         }
         catch (...)
         {
@@ -70,7 +70,7 @@ public:
             (void)uint.parseHex(data);
             SerialIter iter(Slice(uint.data(), uint.size()));
             STIssue stissue(iter, sfAsset);
-            fail("Inconsistent IOU Issue doesn't fail on serializer");
+            fail("Inconsistent IOU IOUIssue doesn't fail on serializer");
         }
         catch (...)
         {
@@ -79,7 +79,7 @@ public:
 
         try
         {
-            STIssue stissue(sfAsset, Asset{xrpIssue()});
+            STIssue stissue(sfAsset, Issue{xrpIssue()});
         }
         catch (...)
         {
@@ -88,7 +88,7 @@ public:
 
         try
         {
-            STIssue stissue(sfAsset, Asset{USD});
+            STIssue stissue(sfAsset, Issue{USD});
         }
         catch (...)
         {
@@ -108,7 +108,7 @@ public:
         }
         catch (...)
         {
-            fail("USD Issue fails on serializer");
+            fail("USD IOUIssue fails on serializer");
         }
 
         try
@@ -122,7 +122,7 @@ public:
         }
         catch (...)
         {
-            fail("XRP Issue fails on serializer");
+            fail("XRP IOUIssue fails on serializer");
         }
     }
 
@@ -133,9 +133,9 @@ public:
         using namespace jtx;
         Account const alice{"alice"};
         auto const USD = alice["USD"];
-        Asset const asset1{xrpIssue()};
-        Asset const asset2{USD};
-        Asset const asset3{MPTID{2}};
+        Issue const asset1{xrpIssue()};
+        Issue const asset2{USD};
+        Issue const asset3{MPTID{2}};
 
         BEAST_EXPECT(STIssue(sfAsset, asset1) != asset2);
         BEAST_EXPECT(STIssue(sfAsset, asset1) != asset3);

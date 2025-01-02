@@ -23,7 +23,7 @@
 #include <xrpl/basics/Buffer.h>
 #include <xrpl/basics/Expected.h>
 #include <xrpl/protocol/AccountID.h>
-#include <xrpl/protocol/Issue.h>
+#include <xrpl/protocol/IOUIssue.h>
 #include <xrpl/protocol/PublicKey.h>
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STBase.h>
