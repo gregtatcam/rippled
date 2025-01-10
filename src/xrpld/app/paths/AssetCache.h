@@ -21,6 +21,7 @@
 #define RIPPLE_APP_PATHS_RIPPLELINECACHE_H_INCLUDED
 
 #include <xrpld/app/ledger/Ledger.h>
+#include <xrpld/app/paths/MPT.h>
 #include <xrpld/app/paths/TrustLine.h>
 #include <xrpl/basics/CountedObject.h>
 #include <xrpl/basics/hardened_hash.h>
@@ -62,7 +63,7 @@ public:
     std::shared_ptr<std::vector<PathFindTrustLine>>
     getRippleLines(AccountID const& accountID, LineDirection direction);
 
-    std::shared_ptr<std::vector<MPTID>> const&
+    std::shared_ptr<std::vector<PathFindMPT>> const&
     getMPTs(AccountID const& account);
 
 private:
@@ -128,7 +129,7 @@ private:
         AccountKey::Hash>
         lines_;
     std::size_t totalLineCount_ = 0;
-    hash_map<AccountID, std::shared_ptr<std::vector<MPTID>>> mpts_;
+    hash_map<AccountID, std::shared_ptr<std::vector<PathFindMPT>>> mpts_;
     std::size_t totalMPTCount_ = 0;
 };
 

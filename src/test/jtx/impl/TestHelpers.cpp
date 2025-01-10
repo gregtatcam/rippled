@@ -101,7 +101,7 @@ rpf(jtx::Account const& src,
     jtx::Account const& dst,
     STAmount const& dstAmount,
     std::optional<STAmount> const& sendMax,
-    std::optional<Currency> const& srcCurrency)
+    std::optional<PathAsset> const& srcAsset)
 {
     Json::Value jv = Json::objectValue;
     jv[jss::command] = "ripple_path_find";
@@ -110,11 +110,14 @@ rpf(jtx::Account const& src,
     jv[jss::destination_amount] = dstAmount.getJson(JsonOptions::none);
     if (sendMax)
         jv[jss::send_max] = sendMax->getJson(JsonOptions::none);
-    if (srcCurrency)
+    if (srcAsset)
     {
         auto& sc = jv[jss::source_currencies] = Json::arrayValue;
         Json::Value j = Json::objectValue;
-        j[jss::currency] = to_string(srcCurrency.value());
+        if (srcAsset->holds<Currency>())
+            j[jss::currency] = to_string(srcAsset->get<Currency>());
+        else
+            j[jss::mpt_issuance_id] = to_string(srcAsset->get<MPTID>());
         sc.append(j);
     }
 

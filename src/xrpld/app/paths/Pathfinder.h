@@ -145,7 +145,7 @@ private:
     getPathsOut(
         PathAsset const& pathAsset,
         AccountID const& account,
-        std::optional<LineDirection> direction,
+        LineDirection direction,
         bool isDestPathAsset,
         AccountID const& dest,
         std::function<bool(void)> const& continueCallback);

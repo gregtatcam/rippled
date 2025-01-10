@@ -3336,8 +3336,9 @@ class MPToken_test : public beast::unit_test::suite
                 find_paths(env, carol, dan, MPT(-1));
             BEAST_EXPECT(srcAmt == MPT1(100));
             BEAST_EXPECT(dstAmt == MPT(100));
-            // This path is consistent with IOU1/gw / IOU/gw path -
-            // [gw1, IOU/gw], except for gw1. This is due to no MPT rippling
+            // Has this been IOU path, it would have started with gw, but not
+            // MPT. This is due to MPT not being bidirectional unlike from
+            // trustline.
             BEAST_EXPECT(same(pathSet, stpath(IPE(mpt.issuanceID()))));
         }
 
@@ -3419,12 +3420,133 @@ class MPToken_test : public beast::unit_test::suite
                 find_paths(env, carol, dan, MPT1(-1));
             BEAST_EXPECT(srcAmt == MPT(100));
             BEAST_EXPECT(dstAmt == MPT1(100));
-            // This path is consistent with IOU/gw / IOU/gw2 -
-            // IOU/gw2 / IOU1/gw1 path -
-            // [gw, IOU2/gw2, IOU1/gw1], except for gw.
-            // This is due to no MPT rippling
+            // Has this been IOU path, it would have started with gw, but not
+            // MPT. This is due to MPT not being bidirectional unlike from
+            // trustline.
             BEAST_EXPECT(
                 same(pathSet, stpath(IPE(USD2), IPE(mpt1.issuanceID()))));
+        }
+
+        // Cross-asset payment via offers (two steps)
+        // Start/End with mpt/mp2 and book steps in the middle
+        // offers are MPT/MPT
+        {
+            Env env = pathTestEnv(*this);
+            Account const gw2{"gw2"};
+            env.fund(XRP(1'000), gw, gw1, gw2, alice, bob, carol, dan);
+
+            MPTTester mpt(env, gw, {.holders = {alice, carol}, .fund = false});
+            mpt.create(
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT = mpt["MPT"];
+            mpt.authorize({.account = alice});
+            mpt.authorize({.account = carol});
+            mpt.pay(gw, carol, 200);
+
+            MPTTester mpt1(env, gw1, {.holders = {bob, alice}, .fund = false});
+            mpt1.create(
+                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT1 = mpt1["MPT1"];
+            mpt1.authorize({.account = alice});
+            mpt1.pay(gw1, alice, 200);
+            mpt1.authorize({.account = bob});
+
+            MPTTester mpt2(env, gw2, {.holders = {bob, dan}, .fund = false});
+            mpt2.create(
+                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT2 = mpt2["MPT2"];
+            mpt2.authorize({.account = bob});
+            mpt2.pay(gw2, bob, 200);
+            mpt2.authorize({.account = dan});
+
+            env(offer(alice, MPT(100), MPT1(100)));
+            env(offer(bob, MPT1(100), MPT2(100)));
+            env.close();
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, MPT2(-1));
+            BEAST_EXPECT(srcAmt == MPT(100));
+            BEAST_EXPECT(dstAmt == MPT2(100));
+            // Has this been IOU path, it would have started with gw, but not
+            // MPT. This is due to MPT not being bidirectional unlike from
+            // trustline
+            BEAST_EXPECT(same(
+                pathSet,
+                stpath(IPE(mpt1.issuanceID()), IPE(mpt2.issuanceID()))));
+        }
+
+        // Cross-asset payment via offers (three steps)
+        // Start/End with mpt/mp3 and book steps in the middle
+        // offers are MPT/MPT
+        {
+            Env env = pathTestEnv(*this);
+            Account const gw2{"gw2"};
+            Account const gw3{"gw3"};
+            Account const greg{"greg"};
+            env.fund(
+                XRP(1'000), gw, gw1, gw2, gw3, alice, bob, carol, greg, dan);
+
+            MPTTester mpt(env, gw, {.holders = {alice, carol}, .fund = false});
+            mpt.create(
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT = mpt["MPT"];
+            mpt.authorize({.account = alice});
+            mpt.authorize({.account = carol});
+            mpt.pay(gw, carol, 200);
+
+            MPTTester mpt1(env, gw1, {.holders = {bob, alice}, .fund = false});
+            mpt1.create(
+                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT1 = mpt1["MPT1"];
+            mpt1.authorize({.account = alice});
+            mpt1.pay(gw1, alice, 200);
+            mpt1.authorize({.account = bob});
+
+            MPTTester mpt2(env, gw2, {.holders = {bob, greg}, .fund = false});
+            mpt2.create(
+                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT2 = mpt2["MPT2"];
+            mpt2.authorize({.account = bob});
+            mpt2.pay(gw2, bob, 200);
+            mpt2.authorize({.account = greg});
+
+            MPTTester mpt3(env, gw3, {.holders = {greg, dan}, .fund = false});
+            mpt3.create(
+                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT3 = mpt3["MPT3"];
+            mpt3.authorize({.account = greg});
+            mpt3.pay(gw3, greg, 200);
+            mpt3.authorize({.account = dan});
+
+            env(offer(alice, MPT(100), MPT1(100)));
+            env(offer(bob, MPT1(100), MPT2(100)));
+            env(offer(greg, MPT2(100), MPT3(100)));
+            env.close();
+
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, carol, dan, MPT3(-1));
+            BEAST_EXPECT(srcAmt == MPT(100));
+            BEAST_EXPECT(dstAmt == MPT3(100));
+            // Has this been IOU path, it would have started with gw, but not
+            // MPT. This is due to MPT not being bidirectional unlike from
+            // trustline
+            BEAST_EXPECT(same(
+                pathSet,
+                stpath(
+                    IPE(mpt1.issuanceID()),
+                    IPE(mpt2.issuanceID()),
+                    IPE(mpt3.issuanceID()))));
+
+            // TODO, path finding doesn't work, but the payment does
+            // Note that it doesn't work for all IOU either
+            env(pay(carol, dan, MPT3(100)),
+                path(~MPT1, ~MPT2, ~MPT3),
+                sendmax(MPT(100)),
+                txflags(tfNoRippleDirect | tfPartialPayment));
         }
     }
 

@@ -174,7 +174,7 @@ rpf(jtx::Account const& src,
     jtx::Account const& dst,
     STAmount const& dstAmount,
     std::optional<STAmount> const& sendMax = std::nullopt,
-    std::optional<Currency> const& srcCurrency = std::nullopt);
+    std::optional<PathAsset> const& srcAsset = std::nullopt);
 
 jtx::Env
 pathTestEnv(beast::unit_test::suite& suite);

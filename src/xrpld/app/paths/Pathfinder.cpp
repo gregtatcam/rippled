@@ -741,7 +741,7 @@ int
 Pathfinder::getPathsOut(
     PathAsset const& pathAsset,
     AccountID const& account,
-    std::optional<LineDirection> direction,
+    LineDirection direction,
     bool isDstAsset,
     AccountID const& dstAccount,
     std::function<bool(void)> const& continueCallback)
@@ -780,9 +780,8 @@ Pathfinder::getPathsOut(
 
         if (asset.holds<Issue>())
         {
-            assert(direction);
             if (auto const lines =
-                    mAssetCache->getRippleLines(account, *direction))
+                    mAssetCache->getRippleLines(account, direction))
             {
                 for (auto const& rspEntry : *lines)
                 {
@@ -822,18 +821,21 @@ Pathfinder::getPathsOut(
         {
             for (auto const& mpt : *mpts)
             {
-                if (pathAsset.get<MPTID>() != mpt)
+                if (pathAsset.get<MPTID>() != mpt.getMptID())
                 {
                 }
-                // TODO MPT is this correct
-                else if (
-                    bAuthRequired &&
-                    requireAuth(*mLedger, MPTIssue{mpt}, account) != tesSUCCESS)
+                else if (mpt.isZeroBalance() || mpt.isMaxedOut())
+                {
+                }
+                else if (bAuthRequired)
                 {
                 }
                 else if (isDstAsset && dstAccount == getMPTIssuer(mpt))
                 {
                     count += 10000;
+                }
+                else if (bFrozen)
+                {
                 }
                 else
                 {
@@ -1064,7 +1066,7 @@ Pathfinder::addLink(
                     static bool constexpr isLine = std::
                         is_same_v<AssetType, std::vector<PathFindTrustLine>>;
                     static bool constexpr isMPT =
-                        std::is_same_v<AssetType, std::vector<MPTID>>;
+                        std::is_same_v<AssetType, std::vector<PathFindMPT>>;
 
                     for (auto const& asset : assets)
                     {
@@ -1073,14 +1075,17 @@ Pathfinder::addLink(
                         auto const& acct = [&]() constexpr {
                             if constexpr (isLine)
                                 return asset.getAccountIDPeer();
+                            // Unlikely from trustline, MPT is not bidirectional
                             if constexpr (isMPT)
                                 return getMPTIssuer(asset);
                         }();
                         auto const direction =
-                            [&]() constexpr -> std::optional<LineDirection> {
+                            [&]() constexpr -> LineDirection {
                             if constexpr (isLine)
                                 return asset.getDirectionPeer();
-                            return std::nullopt;
+                            // incoming for MPT since MPT doesn't support
+                            // rippling (see LineDirection comments)
+                            return LineDirection::incoming;
                         }();
 
                         if (hasEffectiveDestination && (acct == mDstAccount))
@@ -1101,9 +1106,10 @@ Pathfinder::addLink(
                                 return uEndPathAsset.get<Currency>() ==
                                     asset.getLimit().getCurrency();
                             if constexpr (isMPT)
-                                return uEndPathAsset.get<MPTID>() == asset;
+                                return uEndPathAsset.get<MPTID>() ==
+                                    asset.getMptID();
                         }();
-                        auto checkLine = [&]() {
+                        auto checkAsset = [&]() {
                             if constexpr (isLine)
                             {
                                 return (
@@ -1115,7 +1121,12 @@ Pathfinder::addLink(
                                     (bIsNoRippleOut && asset.getNoRipple()));
                             }
                             if constexpr (isMPT)
-                                return false;
+                            {
+                                return asset.isZeroBalance() ||
+                                    asset.isMaxedOut() ||
+                                    requireAuth(
+                                           *mLedger, MPTIssue{asset}, acct);
+                            }
                         };
 
                         if (correctAsset &&
@@ -1123,7 +1134,7 @@ Pathfinder::addLink(
                         {
                             // path is for correct currency and has not been
                             // seen
-                            if (checkLine())
+                            if (checkAsset())
                             {
                                 // Can't leave on this path
                             }

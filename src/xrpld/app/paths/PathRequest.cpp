@@ -227,7 +227,7 @@ PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
         if (auto mpts = crCache->getMPTs(*raDstAccount))
         {
             for (auto const& mpt : *mpts)
-                jvDestCur.append(to_string(mpt));
+                jvDestCur.append(to_string(mpt.getMptID()));
         }
 
         jvStatus[jss::destination_tag] =
@@ -564,7 +564,7 @@ PathRequest::findPaths(
             if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
                 return false;
             for (auto const& mpt : *mpts)
-                sourceAssets.insert(mpt);
+                sourceAssets.insert(MPTIssue{mpt});
         }
     }
 
@@ -737,7 +737,7 @@ PathRequest::doUpdate(
         if (auto mpts = cache->getMPTs(*raDstAccount))
         {
             for (auto const& mpt : *mpts)
-                destAssets.append(to_string(mpt));
+                destAssets.append(to_string(mpt.getMptID()));
         }
     }
 
