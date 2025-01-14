@@ -102,6 +102,12 @@ struct MPTCreate
     std::optional<std::string> metadata = std::nullopt;
     std::optional<std::uint32_t> ownerCount = std::nullopt;
     std::optional<std::uint32_t> holderCount = std::nullopt;
+    // if empty vector then authorize all holders
+    std::optional<std::vector<Account>> authorize = std::nullopt;
+    // pay only if authorize is seated
+    // if empty vector then pay to either authorize or all holders
+    std::optional<std::pair<std::vector<Account>, std::uint64_t>> pay =
+        std::nullopt;
     bool fund = true;
     std::optional<std::uint32_t> flags = {0};
     std::optional<TER> err = std::nullopt;
