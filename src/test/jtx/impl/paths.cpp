@@ -57,6 +57,11 @@ paths::operator()(Env& env, JTx& jt) const
 
 //------------------------------------------------------------------------------
 
+path::path(STPath const& p)
+{
+    jv_ = p.getJson(JsonOptions::none);
+}
+
 Json::Value&
 path::create()
 {

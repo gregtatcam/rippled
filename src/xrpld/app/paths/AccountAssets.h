@@ -25,14 +25,14 @@
 
 namespace ripple {
 
-hash_set<Currency>
-accountDestCurrencies(
+hash_set<PathAsset>
+accountDestAssets(
     AccountID const& account,
     std::shared_ptr<AssetCache> const& cache,
     bool includeXRP);
 
-hash_set<Currency>
-accountSourceCurrencies(
+hash_set<PathAsset>
+accountSourceAssets(
     AccountID const& account,
     std::shared_ptr<AssetCache> const& lrLedger,
     bool includeXRP);

@@ -20,7 +20,7 @@
 #include <xrpld/app/main/Application.h>
 #include <xrpld/app/misc/LoadFeeTrack.h>
 #include <xrpld/app/misc/NetworkOPs.h>
-#include <xrpld/app/paths/AccountCurrencies.h>
+#include <xrpld/app/paths/AccountAssets.h>
 #include <xrpld/app/paths/PathRequest.h>
 #include <xrpld/app/paths/PathRequests.h>
 #include <xrpld/app/paths/RippleCalc.h>
@@ -218,17 +218,11 @@ PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
     {
         bool const disallowXRP(sleDest->getFlags() & lsfDisallowXRP);
 
-        auto usDestCurrID =
-            accountDestCurrencies(*raDstAccount, crCache, !disallowXRP);
+        auto const destAssets =
+            accountDestAssets(*raDstAccount, crCache, !disallowXRP);
 
-        for (auto const& currency : usDestCurrID)
-            jvDestCur.append(to_string(currency));
-
-        if (auto mpts = crCache->getMPTs(*raDstAccount))
-        {
-            for (auto const& mpt : *mpts)
-                jvDestCur.append(to_string(mpt.getMptID()));
-        }
+        for (auto const& asset : destAssets)
+            jvDestCur.append(to_string(asset));
 
         jvStatus[jss::destination_tag] =
             (sleDest->getFlags() & lsfRequireDestTag);
@@ -545,26 +539,30 @@ PathRequest::findPaths(
     }
     if (sourceAssets.empty())
     {
-        auto currencies = accountSourceCurrencies(*raSrcAccount, cache, true);
+        auto assets = accountSourceAssets(*raSrcAccount, cache, true);
         bool const sameAccount = *raSrcAccount == *raDstAccount;
-        for (auto const& c : currencies)
+        for (auto const& asset : assets)
         {
-            if (!sameAccount ||
-                (saDstAmount.holds<Issue>() &&
-                 c != saDstAmount.get<Issue>().currency))
+            if (!std::visit(
+                    [&]<typename TAsset>(TAsset const& a) {
+                        if (!sameAccount || a != saDstAmount.asset())
+                        {
+                            if (sourceAssets.size() >=
+                                RPC::Tuning::max_auto_src_cur)
+                                return false;
+                            if constexpr (std::is_same_v<TAsset, Currency>)
+                                sourceAssets.insert(Issue{
+                                    a,
+                                    a.isZero() ? xrpAccount() : *raSrcAccount});
+                            else
+                                sourceAssets.insert(MPTIssue{a});
+                        }
+                        return true;
+                    },
+                    asset.value()))
             {
-                if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
-                    return false;
-                sourceAssets.insert(
-                    Issue{c, c.isZero() ? xrpAccount() : *raSrcAccount});
-            }
-        }
-        if (auto mpts = cache->getMPTs(*raSrcAccount))
-        {
-            if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
                 return false;
-            for (auto const& mpt : *mpts)
-                sourceAssets.insert(MPTIssue{mpt});
+            }
         }
     }
 
@@ -731,14 +729,9 @@ PathRequest::doUpdate(
         // Old ripple_path_find API gives destination_currencies
         auto& destAssets =
             (newStatus[jss::destination_currencies] = Json::arrayValue);
-        auto usAssets = accountDestCurrencies(*raDstAccount, cache, true);
-        for (auto const& c : usAssets)
-            destAssets.append(to_string(c));
-        if (auto mpts = cache->getMPTs(*raDstAccount))
-        {
-            for (auto const& mpt : *mpts)
-                destAssets.append(to_string(mpt.getMptID()));
-        }
+        auto const assets = accountDestAssets(*raDstAccount, cache, true);
+        for (auto const& asset : assets)
+            destAssets.append(to_string(asset));
     }
 
     newStatus[jss::source_account] = toBase58(*raSrcAccount);
