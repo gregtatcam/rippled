@@ -21,7 +21,10 @@
 
 #include <test/jtx/offer.h>
 #include <test/jtx/owners.h>
+#include <xrpld/rpc/RPCHandler.h>
+#include <xrpl/protocol/STParsedJSON.h>
 #include <xrpl/protocol/TxFlags.h>
+#include <xrpl/resource/Fees.h>
 
 namespace ripple {
 namespace test {
@@ -96,12 +99,38 @@ IPE(MPTIssue const& iss)
         iss.getIssuer());
 }
 
+static void
+addSourceAsset(
+    Json::Value& jv,
+    PathAsset const& srcAsset,
+    std::optional<AccountID> const& srcIssuer)
+{
+    std::visit(
+        [&]<typename TAsset>(TAsset const& asset) {
+            if constexpr (std::is_same_v<TAsset, Currency>)
+            {
+                jv[jss::currency] = to_string(asset);
+                if (srcIssuer)
+                    jv[jss::issuer] = to_string(*srcIssuer);
+            }
+            else
+            {
+                if (srcIssuer)
+                    Throw<std::runtime_error>(
+                        "MPT source_currencies can't have issuer");
+                jv[jss::mpt_issuance_id] = to_string(asset);
+            }
+        },
+        srcAsset.value());
+}
+
 Json::Value
 rpf(jtx::Account const& src,
     jtx::Account const& dst,
     STAmount const& dstAmount,
     std::optional<STAmount> const& sendMax,
-    std::optional<PathAsset> const& srcAsset)
+    std::optional<PathAsset> const& srcAsset,
+    std::optional<AccountID> const& srcIssuer)
 {
     Json::Value jv = Json::objectValue;
     jv[jss::command] = "ripple_path_find";
@@ -114,10 +143,7 @@ rpf(jtx::Account const& src,
     {
         auto& sc = jv[jss::source_currencies] = Json::arrayValue;
         Json::Value j = Json::objectValue;
-        if (srcAsset->holds<Currency>())
-            j[jss::currency] = to_string(srcAsset->get<Currency>());
-        else
-            j[jss::mpt_issuance_id] = to_string(srcAsset->get<MPTID>());
+        addSourceAsset(j, *srcAsset, srcIssuer);
         sc.append(j);
     }
 
@@ -146,7 +172,8 @@ find_paths_request(
     jtx::Account const& dst,
     STAmount const& saDstAmount,
     std::optional<STAmount> const& saSendMax,
-    std::optional<Currency> const& saSrcCurrency)
+    std::optional<PathAsset> const& srcAsset,
+    std::optional<AccountID> const& srcIssuer)
 {
     using namespace jtx;
 
@@ -175,11 +202,12 @@ find_paths_request(
     params[jss::destination_amount] = saDstAmount.getJson(JsonOptions::none);
     if (saSendMax)
         params[jss::send_max] = saSendMax->getJson(JsonOptions::none);
-    if (saSrcCurrency)
+
+    if (srcAsset)
     {
         auto& sc = params[jss::source_currencies] = Json::arrayValue;
         Json::Value j = Json::objectValue;
-        j[jss::currency] = to_string(saSrcCurrency.value());
+        addSourceAsset(j, *srcAsset, srcIssuer);
         sc.append(j);
     }
 
@@ -205,10 +233,11 @@ find_paths(
     jtx::Account const& dst,
     STAmount const& saDstAmount,
     std::optional<STAmount> const& saSendMax,
-    std::optional<Currency> const& saSrcCurrency)
+    std::optional<PathAsset> const& srcAsset,
+    std::optional<AccountID> const& srcIssuer)
 {
     Json::Value result = find_paths_request(
-        env, src, dst, saDstAmount, saSendMax, saSrcCurrency);
+        env, src, dst, saDstAmount, saSendMax, srcAsset, srcIssuer);
     if (result.isMember(jss::error))
         return std::make_tuple(STPathSet{}, STAmount{}, STAmount{});
 

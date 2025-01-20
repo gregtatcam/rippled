@@ -3265,8 +3265,14 @@ class MPToken_test : public beast::unit_test::suite
                 find_paths(env, carol, dan, MPT(-1));
             BEAST_EXPECT(srcAmt == XRP(100));
             BEAST_EXPECT(dstAmt == MPT(100));
-            // This path is consistent with XRP/IOU.
-            BEAST_EXPECT(same(pathSet, stpath(IPE(mpt.issuanceID()))));
+            if (BEAST_EXPECT(same(pathSet, stpath(IPE(mpt.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT(10)),
+                    path(~MPT),
+                    sendmax(XRP(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
         }
 
         // Cross-asset payment via IOU/MPT offer (one step)
@@ -3295,12 +3301,131 @@ class MPToken_test : public beast::unit_test::suite
             env(offer(alice, USD(100), MPT(100)));
             env.close();
 
-            auto const [pathSet, srcAmt, dstAmt] =
+            // No sendMax
+            STPathSet pathSet;
+            STAmount srcAmt;
+            STAmount dstAmt;
+            std::tie(pathSet, srcAmt, dstAmt) =
                 find_paths(env, carol, dan, MPT(-1));
             BEAST_EXPECT(srcAmt == USD(100));
             BEAST_EXPECT(dstAmt == MPT(100));
-            // This path is consistent with IOU1/gw1 / IOU/gw
-            BEAST_EXPECT(same(pathSet, stpath(gw, IPE(mpt.issuanceID()))));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(gw, IPE(mpt.issuanceID())))))
+            {
+                // Validate the payment works with the path
+                env(pay(carol, dan, MPT(10)),
+                    path(pathSet[0]),
+                    sendmax(USD(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include sendMax
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, MPT(-1), USD(-1));
+            BEAST_EXPECT(srcAmt == USD(90));
+            BEAST_EXPECT(dstAmt == MPT(90));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(mpt.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT(10)),
+                    path(pathSet[0]),
+                    sendmax(USD(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include source token
+            std::tie(pathSet, srcAmt, dstAmt) = find_paths(
+                env, carol, dan, MPT(-1), std::nullopt, USD.currency);
+            BEAST_EXPECT(srcAmt == USD(80));
+            BEAST_EXPECT(dstAmt == MPT(80));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(gw, IPE(mpt.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT(10)),
+                    path(pathSet[0]),
+                    sendmax(USD(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+        }
+
+        // Cross-asset payment via MPT/IOU offer (one step)
+        {
+            Env env = pathTestEnv(*this);
+
+            env.fund(XRP(1'000), dan);
+            env.fund(XRP(1'000), gw);
+
+            MPTTester mpt(env, gw1, {.holders = {carol, alice}});
+
+            mpt.create(
+                {.ownerCount = 1,
+                 .holderCount = 0,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const MPT = mpt["MPT"];
+
+            mpt.authorize({.account = carol});
+            mpt.authorize({.account = alice});
+            mpt.pay(gw1, carol, 200);
+
+            env(trust(dan, USD(400)));
+            env(trust(alice, USD(400)));
+            env(pay(gw, alice, USD(200)));
+
+            env(offer(alice, MPT(100), USD(100)));
+            env.close();
+
+            // No sendMax
+            STPathSet pathSet;
+            STAmount srcAmt;
+            STAmount dstAmt;
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, USD(-1));
+            BEAST_EXPECT(srcAmt == MPT(100));
+            BEAST_EXPECT(dstAmt == USD(100));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 && same(pathSet, stpath(IPE(USD)))))
+            {
+                // Validate the payment works with the path
+                env(pay(carol, dan, USD(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include sendMax
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, USD(-1), MPT(-1));
+            BEAST_EXPECT(srcAmt == MPT(90));
+            BEAST_EXPECT(dstAmt == USD(90));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 && same(pathSet, stpath(IPE(USD)))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, USD(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include source token
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, USD(-1), std::nullopt, MPT.mpt());
+            BEAST_EXPECT(srcAmt == MPT(80));
+            BEAST_EXPECT(dstAmt == USD(80));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 && same(pathSet, stpath(IPE(USD)))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, USD(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
         }
 
         // Cross-asset payment via MPT1/MPT offer (one step)
@@ -3332,14 +3457,56 @@ class MPToken_test : public beast::unit_test::suite
             env(offer(alice, MPT1(100), MPT(100)));
             env.close();
 
-            auto const [pathSet, srcAmt, dstAmt] =
+            // No sendMax
+            STPathSet pathSet;
+            STAmount srcAmt;
+            STAmount dstAmt;
+            std::tie(pathSet, srcAmt, dstAmt) =
                 find_paths(env, carol, dan, MPT(-1));
             BEAST_EXPECT(srcAmt == MPT1(100));
             BEAST_EXPECT(dstAmt == MPT(100));
-            // Has this been IOU path, it would have started with gw, but not
-            // MPT. This is due to MPT not being bidirectional unlike from
-            // trustline.
-            BEAST_EXPECT(same(pathSet, stpath(IPE(mpt.issuanceID()))));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(mpt.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT1(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include sendMax
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, MPT(-1), MPT1(-1));
+            BEAST_EXPECT(srcAmt == MPT1(90));
+            BEAST_EXPECT(dstAmt == MPT(90));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(mpt.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT1(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include source token
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, MPT(-1), std::nullopt, MPT1.mpt());
+            BEAST_EXPECT(srcAmt == MPT1(80));
+            BEAST_EXPECT(dstAmt == MPT(80));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(mpt.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT1(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
         }
 
         // Cross-asset payment via offers (two steps)
@@ -3371,13 +3538,40 @@ class MPToken_test : public beast::unit_test::suite
             env(offer(bob, MPT(100), USD(100)));
             env.close();
 
-            auto const [pathSet, srcAmt, dstAmt] =
+            // No sendMax
+            STPathSet pathSet;
+            STAmount srcAmt;
+            STAmount dstAmt;
+            std::tie(pathSet, srcAmt, dstAmt) =
                 find_paths(env, carol, dan, USD(-1));
             BEAST_EXPECT(srcAmt == XRP(100));
             BEAST_EXPECT(dstAmt == USD(100));
-            // This path is consistent with XRP/ IOU1/gw - IOU1/gw1 / IOU/gw
-            BEAST_EXPECT(
-                same(pathSet, stpath(IPE(mpt.issuanceID()), IPE(USD))));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(mpt.issuanceID()), IPE(USD)))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, USD(10)),
+                    path(pathSet[0]),
+                    sendmax(XRP(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include sendMax
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, USD(-1), XRP(100));
+            BEAST_EXPECT(srcAmt == XRP(90));
+            BEAST_EXPECT(dstAmt == USD(90));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(mpt.issuanceID()), IPE(USD)))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, USD(10)),
+                    path(pathSet[0]),
+                    sendmax(XRP(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
         }
 
         // Cross-asset payment via offers (two steps)
@@ -3416,15 +3610,56 @@ class MPToken_test : public beast::unit_test::suite
             env(offer(bob, USD2(100), MPT1(100)));
             env.close();
 
-            auto const [pathSet, srcAmt, dstAmt] =
+            // No sendMax
+            STPathSet pathSet;
+            STAmount srcAmt;
+            STAmount dstAmt;
+            std::tie(pathSet, srcAmt, dstAmt) =
                 find_paths(env, carol, dan, MPT1(-1));
             BEAST_EXPECT(srcAmt == MPT(100));
             BEAST_EXPECT(dstAmt == MPT1(100));
-            // Has this been IOU path, it would have started with gw, but not
-            // MPT. This is due to MPT not being bidirectional unlike from
-            // trustline.
-            BEAST_EXPECT(
-                same(pathSet, stpath(IPE(USD2), IPE(mpt1.issuanceID()))));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(USD2), IPE(mpt1.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT1(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include sendMax
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, MPT1(-1), MPT(-1));
+            BEAST_EXPECT(srcAmt == MPT(90));
+            BEAST_EXPECT(dstAmt == MPT1(90));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(USD2), IPE(mpt1.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT1(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include source token
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, MPT1(-1), std::nullopt, MPT.mpt());
+            BEAST_EXPECT(srcAmt == MPT(80));
+            BEAST_EXPECT(dstAmt == MPT1(80));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(pathSet, stpath(IPE(USD2), IPE(mpt1.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT1(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
         }
 
         // Cross-asset payment via offers (two steps)
@@ -3465,88 +3700,121 @@ class MPToken_test : public beast::unit_test::suite
             env(offer(bob, MPT1(100), MPT2(100)));
             env.close();
 
-            auto const [pathSet, srcAmt, dstAmt] =
+            // No sendMax
+            STPathSet pathSet;
+            STAmount srcAmt;
+            STAmount dstAmt;
+            std::tie(pathSet, srcAmt, dstAmt) =
                 find_paths(env, carol, dan, MPT2(-1));
             BEAST_EXPECT(srcAmt == MPT(100));
             BEAST_EXPECT(dstAmt == MPT2(100));
-            // Has this been IOU path, it would have started with gw, but not
-            // MPT. This is due to MPT not being bidirectional unlike from
-            // trustline
-            BEAST_EXPECT(same(
-                pathSet,
-                stpath(IPE(mpt1.issuanceID()), IPE(mpt2.issuanceID()))));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(
+                        pathSet,
+                        stpath(
+                            IPE(mpt1.issuanceID()), IPE(mpt2.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT2(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include sendMax
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, MPT2(-1), MPT(-1));
+            BEAST_EXPECT(srcAmt == MPT(90));
+            BEAST_EXPECT(dstAmt == MPT2(90));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(
+                        pathSet,
+                        stpath(
+                            IPE(mpt1.issuanceID()), IPE(mpt2.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT2(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
+
+            // Include source token
+            std::tie(pathSet, srcAmt, dstAmt) =
+                find_paths(env, carol, dan, MPT2(-1), std::nullopt, MPT.mpt());
+            BEAST_EXPECT(srcAmt == MPT(80));
+            BEAST_EXPECT(dstAmt == MPT2(80));
+            if (BEAST_EXPECT(
+                    pathSet.size() == 1 &&
+                    same(
+                        pathSet,
+                        stpath(
+                            IPE(mpt1.issuanceID()), IPE(mpt2.issuanceID())))))
+            {
+                // validate a payment works with the path
+                env(pay(carol, dan, MPT2(10)),
+                    path(pathSet[0]),
+                    sendmax(MPT(10)),
+                    txflags(tfNoRippleDirect | tfPartialPayment));
+            }
         }
 
-        // Cross-asset payment via offers (three steps)
-        // Start/End with mpt/mp3 and book steps in the middle
-        // offers are MPT/MPT
+        // verify no MPT rippling
         {
             Env env = pathTestEnv(*this);
-            Account const gw2{"gw2"};
-            Account const gw3{"gw3"};
-            Account const greg{"greg"};
-            env.fund(
-                XRP(1'000), gw, gw1, gw2, gw3, alice, bob, carol, greg, dan);
+            Account const gw{"gw"};
+            Account const gw1{"gw1"};
+            Account const carol{"carol"};
+            Account const bob{"bob"};
+            Account const dan{"dan"};
+            Account const john{"john"};
+            Account const sean{"sean"};
 
-            MPTTester mpt(env, gw, {.holders = {alice, carol}, .fund = false});
-            mpt.create(
-                {.ownerCount = 1,
-                 .holderCount = 0,
-                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
-            auto const MPT = mpt["MPT"];
-            mpt.authorize({.account = alice});
-            mpt.authorize({.account = carol});
-            mpt.pay(gw, carol, 200);
-
-            MPTTester mpt1(env, gw1, {.holders = {bob, alice}, .fund = false});
-            mpt1.create(
-                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
-            auto const MPT1 = mpt1["MPT1"];
-            mpt1.authorize({.account = alice});
-            mpt1.pay(gw1, alice, 200);
-            mpt1.authorize({.account = bob});
-
-            MPTTester mpt2(env, gw2, {.holders = {bob, greg}, .fund = false});
-            mpt2.create(
-                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
-            auto const MPT2 = mpt2["MPT2"];
-            mpt2.authorize({.account = bob});
-            mpt2.pay(gw2, bob, 200);
-            mpt2.authorize({.account = greg});
-
-            MPTTester mpt3(env, gw3, {.holders = {greg, dan}, .fund = false});
-            mpt3.create(
-                {.ownerCount = 1, .flags = tfMPTCanTransfer | tfMPTCanTrade});
-            auto const MPT3 = mpt3["MPT3"];
-            mpt3.authorize({.account = greg});
-            mpt3.pay(gw3, greg, 200);
-            mpt3.authorize({.account = dan});
-
-            env(offer(alice, MPT(100), MPT1(100)));
-            env(offer(bob, MPT1(100), MPT2(100)));
-            env(offer(greg, MPT2(100), MPT3(100)));
+            env.fund(XRP(1'000'000), gw);
+            env.fund(XRP(1'000'000), gw1);
+            env.fund(XRP(1'000'000), carol);
+            env.fund(XRP(1'000'000), dan);
+            env.fund(XRP(1'000'000), bob);
+            env.fund(XRP(1'000'000), john);
+            env.fund(XRP(1'000'000), sean);
             env.close();
 
-            auto const [pathSet, srcAmt, dstAmt] =
-                find_paths(env, carol, dan, MPT3(-1));
-            BEAST_EXPECT(srcAmt == MPT(100));
-            BEAST_EXPECT(dstAmt == MPT3(100));
-            // Has this been IOU path, it would have started with gw, but not
-            // MPT. This is due to MPT not being bidirectional unlike from
-            // trustline
-            BEAST_EXPECT(same(
-                pathSet,
-                stpath(
-                    IPE(mpt1.issuanceID()),
-                    IPE(mpt2.issuanceID()),
-                    IPE(mpt3.issuanceID()))));
+            MPTTester usd(env, gw, {.holders = {carol, dan}, .fund = false});
+            usd.create(
+                {.authorize = {{}},
+                 .pay = {{{}, 100}},
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const USD = usd["USD"];
+            env(offer(carol, XRP(100), USD(100)));
 
-            // TODO, path finding doesn't work, but the payment does
-            // Note that it doesn't work for all IOU either
-            env(pay(carol, dan, MPT3(100)),
-                path(~MPT1, ~MPT2, ~MPT3),
-                sendmax(MPT(100)),
-                txflags(tfNoRippleDirect | tfPartialPayment));
+            MPTTester gbp(env, gw, {.holders = {bob, sean}, .fund = false});
+            gbp.create(
+                {.authorize = {{}},
+                 .pay = {{{bob}, 100}},
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const GBP = gbp["GBP"];
+
+            MPTTester usd1(env, gw1, {.holders = {bob, dan}, .fund = false});
+            usd1.create(
+                {.authorize = {{}},
+                 .pay = {{{dan}, 100}},
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade});
+            auto const USD1 = usd1["USD1"];
+            env(offer(bob, USD1(100), GBP(100)));
+
+            // dan has USD/gw and USD1/gw. Had USD been IOU, it would have
+            // rippled through dan's account.
+            auto const [pathSet, srcAmt, dstAmt] =
+                find_paths(env, john, sean, GBP(-1), XRP(-1));
+            BEAST_EXPECT(pathSet.size() == 0);
+
+            env(pay(john, sean, GBP(10)),
+                sendmax(XRP(20)),
+                path(~USD, dan, gw1, ~GBP),
+                txflags(tfNoRippleDirect | tfPartialPayment),
+                ter(temBAD_PATH));
         }
     }
 

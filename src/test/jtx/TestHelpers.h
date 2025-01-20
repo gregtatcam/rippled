@@ -174,7 +174,8 @@ rpf(jtx::Account const& src,
     jtx::Account const& dst,
     STAmount const& dstAmount,
     std::optional<STAmount> const& sendMax = std::nullopt,
-    std::optional<PathAsset> const& srcAsset = std::nullopt);
+    std::optional<PathAsset> const& srcAsset = std::nullopt,
+    std::optional<AccountID> const& srcIssuer = std::nullopt);
 
 jtx::Env
 pathTestEnv(beast::unit_test::suite& suite);
@@ -215,7 +216,8 @@ find_paths_request(
     jtx::Account const& dst,
     STAmount const& saDstAmount,
     std::optional<STAmount> const& saSendMax = std::nullopt,
-    std::optional<Currency> const& saSrcCurrency = std::nullopt);
+    std::optional<PathAsset> const& srcAsset = std::nullopt,
+    std::optional<AccountID> const& srcIssuer = std::nullopt);
 
 std::tuple<STPathSet, STAmount, STAmount>
 find_paths(
@@ -224,7 +226,8 @@ find_paths(
     jtx::Account const& dst,
     STAmount const& saDstAmount,
     std::optional<STAmount> const& saSendMax = std::nullopt,
-    std::optional<Currency> const& saSrcCurrency = std::nullopt);
+    std::optional<PathAsset> const& srcAsset = std::nullopt,
+    std::optional<AccountID> const& srcIssuer = std::nullopt);
 
 /******************************************************************************/
 

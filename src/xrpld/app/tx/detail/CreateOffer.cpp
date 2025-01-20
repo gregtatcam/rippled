@@ -25,6 +25,7 @@
 #include <xrpl/beast/utility/WrappedSink.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Quality.h>
+#include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/st.h>
 
 namespace ripple {
