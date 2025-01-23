@@ -194,7 +194,7 @@ $(function() {
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/time_point.html">NetClock::time_point</a> newCloseTime,</div>
 <div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/time_point.html">NetClock::time_point</a> now)</div>
 <div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    {</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a59392a6dd8f11f23ed3978458f54be31">signingHash_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/utility/optional/reset.html">reset</a>();</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a59392a6dd8f11f23ed3978458f54be31">signingHash_</a>.reset();</div>
 <div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a860f0abb9aef8bd8bea69e67e4d33c02">position_</a> = newPosition;</div>
 <div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a2e8914cd894504750d7a028379070d1b">closeTime_</a> = newCloseTime;</div>
 <div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a293a19eb7078770dad6340be1e3b4153">time_</a> = now;</div>
@@ -205,7 +205,7 @@ $(function() {
 <div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="keywordtype">void</span></div>
 <div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="classripple_1_1ConsensusProposal.html#a7d279f2fd7f378e66f151870d1171f75">  190</a></span>    <a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a7d279f2fd7f378e66f151870d1171f75">bowOut</a>(<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/time_point.html">NetClock::time_point</a> now)</div>
 <div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    {</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a59392a6dd8f11f23ed3978458f54be31">signingHash_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/utility/optional/reset.html">reset</a>();</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a59392a6dd8f11f23ed3978458f54be31">signingHash_</a>.reset();</div>
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a293a19eb7078770dad6340be1e3b4153">time_</a> = now;</div>
 <div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a4deadd017bafaa3ea45a1a441080ae7c">proposeSeq_</a> = <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a7fa551a6ee5a7a363d97bcab2fd8cec4">seqLeave</a>;</div>
 <div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    }</div>
@@ -243,7 +243,7 @@ $(function() {
 <div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>                <a class="code hl_function" href="classripple_1_1ConsensusProposal.html#a91e326fe44578217610b5ace9e246004">position</a>());</div>
 <div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        }</div>
 <div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a59392a6dd8f11f23ed3978458f54be31">signingHash_</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/utility/optional/value.html">value</a>();</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <span class="keywordflow">return</span> <a class="code hl_variable" href="classripple_1_1ConsensusProposal.html#a59392a6dd8f11f23ed3978458f54be31">signingHash_</a>.value();</div>
 <div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    }</div>
 <div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
 <div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="keyword">private</span>:</div>
@@ -311,10 +311,8 @@ $(function() {
 <div class="ttc" id="anamespaceripple_html_adb9995d7c8e8a2aa3d702b73edfa0672"><div class="ttname"><a href="namespaceripple.html#adb9995d7c8e8a2aa3d702b73edfa0672">ripple::operator==</a></div><div class="ttdeci">constexpr bool operator==(base_uint&lt; Bits, Tag &gt; const &amp;lhs, base_uint&lt; Bits, Tag &gt; const &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="base__uint_8h_source.html#l00584">base_uint.h:584</a></div></div>
 <div class="ttc" id="anamespaceripple_html_ae3f5bc352766a1a8dbf5270eb7dbc2e7"><div class="ttname"><a href="namespaceripple.html#ae3f5bc352766a1a8dbf5270eb7dbc2e7">ripple::sha512Half</a></div><div class="ttdeci">sha512_half_hasher::result_type sha512Half(Args const &amp;... args)</div><div class="ttdoc">Returns the SHA512-Half of a series of objects.</div><div class="ttdef"><b>Definition:</b> <a href="digest_8h_source.html#l00223">digest.h:223</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
-<div class="ttc" id="areset_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/optional/reset.html">std::optional::reset</a></div><div class="ttdeci">T reset(T... args)</div></div>
 <div class="ttc" id="atime_point_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/chrono/time_point.html">std::chrono::time_point</a></div></div>
 <div class="ttc" id="ato_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string/to_string.html">std::to_string</a></div><div class="ttdeci">T to_string(T... args)</div></div>
-<div class="ttc" id="avalue_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/optional/value.html">std::optional::value</a></div><div class="ttdeci">T value(T... args)</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
