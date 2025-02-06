@@ -255,8 +255,8 @@ CreateOffer::checkAcceptAsset(
         auto const& issue = asset.get<Issue>();
         if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
         {
-            auto const trustLine = view.read(keylet::line(
-                id, asset.getIssuer(), issue.currency));
+            auto const trustLine =
+                view.read(keylet::line(id, asset.getIssuer(), issue.currency));
 
             if (!trustLine)
             {

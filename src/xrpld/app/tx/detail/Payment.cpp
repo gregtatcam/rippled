@@ -384,6 +384,7 @@ Payment::doApply()
     bool const depositPreauth = view().rules().enabled(featureDepositPreauth);
     bool const MPTokensV2 = view().rules().enabled(featureMPTokensV2);
 
+    // Direct MPT payment is handled by payment engine if MPTokensV2 is enabled
     bool const ripple = (hasPaths || sendMax || !dstAmount.native()) &&
         (!isDstMPT || MPTokensV2);
 

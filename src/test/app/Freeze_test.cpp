@@ -964,9 +964,7 @@ class Freeze_test : public beast::unit_test::suite
                 ter(tecKILLED));
             env.close();
             env.require(
-                balance(A1, USD(1002)),
-                balance(A2, USD(997)),
-                offers(A1, 0));
+                balance(A1, USD(1002)), balance(A2, USD(997)), offers(A1, 0));
 
             // test: A1 can create passive sell offer
             env(offer(A1, XRP(2), USD(1)), txflags(tfPassive));

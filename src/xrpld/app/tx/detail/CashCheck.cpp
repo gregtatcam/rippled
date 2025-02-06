@@ -441,7 +441,7 @@ CashCheck::doApply()
                     STAmount initialBalance(flowDeliver.asset());
                     initialBalance.setIssuer(noAccount());
 
-                // clang-format off
+                    // clang-format off
                 if (TER const ter = trustCreate(
                         psb,                            // payment sandbox
                         destLow,                        // is dest low?
@@ -462,7 +462,7 @@ CashCheck::doApply()
                 {
                     return ter;
                 }
-                // clang-format on
+                    // clang-format on
 
                     psb.update(sleDst);
 

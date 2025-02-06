@@ -300,8 +300,7 @@ isLPTokenFrozen(
     Asset const& asset,
     Asset const& asset2)
 {
-    return isFrozen(view, account, asset) ||
-        isFrozen(view, account, asset2);
+    return isFrozen(view, account, asset) || isFrozen(view, account, asset2);
 }
 
 STAmount

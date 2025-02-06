@@ -71,10 +71,7 @@ checkFreeze(
                 return tecINTERNAL;  // LCOV_EXCL_LINE
 
             if (isLPTokenFrozen(
-                    view,
-                    src,
-                    (*sleAmm)[sfAsset],
-                    (*sleAmm)[sfAsset2]))
+                    view, src, (*sleAmm)[sfAsset], (*sleAmm)[sfAsset2]))
             {
                 return terNO_LINE;
             }
