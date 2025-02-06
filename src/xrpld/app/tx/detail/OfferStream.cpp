@@ -247,6 +247,24 @@ TOfferStreamBase<TIn, TOut>::step()
             continue;
         }
 
+        // TODO MPT
+        if (offer_.assetIn().template holds<Issue>())
+        {
+            bool const deepFrozen = isDeepFrozen(
+                view_,
+                offer_.owner(),
+                offer_.assetIn().template get<Issue>().currency,
+                offer_.assetIn().getIssuer());
+            if (deepFrozen)
+            {
+                JLOG(j_.trace())
+                    << "Removing deep frozen unfunded offer " << entry->key();
+                permRmOffer(entry->key());
+                offer_ = TOffer<TIn, TOut>{};
+                continue;
+            }
+        }
+
         // Calculate owner funds
         ownerFunds_ = accountFundsHelper(
             view_,

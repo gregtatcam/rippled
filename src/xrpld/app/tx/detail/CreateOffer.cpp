@@ -252,10 +252,11 @@ CreateOffer::checkAcceptAsset(
 
     if (asset.holds<Issue>())
     {
+        auto const& issue = asset.get<Issue>();
         if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
         {
             auto const trustLine = view.read(keylet::line(
-                id, asset.getIssuer(), asset.get<Issue>().currency));
+                id, asset.getIssuer(), issue.currency));
 
             if (!trustLine)
             {
@@ -278,6 +279,32 @@ CreateOffer::checkAcceptAsset(
 
                 return (flags & tapRETRY) ? TER{terNO_AUTH} : TER{tecNO_AUTH};
             }
+        }
+
+        // An account can not create a trustline to itself, so no line can exist
+        // to be frozen. Additionally, an issuer can always accept its own
+        // issuance.
+        if (issue.account == id)
+        {
+            return tesSUCCESS;
+        }
+
+        auto const trustLine =
+            view.read(keylet::line(id, issue.account, issue.currency));
+
+        if (!trustLine)
+        {
+            return tesSUCCESS;
+        }
+
+        // There's no difference which side enacted deep freeze, accepting
+        // tokens shouldn't be possible.
+        bool const deepFrozen =
+            (*trustLine)[sfFlags] & (lsfLowDeepFreeze | lsfHighDeepFreeze);
+
+        if (deepFrozen)
+        {
+            return tecFROZEN;
         }
 
         return tesSUCCESS;
