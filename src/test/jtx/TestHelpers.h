@@ -260,6 +260,9 @@ bool
 expectLine(Env& env, AccountID const& account, None const& value);
 
 bool
+expectMPT(Env& env, AccountID const& account, STAmount const& value);
+
+bool
 expectOffers(
     Env& env,
     AccountID const& account,

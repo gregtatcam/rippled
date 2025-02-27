@@ -329,6 +329,15 @@ expectLine(Env& env, AccountID const& account, None const& value)
 }
 
 [[nodiscard]] bool
+expectMPT(Env& env, AccountID const& account, STAmount const& value)
+{
+    auto const mptIssuanceID =
+        keylet::mptIssuance(value.asset().get<MPTIssue>());
+    auto const mptToken = env.le(keylet::mptoken(mptIssuanceID.key, account));
+    return mptToken && (*mptToken)[sfMPTAmount] == value.mpt().value();
+}
+
+[[nodiscard]] bool
 expectOffers(
     Env& env,
     AccountID const& account,
