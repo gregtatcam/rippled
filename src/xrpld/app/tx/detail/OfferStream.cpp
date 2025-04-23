@@ -109,8 +109,7 @@ accountFundsHelper(
             view, id, amtDefault, freezeHandling, authHandling, j);
     else
     {
-        if constexpr (
-            std::is_same_v<T, IOUAmount> || std::is_same_v<T, MPTAmount>)
+        if constexpr (std::is_same_v<T, IOUAmount>)
         {
             if (asset.getIssuer() == id)
                 // self funded

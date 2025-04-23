@@ -50,6 +50,7 @@ protected:
     // Direct payment between the holders
     // Used by maxFlow's last step.
     bool const isDirectBetweenHolders_;
+    bool forceLimiting_;
     beast::Journal const j_;
 
     struct Cache
@@ -113,6 +114,7 @@ public:
               ctx.strandSrc != mptIssue_.getIssuer() &&
               ctx.strandDst != mptIssue_.getIssuer() &&
               (ctx.isFirst || (ctx.prevStep && !ctx.prevStep->bookStepBook())))
+        , forceLimiting_(false)
         , j_(ctx.j)
     {
     }
@@ -199,6 +201,14 @@ public:
         MPTAmount const& fwdSrcToDst,
         MPTAmount const& fwdOut,
         DebtDirection srcDebtDir);
+
+    bool
+    forceLimiting() override
+    {
+        bool const force = forceLimiting_;
+        forceLimiting_ = false;
+        return force;
+    }
 
     friend bool
     operator==(MPTEndpointStep const& lhs, MPTEndpointStep const& rhs)
@@ -438,6 +448,11 @@ MPTEndpointPaymentStep::check(
             return ter;
     }
 
+    // Can't check for creditBalance/Limit at this point. Even if
+    // OutstandingAmount is equal to MaximumAmount a payment can
+    // still be successful. For instance, when a balance is shifted
+    // from one holder to another.
+
     return tesSUCCESS;
 }
 
@@ -499,32 +514,12 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
     // From an issuer to a holder
     if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_)))
     {
-        std::uint64_t const maximumAmount = [&] {
-            auto const max = sle->getFieldU64(sfMaximumAmount);
-            return max > 0 ? max : maxMPTokenAmount;
-        }();
+        std::uint64_t const maximumAmount =
+            (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
         std::int64_t const maxFlow =
-            maximumAmount - sle->getFieldU64(sfOutstandingAmount);
+            maximumAmount - (*sle)[sfOutstandingAmount];
 
-        // Direct issue, an issuer pays to a holder
-        if (!prevStep_)
-            return {MPTAmount{maxFlow}, DebtDirection::issues};
-
-        // Direct payment between holders or a cross currency payment.
-        // If maxFlow returned in this case then a valid payment will fail.
-        // Consider MaximumAmount is 100, alice is issuer. Then the last
-        // payment fails: pay(alice, bob, 100), pay(bob, carol, 100).
-        // Payment starts in reverse with the issuer paying to carol 100,
-        // therefore exceeding MaximumAmount. In the previous step, bob pays
-        // to the issuer 100, offsetting 100 paid by the issuer to carol.
-        // Another use case with a cross-currency payment, which would
-        // also fail has maxFlow been returned. Last payment fails.
-        // MPT MaximumAmount is 1000, gw is issuer. pay(gw, alice, MPT(1000)),
-        // pay(gw, carol, MPT(100)), offer(alice, MPT1(10), MPT(10)),
-        // pay(carol, bob, MPT(10), sendmax(MPT1(10)), path(~MPT)).
-        // In case of a cross-currency payment, the previous step limits
-        // the output amount.
-        return {MPTAmount(maximumAmount), DebtDirection::issues};
+        return {MPTAmount{maxFlow}, DebtDirection::issues};
     }
 
     return {MPTAmount{0}, DebtDirection::issues};
@@ -569,6 +564,17 @@ MPTEndpointStep<TDerived>::revImp(
                      << " outReq: " << to_string(out)
                      << " maxSrcToDst: " << to_string(maxSrcToDst)
                      << " srcQOut: " << srcQOut << " dstQIn: " << dstQIn;
+
+    // It's possible that the next step (in rev order) redeems and
+    // there is enough funds to pay the entire out amount. Force the next step
+    // as limiting, which forces re-execution in forward. maxFlow then
+    // can calculate the available amount.
+    if (maxSrcToDst < out && prevStep_)
+    {
+        forceLimiting_ = true;
+        resetCache(srcDebtDir);
+        return {beast::zero, beast::zero};
+    }
 
     if (maxSrcToDst.signum() <= 0)
     {

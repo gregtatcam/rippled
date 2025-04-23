@@ -155,7 +155,8 @@ public:
     isFunded() const
     {
         // Offer owner is issuer; they have unlimited funds
-        return m_account == assetOut().getIssuer();
+        return m_account == assetOut().getIssuer() &&
+            assetOut().template holds<Issue>();
     }
 
     static std::pair<std::uint32_t, std::uint32_t>

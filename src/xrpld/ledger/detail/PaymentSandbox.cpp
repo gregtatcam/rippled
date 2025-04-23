@@ -30,20 +30,35 @@ namespace ripple {
 namespace detail {
 
 auto
-DeferredCredits::makeKey(
+DeferredCredits::makeIOUKey(
     AccountID const& a1,
     AccountID const& a2,
-    Asset const& a) -> Key
+    Issue const& issue) -> Key
 {
-    auto const isIssue = a.holds<Issue>();
-    if ((isIssue && a1 < a2) || (!isIssue && a1 != a.getIssuer()))
-        return std::make_tuple(a1, a2, a.token());
+    if (a1 < a2)
+        return std::make_tuple(a1, a2, issue.currency);
     else
-        return std::make_tuple(a2, a1, a.token());
+        return std::make_tuple(a2, a1, issue.currency);
+}
+
+auto
+DeferredCredits::makeMPTKey(
+    std::optional<AccountID> const& account,
+    MPTIssue const& issue) -> Key
+{
+    auto const& issuer = issue.getIssuer();
+    if (account)
+    {
+        if (*account == issuer)
+            Throw<std::runtime_error>("makeMPTKey: invalid holder");
+        return std::make_tuple(issuer, *account, issue.getMptID());
+    }
+    else
+        return std::make_tuple(issuer, issuer, issue.getMptID());
 }
 
 void
-DeferredCredits::credit(
+DeferredCredits::creditIOU(
     AccountID const& sender,
     AccountID const& receiver,
     STAmount const& amount,
@@ -51,20 +66,17 @@ DeferredCredits::credit(
 {
     XRPL_ASSERT(
         sender != receiver,
-        "ripple::detail::DeferredCredits::credit : sender is not receiver");
+        "ripple::detail::DeferredCredits::creditIOU : sender is not receiver");
     XRPL_ASSERT(
         !amount.negative(),
-        "ripple::detail::DeferredCredits::credit : positive amount");
+        "ripple::detail::DeferredCredits::creditIOU : positive amount");
 
-    auto const k = makeKey(sender, receiver, amount.asset());
+    auto const k = makeIOUKey(sender, receiver, amount.asset().get<Issue>());
     auto i = credits_.find(k);
-    auto const isIssue = amount.holds<Issue>();
-    auto const& issuer = amount.getIssuer();
     if (i == credits_.end())
     {
-        Value v;
-
-        if ((isIssue && sender < receiver) || (!isIssue && sender != issuer))
+        IssueValue v;
+        if (sender < receiver)
         {
             v.highAcctCredits = amount;
             v.lowAcctCredits = amount.zeroed();
@@ -74,20 +86,52 @@ DeferredCredits::credit(
         {
             v.highAcctCredits = amount.zeroed();
             v.lowAcctCredits = amount;
-            v.lowAcctOrigBalance =
-                isIssue ? -preCreditSenderBalance : preCreditSenderBalance;
+            v.lowAcctOrigBalance = -preCreditSenderBalance;
         }
-
         credits_[k] = v;
     }
     else
     {
         // only record the balance the first time, do not record it here
-        auto& v = i->second;
-        if ((isIssue && sender < receiver) || (!isIssue && sender != issuer))
+        auto& v = std::get<IssueValue>(i->second);
+        if (sender < receiver)
             v.highAcctCredits += amount;
         else
             v.lowAcctCredits += amount;
+    }
+}
+
+void
+DeferredCredits::creditMPT(
+    std::optional<AccountID> const& account,
+    STAmount const& amount,
+    STAmount const& originalBalance)
+{
+    auto const& asset = amount.asset();
+    if (!asset.holds<MPTIssue>())
+        Throw<std::runtime_error>("creditMPT: non MPTIssue");
+    auto const& issue = asset.get<MPTIssue>();
+    auto const k = makeMPTKey(account, issue);
+    auto it = credits_.find(k);
+    if (it == credits_.end())
+    {
+        MPTIssueValue v{issue};
+        if (account)
+            v.creditsHolder = amount;
+        else
+            v.creditsIssuer = amount;
+        v.originalBalance = originalBalance;
+        credits_[k] = v;
+    }
+    else
+    {
+        if (!std::holds_alternative<MPTIssueValue>(it->second))
+            Throw<std::runtime_error>("creditMPT: credit is not MPTIssueValue");
+        auto& v = std::get<MPTIssueValue>(it->second);
+        if (account)
+            v.creditsHolder += amount;
+        else
+            v.creditsIssuer += amount;
     }
 }
 
@@ -117,36 +161,49 @@ DeferredCredits::ownerCount(AccountID const& id) const
 
 // Get the adjustments for the balance between main and other.
 auto
-DeferredCredits::adjustments(
+DeferredCredits::adjustmentsIOU(
     AccountID const& main,
     AccountID const& other,
-    Asset const& asset) const -> std::optional<Adjustment>
+    Issue const& issue) const -> std::optional<Adjustment>
 {
     std::optional<Adjustment> result;
 
-    Key const k = makeKey(main, other, asset);
+    Key const k = makeIOUKey(main, other, issue);
     auto i = credits_.find(k);
     if (i == credits_.end())
         return result;
 
-    auto const& v = i->second;
-    auto const isIssue = asset.holds<Issue>();
-
-    if ((isIssue && main < other) || (!isIssue && main != asset.getIssuer()))
-    {
+    auto& v = std::get<IssueValue>(i->second);
+    if (main < other)
         result.emplace(
             v.highAcctCredits, v.lowAcctCredits, v.lowAcctOrigBalance);
-        return result;
-    }
     else
-    {
         result.emplace(
-            v.lowAcctCredits,
-            v.highAcctCredits,
-            asset.holds<Issue>() ? -v.lowAcctOrigBalance
-                                 : v.lowAcctOrigBalance);
+            v.lowAcctCredits, v.highAcctCredits, -v.lowAcctOrigBalance);
+
+    return result;
+}
+
+auto
+DeferredCredits::adjustmentsMPT(
+    std::optional<AccountID> const& account,
+    MPTIssue const& issue) const -> std::optional<Adjustment>
+{
+    std::optional<Adjustment> result;
+
+    Key const k = makeMPTKey(account, issue);
+    auto i = credits_.find(k);
+    if (i == credits_.end())
         return result;
-    }
+
+    auto& v = std::get<MPTIssueValue>(i->second);
+
+    if (account)
+        result.emplace(v.creditsIssuer, v.creditsHolder, v.originalBalance);
+    else
+        result.emplace(v.creditsHolder, v.creditsIssuer, v.originalBalance);
+
+    return result;
 }
 
 void
@@ -157,11 +214,23 @@ DeferredCredits::apply(DeferredCredits& to)
         auto r = to.credits_.emplace(i);
         if (!r.second)
         {
-            auto& toVal = r.first->second;
-            auto const& fromVal = i.second;
-            toVal.lowAcctCredits += fromVal.lowAcctCredits;
-            toVal.highAcctCredits += fromVal.highAcctCredits;
-            // Do not update the orig balance, it's already correct
+            std::visit(
+                [&]<typename TV>(TV& fromVal) {
+                    if constexpr (std::is_same_v<TV, IssueValue>)
+                    {
+                        auto& toVal = std::get<IssueValue>(r.first->second);
+                        toVal.lowAcctCredits += fromVal.lowAcctCredits;
+                        toVal.highAcctCredits += fromVal.highAcctCredits;
+                    }
+                    else if constexpr (std::is_same_v<TV, MPTIssue>)
+                    {
+                        auto& toVal = std::get<MPTIssueValue>(r.first->second);
+                        toVal.creditsHolder += fromVal.creditsHolder;
+                        toVal.creditsIssuer += fromVal.creditsIssuer;
+                    }
+                    // Do not update the orig balance, it's already correct
+                },
+                i.second);
         }
     }
 
@@ -180,7 +249,7 @@ DeferredCredits::apply(DeferredCredits& to)
 }  // namespace detail
 
 STAmount
-PaymentSandbox::balanceHook(
+PaymentSandbox::balanceHookIOU(
     AccountID const& account,
     AccountID const& issuer,
     STAmount const& amount) const
@@ -190,7 +259,7 @@ PaymentSandbox::balanceHook(
     current amount and subtracts the recorded credits. The post-switchover
     algorithm remembers the original balance, and subtracts the debits. The
     post-switchover algorithm should be more numerically stable. Consider a
-    large credit with a small initial balance. The pre-switchover algorithm
+    large creditIOU with a small initial balance. The pre-switchover algorithm
     computes (B+C)-C (where B+C will the amount passed in). The
     post-switchover algorithm returns B. When B and C differ by large
     magnitudes, (B+C)-C may not equal B.
@@ -203,7 +272,8 @@ PaymentSandbox::balanceHook(
     auto minBal = amount;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
     {
-        if (auto adj = curSB->tab_.adjustments(account, issuer, asset))
+        if (auto adj =
+                curSB->tab_.adjustmentsIOU(account, issuer, asset.get<Issue>()))
         {
             delta += adj->debits;
             lastBal = adj->origBalance;
@@ -230,6 +300,37 @@ PaymentSandbox::balanceHook(
     return adjustedAmt;
 }
 
+STAmount
+PaymentSandbox::balanceHookMPT(
+    std::optional<AccountID> const& account,
+    STAmount const& amount) const
+{
+    auto const asset = amount.asset();
+
+    auto delta = amount.zeroed();
+    auto lastBal = amount;
+    auto minBal = amount;
+    for (auto curSB = this; curSB; curSB = curSB->ps_)
+    {
+        if (auto adj =
+                curSB->tab_.adjustmentsMPT(account, asset.get<MPTIssue>()))
+        {
+            delta += adj->debits;
+            lastBal = adj->origBalance;
+            if (lastBal < minBal)
+                minBal = lastBal;
+        }
+    }
+
+    // The adjusted amount should never be larger than the balance. In
+    // some circumstances, it is possible for the deferred credits table
+    // to compute usable balance just slightly above what the ledger
+    // calculates (but always less than the actual balance).
+    auto adjustedAmt = std::min({amount, lastBal - delta, minBal});
+
+    return adjustedAmt;
+}
+
 std::uint32_t
 PaymentSandbox::ownerCountHook(AccountID const& account, std::uint32_t count)
     const
@@ -244,13 +345,22 @@ PaymentSandbox::ownerCountHook(AccountID const& account, std::uint32_t count)
 }
 
 void
-PaymentSandbox::creditHook(
+PaymentSandbox::creditHookIOU(
     AccountID const& from,
     AccountID const& to,
     STAmount const& amount,
     STAmount const& preCreditBalance)
 {
-    tab_.credit(from, to, amount, preCreditBalance);
+    tab_.creditIOU(from, to, amount, preCreditBalance);
+}
+
+void
+PaymentSandbox::creditHookMPT(
+    std::optional<AccountID> const& account,
+    STAmount const& amount,
+    STAmount const& preCreditBalance)
+{
+    tab_.creditMPT(account, amount, preCreditBalance);
 }
 
 void

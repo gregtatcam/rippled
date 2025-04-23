@@ -137,9 +137,17 @@ flow(
         EitherAmount limitStepOut;
         {
             EitherAmount stepOut(out);
+            bool forceLimiting = false;
             for (auto i = s; i--;)
             {
                 auto r = strand[i]->rev(*sb, *afView, ofrsToRm, stepOut);
+
+                if (strand[i]->forceLimiting())
+                {
+                    forceLimiting = true;
+                    continue;
+                }
+
                 if (strand[i]->isZero(r.second))
                 {
                     JLOG(j.trace()) << "Strand found dry in rev";
@@ -178,7 +186,8 @@ flow(
                         return Result{strand, std::move(ofrsToRm)};
                     }
                 }
-                else if (!strand[i]->equalOut(r.second, stepOut))
+                else if (
+                    forceLimiting || !strand[i]->equalOut(r.second, stepOut))
                 {
                     // limiting
                     // Throw out previous results
@@ -219,6 +228,7 @@ flow(
 
                 // prev node needs to produce what this node wants to consume
                 stepOut = r.first;
+                forceLimiting = false;
             }
         }
 

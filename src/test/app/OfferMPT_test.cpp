@@ -3681,11 +3681,11 @@ public:
         env.fund(startXrpBalance, gw);
         env.close();
 
-        auto MBTC =
-            MPTTester({.env = env, .issuer = gw, .transferFee = 25'000});
+        auto MBTC = MPTTester(
+            {.env = env, .issuer = gw, .transferFee = 25'000, .maxAmt = 40});
         MPT const BTC = MBTC;
-        auto MUSD =
-            MPTTester({.env = env, .issuer = gw, .transferFee = 25'000});
+        auto MUSD = MPTTester(
+            {.env = env, .issuer = gw, .transferFee = 25'000, .maxAmt = 8'000});
         MPT const USD = MUSD;
 
         // Test cases
