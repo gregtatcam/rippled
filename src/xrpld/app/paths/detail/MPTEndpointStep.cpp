@@ -50,7 +50,6 @@ protected:
     // Direct payment between the holders
     // Used by maxFlow's last step.
     bool const isDirectBetweenHolders_;
-    bool forceLimiting_;
     beast::Journal const j_;
 
     struct Cache
@@ -114,7 +113,6 @@ public:
               ctx.strandSrc != mptIssue_.getIssuer() &&
               ctx.strandDst != mptIssue_.getIssuer() &&
               (ctx.isFirst || (ctx.prevStep && !ctx.prevStep->bookStepBook())))
-        , forceLimiting_(false)
         , j_(ctx.j)
     {
     }
@@ -201,14 +199,6 @@ public:
         MPTAmount const& fwdSrcToDst,
         MPTAmount const& fwdOut,
         DebtDirection srcDebtDir);
-
-    bool
-    forceLimiting() override
-    {
-        bool const force = forceLimiting_;
-        forceLimiting_ = false;
-        return force;
-    }
 
     friend bool
     operator==(MPTEndpointStep const& lhs, MPTEndpointStep const& rhs)
@@ -504,22 +494,31 @@ template <class TDerived>
 std::pair<MPTAmount, DebtDirection>
 MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
+    auto const maxFlow =
+        accountHolds(sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
     // From a holder to an issuer
     if (src_ != mptIssue_.getIssuer())
-        return {
-            toAmount<MPTAmount>(accountHolds(
-                sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_)),
-            DebtDirection::redeems};
+        return {toAmount<MPTAmount>(maxFlow), DebtDirection::redeems};
 
     // From an issuer to a holder
     if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_)))
     {
-        std::uint64_t const maximumAmount =
-            (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
-        std::int64_t const maxFlow =
-            maximumAmount - (*sle)[sfOutstandingAmount];
+        // If issuer is the source account, and it is:
+        //  - direct payment then MPTEndpointStep is the only step.
+        //    Provide the available maxFlow.
+        //  - cross currency payment then BookStep is the first step.
+        //    MPTEndpointStep could be the last step in this case.
+        if (!prevStep_)
+            return {MPTAmount{maxFlow}, DebtDirection::issues};
 
-        return {MPTAmount{maxFlow}, DebtDirection::issues};
+        // MPTEndpointStep is the last step. It's always issuing in
+        // this case. We can't decide at this point what the maxFlow is,
+        // because previous step may issue or redeem. Allow OutstandingAmount
+        // to temporarily overflow. Let the previous step decide
+        // how to limit the flow.
+        std::int64_t const maxAmount =
+            (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+        return {MPTAmount{maxAmount}, DebtDirection::issues};
     }
 
     return {MPTAmount{0}, DebtDirection::issues};
@@ -564,17 +563,6 @@ MPTEndpointStep<TDerived>::revImp(
                      << " outReq: " << to_string(out)
                      << " maxSrcToDst: " << to_string(maxSrcToDst)
                      << " srcQOut: " << srcQOut << " dstQIn: " << dstQIn;
-
-    // It's possible that the next step (in rev order) redeems and
-    // there is enough funds to pay the entire out amount. Force the next step
-    // as limiting, which forces re-execution in forward. maxFlow then
-    // can calculate the available amount.
-    if (maxSrcToDst < out && prevStep_)
-    {
-        forceLimiting_ = true;
-        resetCache(srcDebtDir);
-        return {beast::zero, beast::zero};
-    }
 
     if (maxSrcToDst.signum() <= 0)
     {

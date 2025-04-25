@@ -69,7 +69,6 @@ protected:
     // if AMM offer quality is better than CLOB offer
     // quality or there is no CLOB offer.
     std::optional<AMMLiquidity<TIn, TOut>> ammLiquidity_;
-    mutable bool forceLimiting_;
     beast::Journal const j_;
 
     struct Cache
@@ -100,7 +99,6 @@ public:
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
-        , forceLimiting_(false)
         , j_(ctx.j)
     {
         if (auto const ammSle = ctx.view.read(keylet::amm(in, out));
@@ -159,14 +157,6 @@ public:
 
     std::uint32_t
     offersUsed() const override;
-
-    bool
-    forceLimiting() override
-    {
-        auto const force = forceLimiting_;
-        forceLimiting_ = false;
-        return force;
-    }
 
     std::pair<TIn, TOut>
     revImp(
@@ -860,7 +850,6 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                         limitIn);
                 else
                 {
-                    forceLimiting_ = true;
                     return false;
                 }
             }
@@ -1139,12 +1128,6 @@ BookStep<TIn, TOut, TDerived>::revImp(
             // Use the liquidity, but use this to mark the strand as inactive so
             // it's not used further
             inactive_ = true;
-        }
-
-        if (forceLimiting_)
-        {
-            cache_.emplace(beast::zero, beast::zero);
-            return {beast::zero, beast::zero};
         }
     }
 

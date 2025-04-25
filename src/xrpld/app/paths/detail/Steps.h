@@ -267,23 +267,6 @@ public:
     virtual std::pair<bool, EitherAmount>
     validFwd(PaymentSandbox& sb, ApplyView& afView, EitherAmount const& in) = 0;
 
-    /** Checks if the next step must be forced into a limiting step. This
-     * is used in reverse steps execution in case of MPT when it's not
-     * know if there are sufficient funds to execute a current step.
-     * For example, in case of a direct payment of 100 MPT between two holder
-     * accounts A1, A2 the last step is executed first and is a payment of
-     * 100 MPT from issuer to A2. If OutstandingAmount is equal to
-     * MaximumAmount then it appears the payment should fail. But in the next
-     * step A1 redeems 100 MPT. If the first step is forced into a limiting
-     * step then the payment can successfully execute. The flag should be reset
-     * after calling this function.
-     */
-    virtual bool
-    forceLimiting()
-    {
-        return false;
-    }
-
     /** Return true if lhs == rhs.
 
         @param lhs Step to compare.

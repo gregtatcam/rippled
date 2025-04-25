@@ -93,10 +93,11 @@ TOfferStreamBase<TIn, TOut>::erase(ApplyView& view)
                      << " removed from directory " << tip_.dir();
 }
 
-template <typename T>
+template <StepAmount T>
 static T
 accountFundsHelper(
     ReadView const& view,
+    ReadView const& cancelView,
     AccountID const& id,
     T const& amtDefault,
     Asset const& asset,
@@ -104,20 +105,46 @@ accountFundsHelper(
     AuthHandling authHandling,
     beast::Journal j)
 {
-    if constexpr (std::is_same_v<T, STAmount>)
-        return accountFunds(
-            view, id, amtDefault, freezeHandling, authHandling, j);
-    else
+    if constexpr (std::is_same_v<T, IOUAmount>)
     {
-        if constexpr (std::is_same_v<T, IOUAmount>)
-        {
-            if (asset.getIssuer() == id)
-                // self funded
-                return amtDefault;
-        }
-
+        if (asset.getIssuer() == id)
+            // self funded
+            return amtDefault;
+    }
+    else if constexpr (std::is_same_v<T, XRPAmount>)
         return toAmount<T>(
             accountHolds(view, id, asset, freezeHandling, authHandling, j));
+    // MPTAmount
+    else
+    {
+        auto const availableNow = toAmount<T>(
+            accountHolds(view, id, asset, freezeHandling, authHandling, j));
+        // We need to figure out available offer's owner funds to send
+        // takerGets amount. takerGets is always sent from the offer's owner
+        // to the issuer.
+
+        // Redeeming. Return available funds.
+        if (id != asset.getIssuer())
+            return availableNow;
+
+        // Issuing. Offer's owner is the issuer. There is no paying to self
+        // in this case. But the previous step (in rev order) may have
+        // resulted in OutstandingAmount overflow. Therefore, we need to figure
+        // out how much to limit takerGets if any.
+
+        // Not limited
+        if (availableNow > amtDefault)
+            return availableNow;
+
+        // Limited. We need to know how much this step issued in total and
+        // how much the previous step (in rev order) issued.
+        auto const availableOriginal = toAmount<T>(
+            accountHolds(cancelView, id, asset, freezeHandling, authHandling, j));
+
+        if (availableNow > beast::zero)
+        {
+
+        }
     }
 }
 
@@ -266,6 +293,7 @@ TOfferStreamBase<TIn, TOut>::step()
         // Calculate owner funds
         ownerFunds_ = accountFundsHelper(
             view_,
+            cancelView_,
             offer_.owner(),
             amount.out,
             offer_.assetOut(),
@@ -280,6 +308,7 @@ TOfferStreamBase<TIn, TOut>::step()
             // we haven't modified the balance and therefore the
             // offer is "found unfunded" versus "became unfunded"
             auto const original_funds = accountFundsHelper(
+                cancelView_,
                 cancelView_,
                 offer_.owner(),
                 amount.out,
@@ -334,6 +363,7 @@ TOfferStreamBase<TIn, TOut>::step()
         {
             auto const original_funds = accountFundsHelper(
                 cancelView_,
+                cancelView_,
                 offer_.owner(),
                 amount.out,
                 offer_.assetOut(),
@@ -372,7 +402,6 @@ FlowOfferStream<TIn, TOut>::permRmOffer(uint256 const& offerIndex)
     permToRemove_.insert(offerIndex);
 }
 
-template class FlowOfferStream<STAmount, STAmount>;
 template class FlowOfferStream<IOUAmount, IOUAmount>;
 template class FlowOfferStream<XRPAmount, IOUAmount>;
 template class FlowOfferStream<IOUAmount, XRPAmount>;
@@ -382,7 +411,6 @@ template class FlowOfferStream<MPTAmount, XRPAmount>;
 template class FlowOfferStream<IOUAmount, MPTAmount>;
 template class FlowOfferStream<MPTAmount, IOUAmount>;
 
-template class TOfferStreamBase<STAmount, STAmount>;
 template class TOfferStreamBase<IOUAmount, IOUAmount>;
 template class TOfferStreamBase<XRPAmount, IOUAmount>;
 template class TOfferStreamBase<IOUAmount, XRPAmount>;

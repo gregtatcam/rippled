@@ -27,6 +27,7 @@
 #include <xrpl/protocol/Protocol.h>
 #include <xrpl/protocol/Quality.h>
 #include <xrpl/protocol/st.h>
+
 #include <optional>
 
 namespace ripple {
@@ -397,6 +398,19 @@ accountHolds(
         view, account, issue.currency, issue.account, zeroIfFrozen, j);
 }
 
+/** Return available amount to issue (could be negative if overflow)
+ * and the maximum amount.
+ */
+static std::pair<std::int64_t, std::uint64_t>
+availableMPT(std::shared_ptr<SLE const> const& sleIssuance)
+{
+    auto const maximumAmount =
+        (*sleIssuance)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+    auto const outstandingAmount = (*sleIssuance)[sfOutstandingAmount];
+    std::int64_t const available = maximumAmount - outstandingAmount;
+    return std::make_pair(available, maximumAmount);
+}
+
 STAmount
 accountHolds(
     ReadView const& view,
@@ -415,10 +429,8 @@ accountHolds(
         auto const sle = view.read(keylet::mptIssuance(mptIssue));
         if (!sle)
             return amount;
-        auto const maxAmount =
-            (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
-        std::int64_t const available = maxAmount - (*sle)[sfOutstandingAmount];
-        return view.balanceHookMPT(std::nullopt, STAmount{mptIssue, available});
+        auto const available = availableMPT(sle);
+        return STAmount{mptIssue, available.first};
     }
 
     auto const sleMpt =
@@ -1520,16 +1532,15 @@ rippleCreditMPT(
         return tecOBJECT_NOT_FOUND;
 
     auto const outstanding = (*sleIssuance)[sfOutstandingAmount];
-    auto const maximumAmount =
-        (*sleIssuance)[~sfMaximumAmount].value_or(maxMPTokenAmount);
-    auto const available = maximumAmount - outstanding;
+    auto const available = availableMPT(sleIssuance);
 
     if (uSenderID == issuer)
     {
         auto const amt = saAmount.mpt().value();
         if (view.rules().enabled(featureMPTokensV2))
         {
-            if (amt > available)
+            // Allow to overflow but not uint64
+            if (amt > available.second)
                 return tecPATH_DRY;
         }
         (*sleIssuance)[sfOutstandingAmount] += amt;
@@ -1557,7 +1568,9 @@ rippleCreditMPT(
         if (outstanding >= redeem)
         {
             view.creditHookMPT(
-                std::nullopt, saAmount, STAmount{saAmount.asset(), available});
+                std::nullopt,
+                saAmount,
+                STAmount{saAmount.asset(), available.first});
             sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
             view.update(sleIssuance);
         }
@@ -1613,9 +1626,8 @@ rippleSendMPT(
             auto const sendAmount = saAmount.mpt().value();
             auto const maximumAmount =
                 sle->at(~sfMaximumAmount).value_or(maxMPTokenAmount);
-            if (sendAmount > maximumAmount ||
-                sle->getFieldU64(sfOutstandingAmount) >
-                    maximumAmount - sendAmount)
+            // This condition is sufficient to not overflow uint64
+            if (sendAmount > maximumAmount)
                 return tecPATH_DRY;
         }
 
