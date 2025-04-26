@@ -1567,10 +1567,11 @@ rippleCreditMPT(
         auto const redeem = saAmount.mpt().value();
         if (outstanding >= redeem)
         {
-            view.creditHookMPT(
-                std::nullopt,
-                saAmount,
-                STAmount{saAmount.asset(), available.first});
+            if (uSenderID != issuer)
+                view.creditHookMPT(
+                    std::nullopt,
+                    saAmount,
+                    STAmount{saAmount.asset(), available.first});
             sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
             view.update(sleIssuance);
         }
@@ -1627,8 +1628,18 @@ rippleSendMPT(
             auto const maximumAmount =
                 sle->at(~sfMaximumAmount).value_or(maxMPTokenAmount);
             // This condition is sufficient to not overflow uint64
-            if (sendAmount > maximumAmount)
-                return tecPATH_DRY;
+            if (view.rules().enabled(featureMPTokensV2))
+            {
+                if (sendAmount > maximumAmount)
+                    return tecPATH_DRY;
+            }
+            else
+            {
+                if (sendAmount > maximumAmount ||
+                    sle->getFieldU64(sfOutstandingAmount) >
+                        maximumAmount - sendAmount)
+                    return tecPATH_DRY;
+            }
         }
 
         // Direct send: redeeming MPTs and/or sending own MPTs.
@@ -2019,13 +2030,15 @@ requireAuth(
     auto const mptokenID = keylet::mptoken(mptID.key, account);
     auto const sleToken = view.read(mptokenID);
 
+    bool const mptokensV2 = view.rules().enabled(featureMPTokensV2);
     // if account has no MPToken, fail
-    if (!sleToken && authType == MPTAuthType::StrongAuth)
+    if (!sleToken && (!mptokensV2 || authType == MPTAuthType::StrongAuth))
         return tecNO_AUTH;
 
     // mptoken must be authorized if issuance enabled requireAuth
     if (sleIssuance->getFieldU32(sfFlags) & lsfMPTRequireAuth &&
-        (!sleToken || (!(sleToken->getFlags() & lsfMPTAuthorized))))
+        ((!sleToken && mptokensV2) ||
+         (!(sleToken->getFlags() & lsfMPTAuthorized))))
         return tecNO_AUTH;
 
     return tesSUCCESS;

@@ -223,9 +223,10 @@ private:
     // Unfunded offers and bad offers are skipped (and returned).
     // callback is called with the offer SLE, taker pays, taker gets.
     // If callback returns false, don't process any more offers.
-    // Return the unfunded and bad offers and the number of offers consumed.
+    // Return the unfunded, bad offers and the number of offers consumed,
+    // and if MPT overflows.
     template <class Callback>
-    std::pair<boost::container::flat_set<uint256>, std::uint32_t>
+    std::tuple<boost::container::flat_set<uint256>, std::uint32_t, bool>
     forEachOffer(
         PaymentSandbox& sb,
         ApplyView& afView,
@@ -240,7 +241,8 @@ private:
         Offer<TIn, TOut>& offer,
         TAmounts<TIn, TOut> const& ofrAmt,
         TAmounts<TIn, TOut> const& stepAmt,
-        TOut const& ownerGives) const;
+        TOut const& ownerGives,
+        std::int64_t& selfIssuedMPT) const;
 
     // If clobQuality is available and has a better quality then return nullopt,
     // otherwise if amm liquidity is available return AMM offer adjusted based
@@ -708,7 +710,7 @@ limitStepOut(
 
 template <class TIn, class TOut, class TDerived>
 template <class Callback>
-std::pair<boost::container::flat_set<uint256>, std::uint32_t>
+std::tuple<boost::container::flat_set<uint256>, std::uint32_t, bool>
 BookStep<TIn, TOut, TDerived>::forEachOffer(
     PaymentSandbox& sb,
     ApplyView& afView,
@@ -728,11 +730,12 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         ? rate(sb, book_.out, this->strandDst_).value
         : QUALITY_ONE;
 
+    std::int64_t selfIssuedMPT = 0;
     typename FlowOfferStream<TIn, TOut>::StepCounter counter(
         maxOffersToConsume_, j_);
 
     FlowOfferStream<TIn, TOut> offers(
-        sb, afView, book_, sb.parentCloseTime(), counter, j_);
+        sb, afView, book_, sb.parentCloseTime(), counter, selfIssuedMPT, j_);
 
     bool offerAttempted = false;
     std::optional<Quality> ofrQ;
@@ -830,34 +833,41 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         if (isAssetInMPT)
         {
             auto const& mptIssue = offer.assetIn();
-            auto const limitIn = toAmount<TIn>(accountHolds(
+            auto const available = toAmount<TIn>(accountHolds(
                 sb,
                 mptIssue.getIssuer(),
                 mptIssue,
                 FreezeHandling::fhIGNORE_FREEZE,
                 ahIGNORE_AUTH,
                 j_));
-            if (stpAmt.in > limitIn)
+            // BookStep is the first step. Issuer pays takerPays
+            // to the offer's owner. Must limit the offer's takerPays
+            // if it exceeds available amount to issue. If it must be
+            // limited, but it's not the first step then the next step (rev)
+            // limits the amount when calculating ownerFunds for takerGets.
+            // This step then temporarily overflows OutstandingAmount.
+            if (!prevStep_ && stpAmt.in > available)
             {
-                if (!prevStep_)
-                    limitStepIn(
-                        offer,
-                        ofrAmt,
-                        stpAmt,
-                        ownerGives,
-                        ofrInRate,
-                        ofrOutRate,
-                        limitIn);
-                else
-                {
-                    return false;
-                }
+                limitStepIn(
+                    offer,
+                    ofrAmt,
+                    stpAmt,
+                    ownerGives,
+                    ofrInRate,
+                    ofrOutRate,
+                    available);
             }
         }
 
         offerAttempted = true;
         return callback(
-            offer, ofrAmt, stpAmt, ownerGives, ofrInRate, ofrOutRate);
+            offer,
+            ofrAmt,
+            stpAmt,
+            ownerGives,
+            selfIssuedMPT,
+            ofrInRate,
+            ofrOutRate);
     };
 
     // At any payment engine iteration, AMM offer can only be consumed once.
@@ -891,7 +901,20 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         tryAMM(std::nullopt);
     }
 
-    return {offers.permToRemove(), counter.count()};
+    // Check MPT overflow
+    bool res = true;
+    if (counter.count() == 0 && book_.out.holds<MPTIssue>())
+    {
+        res = accountHolds(
+                  sb,
+                  book_.out.getIssuer(),
+                  book_.out,
+                  fhIGNORE_FREEZE,
+                  ahZERO_IF_UNAUTHORIZED,
+                  j_) >= beast::zero;
+    }
+
+    return {offers.permToRemove(), counter.count(), res};
 }
 
 template <class TIn, class TOut, class TDerived>
@@ -902,7 +925,8 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     Offer<TIn, TOut>& offer,
     TAmounts<TIn, TOut> const& ofrAmt,
     TAmounts<TIn, TOut> const& stepAmt,
-    TOut const& ownerGives) const
+    TOut const& ownerGives,
+    std::int64_t& selfIssuedMPT) const
 {
     if (!offer.checkInvariant(ofrAmt, j_))
     {
@@ -939,6 +963,11 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
             j_);
         if (cr != tesSUCCESS)
             Throw<FlowException>(cr);
+        if constexpr (std::is_same_v<TOut, MPTAmount>)
+        {
+            if (offer.owner() == book_.out.getIssuer())
+                selfIssuedMPT += ownerGives.value();
+        }
     }
 
     offer.consume(sb, ofrAmt);
@@ -1058,6 +1087,7 @@ BookStep<TIn, TOut, TDerived>::revImp(
                          TAmounts<TIn, TOut> const& ofrAmt,
                          TAmounts<TIn, TOut> const& stpAmt,
                          TOut const& ownerGives,
+                         std::int64_t& selfIssuedMPT,
                          std::uint32_t transferRateIn,
                          std::uint32_t transferRateOut) mutable -> bool {
         if (remainingOut <= beast::zero)
@@ -1069,7 +1099,8 @@ BookStep<TIn, TOut, TDerived>::revImp(
             savedOuts.insert(stpAmt.out);
             result = TAmounts<TIn, TOut>(sum(savedIns), sum(savedOuts));
             remainingOut = out - result.out;
-            this->consumeOffer(sb, offer, ofrAmt, stpAmt, ownerGives);
+            this->consumeOffer(
+                sb, offer, ofrAmt, stpAmt, ownerGives, selfIssuedMPT);
             // return true b/c even if the payment is satisfied,
             // we need to consume the offer
             return true;
@@ -1092,7 +1123,8 @@ BookStep<TIn, TOut, TDerived>::revImp(
             savedOuts.insert(remainingOut);
             result.in = sum(savedIns);
             result.out = out;
-            this->consumeOffer(sb, offer, ofrAdjAmt, stpAdjAmt, ownerGivesAdj);
+            this->consumeOffer(
+                sb, offer, ofrAdjAmt, stpAdjAmt, ownerGivesAdj, selfIssuedMPT);
 
             // Explicitly check whether the offer is funded.  Given that we have
             // (stpAmt.out > remainingOut), it's natural to assume the offer
@@ -1114,6 +1146,12 @@ BookStep<TIn, TOut, TDerived>::revImp(
         std::uint32_t const offersConsumed = std::get<1>(r);
         offersUsed_ = offersConsumed;
         SetUnion(ofrsToRm, toRm);
+
+        if (!std::get<bool>(r))
+        {
+            cache_.emplace(beast::zero, beast::zero);
+            return {beast::zero, beast::zero};
+        }
 
         if (offersConsumed >= maxOffersToConsume_)
         {
@@ -1177,6 +1215,7 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
                          TAmounts<TIn, TOut> const& ofrAmt,
                          TAmounts<TIn, TOut> const& stpAmt,
                          TOut const& ownerGives,
+                         std::int64_t& selfIssuedMPT,
                          std::uint32_t transferRateIn,
                          std::uint32_t transferRateOut) mutable -> bool {
         XRPL_ASSERT(
@@ -1265,7 +1304,8 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
         }
 
         remainingIn = in - result.in;
-        this->consumeOffer(sb, offer, ofrAdjAmt, stpAdjAmt, ownerGivesAdj);
+        this->consumeOffer(
+            sb, offer, ofrAdjAmt, stpAdjAmt, ownerGivesAdj, selfIssuedMPT);
 
         // When the mantissas of two iou amounts differ by less than ten, then
         // subtracting them leaves a result of zero. This can cause the check
@@ -1285,6 +1325,12 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
         std::uint32_t const offersConsumed = std::get<1>(r);
         offersUsed_ = offersConsumed;
         SetUnion(ofrsToRm, toRm);
+
+        if (!std::get<bool>(r))
+        {
+            cache_.emplace(beast::zero, beast::zero);
+            return {beast::zero, beast::zero};
+        }
 
         if (offersConsumed >= maxOffersToConsume_)
         {

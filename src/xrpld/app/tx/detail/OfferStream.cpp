@@ -42,6 +42,7 @@ TOfferStreamBase<TIn, TOut>::TOfferStreamBase(
     Book const& book,
     NetClock::time_point when,
     StepCounter& counter,
+    std::int64_t& selfIssuedMPT,
     beast::Journal journal)
     : j_(journal)
     , view_(view)
@@ -51,6 +52,7 @@ TOfferStreamBase<TIn, TOut>::TOfferStreamBase(
     , expire_(when)
     , tip_(view, book_)
     , counter_(counter)
+    , selfIssuedMPT_(selfIssuedMPT)
 {
     XRPL_ASSERT(
         validBook_, "ripple::TOfferStreamBase::TOfferStreamBase : valid book");
@@ -101,29 +103,27 @@ accountFundsHelper(
     AccountID const& id,
     T const& amtDefault,
     Asset const& asset,
+    std::int64_t selfIssuedMPT,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal j)
 {
+    auto const availableNow = toAmount<T>(
+        accountHolds(view, id, asset, freezeHandling, authHandling, j));
+
     if constexpr (std::is_same_v<T, IOUAmount>)
     {
         if (asset.getIssuer() == id)
             // self funded
             return amtDefault;
     }
-    else if constexpr (std::is_same_v<T, XRPAmount>)
-        return toAmount<T>(
-            accountHolds(view, id, asset, freezeHandling, authHandling, j));
-    // MPTAmount
-    else
+    else if constexpr (std::is_same_v<T, MPTAmount>)
     {
-        auto const availableNow = toAmount<T>(
-            accountHolds(view, id, asset, freezeHandling, authHandling, j));
-        // We need to figure out available offer's owner funds to send
+        // We need to figure out available offer's owner funds to pay
         // takerGets amount. takerGets is always sent from the offer's owner
         // to the issuer.
 
-        // Redeeming. Return available funds.
+        // Redeeming. Return available funds, limited to the holder's funds.
         if (id != asset.getIssuer())
             return availableNow;
 
@@ -132,20 +132,24 @@ accountFundsHelper(
         // resulted in OutstandingAmount overflow. Therefore, we need to figure
         // out how much to limit takerGets if any.
 
-        // Not limited
-        if (availableNow > amtDefault)
+        // Not limited. The previous step (in rev order) either issued without
+        // the overflow or with overflow, which is offset by some offers
+        // redeeming (pay takerGets holder to issuer).
+        if (availableNow >= beast::zero)
             return availableNow;
 
-        // Limited. We need to know how much this step issued in total and
-        // how much the previous step (in rev order) issued.
-        auto const availableOriginal = toAmount<T>(
-            accountHolds(cancelView, id, asset, freezeHandling, authHandling, j));
+        // Limited. The previous step (in rev order) issued with the overflow
+        // and this step have not had so far enough redeeming offer is any.
+        // Available funds from the previous iteration.
+        auto const availablePrevious = toAmount<T>(accountHolds(
+            cancelView, id, asset, freezeHandling, authHandling, j));
 
-        if (availableNow > beast::zero)
-        {
-
-        }
+        // Available now to self issue
+        auto const available = availablePrevious - MPTAmount{selfIssuedMPT};
+        return available > amtDefault ? amtDefault : available;
     }
+
+    return availableNow;
 }
 
 template <class TIn, class TOut>
@@ -297,6 +301,7 @@ TOfferStreamBase<TIn, TOut>::step()
             offer_.owner(),
             amount.out,
             offer_.assetOut(),
+            selfIssuedMPT_,
             fhZERO_IF_FROZEN,
             ahZERO_IF_UNAUTHORIZED,
             j_);
@@ -313,6 +318,7 @@ TOfferStreamBase<TIn, TOut>::step()
                 offer_.owner(),
                 amount.out,
                 offer_.assetOut(),
+                selfIssuedMPT_,
                 fhZERO_IF_FROZEN,
                 ahZERO_IF_UNAUTHORIZED,
                 j_);
@@ -367,6 +373,7 @@ TOfferStreamBase<TIn, TOut>::step()
                 offer_.owner(),
                 amount.out,
                 offer_.assetOut(),
+                selfIssuedMPT_,
                 fhZERO_IF_FROZEN,
                 ahZERO_IF_UNAUTHORIZED,
                 j_);

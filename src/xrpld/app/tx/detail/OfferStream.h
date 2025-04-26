@@ -78,6 +78,7 @@ protected:
     TOffer<TIn, TOut> offer_;
     std::optional<TOut> ownerFunds_;
     StepCounter& counter_;
+    std::int64_t& selfIssuedMPT_;
 
     void
     erase(ApplyView& view);
@@ -97,6 +98,7 @@ public:
         Book const& book,
         NetClock::time_point when,
         StepCounter& counter,
+        std::int64_t& selfIssuedMPT,
         beast::Journal journal);
 
     virtual ~TOfferStreamBase() = default;

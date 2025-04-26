@@ -509,7 +509,7 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
         //  - cross currency payment then BookStep is the first step.
         //    MPTEndpointStep could be the last step in this case.
         if (!prevStep_)
-            return {MPTAmount{maxFlow}, DebtDirection::issues};
+            return {maxFlow.mpt(), DebtDirection::issues};
 
         // MPTEndpointStep is the last step. It's always issuing in
         // this case. We can't decide at this point what the maxFlow is,
