@@ -175,20 +175,13 @@ public:
 
     // Accounts in a payment are not allowed to use assets acquired during that
     // payment. The PaymentSandbox tracks the debits, credits, and owner count
-    // changes that accounts make during a payment. `balanceHookIOU/MPT` adjusts
+    // changes that accounts make during a payment. `balanceHook` adjusts
     // balances so newly acquired assets are not counted toward the balance.
     // This is required to support PaymentSandbox.
     virtual STAmount
-    balanceHookIOU(
+    balanceHook(
         AccountID const& account,
         AccountID const& issuer,
-        STAmount const& amount) const
-    {
-        return amount;
-    }
-    virtual STAmount
-    balanceHookMPT(
-        std::optional<AccountID> const& account,
         STAmount const& amount) const
     {
         return amount;

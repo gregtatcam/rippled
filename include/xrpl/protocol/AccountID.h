@@ -52,6 +52,12 @@ using AccountID = base_uint<160, detail::AccountIDTag>;
 std::string
 toBase58(AccountID const& v);
 
+inline std::string
+acct_str(AccountID const& a)
+{
+    return toBase58(a).substr(0, 5);
+}
+
 /** Parse AccountID from checked, base58 string.
     @return std::nullopt if a parse error occurs
 */

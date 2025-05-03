@@ -28,7 +28,7 @@
 #include <xrpl/basics/contract.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/jss.h>
-
+extern bool bLog;
 namespace ripple {
 namespace test {
 
@@ -950,9 +950,11 @@ struct Flow_test : public beast::unit_test::suite
             BEAST_EXPECT(offer[sfTakerPays] == USD(500));
         }
 
+        bLog = true;
         env(pay(alice, alice, EUR(60)),
             sendmax(USD(50)),
             txflags(tfPartialPayment));
+        bLog = false;
         env.close();
 
         env.require(owners(alice, 3));

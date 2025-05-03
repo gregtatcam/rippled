@@ -157,7 +157,7 @@ ammLPHolds(
                         << " amount=" << amount.getFullText();
     }
 
-    return view.balanceHookIOU(lpAccount, ammAccount, amount);
+    return view.balanceHook(lpAccount, ammAccount, amount);
 }
 
 STAmount

@@ -20,7 +20,7 @@
 #include <xrpld/app/tx/detail/OfferStream.h>
 #include <xrpl/basics/Log.h>
 #include <xrpl/protocol/Feature.h>
-
+extern bool bLog;
 namespace ripple {
 
 namespace {
@@ -42,7 +42,6 @@ TOfferStreamBase<TIn, TOut>::TOfferStreamBase(
     Book const& book,
     NetClock::time_point when,
     StepCounter& counter,
-    std::int64_t& selfIssuedMPT,
     beast::Journal journal)
     : j_(journal)
     , view_(view)
@@ -52,7 +51,6 @@ TOfferStreamBase<TIn, TOut>::TOfferStreamBase(
     , expire_(when)
     , tip_(view, book_)
     , counter_(counter)
-    , selfIssuedMPT_(selfIssuedMPT)
 {
     XRPL_ASSERT(
         validBook_, "ripple::TOfferStreamBase::TOfferStreamBase : valid book");
@@ -99,57 +97,54 @@ template <StepAmount T>
 static T
 accountFundsHelper(
     ReadView const& view,
-    ReadView const& cancelView,
     AccountID const& id,
     T const& amtDefault,
     Asset const& asset,
-    std::int64_t selfIssuedMPT,
     FreezeHandling freezeHandling,
     AuthHandling authHandling,
     beast::Journal j)
 {
-    auto const availableNow = toAmount<T>(
+    if (bLog)
+        std::cout << "  accountFundsHelper " << acct_str(id) << " issuer "
+                  << acct_str(asset.getIssuer()) << " " << to_string(amtDefault)
+                  << std::endl;
+
+    auto const available = toAmount<T>(
         accountHolds(view, id, asset, freezeHandling, authHandling, j));
+
+    auto const& issuer = asset.getIssuer();
+
+    if (bLog)
+        std::cout << "     --> helper final ";
 
     if constexpr (std::is_same_v<T, IOUAmount>)
     {
-        if (asset.getIssuer() == id)
+        if (bLog)
+            std::cout << ((id == issuer) ? to_string(amtDefault)
+                                         : to_string(available))
+                      << std::endl;
+        if (id == issuer)
             // self funded
             return amtDefault;
     }
     else if constexpr (std::is_same_v<T, MPTAmount>)
     {
-        // We need to figure out available offer's owner funds to pay
-        // takerGets amount. takerGets is always sent from the offer's owner
-        // to the issuer.
+        if (bLog)
+            std::cout << to_string(
+                             (id != issuer || available.value() >= 0)
+                                 ? available
+                                 : T{0})
+                      << std::endl;
+        if (id != issuer || available.value() >= 0)
+            return available;
 
-        // Redeeming. Return available funds, limited to the holder's funds.
-        if (id != asset.getIssuer())
-            return availableNow;
-
-        // Issuing. Offer's owner is the issuer. There is no paying to self
-        // in this case. But the previous step (in rev order) may have
-        // resulted in OutstandingAmount overflow. Therefore, we need to figure
-        // out how much to limit takerGets if any.
-
-        // Not limited. The previous step (in rev order) either issued without
-        // the overflow or with overflow, which is offset by some offers
-        // redeeming (pay takerGets holder to issuer).
-        if (availableNow >= beast::zero)
-            return availableNow;
-
-        // Limited. The previous step (in rev order) issued with the overflow
-        // and this step have not had so far enough redeeming offer is any.
-        // Available funds from the previous iteration.
-        auto const availablePrevious = toAmount<T>(accountHolds(
-            cancelView, id, asset, freezeHandling, authHandling, j));
-
-        // Available now to self issue
-        auto const available = availablePrevious - MPTAmount{selfIssuedMPT};
-        return available > amtDefault ? amtDefault : available;
+        // Can't issue if OutstandingAmount is already overflown
+        return T{0};
     }
+    if (bLog && isXRP(asset))
+        std::cout << to_string(available) << std::endl;
 
-    return availableNow;
+    return available;
 }
 
 template <class TIn, class TOut>
@@ -297,11 +292,9 @@ TOfferStreamBase<TIn, TOut>::step()
         // Calculate owner funds
         ownerFunds_ = accountFundsHelper(
             view_,
-            cancelView_,
             offer_.owner(),
             amount.out,
             offer_.assetOut(),
-            selfIssuedMPT_,
             fhZERO_IF_FROZEN,
             ahZERO_IF_UNAUTHORIZED,
             j_);
@@ -314,11 +307,9 @@ TOfferStreamBase<TIn, TOut>::step()
             // offer is "found unfunded" versus "became unfunded"
             auto const original_funds = accountFundsHelper(
                 cancelView_,
-                cancelView_,
                 offer_.owner(),
                 amount.out,
                 offer_.assetOut(),
-                selfIssuedMPT_,
                 fhZERO_IF_FROZEN,
                 ahZERO_IF_UNAUTHORIZED,
                 j_);
@@ -369,11 +360,9 @@ TOfferStreamBase<TIn, TOut>::step()
         {
             auto const original_funds = accountFundsHelper(
                 cancelView_,
-                cancelView_,
                 offer_.owner(),
                 amount.out,
                 offer_.assetOut(),
-                selfIssuedMPT_,
                 fhZERO_IF_FROZEN,
                 ahZERO_IF_UNAUTHORIZED,
                 j_);

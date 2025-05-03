@@ -494,34 +494,41 @@ template <class TDerived>
 std::pair<MPTAmount, DebtDirection>
 MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
-    auto const maxFlow =
-        accountHolds(sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
-    // From a holder to an issuer
-    if (src_ != mptIssue_.getIssuer())
-        return {toAmount<MPTAmount>(maxFlow), DebtDirection::redeems};
+    auto const res = [&]() -> std::pair<MPTAmount, DebtDirection> {
+        auto const maxFlow = accountHolds(
+            sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
+        // From a holder to an issuer
+        if (src_ != mptIssue_.getIssuer())
+            return {toAmount<MPTAmount>(maxFlow), DebtDirection::redeems};
 
-    // From an issuer to a holder
-    if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_)))
-    {
-        // If issuer is the source account, and it is:
-        //  - direct payment then MPTEndpointStep is the only step.
-        //    Provide the available maxFlow.
-        //  - cross currency payment then BookStep is the first step.
-        //    MPTEndpointStep could be the last step in this case.
-        if (!prevStep_)
-            return {maxFlow.mpt(), DebtDirection::issues};
+        // From an issuer to a holder
+        if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_)))
+        {
+            // If issuer is the source account, and it is:
+            //  - direct payment then MPTEndpointStep is the only step.
+            //    Provide the available maxFlow.
+            //  - cross currency payment then BookStep is the first step.
+            //    MPTEndpointStep could be the last step in this case.
+            if (!prevStep_)
+                return {maxFlow.mpt(), DebtDirection::issues};
 
-        // MPTEndpointStep is the last step. It's always issuing in
-        // this case. We can't decide at this point what the maxFlow is,
-        // because previous step may issue or redeem. Allow OutstandingAmount
-        // to temporarily overflow. Let the previous step decide
-        // how to limit the flow.
-        std::int64_t const maxAmount =
-            (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
-        return {MPTAmount{maxAmount}, DebtDirection::issues};
-    }
+            // MPTEndpointStep is the last step. It's always issuing in
+            // this case. We can't decide at this point what the maxFlow is,
+            // because previous step may issue or redeem. Allow
+            // OutstandingAmount to temporarily overflow. Let the previous step
+            // decide how to limit the flow.
+            std::int64_t const maxAmount =
+                (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+            return {MPTAmount{maxAmount}, DebtDirection::issues};
+        }
 
-    return {MPTAmount{0}, DebtDirection::issues};
+        return {MPTAmount{0}, DebtDirection::issues};
+    }();
+
+    if (bLog)
+        std::cout << "  maxPaymentFlow src " << acct_str(src_) << " dst "
+                  << acct_str(dst_) << " " << to_string(res.first) << std::endl;
+    return res;
 }
 
 template <class TDerived>

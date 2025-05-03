@@ -326,8 +326,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
 
         ApplyViewImpl av(&*env.current(), tapNONE);
         PaymentSandbox pv(&av);
-        pv.creditHookIOU(gw, alice, hugeAmt, -tinyAmt);
-        BEAST_EXPECT(pv.balanceHookIOU(alice, gw, hugeAmt) == tinyAmt);
+        pv.creditHook(gw, alice, hugeAmt, -tinyAmt);
+        BEAST_EXPECT(pv.balanceHook(alice, gw, hugeAmt) == tinyAmt);
     }
 
     void
@@ -379,8 +379,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
     testBalanceHook(FeatureBitset features)
     {
         // Make sure the Issue::Account returned by
-        // PAymentSandbox::balanceHookIOU is correct.
-        testcase("balanceHookIOU");
+        // PAymentSandbox::balanceHook is correct.
+        testcase("balanceHook");
 
         using namespace jtx;
         Env env(*this, features);
@@ -393,18 +393,18 @@ class PaymentSandbox_test : public beast::unit_test::suite
         PaymentSandbox sb(&av);
 
         // The currency we pass for the last argument mimics the currency that
-        // is typically passed to creditHookIOU, since it comes from a trust
+        // is typically passed to creditHook, since it comes from a trust
         // line.
         Issue tlIssue = noIssue();
         tlIssue.currency = USD.currency;
 
-        sb.creditHookIOU(gw.id(), alice.id(), {USD, 400}, {tlIssue, 600});
-        sb.creditHookIOU(gw.id(), alice.id(), {USD, 100}, {tlIssue, 600});
+        sb.creditHook(gw.id(), alice.id(), {USD, 400}, {tlIssue, 600});
+        sb.creditHook(gw.id(), alice.id(), {USD, 100}, {tlIssue, 600});
 
-        // Expect that the STAmount issuer returned by balanceHookIOU() is
+        // Expect that the STAmount issuer returned by balanceHook() is
         // correct.
         STAmount const balance =
-            sb.balanceHookIOU(gw.id(), alice.id(), {USD, 600});
+            sb.balanceHook(gw.id(), alice.id(), {USD, 600});
         BEAST_EXPECT(balance.getIssuer() == USD.account.id());
     }
 

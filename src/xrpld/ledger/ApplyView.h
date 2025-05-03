@@ -237,16 +237,9 @@ public:
     // Called when a credit is made to an account
     // This is required to support PaymentSandbox
     virtual void
-    creditHookIOU(
+    creditHook(
         AccountID const& from,
         AccountID const& to,
-        STAmount const& amount,
-        STAmount const& preCreditBalance)
-    {
-    }
-    virtual void
-    creditHookMPT(
-        std::optional<AccountID> const& account,
         STAmount const& amount,
         STAmount const& preCreditBalance)
     {

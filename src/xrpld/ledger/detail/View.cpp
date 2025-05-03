@@ -29,7 +29,7 @@
 #include <xrpl/protocol/st.h>
 
 #include <optional>
-
+extern bool bLog;
 namespace ripple {
 
 namespace detail {
@@ -383,7 +383,7 @@ accountHolds(
     JLOG(j.trace()) << "accountHolds:" << " account=" << to_string(account)
                     << " amount=" << amount.getFullText();
 
-    return view.balanceHookIOU(account, issuer, amount);
+    return view.balanceHook(account, issuer, amount);
 }
 
 STAmount
@@ -421,16 +421,18 @@ accountHolds(
     beast::Journal j)
 {
     STAmount amount{mptIssue};
+    auto const& issuer = mptIssue.getIssuer();
 
     bool const mptokensV2 = view.rules().enabled(featureMPTokensV2);
 
-    if (mptokensV2 && account == mptIssue.getIssuer())
+    if (mptokensV2 && account == issuer)
     {
         auto const sle = view.read(keylet::mptIssuance(mptIssue));
         if (!sle)
             return amount;
         auto const available = availableMPT(sle);
-        return STAmount{mptIssue, available.first};
+        return view.balanceHook(
+            issuer, issuer, STAmount{mptIssue, available.first});
     }
 
     auto const sleMpt =
@@ -460,7 +462,7 @@ accountHolds(
     }
 
     if (mptokensV2)
-        return view.balanceHookMPT(account, amount);
+        return view.balanceHook(account, issuer, amount);
     return amount;
 }
 
@@ -586,7 +588,7 @@ xrpLiquid(
 
     auto const fullBalance = sle->getFieldAmount(sfBalance);
 
-    auto const balance = view.balanceHookIOU(id, xrpAccount(), fullBalance);
+    auto const balance = view.balanceHook(id, xrpAccount(), fullBalance);
 
     STAmount const amount =
         (balance < reserve) ? STAmount{0} : balance - reserve;
@@ -1105,7 +1107,7 @@ trustCreate(
     sleRippleState->setFieldAmount(
         sfBalance, bSetHigh ? -saBalance : saBalance);
 
-    view.creditHookIOU(
+    view.creditHook(
         uSrcAccountID, uDstAccountID, saBalance, saBalance.zeroed());
 
     return tesSUCCESS;
@@ -1232,7 +1234,7 @@ rippleCreditIOU(
         if (bSenderHigh)
             saBalance.negate();  // Put balance in sender terms.
 
-        view.creditHookIOU(uSenderID, uReceiverID, saAmount, saBalance);
+        view.creditHook(uSenderID, uReceiverID, saAmount, saBalance);
 
         STAmount const saBefore = saBalance;
 
@@ -1420,6 +1422,11 @@ accountSendIOU(
             "ripple::accountSendIOU : minimum amount and not MPT");
     }
 
+    if (bLog)
+        std::cout << "  accountSend " << acct_str(uSenderID) << " "
+                  << acct_str(uReceiverID) << " " << saAmount.getText()
+                  << std::endl;
+
     /* If we aren't sending anything or if the sender is the same as the
      * receiver then we don't need to do anything.
      */
@@ -1480,7 +1487,7 @@ accountSendIOU(
         else
         {
             auto const sndBal = sender->getFieldAmount(sfBalance);
-            view.creditHookIOU(uSenderID, xrpAccount(), saAmount, sndBal);
+            view.creditHook(uSenderID, xrpAccount(), saAmount, sndBal);
 
             // Decrement XRP balance.
             sender->setFieldAmount(sfBalance, sndBal - saAmount);
@@ -1493,7 +1500,7 @@ accountSendIOU(
         // Increment XRP balance.
         auto const rcvBal = receiver->getFieldAmount(sfBalance);
         receiver->setFieldAmount(sfBalance, rcvBal + saAmount);
-        view.creditHookIOU(xrpAccount(), uReceiverID, saAmount, -rcvBal);
+        view.creditHook(xrpAccount(), uReceiverID, saAmount, -rcvBal);
 
         view.update(receiver);
     }
@@ -1567,11 +1574,11 @@ rippleCreditMPT(
         auto const redeem = saAmount.mpt().value();
         if (outstanding >= redeem)
         {
-            if (uSenderID != issuer)
-                view.creditHookMPT(
-                    std::nullopt,
-                    saAmount,
-                    STAmount{saAmount.asset(), available.first});
+            view.creditHook(
+                uSenderID,
+                uReceiverID,
+                saAmount,
+                STAmount{saAmount.asset(), available.first});
             sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
             view.update(sleIssuance);
         }
@@ -1583,7 +1590,8 @@ rippleCreditMPT(
         auto const mptokenID = keylet::mptoken(mptID.key, uReceiverID);
         if (auto sle = view.peek(mptokenID))
         {
-            view.creditHookMPT(
+            view.creditHook(
+                uSenderID,
                 uReceiverID,
                 saAmount,
                 STAmount{saAmount.asset(), (*sle)[sfMPTAmount]});
@@ -1817,7 +1825,7 @@ issueIOU(
             final_balance,
             j);
 
-        view.creditHookIOU(issue.account, account, amount, start_balance);
+        view.creditHook(issue.account, account, amount, start_balance);
 
         if (bSenderHigh)
             final_balance.negate();
@@ -1911,7 +1919,7 @@ redeemIOU(
         auto const must_delete = updateTrustLine(
             view, state, bSenderHigh, account, start_balance, final_balance, j);
 
-        view.creditHookIOU(account, issue.account, amount, start_balance);
+        view.creditHook(account, issue.account, amount, start_balance);
 
         if (bSenderHigh)
             final_balance.negate();
@@ -2219,6 +2227,10 @@ rippleCredit(
     bool bCheckIssuer,
     beast::Journal j)
 {
+    if (bLog)
+        std::cout << "  rippleCredit " << acct_str(uSenderID) << " "
+                  << acct_str(uReceiverID) << " " << saAmount.getText()
+                  << std::endl;
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
             if constexpr (std::is_same_v<TIss, Issue>)

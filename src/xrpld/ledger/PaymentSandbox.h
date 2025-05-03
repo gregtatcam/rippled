@@ -47,41 +47,20 @@ public:
         STAmount origBalance;
     };
 
-    // Get the adjustmentsIOU for the balance between main and other.
+    // Get the adjustments for the balance between main and other.
     // Returns the debits, credits and the original balance
     std::optional<Adjustment>
-    adjustmentsIOU(
+    adjustments(
         AccountID const& main,
         AccountID const& other,
-        Issue const& issue) const;
-
-    std::optional<Adjustment>
-    adjustmentsMPT(
-        std::optional<AccountID> const& account,
-        MPTIssue const& issue) const;
+        Asset const& asset) const;
 
     void
-    creditIOU(
+    credit(
         AccountID const& sender,
         AccountID const& receiver,
         STAmount const& amount,
         STAmount const& preCreditSenderBalance);
-
-    /** MPT doesn't have bidirectional relationship between an issuer
-     * and holder and it doesn't have balances based on high/low accounts.
-     * MPT has one global limit of MaximumAmount. Available amount that
-     * can be issued is determined as MaximumAmount - OutstandingAmount.
-     */
-    /** Credit to the holder
-     * @receiver holder's account
-     * @amount of credit
-     * @preCreditBalance balance before credit
-     */
-    void
-    creditMPT(
-        std::optional<AccountID> const& account,
-        STAmount const& amount,
-        STAmount const& preCreditBalance);
 
     void
     ownerCount(AccountID const& id, std::uint32_t cur, std::uint32_t next);
@@ -99,41 +78,67 @@ private:
     // if IOU then lowAccount, highAccount
     // if MPT then lowAccount is holder, highAccount is issuer
     using Key = std::tuple<AccountID, AccountID, Asset::token_type>;
-    struct IssueValue
+    struct Value
     {
-        explicit IssueValue() = default;
+        explicit Value() = default;
 
+        // if MPT then credit to holder
         STAmount lowAcctCredits;
+        // if MPT then debit to issuer
         STAmount highAcctCredits;
         STAmount lowAcctOrigBalance;
-    };
-    struct MPTIssueValue
-    {
-        explicit MPTIssueValue() = default;
-        MPTIssueValue(MPTIssue const& issue)
-            : creditsHolder{STAmount{issue}}
-            , creditsIssuer{STAmount{issue}}
-            , originalBalance{STAmount{issue}}
+        /** Unlike IOU, MPT holder/issuer don't have a bidirectional
+         * high/low account relationship. These accessors make this structure
+         * adapaptable to MPT usage.
+         */
+        STAmount&
+        creditToHolder()
         {
+            return lowAcctCredits;
         }
-
-        // credit to holder
-        STAmount creditsHolder;
-        // debit from holder
-        STAmount creditsIssuer;
-        // issuer available balance on creditIOU
-        // holder available balance on debit
-        STAmount originalBalance;
+        STAmount&
+        debitToIssuer()
+        {
+            return highAcctCredits;
+        }
+        STAmount&
+        originalBalance()
+        {
+            return lowAcctOrigBalance;
+        }
+        STAmount const&
+        creditToHolder() const
+        {
+            return lowAcctCredits;
+        }
+        STAmount const&
+        debitToIssuer() const
+        {
+            return highAcctCredits;
+        }
+        STAmount const&
+        originalBalance() const
+        {
+            return lowAcctOrigBalance;
+        }
     };
-    using Value = std::variant<IssueValue, MPTIssueValue>;
 
     static Key
-    makeIOUKey(AccountID const& a1, AccountID const& a2, Issue const& issue);
+    makeKey(AccountID const& a1, AccountID const& a2, Asset const& a);
 
-    /** If account is seated then it's a debit, otherwise it's a credit
-     */
-    static Key
-    makeMPTKey(std::optional<AccountID> const& account, MPTIssue const& issue);
+    void
+    creditIOU(
+        AccountID const& sender,
+        AccountID const& receiver,
+        STAmount const& amount,
+        STAmount const& preCreditSenderBalance);
+
+    void
+    creditDebitMPT(
+        AccountID const& sender,
+        AccountID const& receiver,
+        STAmount const& amount,
+        STAmount const& preSendBalance);
 
     std::map<Key, Value> credits_;
     std::map<AccountID, std::uint32_t> ownerCounts_;
@@ -150,7 +155,7 @@ private:
     other paths to gain liquidity.
 
     The behavior of certain free functions in the ApplyView API
-    will change via the balanceHookIOU/MPT and creditHookIOU/MPT overrides
+    will change via the balanceHook and creditHook overrides
     of PaymentSandbox.
 
     @note Presented as ApplyView to clients
@@ -202,26 +207,15 @@ public:
     /** @} */
 
     STAmount
-    balanceHookIOU(
+    balanceHook(
         AccountID const& account,
         AccountID const& issuer,
         STAmount const& amount) const override;
 
-    STAmount
-    balanceHookMPT(
-        std::optional<AccountID> const& account,
-        STAmount const& amount) const override;
-
     void
-    creditHookIOU(
+    creditHook(
         AccountID const& from,
         AccountID const& to,
-        STAmount const& amount,
-        STAmount const& preCreditBalance) override;
-
-    void
-    creditHookMPT(
-        std::optional<AccountID> const& account,
         STAmount const& amount,
         STAmount const& preCreditBalance) override;
 
@@ -260,9 +254,58 @@ public:
     xrpDestroyed() const;
 
 private:
+    STAmount
+    balanceHookIOU(
+        AccountID const& account,
+        AccountID const& issuer,
+        STAmount const& amount) const;
+
+    STAmount
+    balanceHookMPT(
+        AccountID const& account,
+        AccountID const& issuer,
+        STAmount const& amount) const;
+
     detail::DeferredCredits tab_;
     PaymentSandbox const* ps_ = nullptr;
 };
+
+namespace detail {
+
+inline void
+DeferredCredits::credit(
+    AccountID const& sender,
+    AccountID const& receiver,
+    STAmount const& amount,
+    STAmount const& preSendBalance)
+{
+    std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                creditIOU(sender, receiver, amount, preSendBalance);
+            else
+                creditDebitMPT(sender, receiver, amount, preSendBalance);
+        },
+        amount.asset().value());
+}
+
+}  // namespace detail
+
+inline STAmount
+PaymentSandbox::balanceHook(
+    AccountID const& account,
+    AccountID const& issuer,
+    STAmount const& amount) const
+{
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return balanceHookIOU(account, issuer, amount);
+            else
+                return balanceHookMPT(account, issuer, amount);
+        },
+        amount.asset().value());
+}
 
 }  // namespace ripple
 
