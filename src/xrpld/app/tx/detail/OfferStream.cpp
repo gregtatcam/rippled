@@ -129,17 +129,35 @@ accountFundsHelper(
     }
     else if constexpr (std::is_same_v<T, MPTAmount>)
     {
-        if (bLog)
-            std::cout << to_string(
-                             (id != issuer || available.value() >= 0)
-                                 ? available
-                                 : T{0})
-                      << std::endl;
-        if (id != issuer || available.value() >= 0)
-            return available;
+        // TODO
+        auto const res = [&]() {
+            if (id != issuer)
+            {
+                auto const availableIssuer = toAmount<T>(accountHolds(
+                    view, issuer, asset, freezeHandling, authHandling, j));
 
-        // Can't issue if OutstandingAmount is already overflown
-        return T{0};
+                if (availableIssuer.value() < 0)
+                {
+                    auto const credits = toAmount<T>(
+                        view.getCreditsDebits(id, asset.get<MPTIssue>()).first);
+                    // An amount was issued to this holder, and it caused
+                    // overflow: need additional member to indicate that
+                    // specifically issuing to this holder caused overflow
+                    if (credits.value() > 0)
+                    {
+                        auto const delta = credits + availableIssuer;
+                        if (delta.value() > 0)
+                            return delta;
+                    }
+                }
+            }
+
+            // Can't issue if OutstandingAmount is already overflown
+            return available.value() >= 0 ? available : T{0};
+        }();
+        if (bLog)
+            std::cout << to_string(res) << std::endl;
+        return res;
     }
     if (bLog && isXRP(asset))
         std::cout << to_string(available) << std::endl;

@@ -504,6 +504,16 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
         // From an issuer to a holder
         if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_)))
         {
+            // TODO it's not right to handle it this way on a second PE
+            // iteration. A book step could be issuing so it's possible that
+            // more liquidity can be provided. Book step has to to decide
+            // whether it's dry or not.
+            {
+                auto const credits = sb.getCreditsDebits(src_, mptIssue_);
+                // already issued, return whatever is available
+                if (credits.first > beast::zero)
+                    return {maxFlow.mpt(), DebtDirection::issues};
+            }
             // If issuer is the source account, and it is:
             //  - direct payment then MPTEndpointStep is the only step.
             //    Provide the available maxFlow.

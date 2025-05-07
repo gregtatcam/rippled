@@ -1107,7 +1107,7 @@ trustCreate(
     sleRippleState->setFieldAmount(
         sfBalance, bSetHigh ? -saBalance : saBalance);
 
-    view.creditHook(
+    view.creditHookIOU(
         uSrcAccountID, uDstAccountID, saBalance, saBalance.zeroed());
 
     return tesSUCCESS;
@@ -1234,7 +1234,7 @@ rippleCreditIOU(
         if (bSenderHigh)
             saBalance.negate();  // Put balance in sender terms.
 
-        view.creditHook(uSenderID, uReceiverID, saAmount, saBalance);
+        view.creditHookIOU(uSenderID, uReceiverID, saAmount, saBalance);
 
         STAmount const saBefore = saBalance;
 
@@ -1487,7 +1487,7 @@ accountSendIOU(
         else
         {
             auto const sndBal = sender->getFieldAmount(sfBalance);
-            view.creditHook(uSenderID, xrpAccount(), saAmount, sndBal);
+            view.creditHookIOU(uSenderID, xrpAccount(), saAmount, sndBal);
 
             // Decrement XRP balance.
             sender->setFieldAmount(sfBalance, sndBal - saAmount);
@@ -1500,7 +1500,7 @@ accountSendIOU(
         // Increment XRP balance.
         auto const rcvBal = receiver->getFieldAmount(sfBalance);
         receiver->setFieldAmount(sfBalance, rcvBal + saAmount);
-        view.creditHook(xrpAccount(), uReceiverID, saAmount, -rcvBal);
+        view.creditHookIOU(xrpAccount(), uReceiverID, saAmount, -rcvBal);
 
         view.update(receiver);
     }
@@ -1538,6 +1538,7 @@ rippleCreditMPT(
     if (!sleIssuance)
         return tecOBJECT_NOT_FOUND;
 
+    auto const& asset = saAmount.asset();
     auto const outstanding = (*sleIssuance)[sfOutstandingAmount];
     auto const available = availableMPT(sleIssuance);
 
@@ -1562,6 +1563,12 @@ rippleCreditMPT(
             auto const amt = saAmount.mpt().value();
             if (holderBalance < amt)
                 return tecINSUFFICIENT_FUNDS;
+            view.creditHookMPT(
+                uSenderID,
+                uReceiverID,
+                saAmount,
+                STAmount{asset, (*sle)[sfMPTAmount]},
+                STAmount{asset, available.first});
             (*sle)[sfMPTAmount] = holderBalance - amt;
             view.update(sle);
         }
@@ -1574,11 +1581,6 @@ rippleCreditMPT(
         auto const redeem = saAmount.mpt().value();
         if (outstanding >= redeem)
         {
-            view.creditHook(
-                uSenderID,
-                uReceiverID,
-                saAmount,
-                STAmount{saAmount.asset(), available.first});
             sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
             view.update(sleIssuance);
         }
@@ -1590,11 +1592,12 @@ rippleCreditMPT(
         auto const mptokenID = keylet::mptoken(mptID.key, uReceiverID);
         if (auto sle = view.peek(mptokenID))
         {
-            view.creditHook(
+            view.creditHookMPT(
                 uSenderID,
                 uReceiverID,
                 saAmount,
-                STAmount{saAmount.asset(), (*sle)[sfMPTAmount]});
+                STAmount{asset, (*sle)[sfMPTAmount]},
+                STAmount{asset, available.first});
             (*sle)[sfMPTAmount] += saAmount.mpt().value();
             view.update(sle);
         }
@@ -1825,7 +1828,7 @@ issueIOU(
             final_balance,
             j);
 
-        view.creditHook(issue.account, account, amount, start_balance);
+        view.creditHookIOU(issue.account, account, amount, start_balance);
 
         if (bSenderHigh)
             final_balance.negate();
@@ -1919,7 +1922,7 @@ redeemIOU(
         auto const must_delete = updateTrustLine(
             view, state, bSenderHigh, account, start_balance, final_balance, j);
 
-        view.creditHook(account, issue.account, amount, start_balance);
+        view.creditHookIOU(account, issue.account, amount, start_balance);
 
         if (bSenderHigh)
             final_balance.negate();

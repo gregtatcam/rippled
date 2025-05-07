@@ -833,6 +833,8 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         if (isAssetInMPT)
         {
             auto const& mptIssue = offer.assetIn();
+            auto const bSave = bLog;
+            bLog = false;
             auto const available = toAmount<TIn>(accountHolds(
                 sb,
                 mptIssue.getIssuer(),
@@ -840,6 +842,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 FreezeHandling::fhIGNORE_FREEZE,
                 ahIGNORE_AUTH,
                 j_));
+            bLog = bSave;
             // BookStep is the first step. Issuer pays takerPays
             // to the offer's owner. Must limit the offer's takerPays
             // if it exceeds available amount to issue. If it must be

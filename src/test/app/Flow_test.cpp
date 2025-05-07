@@ -913,6 +913,9 @@ struct Flow_test : public beast::unit_test::suite
         auto const alice = Account("alice");
         auto const USD = gw1["USD"];
         auto const EUR = gw2["EUR"];
+        std::cout << "gw1 " << acct_str(gw1) << std::endl;
+        std::cout << "gw2 " << acct_str(gw2) << std::endl;
+        std::cout << "alice " << acct_str(alice) << std::endl << std::endl;
 
         Env env(*this, features);
 

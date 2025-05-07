@@ -198,6 +198,12 @@ public:
         return count;
     }
 
+    virtual std::pair<STAmount, STAmount>
+    getCreditsDebits(AccountID const& account, MPTIssue const& issue) const
+    {
+        return std::make_pair(STAmount{issue}, STAmount{issue});
+    }
+
     // used by the implementation
     virtual std::unique_ptr<sles_type::iter_base>
     slesBegin() const = 0;

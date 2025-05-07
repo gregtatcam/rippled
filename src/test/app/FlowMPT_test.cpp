@@ -1187,8 +1187,8 @@ struct FlowMPT_test : public beast::unit_test::suite
         using namespace jtx;
         auto const sa = supported_amendments();
         testWithFeats(sa);
-        return;
-        testEmptyStrand(sa);
+        // return;
+        // testEmptyStrand(sa);
         using namespace jtx;
         Account const gw("gw");
         Account const alice("alice");
@@ -1198,7 +1198,6 @@ struct FlowMPT_test : public beast::unit_test::suite
         std::cout << "alice " << alice.human().substr(0, 5) << std::endl;
         std::cout << "carol " << carol.human().substr(0, 5) << std::endl;
         std::cout << "bob " << bob.human().substr(0, 5) << std::endl;
-#if 0
         // IOU direct between holders
         {
             std::cout << "## 1. IOU direct between holders, over limit fail"
@@ -1390,7 +1389,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             BEAST_EXPECT(
                 (*env.le(keylet::mptoken(USD, carol)))[sfMPTAmount] == 100);
         }
-
+        return;
         // IOU cross-currency, trust extended
         {
             std::cout << "## 11. IOU cross-currency, trust extended"
@@ -1512,7 +1511,9 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(pay(gw, carol, USD(100)));
             env(pay(gw, bob, USD(100)));
             env(offer(bob, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(env.balance(carol, USD) == USD(120));
         }
@@ -1525,7 +1526,9 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(pay(gw, carol, USD(100)));
             env(pay(gw, bob, USD(100)));
             env(offer(gw, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(env.balance(carol, USD) == USD(120));
         }
@@ -1536,7 +1539,9 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(trust(carol, USD(120)));
             env(pay(gw, carol, USD(100)));
             env(offer(carol, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
@@ -1547,47 +1552,66 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(trust(carol, USD(100)));
             env(pay(gw, carol, USD(100)));
             env(offer(carol, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
-                txflags(tfPartialPayment), ter(tecPATH_DRY));
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment),
+                ter(tecPATH_DRY));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice, carol);
-            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {carol }, .maxAmt = 120});
+            MPT const USD = MPTTester(
+                {.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 120});
             env(pay(gw, carol, USD(100)));
             env(offer(carol, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice, carol);
-            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {carol }, .maxAmt = 100});
+            MPT const USD = MPTTester(
+                {.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
             env(pay(gw, carol, USD(100)));
             env(offer(carol, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice, carol);
-            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {carol }, .maxAmt = 100});
+            MPT const USD = MPTTester(
+                {.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
             env(pay(gw, carol, USD(100)));
             env(offer(gw, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
-                txflags(tfPartialPayment), ter(tecPATH_DRY));
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
+                txflags(tfPartialPayment),
+                ter(tecPATH_DRY));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice, carol, bob);
-            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {carol, bob}, .maxAmt = 100});
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {carol, bob},
+                 .maxAmt = 100});
             env(pay(gw, bob, USD(100)));
             env(offer(bob, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
@@ -1597,16 +1621,19 @@ struct FlowMPT_test : public beast::unit_test::suite
             auto const USD = gw["USD"];
             env(trust(carol, USD(2000)));
             env(pay(gw, carol, USD(100)));
-            std::cout << (*env.le(keylet::line(carol, USD)))[sfBalance] << std::endl;
-            //std::cout << (*env.le(keylet::line(gw, USD)))[sfBalance] << std::endl;
+            std::cout << (*env.le(keylet::line(carol, USD)))[sfBalance]
+                      << std::endl;
+            // std::cout << (*env.le(keylet::line(gw, USD)))[sfBalance] <<
+            // std::endl;
             std::cout << getAccountLines(env, carol).toStyledString();
             std::cout << getAccountLines(env, gw).toStyledString();
             env(offer(carol, XRP(100), USD(100)));
-            env(pay(alice, carol, USD(100)), path(~USD), sendmax(XRP(100)),
+            env(pay(alice, carol, USD(100)),
+                path(~USD),
+                sendmax(XRP(100)),
                 txflags(tfPartialPayment));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
-#endif
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice, carol);
@@ -1631,11 +1658,9 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(offer(alice, XRP(10), USD(19)));
             env(offer(alice, XRP(15), USD(28)));
             env(offer(alice, XRP(25), USD(46)));
-            bLog = true;
             env(pay(carol, carol, USD(200)),
                 sendmax(XRP(100)),
                 txflags(tfPartialPayment));
-            bLog = false;
             std::cout << "carol's balance " << env.balance(carol, USD)
                       << std::endl;
         }

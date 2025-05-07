@@ -56,11 +56,19 @@ public:
         Asset const& asset) const;
 
     void
-    credit(
+    creditIOU(
         AccountID const& sender,
         AccountID const& receiver,
         STAmount const& amount,
         STAmount const& preCreditSenderBalance);
+
+    void
+    creditMPT(
+        AccountID const& sender,
+        AccountID const& receiver,
+        STAmount const& amount,
+        STAmount const& preCreditSenderBalanceHolder,
+        STAmount const& preCreditSenderIssuer);
 
     void
     ownerCount(AccountID const& id, std::uint32_t cur, std::uint32_t next);
@@ -126,20 +134,6 @@ private:
     static Key
     makeKey(AccountID const& a1, AccountID const& a2, Asset const& a);
 
-    void
-    creditIOU(
-        AccountID const& sender,
-        AccountID const& receiver,
-        STAmount const& amount,
-        STAmount const& preCreditSenderBalance);
-
-    void
-    creditDebitMPT(
-        AccountID const& sender,
-        AccountID const& receiver,
-        STAmount const& amount,
-        STAmount const& preSendBalance);
-
     std::map<Key, Value> credits_;
     std::map<AccountID, std::uint32_t> ownerCounts_;
 };
@@ -155,7 +149,7 @@ private:
     other paths to gain liquidity.
 
     The behavior of certain free functions in the ApplyView API
-    will change via the balanceHook and creditHook overrides
+    will change via the balanceHook and creditHookIOU overrides
     of PaymentSandbox.
 
     @note Presented as ApplyView to clients
@@ -213,11 +207,19 @@ public:
         STAmount const& amount) const override;
 
     void
-    creditHook(
+    creditHookIOU(
         AccountID const& from,
         AccountID const& to,
         STAmount const& amount,
         STAmount const& preCreditBalance) override;
+
+    void
+    creditHookMPT(
+        AccountID const& from,
+        AccountID const& to,
+        STAmount const& amount,
+        STAmount const& preCreditBalanceHolder,
+        STAmount const& preCreditBalanceIssuer) override;
 
     void
     adjustOwnerCountHook(
@@ -227,6 +229,10 @@ public:
 
     std::uint32_t
     ownerCountHook(AccountID const& account, std::uint32_t count)
+        const override;
+
+    std::pair<STAmount, STAmount>
+    getCreditsDebits(AccountID const& account, MPTIssue const& issue)
         const override;
 
     /** Apply changes to base view.
@@ -271,23 +277,6 @@ private:
 };
 
 namespace detail {
-
-inline void
-DeferredCredits::credit(
-    AccountID const& sender,
-    AccountID const& receiver,
-    STAmount const& amount,
-    STAmount const& preSendBalance)
-{
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                creditIOU(sender, receiver, amount, preSendBalance);
-            else
-                creditDebitMPT(sender, receiver, amount, preSendBalance);
-        },
-        amount.asset().value());
-}
 
 }  // namespace detail
 
