@@ -152,6 +152,18 @@ accountFundsHelper(
                 }
             }
 
+            if (available.value() < 0)
+            {
+                auto const credits = toAmount<T>(
+                    view.getCreditsDebits(issuer, asset.get<MPTIssue>()).first);
+                if (credits.value() > 0)
+                {
+                    auto const delta = credits + available;
+                    if (delta.value() > 0)
+                        return delta;
+                }
+            }
+
             // Can't issue if OutstandingAmount is already overflown
             return available.value() >= 0 ? available : T{0};
         }();
