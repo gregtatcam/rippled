@@ -1442,7 +1442,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             std::cout << outstandingAmt(env, USD) << std::endl;
             std::cout << env.balance(alice, USD) << std::endl;
             std::cout << env.balance(bob, USD) << std::endl;
-            std::cout << env.balance(carol, USD) << std::endl;
+            std::cout << env.balance(carol, EUR) << std::endl;
         }
 
 #if 0

@@ -429,7 +429,15 @@ PaymentSandbox::balanceHookMPT(
             if (accountIsHolder)
                 delta += adj->debits;
             else
+            {
+                // Should subtract debits from different accounts than the
+                // one that was credited. account and issuer are interchangable
+                // like IOU. If account is issuer and issuer is account then
+                // subtract debits from all other accounts but "issuer".
+                // For now get the total debits and then adjust with debits
+                // from "issuer"
                 delta += adj->credits;
+            }
             lastBal = adj->origBalance;
             if (lastBal < minBal)
                 minBal = lastBal;

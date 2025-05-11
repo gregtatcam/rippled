@@ -386,18 +386,6 @@ accountHolds(
     return view.balanceHook(account, issuer, amount);
 }
 
-STAmount
-accountHolds(
-    ReadView const& view,
-    AccountID const& account,
-    Issue const& issue,
-    FreezeHandling zeroIfFrozen,
-    beast::Journal j)
-{
-    return accountHolds(
-        view, account, issue.currency, issue.account, zeroIfFrozen, j);
-}
-
 /** Return available amount to issue (could be negative if overflow)
  * and the maximum amount.
  */
@@ -464,26 +452,6 @@ accountHolds(
     if (mptokensV2)
         return view.balanceHook(account, issuer, amount);
     return amount;
-}
-
-STAmount
-accountHolds(
-    ReadView const& view,
-    AccountID const& account,
-    Asset const& issue,
-    FreezeHandling zeroIfFrozen,
-    AuthHandling zeroIfUnauthorized,
-    beast::Journal j)
-{
-    return std::visit(
-        [&]<typename TIss>(TIss const& issue_) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                return accountHolds(view, account, issue_, zeroIfFrozen, j);
-            else
-                return accountHolds(
-                    view, account, issue_, zeroIfFrozen, zeroIfUnauthorized, j);
-        },
-        issue.value());
 }
 
 STAmount
@@ -1539,7 +1507,7 @@ rippleCreditMPT(
         return tecOBJECT_NOT_FOUND;
 
     auto const& asset = saAmount.asset();
-    auto const outstanding = (*sleIssuance)[sfOutstandingAmount];
+    auto const outstanding = sleIssuance->getFieldU64(sfOutstandingAmount);
     auto const available = availableMPT(sleIssuance);
 
     if (uSenderID == issuer)
@@ -1552,6 +1520,11 @@ rippleCreditMPT(
                 return tecPATH_DRY;
         }
         (*sleIssuance)[sfOutstandingAmount] += amt;
+        if (bLog)
+            std::cout << "------- outstanding issuer initial/updated/amt "
+                      << outstanding << " "
+                      << (*sleIssuance)[sfOutstandingAmount] << " " << amt
+                      << std::endl;
         view.update(sleIssuance);
     }
     else
@@ -1582,6 +1555,11 @@ rippleCreditMPT(
         if (outstanding >= redeem)
         {
             sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
+            if (bLog)
+                std::cout << "------- outstanding redeem initial/updated/amt "
+                          << outstanding << " "
+                          << (*sleIssuance)[sfOutstandingAmount] << " "
+                          << redeem << std::endl;
             view.update(sleIssuance);
         }
         else
