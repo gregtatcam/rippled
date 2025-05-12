@@ -437,8 +437,14 @@ struct FlowMPT_test : public beast::unit_test::suite
             Env env(*this, features);
 
             env.fund(XRP(10000), alice, bob, carol, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob, carol);
+
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob, carol},
+                 .transferFee = 25'000,
+                 .maxAmt = 1'000});
+
             env(pay(gw, alice, USD(50)));
             env.require(balance(alice, USD(50)));
             env(pay(alice, bob, USD(40)), sendmax(USD(50)));
@@ -448,9 +454,15 @@ struct FlowMPT_test : public beast::unit_test::suite
             // transfer rate is not charged when issuer is src or dst
             Env env(*this, features);
 
-            env.fund(XRP(10000), alice, bob, carol, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob, carol);
+            env.fund(XRP(10'000), alice, bob, carol, gw);
+
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob, carol},
+                 .transferFee = 25'000,
+                 .maxAmt = 1'000});
+
             env(pay(gw, alice, USD(50)));
             env.require(balance(alice, USD(50)));
             env(pay(alice, gw, USD(40)), sendmax(USD(40)));
@@ -460,28 +472,50 @@ struct FlowMPT_test : public beast::unit_test::suite
             // transfer fee on an offer
             Env env(*this, features);
 
-            env.fund(XRP(10000), alice, bob, carol, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob, carol);
-            env(pay(gw, bob, USD(65)));
+            env.fund(XRP(10'000), alice, bob, carol, gw);
 
-            env(offer(bob, XRP(50), USD(50)));
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob, carol},
+                 .transferFee = 25'000,
+                 .maxAmt = 10'000});
 
-            env(pay(alice, carol, USD(50)), path(~USD), sendmax(XRP(50)));
+            // scale by 1
+            env(pay(gw, bob, USD(650)));
+
+            env(offer(bob, XRP(50), USD(500)));
+
+            env(pay(alice, carol, USD(500)),
+                path(~USD),
+                sendmax(XRP(50)),
+                txflags(tfPartialPayment));
+
             env.require(
-                balance(alice, xrpMinusFee(env, 10000 - 50)),
-                balance(bob, USD(2.5)),  // owner pays transfer fee
-                balance(carol, USD(50)));
+                balance(alice, XRP(10'000 - 50) - txfee(env, 2)),
+                balance(bob, USD(25)),  // owner pays transfer fee
+                balance(carol, USD(500)));
         }
 
         {
             // Transfer fee two consecutive offers
             Env env(*this, features);
 
-            env.fund(XRP(10000), alice, bob, carol, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob, carol);
-            env.trust(EUR(1000), alice, bob, carol);
+            env.fund(XRP(10'000), alice, bob, carol, gw);
+
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob, carol},
+                 .transferFee = 25'000,
+                 .maxAmt = 1'000});
+            MPT const EUR = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob, carol},
+                 .transferFee = 25'000,
+                 .maxAmt = 1'000});
+
             env(pay(gw, bob, USD(50)));
             env(pay(gw, bob, EUR(50)));
 
@@ -490,89 +524,49 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env(pay(alice, carol, EUR(40)), path(~USD, ~EUR), sendmax(XRP(40)));
             env.require(
-                balance(alice, xrpMinusFee(env, 10000 - 40)),
+                balance(alice, XRP(10'000 - 40) - txfee(env, 3)),
                 balance(bob, USD(40)),
                 balance(bob, EUR(0)),
                 balance(carol, EUR(40)));
         }
 
         {
-            // First pass through a strand redeems, second pass issues, no
-            // offers limiting step is not an endpoint
-            Env env(*this, features);
-            auto const USDA = alice["USD"];
-            auto const USDB = bob["USD"];
-
-            env.fund(XRP(10000), alice, bob, carol, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob, carol);
-            env.trust(USDA(1000), bob);
-            env.trust(USDB(1000), gw);
-            env(pay(gw, bob, USD(50)));
-            // alice -> bob -> gw -> carol. $50 should have transfer fee; $10,
-            // no fee
-            env(pay(alice, carol, USD(50)), path(bob), sendmax(USDA(60)));
-            env.require(
-                balance(bob, USD(-10)),
-                balance(bob, USDA(60)),
-                balance(carol, USD(50)));
-        }
-        {
-            // First pass through a strand redeems, second pass issues, through
-            // an offer limiting step is not an endpoint
-            Env env(*this, features);
-            auto const USDA = alice["USD"];
-            auto const USDB = bob["USD"];
-            Account const dan("dan");
-
-            env.fund(XRP(10000), alice, bob, carol, dan, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob, carol, dan);
-            env.trust(EUR(1000), carol, dan);
-            env.trust(USDA(1000), bob);
-            env.trust(USDB(1000), gw);
-            env(pay(gw, bob, USD(50)));
-            env(pay(gw, dan, EUR(100)));
-            env(offer(dan, USD(100), EUR(100)));
-            // alice -> bob -> gw -> carol. $50 should have transfer fee; $10,
-            // no fee
-            env(pay(alice, carol, EUR(50)),
-                path(bob, gw, ~EUR),
-                sendmax(USDA(60)),
-                txflags(tfNoRippleDirect));
-            env.require(
-                balance(bob, USD(-10)),
-                balance(bob, USDA(60)),
-                balance(dan, USD(50)),
-                balance(dan, EUR(37.5)),
-                balance(carol, EUR(50)));
-        }
-
-        {
             // Offer where the owner is also the issuer, owner pays fee
             Env env(*this, features);
 
-            env.fund(XRP(10000), alice, bob, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob);
+            env.fund(XRP(10'000), alice, bob, gw);
+
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob},
+                 .transferFee = 25'000,
+                 .maxAmt = 1'000});
+
             env(offer(gw, XRP(100), USD(100)));
             env(pay(alice, bob, USD(100)), sendmax(XRP(100)));
             env.require(
-                balance(alice, xrpMinusFee(env, 10000 - 100)),
+                balance(alice, XRP(10'000 - 100) - txfee(env, 2)),
                 balance(bob, USD(100)));
         }
-        if (!features[featureOwnerPaysFee])
+
         {
             // Offer where the owner is also the issuer, sender pays fee
-            Env env(*this, features);
+            Env env(*this, features - featureOwnerPaysFee);
 
-            env.fund(XRP(10000), alice, bob, gw);
-            env(rate(gw, 1.25));
-            env.trust(USD(1000), alice, bob);
+            env.fund(XRP(10'000), alice, bob, gw);
+
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob},
+                 .transferFee = 25'000,
+                 .maxAmt = 1'000});
+
             env(offer(gw, XRP(125), USD(125)));
             env(pay(alice, bob, USD(100)), sendmax(XRP(200)));
             env.require(
-                balance(alice, xrpMinusFee(env, 10000 - 125)),
+                balance(alice, XRP(10'000 - 125) - txfee(env, 2)),
                 balance(bob, USD(100)));
         }
     }
@@ -838,19 +832,21 @@ struct FlowMPT_test : public beast::unit_test::suite
 
         auto const alice = Account("alice");
         auto const gw = Account("gw");
-        auto const USD = gw["USD"];
 
-        env.fund(XRP(10000), alice, gw);
-        env(trust(alice, USD(20)));
+        env.fund(XRP(10'000), alice, gw);
+
+        MPT const USD = MPTTester(
+            {.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 20});
+
         env(pay(gw, alice, USD(10)));
-        env(offer(alice, XRP(50000), USD(10)));
+        env(offer(alice, XRP(50'000), USD(10)));
 
         // Consuming the offer changes the owner count, which could also cause
         // liquidity to decrease in the forward pass
         auto const toSend = consumeOffer ? USD(10) : USD(9);
         env(pay(alice, alice, toSend),
             path(~USD),
-            sendmax(XRP(20000)),
+            sendmax(XRP(20'000)),
             txflags(tfPartialPayment | tfNoRippleDirect));
     }
 
@@ -867,20 +863,26 @@ struct FlowMPT_test : public beast::unit_test::suite
             auto const alice = Account("alice");
             auto const bob = Account("bob");
             auto const gw = Account("gw");
-            auto const USD = gw["USD"];
 
-            env.fund(XRP(100000), alice, bob, gw);
-            env(trust(bob, USD(20)));
+            env.fund(XRP(100'000), alice, bob, gw);
 
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob},
+                 .maxAmt = 20E+17});
+
+            // scale by 17
             STAmount tinyAmt1{
-                USD, 9000000000000000ll, -17, false, STAmount::unchecked{}};
+                USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
             STAmount tinyAmt3{
-                USD, 9000000000000003ll, -17, false, STAmount::unchecked{}};
+                USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
 
-            env(offer(gw, drops(9000000000), tinyAmt3));
+            env(offer(gw, drops(9'000'000'000), tinyAmt3));
+
             env(pay(alice, bob, tinyAmt1),
                 path(~USD),
-                sendmax(drops(9000000000)),
+                sendmax(drops(9'000'000'000)),
                 txflags(tfNoRippleDirect));
 
             BEAST_EXPECT(!isOffer(env, gw, XRP(0), USD(0)));
@@ -892,22 +894,27 @@ struct FlowMPT_test : public beast::unit_test::suite
             auto const alice = Account("alice");
             auto const bob = Account("bob");
             auto const gw = Account("gw");
-            auto const USD = gw["USD"];
 
-            env.fund(XRP(100000), alice, bob, gw);
-            env(trust(alice, USD(20)));
+            env.fund(XRP(100'000), alice, bob, gw);
 
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, bob},
+                 .maxAmt = 20E+17});
+
+            // scale by 17
             STAmount tinyAmt1{
-                USD, 9000000000000000ll, -17, false, STAmount::unchecked{}};
+                USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
             STAmount tinyAmt3{
-                USD, 9000000000000003ll, -17, false, STAmount::unchecked{}};
+                USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
 
             env(pay(gw, alice, tinyAmt1));
 
-            env(offer(gw, tinyAmt3, drops(9000000000)));
-            env(pay(alice, bob, drops(9000000000)),
+            env(offer(gw, tinyAmt3, drops(9'000'000'000)));
+            env(pay(alice, bob, drops(9'000'000'000)),
                 path(~XRP),
-                sendmax(USD(1)),
+                sendmax(USD(static_cast<std::uint64_t>(1E+17))),
                 txflags(tfNoRippleDirect));
 
             BEAST_EXPECT(!isOffer(env, gw, USD(0), XRP(0)));
@@ -925,49 +932,49 @@ struct FlowMPT_test : public beast::unit_test::suite
         auto const alice = Account("alice");
         auto const bob = Account("bob");
         auto const gw = Account("gw");
-        auto const USD = gw["USD"];
-        auto const usdC = USD.currency;
 
-        env.fund(XRP(10000), alice, bob, gw);
-        env.close();
-        env(trust(alice, USD(100)));
-        env.close();
+        env.fund(XRP(10'000), alice, bob, gw);
 
-        // BEAST_EXPECT(!getNoRippleFlag(env, gw, alice, usdC));
+        // scale by 16
+        MPT const USD = MPTTester(
+            {.env = env,
+             .issuer = gw,
+             .holders = {alice, bob},
+             .maxAmt = 100E+16});
 
         env(
             pay(gw,
                 alice,
                 // 12.55....
-                STAmount{USD, std::uint64_t(1255555555555555ull), -14, false}));
+                STAmount{USD, std::uint64_t(1255555555555555ull), 2, false}));
 
         env(offer(
             gw,
             // 5.0...
-            STAmount{USD, std::uint64_t(5000000000000000ull), -15, false},
+            STAmount{USD, std::uint64_t(5000000000000000ull), 1, false},
             XRP(1000)));
 
         env(offer(
             gw,
             // .555...
-            STAmount{USD, std::uint64_t(5555555555555555ull), -16, false},
+            STAmount{USD, std::uint64_t(5555555555555555ull), 0, false},
             XRP(10)));
 
         env(offer(
             gw,
             // 4.44....
-            STAmount{USD, std::uint64_t(4444444444444444ull), -15, false},
+            STAmount{USD, std::uint64_t(4444444444444444ull), 1, false},
             XRP(.1)));
 
         env(offer(
             alice,
             // 17
-            STAmount{USD, std::uint64_t(1700000000000000ull), -14, false},
+            STAmount{USD, std::uint64_t(1700000000000000ull), 0, false},
             XRP(.001)));
 
-        env(pay(alice, bob, XRP(10000)),
+        env(pay(alice, bob, XRP(10'000)),
             path(~XRP),
-            sendmax(USD(100)),
+            sendmax(USD(static_cast<std::uint64_t>(100E+16))),
             txflags(tfPartialPayment | tfNoRippleDirect));
     }
 
@@ -985,26 +992,28 @@ struct FlowMPT_test : public beast::unit_test::suite
 
         auto const ann = Account("ann");
         auto const gw = Account("gateway");
-        auto const CTB = gw["CTB"];
 
         auto const fee = env.current()->fees().base;
         env.fund(reserve(env, 2) + drops(9999640) + fee, ann);
         env.fund(reserve(env, 2) + fee * 4, gw);
+
+        // scale by 5
+        MPT const CTB = MPTTester(
+            {.env = env,
+             .issuer = gw,
+             .holders = {ann},
+             .transferFee = 2'000,  // 2%
+             .maxAmt = 1'000'000});
+
+        env(pay(gw, ann, CTB(285'600)));
         env.close();
 
-        env(rate(gw, 1.002));
-        env(trust(ann, CTB(10)));
+        env(offer(ann, drops(365'611'702'030), CTB(571'300)));
         env.close();
 
-        env(pay(gw, ann, CTB(2.856)));
-        env.close();
-
-        env(offer(ann, drops(365611702030), CTB(5.713)));
-        env.close();
-
-        // This payment caused the assert.
-        env(pay(ann, ann, CTB(0.687)),
-            sendmax(drops(20000000000)),
+        // This payment caused assert.
+        env(pay(ann, ann, CTB(68'700)),
+            sendmax(drops(20'000'000'000)),
             txflags(tfPartialPayment));
     }
 
@@ -1020,9 +1029,9 @@ struct FlowMPT_test : public beast::unit_test::suite
 
         env.fund(XRP(10000), alice);
 
-        env(pay(alice, alice, alice["USD"](100)),
-            path(~alice["USD"]),
-            ter(temBAD_PATH));
+        MPT USD;
+
+        env(pay(alice, alice, USD(100)), path(~USD), ter(temBAD_PATH));
     }
 
     void
@@ -1113,30 +1122,6 @@ struct FlowMPT_test : public beast::unit_test::suite
                 txflags(tfNoRippleDirect),
                 ter(temBAD_PATH_LOOP));
         }
-    }
-
-    void
-    testTicketPay(FeatureBitset features)
-    {
-        testcase("Payment with ticket");
-        using namespace jtx;
-
-        auto const alice = Account("alice");
-        auto const bob = Account("bob");
-
-        Env env(*this, features);
-
-        env.fund(XRP(10000), alice);
-
-        // alice creates a ticket for the payment.
-        std::uint32_t const ticketSeq{env.seq(alice) + 1};
-        env(ticket::create(alice, 1));
-
-        // Make a payment using the ticket.
-        env(pay(alice, bob, XRP(1000)), ticket::use(ticketSeq));
-        env.close();
-        env.require(balance(bob, XRP(1000)));
-        env.require(balance(alice, XRP(9000) - drops(20)));
     }
 
     void
@@ -1428,55 +1413,16 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(offer(gw, EUR(100), USD(101)));
             env(offer(gw, EUR(100), USD(100)));
 
-            bLog = true;
             env(pay(carol, bob, USD(2000)),
                 sendmax(EUR(2000)),
                 path(~USD),
                 txflags(tfPartialPayment));
-            bLog = false;
 
             BEAST_EXPECT(expectOutstandingAmt(env, USD, 1'000));
             BEAST_EXPECT(env.balance(alice, USD) == USD(495));  // 495
             BEAST_EXPECT(env.balance(bob, USD) == USD(505));    // 615
             BEAST_EXPECT(env.balance(carol, EUR) == USD(210));  // 100
-            std::cout << outstandingAmt(env, USD) << std::endl;
-            std::cout << env.balance(alice, USD) << std::endl;
-            std::cout << env.balance(bob, USD) << std::endl;
-            std::cout << env.balance(carol, EUR) << std::endl;
         }
-
-#if 0
-        {
-            Env env(*this);
-            env.fund(XRP(1'000), gw, alice, carol, bob);
-            auto const USD = gw["USD"];
-            auto const EUR = gw["EUR"];
-            env(trust(alice, USD(2000)));
-            env(trust(carol, USD(2000)));
-            env(trust(bob, USD(2000)));
-            env(trust(alice, EUR(2000)));
-            env(trust(carol, EUR(2000)));
-            env(trust(bob, EUR(2000)));
-            env(pay(gw, alice, USD(600)));
-            env(pay(gw, carol, EUR(700)));
-            env(offer(alice, EUR(100), USD(105)));
-            env(offer(gw, EUR(100), USD(104)));
-            env(offer(gw, EUR(100), USD(103)));
-            env(offer(gw, EUR(100), USD(102)));
-            env(offer(gw, EUR(100), USD(101)));
-            env(offer(gw, EUR(100), USD(100)));
-            env(pay(carol, bob, USD(2000)),
-                sendmax(EUR(2000)),
-                path(~USD),
-                txflags(tfPartialPayment));
-            std::cout << env.balance(gw, USD) << std::endl;
-            std::cout << env.balance(alice, USD) << std::endl;
-            std::cout << env.balance(bob, USD) << std::endl;
-            std::cout << env.balance(carol, EUR) << std::endl;
-            std::cout << getAccountOffers(env, alice).toStyledString();
-            std::cout << getAccountOffers(env, gw).toStyledString();
-        }
-#endif
 
         // Cross-currency payment holder to holder. Multiple offers with
         // different owners - some holders, some issuer. Source and destination
@@ -1521,31 +1467,32 @@ struct FlowMPT_test : public beast::unit_test::suite
     testWithFeats(FeatureBitset features)
     {
         using namespace jtx;
+        FeatureBitset const ownerPaysFee{featureOwnerPaysFee};
 
         testMaxAndSelfPaymentEdgeCases(features);
         testFalseDry(features);
         testDirectStep(features);
         testBookStep(features);
+        testDirectStep(features | ownerPaysFee);
+        testBookStep(features | ownerPaysFee);
+        testTransferRate(features | ownerPaysFee);
         testSelfPayment1(features);
         testSelfPayment2(features);
-        return;
         testSelfFundedXRPEndpoint(false, features);
         testSelfFundedXRPEndpoint(true, features);
         testUnfundedOffer(features);
         testReexecuteDirectStep(features);
         testSelfPayLowQualityOffer(features);
-        testTicketPay(features);
     }
 
     void
     run() override
     {
-        testLimitQuality();
-        testXRPPathLoop();
         using namespace jtx;
         auto const sa = supported_amendments();
+        testLimitQuality();
+        testXRPPathLoop();
         testWithFeats(sa);
-        return;
         testEmptyStrand(sa);
     }
 };
