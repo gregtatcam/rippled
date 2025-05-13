@@ -76,7 +76,6 @@ XRPL_FEATURE(ExpandedSignerList,         Supported::yes, VoteBehavior::DefaultNo
 XRPL_FEATURE(CheckCashMakesTrustLine,    Supported::yes, VoteBehavior::DefaultNo)
 XRPL_FIX    (RmSmallIncreasedQOffers,    Supported::yes, VoteBehavior::DefaultYes)
 XRPL_FIX    (STAmountCanonicalize,       Supported::yes, VoteBehavior::DefaultYes)
-XRPL_FEATURE(FlowSortStrands,            Supported::yes, VoteBehavior::DefaultYes)
 XRPL_FEATURE(TicketBatch,                Supported::yes, VoteBehavior::DefaultYes)
 XRPL_FEATURE(NegativeUNL,                Supported::yes, VoteBehavior::DefaultYes)
 XRPL_FIX    (AmendmentMajorityCalc,      Supported::yes, VoteBehavior::DefaultYes)

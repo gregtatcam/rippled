@@ -102,7 +102,7 @@ public:
         auto const alice = Account("alice");
         auto const bob = Account("bob");
 
-        env.fund(XRP(10000), "alice", "bob", gw);
+        env.fund(XRP(10'000), "alice", "bob", gw);
 
         MPT const USD = MPTTester(
             {.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 100});
@@ -226,7 +226,7 @@ public:
         using namespace jtx;
         Env env = pathTestEnv();
         auto const gw = Account("gateway");
-        env.fund(XRP(10000), "alice", "bob", gw);
+        env.fund(XRP(10'000), "alice", "bob", gw);
         MPT const USD =
             MPTTester({.env = env, .issuer = gw, .holders = {"alice", "bob"}});
         env(pay(gw, "alice", USD(70)));
@@ -242,7 +242,7 @@ public:
         using namespace jtx;
         Env env = pathTestEnv();
         auto const gw = Account("gateway");
-        env.fund(XRP(10000), "alice", "bob", gw);
+        env.fund(XRP(10'000), "alice", "bob", gw);
         MPT const USD =
             MPTTester({.env = env, .issuer = gw, .holders = {"alice", "bob"}});
         env(pay(gw, "alice", USD(70)));
@@ -304,7 +304,7 @@ public:
         Env env = pathTestEnv();
         auto const gw = Account("gateway");
         auto const gw2 = Account("gateway2");
-        env.fund(XRP(10000), "alice", "bob", gw, gw2);
+        env.fund(XRP(10'000), "alice", "bob", gw, gw2);
         MPT const USD =
             MPTTester({.env = env, .issuer = gw, .holders = {"alice", "bob"}});
         MPT const gw2_USD = MPTTester(
@@ -333,7 +333,7 @@ public:
         {
             // XRP -> IOU receive max
             Env env = pathTestEnv();
-            env.fund(XRP(10000), alice, bob, charlie, gw);
+            env.fund(XRP(10'000), alice, bob, charlie, gw);
             env.close();
             MPT const USD = MPTTester(
                 {.env = env, .issuer = gw, .holders = {alice, bob, charlie}});
@@ -356,7 +356,7 @@ public:
         {
             // IOU -> XRP receive max
             Env env = pathTestEnv();
-            env.fund(XRP(10000), alice, bob, charlie, gw);
+            env.fund(XRP(10'000), alice, bob, charlie, gw);
             env.close();
             MPT const USD = MPTTester(
                 {.env = env, .issuer = gw, .holders = {alice, bob, charlie}});
