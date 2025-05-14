@@ -438,10 +438,17 @@ MPTEndpointPaymentStep::check(
             return ter;
     }
 
-    // Can't check for creditBalance/Limit at this point. Even if
-    // OutstandingAmount is equal to MaximumAmount a payment can
-    // still be successful. For instance, when a balance is shifted
-    // from one holder to another.
+    // Can't check for creditBalance/Limit unless it's the first step.
+    // Otherwise, even if OutstandingAmount is equal to MaximumAmount
+    // a payment can still be successful. For instance, when a balance
+    // is shifted from one holder to another.
+
+    if (!prevStep_)
+    {
+        auto const owed = creditBalance(ctx.view, src_, mptIssue_);
+        if (owed <= beast::zero)
+            return tecPATH_DRY;
+    }
 
     return tesSUCCESS;
 }
@@ -1071,5 +1078,23 @@ make_MPTEndpointStep(
 
     return {tesSUCCESS, std::move(r)};
 }
+
+namespace test {
+// Needed for testing
+bool
+mptEndpointStepEqual(
+    Step const& step,
+    AccountID const& src,
+    AccountID const& dst,
+    MPTID const& mptid)
+{
+    if (auto ds =
+            dynamic_cast<MPTEndpointStep<MPTEndpointPaymentStep> const*>(&step))
+    {
+        return ds->src() == src && ds->dst() == dst && ds->mptID() == mptid;
+    }
+    return false;
+}
+}  // namespace test
 
 }  // namespace ripple

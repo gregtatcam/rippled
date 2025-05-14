@@ -647,6 +647,7 @@ class MPToken_test : public beast::unit_test::suite
         Account const alice("alice");  // issuer
         Account const bob("bob");      // holder
         Account const carol("carol");  // holder
+        auto const MPTokensV2 = features[featureMPTokensV2];
 
         // preflight validation
 
@@ -719,7 +720,6 @@ class MPToken_test : public beast::unit_test::suite
             // sendMax and DeliverMin are valid XRP amount,
             // but is invalid combination with MPT amount
             auto const MPT = mptAlice["MPT"];
-            auto const MPTokensV2 = features[featureMPTokensV2];
             auto err = !MPTokensV2 ? ter(temMALFORMED) : ter(tecPATH_PARTIAL);
             env(pay(alice, carol, MPT(100)), sendmax(XRP(100)), err);
             env(pay(alice, carol, MPT(100)),
@@ -1118,7 +1118,8 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.pay(alice, bob, 100);
 
             // issuer tries to exceed max amount
-            mptAlice.pay(alice, bob, 1, tecPATH_PARTIAL);
+            auto const err = MPTokensV2 ? tecPATH_DRY : tecPATH_PARTIAL;
+            mptAlice.pay(alice, bob, 1, err);
         }
 
         // Issuer fails trying to send more than the default maximum
@@ -1136,7 +1137,8 @@ class MPToken_test : public beast::unit_test::suite
             mptAlice.pay(alice, bob, maxMPTokenAmount);
 
             // issuer tries to exceed max amount
-            mptAlice.pay(alice, bob, 1, tecPATH_PARTIAL);
+            auto const err = MPTokensV2 ? tecPATH_DRY : tecPATH_PARTIAL;
+            mptAlice.pay(alice, bob, 1, err);
         }
 
         // Pay more than max amount fails in the json parser before
@@ -1201,9 +1203,8 @@ class MPToken_test : public beast::unit_test::suite
 
             // payment between the holders fails without
             // partial payment
-            env(pay(bob, carol, MPT(10'000)),
-                sendmax(MPT(10'000)),
-                ter(tecPATH_PARTIAL));
+            auto const err = MPTokensV2 ? tecPATH_DRY : tecPATH_PARTIAL;
+            env(pay(bob, carol, MPT(10'000)), sendmax(MPT(10'000)), ter(err));
         }
 
         // Pay maximum allowed amount

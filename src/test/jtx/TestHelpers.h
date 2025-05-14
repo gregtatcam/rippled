@@ -20,6 +20,7 @@
 #define RIPPLE_TEST_JTX_TESTHELPERS_H_INCLUDED
 
 #include <test/jtx/Env.h>
+#include <xrpld/app/paths/detail/Steps.h>
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/json/json_value.h>
 #include <xrpl/protocol/AccountID.h>
@@ -496,13 +497,85 @@ n_offers(
 /* Pay Strand */
 /***************************************************************/
 
-// Currency path element
+struct DirectStepInfo
+{
+    AccountID src;
+    AccountID dst;
+    Currency currency;
+};
+
+struct MPTEndpointStepInfo
+{
+    AccountID src;
+    AccountID dst;
+    MPTID mptid;
+};
+
+struct XRPEndpointStepInfo
+{
+    AccountID acc;
+};
+
+// Currency/MPTID path element
 STPathElement
-cpe(Currency const& c);
+cpe(PathAsset const& pa);
+
+// Currency/MPTID and issuer path element
+STPathElement
+ipe(Asset const& asset);
+
+// Issuer path element
+STPathElement
+iape(AccountID const& account);
+
+// Account path element
+STPathElement
+ape(AccountID const& a);
 
 // All path element
 STPathElement
-allpe(AccountID const& a, Issue const& iss);
+allpe(AccountID const& a, Asset const& asset);
+
+bool
+equal(std::unique_ptr<Step> const& s1, DirectStepInfo const& dsi);
+
+bool
+equal(std::unique_ptr<Step> const& s1, MPTEndpointStepInfo const& dsi);
+
+bool
+equal(std::unique_ptr<Step> const& s1, XRPEndpointStepInfo const& xrpsi);
+
+bool
+equal(std::unique_ptr<Step> const& s1, ripple::Book const& bsi);
+
+template <class Iter>
+bool
+strandEqualHelper(Iter i)
+{
+    // base case. all args processed and found equal.
+    return true;
+}
+
+template <class Iter, class StepInfo, class... Args>
+bool
+strandEqualHelper(Iter i, StepInfo&& si, Args&&... args)
+{
+    if (!jtx::equal(*i, std::forward<StepInfo>(si)))
+        return false;
+    return strandEqualHelper(++i, std::forward<Args>(args)...);
+}
+
+template <class... Args>
+bool
+equal(Strand const& strand, Args&&... args)
+{
+    if (strand.size() != sizeof...(Args))
+        return false;
+    if (strand.empty())
+        return true;
+    return strandEqualHelper(strand.begin(), std::forward<Args>(args)...);
+}
+
 /***************************************************************/
 
 /* Check */
