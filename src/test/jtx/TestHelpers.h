@@ -610,6 +610,61 @@ create(
 
 }  // namespace check
 
+/** Set Expiration on a JTx. */
+class expiration
+{
+private:
+    std::uint32_t const expry_;
+
+public:
+    explicit expiration(NetClock::time_point const& expiry)
+        : expry_{expiry.time_since_epoch().count()}
+    {
+    }
+
+    void
+    operator()(Env&, JTx& jt) const
+    {
+        jt[sfExpiration.jsonName] = expry_;
+    }
+};
+
+/** Set SourceTag on a JTx. */
+class source_tag
+{
+private:
+    std::uint32_t const tag_;
+
+public:
+    explicit source_tag(std::uint32_t tag) : tag_{tag}
+    {
+    }
+
+    void
+    operator()(Env&, JTx& jt) const
+    {
+        jt[sfSourceTag.jsonName] = tag_;
+    }
+};
+
+/** Set DestinationTag on a JTx. */
+class dest_tag
+{
+private:
+    std::uint32_t const tag_;
+
+public:
+    explicit dest_tag(std::uint32_t tag) : tag_{tag}
+    {
+    }
+
+    void
+    operator()(Env&, JTx& jt) const
+    {
+        jt[sfDestinationTag.jsonName] = tag_;
+    }
+};
+
 }  // namespace jtx
 }  // namespace test
 }  // namespace ripple

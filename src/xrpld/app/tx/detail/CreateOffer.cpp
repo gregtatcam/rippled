@@ -140,10 +140,7 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
     auto saTakerPays = ctx.tx[sfTakerPays];
     auto saTakerGets = ctx.tx[sfTakerGets];
 
-    auto const& uPaysIssuerID = saTakerPays.getIssuer();
     auto const& uPaysAsset = saTakerPays.asset();
-
-    auto const& uGetsIssuerID = saTakerGets.getIssuer();
 
     auto const cancelSequence = ctx.tx[~sfOfferSequence];
 
@@ -155,8 +152,8 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
 
     auto viewJ = ctx.app.journal("View");
 
-    if (isGlobalFrozen(ctx.view, uPaysIssuerID) ||
-        isGlobalFrozen(ctx.view, uGetsIssuerID))
+    if (isGlobalFrozen(ctx.view, saTakerPays.asset()) ||
+        isGlobalFrozen(ctx.view, saTakerGets.asset()))
     {
         JLOG(ctx.j.debug()) << "Offer involves frozen asset";
         return tecFROZEN;

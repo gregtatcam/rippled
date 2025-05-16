@@ -120,7 +120,7 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
         {
             // The currency may not be globally frozen
             AccountID const& issuerId{sendMax.getIssuer()};
-            if (isGlobalFrozen(ctx.view, issuerId))
+            if (isGlobalFrozen(ctx.view, sendMax.asset()))
             {
                 JLOG(ctx.j.warn()) << "Creating a check for frozen asset";
                 return tecFROZEN;
