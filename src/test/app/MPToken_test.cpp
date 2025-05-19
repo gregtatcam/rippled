@@ -2215,17 +2215,18 @@ class MPToken_test : public beast::unit_test::suite
 
             MPTTester mpt(env, gw, {.holders = {alice}});
 
-            auto const lockMPToken =
+            bool const lockMPToken =
                 (flags & (tfMPTCanLock | tfMPTCanTransfer)) == tfMPTCanLock;
-            auto const lockMPTIssue =
+            bool const lockMPTIssue =
                 (flags & (tfMPTCanLock | tfMPTCanTransfer)) ==
                 (tfMPTCanLock | tfMPTCanTransfer);
+            bool const requireAuth = flags & tfMPTRequireAuth;
             flags = lockMPToken ? (flags | tfMPTCanTransfer) : flags;
 
             mpt.create({.ownerCount = 1, .holderCount = 0, .flags = flags});
             auto const MPT = mpt["MPT"];
 
-            if ((flags & tfMPTRequireAuth) == 0)
+            if (!requireAuth)
             {
                 mpt.authorize({.account = alice});
                 mpt.pay(gw, alice, 200);
@@ -2235,8 +2236,15 @@ class MPToken_test : public beast::unit_test::suite
             else if (lockMPTIssue)
                 mpt.set({.flags = tfMPTLock});
 
-            auto const err =
-                flags & tfMPTRequireAuth ? tecUNFUNDED_OFFER : tecNO_PERMISSION;
+            auto const err = [&]() {
+                // Global lock
+                if (lockMPTIssue)
+                    return tecFROZEN;
+                // MPToken doesn't exist
+                else if (requireAuth)
+                    return tecUNFUNDED_OFFER;
+                return tecNO_PERMISSION;
+            }();
 
             env(offer(alice, XRP(100), MPT(101)), ter(err));
             env.close();
@@ -2390,46 +2398,6 @@ class MPToken_test : public beast::unit_test::suite
         Account const carol = Account("carol");
         Account const bob = Account("bob");
         auto const USD = gw["USD"];
-
-        // Blocking flags
-        for (auto flags :
-             {tfMPTCanLock |
-                  tfMPTCanTransfer,  // locked, issuer and holder fails
-              tfMPTRequireAuth |
-                  tfMPTCanTransfer,  // not authorized, holder fails
-              tfMPTCanTrade,         // can't transfer, holder fails
-              tfMPTCanLock})         // lock mptoken, holder fails
-        {
-            Env env{*this, features};
-
-            MPTTester mpt(env, gw, {.holders = {alice}});
-
-            auto const lockMPToken =
-                (flags & (tfMPTCanLock | tfMPTCanTransfer)) == tfMPTCanLock;
-            auto const lockMPTIssue =
-                (flags & (tfMPTCanLock | tfMPTCanTransfer)) ==
-                (tfMPTCanLock | tfMPTCanTransfer);
-            flags = lockMPToken ? (flags | tfMPTCanTransfer) : flags;
-
-            mpt.create({.ownerCount = 1, .holderCount = 0, .flags = flags});
-            auto const MPT = mpt["MPT"];
-
-            if ((flags & tfMPTRequireAuth) == 0)
-            {
-                mpt.authorize({.account = alice});
-                mpt.pay(gw, alice, 200);
-            }
-            if (lockMPToken)
-                mpt.set({.holder = alice, .flags = tfMPTLock});
-            else if (lockMPTIssue)
-                mpt.set({.flags = tfMPTLock});
-
-            auto const err =
-                flags & tfMPTRequireAuth ? tecUNFUNDED_OFFER : tecNO_PERMISSION;
-
-            env(offer(alice, XRP(100), MPT(101)), ter(err));
-            env.close();
-        }
 
         // Loop
         {
