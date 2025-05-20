@@ -20,11 +20,13 @@
 #include <xrpld/app/paths/detail/AmountSpec.h>
 #include <xrpld/ledger/PaymentSandbox.h>
 #include <xrpld/ledger/View.h>
+
 #include <xrpl/beast/utility/instrumentation.h>
-#include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STAccount.h>
+
 extern bool bLog;
+
 namespace ripple {
 
 namespace detail {
@@ -281,7 +283,7 @@ DeferredCredits::adjustments(
             }
             else
             {
-                const bool b = (main != other);
+                bool const b = (main != other);
                 if (bLog)
                     std::cout
                         << "    adjustments " << (b ? "debit " : "credit ")

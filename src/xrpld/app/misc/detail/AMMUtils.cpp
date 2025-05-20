@@ -16,11 +16,12 @@
     OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 //==============================================================================
+
 #include <xrpld/app/misc/AMMUtils.h>
 #include <xrpld/ledger/Sandbox.h>
+
 #include <xrpl/basics/Log.h>
 #include <xrpl/protocol/AMMCore.h>
-#include <xrpl/protocol/STAccount.h>
 #include <xrpl/protocol/STObject.h>
 
 namespace ripple {
@@ -74,7 +75,7 @@ ammHolds(
         auto const singleAsset =
             [&asset1, &asset2, &j](
                 Asset checkIssue,
-                const char* label) -> std::optional<std::pair<Asset, Asset>> {
+                char const* label) -> std::optional<std::pair<Asset, Asset>> {
             if (checkIssue == asset1)
                 return std::make_optional(std::make_pair(asset1, asset2));
             else if (checkIssue == asset2)

@@ -19,7 +19,6 @@
 
 #include <xrpld/app/paths/AssetCache.h>
 #include <xrpld/app/paths/TrustLine.h>
-#include <xrpld/ledger/OpenView.h>
 
 namespace ripple {
 
@@ -130,7 +129,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
 }
 
 std::shared_ptr<std::vector<PathFindMPT>> const&
-AssetCache::getMPTs(const ripple::AccountID& account)
+AssetCache::getMPTs(ripple::AccountID const& account)
 {
     std::lock_guard sl(mLock);
 
