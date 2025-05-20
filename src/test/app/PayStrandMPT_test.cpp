@@ -16,11 +16,13 @@
 //==============================================================================
 
 #include <test/jtx.h>
+
 #include <xrpld/app/paths/AMMContext.h>
 #include <xrpld/app/paths/RippleCalc.h>
 #include <xrpld/app/paths/detail/Steps.h>
 #include <xrpld/ledger/ApplyViewImpl.h>
 #include <xrpld/ledger/PaymentSandbox.h>
+
 #include <xrpl/basics/contract.h>
 #include <xrpl/basics/safe_cast.h>
 #include <xrpl/protocol/Feature.h>
