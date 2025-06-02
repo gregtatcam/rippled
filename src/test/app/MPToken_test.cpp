@@ -3205,7 +3205,6 @@ class MPToken_test : public beast::unit_test::suite
                 path(~USD),
                 txflags(tfNoRippleDirect | tfPartialPayment));
         }
-#if 0
         {
             Env env(*this, features);
             env.fund(XRP(1'000), gw, alice, carol, bob);
@@ -3255,10 +3254,9 @@ class MPToken_test : public beast::unit_test::suite
             BEAST_EXPECT(MUSD.checkMPTokenOutstandingAmount(1'000));
             // initial + offer - fees
             BEAST_EXPECT(
-                env.balance(gw) == (XRP(1'000) + XRP(200) - txfee(env, 3)));
+                env.balance(gw) == (XRP(1'000) + XRP(200) - txfee(env, 4)));
             BEAST_EXPECT(env.balance(bob, EUR) == EUR(200));
         }
-#endif
     }
 
     void
