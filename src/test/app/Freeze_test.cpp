@@ -2098,9 +2098,7 @@ public:
         testAll(
             sa - featureDeepFreeze - featurePermissionedDEX -
             fixEnforceNFTokenTrustlineV2);
-        testAll(
-            sa - featurePermissionedDEX -
-            fixEnforceNFTokenTrustlineV2);
+        testAll(sa - featurePermissionedDEX - fixEnforceNFTokenTrustlineV2);
         testAll(sa - fixEnforceNFTokenTrustlineV2);
         testAll(sa);
     }
