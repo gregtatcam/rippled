@@ -35,13 +35,22 @@ class AMM;
 
 enum class Fund { All, Acct, Gw, TokenOnly };
 
+struct TestAMMArg
+{
+    std::optional<std::pair<STAmount, STAmount>> pool = std::nullopt;
+    std::uint16_t tfee = 0;
+    std::optional<jtx::ter> ter = std::nullopt;
+    std::vector<FeatureBitset> features = {supported_amendments()};
+    bool noLog = false;
+};
+
 // A hint to testAMM() or fund() to create/fund MPT.
 // A distinct MPT is created if both AMM assets
 // are MPT. The actual MPT asset can be accessed
 // via AMM::operator[](0|1).
 inline static auto AMMMPT = MPT("AMM");
 
-[[maybe_unused]] std::vector<STAmount>
+void
 fund(
     jtx::Env& env,
     jtx::Account const& gw,
@@ -102,13 +111,11 @@ protected:
         std::uint16_t tfee = 0,
         std::optional<jtx::ter> const& ter = std::nullopt,
         std::vector<FeatureBitset> const& features = {supported_amendments()});
+
     void
     testAMM(
         std::function<void(jtx::AMM&, jtx::Env&)>&& cb,
-        TestAMMArgs const& args)
-    {
-        testAMM(std::move(cb), args.pool, args.tfee, args.ter, args.features);
-    }
+        TestAMMArg const& arg);
 };
 
 class AMMTest : public jtx::AMMTestBase
