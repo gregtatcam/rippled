@@ -50,7 +50,7 @@ struct TestAMMArg
 // via AMM::operator[](0|1).
 inline static auto AMMMPT = MPT("AMM");
 
-void
+[[maybe_unused]] std::vector<STAmount>
 fund(
     jtx::Env& env,
     jtx::Account const& gw,

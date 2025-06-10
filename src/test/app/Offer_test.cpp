@@ -5440,7 +5440,7 @@ class OfferAllFeatures_test : public OfferBaseUtil_test
     void
     run() override
     {
-        OfferBaseUtil_test::run(6, true);
+        OfferBaseUtil_test::run(5, true);
     }
 };
 

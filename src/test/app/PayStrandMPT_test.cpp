@@ -71,6 +71,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 true,
                 OfferCrossing::no,
                 ammContext,
+                std::nullopt,
                 env.app().logs().journal("Flow"));
             BEAST_EXPECT(ter == expTer);
             if (sizeof...(expSteps) != 0)
@@ -127,6 +128,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     true,
                     OfferCrossing::no,
                     ammContext,
+                    std::nullopt,
                     env.app().logs().journal("Flow"));
                 (void)_;
                 BEAST_EXPECT(ter == tesSUCCESS);
@@ -144,6 +146,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     true,
                     OfferCrossing::no,
                     ammContext,
+                    std::nullopt,
                     env.app().logs().journal("Flow"));
                 (void)_;
                 BEAST_EXPECT(ter == tesSUCCESS);
@@ -185,7 +188,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 STPath(),
                 tesSUCCESS,
                 M{alice, gw, USD},
-                B{USD, EUR},
+                B{USD, EUR, std::nullopt},
                 M{gw, bob, EUR});
 
             // Path with explicit offer
@@ -196,7 +199,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 STPath({ipe(EUR)}),
                 tesSUCCESS,
                 M{alice, gw, USD},
-                B{USD, EUR},
+                B{USD, EUR, std::nullopt},
                 M{gw, bob, EUR});
 
             // Path with XRP src currency
@@ -207,7 +210,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 STPath({ipe(USD)}),
                 tesSUCCESS,
                 XRPS{alice},
-                B{XRP, USD},
+                B{XRP, USD, std::nullopt},
                 M{gw, bob, USD});
 
             // Path with XRP dst currency.
@@ -222,7 +225,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     xrpAccount()}}),
                 tesSUCCESS,
                 M{alice, gw, USD},
-                B{USD, XRP},
+                B{USD, XRP, std::nullopt},
                 XRPS{bob});
 
             // Path with XRP cross currency bridged payment
@@ -233,8 +236,8 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 STPath({cpe(xrpCurrency())}),
                 tesSUCCESS,
                 M{alice, gw, USD},
-                B{USD, XRP},
-                B{XRP, EUR},
+                B{USD, XRP, std::nullopt},
+                B{XRP, EUR, std::nullopt},
                 M{gw, bob, EUR});
 
             // Create an offer with the same in/out issue
@@ -347,6 +350,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 true,
                 OfferCrossing::no,
                 ammContext,
+                std::nullopt,
                 env.app().logs().journal("Flow"));
             BEAST_EXPECT(ter == tesSUCCESS);
             BEAST_EXPECT(equal(strand, M{alice, gw, USD}));
@@ -378,10 +382,14 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 false,
                 OfferCrossing::no,
                 ammContext,
+                std::nullopt,
                 env.app().logs().journal("Flow"));
             BEAST_EXPECT(ter == tesSUCCESS);
             BEAST_EXPECT(equal(
-                strand, M{alice, gw, USD}, B{USD, xrpIssue()}, XRPS{bob}));
+                strand,
+                M{alice, gw, USD},
+                B{USD, xrpIssue(), std::nullopt},
+                XRPS{bob}));
         }
     }
 
@@ -549,6 +557,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     dstAcc,
                     noAccount(),
                     pathSet,
+                    std::nullopt,
                     env.app().logs(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);
@@ -561,6 +570,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     noAccount(),
                     srcAcc,
                     pathSet,
+                    std::nullopt,
                     env.app().logs(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);
@@ -573,6 +583,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     dstAcc,
                     srcAcc,
                     pathSet,
+                    std::nullopt,
                     env.app().logs(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);
@@ -585,6 +596,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     dstAcc,
                     srcAcc,
                     pathSet,
+                    std::nullopt,
                     env.app().logs(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);

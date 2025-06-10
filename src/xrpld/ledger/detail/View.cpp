@@ -39,7 +39,7 @@
 
 #include <type_traits>
 #include <variant>
-
+extern bool bLog;
 namespace ripple {
 
 namespace detail {
@@ -539,29 +539,6 @@ accountHolds(
     if (mptokensV2)
         return view.balanceHook(account, issuer, amount);
     return amount;
-}
-
-[[nodiscard]] STAmount
-accountHolds(
-    ReadView const& view,
-    AccountID const& account,
-    Asset const& asset,
-    FreezeHandling zeroIfFrozen,
-    AuthHandling zeroIfUnauthorized,
-    beast::Journal j)
-{
-    return std::visit(
-        [&](auto const& value) {
-            if constexpr (std::is_same_v<
-                              std::remove_cvref_t<decltype(value)>,
-                              Issue>)
-            {
-                return accountHolds(view, account, value, zeroIfFrozen, j);
-            }
-            return accountHolds(
-                view, account, value, zeroIfFrozen, zeroIfUnauthorized, j);
-        },
-        asset.value());
 }
 
 STAmount

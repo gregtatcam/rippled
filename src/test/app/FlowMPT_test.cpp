@@ -328,6 +328,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                     OfferCrossing::no,
                     std::nullopt,
                     smax,
+                    std::nullopt,
                     flowJournal);
             }();
 

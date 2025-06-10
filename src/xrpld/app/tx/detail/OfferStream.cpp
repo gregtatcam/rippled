@@ -24,7 +24,7 @@
 #include <xrpl/basics/Log.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/LedgerFormats.h>
-
+extern bool bLog;
 namespace ripple {
 
 namespace {

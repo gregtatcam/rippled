@@ -270,8 +270,7 @@ applyCreate(
     auto const accountId = (*account)[sfAccount];
 
     // LP Token already exists. (should not happen)
-    auto const lptIss =
-        ammLPTIssue(amount.asset(), amount2.asset(), accountId);
+    auto const lptIss = ammLPTIssue(amount.asset(), amount2.asset(), accountId);
     if (sb.read(keylet::line(accountId, lptIss)))
     {
         JLOG(j_.error()) << "AMM Instance: LP Token already exists.";
@@ -322,7 +321,7 @@ applyCreate(
             auto const& mptID = mptIssue.getMptID();
             std::uint32_t flags = lsfMPTAMM;
             if (auto const err = requireAuth(
-                    ctx_.view(), mptIssue, *ammAccount, MPTAuthType::WeakAuth);
+                    ctx_.view(), mptIssue, accountId, MPTAuthType::WeakAuth);
                 err != tesSUCCESS)
             {
                 if (err == tecNO_AUTH)
@@ -332,7 +331,7 @@ applyCreate(
             }
 
             if (auto const err = MPTokenAuthorize::createMPToken(
-                    sb, mptID, *ammAccount, flags);
+                    sb, mptID, accountId, flags);
                 err != tesSUCCESS)
                 return err;
             // Don't adjust AMM owner count.

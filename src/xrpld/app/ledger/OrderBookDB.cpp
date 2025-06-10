@@ -265,7 +265,7 @@ OrderBookDB::getBookSize(
 }
 
 bool
-OrderBookDB::isBookToXRP(Issue const& asset, std::optional<Domain> domain)
+OrderBookDB::isBookToXRP(Asset const& asset, std::optional<Domain> domain)
 {
     std::lock_guard sl(mLock);
     if (domain)
