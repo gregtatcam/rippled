@@ -79,7 +79,7 @@ invalidAMMAsset(
     std::optional<std::pair<Asset, Asset>> const& pair)
 {
     if (asset.holds<MPTIssue>() &&
-        asset.get<MPTIssue>().getIssuer() == beast::zero)
+        asset.get<MPTIssue>().getIssuer() == noAccount())
         return temBAD_MPT;
     if (asset.holds<Issue>() && badCurrency() == asset.get<Issue>().currency)
         return temBAD_CURRENCY;

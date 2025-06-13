@@ -270,6 +270,10 @@ AMM::expectLPTokens(AccountID const& account, IOUAmount const& expTokens) const
     {
         auto const lptAMMBalance =
             ammLPHolds(*env_.current(), *amm, account, env_.journal);
+        if (lptAMMBalance != STAmount{expTokens, lptIssue_})
+        {
+            std::cout << " lpBalance: " << lptAMMBalance << std::endl;
+        }
         return lptAMMBalance == STAmount{expTokens, lptIssue_};
     }
     return false;

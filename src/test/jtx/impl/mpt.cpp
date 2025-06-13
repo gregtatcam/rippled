@@ -89,12 +89,14 @@ makeMPTCreate(MPTInitDef const& arg)
 {
     if (arg.pay)
         return {
+            .assetScale = arg.assetScale,
             .maxAmt = arg.maxAmt,
             .transferFee = arg.transferFee,
             .pay = {{arg.holders, *arg.pay}},
             .flags = arg.flags,
             .authHolder = arg.authHolder};
     return {
+        .assetScale = arg.assetScale,
         .maxAmt = arg.maxAmt,
         .transferFee = arg.transferFee,
         .authorize = arg.holders,
@@ -312,6 +314,8 @@ MPTTester::set(MPTSet const& arg)
     }
     if (arg.holder)
         jv[sfHolder] = arg.holder->human();
+    if (arg.holderID)
+        jv[sfHolder] = toBase58(*arg.holderID);
     if (arg.delegate)
         jv[sfDelegate] = arg.delegate->human();
     if (submit(arg, jv) == tesSUCCESS && arg.flags.value_or(0))

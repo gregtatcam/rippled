@@ -129,6 +129,7 @@ struct MPTInitDef
     Holders holders = {};
     std::uint16_t transferFee = 0;
     std::optional<std::uint64_t> pay = std::nullopt;
+    std::optional<std::uint8_t> assetScale = std::nullopt;
     std::uint32_t flags = MPTDEXFlags;
     bool authHolder = false;
     bool fund = false;
@@ -156,12 +157,14 @@ struct MPTAuthorize
     std::optional<std::uint32_t> holderCount = std::nullopt;
     std::optional<std::uint32_t> flags = std::nullopt;
     std::optional<TER> err = std::nullopt;
+    std::optional<std::uint8_t> assetScale = std::nullopt;
 };
 
 struct MPTSet
 {
     std::optional<Account> account = std::nullopt;
     std::optional<Account> holder = std::nullopt;
+    std::optional<AccountID> holderID = std::nullopt;
     std::optional<MPTID> id = std::nullopt;
     std::optional<std::uint32_t> ownerCount = std::nullopt;
     std::optional<std::uint32_t> holderCount = std::nullopt;
