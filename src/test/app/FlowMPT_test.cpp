@@ -30,7 +30,7 @@
 #include <xrpl/basics/contract.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/jss.h>
-bool bLog = false;
+
 namespace ripple {
 namespace test {
 
@@ -1471,7 +1471,6 @@ struct FlowMPT_test : public beast::unit_test::suite
                 sendmax(EUR(2000)),
                 path(~USD),
                 txflags(tfPartialPayment));
-            bLog = false;
 
             BEAST_EXPECT(expectOutstandingAmt(env, USD, 1'000));
             BEAST_EXPECT(env.balance(alice, USD) == USD(495));

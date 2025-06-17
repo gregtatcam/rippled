@@ -40,8 +40,6 @@
 #include <iterator>
 #include <numeric>
 
-extern bool bLog;
-
 namespace ripple {
 
 /** Result of flow() execution of a single Strand. */
@@ -140,12 +138,7 @@ flow(
             EitherAmount stepOut(out);
             for (auto i = s; i--;)
             {
-                if (bLog)
-                    std::cout << "  -- rev " << i << " " << stepOut
-                              << std::endl;
-
                 auto r = strand[i]->rev(*sb, *afView, ofrsToRm, stepOut);
-
                 if (strand[i]->isZero(r.second))
                 {
                     JLOG(j.trace()) << "Strand found dry in rev";
@@ -158,10 +151,6 @@ flow(
                     // Throw out previous results
                     sb.emplace(&baseView);
                     limitingStep = i;
-
-                    if (bLog)
-                        std::cout << "  -- fwd as limiting " << i
-                                  << to_string(*maxIn) << std::endl;
 
                     // re-execute the limiting step
                     r = strand[i]->fwd(
@@ -196,11 +185,6 @@ flow(
                     afView.emplace(&baseView);
                     limitingStep = i;
 
-                    if (bLog)
-                        std::cout << "  -- rev limiting " << i << " asked "
-                                  << stepOut << " actual " << r.second
-                                  << std::endl;
-
                     // re-execute the limiting step
                     stepOut = r.second;
                     r = strand[i]->rev(*sb, *afView, ofrsToRm, stepOut);
@@ -225,10 +209,6 @@ flow(
 #else
                         JLOG(j.fatal()) << "Re-executed limiting step failed";
 #endif
-                        if (bLog)
-                            std::cout << "Re-executed limiting step failed. "
-                                         "r.second: "
-                                      << r.second << " stepOut: " << stepOut;
                         UNREACHABLE(
                             "ripple::flow : limiting step re-executing the "
                             "limiting step failed");
@@ -240,14 +220,11 @@ flow(
                 stepOut = r.first;
             }
         }
-        if (bLog)
-            std::cout << "  --> end rev" << std::endl;
+
         {
             EitherAmount stepIn(limitStepOut);
             for (auto i = limitingStep + 1; i < s; ++i)
             {
-                if (bLog)
-                    std::cout << "  -- fwd " << i << " " << stepIn << std::endl;
                 auto const r = strand[i]->fwd(*sb, *afView, ofrsToRm, stepIn);
                 if (strand[i]->isZero(r.second))
                 {
@@ -276,8 +253,6 @@ flow(
                 stepIn = r.second;
             }
         }
-        if (bLog)
-            std::cout << "  --> end fwd" << std::endl;
 
         auto const strandIn = *strand.front()->cachedIn();
         auto const strandOut = *strand.back()->cachedOut();
@@ -289,8 +264,6 @@ flow(
             PaymentSandbox checkSB(&baseView);
             PaymentSandbox checkAfView(&baseView);
             EitherAmount stepIn(*strand[0]->cachedIn());
-            auto const bLogSave = bLog;
-            bLog = false;
             for (auto i = 0; i < s; ++i)
             {
                 bool valid;
@@ -303,7 +276,6 @@ flow(
                     break;
                 }
             }
-            bLog = bLogSave;
         }
 #endif
 
@@ -673,11 +645,6 @@ flow(
     while (remainingOut > beast::zero &&
            (!remainingIn || *remainingIn > beast::zero))
     {
-        if (bLog)
-            std::cout << "----- flow " << curTry << " "
-                      << to_string(remainingOut) << " "
-                      << to_string(remainingIn.value_or(TInAmt{0}))
-                      << std::endl;
         ++curTry;
         if (curTry >= maxTries)
         {
@@ -811,21 +778,11 @@ flow(
                        // view
         if (!ofrsToRm.empty())
         {
-            if (bLog)
-                std::cout << "  @@@ offers to remove " << ofrsToRm.size()
-                          << std::endl;
             SetUnion(ofrsToRmOnFail, ofrsToRm);
             for (auto const& o : ofrsToRm)
             {
                 if (auto ok = sb.peek(keylet::offer(o)))
-                {
-                    if (bLog)
-                        std::cout
-                            << ok->getJson(JsonOptions::none).toStyledString();
                     offerDelete(sb, ok, j);
-                }
-                else if (bLog)
-                    std::cout << "offer not found" << std::endl;
             }
         }
 

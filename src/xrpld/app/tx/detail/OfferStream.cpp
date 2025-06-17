@@ -24,7 +24,7 @@
 #include <xrpl/basics/Log.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/LedgerFormats.h>
-extern bool bLog;
+
 namespace ripple {
 
 namespace {
@@ -108,32 +108,17 @@ accountFundsHelper(
     AuthHandling authHandling,
     beast::Journal j)
 {
-    if (bLog)
-        std::cout << "  accountFundsHelper " << acct_str(id) << " issuer "
-                  << acct_str(asset.getIssuer()) << " " << to_string(amtDefault)
-                  << std::endl;
-
     auto const available = toAmount<T>(
         accountHolds(view, id, asset, freezeHandling, authHandling, j));
 
     auto const& issuer = asset.getIssuer();
 
-    if (bLog)
-        std::cout << "     --> helper final ";
-
     if constexpr (std::is_same_v<T, IOUAmount>)
     {
-        if (bLog)
-            std::cout << ((id == issuer) ? to_string(amtDefault)
-                                         : to_string(available))
-                      << std::endl;
         if (id == issuer)
             // self funded
             return amtDefault;
     }
-
-    if (bLog)
-        std::cout << to_string(available) << std::endl;
 
     return available;
 }
@@ -251,10 +236,6 @@ TOfferStreamBase<TIn, TOut>::step()
         }
 
         offer_ = TOffer<TIn, TOut>(entry, tip_.quality());
-        if (bLog)
-            std::cout << "   >>>>>>>> evaluating offer "
-                      << to_string(offer_.amount().in) << " "
-                      << to_string(offer_.amount().out) << std::endl;
 
         auto const amount(offer_.amount());
 

@@ -31,7 +31,7 @@
 
 #include <numeric>
 #include <sstream>
-extern bool bLog;
+
 namespace ripple {
 
 template <class TDerived>
@@ -475,24 +475,16 @@ template <class TDerived>
 std::pair<IOUAmount, DebtDirection>
 DirectStepI<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
-    auto res = [&]() -> std::pair<IOUAmount, DebtDirection> {
-        auto const srcOwed = toAmount<IOUAmount>(
-            accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_));
+    auto const srcOwed = toAmount<IOUAmount>(
+        accountHolds(sb, src_, currency_, dst_, fhIGNORE_FREEZE, j_));
 
-        if (srcOwed.signum() > 0)
-            return {srcOwed, DebtDirection::redeems};
+    if (srcOwed.signum() > 0)
+        return {srcOwed, DebtDirection::redeems};
 
-        // srcOwed is negative or zero
-        return {
-            creditLimit2(sb, dst_, src_, currency_) + srcOwed,
-            DebtDirection::issues};
-    }();
-
-    if (bLog)
-        std::cout << "  maxPaymentFlow src " << acct_str(src_) << " dst "
-                  << acct_str(dst_) << " " << to_string(res.first) << std::endl;
-
-    return res;
+    // srcOwed is negative or zero
+    return {
+        creditLimit2(sb, dst_, src_, currency_) + srcOwed,
+        DebtDirection::issues};
 }
 
 template <class TDerived>

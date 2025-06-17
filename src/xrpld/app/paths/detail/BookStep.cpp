@@ -40,7 +40,7 @@
 
 #include <numeric>
 #include <sstream>
-extern bool bLog;
+
 namespace ripple {
 
 template <class TIn, class TOut, class TDerived>
@@ -834,8 +834,6 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         if (isAssetInMPT && !prevStep_)
         {
             auto const& mptIssue = offer.assetIn();
-            auto const bSave = bLog;
-            bLog = false;
             auto const available = toAmount<TIn>(accountHolds(
                 sb,
                 mptIssue.getIssuer(),
@@ -843,7 +841,6 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 FreezeHandling::fhIGNORE_FREEZE,
                 ahIGNORE_AUTH,
                 j_));
-            bLog = bSave;
             // BookStep is the first step. Issuer pays takerPays
             // to the offer's owner. Must limit the offer's takerPays
             // if it exceeds available amount to issue. If it must be
@@ -959,10 +956,6 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
             }
         }
     }
-
-    if (bLog)
-        std::cout << "-----> consume offer " << to_string(ofrAmt.in) << " "
-                  << to_string(ofrAmt.out) << std::endl;
 
     offer.consume(sb, ofrAmt);
 }

@@ -40,7 +40,7 @@
 
 #include <type_traits>
 #include <variant>
-extern bool bLog;
+
 namespace ripple {
 
 namespace detail {
@@ -1753,11 +1753,6 @@ accountSendIOU(
             "ripple::accountSendIOU : minimum amount and not MPT");
     }
 
-    if (bLog)
-        std::cout << "  accountSend " << acct_str(uSenderID) << " "
-                  << acct_str(uReceiverID) << " " << saAmount.getText()
-                  << std::endl;
-
     /* If we aren't sending anything or if the sender is the same as the
      * receiver then we don't need to do anything.
      */
@@ -1884,11 +1879,6 @@ rippleCreditMPT(
                 return tecPATH_DRY;
         }
         (*sleIssuance)[sfOutstandingAmount] += amt;
-        if (bLog)
-            std::cout
-                << "------- outstanding issuer initial/updated/amt/available "
-                << outstanding << " " << (*sleIssuance)[sfOutstandingAmount]
-                << " " << amt << " " << available << std::endl;
         view.update(sleIssuance);
     }
     else
@@ -1919,12 +1909,6 @@ rippleCreditMPT(
         if (outstanding >= redeem)
         {
             sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
-            if (bLog)
-                std::cout << "------- outstanding redeem "
-                             "initial/updated/amt/available "
-                          << outstanding << " "
-                          << (*sleIssuance)[sfOutstandingAmount] << " "
-                          << redeem << " " << available << std::endl;
             view.update(sleIssuance);
         }
         else
@@ -2728,10 +2712,6 @@ rippleCredit(
     bool bCheckIssuer,
     beast::Journal j)
 {
-    if (bLog)
-        std::cout << "  rippleCredit " << acct_str(uSenderID) << " "
-                  << acct_str(uReceiverID) << " " << saAmount.getText()
-                  << std::endl;
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
             if constexpr (std::is_same_v<TIss, Issue>)

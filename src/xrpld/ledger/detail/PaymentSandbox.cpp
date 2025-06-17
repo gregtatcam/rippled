@@ -26,8 +26,6 @@
 #include <xrpl/protocol/SField.h>
 #include <xrpl/protocol/STAccount.h>
 
-extern bool bLog;
-
 namespace ripple {
 
 namespace detail {
@@ -74,31 +72,22 @@ DeferredCredits::creditIOU(
 
     auto const k = makeKeyIOU(sender, receiver, amount.get<Issue>().currency);
     auto i = creditsIOU_.find(k);
-    if (bLog)
-        std::cout << "  $$$ creditHookIOU " << acct_str(sender) << " "
-                  << acct_str(receiver);
     if (i == creditsIOU_.end())
     {
         ValueIOU v;
 
         if (sender < receiver)
         {
-            if (bLog)
-                std::cout << " highAcct " << amount.getText();
             v.highAcctCredits = amount;
             v.lowAcctCredits = amount.zeroed();
             v.lowAcctOrigBalance = preCreditSenderBalance;
         }
         else
         {
-            if (bLog)
-                std::cout << " lowAcct " << amount.getText();
             v.highAcctCredits = amount.zeroed();
             v.lowAcctCredits = amount;
             v.lowAcctOrigBalance = -preCreditSenderBalance;
         }
-        if (bLog)
-            std::cout << " " << v.lowAcctOrigBalance.getText() << std::endl;
         creditsIOU_[k] = v;
     }
     else
@@ -107,19 +96,10 @@ DeferredCredits::creditIOU(
         auto& v = i->second;
         if (sender < receiver)
         {
-            if (bLog)
-                std::cout << " highAcct " << amount.getText() << " before "
-                          << v.highAcctCredits.getText() << " after "
-                          << (v.highAcctCredits + amount).getText()
-                          << std::endl;
             v.highAcctCredits += amount;
         }
         else
         {
-            if (bLog)
-                std::cout << " lowAcct " << amount.getText() << " before "
-                          << v.lowAcctCredits.getText() << " after "
-                          << (v.lowAcctCredits + amount).getText() << std::endl;
             v.lowAcctCredits += amount;
         }
     }
@@ -147,32 +127,22 @@ DeferredCredits::creditMPT(
     bool const isSenderIssuer = sender == issuer;
 
     auto i = creditsMPT_.find(mptID);
-    if (bLog)
-        std::cout << "  $$$ creditHookMPT " << isSenderIssuer << " "
-                  << acct_str(sender) << " " << acct_str(receiver);
     if (i == creditsMPT_.end())
     {
         IssuerValueMPT v;
         if (isSenderIssuer)
         {
-            if (bLog)
-                std::cout << " issuing " << mptAmtVal;
             v.creditHolder = mptAmtVal;
             v.holder[receiver].origBalance = preCreditBalanceHolder;
         }
         else
         {
-            if (bLog)
-                std::cout << " redeeming " << mptAmtVal;
             v.creditIssuer = mptAmtVal;
             v.holder[sender].creditIssuer = mptAmtVal;
             v.holder[sender].origBalance = preCreditBalanceHolder;
         }
         v.origBalance = preCreditBalanceIssuer;
         creditsMPT_.emplace(mptID, std::move(v));
-        if (bLog)
-            std::cout << " orig issuer " << preCreditBalanceIssuer
-                      << " orig holder " << preCreditBalanceHolder << std::endl;
     }
     else
     {
@@ -183,12 +153,6 @@ DeferredCredits::creditMPT(
             v.creditHolder += mptAmtVal;
             if (v.holder.find(receiver) == v.holder.end())
                 v.holder[receiver].origBalance = preCreditBalanceHolder;
-            if (bLog)
-                std::cout << " issuing " << mptAmtVal << " before "
-                          << v.creditHolder << " after "
-                          << (v.creditHolder + mptAmtVal) << " orig holder "
-                          << v.holder[receiver].origBalance
-                          << preCreditBalanceHolder << std::endl;
         }
         else
         {
@@ -202,12 +166,6 @@ DeferredCredits::creditMPT(
             {
                 v.holder[sender].creditIssuer += mptAmtVal;
             }
-            if (bLog)
-                std::cout << " redeeming " << mptAmtVal << " before "
-                          << v.creditIssuer << " after "
-                          << (v.creditIssuer + mptAmtVal) << " orig holder "
-                          << v.holder[sender].origBalance << " "
-                          << preCreditBalanceHolder << std::endl;
         }
     }
 }
@@ -232,9 +190,6 @@ DeferredCredits::selfRedeemMPT(
     {
         i->second.selfRedeem += selfRedeem.mpt().value();
     }
-    if (bLog)
-        std::cout << " $$$ selfRedeemMPT " << selfRedeem.getText() << " orig "
-                  << origBalance << std::endl;
 }
 
 void
@@ -279,19 +234,11 @@ DeferredCredits::adjustmentsIOU(
 
     if (main < other)
     {
-        if (bLog)
-            std::cout << "    adjustments highAcct "
-                      << v.highAcctCredits.getText() << " "
-                      << v.lowAcctOrigBalance.getText() << std::endl;
         result.emplace(
             v.highAcctCredits, v.lowAcctCredits, v.lowAcctOrigBalance);
     }
     else
     {
-        if (bLog)
-            std::cout << "    adjustments lowAcct "
-                      << v.lowAcctCredits.getText() << " "
-                      << (-v.lowAcctOrigBalance).getText() << std::endl;
         result.emplace(
             v.lowAcctCredits, v.highAcctCredits, -v.lowAcctOrigBalance);
     }
@@ -372,11 +319,6 @@ PaymentSandbox::balanceHookIOU(
     AccountID const& issuer,
     STAmount const& amount) const
 {
-    if (bLog)
-        std::cout << "  $$$ balanceHook acct " << acct_str(account)
-                  << " issuer " << acct_str(issuer) << " amount "
-                  << amount.getText() << std::endl;
-
     auto const& currency = amount.get<Issue>().currency;
 
     auto delta = amount.zeroed();
@@ -390,9 +332,6 @@ PaymentSandbox::balanceHookIOU(
             lastBal = adj->origBalance;
             if (lastBal < minBal)
                 minBal = lastBal;
-            if (bLog)
-                std::cout << "   delta += " << adj->debits.getText() << " orig "
-                          << adj->origBalance.getText() << std::endl;
         }
     }
 
@@ -403,11 +342,6 @@ PaymentSandbox::balanceHookIOU(
     auto adjustedAmt = std::min({amount, lastBal - delta, minBal});
     if (amount.holds<Issue>())
         adjustedAmt.setIssuer(amount.getIssuer());
-    if (bLog)
-        std::cout << "    adj/amt/lastBal/delta/minBal "
-                  << adjustedAmt.getText() << " " << amount.getText() << " "
-                  << lastBal.getText() << " " << delta.getText() << " "
-                  << minBal.getText() << std::endl;
 
     if (isXRP(issuer) && adjustedAmt < beast::zero)
         // A calculated negative XRP balance is not an error case. Consider a
@@ -427,11 +361,6 @@ PaymentSandbox::balanceHookMPT(
 {
     auto const& issuer = issue.getIssuer();
     bool const accountIsHolder = account != issuer;
-
-    if (bLog)
-        std::cout << "  $$$ balanceHook acct " << acct_str(account)
-                  << " issuer " << acct_str(issuer) << " amount " << amount
-                  << std::endl;
 
     std::uint64_t delta = 0;
     std::uint64_t selfRedeem = 0;
@@ -458,10 +387,6 @@ PaymentSandbox::balanceHookMPT(
             }
             if (lastBal < minBal)
                 minBal = lastBal;
-
-            if (bLog)
-                std::cout << "   delta " << delta << " lastBal " << lastBal
-                          << " minBal " << minBal << std::endl;
         }
     }
 
@@ -471,30 +396,14 @@ PaymentSandbox::balanceHookMPT(
     {
         std::uint64_t const adjustedAmt =
             std::min({amount, lastBal - delta, minBal});
-        if (bLog)
-            std::cout << "    non-issuer adj/amt/lastBal/delta/minBal "
-                      << adjustedAmt << " " << amount << " " << lastBal << " "
-                      << delta << " " << minBal << std::endl;
         return STAmount{issue, adjustedAmt};
     }
 
     if (lastBal > selfRedeem)
     {
         std::uint64_t const adjustedAmt = lastBal - selfRedeem;
-        // std::min({amount, lastBal - selfRedeem, minBal});
 
         auto const maxAmount = maxMPTAmount(*this, issue.getMptID());
-
-        if (bLog)
-            std::cout << "    issuer adj/amt/lastBal/delta/redeem/minBal/max "
-                      << adjustedAmt << " " << amount << " " << lastBal << " "
-                      << delta << " " << selfRedeem << " " << minBal << " "
-                      << maxAmount << " "
-                      << static_cast<std::int64_t>(adjustedAmt - maxAmount)
-                      << " "
-                      << static_cast<std::int64_t>(
-                             adjustedAmt - maxAmount + amount)
-                      << std::endl;
 
         if (adjustedAmt > maxAmount)
             return STAmount{issue, adjustedAmt - maxAmount};
