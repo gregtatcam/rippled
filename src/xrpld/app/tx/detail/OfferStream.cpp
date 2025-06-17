@@ -131,51 +131,8 @@ accountFundsHelper(
             // self funded
             return amtDefault;
     }
-    else if constexpr (std::is_same_v<T, MPTAmount>)
-    {
-        // TODO
-        auto const res = [&]() {
-            if (id != issuer)
-            {
-                auto const availableIssuer = toAmount<T>(accountHolds(
-                    view, issuer, asset, freezeHandling, authHandling, j));
 
-                if (availableIssuer.value() < 0)
-                {
-                    auto const credits = toAmount<T>(
-                        view.getCreditsDebits(id, asset.get<MPTIssue>()).first);
-                    // An amount was issued to this holder, and it caused
-                    // overflow: need additional member to indicate that
-                    // specifically issuing to this holder caused overflow
-                    if (credits.value() > 0)
-                    {
-                        auto const delta = credits + availableIssuer;
-                        if (delta.value() > 0)
-                            return delta;
-                    }
-                }
-            }
-
-            if (available.value() < 0)
-            {
-                auto const credits = toAmount<T>(
-                    view.getCreditsDebits(issuer, asset.get<MPTIssue>()).first);
-                if (credits.value() > 0)
-                {
-                    auto const delta = credits + available;
-                    if (delta.value() > 0)
-                        return delta;
-                }
-            }
-
-            // Can't issue if OutstandingAmount is already overflown
-            return available.value() >= 0 ? available : T{0};
-        }();
-        if (bLog)
-            std::cout << to_string(res) << std::endl;
-        return res;
-    }
-    if (bLog && isXRP(asset))
+    if (bLog)
         std::cout << to_string(available) << std::endl;
 
     return available;
@@ -294,6 +251,10 @@ TOfferStreamBase<TIn, TOut>::step()
         }
 
         offer_ = TOffer<TIn, TOut>(entry, tip_.quality());
+        if (bLog)
+            std::cout << "   >>>>>>>> evaluating offer "
+                      << to_string(offer_.amount().in) << " "
+                      << to_string(offer_.amount().out) << std::endl;
 
         auto const amount(offer_.amount());
 

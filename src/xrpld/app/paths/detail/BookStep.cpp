@@ -40,7 +40,7 @@
 
 #include <numeric>
 #include <sstream>
-
+extern bool bLog;
 namespace ripple {
 
 template <class TIn, class TOut, class TDerived>
@@ -831,7 +831,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         // OutstandingAmount + takerPays must be <= MaximumAmount.
         // This only applies when executing in reverse. This limit is
         // ownerGives when executing in forward.
-        if (isAssetInMPT)
+        if (isAssetInMPT && !prevStep_)
         {
             auto const& mptIssue = offer.assetIn();
             auto const bSave = bLog;
@@ -850,7 +850,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
             // limited, but it's not the first step then the next step (rev)
             // limits the amount when calculating ownerFunds for takerGets.
             // This step then temporarily overflows OutstandingAmount.
-            if (!prevStep_ && stpAmt.in > available)
+            if (stpAmt.in > available)
             {
                 limitStepIn(
                     offer,
@@ -943,15 +943,26 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     // The offer owner pays `ownerGives`. The difference between ownerGives and
     // stepAmt is a transfer fee that goes to book_.out.account
     {
-        auto const cr = offer.send(
-            sb,
-            offer.owner(),
-            book_.out.getIssuer(),
-            toSTAmount(ownerGives, book_.out),
-            j_);
+        auto const out = toSTAmount(ownerGives, book_.out);
+        Asset const& asset = offer.assetOut();
+        auto const& issuer = asset.getIssuer();
+        auto const cr = offer.send(sb, offer.owner(), issuer, out, j_);
         if (cr != tesSUCCESS)
             Throw<FlowException>(cr);
+        if constexpr (std::is_same_v<TOut, MPTAmount>)
+        {
+            if (offer.owner() == issuer)
+            {
+                auto const available =
+                    availableMPTAmount(sb, asset.get<MPTIssue>().getMptID());
+                sb.selfRedeemHookMPT(out, available);
+            }
+        }
     }
+
+    if (bLog)
+        std::cout << "-----> consume offer " << to_string(ofrAmt.in) << " "
+                  << to_string(ofrAmt.out) << std::endl;
 
     offer.consume(sb, ofrAmt);
 }

@@ -18,6 +18,7 @@
 //==============================================================================
 
 #include <xrpld/app/misc/CredentialHelpers.h>
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/tx/detail/MPTokenAuthorize.h>
 #include <xrpld/ledger/ReadView.h>
 #include <xrpld/ledger/View.h>
@@ -464,19 +465,6 @@ accountHolds(
     return view.balanceHook(account, issuer, amount);
 }
 
-/** Return available amount to issue (could be negative if overflow)
- * and the maximum amount.
- */
-static std::pair<std::int64_t, std::uint64_t>
-availableMPT(std::shared_ptr<SLE const> const& sleIssuance)
-{
-    auto const maximumAmount =
-        (*sleIssuance)[~sfMaximumAmount].value_or(maxMPTokenAmount);
-    auto const outstandingAmount = (*sleIssuance)[sfOutstandingAmount];
-    std::int64_t const available = maximumAmount - outstandingAmount;
-    return std::make_pair(available, maximumAmount);
-}
-
 STAmount
 accountHolds(
     ReadView const& view,
@@ -496,9 +484,8 @@ accountHolds(
         auto const sle = view.read(keylet::mptIssuance(mptIssue));
         if (!sle)
             return amount;
-        auto const available = availableMPT(sle);
-        return view.balanceHook(
-            issuer, issuer, STAmount{mptIssue, available.first});
+        auto const available = availableMPTAmount(*sle);
+        return view.balanceHookMPT(issuer, mptIssue, available);
     }
 
     auto const sleMpt =
@@ -537,7 +524,7 @@ accountHolds(
     }
 
     if (mptokensV2)
-        return view.balanceHook(account, issuer, amount);
+        return view.balanceHookMPT(account, mptIssue, amount.mpt().value());
     return amount;
 }
 
@@ -1883,9 +1870,9 @@ rippleCreditMPT(
     if (!sleIssuance)
         return tecOBJECT_NOT_FOUND;
 
-    auto const& asset = saAmount.asset();
+    auto const maxAmount = maxMPTAmount(*sleIssuance);
     auto const outstanding = sleIssuance->getFieldU64(sfOutstandingAmount);
-    auto const available = availableMPT(sleIssuance);
+    auto const available = availableMPTAmount(*sleIssuance);
 
     if (uSenderID == issuer)
     {
@@ -1893,15 +1880,15 @@ rippleCreditMPT(
         if (view.rules().enabled(featureMPTokensV2))
         {
             // Allow to overflow but not uint64
-            if (amt > available.second)
+            if (amt > maxAmount || outstanding > (2 * maxAmount - amt))
                 return tecPATH_DRY;
         }
         (*sleIssuance)[sfOutstandingAmount] += amt;
         if (bLog)
-            std::cout << "------- outstanding issuer initial/updated/amt "
-                      << outstanding << " "
-                      << (*sleIssuance)[sfOutstandingAmount] << " " << amt
-                      << std::endl;
+            std::cout
+                << "------- outstanding issuer initial/updated/amt/available "
+                << outstanding << " " << (*sleIssuance)[sfOutstandingAmount]
+                << " " << amt << " " << available << std::endl;
         view.update(sleIssuance);
     }
     else
@@ -1917,8 +1904,8 @@ rippleCreditMPT(
                 uSenderID,
                 uReceiverID,
                 saAmount,
-                STAmount{asset, (*sle)[sfMPTAmount]},
-                STAmount{asset, available.first});
+                (*sle)[sfMPTAmount],
+                available);
             (*sle)[sfMPTAmount] = holderBalance - amt;
             view.update(sle);
         }
@@ -1933,10 +1920,11 @@ rippleCreditMPT(
         {
             sleIssuance->setFieldU64(sfOutstandingAmount, outstanding - redeem);
             if (bLog)
-                std::cout << "------- outstanding redeem initial/updated/amt "
+                std::cout << "------- outstanding redeem "
+                             "initial/updated/amt/available "
                           << outstanding << " "
                           << (*sleIssuance)[sfOutstandingAmount] << " "
-                          << redeem << std::endl;
+                          << redeem << " " << available << std::endl;
             view.update(sleIssuance);
         }
         else
@@ -1951,8 +1939,8 @@ rippleCreditMPT(
                 uSenderID,
                 uReceiverID,
                 saAmount,
-                STAmount{asset, (*sle)[sfMPTAmount]},
-                STAmount{asset, available.first});
+                (*sle)[sfMPTAmount],
+                available);
             (*sle)[sfMPTAmount] += saAmount.mpt().value();
             view.update(sle);
         }

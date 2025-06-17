@@ -749,74 +749,125 @@ struct FlowMPT_test : public beast::unit_test::suite
         }
     }
 
+    template <typename TGets, typename TPays>
+    struct TokenData
+    {
+        TGets EUR;
+        TPays USD;
+        jtx::PrettyAmount remTakerGets;
+        jtx::PrettyAmount remTakerPays;
+    };
+
     void
     testSelfPayment2(FeatureBitset features)
     {
         testcase("Self-payment 2");
 
-        // In this case the difference between the old payment code and
-        // the new is the values left behind in the offer.  Not saying either
-        // ios ring, they are just different.
         using namespace jtx;
+
+        // This test shows a difference between IOU and MPT self-payment
+        // result depending on IOU trustline limit.
 
         auto const gw1 = Account("gw1");
         auto const gw2 = Account("gw2");
         auto const alice = Account("alice");
 
-        Env env(*this, features);
+        auto initMPT = [&](Env& env) {
+            MPT const USD = MPTTester(
+                {.env = env, .issuer = gw1, .holders = {alice}, .maxAmt = 506});
+            MPT const EUR = MPTTester(
+                {.env = env, .issuer = gw2, .holders = {alice}, .maxAmt = 606});
+            // Payment's engine last step overflows OutstandingAmount since
+            // it doesn't know if the BookStep redeems or not. The BookStep
+            // then has 600EUR available. Consequently, the entire offer
+            // is crossed.
+            return TokenData<MPT, MPT>{EUR, USD, EUR(540), USD(450)};
+        };
 
-        env.fund(XRP(1'000'000), gw1, gw2);
-        env.close();
+        auto initIOU = [&](Env& env) {
+            auto const USD = gw1["USD"];
+            auto const EUR = gw2["EUR"];
+            env(trust(alice, USD(506)));
+            env(trust(alice, EUR(606)));
+            env.close();
+            // Payment's engine last step is limited by alice's trustline - 606.
+            // Therefore, only 6EUR is delivered and the offer is partially
+            // crossed.
+            return TokenData<IOU, IOU>{EUR, USD, EUR(594), USD(495)};
+        };
 
-        // The fee that's charged for transactions.
-        auto const f = env.current()->fees().base;
+        auto initIOU1 = [&](Env& env) {
+            auto const USD = gw1["USD"];
+            auto const EUR = gw2["EUR"];
+            env(trust(alice, USD(1'000)));
+            env(trust(alice, EUR(1'000)));
+            env.close();
+            // Payment's engine last step is not limited by alice's trustline.
+            // Therefore, the entire offer is crossed. This the same result
+            // as with MPT.
+            return TokenData<IOU, IOU>{EUR, USD, EUR(540), USD(450)};
+        };
 
-        env.fund(reserve(env, 3) + f * 4, alice);
-        env.close();
+        auto test = [&](auto&& initToken) {
+            Env env(*this, features);
 
-        MPT const USD = MPTTester(
-            {.env = env, .issuer = gw1, .holders = {alice}, .maxAmt = 506});
-        MPT const EUR = MPTTester(
-            {.env = env, .issuer = gw2, .holders = {alice}, .maxAmt = 606});
+            env.fund(XRP(1'000'000), gw1, gw2);
+            env.close();
 
-        env(pay(gw1, alice, USD(500)));
-        env(pay(gw2, alice, EUR(600)));
-        env.close();
+            // The fee that's charged for transactions.
+            auto const f = env.current()->fees().base;
 
-        env(offer(alice, USD(500), EUR(600)));
-        env.close();
+            env.fund(reserve(env, 3) + f * 4, alice);
+            env.close();
 
-        env.require(owners(alice, 3));
-        env.require(balance(alice, USD(500)));
-        env.require(balance(alice, EUR(600)));
+            auto const tok = initToken(env);
 
-        auto aliceOffers = offersOnAccount(env, alice);
-        BEAST_EXPECT(aliceOffers.size() == 1);
-        for (auto const& offerPtr : aliceOffers)
-        {
-            auto const offer = *offerPtr;
-            BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(offer[sfTakerGets] == EUR(600));
-            BEAST_EXPECT(offer[sfTakerPays] == USD(500));
-        }
+            auto const& USD = tok.USD;
+            auto const& EUR = tok.EUR;
 
-        env(pay(alice, alice, EUR(60)),
-            sendmax(USD(50)),
-            txflags(tfPartialPayment));
-        env.close();
+            env(pay(gw1, alice, USD(500)));
+            env(pay(gw2, alice, EUR(600)));
+            env.close();
 
-        env.require(owners(alice, 3));
-        env.require(balance(alice, USD(500)));
-        env.require(balance(alice, EUR(600)));
-        aliceOffers = offersOnAccount(env, alice);
-        BEAST_EXPECT(aliceOffers.size() == 1);
-        for (auto const& offerPtr : aliceOffers)
-        {
-            auto const offer = *offerPtr;
-            BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-            BEAST_EXPECT(offer[sfTakerGets] == EUR(594));
-            BEAST_EXPECT(offer[sfTakerPays] == USD(495));
-        }
+            env(offer(alice, USD(500), EUR(600)));
+            env.close();
+
+            env.require(owners(alice, 3));
+            env.require(balance(alice, USD(500)));
+            env.require(balance(alice, EUR(600)));
+
+            auto aliceOffers = offersOnAccount(env, alice);
+            BEAST_EXPECT(aliceOffers.size() == 1);
+            for (auto const& offerPtr : aliceOffers)
+            {
+                auto const offer = *offerPtr;
+                BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
+                BEAST_EXPECT(offer[sfTakerGets] == EUR(600));
+                BEAST_EXPECT(offer[sfTakerPays] == USD(500));
+            }
+
+            env(pay(alice, alice, EUR(60)),
+                sendmax(USD(50)),
+                txflags(tfPartialPayment));
+            env.close();
+
+            env.require(owners(alice, 3));
+            env.require(balance(alice, USD(500)));
+            env.require(balance(alice, EUR(600)));
+            aliceOffers = offersOnAccount(env, alice);
+            BEAST_EXPECT(aliceOffers.size() == 1);
+            for (auto const& offerPtr : aliceOffers)
+            {
+                auto const offer = *offerPtr;
+                BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
+                BEAST_EXPECT(offer[sfTakerGets] == tok.remTakerGets);
+                BEAST_EXPECT(offer[sfTakerPays] == tok.remTakerPays);
+            }
+        };
+
+        test(initMPT);
+        test(initIOU);
+        test(initIOU1);
     }
 
     void
@@ -1420,11 +1471,15 @@ struct FlowMPT_test : public beast::unit_test::suite
                 sendmax(EUR(2000)),
                 path(~USD),
                 txflags(tfPartialPayment));
+            bLog = false;
 
             BEAST_EXPECT(expectOutstandingAmt(env, USD, 1'000));
-            BEAST_EXPECT(env.balance(alice, USD) == USD(495));  // 495
-            BEAST_EXPECT(env.balance(bob, USD) == USD(505));    // 615
-            BEAST_EXPECT(env.balance(carol, EUR) == USD(210));  // 100
+            BEAST_EXPECT(env.balance(alice, USD) == USD(495));
+            BEAST_EXPECT(env.balance(bob, USD) == USD(505));
+            BEAST_EXPECT(env.balance(carol, EUR) == EUR(210));
+            // 100/101 is partially crossed (90/91) and 100/100 is unfunded
+            env.require(offers(gw, 0));
+            ;
         }
 
         // Cross-currency payment holder to holder. Multiple offers with
@@ -1457,12 +1512,42 @@ struct FlowMPT_test : public beast::unit_test::suite
                 sendmax(XRP(100)),
                 txflags(tfPartialPayment));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 1624));
-            BEAST_EXPECT(env.balance(carol, USD) == USD(1102));
+            BEAST_EXPECT(expectOutstandingAmt(env, USD, 1'624));
+            BEAST_EXPECT(env.balance(carol, USD) == USD(1'102));
             env.require(offers(carol, 0));
             env.require(offers(gw, 0));
             // 100 XRP's = 5+6+7+17+23+10+15+17(25-8)
             BEAST_EXPECT(isOffer(env, alice, XRP(8), USD(15)));
+        }
+
+        // Cross-currency payment holder to holder. Multiple offers with
+        // different owners - some holders, some issuer. Source and destination
+        // account is the same.
+        {
+            Env env(*this);
+            env.fund(XRP(1'000), gw, alice, carol, bob);
+
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, carol, bob},
+                 .maxAmt = 30});
+
+            env(pay(gw, alice, USD(12)));  // 12, 15, 20
+            env(pay(gw, bob, USD(5)));     // 5, 5, 10
+
+            env(offer(alice, XRP(10), USD(12)));
+            env(offer(gw, XRP(10), USD(11)));
+            env(offer(bob, XRP(10), USD(10)));
+
+            env(pay(carol, bob, USD(30)),
+                sendmax(XRP(30)),
+                txflags(tfPartialPayment),
+                path(~USD));
+            BEAST_EXPECT(expectOutstandingAmt(env, USD, 28));
+            BEAST_EXPECT(env.balance(alice, USD) == USD(0));
+            // 12+11+5
+            BEAST_EXPECT(env.balance(bob, USD) == USD(28));
         }
     }
 

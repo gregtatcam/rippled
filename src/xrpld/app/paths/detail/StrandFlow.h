@@ -197,7 +197,8 @@ flow(
                     limitingStep = i;
 
                     if (bLog)
-                        std::cout << "  -- rev limiting " << i << " " << stepOut
+                        std::cout << "  -- rev limiting " << i << " asked "
+                                  << stepOut << " actual " << r.second
                                   << std::endl;
 
                     // re-execute the limiting step
@@ -224,6 +225,10 @@ flow(
 #else
                         JLOG(j.fatal()) << "Re-executed limiting step failed";
 #endif
+                        if (bLog)
+                            std::cout << "Re-executed limiting step failed. "
+                                         "r.second: "
+                                      << r.second << " stepOut: " << stepOut;
                         UNREACHABLE(
                             "ripple::flow : limiting step re-executing the "
                             "limiting step failed");
@@ -806,11 +811,21 @@ flow(
                        // view
         if (!ofrsToRm.empty())
         {
+            if (bLog)
+                std::cout << "  @@@ offers to remove " << ofrsToRm.size()
+                          << std::endl;
             SetUnion(ofrsToRmOnFail, ofrsToRm);
             for (auto const& o : ofrsToRm)
             {
                 if (auto ok = sb.peek(keylet::offer(o)))
+                {
+                    if (bLog)
+                        std::cout
+                            << ok->getJson(JsonOptions::none).toStyledString();
                     offerDelete(sb, ok, j);
+                }
+                else if (bLog)
+                    std::cout << "offer not found" << std::endl;
             }
         }
 

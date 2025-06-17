@@ -17,6 +17,7 @@
 */
 //==============================================================================
 
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/paths/detail/AmountSpec.h>
 #include <xrpld/ledger/PaymentSandbox.h>
 #include <xrpld/ledger/View.h>
@@ -32,42 +33,26 @@ namespace ripple {
 namespace detail {
 
 auto
-DeferredCredits::makeKey(
+DeferredCredits::makeKeyIOU(
     AccountID const& a1,
     AccountID const& a2,
-    Asset const& a) -> Key
+    Currency const& c) -> KeyIOU
 {
     bool bSave = false;
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) -> Key {
-            if constexpr (std::is_same_v<TIss, Issue>)
-            {
-                if (a1 < a2)
-                {
-                    if (bSave)
-                        std::cout << "      key: a1 < a2 " << acct_str(a1)
-                                  << " " << acct_str(a2) << std::endl;
-                    return std::make_tuple(a1, a2, issue.currency);
-                }
-                else
-                {
-                    if (bSave)
-                        std::cout << "      key: a1 >= a2 " << acct_str(a2)
-                                  << " " << acct_str(a1) << std::endl;
-                    return std::make_tuple(a2, a1, issue.currency);
-                }
-            }
-            else
-            {
-                if (bSave)
-                    std::cout << "      key: a1/a2 " << acct_str(a1) << " "
-                              << acct_str(a2) << std::endl;
-                // if holder credit then a1 must be holder, a2 issuer
-                // if issuer debit then a1 and a2 must be issuer
-                return std::make_tuple(a1, a2, issue.getMptID());
-            }
-        },
-        a.value());
+    if (a1 < a2)
+    {
+        if (bSave)
+            std::cout << "      key: a1 < a2 " << acct_str(a1) << " "
+                      << acct_str(a2) << std::endl;
+        return std::make_tuple(a1, a2, c);
+    }
+    else
+    {
+        if (bSave)
+            std::cout << "      key: a1 >= a2 " << acct_str(a2) << " "
+                      << acct_str(a1) << std::endl;
+        return std::make_tuple(a2, a1, c);
+    }
 }
 
 void
@@ -83,15 +68,18 @@ DeferredCredits::creditIOU(
     XRPL_ASSERT(
         !amount.negative(),
         "ripple::detail::DeferredCredits::creditIOU : positive amount");
+    XRPL_ASSERT(
+        amount.holds<Issue>(),
+        "ripple::detail::DeferredCredits::creditIOU : amount is for Issue");
 
-    auto const k = makeKey(sender, receiver, amount.asset());
-    auto i = credits_.find(k);
+    auto const k = makeKeyIOU(sender, receiver, amount.get<Issue>().currency);
+    auto i = creditsIOU_.find(k);
     if (bLog)
         std::cout << "  $$$ creditHookIOU " << acct_str(sender) << " "
                   << acct_str(receiver);
-    if (i == credits_.end())
+    if (i == creditsIOU_.end())
     {
-        Value v;
+        ValueIOU v;
 
         if (sender < receiver)
         {
@@ -111,7 +99,7 @@ DeferredCredits::creditIOU(
         }
         if (bLog)
             std::cout << " " << v.lowAcctOrigBalance.getText() << std::endl;
-        credits_[k] = v;
+        creditsIOU_[k] = v;
     }
     else
     {
@@ -142,74 +130,111 @@ DeferredCredits::creditMPT(
     AccountID const& sender,
     AccountID const& receiver,
     STAmount const& amount,
-    STAmount const& preSendBalanceHolder,
-    STAmount const& preSendBalanceIssuer)
+    std::uint64_t preCreditBalanceHolder,
+    std::uint64_t preCreditBalanceIssuer)
 {
+    XRPL_ASSERT(
+        amount.holds<MPTIssue>(),
+        "ripple::detail::DeferredCredits::creditIOU : amount is for MPTIssue");
+    XRPL_ASSERT(
+        sender != receiver,
+        "ripple::detail::DeferredCredits::creditMPT : sender is not receiver");
+
+    auto const mptAmtVal = amount.mpt().value();
     auto const& issuer = amount.getIssuer();
+    auto const& mptIssue = amount.get<MPTIssue>();
+    auto const& mptID = mptIssue.getMptID();
     bool const isSenderIssuer = sender == issuer;
 
-    auto doCredit = [&](AccountID const& a1,
-                        AccountID const& a2,
-                        auto const& preSendBalance) {
-        auto const k = makeKey(a1, a2, amount.asset());
-        auto i = credits_.find(k);
-        if (bLog)
-            std::cout << "  $$$ creditHookMPT " << acct_str(sender) << " "
-                      << acct_str(receiver);
-        if (i == credits_.end())
+    auto i = creditsMPT_.find(mptID);
+    if (bLog)
+        std::cout << "  $$$ creditHookMPT " << isSenderIssuer << " "
+                  << acct_str(sender) << " " << acct_str(receiver);
+    if (i == creditsMPT_.end())
+    {
+        IssuerValueMPT v;
+        if (isSenderIssuer)
         {
-            Value v;
-
-            if (isSenderIssuer)
-            {
-                if (bLog)
-                    std::cout << " issuing " << amount.getText();
-                v.creditToHolder() = amount;
-                v.debitToIssuer() = amount.zeroed();
-                v.originalBalance() = preSendBalance;
-            }
-            else
-            {
-                if (bLog)
-                    std::cout << " redeeming " << amount.getText();
-                v.creditToHolder() = amount.zeroed();
-                v.debitToIssuer() = amount;
-                v.originalBalance() = preSendBalance;
-            }
             if (bLog)
-                std::cout << " " << v.originalBalance().getText() << std::endl;
-            credits_[k] = v;
+                std::cout << " issuing " << mptAmtVal;
+            v.creditHolder = mptAmtVal;
+            v.holder[receiver].origBalance = preCreditBalanceHolder;
         }
         else
         {
-            // only record the balance the first time, do not record it here
-            auto& v = i->second;
-            if (isSenderIssuer)
+            if (bLog)
+                std::cout << " redeeming " << mptAmtVal;
+            v.creditIssuer = mptAmtVal;
+            v.holder[sender].creditIssuer = mptAmtVal;
+            v.holder[sender].origBalance = preCreditBalanceHolder;
+        }
+        v.origBalance = preCreditBalanceIssuer;
+        creditsMPT_.emplace(mptID, std::move(v));
+        if (bLog)
+            std::cout << " orig issuer " << preCreditBalanceIssuer
+                      << " orig holder " << preCreditBalanceHolder << std::endl;
+    }
+    else
+    {
+        // only record the balance the first time, do not record it here
+        auto& v = i->second;
+        if (isSenderIssuer)
+        {
+            v.creditHolder += mptAmtVal;
+            if (v.holder.find(receiver) == v.holder.end())
+                v.holder[receiver].origBalance = preCreditBalanceHolder;
+            if (bLog)
+                std::cout << " issuing " << mptAmtVal << " before "
+                          << v.creditHolder << " after "
+                          << (v.creditHolder + mptAmtVal) << " orig holder "
+                          << v.holder[receiver].origBalance
+                          << preCreditBalanceHolder << std::endl;
+        }
+        else
+        {
+            v.creditIssuer += mptAmtVal;
+            if (v.holder.find(sender) == v.holder.end())
             {
-                if (bLog)
-                    std::cout << " issuing " << amount.getText() << " before "
-                              << v.creditToHolder().getText() << " after "
-                              << (v.creditToHolder() + amount).getText()
-                              << std::endl;
-                v.creditToHolder() += amount;
+                v.holder[sender].creditIssuer = mptAmtVal;
+                v.holder[sender].origBalance = preCreditBalanceHolder;
             }
             else
             {
-                if (bLog)
-                    std::cout << " redeeming " << amount.getText() << " before "
-                              << v.debitToIssuer().getText() << " after "
-                              << (v.debitToIssuer() + amount).getText()
-                              << std::endl;
-                v.debitToIssuer() += amount;
+                v.holder[sender].creditIssuer += mptAmtVal;
             }
+            if (bLog)
+                std::cout << " redeeming " << mptAmtVal << " before "
+                          << v.creditIssuer << " after "
+                          << (v.creditIssuer + mptAmtVal) << " orig holder "
+                          << v.holder[sender].origBalance << " "
+                          << preCreditBalanceHolder << std::endl;
         }
-    };
+    }
+}
 
-    auto const& a1 = isSenderIssuer ? receiver : sender;
-    auto const& a2 = isSenderIssuer ? sender : receiver;
-    doCredit(a1, a2, preSendBalanceHolder);
-    // total credit/debit
-    doCredit(issuer, issuer, preSendBalanceIssuer);
+void
+DeferredCredits::selfRedeemMPT(
+    STAmount const& selfRedeem,
+    std::uint64_t origBalance)
+{
+    auto const& mptIssue = selfRedeem.get<MPTIssue>();
+    auto const& mptID = mptIssue.getMptID();
+    auto i = creditsMPT_.find(mptID);
+
+    if (i == creditsMPT_.end())
+    {
+        IssuerValueMPT v;
+        v.origBalance = origBalance;
+        v.selfRedeem = selfRedeem.mpt().value();
+        creditsMPT_.emplace(mptID, std::move(v));
+    }
+    else
+    {
+        i->second.selfRedeem += selfRedeem.mpt().value();
+    }
+    if (bLog)
+        std::cout << " $$$ selfRedeemMPT " << selfRedeem.getText() << " orig "
+                  << origBalance << std::endl;
 }
 
 void
@@ -238,79 +263,91 @@ DeferredCredits::ownerCount(AccountID const& id) const
 
 // Get the adjustments for the balance between main and other.
 auto
-DeferredCredits::adjustments(
+DeferredCredits::adjustmentsIOU(
     AccountID const& main,
     AccountID const& other,
-    Asset const& asset) const -> std::optional<Adjustment>
+    Currency const& currency) const -> std::optional<AdjustmentIOU>
 {
-    std::optional<Adjustment> result;
+    std::optional<AdjustmentIOU> result;
 
-    Key const k = makeKey(main, other, asset);
-    auto i = credits_.find(k);
-    if (i == credits_.end())
+    auto const k = makeKeyIOU(main, other, currency);
+    auto i = creditsIOU_.find(k);
+    if (i == creditsIOU_.end())
         return result;
 
     auto const& v = i->second;
 
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const&) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-            {
-                if (main < other)
-                {
-                    if (bLog)
-                        std::cout << "    adjustments highAcct "
-                                  << v.highAcctCredits.getText() << " "
-                                  << v.lowAcctOrigBalance.getText()
-                                  << std::endl;
-                    result.emplace(
-                        v.highAcctCredits,
-                        v.lowAcctCredits,
-                        v.lowAcctOrigBalance);
-                }
-                else
-                {
-                    if (bLog)
-                        std::cout << "    adjustments lowAcct "
-                                  << v.lowAcctCredits.getText() << " "
-                                  << (-v.lowAcctOrigBalance).getText()
-                                  << std::endl;
-                    result.emplace(
-                        v.lowAcctCredits,
-                        v.highAcctCredits,
-                        -v.lowAcctOrigBalance);
-                }
-            }
-            else
-            {
-                bool const b = (main != other);
-                if (bLog)
-                    std::cout
-                        << "    adjustments " << (b ? "debit " : "credit ")
-                        << (b ? v.debitToIssuer() : v.creditToHolder())
-                               .getText()
-                        << " " << v.originalBalance().getText() << std::endl;
-                result.emplace(
-                    v.debitToIssuer(), v.creditToHolder(), v.originalBalance());
-            }
-        },
-        asset.value());
+    if (main < other)
+    {
+        if (bLog)
+            std::cout << "    adjustments highAcct "
+                      << v.highAcctCredits.getText() << " "
+                      << v.lowAcctOrigBalance.getText() << std::endl;
+        result.emplace(
+            v.highAcctCredits, v.lowAcctCredits, v.lowAcctOrigBalance);
+    }
+    else
+    {
+        if (bLog)
+            std::cout << "    adjustments lowAcct "
+                      << v.lowAcctCredits.getText() << " "
+                      << (-v.lowAcctOrigBalance).getText() << std::endl;
+        result.emplace(
+            v.lowAcctCredits, v.highAcctCredits, -v.lowAcctOrigBalance);
+    }
 
     return result;
+}
+
+auto
+DeferredCredits::adjustmentsMPT(ripple::MPTID const& mptID) const
+    -> std::optional<AdjustmentMPT>
+{
+    auto i = creditsMPT_.find(mptID);
+    if (i == creditsMPT_.end())
+        return std::nullopt;
+    return i->second;
 }
 
 void
 DeferredCredits::apply(DeferredCredits& to)
 {
-    for (auto const& i : credits_)
+    for (auto const& i : creditsIOU_)
     {
-        auto r = to.credits_.emplace(i);
+        auto r = to.creditsIOU_.emplace(i);
         if (!r.second)
         {
             auto& toVal = r.first->second;
             auto const& fromVal = i.second;
             toVal.lowAcctCredits += fromVal.lowAcctCredits;
             toVal.highAcctCredits += fromVal.highAcctCredits;
+            // Do not update the orig balance, it's already correct
+        }
+    }
+
+    for (auto const& i : creditsMPT_)
+    {
+        auto r = to.creditsMPT_.emplace(i);
+        if (!r.second)
+        {
+            auto& toVal = r.first->second;
+            auto const& fromVal = i.second;
+            toVal.creditHolder += fromVal.creditHolder;
+            toVal.creditIssuer += fromVal.creditIssuer;
+            toVal.selfRedeem += fromVal.selfRedeem;
+            // toVal.origBalance = fromVal.origBalance;
+            for (auto& [k, v] : fromVal.holder)
+            {
+                // if (auto it = toVal.holder.find(k); it != toVal.holder.end())
+                //{
+                // it->second.creditIssuer += v.creditIssuer;
+                // it->second.origBalance = v.origBalance;
+                //}
+                // else
+                //{
+                toVal.holder[k] = v;
+                //}
+            }
             // Do not update the orig balance, it's already correct
         }
     }
@@ -340,14 +377,14 @@ PaymentSandbox::balanceHookIOU(
                   << " issuer " << acct_str(issuer) << " amount "
                   << amount.getText() << std::endl;
 
-    auto const asset = amount.asset();
+    auto const& currency = amount.get<Issue>().currency;
 
     auto delta = amount.zeroed();
     auto lastBal = amount;
     auto minBal = amount;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
     {
-        if (auto adj = curSB->tab_.adjustments(account, issuer, asset))
+        if (auto adj = curSB->tab_.adjustmentsIOU(account, issuer, currency))
         {
             delta += adj->debits;
             lastBal = adj->origBalance;
@@ -375,96 +412,95 @@ PaymentSandbox::balanceHookIOU(
     if (isXRP(issuer) && adjustedAmt < beast::zero)
         // A calculated negative XRP balance is not an error case. Consider a
         // payment snippet that credits a large XRP amount and then debits the
-        // same amount. The credit can't be used but we subtract the debit and
+        // same amount. The credit can't be used, but we subtract the debit and
         // calculate a negative value. It's not an error case.
         adjustedAmt.clear();
 
     return adjustedAmt;
 }
 
-std::pair<STAmount, STAmount>
-PaymentSandbox::getCreditsDebits(
-    AccountID const& account,
-    MPTIssue const& issue) const
-{
-    STAmount credits{issue};
-    STAmount debits{issue};
-    auto const& issuer = issue.getIssuer();
-    Asset asset{issue};
-
-    for (auto curSB = this; curSB; curSB = curSB->ps_)
-    {
-        if (auto adj = curSB->tab_.adjustments(account, issuer, asset))
-        {
-            credits += adj->credits;
-            debits += adj->debits;
-        }
-    }
-
-    return std::make_pair(credits, debits);
-}
-
 STAmount
 PaymentSandbox::balanceHookMPT(
     AccountID const& account,
-    AccountID const& issuer,
-    STAmount const& amount) const
+    MPTIssue const& issue,
+    std::uint64_t amount) const
 {
+    auto const& issuer = issue.getIssuer();
+    bool const accountIsHolder = account != issuer;
+
     if (bLog)
         std::cout << "  $$$ balanceHook acct " << acct_str(account)
-                  << " issuer " << acct_str(issuer) << " amount "
-                  << amount.getText() << std::endl;
+                  << " issuer " << acct_str(issuer) << " amount " << amount
+                  << std::endl;
 
-    auto const asset = amount.asset();
-
-    bool const accountIsHolder = account != issuer;
-    auto const maxAmount = STAmount{asset, maxMPTokenAmount};
-    auto const& initAmount = amount > beast::zero ? amount : maxAmount;
-
-    auto delta = initAmount.zeroed();
-    auto lastBal = initAmount;
-    auto minBal = initAmount;
+    std::uint64_t delta = 0;
+    std::uint64_t selfRedeem = 0;
+    std::uint64_t lastBal = amount;
+    std::uint64_t minBal = amount;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
     {
-        if (auto adj = curSB->tab_.adjustments(account, issuer, asset))
+        if (auto adj = curSB->tab_.adjustmentsMPT(issue))
         {
             if (accountIsHolder)
-                delta += adj->debits;
+            {
+                if (auto const i = adj->holder.find(account);
+                    i != adj->holder.end())
+                {
+                    delta += i->second.creditIssuer;
+                    lastBal = i->second.origBalance;
+                }
+            }
             else
             {
-                // Should subtract debits from different accounts than the
-                // one that was credited. account and issuer are interchangable
-                // like IOU. If account is issuer and issuer is account then
-                // subtract debits from all other accounts but "issuer".
-                // For now get the total debits and then adjust with debits
-                // from "issuer"
-                delta += adj->credits;
+                delta += adj->creditHolder;
+                selfRedeem += adj->selfRedeem;
+                lastBal = adj->origBalance;
             }
-            lastBal = adj->origBalance;
             if (lastBal < minBal)
                 minBal = lastBal;
+
             if (bLog)
-                std::cout
-                    << "   delta += "
-                    << (accountIsHolder ? adj->debits : adj->credits).getText()
-                    << " orig " << adj->origBalance.getText() << std::endl;
+                std::cout << "   delta " << delta << " lastBal " << lastBal
+                          << " minBal " << minBal << std::endl;
         }
     }
 
-    if (minBal == maxAmount)
-        return amount;
-
     // The adjusted amount should never be larger than the balance.
-    auto adjustedAmt = std::min({amount, lastBal - delta, minBal});
 
-    if (bLog)
-        std::cout << "    adj/amt/lastBal/delta/minBal "
-                  << adjustedAmt.getText() << " " << amount.getText() << " "
-                  << lastBal.getText() << " " << delta.getText() << " "
-                  << minBal.getText() << std::endl;
+    if (account != issuer)
+    {
+        std::uint64_t const adjustedAmt =
+            std::min({amount, lastBal - delta, minBal});
+        if (bLog)
+            std::cout << "    non-issuer adj/amt/lastBal/delta/minBal "
+                      << adjustedAmt << " " << amount << " " << lastBal << " "
+                      << delta << " " << minBal << std::endl;
+        return STAmount{issue, adjustedAmt};
+    }
 
-    // Caller must handle negative balance, which happens on overflow
-    return adjustedAmt;
+    if (lastBal > selfRedeem)
+    {
+        std::uint64_t const adjustedAmt = lastBal - selfRedeem;
+        // std::min({amount, lastBal - selfRedeem, minBal});
+
+        auto const maxAmount = maxMPTAmount(*this, issue.getMptID());
+
+        if (bLog)
+            std::cout << "    issuer adj/amt/lastBal/delta/redeem/minBal/max "
+                      << adjustedAmt << " " << amount << " " << lastBal << " "
+                      << delta << " " << selfRedeem << " " << minBal << " "
+                      << maxAmount << " "
+                      << static_cast<std::int64_t>(adjustedAmt - maxAmount)
+                      << " "
+                      << static_cast<std::int64_t>(
+                             adjustedAmt - maxAmount + amount)
+                      << std::endl;
+
+        if (adjustedAmt > maxAmount)
+            return STAmount{issue, adjustedAmt - maxAmount};
+    }
+
+    return STAmount{issue};
 }
 
 std::uint32_t
@@ -495,11 +531,19 @@ PaymentSandbox::creditHookMPT(
     AccountID const& from,
     AccountID const& to,
     STAmount const& amount,
-    STAmount const& preCreditBalanceHolder,
-    STAmount const& preCreditBalanceIssuer)
+    std::uint64_t preCreditBalanceHolder,
+    std::uint64_t preCreditBalanceIssuer)
 {
     tab_.creditMPT(
         from, to, amount, preCreditBalanceHolder, preCreditBalanceIssuer);
+}
+
+void
+PaymentSandbox::selfRedeemHookMPT(
+    ripple::STAmount const& selfRedeem,
+    std::uint64_t origBalance)
+{
+    tab_.selfRedeemMPT(selfRedeem, origBalance);
 }
 
 void

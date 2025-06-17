@@ -184,6 +184,21 @@ public:
         return amount;
     }
 
+    virtual STAmount
+    balanceHookMPT(
+        AccountID const& account,
+        MPTIssue const& issue,
+        std::uint64_t amount) const
+    {
+        // TODO MPT temp
+        if (account != issue.getIssuer())
+            return STAmount{issue, amount};
+        auto const& sle = read(keylet::mptIssuance(issue));
+        assert(sle);
+        auto const max = (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+        return STAmount{issue, amount - max};
+    }
+
     // Accounts in a payment are not allowed to use assets acquired during that
     // payment. The PaymentSandbox tracks the debits, credits, and owner count
     // changes that accounts make during a payment. `ownerCountHook` adjusts the
@@ -193,12 +208,6 @@ public:
     ownerCountHook(AccountID const& account, std::uint32_t count) const
     {
         return count;
-    }
-
-    virtual std::pair<STAmount, STAmount>
-    getCreditsDebits(AccountID const& account, MPTIssue const& issue) const
-    {
-        return std::make_pair(STAmount{issue}, STAmount{issue});
     }
 
     // used by the implementation

@@ -33,7 +33,7 @@
 
 #include <numeric>
 #include <sstream>
-
+extern bool bLog;
 namespace ripple {
 
 template <class TDerived>
@@ -503,40 +503,33 @@ std::pair<MPTAmount, DebtDirection>
 MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
     auto const res = [&]() -> std::pair<MPTAmount, DebtDirection> {
-        auto const maxFlow = accountHolds(
-            sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
         // From a holder to an issuer
         if (src_ != mptIssue_.getIssuer())
+        {
+            auto const maxFlow = accountHolds(
+                sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
             return {toAmount<MPTAmount>(maxFlow), DebtDirection::redeems};
+        }
 
         // From an issuer to a holder
         if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_)))
         {
-            // TODO it's not right to handle it this way on a second PE
-            // iteration. A book step could be issuing so it's possible that
-            // more liquidity can be provided. Book step has to to decide
-            // whether it's dry or not.
-            {
-                auto const credits = sb.getCreditsDebits(src_, mptIssue_);
-                // already issued, return whatever is available
-                if (credits.first > beast::zero)
-                    return {maxFlow.mpt(), DebtDirection::issues};
-            }
             // If issuer is the source account, and it is:
             //  - direct payment then MPTEndpointStep is the only step.
             //    Provide the available maxFlow.
-            //  - cross currency payment then BookStep is the first step.
-            //    MPTEndpointStep could be the last step in this case.
             if (!prevStep_)
-                return {maxFlow.mpt(), DebtDirection::issues};
+            {
+                auto const available = MPTAmount{
+                    static_cast<std::int64_t>(availableMPTAmount(*sle, false))};
+                return {available, DebtDirection::issues};
+            }
 
             // MPTEndpointStep is the last step. It's always issuing in
             // this case. We can't decide at this point what the maxFlow is,
             // because previous step may issue or redeem. Allow
             // OutstandingAmount to temporarily overflow. Let the previous step
             // decide how to limit the flow.
-            std::int64_t const maxAmount =
-                (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+            std::int64_t const maxAmount = maxMPTAmount(*sle);
             return {MPTAmount{maxAmount}, DebtDirection::issues};
         }
 

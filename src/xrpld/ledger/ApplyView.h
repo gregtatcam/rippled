@@ -254,8 +254,13 @@ public:
         AccountID const& from,
         AccountID const& to,
         STAmount const& amount,
-        STAmount const& preCreditBalanceHolder,
-        STAmount const& preCreditBalanceIssuer)
+        std::uint64_t preCreditBalanceHolder,
+        std::uint64_t preCreditBalanceIssuer)
+    {
+    }
+
+    virtual void
+    selfRedeemHookMPT(STAmount const& selfIssue, std::uint64_t origBalance)
     {
     }
 

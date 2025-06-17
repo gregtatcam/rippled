@@ -340,6 +340,8 @@ STAmount::mpt() const
         Throw<std::logic_error>("Cannot return STAmount as MPTAmount");
 
     auto value = static_cast<MPTAmount::value_type>(mValue);
+    if (mOffset != 0)
+        Throw<std::runtime_error>("Bad");
     XRPL_ASSERT(mOffset == 0, "ripple::STAmount::mpt : amount is canonical");
 
     if (mIsNegative)
