@@ -36,21 +36,10 @@ DeferredCredits::makeKeyIOU(
     AccountID const& a2,
     Currency const& c) -> KeyIOU
 {
-    bool bSave = false;
     if (a1 < a2)
-    {
-        if (bSave)
-            std::cout << "      key: a1 < a2 " << acct_str(a1) << " "
-                      << acct_str(a2) << std::endl;
         return std::make_tuple(a1, a2, c);
-    }
     else
-    {
-        if (bSave)
-            std::cout << "      key: a1 >= a2 " << acct_str(a2) << " "
-                      << acct_str(a1) << std::endl;
         return std::make_tuple(a2, a1, c);
-    }
 }
 
 void
