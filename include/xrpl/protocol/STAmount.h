@@ -553,7 +553,7 @@ STAmount::clear()
 {
     // The -100 is used to allow 0 to sort less than a small positive values
     // which have a negative exponent.
-    mOffset = native() ? 0 : -100;
+    mOffset = native() ? 0 : (holds<Issue>() ? -100 : 0);
     mValue = 0;
     mIsNegative = false;
 }

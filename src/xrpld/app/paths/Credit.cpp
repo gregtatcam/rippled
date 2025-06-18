@@ -17,6 +17,7 @@
 */
 //==============================================================================
 
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/ledger/ReadView.h>
 
 #include <xrpl/protocol/AmountConversions.h>
@@ -102,11 +103,7 @@ creditBalance(
     if (!sle)
         return STAmount{issue};
     if (account == issue.getIssuer())
-    {
-        auto const maxAmount =
-            (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
-        return STAmount{issue, maxAmount - (*sle)[sfOutstandingAmount]};
-    }
+        return STAmount{issue, availableMPTAmount(*sle)};
 
     auto const mptSle = view.read(keylet::mptoken(issue.getMptID(), account));
 

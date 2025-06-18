@@ -239,13 +239,17 @@ accountHolds(
     FreezeHandling zeroIfFrozen,
     beast::Journal j);
 
-[[nodiscard]] STAmount
+[[nodiscard]] inline STAmount
 accountHolds(
     ReadView const& view,
     AccountID const& account,
     Issue const& issue,
     FreezeHandling zeroIfFrozen,
-    beast::Journal j);
+    beast::Journal j)
+{
+    return accountHolds(
+        view, account, issue.currency, issue.account, zeroIfFrozen, j);
+}
 
 [[nodiscard]] STAmount
 accountHolds(
@@ -264,6 +268,26 @@ accountHolds(
     FreezeHandling zeroIfFrozen,
     AuthHandling zeroIfUnauthorized,
     beast::Journal j);
+
+[[nodiscard]] inline STAmount
+accountHolds(
+    ReadView const& view,
+    AccountID const& account,
+    Asset const& asset,
+    FreezeHandling zeroIfFrozen,
+    AuthHandling zeroIfUnauthorized,
+    beast::Journal j)
+{
+    return std::visit(
+        [&]<typename TIss>(TIss const& issue) {
+            if constexpr (std::is_same_v<TIss, Issue>)
+                return accountHolds(view, account, issue, zeroIfFrozen, j);
+            else
+                return accountHolds(
+                    view, account, issue, zeroIfFrozen, zeroIfUnauthorized, j);
+        },
+        asset.value());
+}
 
 // Returns the amount an account can spend of the currency type saDefault, or
 // returns saDefault if this account is the issuer of the currency in

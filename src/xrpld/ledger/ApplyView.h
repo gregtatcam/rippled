@@ -241,12 +241,34 @@ public:
     // Called when a credit is made to an account
     // This is required to support PaymentSandbox
     virtual void
-    creditHook(
+    creditHookIOU(
         AccountID const& from,
         AccountID const& to,
         STAmount const& amount,
         STAmount const& preCreditBalance)
     {
+        XRPL_ASSERT(
+            amount.holds<Issue>(), "creditHookIOU: amount is for Issue");
+    }
+
+    virtual void
+    creditHookMPT(
+        AccountID const& from,
+        AccountID const& to,
+        STAmount const& amount,
+        std::uint64_t preCreditBalanceHolder,
+        std::int64_t preCreditBalanceIssuer)
+    {
+        XRPL_ASSERT(
+            amount.holds<MPTIssue>(), "creditHookMPT: amount is for MPTIssue");
+    }
+
+    virtual void
+    selfIssueHookMPT(STAmount const& selfIssue, std::int64_t origBalance)
+    {
+        XRPL_ASSERT(
+            selfIssue.holds<MPTIssue>(),
+            "selfIssueHookMPT: selfIssue is for MPTIssue");
     }
 
     // Called when the owner count changes

@@ -222,7 +222,7 @@ private:
     // Unfunded offers and bad offers are skipped (and returned).
     // callback is called with the offer SLE, taker pays, taker gets.
     // If callback returns false, don't process any more offers.
-    // Return the unfunded and bad offers and the number of offers consumed.
+    // Return the unfunded, bad offers and the number of offers consumed.
     template <class Callback>
     std::pair<boost::container::flat_set<uint256>, std::uint32_t>
     forEachOffer(
@@ -261,6 +261,9 @@ private:
     // whichever is a better quality.
     std::optional<QualityFunction>
     tipOfferQualityF(ReadView const& view) const;
+
+    bool
+    isMPTOverflow(ReadView const& view, std::uint32_t offersConsumed) const;
 };
 
 //------------------------------------------------------------------------------
@@ -747,7 +750,9 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
                 strandSrc_, strandDst_, offer, ofrQ, offers, offerAttempted))
             return true;
 
-        if (offer.assetIn().template holds<MPTIssue>())
+        bool const isAssetInMPT = offer.assetIn().template holds<MPTIssue>();
+
+        if (isAssetInMPT)
         {
             // Create MPToken for the offer's owner. No need to check
             // for the reserve since the offer is removed if it is consumed.
@@ -818,6 +823,39 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
 
             stpAmt.in =
                 mulRatio(ofrAmt.in, ofrInRate, QUALITY_ONE, /*roundUp*/ true);
+        }
+
+        // May have to limit offer's input if MPT since
+        // OutstandingAmount + takerPays must be <= MaximumAmount.
+        // This only applies when executing in reverse. This limit is
+        // ownerGives when executing in forward.
+        if (isAssetInMPT && !prevStep_)
+        {
+            auto const& mptIssue = offer.assetIn();
+            auto const available = toAmount<TIn>(accountHolds(
+                sb,
+                mptIssue.getIssuer(),
+                mptIssue,
+                FreezeHandling::fhIGNORE_FREEZE,
+                ahIGNORE_AUTH,
+                j_));
+            // BookStep is the first step. Issuer pays takerPays
+            // to the offer's owner. Must limit the offer's takerPays
+            // if it exceeds available amount to issue. If it must be
+            // limited, but it's not the first step then the next step (rev)
+            // limits the amount when calculating ownerFunds for takerGets.
+            // This step then temporarily overflows OutstandingAmount.
+            if (stpAmt.in > available)
+            {
+                limitStepIn(
+                    offer,
+                    ofrAmt,
+                    stpAmt,
+                    ownerGives,
+                    ofrInRate,
+                    ofrOutRate,
+                    available);
+            }
         }
 
         offerAttempted = true;
@@ -900,14 +938,21 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     // The offer owner pays `ownerGives`. The difference between ownerGives and
     // stepAmt is a transfer fee that goes to book_.out.account
     {
-        auto const cr = offer.send(
-            sb,
-            offer.owner(),
-            book_.out.getIssuer(),
-            toSTAmount(ownerGives, book_.out),
-            j_);
+        auto const out = toSTAmount(ownerGives, book_.out);
+        Asset const& asset = offer.assetOut();
+        auto const& issuer = asset.getIssuer();
+        auto const cr = offer.send(sb, offer.owner(), issuer, out, j_);
         if (cr != tesSUCCESS)
             Throw<FlowException>(cr);
+        if constexpr (std::is_same_v<TOut, MPTAmount>)
+        {
+            if (offer.owner() == issuer)
+            {
+                auto const available =
+                    availableMPTAmount(sb, asset.get<MPTIssue>().getMptID());
+                sb.selfIssueHookMPT(out, available);
+            }
+        }
     }
 
     offer.consume(sb, ofrAmt);
@@ -1090,6 +1135,12 @@ BookStep<TIn, TOut, TDerived>::revImp(
             // it's not used further
             inactive_ = true;
         }
+
+        if (isMPTOverflow(sb, offersConsumed))
+        {
+            cache_.emplace(beast::zero, beast::zero);
+            return {beast::zero, beast::zero};
+        }
     }
 
     switch (remainingOut.signum())
@@ -1253,6 +1304,12 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
             // it's not used further
             inactive_ = true;
         }
+
+        if (isMPTOverflow(sb, offersConsumed))
+        {
+            cache_.emplace(beast::zero, beast::zero);
+            return {beast::zero, beast::zero};
+        }
     }
 
     switch (remainingIn.signum())
@@ -1408,6 +1465,27 @@ BookStep<TIn, TOut, TDerived>::rate(
         return transferRate(view, asset.getIssuer());
     return transferRate(view, asset.get<MPTIssue>().getMptID());
 };
+
+template <class TIn, class TOut, class TDerived>
+bool
+BookStep<TIn, TOut, TDerived>::isMPTOverflow(
+    ReadView const& view,
+    std::uint32_t offersConsumed) const
+{
+    if constexpr (std::is_same_v<TOut, MPTAmount>)
+    {
+        return offersConsumed == 0 &&
+            accountHolds(
+                view,
+                book_.out.getIssuer(),
+                book_.out,
+                fhIGNORE_FREEZE,
+                ahZERO_IF_UNAUTHORIZED,
+                j_) < beast::zero;
+    }
+    else
+        return false;
+}
 
 //------------------------------------------------------------------------------
 
