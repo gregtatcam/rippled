@@ -62,9 +62,9 @@ private:
         IssuerValueMPT() = default;
         std::map<AccountID, HolderValueMPT> holder;
         std::uint64_t creditHolder = 0;
-        std::uint64_t creditIssuer = 0;
         std::uint64_t origBalance = 0;
-        std::uint64_t selfRedeem = 0;
+        // Self issued on offer sell
+        std::uint64_t selfIssue = 0;
     };
     using AdjustmentMPT = IssuerValueMPT;
 
@@ -107,7 +107,7 @@ public:
         std::uint64_t preCreditBalanceIssuer);
 
     void
-    selfRedeemMPT(STAmount const& selfIssue, std::uint64_t origBalance);
+    selfIssueMPT(STAmount const& selfIssue, std::uint64_t origBalance);
 
     void
     ownerCount(AccountID const& id, std::uint32_t cur, std::uint32_t next);
@@ -196,10 +196,16 @@ public:
     /** @} */
 
     STAmount
-    balanceHook(
+    balanceHookIOU(
         AccountID const& account,
         AccountID const& issuer,
         STAmount const& amount) const override;
+
+    STAmount
+    balanceHookMPT(
+        AccountID const& account,
+        MPTIssue const& issue,
+        std::uint64_t amount) const override;
 
     void
     creditHookIOU(
@@ -217,7 +223,7 @@ public:
         std::uint64_t preCreditBalanceIssuer) override;
 
     void
-    selfRedeemHookMPT(STAmount const& selfRedeem, std::uint64_t origBalance)
+    selfIssueHookMPT(STAmount const& selfIssue, std::uint64_t origBalance)
         override;
 
     void
@@ -254,19 +260,7 @@ public:
     XRPAmount
     xrpDestroyed() const;
 
-    STAmount
-    balanceHookMPT(
-        AccountID const& account,
-        MPTIssue const& issue,
-        std::uint64_t amount) const override;
-
 private:
-    STAmount
-    balanceHookIOU(
-        AccountID const& account,
-        AccountID const& issuer,
-        STAmount const& amount) const;
-
     detail::DeferredCredits tab_;
     PaymentSandbox const* ps_ = nullptr;
 };
@@ -274,25 +268,6 @@ private:
 namespace detail {
 
 }  // namespace detail
-
-inline STAmount
-PaymentSandbox::balanceHook(
-    AccountID const& account,
-    AccountID const& issuer,
-    STAmount const& amount) const
-{
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                return balanceHookIOU(account, issuer, amount);
-            else
-            {
-                Throw<std::runtime_error>("PaymentSandbox::balanceHook");
-                return STAmount{issue};
-            }
-        },
-        amount.asset().value());
-}
 
 }  // namespace ripple
 

@@ -176,7 +176,7 @@ public:
     // balances so newly acquired assets are not counted toward the balance.
     // This is required to support PaymentSandbox.
     virtual STAmount
-    balanceHook(
+    balanceHookIOU(
         AccountID const& account,
         AccountID const& issuer,
         STAmount const& amount) const

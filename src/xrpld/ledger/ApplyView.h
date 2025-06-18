@@ -260,7 +260,7 @@ public:
     }
 
     virtual void
-    selfRedeemHookMPT(STAmount const& selfIssue, std::uint64_t origBalance)
+    selfIssueHookMPT(STAmount const& selfIssue, std::uint64_t origBalance)
     {
     }
 

@@ -137,7 +137,6 @@ DeferredCredits::creditMPT(
         }
         else
         {
-            v.creditIssuer = mptAmtVal;
             v.holder[sender].creditIssuer = mptAmtVal;
             v.holder[sender].origBalance = preCreditBalanceHolder;
         }
@@ -156,7 +155,6 @@ DeferredCredits::creditMPT(
         }
         else
         {
-            v.creditIssuer += mptAmtVal;
             if (v.holder.find(sender) == v.holder.end())
             {
                 v.holder[sender].creditIssuer = mptAmtVal;
@@ -171,11 +169,11 @@ DeferredCredits::creditMPT(
 }
 
 void
-DeferredCredits::selfRedeemMPT(
-    STAmount const& selfRedeem,
+DeferredCredits::selfIssueMPT(
+    STAmount const& selfIssue,
     std::uint64_t origBalance)
 {
-    auto const& mptIssue = selfRedeem.get<MPTIssue>();
+    auto const& mptIssue = selfIssue.get<MPTIssue>();
     auto const& mptID = mptIssue.getMptID();
     auto i = creditsMPT_.find(mptID);
 
@@ -183,12 +181,12 @@ DeferredCredits::selfRedeemMPT(
     {
         IssuerValueMPT v;
         v.origBalance = origBalance;
-        v.selfRedeem = selfRedeem.mpt().value();
+        v.selfIssue = selfIssue.mpt().value();
         creditsMPT_.emplace(mptID, std::move(v));
     }
     else
     {
-        i->second.selfRedeem += selfRedeem.mpt().value();
+        i->second.selfIssue += selfIssue.mpt().value();
     }
 }
 
@@ -280,20 +278,10 @@ DeferredCredits::apply(DeferredCredits& to)
             auto& toVal = r.first->second;
             auto const& fromVal = i.second;
             toVal.creditHolder += fromVal.creditHolder;
-            toVal.creditIssuer += fromVal.creditIssuer;
-            toVal.selfRedeem += fromVal.selfRedeem;
-            // toVal.origBalance = fromVal.origBalance;
+            toVal.selfIssue += fromVal.selfIssue;
             for (auto& [k, v] : fromVal.holder)
             {
-                // if (auto it = toVal.holder.find(k); it != toVal.holder.end())
-                //{
-                // it->second.creditIssuer += v.creditIssuer;
-                // it->second.origBalance = v.origBalance;
-                //}
-                // else
-                //{
                 toVal.holder[k] = v;
-                //}
             }
             // Do not update the orig balance, it's already correct
         }
@@ -363,7 +351,7 @@ PaymentSandbox::balanceHookMPT(
     bool const accountIsHolder = account != issuer;
 
     std::uint64_t delta = 0;
-    std::uint64_t selfRedeem = 0;
+    std::uint64_t selfIssue = 0;
     std::uint64_t lastBal = amount;
     std::uint64_t minBal = amount;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
@@ -382,7 +370,7 @@ PaymentSandbox::balanceHookMPT(
             else
             {
                 delta += adj->creditHolder;
-                selfRedeem += adj->selfRedeem;
+                selfIssue += adj->selfIssue;
                 lastBal = adj->origBalance;
             }
             if (lastBal < minBal)
@@ -399,9 +387,9 @@ PaymentSandbox::balanceHookMPT(
         return STAmount{issue, adjustedAmt};
     }
 
-    if (lastBal > selfRedeem)
+    if (lastBal > selfIssue)
     {
-        std::uint64_t const adjustedAmt = lastBal - selfRedeem;
+        std::uint64_t const adjustedAmt = lastBal - selfIssue;
 
         auto const maxAmount = maxMPTAmount(*this, issue.getMptID());
 
@@ -448,11 +436,11 @@ PaymentSandbox::creditHookMPT(
 }
 
 void
-PaymentSandbox::selfRedeemHookMPT(
-    ripple::STAmount const& selfRedeem,
+PaymentSandbox::selfIssueHookMPT(
+    ripple::STAmount const& selfIssue,
     std::uint64_t origBalance)
 {
-    tab_.selfRedeemMPT(selfRedeem, origBalance);
+    tab_.selfIssueMPT(selfIssue, origBalance);
 }
 
 void

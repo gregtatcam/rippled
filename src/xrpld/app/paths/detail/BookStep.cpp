@@ -952,7 +952,7 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
             {
                 auto const available =
                     availableMPTAmount(sb, asset.get<MPTIssue>().getMptID());
-                sb.selfRedeemHookMPT(out, available);
+                sb.selfIssueHookMPT(out, available);
             }
         }
     }

@@ -329,7 +329,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
         ApplyViewImpl av(&*env.current(), tapNONE);
         PaymentSandbox pv(&av);
         pv.creditHookIOU(gw, alice, hugeAmt, -tinyAmt);
-        BEAST_EXPECT(pv.balanceHook(alice, gw, hugeAmt) == tinyAmt);
+        BEAST_EXPECT(pv.balanceHookIOU(alice, gw, hugeAmt) == tinyAmt);
     }
 
     void
@@ -403,10 +403,10 @@ class PaymentSandbox_test : public beast::unit_test::suite
         sb.creditHookIOU(gw.id(), alice.id(), {USD, 400}, {tlIssue, 600});
         sb.creditHookIOU(gw.id(), alice.id(), {USD, 100}, {tlIssue, 600});
 
-        // Expect that the STAmount issuer returned by balanceHook() is
+        // Expect that the STAmount issuer returned by balanceHookIOU() is
         // correct.
         STAmount const balance =
-            sb.balanceHook(gw.id(), alice.id(), {USD, 600});
+            sb.balanceHookIOU(gw.id(), alice.id(), {USD, 600});
         BEAST_EXPECT(balance.getIssuer() == USD.account.id());
     }
 

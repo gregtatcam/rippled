@@ -462,7 +462,7 @@ accountHolds(
                     << " account=" << to_string(account)
                     << " amount=" << amount.getFullText();
 
-    return view.balanceHook(account, issuer, amount);
+    return view.balanceHookIOU(account, issuer, amount);
 }
 
 STAmount
@@ -630,7 +630,7 @@ xrpLiquid(
 
     auto const fullBalance = sle->getFieldAmount(sfBalance);
 
-    auto const balance = view.balanceHook(id, xrpAccount(), fullBalance);
+    auto const balance = view.balanceHookIOU(id, xrpAccount(), fullBalance);
 
     STAmount const amount =
         (balance < reserve) ? STAmount{0} : balance - reserve;
