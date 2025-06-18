@@ -135,13 +135,13 @@ DeferredCredits::creditMPT(
         IssuerValueMPT v;
         if (isSenderIssuer)
         {
-            v.creditHolder = mptAmtVal;
-            v.holder[receiver].origBalance = preCreditBalanceHolder;
+            v.credit = mptAmtVal;
+            v.holders[receiver].origBalance = preCreditBalanceHolder;
         }
         else
         {
-            v.holder[sender].creditIssuer = mptAmtVal;
-            v.holder[sender].origBalance = preCreditBalanceHolder;
+            v.holders[sender].debit = mptAmtVal;
+            v.holders[sender].origBalance = preCreditBalanceHolder;
         }
         v.origBalance = preCreditBalanceIssuer;
         creditsMPT_.emplace(mptID, std::move(v));
@@ -152,20 +152,20 @@ DeferredCredits::creditMPT(
         auto& v = i->second;
         if (isSenderIssuer)
         {
-            v.creditHolder += mptAmtVal;
-            if (v.holder.find(receiver) == v.holder.end())
-                v.holder[receiver].origBalance = preCreditBalanceHolder;
+            v.credit += mptAmtVal;
+            if (v.holders.find(receiver) == v.holders.end())
+                v.holders[receiver].origBalance = preCreditBalanceHolder;
         }
         else
         {
-            if (v.holder.find(sender) == v.holder.end())
+            if (v.holders.find(sender) == v.holders.end())
             {
-                v.holder[sender].creditIssuer = mptAmtVal;
-                v.holder[sender].origBalance = preCreditBalanceHolder;
+                v.holders[sender].debit = mptAmtVal;
+                v.holders[sender].origBalance = preCreditBalanceHolder;
             }
             else
             {
-                v.holder[sender].creditIssuer += mptAmtVal;
+                v.holders[sender].debit += mptAmtVal;
             }
         }
     }
@@ -280,11 +280,11 @@ DeferredCredits::apply(DeferredCredits& to)
         {
             auto& toVal = r.first->second;
             auto const& fromVal = i.second;
-            toVal.creditHolder += fromVal.creditHolder;
+            toVal.credit += fromVal.credit;
             toVal.selfIssue += fromVal.selfIssue;
-            for (auto& [k, v] : fromVal.holder)
+            for (auto& [k, v] : fromVal.holders)
             {
-                toVal.holder[k] = v;
+                toVal.holders[k] = v;
             }
             // Do not update the orig balance, it's already correct
         }
@@ -365,16 +365,16 @@ PaymentSandbox::balanceHookMPT(
         {
             if (accountIsHolder)
             {
-                if (auto const i = adj->holder.find(account);
-                    i != adj->holder.end())
+                if (auto const i = adj->holders.find(account);
+                    i != adj->holders.end())
                 {
-                    delta += i->second.creditIssuer;
+                    delta += i->second.debit;
                     lastBal = i->second.origBalance;
                 }
             }
             else
             {
-                delta += adj->creditHolder;
+                delta += adj->credit;
                 selfIssue += adj->selfIssue;
                 lastBal = adj->origBalance;
             }

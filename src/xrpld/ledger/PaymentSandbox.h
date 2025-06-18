@@ -43,9 +43,7 @@ private:
     {
         explicit ValueIOU() = default;
 
-        // if MPT then credit to holder
         STAmount lowAcctCredits;
-        // if MPT then debit to issuer
         STAmount highAcctCredits;
         STAmount lowAcctOrigBalance;
     };
@@ -53,15 +51,17 @@ private:
     struct HolderValueMPT
     {
         HolderValueMPT() = default;
-        std::uint64_t creditIssuer = 0;
+        // Debit to issuer
+        std::uint64_t debit = 0;
         std::uint64_t origBalance = 0;
     };
 
     struct IssuerValueMPT
     {
         IssuerValueMPT() = default;
-        std::map<AccountID, HolderValueMPT> holder;
-        std::uint64_t creditHolder = 0;
+        std::map<AccountID, HolderValueMPT> holders;
+        // Credit to holder
+        std::uint64_t credit = 0;
         std::uint64_t origBalance = 0;
         // Self issued on offer sell
         std::uint64_t selfIssue = 0;
