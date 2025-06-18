@@ -67,23 +67,21 @@ maxMPTAmount(ReadView const& view, MPTID const& mptID)
     return maxMPTAmount(*sle);
 }
 
-inline std::uint64_t
-availableMPTAmount(SLE const& sleIssuance, bool extend = true)
+inline std::int64_t
+availableMPTAmount(SLE const& sleIssuance)
 {
     auto const max = maxMPTAmount(sleIssuance);
     auto const outstanding = sleIssuance[sfOutstandingAmount];
-    if (extend)
-        return 2 * max - outstanding;
     return max - outstanding;
 }
 
-inline std::uint64_t
-availableMPTAmount(ReadView const& view, MPTID const& mptID, bool extend = true)
+inline std::int64_t
+availableMPTAmount(ReadView const& view, MPTID const& mptID)
 {
     auto const sle = view.read(keylet::mptIssuance(mptID));
     if (!sle)
         Throw<std::runtime_error>(transHuman(tecINTERNAL));
-    return availableMPTAmount(*sle, extend);
+    return availableMPTAmount(*sle);
 }
 
 }  // namespace ripple

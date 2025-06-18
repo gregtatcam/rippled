@@ -186,19 +186,16 @@ public:
         return amount;
     }
 
+    // Returned amount might be negative when a credit step exceeds
+    // MaximumAmount. This must be balanced out by a redeeming step.
+    // A caller has to handle a negative amount.
     virtual STAmount
     balanceHookMPT(
         AccountID const& account,
         MPTIssue const& issue,
-        std::uint64_t amount) const
+        std::int64_t amount) const
     {
-        // TODO MPT temp
-        if (account != issue.getIssuer())
-            return STAmount{issue, amount};
-        auto const& sle = read(keylet::mptIssuance(issue));
-        assert(sle);
-        auto const max = (*sle)[~sfMaximumAmount].value_or(maxMPTokenAmount);
-        return STAmount{issue, amount - max};
+        return STAmount{issue, amount};
     }
 
     // Accounts in a payment are not allowed to use assets acquired during that

@@ -111,7 +111,7 @@ DeferredCredits::creditMPT(
     AccountID const& receiver,
     STAmount const& amount,
     std::uint64_t preCreditBalanceHolder,
-    std::uint64_t preCreditBalanceIssuer)
+    std::int64_t preCreditBalanceIssuer)
 {
     XRPL_ASSERT(
         amount.holds<MPTIssue>(),
@@ -174,7 +174,7 @@ DeferredCredits::creditMPT(
 void
 DeferredCredits::selfIssueMPT(
     STAmount const& selfIssue,
-    std::uint64_t origBalance)
+    std::int64_t origBalance)
 {
     auto const& mptIssue = selfIssue.get<MPTIssue>();
     auto const& mptID = mptIssue.getMptID();
@@ -350,15 +350,15 @@ STAmount
 PaymentSandbox::balanceHookMPT(
     AccountID const& account,
     MPTIssue const& issue,
-    std::uint64_t amount) const
+    std::int64_t amount) const
 {
     auto const& issuer = issue.getIssuer();
     bool const accountIsHolder = account != issuer;
 
-    std::uint64_t delta = 0;
-    std::uint64_t selfIssue = 0;
-    std::uint64_t lastBal = amount;
-    std::uint64_t minBal = amount;
+    std::int64_t delta = 0;
+    std::int64_t selfIssue = 0;
+    std::int64_t lastBal = amount;
+    std::int64_t minBal = amount;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
     {
         if (auto adj = curSB->tab_.adjustmentsMPT(issue))
@@ -385,24 +385,15 @@ PaymentSandbox::balanceHookMPT(
 
     // The adjusted amount should never be larger than the balance.
 
-    if (account != issuer)
-    {
-        std::uint64_t const adjustedAmt =
-            std::min({amount, lastBal - delta, minBal});
-        return STAmount{issue, adjustedAmt};
-    }
+    std::int64_t const adjustedAmt = [&]() -> std::int64_t {
+        if (account != issuer)
+            return std::min({amount, lastBal - delta, minBal});
+        else if (lastBal > selfIssue)
+            return lastBal - selfIssue;
+        return 0;
+    }();
 
-    if (lastBal > selfIssue)
-    {
-        std::uint64_t const adjustedAmt = lastBal - selfIssue;
-
-        auto const maxAmount = maxMPTAmount(*this, issue.getMptID());
-
-        if (adjustedAmt > maxAmount)
-            return STAmount{issue, adjustedAmt - maxAmount};
-    }
-
-    return STAmount{issue};
+    return adjustedAmt > 0 ? STAmount{issue, adjustedAmt} : STAmount{issue};
 }
 
 std::uint32_t
@@ -436,7 +427,7 @@ PaymentSandbox::creditHookMPT(
     AccountID const& to,
     STAmount const& amount,
     std::uint64_t preCreditBalanceHolder,
-    std::uint64_t preCreditBalanceIssuer)
+    std::int64_t preCreditBalanceIssuer)
 {
     XRPL_ASSERT(
         amount.holds<MPTIssue>, "creditHookMPT: amount is for MPTIssue");
@@ -448,7 +439,7 @@ PaymentSandbox::creditHookMPT(
 void
 PaymentSandbox::selfIssueHookMPT(
     ripple::STAmount const& selfIssue,
-    std::uint64_t origBalance)
+    std::int64_t origBalance)
 {
     XRPL_ASSERT(
         selfIssue.holds<MPTIssue>,

@@ -518,8 +518,7 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
         //    Provide the available maxFlow.
         if (!prevStep_)
         {
-            auto const available = MPTAmount{
-                static_cast<std::int64_t>(availableMPTAmount(*sle, false))};
+            auto const available = MPTAmount{availableMPTAmount(*sle)};
             return {available, DebtDirection::issues};
         }
 

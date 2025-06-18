@@ -39,7 +39,7 @@ checkIssuers(ReadView const& view, Book const& book)
 }
 }  // namespace
 
-template <class TIn, class TOut>
+template <StepAmount TIn, StepAmount TOut>
 TOfferStreamBase<TIn, TOut>::TOfferStreamBase(
     ApplyView& view,
     ApplyView& cancelView,
@@ -62,7 +62,7 @@ TOfferStreamBase<TIn, TOut>::TOfferStreamBase(
 
 // Handle the case where a directory item with no corresponding ledger entry
 // is found. This shouldn't happen but if it does we clean it up.
-template <class TIn, class TOut>
+template <StepAmount TIn, StepAmount TOut>
 void
 TOfferStreamBase<TIn, TOut>::erase(ApplyView& view)
 {
@@ -123,15 +123,12 @@ accountFundsHelper(
     return available;
 }
 
-template <class TIn, class TOut>
+template <StepAmount TIn, StepAmount TOut>
 template <class TTakerPays, class TTakerGets>
     requires ValidTaker<TTakerPays, TTakerGets>
 bool
 TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
 {
-    if (!view_.rules().enabled(fixRmSmallIncreasedQOffers))
-        return false;
-
     // Consider removing the offer if:
     //  o `TakerPays` is XRP (because of XRP drops granularity) or
     //  o `TakerPays` and `TakerGets` are both IOU and `TakerPays`<`TakerGets`
@@ -192,7 +189,7 @@ TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
     return effectiveQuality < offer_.quality();
 }
 
-template <class TIn, class TOut>
+template <StepAmount TIn, StepAmount TOut>
 bool
 TOfferStreamBase<TIn, TOut>::step()
 {
@@ -316,34 +313,7 @@ TOfferStreamBase<TIn, TOut>::step()
             continue;
         }
 
-        bool const rmSmallIncreasedQOffer = [&] {
-            if constexpr (
-                !std::is_same_v<TIn, STAmount> &&
-                !std::is_same_v<TOut, STAmount>)
-                return shouldRmSmallIncreasedQOffer<TIn, TOut>();
-            else if constexpr (
-                std::is_same_v<TIn, STAmount> && std::is_same_v<TOut, STAmount>)
-            {
-                return std::visit(
-                    [&]<typename TInAmt, typename TOutAmt>(
-                        TInAmt const&, TOutAmt const&) {
-                        using TIn_ = typename TInAmt::amount_type;
-                        using TOut_ = typename TOutAmt::amount_type;
-                        if constexpr (
-                            !std::is_same_v<TIn_, XRPAmount> ||
-                            !std::is_same_v<TOut_, XRPAmount>)
-                            return shouldRmSmallIncreasedQOffer<TIn_, TOut_>();
-                        else
-                            return false;
-                    },
-                    offer_.amount().in.asset().getAmountType(),
-                    offer_.amount().out.asset().getAmountType());
-            }
-            assert(0);
-            return false;
-        }();
-
-        if (rmSmallIncreasedQOffer)
+        if (shouldRmSmallIncreasedQOffer<TIn, TOut>())
         {
             auto const original_funds = accountFundsHelper(
                 cancelView_,
@@ -378,7 +348,7 @@ TOfferStreamBase<TIn, TOut>::step()
     return true;
 }
 
-template <class TIn, class TOut>
+template <StepAmount TIn, StepAmount TOut>
 void
 FlowOfferStream<TIn, TOut>::permRmOffer(uint256 const& offerIndex)
 {

@@ -103,9 +103,7 @@ creditBalance(
     if (!sle)
         return STAmount{issue};
     if (account == issue.getIssuer())
-    {
-        return STAmount{issue, availableMPTAmount(*sle, false)};
-    }
+        return STAmount{issue, availableMPTAmount(*sle)};
 
     auto const mptSle = view.read(keylet::mptoken(issue.getMptID(), account));
 
