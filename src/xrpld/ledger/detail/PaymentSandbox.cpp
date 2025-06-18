@@ -84,13 +84,9 @@ DeferredCredits::creditIOU(
         // only record the balance the first time, do not record it here
         auto& v = i->second;
         if (sender < receiver)
-        {
             v.highAcctCredits += amount;
-        }
         else
-        {
             v.lowAcctCredits += amount;
-        }
     }
 }
 
