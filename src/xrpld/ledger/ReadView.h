@@ -181,6 +181,8 @@ public:
         AccountID const& issuer,
         STAmount const& amount) const
     {
+        XRPL_ASSERT(amount.holds<Issue>, "balanceHookIOU: amount is for Issue");
+
         return amount;
     }
 

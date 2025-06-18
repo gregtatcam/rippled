@@ -247,6 +247,7 @@ public:
         STAmount const& amount,
         STAmount const& preCreditBalance)
     {
+        XRPL_ASSERT(amount.holds<Issue>, "creditHookIOU: amount is for Issue");
     }
 
     virtual void
@@ -257,11 +258,16 @@ public:
         std::uint64_t preCreditBalanceHolder,
         std::uint64_t preCreditBalanceIssuer)
     {
+        XRPL_ASSERT(
+            amount.holds<MPTIssue>, "creditHookMPT: amount is for MPTIssue");
     }
 
     virtual void
     selfIssueHookMPT(STAmount const& selfIssue, std::uint64_t origBalance)
     {
+        XRPL_ASSERT(
+            selfIssue.holds<MPTIssue>,
+            "selfIssueHookMPT: selfIssue is for MPTIssue");
     }
 
     // Called when the owner count changes

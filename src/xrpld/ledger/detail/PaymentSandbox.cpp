@@ -115,7 +115,10 @@ DeferredCredits::creditMPT(
 {
     XRPL_ASSERT(
         amount.holds<MPTIssue>(),
-        "ripple::detail::DeferredCredits::creditIOU : amount is for MPTIssue");
+        "ripple::detail::DeferredCredits::creditMPT : amount is for MPTIssue");
+    XRPL_ASSERT(
+        !amount.negative(),
+        "ripple::detail::DeferredCredits::creditMPT : positive amount");
     XRPL_ASSERT(
         sender != receiver,
         "ripple::detail::DeferredCredits::creditMPT : sender is not receiver");
@@ -307,6 +310,8 @@ PaymentSandbox::balanceHookIOU(
     AccountID const& issuer,
     STAmount const& amount) const
 {
+    XRPL_ASSERT(amount.holds<Issue>, "balanceHookIOU: amount is for Issue");
+
     auto const& currency = amount.get<Issue>().currency;
 
     auto delta = amount.zeroed();
@@ -420,6 +425,8 @@ PaymentSandbox::creditHookIOU(
     STAmount const& amount,
     STAmount const& preCreditBalance)
 {
+    XRPL_ASSERT(amount.holds<Issue>, "creditHookIOU: amount is for Issue");
+
     tab_.creditIOU(from, to, amount, preCreditBalance);
 }
 
@@ -431,6 +438,9 @@ PaymentSandbox::creditHookMPT(
     std::uint64_t preCreditBalanceHolder,
     std::uint64_t preCreditBalanceIssuer)
 {
+    XRPL_ASSERT(
+        amount.holds<MPTIssue>, "creditHookMPT: amount is for MPTIssue");
+
     tab_.creditMPT(
         from, to, amount, preCreditBalanceHolder, preCreditBalanceIssuer);
 }
@@ -440,6 +450,10 @@ PaymentSandbox::selfIssueHookMPT(
     ripple::STAmount const& selfIssue,
     std::uint64_t origBalance)
 {
+    XRPL_ASSERT(
+        selfIssue.holds<MPTIssue>,
+        "selfIssueHookMPT: selfIssue is for MPTIssue");
+
     tab_.selfIssueMPT(selfIssue, origBalance);
 }
 
