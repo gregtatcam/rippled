@@ -502,13 +502,12 @@ template <class TDerived>
 std::pair<MPTAmount, DebtDirection>
 MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
+    auto const maxFlow =
+        accountHolds(sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
+
     // From a holder to an issuer
     if (src_ != mptIssue_.getIssuer())
-    {
-        auto const maxFlow = accountHolds(
-            sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
         return {toAmount<MPTAmount>(maxFlow), DebtDirection::redeems};
-    }
 
     // From an issuer to a holder
     if (auto const sle = sb.read(keylet::mptIssuance(mptIssue_)))
@@ -517,10 +516,7 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
         //  - direct payment then MPTEndpointStep is the only step.
         //    Provide the available maxFlow.
         if (!prevStep_)
-        {
-            auto const available = MPTAmount{availableMPTAmount(*sle)};
-            return {available, DebtDirection::issues};
-        }
+            return {toAmount<MPTAmount>(maxFlow), DebtDirection::issues};
 
         // MPTEndpointStep is the last step. It's always issuing in
         // this case. We can't decide at this point what the maxFlow is,
