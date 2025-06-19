@@ -311,6 +311,16 @@ accountFunds(
     AuthHandling authHandling,
     beast::Journal j);
 
+/**
+ * Determine funds available for an issuer to sell in an issuer owner offer.
+ * Issuing step, which could be either MPTEndPointStep last step or BookStep's
+ * TakerPays may overflow OutstandingAmount. Redeeming step, in BookStep's
+ * TakerGets redeems the offer's owner funds, essentially balancing out
+ * the overflow, unless the offer's owner is the issuer.
+ */
+[[nodiscard]] STAmount
+issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue);
+
 // Return the account's liquid (not reserved) XRP.  Generally prefer
 // calling accountHolds() over this interface.  However, this interface
 // allows the caller to temporarily adjust the owner count should that be

@@ -220,6 +220,10 @@ public:
         MPTIssue const& issue,
         std::int64_t amount) const override;
 
+    STAmount
+    balanceHookSelfIssueMPT(MPTIssue const& issue, std::int64_t amount)
+        const override;
+
     void
     creditHookIOU(
         AccountID const& from,

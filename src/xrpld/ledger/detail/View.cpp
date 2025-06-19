@@ -564,6 +564,18 @@ accountFunds(
         view, id, saDefault.asset(), freezeHandling, authHandling, j);
 }
 
+STAmount
+issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue)
+{
+    STAmount amount{issue};
+
+    auto const sle = view.read(keylet::mptIssuance(issue));
+    if (!sle)
+        return amount;
+    auto const available = availableMPTAmount(*sle);
+    return view.balanceHookSelfIssueMPT(issue, available);
+}
+
 // Prevent ownerCount from wrapping under error conditions.
 //
 // adjustment allows the ownerCount to be adjusted up or down in multiple steps.

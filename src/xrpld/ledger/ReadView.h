@@ -199,6 +199,13 @@ public:
         return STAmount{issue, amount};
     }
 
+    //
+    virtual STAmount
+    balanceHookSelfIssueMPT(MPTIssue const& issue, std::int64_t amount) const
+    {
+        return STAmount{issue, amount};
+    }
+
     // Accounts in a payment are not allowed to use assets acquired during that
     // payment. The PaymentSandbox tracks the debits, credits, and owner count
     // changes that accounts make during a payment. `ownerCountHook` adjusts the

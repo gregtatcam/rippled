@@ -352,7 +352,6 @@ PaymentSandbox::balanceHookMPT(
     bool const accountIsHolder = account != issuer;
 
     std::int64_t delta = 0;
-    std::int64_t selfIssue = 0;
     std::int64_t lastBal = amount;
     std::int64_t minBal = amount;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
@@ -371,7 +370,6 @@ PaymentSandbox::balanceHookMPT(
             else
             {
                 delta += adj->credit;
-                selfIssue += adj->selfIssue;
                 lastBal = adj->origBalance;
             }
             if (lastBal < minBal)
@@ -381,15 +379,31 @@ PaymentSandbox::balanceHookMPT(
 
     // The adjusted amount should never be larger than the balance.
 
-    std::int64_t const adjustedAmt = [&]() -> std::int64_t {
-        if (account != issuer)
-            return std::min({amount, lastBal - delta, minBal});
-        else if (lastBal > selfIssue)
-            return lastBal - selfIssue;
-        return 0;
-    }();
+    auto const adjustedAmt = std::min({amount, lastBal - delta, minBal});
 
     return adjustedAmt > 0 ? STAmount{issue, adjustedAmt} : STAmount{issue};
+}
+
+STAmount
+PaymentSandbox::balanceHookSelfIssueMPT(
+    ripple::MPTIssue const& issue,
+    std::int64_t amount) const
+{
+    std::int64_t selfIssue = 0;
+    std::int64_t lastBal = amount;
+    for (auto curSB = this; curSB; curSB = curSB->ps_)
+    {
+        if (auto adj = curSB->tab_.adjustmentsMPT(issue))
+        {
+            selfIssue += adj->selfIssue;
+            lastBal = adj->origBalance;
+        }
+    }
+
+    if (lastBal > selfIssue)
+        return STAmount{issue, lastBal - selfIssue};
+
+    return STAmount{issue};
 }
 
 std::uint32_t

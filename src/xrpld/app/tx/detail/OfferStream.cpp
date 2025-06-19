@@ -114,6 +114,12 @@ accountFundsHelper(
             // self funded
             return amtDefault;
     }
+    else if constexpr (std::is_same_v<T, MPTAmount>)
+    {
+        if (id == asset.getIssuer())
+            return toAmount<T>(
+                issuerFundsToSelfIssue(view, asset.get<MPTIssue>()));
+    }
 
     return toAmount<T>(
         accountHolds(view, id, asset, freezeHandling, authHandling, j));
