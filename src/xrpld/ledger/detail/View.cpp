@@ -576,6 +576,16 @@ issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue)
     return view.balanceHookSelfIssueMPT(issue, available);
 }
 
+void
+issuerSelfDebitHookMPT(
+    ApplyView& view,
+    MPTIssue const& issue,
+    std::uint64_t amount)
+{
+    auto const available = availableMPTAmount(view, issue);
+    view.issuerSelfDebitHookMPT(issue, amount, available);
+}
+
 // Prevent ownerCount from wrapping under error conditions.
 //
 // adjustment allows the ownerCount to be adjusted up or down in multiple steps.

@@ -1188,16 +1188,6 @@ struct FlowMPT_test : public beast::unit_test::suite
         Account const carol("carol");
         Account const bob("bob");
 
-        auto outstandingAmt = [](Env const& env, jtx::MPT const& mpt) {
-            return (*env.le(keylet::mptIssuance(mpt)))[sfOutstandingAmount];
-        };
-
-        auto expectOutstandingAmt = [&](Env const& env,
-                                        jtx::MPT const& mpt,
-                                        std::uint64_t expected) -> bool {
-            return outstandingAmt(env, mpt) == expected;
-        };
-
         // Direct payment between holders.
         {
             Env env(*this);
@@ -1214,7 +1204,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env(pay(alice, carol, USD(100)));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(100));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
             BEAST_EXPECT(env.balance(alice, USD) == USD(0));
         }
@@ -1236,7 +1226,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env(pay(alice, carol, USD(100)), txflags(tfPartialPayment));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 80));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(80));
             BEAST_EXPECT(env.balance(alice, USD) == USD(0));
             BEAST_EXPECT(env.balance(carol, USD) == USD(80));
         }
@@ -1259,7 +1249,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env(pay(alice, carol, USD(100)), txflags(tfPartialPayment));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(100));
             BEAST_EXPECT(env.balance(alice, USD) == USD(0));
             BEAST_EXPECT(env.balance(carol, USD) == USD(80));
         }
@@ -1283,7 +1273,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env(pay(bob, carol, USD(100)), sendmax(XRP(100)), path(~USD));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(100));
             BEAST_EXPECT(env.balance(alice, USD) == USD(0));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
@@ -1310,7 +1300,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 txflags(tfPartialPayment),
                 ter(tecPATH_DRY));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(100));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
 
@@ -1334,7 +1324,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 path(~USD),
                 txflags(tfPartialPayment));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(100));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
         }
 
@@ -1358,7 +1348,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 path(~XRP),
                 ter(tecPATH_PARTIAL));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(100));
             BEAST_EXPECT(env.balance(alice, USD) == USD(100));
         }
 
@@ -1388,8 +1378,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env(pay(gw, carol, USD(100)), sendmax(EUR(100)), path(~USD));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 100));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(100));
             BEAST_EXPECT(env.balance(alice, USD) == USD(0));
             BEAST_EXPECT(env.balance(alice, EUR) == EUR(100));
             BEAST_EXPECT(env.balance(carol, USD) == USD(100));
@@ -1472,7 +1461,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 path(~USD),
                 txflags(tfPartialPayment));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 1'000));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(1'000));
             BEAST_EXPECT(env.balance(alice, USD) == USD(495));
             BEAST_EXPECT(env.balance(bob, USD) == USD(505));
             BEAST_EXPECT(env.balance(carol, EUR) == EUR(210));
@@ -1510,7 +1499,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 sendmax(XRP(100)),
                 txflags(tfPartialPayment));
 
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 1'624));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(1'624));
             BEAST_EXPECT(env.balance(carol, USD) == USD(1'102));
             env.require(offers(carol, 0));
             env.require(offers(gw, 0));
@@ -1541,10 +1530,440 @@ struct FlowMPT_test : public beast::unit_test::suite
                 sendmax(XRP(30)),
                 txflags(tfPartialPayment),
                 path(~USD));
-            BEAST_EXPECT(expectOutstandingAmt(env, USD, 28));
+            BEAST_EXPECT(env.balance(gw, USD) == USD(28));
             BEAST_EXPECT(env.balance(alice, USD) == USD(0));
             // 12+11+5
             BEAST_EXPECT(env.balance(bob, USD) == USD(28));
+        }
+
+        // Cross-currency payment two steps. Second book step issues,
+        // first book step redeems.
+        {
+            Account const dan{"dan"};
+            Account const john{"john"};
+            Account const ed{"ed"};
+            Account const sam{"sam"};
+            Account const bill{"bill"};
+
+            struct TestData
+            {
+                int maxAmt;
+                int sendMax;
+                int dstTrustLimit;
+                int dstExpectEUR;
+                int outstUSD;
+                int expEdBuyUSD;
+                int expDanBuyUSD;
+                int expBobSellUSD;
+                int expGwXRP;  // whole XRP excluding the fees
+                std::uint8_t expOffersGw;
+                bool lastGwBuyUSD;
+                std::uint8_t
+                expOffersBob() const
+                {
+                    return expBobSellUSD == 0 ? 1 : 0;
+                }
+                std::uint8_t
+                expOffersEd() const
+                {
+                    // partially crossed if < 100
+                    return expEdBuyUSD < 100 ? 1 : 0;
+                }
+                std::uint8_t
+                expOffersDan() const
+                {
+                    return expDanBuyUSD == 0 ? 1 : 0;
+                }
+            };
+
+            auto test = [&](TestData const& d) {
+                Env env(*this);
+                env.fund(
+                    XRP(1'000),
+                    gw,
+                    alice,
+                    carol,
+                    bob,
+                    dan,
+                    john,
+                    ed,
+                    sam,
+                    bill);
+
+                MPT const USD = MPTTester(
+                    {.env = env,
+                     .issuer = gw,
+                     .holders = {alice, carol, bob},
+                     .maxAmt = d.maxAmt});
+                auto const EUR = gw["EUR"];
+
+                env(pay(gw, alice, USD(100)));
+                env(pay(gw, carol, USD(100)));
+                env(pay(gw, bob, USD(100)));
+
+                BEAST_EXPECT(env.balance(gw, USD) == USD(300));
+
+                env(trust(john, EUR(100)));
+                env(trust(dan, EUR(100)));
+                env(trust(ed, EUR(100)));
+                env(trust(bill, EUR(d.dstTrustLimit)));
+
+                env(pay(gw, john, EUR(100)));
+                env(pay(gw, dan, EUR(100)));
+                env(pay(gw, ed, EUR(100)));
+                env.close();
+
+                // Sell USD
+                env(offer(alice, XRP(100), USD(100)));
+                env.close();  // close after each create to ensure the order
+                env(offer(carol, XRP(100), USD(100)));
+                env.close();
+                if (!d.lastGwBuyUSD)
+                {
+                    env(offer(gw, XRP(100), USD(100)));
+                    env.close();
+                }
+                env(offer(bob, XRP(100), USD(100)));
+                env.close();
+                if (d.lastGwBuyUSD)
+                {
+                    env(offer(gw, XRP(100), USD(100)));
+                    env.close();
+                }
+                BEAST_EXPECT(expectOffers(env, alice, 1));
+                BEAST_EXPECT(expectOffers(env, carol, 1));
+                BEAST_EXPECT(expectOffers(env, gw, 1));
+                BEAST_EXPECT(expectOffers(env, bob, 1));
+
+                // Buy USD
+                env(offer(john, USD(100), EUR(100)));
+                env.close();
+                env(offer(gw, USD(100), EUR(100)));
+                env.close();
+                env(offer(dan, USD(100), EUR(100)));
+                env.close();
+                env(offer(ed, USD(100), EUR(100)));
+                env.close();
+                BEAST_EXPECT(expectOffers(env, john, 1));
+                BEAST_EXPECT(expectOffers(env, gw, 2));
+                BEAST_EXPECT(expectOffers(env, dan, 1));
+                BEAST_EXPECT(expectOffers(env, ed, 1));
+
+                env(pay(sam, bill, EUR(400)),
+                    sendmax(XRP(d.sendMax)),
+                    path(~USD, ~EUR),
+                    txflags(tfPartialPayment | tfNoRippleDirect));
+                env.close();
+
+                auto const baseFee = env.current()->fees().base.drops();
+                BEAST_EXPECT(env.balance(bill, EUR) == EUR(d.dstExpectEUR));
+                BEAST_EXPECT(env.balance(john, USD) == USD(100));
+                BEAST_EXPECT(env.balance(dan, USD) == USD(d.expDanBuyUSD));
+                BEAST_EXPECT(env.balance(ed, USD) == USD(d.expEdBuyUSD));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(d.outstUSD));
+                BEAST_EXPECT(env.balance(alice, USD) == USD(0));
+                BEAST_EXPECT(env.balance(carol, USD) == USD(0));
+                BEAST_EXPECT(
+                    env.balance(bob, USD) == USD(100 - d.expBobSellUSD));
+                BEAST_EXPECT(
+                    env.balance(gw) ==
+                    XRPAmount{d.expGwXRP * DROPS_PER_XRP - baseFee * 9});
+                BEAST_EXPECT(expectOffers(env, john, 0));
+                BEAST_EXPECT(expectOffers(env, gw, d.expOffersGw));
+                BEAST_EXPECT(expectOffers(env, dan, d.expOffersDan()));
+                BEAST_EXPECT(expectOffers(env, ed, d.expOffersEd()));
+                BEAST_EXPECT(expectOffers(env, alice, 0));
+                BEAST_EXPECT(expectOffers(env, carol, 0));
+                BEAST_EXPECT(expectOffers(env, bob, d.expOffersBob()));
+            };
+
+            // clang-format off
+            std::vector<TestData> tests = {
+                // Sell USD: alice, carol, bob, gw are consumed.
+                // Buy USD: john, gw, dan, ed are consumed.
+                // gw's sell USD is consumed because there is sufficient available balance (100USD).
+                // but OutstandingAmount is 300USD because gw's sell offer is balanced out by
+                // gw's buy offer.
+                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  400,   400,    400,     400,      300,     100,  100,   100,    1100, 0,       false},
+                // Sell USD: alice, carol, bob, gw are consumed.
+                // Buy USD: john, gw, dan, ed (partially) are consumed.
+                // gw's sell USD is partially consumed because there is available balance (50USD).
+                // OutstandingAmount is 250USD because gw's sell offer is partially balanced by
+                // gw's buy offer. ed's offer is on the books because it's partially crossed.
+                // TODO why is gw's offer removed? it's partially consumed
+                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  350,   400,    400,     350,      250,     50,   100,   100,    1050, 0,       false},
+                // Sell USD: alice, carol, bob are consumed; gw's is unfunded
+                //   since OutstandingAmount is initially at MaximumAmount.
+                // Buy USD: john, gw, dan are consumed; ed's remains on the order
+                //   book since 300USD is the sell limit.
+                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   400,    400,     300,      200,     0,    100,   100,    1000, 0,       false},
+                // Same as above. bill's trustline limit sets the output to 300USD.
+                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   400,    300,     300,      200,     0,    100,   100,    1000, 0,       false},
+                // Sell USD: alice, carol, bob are consumed; gw's removed from
+                //   the order book since it's unfunded.
+                // Buy USD: john, gw, dan are consumed; ed's  remains on the order
+                //   book since 300USD is the limit.
+                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   400,    300,     300,      200,     0,    100,   100,    1000, 0,       true},
+                // Sell USD: alice, carol are consumed; gw's removed from
+                //   the order book in rev pass since it's unfunded; bob's
+                //   remains on the order book.
+                // Buy USD: john, gw; ed's, dan's  remains on the order
+                //   book since 300USD is the limit.
+                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   200,    300,     200,      200,     0,    0,     0,      1000, 0,       false},
+                // Same as three tests above since limited by buy 300USD (gw offer is unfunded)
+                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   380,    400,     300,      200,     0,    100,   100,    1000, 0,       false},
+            };
+            // clang-format on
+            for (auto const& t : tests)
+                test(t);
+        }
+
+        // Cross-currency payment. BookStep issues, the first step redeems.
+        {
+            Account const ed{"ed"};
+
+            struct TestData
+            {
+                int maxAmt;
+                int sendMax;
+                int gwOffer;  // quality == 1
+                int dstExpectXRP;
+                int outstUSD;
+                int expBobBuyUSD;
+                int expGwXRP;  // whole XRP excluding the fees
+                std::uint8_t expOffersGw;
+                bool lastGwBuyUSD;
+                std::uint8_t
+                expOffersBob() const
+                {
+                    // partially crossed if < 100
+                    return expBobBuyUSD < 100 ? 1 : 0;
+                }
+            };
+
+            auto test = [&](TestData const& d) {
+                Env env(*this);
+                env.fund(XRP(1'000), gw, alice, carol, bob, ed);
+
+                MPT const USD = MPTTester(
+                    {.env = env,
+                     .issuer = gw,
+                     .holders = {alice},
+                     .maxAmt = d.maxAmt});
+
+                env(pay(gw, alice, USD(300)));
+                env.close();
+
+                env(offer(carol, USD(100), XRP(100)));
+                env.close();
+                if (!d.lastGwBuyUSD)
+                {
+                    env(offer(gw, USD(d.gwOffer), XRP(d.gwOffer)));
+                    env.close();
+                }
+                env(offer(bob, USD(100), XRP(100)));
+                env.close();
+                if (d.lastGwBuyUSD)
+                {
+                    env(offer(gw, USD(d.gwOffer), XRP(d.gwOffer)));
+                    env.close();
+                }
+
+                BEAST_EXPECT(expectOffers(env, carol, 1));
+                BEAST_EXPECT(expectOffers(env, bob, 1));
+                BEAST_EXPECT(expectOffers(env, gw, 1));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(300));
+
+                env(pay(alice, ed, XRP(300)),
+                    sendmax(USD(d.sendMax)),
+                    path(~XRP),
+                    txflags(tfPartialPayment | tfNoRippleDirect));
+                env.close();
+
+                auto const baseFee = env.current()->fees().base.drops();
+                BEAST_EXPECT(env.balance(alice, USD) == USD(300 - d.sendMax));
+                BEAST_EXPECT(env.balance(carol, USD) == USD(100));
+                BEAST_EXPECT(env.balance(bob, USD) == USD(d.expBobBuyUSD));
+                BEAST_EXPECT(env.balance(ed) == XRP(d.dstExpectXRP));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(d.outstUSD));
+                BEAST_EXPECT(
+                    env.balance(gw) ==
+                    XRPAmount{d.expGwXRP * DROPS_PER_XRP - baseFee * 3});
+                BEAST_EXPECT(expectOffers(env, carol, 0));
+                BEAST_EXPECT(expectOffers(env, bob, d.expOffersBob()));
+                BEAST_EXPECT(expectOffers(env, gw, d.expOffersGw));
+            };
+
+            // clang-format off
+            std::vector<TestData> tests = {
+                // Buy USD: carol, gw, bob are consumed.
+                // Gw gets 300USD from alice; carol and bob buy 200USD,
+                // therefore OutstandingAmount is 200.
+                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    100,    1300,  200,     100,   900,  0,       false},
+                // Same as above. Gw offer location in the order book doesn't matter
+                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    100,    1300,  200,     100,   900,  0,       true},
+                // Buy USD: carol, gw are consumed. bob's offer remains on the order book.
+                // Gw gets 300USD from alice; carol buys 100USD,
+                // therefore OutstandingAmount is 100.
+                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    200,    1300,  100,     0,     800,  0,       false},
+                // Buy USD: carol, bob are consumed; gw's is partially consumed (100/100) since it's last.
+                // Gw gets 300USD from alice; carol and bob buy 200USD,
+                // therefore OutstandingAmount is 200.
+                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    200,    1300,  200,     100,   900,  1,       true},
+                // Buy USD: carol, bob are consumed; gw's is partially consumed (50/50) since it's last
+                // and sendMax limits the output.
+                // Gw gets 250USD from alice; carol and bob buy 200USD, alice has 50USD left,
+                // therefore OutstandingAmount is 200.
+                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
+                { 300,    250,    200,    1250,  250,     100,   950,  1,       true},
+            };
+            // clang-format on
+            for (auto const& t : tests)
+                test(t);
+        }
+
+        // Cross-currency payment. BookStep redeems, the last step issues.
+        {
+            Account const ed{"ed"};
+
+            struct TestData
+            {
+                int maxAmt;
+                int sendMax;
+                int initDst;
+                int gwOffer;  // quality == 1
+                int dstExpectUSD;
+                int outstUSD;
+                int expAliceXRP;  // whole XRP excluding the fees
+                int expBobSellUSD;
+                int expGwXRP;
+                std::uint8_t expOffersGw;
+                bool lastGwBuyUSD;
+                std::uint8_t
+                expOffersBob() const
+                {
+                    return expBobSellUSD > 0 && expBobSellUSD < 100 ? 1 : 0;
+                }
+            };
+
+            auto test = [&](TestData const& d) {
+                Env env(*this);
+                env.fund(XRP(1'000), gw, alice, carol, bob, ed);
+
+                MPT const USD = MPTTester(
+                    {.env = env,
+                     .issuer = gw,
+                     .holders = {carol, bob, ed},
+                     .maxAmt = d.maxAmt});
+
+                if (d.initDst != 0)
+                    env(pay(gw, ed, USD(d.initDst)));
+                env(pay(gw, carol, USD(100)));
+                env(pay(gw, bob, USD(100)));
+                env.close();
+
+                env(offer(carol, XRP(100), USD(100)));
+                env.close();
+                if (!d.lastGwBuyUSD)
+                {
+                    env(offer(gw, XRP(d.gwOffer), USD(d.gwOffer)));
+                    env.close();
+                }
+                env(offer(bob, XRP(100), USD(100)));
+                env.close();
+                if (d.lastGwBuyUSD)
+                {
+                    env(offer(gw, XRP(d.gwOffer), USD(d.gwOffer)));
+                    env.close();
+                }
+
+                BEAST_EXPECT(expectOffers(env, carol, 1));
+                BEAST_EXPECT(expectOffers(env, bob, 1));
+                BEAST_EXPECT(expectOffers(env, gw, 1));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(200 + d.initDst));
+
+                env(pay(alice, ed, USD(300)),
+                    sendmax(XRP(d.sendMax)),
+                    path(~USD),
+                    txflags(tfPartialPayment | tfNoRippleDirect));
+                env.close();
+
+                auto const baseFee = env.current()->fees().base.drops();
+                BEAST_EXPECT(
+                    env.balance(alice) ==
+                    XRPAmount{d.expAliceXRP * DROPS_PER_XRP - baseFee});
+                BEAST_EXPECT(env.balance(carol, USD) == USD(0));
+                BEAST_EXPECT(
+                    env.balance(bob, USD) == USD(100 - d.expBobSellUSD));
+                BEAST_EXPECT(env.balance(ed, USD) == USD(d.dstExpectUSD));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(d.outstUSD));
+                BEAST_EXPECT(
+                    env.balance(gw) ==
+                    XRPAmount{
+                        d.expGwXRP * DROPS_PER_XRP -
+                        baseFee * (4 + (d.initDst != 0 ? 1 : 0))});
+                BEAST_EXPECT(expectOffers(env, carol, 0));
+                BEAST_EXPECT(expectOffers(env, bob, d.expOffersBob()));
+                BEAST_EXPECT(expectOffers(env, gw, d.expOffersGw));
+            };
+
+            // clang-format off
+            std::vector<TestData> tests = {
+                // Sell USD: carol, gw, bob are consumed.
+                // ed buys 300USD from carol, gw, bob therefore OutstandingAmount is 300.
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    0,      100,    300,   300,     700,     100,    1100, 0,       false},
+                // Same as above. Gw offer location in the order book doesn't matter
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    0,      100,    300,   300,     700,     100,    1100, 0,       true},
+                // Sell USD: carol, bob are consumed, gw is partially consumed.
+                // ed buys 200 from carol and bob and 50 from gw because gw can only issue 50
+                // (300(max) - 200(carol+bob) - 50(ed)). ed buys 250 from carol, gw, bob and has 50 initially,
+                // therefore OutstandingAmount is 300.
+                // TODO why gw offer is removed? it's partially consumed (no funds?)
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    50,     100,    300,   300,     750,     100,    1050, 0,       false},
+                // Same as above. Gw offer location in the order book doesn't matter.
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    50,     100,    300,   300,     750,     100,    1050, 0,       true},
+                // Same as above. Gw offer size doesn't matter.
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    50,     200,    300,   300,     750,     100,    1050, 0,       true},
+                // Sell USD: carol, gw are consumed, bob is partially consumed.
+                // ed buys 200 from carol and gw and 50 form bob because of sendMax limit. bob keeps 50,
+                // therefore OutstandingAmount is 300.
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    0,      100,    250,   300,     750,     50,     1100, 0,       false},
+                // Sell USD: carol, bob are consumed, gw is partially consumed because of sendMax limit.
+                // ed buys 200 from carol and bob and 50 from gw. Therefore, OutstandingAmount is 250.
+                // TODO why is gw not removed now? it's still funded?
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    0,      100,    250,   250,     750,     100,    1050, 1,       true},
+                // Sell USD: carol, bob are consumed, gw is partially consumed because of sendMax limit, also
+                // there is only 50 available to issue. ed buys 200 from carol and bob and 50 from gw, plus
+                // he has initially 50, therefore OutstandingAmount is 300.
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    50,     100,    300,   300,     750,     100,    1050, 0,       true},
+                // Sell USD: carol, bob are consumed, gw is not consumed because there is not available funds
+                // to issue. ed buys 200 from carol and bob and, plus he has initially 100,
+                // therefore OutstandingAmount is 300. gw offer is removed because it's unfunded.
+                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    100,    100,    300,   300,     800,     100,    1000, 0,       true},
+            };
+            // clang-format on
+            for (auto const& t : tests)
+                test(t);
         }
     }
 

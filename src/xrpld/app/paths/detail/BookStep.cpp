@@ -261,9 +261,6 @@ private:
     // whichever is a better quality.
     std::optional<QualityFunction>
     tipOfferQualityF(ReadView const& view) const;
-
-    bool
-    isMPTOverflow(ReadView const& view, std::uint32_t offersConsumed) const;
 };
 
 //------------------------------------------------------------------------------
@@ -938,20 +935,16 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     // The offer owner pays `ownerGives`. The difference between ownerGives and
     // stepAmt is a transfer fee that goes to book_.out.account
     {
-        auto const out = toSTAmount(ownerGives, book_.out);
-        Asset const& asset = offer.assetOut();
-        auto const& issuer = asset.getIssuer();
-        auto const cr = offer.send(sb, offer.owner(), issuer, out, j_);
+        auto const& issuer = book_.out.getIssuer();
+        auto const cr = offer.send(
+            sb, offer.owner(), issuer, toSTAmount(ownerGives, book_.out), j_);
         if (cr != tesSUCCESS)
             Throw<FlowException>(cr);
         if constexpr (std::is_same_v<TOut, MPTAmount>)
         {
             if (offer.owner() == issuer)
-            {
-                auto const available =
-                    availableMPTAmount(sb, asset.get<MPTIssue>().getMptID());
-                sb.selfIssueHookMPT(out, available);
-            }
+                issuerSelfDebitHookMPT(
+                    sb, book_.out.get<MPTIssue>(), ofrAmt.out.value());
         }
     }
 
@@ -1135,12 +1128,6 @@ BookStep<TIn, TOut, TDerived>::revImp(
             // it's not used further
             inactive_ = true;
         }
-
-        if (isMPTOverflow(sb, offersConsumed))
-        {
-            cache_.emplace(beast::zero, beast::zero);
-            return {beast::zero, beast::zero};
-        }
     }
 
     switch (remainingOut.signum())
@@ -1304,12 +1291,6 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
             // it's not used further
             inactive_ = true;
         }
-
-        if (isMPTOverflow(sb, offersConsumed))
-        {
-            cache_.emplace(beast::zero, beast::zero);
-            return {beast::zero, beast::zero};
-        }
     }
 
     switch (remainingIn.signum())
@@ -1465,27 +1446,6 @@ BookStep<TIn, TOut, TDerived>::rate(
         return transferRate(view, asset.getIssuer());
     return transferRate(view, asset.get<MPTIssue>().getMptID());
 };
-
-template <class TIn, class TOut, class TDerived>
-bool
-BookStep<TIn, TOut, TDerived>::isMPTOverflow(
-    ReadView const& view,
-    std::uint32_t offersConsumed) const
-{
-    if constexpr (std::is_same_v<TOut, MPTAmount>)
-    {
-        return offersConsumed == 0 &&
-            accountHolds(
-                view,
-                book_.out.getIssuer(),
-                book_.out,
-                fhIGNORE_FREEZE,
-                ahZERO_IF_UNAUTHORIZED,
-                j_) < beast::zero;
-    }
-    else
-        return false;
-}
 
 //------------------------------------------------------------------------------
 

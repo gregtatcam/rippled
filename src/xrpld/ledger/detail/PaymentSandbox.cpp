@@ -157,24 +157,24 @@ DeferredCredits::creditMPT(
 }
 
 void
-DeferredCredits::selfIssueMPT(
-    STAmount const& selfIssue,
+DeferredCredits::issuerSelfDebitMPT(
+    MPTIssue const& issue,
+    std::uint64_t amount,
     std::int64_t origBalance)
 {
-    auto const& mptIssue = selfIssue.get<MPTIssue>();
-    auto const& mptID = mptIssue.getMptID();
+    auto const& mptID = issue.getMptID();
     auto i = creditsMPT_.find(mptID);
 
     if (i == creditsMPT_.end())
     {
         IssuerValueMPT v;
         v.origBalance = origBalance;
-        v.selfIssue = selfIssue.mpt().value();
+        v.selfDebit = amount;
         creditsMPT_.emplace(mptID, std::move(v));
     }
     else
     {
-        i->second.selfIssue += selfIssue.mpt().value();
+        i->second.selfDebit += amount;
     }
 }
 
@@ -266,11 +266,9 @@ DeferredCredits::apply(DeferredCredits& to)
             auto& toVal = r.first->second;
             auto const& fromVal = i.second;
             toVal.credit += fromVal.credit;
-            toVal.selfIssue += fromVal.selfIssue;
+            toVal.selfDebit += fromVal.selfDebit;
             for (auto& [k, v] : fromVal.holders)
-            {
                 toVal.holders[k] = v;
-            }
             // Do not update the orig balance, it's already correct
         }
     }
@@ -389,19 +387,19 @@ PaymentSandbox::balanceHookSelfIssueMPT(
     ripple::MPTIssue const& issue,
     std::int64_t amount) const
 {
-    std::int64_t selfIssue = 0;
+    std::int64_t selfDebited = 0;
     std::int64_t lastBal = amount;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
     {
         if (auto adj = curSB->tab_.adjustmentsMPT(issue))
         {
-            selfIssue += adj->selfIssue;
+            selfDebited += adj->selfDebit;
             lastBal = adj->origBalance;
         }
     }
 
-    if (lastBal > selfIssue)
-        return STAmount{issue, lastBal - selfIssue};
+    if (lastBal > selfDebited)
+        return STAmount{issue, lastBal - selfDebited};
 
     return STAmount{issue};
 }
@@ -447,15 +445,12 @@ PaymentSandbox::creditHookMPT(
 }
 
 void
-PaymentSandbox::selfIssueHookMPT(
-    ripple::STAmount const& selfIssue,
+PaymentSandbox::issuerSelfDebitHookMPT(
+    MPTIssue const& issue,
+    std::uint64_t amount,
     std::int64_t origBalance)
 {
-    XRPL_ASSERT(
-        selfIssue.holds<MPTIssue>(),
-        "selfIssueHookMPT: selfIssue is for MPTIssue");
-
-    tab_.selfIssueMPT(selfIssue, origBalance);
+    tab_.issuerSelfDebitMPT(issue, amount, origBalance);
 }
 
 void

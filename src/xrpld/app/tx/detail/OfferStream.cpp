@@ -17,6 +17,7 @@
 */
 //==============================================================================
 
+#include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/misc/PermissionedDEXHelpers.h>
 #include <xrpld/app/tx/detail/OfferStream.h>
 #include <xrpld/ledger/View.h>
@@ -117,8 +118,10 @@ accountFundsHelper(
     else if constexpr (std::is_same_v<T, MPTAmount>)
     {
         if (id == asset.getIssuer())
+        {
             return toAmount<T>(
                 issuerFundsToSelfIssue(view, asset.get<MPTIssue>()));
+        }
     }
 
     return toAmount<T>(

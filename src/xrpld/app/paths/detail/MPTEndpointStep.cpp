@@ -446,7 +446,8 @@ MPTEndpointPaymentStep::check(
 
     if (!prevStep_)
     {
-        auto const owed = creditBalance(ctx.view, src_, mptIssue_);
+        auto const owed = accountHolds(
+            ctx.view, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
         if (owed <= beast::zero)
             return tecPATH_DRY;
     }

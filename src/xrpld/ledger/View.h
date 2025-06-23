@@ -321,6 +321,12 @@ accountFunds(
 [[nodiscard]] STAmount
 issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue);
 
+void
+issuerSelfDebitHookMPT(
+    ApplyView& view,
+    MPTIssue const& issue,
+    std::uint64_t amount);
+
 // Return the account's liquid (not reserved) XRP.  Generally prefer
 // calling accountHolds() over this interface.  However, this interface
 // allows the caller to temporarily adjust the owner count should that be

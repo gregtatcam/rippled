@@ -264,11 +264,11 @@ public:
     }
 
     virtual void
-    selfIssueHookMPT(STAmount const& selfIssue, std::int64_t origBalance)
+    issuerSelfDebitHookMPT(
+        MPTIssue const& issue,
+        std::uint64_t amount,
+        std::int64_t origBalance)
     {
-        XRPL_ASSERT(
-            selfIssue.holds<MPTIssue>(),
-            "selfIssueHookMPT: selfIssue is for MPTIssue");
     }
 
     // Called when the owner count changes

@@ -91,23 +91,4 @@ creditBalance(
     return result;
 }
 
-STAmount
-creditBalance(
-    ReadView const& view,
-    AccountID const& account,
-    MPTIssue const& issue)
-{
-    STAmount result{issue};
-
-    auto const sle = view.read(keylet::mptIssuance(issue));
-    if (!sle)
-        return STAmount{issue};
-    if (account == issue.getIssuer())
-        return STAmount{issue, availableMPTAmount(*sle)};
-
-    auto const mptSle = view.read(keylet::mptoken(issue.getMptID(), account));
-
-    return mptSle ? STAmount{issue, (*mptSle)[sfMPTAmount]} : STAmount{issue};
-}
-
 }  // namespace ripple

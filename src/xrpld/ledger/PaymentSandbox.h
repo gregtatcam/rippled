@@ -62,22 +62,23 @@ private:
         std::map<AccountID, HolderValueMPT> holders;
         // Credit to holder
         std::uint64_t credit = 0;
-        // When MPTs are credited to a holder, it's possible for
-        // OutstandingAmount to overflow. Consider A1 paying 100MPT to A2 and
-        // A1 already having maximum MPTs. Since the payment engine executes
-        // a payment in revers, A2 is credited first and OutstandingAmount
-        // is going to be equal to MaximumAmount + 100MPT. In the next step
-        // A1 redeems 100MPT to the issuer and OutstandingAmount balances out.
+        // OutstandingAmount might overflow when MPTs are credited to a holder.
+        // Consider A1 paying 100MPT to A2 and A1 already having maximum MPTs.
+        // Since the payment engine executes a payment in revers, A2 is
+        // credited first and OutstandingAmount is going to be equal
+        // to MaximumAmount + 100MPT. In the next step A1 redeems 100MPT
+        // to the issuer and OutstandingAmount balances out.
         std::int64_t origBalance = 0;
-        // Self issued on offer sell. Since the payment engine executes
+        // Self debit on offer sell MPT. Since the payment engine executes
         // a payment in revers, a crediting/buying step may overflow
-        // OutstandingAmount. A sell offer owned by a holder can redeem any
+        // OutstandingAmount. A sell MPT offer owned by a holder can redeem any
         // amount up to the offer's amount and holder's available funds,
         // balancing out OutstandingAmount. But if the offer's owner is issuer
         // then it issues more MPT. In this case the available amount to issue
         // is the initial issuer's available amount minus the sum of all sell
-        // amounts by the issuer.
-        std::uint64_t selfIssue = 0;
+        // amounts by the issuer. This is self-debit, where the offer's owner,
+        // issuer in this case debits to self.
+        std::uint64_t selfDebit = 0;
     };
     using AdjustmentMPT = IssuerValueMPT;
 
@@ -120,7 +121,10 @@ public:
         std::int64_t preCreditBalanceIssuer);
 
     void
-    selfIssueMPT(STAmount const& selfIssue, std::int64_t origBalance);
+    issuerSelfDebitMPT(
+        MPTIssue const& issue,
+        std::uint64_t amount,
+        std::int64_t origBalance);
 
     void
     ownerCount(AccountID const& id, std::uint32_t cur, std::uint32_t next);
@@ -240,8 +244,10 @@ public:
         std::int64_t preCreditBalanceIssuer) override;
 
     void
-    selfIssueHookMPT(STAmount const& selfIssue, std::int64_t origBalance)
-        override;
+    issuerSelfDebitHookMPT(
+        MPTIssue const& issue,
+        std::uint64_t amount,
+        std::int64_t origBalance) override;
 
     void
     adjustOwnerCountHook(
