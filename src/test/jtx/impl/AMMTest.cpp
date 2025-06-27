@@ -40,9 +40,10 @@ fund(
     jtx::Account const& gw,
     std::vector<jtx::Account> const& accounts,
     std::vector<STAmount> const& amts,
-    Fund how)
+    Fund how,
+    std::optional<std::uint8_t> const& assetScale)
 {
-    return fund(env, gw, accounts, XRP(30000), amts, how);
+    return fund(env, gw, accounts, XRP(30000), amts, how, assetScale);
 }
 
 [[maybe_unused]] std::vector<STAmount>
@@ -52,7 +53,8 @@ fund(
     STAmount const& xrp,
     std::vector<STAmount> const& amts,
     Fund how,
-    std::optional<Account> const& mptIssuer)
+    std::optional<Account> const& mptIssuer,
+    std::optional<std::uint8_t> const& assetScale)
 {
     for (auto const& account : accounts)
     {
@@ -63,29 +65,65 @@ fund(
     }
     env.close();
     std::vector<STAmount> amtsOut;
+    bool mptCreatedIfNeeded = false;  // only create mpt for the first account
+    std::vector<MPTID> mptIDs;
+    auto const& scale = assetScale ? *assetScale : 0;
+
     for (auto const& account : accounts)
     {
+        unsigned int i = 0;
         for (auto const& amt : amts)
         {
             auto amt_ = [&]() {
                 if (amt.holds<Issue>())
                     env.trust(amt + amt, account);
-                else if (mptIssuer)
+                else if (mptIssuer && !mptCreatedIfNeeded)
                 {
                     MPTTester mpt(
                         {.env = env,
                          .issuer = *mptIssuer,
-                         .holders = {account}});
+                         .holders = accounts,
+                         .assetScale = scale});
+
+                    mptIDs.push_back(mpt.issuanceID());
                     return STAmount{mpt.issuanceID(), amt.mpt().value()};
+                }
+                else
+                {
+                    if (mptIDs.size() == 1)
+                    {
+                        // if the pool is created with MPT/XRP or MPT/IOU
+                        return STAmount{mptIDs[0], amt.mpt().value()};
+                    }
+                    else if (mptIDs.size() == 2)
+                    {
+                        // if the pool is created with two MPTs
+                        return STAmount{mptIDs[i], amt.mpt().value()};
+                    }
                 }
                 return amt;
             }();
-            // only add unique amounts
-            if (account == accounts[0])
-                amtsOut.push_back(amt_);
-            env(pay(amt_.getIssuer(), account, amt_));
+
+            amtsOut.push_back(amt_);
+            if (amt.holds<MPTIssue>())
+            {
+                // to make sure we have sufficient MPT balance in some extream
+                // cases
+                env(
+                    pay(amt_.getIssuer(),
+                        account,
+                        STAmount{amt_.asset(), amt_ * pow(10, scale + 1)}));
+            }
+            else
+            {
+                env(pay(amt_.getIssuer(), account, amt_));
+            }
+            i++;
         }
+
+        mptCreatedIfNeeded = true;
     }
+
     env.close();
     return amtsOut;
 }
@@ -97,12 +135,13 @@ fund(
     std::vector<jtx::Account> const& accounts,
     STAmount const& xrp,
     std::vector<STAmount> const& amts,
-    Fund how)
+    Fund how,
+    std::optional<std::uint8_t> const& assetScale)
 {
     if (how == Fund::All || how == Fund::Gw)
         env.fund(xrp, gw);
     env.close();
-    return fund(env, accounts, xrp, amts, how, gw);
+    return fund(env, accounts, xrp, amts, how, gw, assetScale);
 }
 
 AMMTestBase::AMMTestBase()
@@ -124,12 +163,17 @@ AMMTestBase::testAMM(
     std::optional<std::pair<STAmount, STAmount>> const& pool,
     std::uint16_t tfee,
     std::optional<jtx::ter> const& ter,
-    std::vector<FeatureBitset> const& vfeatures)
+    std::vector<FeatureBitset> const& vfeatures,
+    std::optional<std::uint8_t> const& assetScale)
 {
     testAMM(
         std::move(cb),
         TestAMMArg{
-            .pool = pool, .tfee = tfee, .ter = ter, .features = vfeatures});
+            .pool = pool,
+            .tfee = tfee,
+            .ter = ter,
+            .features = vfeatures,
+            .assetScale = assetScale});
 }
 
 void
@@ -158,11 +202,27 @@ AMMTestBase::testAMM(
                     return defXRP;
                 return a + XRP(1000);
             }
-            auto const defIOU = STAmount{a.asset(), 30000};
-            if (a <= defIOU)
-                return defIOU;
-            return a + STAmount{a.asset(), 1000};
+            else if (a.holds<Issue>())
+            {
+                auto const defIOU = STAmount{a.asset(), 30000};
+                if (a <= defIOU)
+                    return defIOU;
+                return a + STAmount{a.asset(), 1000};
+            }
+            else if (a.holds<MPTIssue>())
+            {
+                auto const scale = arg.assetScale ? *arg.assetScale : 0;
+                auto const defMPT = STAmount{a.asset(), 30000, scale};
+                if (a <= defMPT)
+                    return defMPT;
+                return a + STAmount{a.asset(), 1000, scale};
+            }
+            else
+            {
+                Throw<std::runtime_error>("AMMTest: invalid asset");
+            }
         };
+
         auto const toFund1 = tofund(asset1);
         auto const toFund2 = tofund(asset2);
         BEAST_EXPECT(asset1 <= toFund1 && asset2 <= toFund2);
@@ -174,19 +234,36 @@ AMMTestBase::testAMM(
         std::vector<STAmount> funded;
         if (!asset1.native() && !asset2.native())
         {
-            funded =
-                fund(env, gw, {alice, carol}, {toFund1, toFund2}, Fund::All);
+            funded = fund(
+                env,
+                gw,
+                {alice, carol},
+                {toFund1, toFund2},
+                Fund::All,
+                arg.assetScale);
         }
         else if (asset1.native())
         {
-            funded =
-                fund(env, gw, {alice, carol}, toFund1, {toFund2}, Fund::All);
+            funded = fund(
+                env,
+                gw,
+                {alice, carol},
+                toFund1,
+                {toFund2},
+                Fund::All,
+                arg.assetScale);
             funded.insert(funded.begin(), toFund1);
         }
         else if (asset2.native())
         {
-            funded =
-                fund(env, gw, {alice, carol}, toFund2, {toFund1}, Fund::All);
+            funded = fund(
+                env,
+                gw,
+                {alice, carol},
+                toFund2,
+                {toFund1},
+                Fund::All,
+                arg.assetScale);
             funded.push_back(toFund2);
         }
 

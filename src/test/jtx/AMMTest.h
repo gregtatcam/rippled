@@ -38,6 +38,7 @@ enum class Fund { All, Acct, Gw, TokenOnly };
 struct TestAMMArg
 {
     std::optional<std::pair<STAmount, STAmount>> pool = std::nullopt;
+    std::optional<std::uint8_t> const& assetScale = std::nullopt;
     std::uint16_t tfee = 0;
     std::optional<jtx::ter> ter = std::nullopt;
     std::vector<FeatureBitset> features = {supported_amendments()};
@@ -56,7 +57,8 @@ fund(
     jtx::Account const& gw,
     std::vector<jtx::Account> const& accounts,
     std::vector<STAmount> const& amts,
-    Fund how);
+    Fund how,
+    std::optional<std::uint8_t> const& assetScale = std::nullopt);
 
 [[maybe_unused]] std::vector<STAmount>
 fund(
@@ -65,7 +67,8 @@ fund(
     std::vector<jtx::Account> const& accounts,
     STAmount const& xrp,
     std::vector<STAmount> const& amts = {},
-    Fund how = Fund::All);
+    Fund how = Fund::All,
+    std::optional<std::uint8_t> const& assetScale = std::nullopt);
 
 [[maybe_unused]] std::vector<STAmount>
 fund(
@@ -74,11 +77,13 @@ fund(
     STAmount const& xrp,
     std::vector<STAmount> const& amts = {},
     Fund how = Fund::All,
-    std::optional<Account> const& mptIssuer = std::nullopt);
+    std::optional<Account> const& mptIssuer = std::nullopt,
+    std::optional<std::uint8_t> const& assetScale = std::nullopt);
 
 struct TestAMMArgs
 {
     std::optional<std::pair<STAmount, STAmount>> const& pool = std::nullopt;
+    std::optional<std::uint8_t> const& assetScale = std::nullopt;
     std::uint16_t tfee = 0;
     std::optional<jtx::ter> const& ter = std::nullopt;
     std::vector<FeatureBitset> const& features = {supported_amendments()};
@@ -110,7 +115,8 @@ protected:
         std::optional<std::pair<STAmount, STAmount>> const& pool = std::nullopt,
         std::uint16_t tfee = 0,
         std::optional<jtx::ter> const& ter = std::nullopt,
-        std::vector<FeatureBitset> const& features = {supported_amendments()});
+        std::vector<FeatureBitset> const& features = {supported_amendments()},
+        std::optional<std::uint8_t> const& assetScale = std::nullopt);
 
     void
     testAMM(

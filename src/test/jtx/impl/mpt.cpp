@@ -89,12 +89,14 @@ makeMPTCreate(MPTInitDef const& arg)
 {
     if (arg.pay)
         return {
+            .assetScale = arg.assetScale,
             .maxAmt = arg.maxAmt,
             .transferFee = arg.transferFee,
             .pay = {{arg.holders, *arg.pay}},
             .flags = arg.flags,
             .authHolder = arg.authHolder};
     return {
+        .assetScale = arg.assetScale,
         .maxAmt = arg.maxAmt,
         .transferFee = arg.transferFee,
         .authorize = arg.holders,
