@@ -154,13 +154,6 @@ AMMClawback::preclaim(PreclaimContext const& ctx)
             return tecNO_PERMISSION;
         }
 
-        if (!(issuanceFlags & lsfMPTCanLock))
-        {
-            JLOG(ctx.j.debug())
-                << "AMM Clawback: MPT Issuer does not set lsfMPTCanLock.";
-            return tecNO_PERMISSION;
-        }
-
         // if the issuer sets tfClawTwoAssets, we will claw the paired asset.
         // if asset2 holds Issue, we will need to check
         // lsfAllowTrustLineClawback is set for the issuer

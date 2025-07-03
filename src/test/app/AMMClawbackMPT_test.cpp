@@ -241,34 +241,6 @@ class AMMClawbackMPT_test : public jtx::AMMTest
             env(amm::ammClawback(gw, alice, BTC, USD, std::nullopt));
             BEAST_EXPECT(!amm.ammExists());
         }
-
-        // Test clawing MPT that did not set lsfMPTCanLock
-        {
-            Env env(*this);
-            Account gw{"gateway"};
-            Account alice{"alice"};
-            env.fund(XRP(10000), gw, alice);
-            env.close();
-
-            auto const USD = gw["USD"];
-            env.trust(USD(10000), alice);
-            env(pay(gw, alice, USD(10000)));
-            env.close();
-
-            MPT BTC = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice},
-                 .pay = 40'000,
-                 .flags = tfMPTCanClawback | tfMPTCanTransfer});
-
-            AMM amm(env, alice, BTC(100), USD(100));
-            env.close();
-
-            // BTC can not be clawed from the AMM because it can not be locked
-            env(amm::ammClawback(gw, alice, BTC, USD, std::nullopt),
-                ter(tecNO_PERMISSION));
-        }
     }
 
     void
