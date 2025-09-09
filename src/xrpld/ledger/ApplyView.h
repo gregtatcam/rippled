@@ -143,6 +143,7 @@ operator&=(ApplyFlags& lhs, ApplyFlags const& rhs)
 class ApplyView : public ReadView
 {
 private:
+    bool mptOverflow_{false};
     /** Add an entry to a directory using the specified insert strategy */
     std::optional<std::uint64_t>
     dirAdd(
@@ -303,6 +304,28 @@ public:
     {
     }
 
+    /** A flag to indicate if an ApplyView instance allows OutstandingAmount
+     * overflow.
+     * This flag is used to set the OutstandingAmount overflow threshold for MPT
+     * payments. The threshold is set higher within the payment engine and
+     * View::accountSend() to allow for overflow in View::rippleCreditMPT().
+     * Overflow is permitted in this specific case because the first transfer
+     * could be from an issuer to a holder, temporarily overflowing
+     * OutstandingAmount. In contrast, the threshold is set lower to prevent
+     * overflow when payments bypass the payment engine or call
+     * View::rippleCredit().
+     */
+    bool
+    allowMPTOverflow() const
+    {
+        return mptOverflow_;
+    }
+    void
+    setAllowMPTOverflow(bool allow)
+    {
+        mptOverflow_ = allow;
+    }
+
     // Called when the owner count changes
     // This is required to support PaymentSandbox
     virtual void
@@ -438,6 +461,24 @@ public:
     */
     bool
     emptyDirDelete(Keylet const& directory);
+};
+
+class AllowMPTOverflow
+{
+private:
+    ApplyView& view_;
+    bool allowOverflow_;
+
+public:
+    AllowMPTOverflow(ApplyView& view)
+        : view_(view), allowOverflow_(view.allowMPTOverflow())
+    {
+        view.setAllowMPTOverflow(true);
+    }
+    ~AllowMPTOverflow()
+    {
+        view_.setAllowMPTOverflow(allowOverflow_);
+    }
 };
 
 }  // namespace ripple

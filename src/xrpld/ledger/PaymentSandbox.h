@@ -180,10 +180,12 @@ public:
     PaymentSandbox(ReadView const* base, ApplyFlags flags)
         : ApplyViewBase(base, flags)
     {
+        setAllowMPTOverflow(true);
     }
 
     PaymentSandbox(ApplyView const* base) : ApplyViewBase(base, base->flags())
     {
+        setAllowMPTOverflow(true);
     }
 
     /** Construct on top of existing PaymentSandbox.
@@ -203,11 +205,13 @@ public:
     explicit PaymentSandbox(PaymentSandbox const* base)
         : ApplyViewBase(base, base->flags()), ps_(base)
     {
+        setAllowMPTOverflow(true);
     }
 
     explicit PaymentSandbox(PaymentSandbox* base)
         : ApplyViewBase(base, base->flags()), ps_(base)
     {
+        setAllowMPTOverflow(true);
     }
     /** @} */
 

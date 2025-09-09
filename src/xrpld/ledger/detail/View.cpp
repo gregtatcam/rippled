@@ -1963,6 +1963,25 @@ accountSendIOU(
     return terResult;
 }
 
+/** Check if OutstandingAmount overflows. Overflow (not uint64) is allowed
+ * when the payments are executed via the payment engine or accountSend().
+ * Overflow is not allowed when the payments bypass the payment engine or
+ * rippleCredit() is called directly.
+ */
+static bool
+isMPTOverflow(
+    std::int64_t sendAmount,
+    std::uint64_t outstandingAmount,
+    std::int64_t maxAmount,
+    bool allowOverflow)
+{
+    // Don't overflow uint64
+    auto const multiplier = allowOverflow ? 2 : 1;
+    return (
+        sendAmount > maxAmount ||
+        outstandingAmount > (multiplier * maxAmount - sendAmount));
+}
+
 static TER
 rippleCreditMPT(
     ApplyView& view,
@@ -1987,8 +2006,8 @@ rippleCreditMPT(
     {
         if (view.rules().enabled(featureMPTokensV2))
         {
-            // Don't overflow uint64
-            if (amt > maxAmount || outstanding > (2 * maxAmount - amt))
+            if (isMPTOverflow(
+                    amt, outstanding, maxAmount, view.allowMPTOverflow()))
                 return tecPATH_DRY;
         }
         (*sleIssuance)[sfOutstandingAmount] += amt;
@@ -2077,19 +2096,11 @@ rippleSendMPT(
             auto const sendAmount = saAmount.mpt().value();
             auto const maxAmount = maxMPTAmount(*sle);
             auto const outstanding = sle->getFieldU64(sfOutstandingAmount);
-            if (view.rules().enabled(featureMPTokensV2))
-            {
-                // Don't overflow uint64
-                if (sendAmount > maxAmount ||
-                    outstanding > (2 * maxAmount - sendAmount))
-                    return tecPATH_DRY;
-            }
-            else
-            {
-                if (sendAmount > maxAmount ||
-                    outstanding > (maxAmount - sendAmount))
-                    return tecPATH_DRY;
-            }
+            bool const allowOverflow = view.allowMPTOverflow() &&
+                view.rules().enabled(featureMPTokensV2);
+            if (isMPTOverflow(
+                    sendAmount, outstanding, maxAmount, allowOverflow))
+                return tecPATH_DRY;
         }
 
         // Direct send: redeeming MPTs and/or sending own MPTs.
@@ -2112,6 +2123,8 @@ rippleSendMPT(
                     << to_string(uReceiverID)
                     << " : deliver=" << saAmount.getFullText()
                     << " cost=" << saActual.getFullText();
+
+    AllowMPTOverflow overflow(view);
 
     if (auto const terResult =
             rippleCreditMPT(view, issuer, uReceiverID, saAmount, j);
