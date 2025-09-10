@@ -143,7 +143,18 @@ operator&=(ApplyFlags& lhs, ApplyFlags const& rhs)
 class ApplyView : public ReadView
 {
 private:
-    bool mptOverflow_{false};
+    /** A flag to indicate if an ApplyView instance allows OutstandingAmount
+     * overflow.
+     * This flag is used to set the OutstandingAmount overflow threshold for MPT
+     * payments. The threshold is set higher within the payment engine and
+     * View::accountSend() to allow for overflow in View::rippleCreditMPT().
+     * Overflow is permitted in this specific case because the first transfer
+     * could be from an issuer to a holder, temporarily overflowing
+     * OutstandingAmount. In contrast, the threshold is set lower to prevent
+     * overflow when payments bypass the payment engine or call
+     * View::rippleCredit() directly.
+     */
+    bool allowMPTOverflow_{false};
     /** Add an entry to a directory using the specified insert strategy */
     std::optional<std::uint64_t>
     dirAdd(
@@ -304,26 +315,15 @@ public:
     {
     }
 
-    /** A flag to indicate if an ApplyView instance allows OutstandingAmount
-     * overflow.
-     * This flag is used to set the OutstandingAmount overflow threshold for MPT
-     * payments. The threshold is set higher within the payment engine and
-     * View::accountSend() to allow for overflow in View::rippleCreditMPT().
-     * Overflow is permitted in this specific case because the first transfer
-     * could be from an issuer to a holder, temporarily overflowing
-     * OutstandingAmount. In contrast, the threshold is set lower to prevent
-     * overflow when payments bypass the payment engine or call
-     * View::rippleCredit().
-     */
     bool
     allowMPTOverflow() const
     {
-        return mptOverflow_;
+        return allowMPTOverflow_;
     }
-    void
+    bool
     setAllowMPTOverflow(bool allow)
     {
-        mptOverflow_ = allow;
+        return std::exchange(allowMPTOverflow_, allow);
     }
 
     // Called when the owner count changes
@@ -463,21 +463,22 @@ public:
     emptyDirDelete(Keylet const& directory);
 };
 
-class AllowMPTOverflow
+/** RAII class to set and restore ApplyView allowMPTOverflow_
+ */
+class AllowMPTOverflowGuard
 {
 private:
     ApplyView& view_;
-    bool allowOverflow_;
+    bool saved_;
 
 public:
-    AllowMPTOverflow(ApplyView& view)
-        : view_(view), allowOverflow_(view.allowMPTOverflow())
+    AllowMPTOverflowGuard(ApplyView& view)
+        : view_(view), saved_(view.setAllowMPTOverflow(true))
     {
-        view.setAllowMPTOverflow(true);
     }
-    ~AllowMPTOverflow()
+    ~AllowMPTOverflowGuard()
     {
-        view_.setAllowMPTOverflow(allowOverflow_);
+        view_.setAllowMPTOverflow(saved_);
     }
 };
 

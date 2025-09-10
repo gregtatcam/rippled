@@ -2124,7 +2124,7 @@ rippleSendMPT(
                     << " : deliver=" << saAmount.getFullText()
                     << " cost=" << saActual.getFullText();
 
-    AllowMPTOverflow overflow(view);
+    AllowMPTOverflowGuard overflow(view);
 
     if (auto const terResult =
             rippleCreditMPT(view, issuer, uReceiverID, saAmount, j);
