@@ -309,7 +309,8 @@ deleteAMMMPTokens(Sandbox& sb, AccountID const& ammAccountID, beast::Journal j)
             if (nodeType == ltMPTOKEN)
             {
                 // MPT must have zero balance
-                if (sleItem->getFieldU64(sfMPTAmount) != 0)
+                if (sleItem->getFieldU64(sfMPTAmount) != 0 ||
+                    (*sleItem)[~sfLockedAmount].value_or(0) != 0)
                 {
                     // LCOV_EXCL_START
                     JLOG(j.error()) << "deleteAMMObjects: deleting MPT with "

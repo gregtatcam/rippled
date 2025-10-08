@@ -2048,12 +2048,12 @@ accountSendIOU(
 }
 
 /** Checks for two types of OutstandingAmount overflow during a send operation.
- * 1.  **Direct rippleCredit (Multiplier: 1):** A true overflow check when
+ * 1.  **Direct rippleCredit (Overflow: No):** A true overflow check when
  * `OutstandingAmount > MaximumAmount`. This threshold is used for direct
  * rippleCredit transactions that bypass the payment engine.
- * 2.  **accountSend & Payment Engine (Multiplier: 2):** A temporary overflow
- * check when `OutstandingAmount > 2 * MaximumAmount`. This higher threshold
- * is used for `accountSend` and payments processed via the payment engine.
+ * 2.  **accountSend & Payment Engine (Overflow: Yes):** A temporary overflow
+ * check when `OutstandingAmount > UINT64_MAX`. This higher threshold is used
+ * for `accountSend` and payments processed via the payment engine.
  */
 static bool
 isMPTOverflow(
@@ -2062,10 +2062,11 @@ isMPTOverflow(
     std::int64_t maximumAmount,
     AllowMPTOverflow allowOverflow)
 {
-    auto const multiplier = allowOverflow == AllowMPTOverflow::Yes ? 2 : 1;
+    std::uint64_t const limit = (allowOverflow == AllowMPTOverflow::Yes)
+        ? std::numeric_limits<std::uint64_t>::max()
+        : maximumAmount;
     return (
-        sendAmount > maximumAmount ||
-        outstandingAmount > (multiplier * maximumAmount - sendAmount));
+        sendAmount > maximumAmount || outstandingAmount > (limit - sendAmount));
 }
 
 static TER

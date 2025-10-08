@@ -497,7 +497,7 @@ CashCheck::doApply()
                 {
                     auto sleDst = checkReserve();
                     if (sleDst == nullptr)
-                        return tecNO_LINE_INSUF_RESERVE;
+                        return tecINSUFFICIENT_RESERVE;
 
                     if (auto const err = MPTokenAuthorize::checkCreateMPT(
                             psb, mptID, account_, j_);
