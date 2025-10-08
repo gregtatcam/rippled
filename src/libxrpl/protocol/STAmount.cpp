@@ -132,12 +132,19 @@ getMPTValue(STAmount const& amount)
 static bool
 areComparable(STAmount const& v1, STAmount const& v2)
 {
-    if (v1.holds<Issue>() && v2.holds<Issue>())
-        return v1.native() == v2.native() &&
-            v1.get<Issue>().currency == v2.get<Issue>().currency;
-    if (v1.holds<MPTIssue>() && v2.holds<MPTIssue>())
-        return v1.get<MPTIssue>() == v2.get<MPTIssue>();
-    return false;
+    return std::visit(
+        [&]<ValidIssueType TIss1, ValidIssueType TIss2>(
+            TIss1 const& issue1, TIss2 const& issue2) {
+            if constexpr (is_issue_v<TIss1> && is_issue_v<TIss2>)
+                return v1.native() == v2.native() &&
+                    issue1.currency == issue2.currency;
+            else if constexpr (is_mptissue_v<TIss1> && is_mptissue_v<TIss2>)
+                return issue1 == issue2;
+            else
+                return false;
+        },
+        v1.asset().value(),
+        v2.asset().value());
 }
 
 STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
@@ -554,33 +561,44 @@ canAdd(STAmount const& a, STAmount const& b)
     }
 
     // IOU case (precision check)
-    if (a.holds<Issue>() && b.holds<Issue>())
-    {
-        static STAmount const one{IOUAmount{1, 0}, noIssue()};
-        static STAmount const maxLoss{IOUAmount{1, -4}, noIssue()};
-        STAmount lhs = divide((a - b) + b, a, noIssue()) - one;
-        STAmount rhs = divide((b - a) + a, b, noIssue()) - one;
-        return ((rhs.negative() ? -rhs : rhs) +
-                (lhs.negative() ? -lhs : lhs)) <= maxLoss;
-    }
+    auto const ret = std::visit(
+        [&]<ValidIssueType TIss1, ValidIssueType TIss2>(
+            TIss1 const&, TIss2 const&) -> std::optional<bool> {
+            if constexpr (is_issue_v<TIss1> && is_issue_v<TIss2>)
+            {
+                static STAmount const one{IOUAmount{1, 0}, noIssue()};
+                static STAmount const maxLoss{IOUAmount{1, -4}, noIssue()};
+                STAmount lhs = divide((a - b) + b, a, noIssue()) - one;
+                STAmount rhs = divide((b - a) + a, b, noIssue()) - one;
+                return ((rhs.negative() ? -rhs : rhs) +
+                        (lhs.negative() ? -lhs : lhs)) <= maxLoss;
+            }
 
-    // MPT (overflow & underflow check)
-    if (a.holds<MPTIssue>() && b.holds<MPTIssue>())
-    {
-        MPTAmount A = a.mpt();
-        MPTAmount B = b.mpt();
-        if ((B > MPTAmount{0} &&
-             A > MPTAmount{std::numeric_limits<MPTAmount::value_type>::max()} -
-                     B) ||
-            (B < MPTAmount{0} &&
-             A < MPTAmount{std::numeric_limits<MPTAmount::value_type>::min()} -
-                     B))
-        {
-            return false;
-        }
+            // MPT (overflow & underflow check)
+            if constexpr (is_mptissue_v<TIss1> && is_mptissue_v<TIss2>)
+            {
+                MPTAmount A = a.mpt();
+                MPTAmount B = b.mpt();
+                if ((B > MPTAmount{0} &&
+                     A > MPTAmount{std::numeric_limits<
+                             MPTAmount::value_type>::max()} -
+                             B) ||
+                    (B < MPTAmount{0} &&
+                     A < MPTAmount{std::numeric_limits<
+                             MPTAmount::value_type>::min()} -
+                             B))
+                {
+                    return false;
+                }
 
-        return true;
-    }
+                return true;
+            }
+            return std::nullopt;
+        },
+        a.asset().value(),
+        b.asset().value());
+    if (ret)
+        return *ret;
     // LCOV_EXCL_START
     UNREACHABLE("STAmount::canAdd : unexpected STAmount type");
     return false;
@@ -634,28 +652,39 @@ canSubtract(STAmount const& a, STAmount const& b)
     }
 
     // IOU case (no underflow)
-    if (a.holds<Issue>() && b.holds<Issue>())
-    {
-        return true;
-    }
+    auto const ret = std::visit(
+        [&]<ValidIssueType TIss1, ValidIssueType TIss2>(
+            TIss1 const&, TIss2 const&) -> std::optional<bool> {
+            if constexpr (is_issue_v<TIss1> && is_issue_v<TIss2>)
+            {
+                return true;
+            }
 
-    // MPT case (underflow & overflow check)
-    if (a.holds<MPTIssue>() && b.holds<MPTIssue>())
-    {
-        MPTAmount A = a.mpt();
-        MPTAmount B = b.mpt();
+            // MPT case (underflow & overflow check)
+            if constexpr (is_mptissue_v<TIss1> && is_mptissue_v<TIss2>)
+            {
+                MPTAmount A = a.mpt();
+                MPTAmount B = b.mpt();
 
-        // Underflow check
-        if (B > MPTAmount{0} && A < B)
-            return false;
+                // Underflow check
+                if (B > MPTAmount{0} && A < B)
+                    return false;
 
-        // Overflow check
-        if (B < MPTAmount{0} &&
-            A > MPTAmount{std::numeric_limits<MPTAmount::value_type>::max()} +
-                    B)
-            return false;
-        return true;
-    }
+                // Overflow check
+                if (B < MPTAmount{0} &&
+                    A >
+                        MPTAmount{
+                            std::numeric_limits<MPTAmount::value_type>::max()} +
+                            B)
+                    return false;
+                return true;
+            }
+            return std::nullopt;
+        },
+        a.asset().value(),
+        b.asset().value());
+    if (ret)
+        return *ret;
     // LCOV_EXCL_START
     UNREACHABLE("STAmount::canSubtract : unexpected STAmount type");
     return false;
@@ -802,40 +831,50 @@ STAmount::getJson(JsonOptions) const
 void
 STAmount::add(Serializer& s) const
 {
-    if (native())
-    {
-        XRPL_ASSERT(mOffset == 0, "ripple::STAmount::add : zero offset");
+    std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (is_mptissue_v<TIss>)
+            {
+                auto u8 = static_cast<unsigned char>(cMPToken >> 56);
+                if (!mIsNegative)
+                    u8 |= static_cast<unsigned char>(cPositive >> 56);
+                s.add8(u8);
+                s.add64(mValue);
+                s.addBitString(issue.getMptID());
+            }
+            else
+            {
+                if (native())
+                {
+                    XRPL_ASSERT(
+                        mOffset == 0, "ripple::STAmount::add : zero offset");
 
-        if (!mIsNegative)
-            s.add64(mValue | cPositive);
-        else
-            s.add64(mValue);
-    }
-    else if (mAsset.holds<MPTIssue>())
-    {
-        auto u8 = static_cast<unsigned char>(cMPToken >> 56);
-        if (!mIsNegative)
-            u8 |= static_cast<unsigned char>(cPositive >> 56);
-        s.add8(u8);
-        s.add64(mValue);
-        s.addBitString(mAsset.get<MPTIssue>().getMptID());
-    }
-    else
-    {
-        if (*this == beast::zero)
-            s.add64(cIssuedCurrency);
-        else if (mIsNegative)  // 512 = not native
-            s.add64(
-                mValue |
-                (static_cast<std::uint64_t>(mOffset + 512 + 97) << (64 - 10)));
-        else  // 256 = positive
-            s.add64(
-                mValue |
-                (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
-                 << (64 - 10)));
-        s.addBitString(mAsset.get<Issue>().currency);
-        s.addBitString(mAsset.get<Issue>().account);
-    }
+                    if (!mIsNegative)
+                        s.add64(mValue | cPositive);
+                    else
+                        s.add64(mValue);
+                }
+                else
+                {
+                    if (*this == beast::zero)
+                        s.add64(cIssuedCurrency);
+                    else if (mIsNegative)  // 512 = not native
+                        s.add64(
+                            mValue |
+                            (static_cast<std::uint64_t>(mOffset + 512 + 97)
+                             << (64 - 10)));
+                    else  // 256 = positive
+                        s.add64(
+                            mValue |
+                            (static_cast<std::uint64_t>(
+                                 mOffset + 512 + 256 + 97)
+                             << (64 - 10)));
+                    s.addBitString(issue.currency);
+                    s.addBitString(issue.account);
+                }
+            }
+        },
+        mAsset.value());
 }
 
 bool

@@ -208,7 +208,7 @@ toMaxAmount(Asset const& asset)
     {
         return std::visit(
             []<ValidIssueType TIss>(TIss const& issue) {
-                if constexpr (std::is_same_v<TIss, Issue>)
+                if constexpr (is_issue_v<TIss>)
                 {
                     if (isXRP(issue))
                         return STAmount(

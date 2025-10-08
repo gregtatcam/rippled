@@ -88,10 +88,9 @@ assetFromJson(Json::Value const& v)
 std::ostream&
 operator<<(std::ostream& os, Asset const& x)
 {
-    if (x.holds<Issue>())
-        os << x.get<Issue>();
-    else
-        os << x.get<MPTIssue>();
+    std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) { os << issue; },
+        x.value());
     return os;
 }
 

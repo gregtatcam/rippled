@@ -75,36 +75,44 @@ VaultWithdraw::preclaim(PreclaimContext const& ctx)
     if (assets.asset() != vaultAsset && assets.asset() != vaultShare)
         return tecWRONG_ASSET;
 
-    if (vaultAsset.native())
-        ;  // No special checks for XRP
-    else if (vaultAsset.holds<MPTIssue>())
-    {
-        auto mptID = vaultAsset.get<MPTIssue>().getMptID();
-        auto issuance = ctx.view.read(keylet::mptIssuance(mptID));
-        if (!issuance)
-            return tecOBJECT_NOT_FOUND;
-        if (!issuance->isFlag(lsfMPTCanTransfer))
-        {
-            // LCOV_EXCL_START
-            JLOG(ctx.j.error())
-                << "VaultWithdraw: vault assets are non-transferable.";
-            return tecNO_AUTH;
-            // LCOV_EXCL_STOP
-        }
-    }
-    else if (vaultAsset.holds<Issue>())
-    {
-        auto const issuer =
-            ctx.view.read(keylet::account(vaultAsset.getIssuer()));
-        if (!issuer)
-        {
-            // LCOV_EXCL_START
-            JLOG(ctx.j.error())
-                << "VaultWithdraw: missing issuer of vault assets.";
-            return tefINTERNAL;
-            // LCOV_EXCL_STOP
-        }
-    }
+    auto const err = std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) -> std::optional<TER> {
+            if constexpr (is_mptissue_v<TIss>)
+            {
+                auto const& mptID = issue.getMptID();
+                auto issuance = ctx.view.read(keylet::mptIssuance(mptID));
+                if (!issuance)
+                    return tecOBJECT_NOT_FOUND;
+                if (!issuance->isFlag(lsfMPTCanTransfer))
+                {
+                    // LCOV_EXCL_START
+                    JLOG(ctx.j.error())
+                        << "VaultWithdraw: vault assets are non-transferable.";
+                    return tecNO_AUTH;
+                    // LCOV_EXCL_STOP
+                }
+            }
+            else
+            {
+                if (issue.native())
+                    return std::nullopt;  // no special checks for XRP
+
+                auto const issuer =
+                    ctx.view.read(keylet::account(vaultAsset.getIssuer()));
+                if (!issuer)
+                {
+                    // LCOV_EXCL_START
+                    JLOG(ctx.j.error())
+                        << "VaultWithdraw: missing issuer of vault assets.";
+                    return tefINTERNAL;
+                    // LCOV_EXCL_STOP
+                }
+            }
+            return std::nullopt;
+        },
+        vaultAsset.value());
+    if (err)
+        return *err;
 
     // Enforce valid withdrawal policy
     if (vault->at(sfWithdrawalPolicy) != vaultStrategyFirstComeFirstServe)

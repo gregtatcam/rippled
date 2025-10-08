@@ -1541,8 +1541,7 @@ class CheckMPT_test : public beast::unit_test::suite
             env(check::create(gw1, yui, CK8(99)));
             env.close();
 
-            env(check::cash(yui, chkId, CK8(99)),
-                ter(tecNO_LINE_INSUF_RESERVE));
+            env(check::cash(yui, chkId, CK8(99)), ter(tecINSUFFICIENT_RESERVE));
             env.close();
             alice.verifyOwners(__LINE__);
 

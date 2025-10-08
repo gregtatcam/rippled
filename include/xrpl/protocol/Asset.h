@@ -149,6 +149,12 @@ public:
     equalTokens(Asset const& lhs, Asset const& rhs);
 };
 
+template <ValidIssueType TIss>
+constexpr bool is_issue_v = std::is_same_v<TIss, Issue>;
+
+template <ValidIssueType TIss>
+constexpr bool is_mptissue_v = std::is_same_v<TIss, MPTIssue>;
+
 inline Json::Value
 to_json(Asset const& asset)
 {
@@ -193,7 +199,7 @@ Asset::token() const
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) -> token_type {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return issue.currency;
             else
                 return issue.getMptID();
@@ -209,7 +215,7 @@ Asset::getAmountType() const
             constexpr AmountType<XRPAmount> xrp;
             constexpr AmountType<IOUAmount> iou;
             constexpr AmountType<MPTAmount> mpt;
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return native() ? AmtType(xrp) : AmtType(iou);
             else
                 return AmtType(mpt);
@@ -261,7 +267,7 @@ operator==(BadAsset const&, Asset const& rhs)
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return badCurrency() == issue.currency;
             else
                 return issue.getIssuer() == xrpAccount();
@@ -312,7 +318,7 @@ isConsistent(Asset const& issue)
 {
     return std::visit(
         [&]<typename TIss>(TIss const& issue_) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return isConsistent(issue_);
             else
                 return true;
@@ -325,7 +331,7 @@ validAsset(Asset const& asset)
 {
     return std::visit(
         [&]<typename TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return isConsistent(issue) && issue.currency != badCurrency();
             else
                 return issue.getIssuer() != xrpAccount();
@@ -340,7 +346,7 @@ hash_append(Hasher& h, Asset const& r)
     using beast::hash_append;
     std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 hash_append(h, issue);
             else
                 hash_append(h, issue);

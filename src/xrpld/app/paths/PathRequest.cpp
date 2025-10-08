@@ -622,13 +622,15 @@ PathRequest::findPaths(
         STAmount saMaxAmount = [&]() {
             if (saSendMax)
                 return *saSendMax;
-            if (asset.holds<Issue>())
-                return STAmount(
-                    Issue{asset.get<Issue>().currency, sourceAccount},
-                    1u,
-                    0,
-                    true);
-            return STAmount(asset.get<MPTIssue>(), 1u, 0, true);
+            return std::visit(
+                [&]<ValidIssueType TIss>(TIss const& issue) {
+                    if constexpr (is_issue_v<TIss>)
+                        return STAmount(
+                            Issue{issue.currency, sourceAccount}, 1u, 0, true);
+                    else
+                        return STAmount(issue, 1u, 0, true);
+                },
+                asset.value());
         }();
 
         JLOG(m_journal.debug())

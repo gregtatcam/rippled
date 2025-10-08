@@ -201,7 +201,7 @@ isGlobalFrozen(ReadView const& view, Asset const& asset)
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return isGlobalFrozen(view, issue.getIssuer());
             else
                 return isGlobalFrozen(view, issue);
@@ -2267,7 +2267,7 @@ accountSend(
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return accountSendIOU(
                     view, uSenderID, uReceiverID, saAmount, j, waiveFee);
             else
@@ -2625,7 +2625,7 @@ requireAuth(
             auto const asset = sleVault->at(sfAsset);
             if (auto const err = std::visit(
                     [&]<ValidIssueType TIss>(TIss const& issue) {
-                        if constexpr (std::is_same_v<TIss, Issue>)
+                        if constexpr (is_issue_v<TIss>)
                             return requireAuth(view, issue, account, authType);
                         else
                             return requireAuth(
@@ -2951,7 +2951,7 @@ rippleCredit(
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
             {
                 return rippleCreditIOU(
                     view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);

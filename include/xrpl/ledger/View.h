@@ -228,7 +228,7 @@ isAnyFrozen(
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return isAnyFrozen(view, accounts, issue);
             else
                 return isAnyFrozen(view, accounts, issue, depth);
@@ -303,7 +303,7 @@ accountHolds(
 {
     return std::visit(
         [&]<typename TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return accountHolds(view, account, issue, zeroIfFrozen, j);
             else
                 return accountHolds(
@@ -441,7 +441,7 @@ transferRate(ReadView const& view, STAmount const& amount)
 {
     return std::visit(
         [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
+            if constexpr (is_issue_v<TIss>)
                 return transferRate(view, issue.getIssuer());
             else
                 return transferRate(view, issue.getMptID());

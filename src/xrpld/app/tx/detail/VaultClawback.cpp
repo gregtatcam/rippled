@@ -105,35 +105,38 @@ VaultClawback::preclaim(PreclaimContext const& ctx)
         return tecNO_PERMISSION;  // Only issuers can clawback.
     }
 
-    if (vaultAsset.holds<MPTIssue>())
-    {
-        auto const mpt = vaultAsset.get<MPTIssue>();
-        auto const mptIssue =
-            ctx.view.read(keylet::mptIssuance(mpt.getMptID()));
-        if (mptIssue == nullptr)
-            return tecOBJECT_NOT_FOUND;
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) -> TER {
+            if constexpr (is_mptissue_v<TIss>)
+            {
+                auto const& mpt = issue;
+                auto const mptIssue =
+                    ctx.view.read(keylet::mptIssuance(mpt.getMptID()));
+                if (mptIssue == nullptr)
+                    return tecOBJECT_NOT_FOUND;
 
-        std::uint32_t const issueFlags = mptIssue->getFieldU32(sfFlags);
-        if (!(issueFlags & lsfMPTCanClawback))
-        {
-            JLOG(ctx.j.debug())
-                << "VaultClawback: cannot clawback MPT vault asset.";
-            return tecNO_PERMISSION;
-        }
-    }
-    else if (vaultAsset.holds<Issue>())
-    {
-        std::uint32_t const issuerFlags = issuer->getFieldU32(sfFlags);
-        if (!(issuerFlags & lsfAllowTrustLineClawback) ||
-            (issuerFlags & lsfNoFreeze))
-        {
-            JLOG(ctx.j.debug())
-                << "VaultClawback: cannot clawback IOU vault asset.";
-            return tecNO_PERMISSION;
-        }
-    }
-
-    return tesSUCCESS;
+                std::uint32_t const issueFlags = mptIssue->getFieldU32(sfFlags);
+                if (!(issueFlags & lsfMPTCanClawback))
+                {
+                    JLOG(ctx.j.debug())
+                        << "VaultClawback: cannot clawback MPT vault asset.";
+                    return tecNO_PERMISSION;
+                }
+            }
+            else
+            {
+                std::uint32_t const issuerFlags = issuer->getFieldU32(sfFlags);
+                if (!(issuerFlags & lsfAllowTrustLineClawback) ||
+                    (issuerFlags & lsfNoFreeze))
+                {
+                    JLOG(ctx.j.debug())
+                        << "VaultClawback: cannot clawback IOU vault asset.";
+                    return tecNO_PERMISSION;
+                }
+            }
+            return tesSUCCESS;
+        },
+        vaultAsset.value());
 }
 
 TER

@@ -1403,31 +1403,39 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
             auto const& view = ctx.view;
             auto const& cur = book_.in.getIssuer();
 
-            if (book_.in.holds<Issue>())
-            {
-                auto sle = view.read(
-                    keylet::line(*prev, cur, book_.in.get<Issue>().currency));
-                if (!sle)
-                    return terNO_LINE;
-                if ((*sle)[sfFlags] &
-                    ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple))
-                    return terNO_RIPPLE;
-            }
-            else
-            {
-                auto const issuanceID =
-                    keylet::mptIssuance(book_.in.get<MPTIssue>().getMptID());
-                if (!view.exists(issuanceID))
-                    return tecOBJECT_NOT_FOUND;
+            auto const err = std::visit(
+                [&]<ValidIssueType TIss>(
+                    TIss const& issue) -> std::optional<TER> {
+                    if constexpr (is_issue_v<TIss>)
+                    {
+                        auto sle =
+                            view.read(keylet::line(*prev, cur, issue.currency));
+                        if (!sle)
+                            return terNO_LINE;
+                        if ((*sle)[sfFlags] &
+                            ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple))
+                            return terNO_RIPPLE;
+                    }
+                    else
+                    {
+                        auto const issuanceID =
+                            keylet::mptIssuance(issue.getMptID());
+                        if (!view.exists(issuanceID))
+                            return tecOBJECT_NOT_FOUND;
 
-                if (auto const ter = checkMPTDEXAllowed(
-                        view,
-                        book_.in,
-                        book_.in.getIssuer(),
-                        book_.in.getIssuer());
-                    ter != tesSUCCESS)
-                    return ter;
-            }
+                        if (auto const ter = checkMPTDEXAllowed(
+                                view,
+                                book_.in,
+                                issue.getIssuer(),
+                                issue.getIssuer());
+                            ter != tesSUCCESS)
+                            return ter;
+                    }
+                    return std::nullopt;
+                },
+                book_.in.value());
+            if (err)
+                return *err;
         }
     }
 
@@ -1443,9 +1451,14 @@ BookStep<TIn, TOut, TDerived>::rate(
 {
     if (isXRP(asset) || asset.getIssuer() == dstAccount)
         return parityRate;
-    if (asset.holds<Issue>())
-        return transferRate(view, asset.getIssuer());
-    return transferRate(view, asset.get<MPTIssue>().getMptID());
+    return std::visit(
+        [&]<ValidIssueType TIss>(TIss const& issue) {
+            if constexpr (is_issue_v<TIss>)
+                return transferRate(view, issue.getIssuer());
+            else
+                return transferRate(view, issue.getMptID());
+        },
+        asset.value());
 };
 
 //------------------------------------------------------------------------------

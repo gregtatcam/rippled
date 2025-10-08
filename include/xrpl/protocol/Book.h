@@ -182,12 +182,12 @@ public:
     {
         return std::visit(
             [&]<ripple::ValidIssueType TIss>(TIss const& issue) {
-                if constexpr (std::is_same_v<TIss, ripple::Issue>)
+                if constexpr (ripple::is_issue_v<TIss>)
                 {
                     value_type result(m_issue_hasher(issue));
                     return result;
                 }
-                else if constexpr (std::is_same_v<TIss, ripple::MPTIssue>)
+                else
                 {
                     value_type result(m_mptissue_hasher(issue));
                     return result;
