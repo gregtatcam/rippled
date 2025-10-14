@@ -352,7 +352,7 @@ applyCreate(
             if (SLE::pointer sleRippleState =
                     sb.peek(keylet::line(accountId, amount.get<Issue>()));
                 !sleRippleState)
-                return tecINTERNAL;
+                return tecINTERNAL;  // LCOV_EXCL_LINE
             else
             {
                 auto const flags = sleRippleState->getFlags();
