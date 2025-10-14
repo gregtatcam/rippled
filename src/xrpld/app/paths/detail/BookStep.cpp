@@ -1403,37 +1403,32 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
             auto const& view = ctx.view;
             auto const& cur = book_.in.getIssuer();
 
-            auto const err = std::visit(
-                [&]<ValidIssueType TIss>(
-                    TIss const& issue) -> std::optional<TER> {
-                    if constexpr (is_issue_v<TIss>)
-                    {
-                        auto sle =
-                            view.read(keylet::line(*prev, cur, issue.currency));
-                        if (!sle)
-                            return terNO_LINE;
-                        if ((*sle)[sfFlags] &
-                            ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple))
-                            return terNO_RIPPLE;
-                    }
-                    else
-                    {
-                        auto const issuanceID =
-                            keylet::mptIssuance(issue.getMptID());
-                        if (!view.exists(issuanceID))
-                            return tecOBJECT_NOT_FOUND;
-
-                        if (auto const ter = checkMPTDEXAllowed(
-                                view,
-                                book_.in,
-                                issue.getIssuer(),
-                                issue.getIssuer());
-                            ter != tesSUCCESS)
-                            return ter;
-                    }
+            auto const err = book_.in.visit(
+                [&](Issue const& issue) -> std::optional<TER> {
+                    auto sle =
+                        view.read(keylet::line(*prev, cur, issue.currency));
+                    if (!sle)
+                        return terNO_LINE;
+                    if ((*sle)[sfFlags] &
+                        ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple))
+                        return terNO_RIPPLE;
                     return std::nullopt;
                 },
-                book_.in.value());
+                [&](MPTIssue const& issue) -> std::optional<TER> {
+                    auto const issuanceID =
+                        keylet::mptIssuance(issue.getMptID());
+                    if (!view.exists(issuanceID))
+                        return tecOBJECT_NOT_FOUND;
+
+                    if (auto const ter = checkMPTDEXAllowed(
+                            view,
+                            book_.in,
+                            issue.getIssuer(),
+                            issue.getIssuer());
+                        ter != tesSUCCESS)
+                        return ter;
+                    return std::nullopt;
+                });
             if (err)
                 return *err;
         }
@@ -1451,14 +1446,13 @@ BookStep<TIn, TOut, TDerived>::rate(
 {
     if (isXRP(asset) || asset.getIssuer() == dstAccount)
         return parityRate;
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                return transferRate(view, issue.getIssuer());
-            else
-                return transferRate(view, issue.getMptID());
+    return asset.visit(
+        [&](Issue const& issue) {
+            return transferRate(view, issue.getIssuer());
         },
-        asset.value());
+        [&](MPTIssue const& issue) {
+            return transferRate(view, issue.getMptID());
+        });
 };
 
 //------------------------------------------------------------------------------

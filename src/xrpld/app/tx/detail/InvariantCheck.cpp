@@ -358,30 +358,29 @@ NoZeroEscrow::visitEntry(
         }
         else
         {
-            return std::visit(
-                [&]<ValidIssueType TIss>(TIss const& issue) {
+            return amount.asset().visit(
+                [&](Issue const& issue) {
                     // IOU case
-                    if constexpr (is_issue_v<TIss>)
-                    {
-                        if (amount <= beast::zero)
-                            return true;
+                    if (amount <= beast::zero)
+                        return true;
 
-                        if (badCurrency() == issue.currency)
-                            return true;
-                    }
+                    if (badCurrency() == issue.currency)
+                        return true;
 
-                    // MPT case
-                    else
-                    {
-                        if (amount <= beast::zero)
-                            return true;
-
-                        if (amount.mpt() > MPTAmount{maxMPTokenAmount})
-                            return true;  // LCOV_EXCL_LINE
-                    }
                     return false;
-                },
-                amount.asset().value());
+                }
+
+                // MPT case
+                ,
+                [&](MPTIssue const&) {
+                    if (amount <= beast::zero)
+                        return true;
+
+                    if (amount.mpt() > MPTAmount{maxMPTokenAmount})
+                        return true;  // LCOV_EXCL_LINE
+
+                    return false;
+                });
         }
         return false;
     };
@@ -1398,26 +1397,20 @@ ValidClawback::finalize(
             AccountID const issuer = tx.getAccountID(sfAccount);
             STAmount const& amount = tx.getFieldAmount(sfAmount);
             AccountID const& holder = amount.getIssuer();
-            STAmount const holderBalance = std::visit(
-                [&]<ValidIssueType TIss>(TIss const& issue) {
-                    if constexpr (is_issue_v<TIss>)
-                        return accountHolds(
-                            view,
-                            holder,
-                            issue.currency,
-                            issuer,
-                            fhIGNORE_FREEZE,
-                            j);
-                    else
-                        return accountHolds(
-                            view,
-                            issuer,
-                            issue,
-                            fhIGNORE_FREEZE,
-                            ahIGNORE_AUTH,
-                            j);
+            STAmount const holderBalance = amount.asset().visit(
+                [&](Issue const& issue) {
+                    return accountHolds(
+                        view,
+                        holder,
+                        issue.currency,
+                        issuer,
+                        fhIGNORE_FREEZE,
+                        j);
                 },
-                amount.asset().value());
+                [&](MPTIssue const& issue) {
+                    return accountHolds(
+                        view, issuer, issue, fhIGNORE_FREEZE, ahIGNORE_AUTH, j);
+                });
 
             if (holderBalance.signum() < 0)
             {

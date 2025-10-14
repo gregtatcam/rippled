@@ -831,50 +831,44 @@ STAmount::getJson(JsonOptions) const
 void
 STAmount::add(Serializer& s) const
 {
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_mptissue_v<TIss>)
+    mAsset.visit(
+        [&](MPTIssue const& issue) {
+            auto u8 = static_cast<unsigned char>(cMPToken >> 56);
+            if (!mIsNegative)
+                u8 |= static_cast<unsigned char>(cPositive >> 56);
+            s.add8(u8);
+            s.add64(mValue);
+            s.addBitString(issue.getMptID());
+        },
+        [&](Issue const& issue) {
+            if (native())
             {
-                auto u8 = static_cast<unsigned char>(cMPToken >> 56);
+                XRPL_ASSERT(
+                    mOffset == 0, "ripple::STAmount::add : zero offset");
+
                 if (!mIsNegative)
-                    u8 |= static_cast<unsigned char>(cPositive >> 56);
-                s.add8(u8);
-                s.add64(mValue);
-                s.addBitString(issue.getMptID());
+                    s.add64(mValue | cPositive);
+                else
+                    s.add64(mValue);
             }
             else
             {
-                if (native())
-                {
-                    XRPL_ASSERT(
-                        mOffset == 0, "ripple::STAmount::add : zero offset");
-
-                    if (!mIsNegative)
-                        s.add64(mValue | cPositive);
-                    else
-                        s.add64(mValue);
-                }
-                else
-                {
-                    if (*this == beast::zero)
-                        s.add64(cIssuedCurrency);
-                    else if (mIsNegative)  // 512 = not native
-                        s.add64(
-                            mValue |
-                            (static_cast<std::uint64_t>(mOffset + 512 + 97)
-                             << (64 - 10)));
-                    else  // 256 = positive
-                        s.add64(
-                            mValue |
-                            (static_cast<std::uint64_t>(
-                                 mOffset + 512 + 256 + 97)
-                             << (64 - 10)));
-                    s.addBitString(issue.currency);
-                    s.addBitString(issue.account);
-                }
+                if (*this == beast::zero)
+                    s.add64(cIssuedCurrency);
+                else if (mIsNegative)  // 512 = not native
+                    s.add64(
+                        mValue |
+                        (static_cast<std::uint64_t>(mOffset + 512 + 97)
+                         << (64 - 10)));
+                else  // 256 = positive
+                    s.add64(
+                        mValue |
+                        (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
+                         << (64 - 10)));
+                s.addBitString(issue.currency);
+                s.addBitString(issue.account);
             }
-        },
-        mAsset.value());
+        });
 }
 
 bool

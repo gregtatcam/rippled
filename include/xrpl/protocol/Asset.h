@@ -27,6 +27,8 @@
 #include <xrpl/protocol/MPTIssue.h>
 #include <xrpl/protocol/Rules.h>
 
+#include "Concepts.h"
+
 namespace ripple {
 
 class STAmount;
@@ -129,6 +131,16 @@ public:
     constexpr AmtType
     getAmountType() const;
 
+    // Custom, generic visit implementation
+    template <typename... Visitors>
+    constexpr auto
+    visit(Visitors&&... visitors) const -> decltype(auto)
+    {
+        // Simple delegation to the reusable utility, passing the internal
+        // variant data.
+        return detail::visit(issue_, std::forward<Visitors>(visitors)...);
+    }
+
     friend constexpr bool
     operator==(Asset const& lhs, Asset const& rhs);
 
@@ -197,30 +209,26 @@ Asset::value() const
 constexpr Asset::token_type
 Asset::token() const
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) -> token_type {
-            if constexpr (is_issue_v<TIss>)
-                return issue.currency;
-            else
-                return issue.getMptID();
-        },
-        issue_);
+    return visit(
+        [&](Issue const& issue) -> Asset::token_type { return issue.currency; },
+        [&](MPTIssue const& issue) -> Asset::token_type {
+            return issue.getMptID();
+        });
 }
 
 constexpr Asset::AmtType
 Asset::getAmountType() const
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) -> AmtType {
+    return visit(
+        [&](Issue const& issue) -> Asset::AmtType {
             constexpr AmountType<XRPAmount> xrp;
             constexpr AmountType<IOUAmount> iou;
-            constexpr AmountType<MPTAmount> mpt;
-            if constexpr (is_issue_v<TIss>)
-                return native() ? AmtType(xrp) : AmtType(iou);
-            else
-                return AmtType(mpt);
+            return native() ? AmtType(xrp) : AmtType(iou);
         },
-        issue_);
+        [&](MPTIssue const& issue) -> Asset::AmtType {
+            constexpr AmountType<MPTAmount> mpt;
+            return AmtType(mpt);
+        });
 }
 
 constexpr bool
@@ -246,8 +254,7 @@ operator<=>(Asset const& lhs, Asset const& rhs)
             TLhs const& lhs_, TRhs const& rhs_) {
             if constexpr (std::is_same_v<TLhs, TRhs>)
                 return std::weak_ordering(lhs_ <=> rhs_);
-            else if constexpr (
-                std::is_same_v<TLhs, Issue> && std::is_same_v<TRhs, MPTIssue>)
+            else if constexpr (is_issue_v<TLhs> && is_mptissue_v<TRhs>)
                 return std::weak_ordering::greater;
             else
                 return std::weak_ordering::less;
@@ -265,14 +272,13 @@ operator==(Currency const& lhs, Asset const& rhs)
 constexpr bool
 operator==(BadAsset const&, Asset const& rhs)
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                return badCurrency() == issue.currency;
-            else
-                return issue.getIssuer() == xrpAccount();
+    return rhs.visit(
+        [&](Issue const& issue) -> bool {
+            return badCurrency() == issue.currency;
         },
-        rhs.value());
+        [&](MPTIssue const& issue) -> bool {
+            return issue.getIssuer() == xrpAccount();
+        });
 }
 
 constexpr bool
@@ -314,29 +320,23 @@ Json::Value
 to_json(Asset const& asset);
 
 inline bool
-isConsistent(Asset const& issue)
+isConsistent(Asset const& asset)
 {
-    return std::visit(
-        [&]<typename TIss>(TIss const& issue_) {
-            if constexpr (is_issue_v<TIss>)
-                return isConsistent(issue_);
-            else
-                return true;
-        },
-        issue.value());
+    return asset.visit(
+        [&](Issue const& issue) { return isConsistent(issue); },
+        [&](MPTIssue const&) { return true; });
 }
 
 inline bool
 validAsset(Asset const& asset)
 {
-    return std::visit(
-        [&]<typename TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                return isConsistent(issue) && issue.currency != badCurrency();
-            else
-                return issue.getIssuer() != xrpAccount();
+    return asset.visit(
+        [&](Issue const& issue) {
+            return isConsistent(issue) && issue.currency != badCurrency();
         },
-        asset.value());
+        [&](MPTIssue const& issue) {
+            return issue.getIssuer() != xrpAccount();
+        });
 }
 
 template <class Hasher>
@@ -344,14 +344,9 @@ void
 hash_append(Hasher& h, Asset const& r)
 {
     using beast::hash_append;
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                hash_append(h, issue);
-            else
-                hash_append(h, issue);
-        },
-        r.value());
+    r.visit(
+        [&](Issue const& issue) { hash_append(h, issue); },
+        [&](MPTIssue const& issue) { hash_append(h, issue); });
 }
 
 std::ostream&

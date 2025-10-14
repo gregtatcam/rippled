@@ -61,42 +61,40 @@ VaultDeposit::preclaim(PreclaimContext const& ctx)
     if (assets.asset() != vaultAsset)
         return tecWRONG_ASSET;
 
-    auto const err = std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) -> std::optional<TER> {
-            if constexpr (is_mptissue_v<TIss>)
+    auto const err = vaultAsset.visit(
+        [&](MPTIssue const& issue) -> std::optional<TER> {
+            auto const& mptID = issue.getMptID();
+            auto issuance = ctx.view.read(keylet::mptIssuance(mptID));
+            if (!issuance)
+                return tecOBJECT_NOT_FOUND;
+            if (!issuance->isFlag(lsfMPTCanTransfer))
             {
-                auto const& mptID = issue.getMptID();
-                auto issuance = ctx.view.read(keylet::mptIssuance(mptID));
-                if (!issuance)
-                    return tecOBJECT_NOT_FOUND;
-                if (!issuance->isFlag(lsfMPTCanTransfer))
-                {
-                    // LCOV_EXCL_START
-                    JLOG(ctx.j.error())
-                        << "VaultDeposit: vault assets are non-transferable.";
-                    return tecNO_AUTH;
-                    // LCOV_EXCL_STOP
-                }
+                // LCOV_EXCL_START
+                JLOG(ctx.j.error())
+                    << "VaultDeposit: vault assets are non-transferable.";
+                return tecNO_AUTH;
+                // LCOV_EXCL_STOP
             }
-            else
-            {
-                if (issue.native())
-                    return std::nullopt;  // No special checks for XRP
 
-                auto const issuer =
-                    ctx.view.read(keylet::account(vaultAsset.getIssuer()));
-                if (!issuer)
-                {
-                    // LCOV_EXCL_START
-                    JLOG(ctx.j.error())
-                        << "VaultDeposit: missing issuer of vault assets.";
-                    return tefINTERNAL;
-                    // LCOV_EXCL_STOP
-                }
-            }
             return std::nullopt;
         },
-        vaultAsset.value());
+        [&](Issue const& issue) -> std::optional<TER> {
+            if (issue.native())
+                return std::nullopt;  // No special checks for XRP
+
+            auto const issuer =
+                ctx.view.read(keylet::account(vaultAsset.getIssuer()));
+            if (!issuer)
+            {
+                // LCOV_EXCL_START
+                JLOG(ctx.j.error())
+                    << "VaultDeposit: missing issuer of vault assets.";
+                return tefINTERNAL;
+                // LCOV_EXCL_STOP
+            }
+
+            return std::nullopt;
+        });
     if (err)
         return *err;
 

@@ -135,32 +135,27 @@ AMMClawback::preclaim(PreclaimContext const& ctx)
     }
 
     auto const checkClawAsset = [&](Asset const asset) -> bool {
-        return std::visit(
-            [&]<ValidIssueType TIss>(TIss const& issue) {
-                if constexpr (is_issue_v<TIss>)
-                {
-                    if (issue.native())
-                        return false;  // LCOV_EXCL_LINE
+        return asset.visit(
+            [&](Issue const& issue) {
+                if (issue.native())
+                    return false;  // LCOV_EXCL_LINE
 
-                    if (!(issuerFlagsIn & lsfAllowTrustLineClawback) ||
-                        (issuerFlagsIn & lsfNoFreeze))
-                        return false;
-                }
-                else
-                {
-                    auto const sleIssuance =
-                        ctx.view.read(keylet::mptIssuance(issue.getMptID()));
-
-                    if (!sleIssuance ||
-                        !sleIssuance->isFlag(lsfMPTCanClawback) ||
-                        sleIssuance->getAccountID(sfIssuer) !=
-                            ctx.tx[sfAccount])
-                        return false;
-                }
+                if (!(issuerFlagsIn & lsfAllowTrustLineClawback) ||
+                    (issuerFlagsIn & lsfNoFreeze))
+                    return false;
 
                 return true;
             },
-            asset.value());
+            [&](MPTIssue const& issue) {
+                auto const sleIssuance =
+                    ctx.view.read(keylet::mptIssuance(issue.getMptID()));
+
+                if (!sleIssuance || !sleIssuance->isFlag(lsfMPTCanClawback) ||
+                    sleIssuance->getAccountID(sfIssuer) != ctx.tx[sfAccount])
+                    return false;
+
+                return true;
+            });
     };
 
     if (!checkClawAsset(asset))

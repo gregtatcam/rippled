@@ -57,20 +57,31 @@ public:
     constexpr std::variant<Currency, MPTID> const&
     value() const;
 
+    // Custom, generic visit implementation
+    template <typename... Visitors>
+    constexpr auto
+    visit(Visitors&&... visitors) const -> decltype(auto)
+    {
+        // Simple delegation to the reusable utility, passing the internal
+        // variant data.
+        return detail::visit(easset_, std::forward<Visitors>(visitors)...);
+    }
+
     friend constexpr bool
     operator==(PathAsset const& lhs, PathAsset const& rhs);
 };
 
+template <ValidPathAsset PA>
+constexpr bool is_currency_v = std::is_same_v<PA, Currency>;
+
+template <ValidPathAsset PA>
+constexpr bool is_mptid_v = std::is_same_v<PA, MPTID>;
+
 inline PathAsset::PathAsset(Asset const& asset)
 {
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                easset_ = issue.currency;
-            else
-                easset_ = issue.getMptID();
-        },
-        asset.value());
+    asset.visit(
+        [&](Issue const& issue) { easset_ = issue.currency; },
+        [&](MPTIssue const& issue) { easset_ = issue.getMptID(); });
 }
 
 template <ValidPathAsset T>
@@ -98,14 +109,9 @@ PathAsset::value() const
 constexpr bool
 PathAsset::isXRP() const
 {
-    return std::visit(
-        [&]<ValidPathAsset A>(A const& a) {
-            if constexpr (std::is_same_v<A, Currency>)
-                return ripple::isXRP(a);
-            else
-                return false;
-        },
-        easset_);
+    return visit(
+        [&](Currency const& currency) { return ripple::isXRP(currency); },
+        [](MPTID const&) { return false; });
 }
 
 constexpr bool

@@ -109,24 +109,19 @@ STIssue::getJson(JsonOptions) const
 void
 STIssue::add(Serializer& s) const
 {
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-            {
-                s.addBitString(issue.currency);
-                if (!isXRP(issue.currency))
-                    s.addBitString(issue.account);
-            }
-            else
-            {
-                s.addBitString(issue.getIssuer());
-                s.addBitString(noAccount());
-                std::uint32_t sequence;
-                memcpy(&sequence, issue.getMptID().data(), sizeof(sequence));
-                s.add32(sequence);
-            }
+    asset_.visit(
+        [&](Issue const& issue) {
+            s.addBitString(issue.currency);
+            if (!isXRP(issue.currency))
+                s.addBitString(issue.account);
         },
-        asset_.value());
+        [&](MPTIssue const& issue) {
+            s.addBitString(issue.getIssuer());
+            s.addBitString(noAccount());
+            std::uint32_t sequence;
+            memcpy(&sequence, issue.getMptID().data(), sizeof(sequence));
+            s.add32(sequence);
+        });
 }
 
 bool

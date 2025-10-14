@@ -167,31 +167,23 @@ amountFromPathAsset(
     std::optional<AccountID> const& srcIssuer,
     AccountID const& srcAccount)
 {
-    return std::visit(
-        [&]<ValidPathAsset T>(T const& el) {
-            if constexpr (std::is_same_v<T, Currency>)
-            {
-                auto const& account =
-                    srcIssuer.value_or(isXRP(el) ? xrpAccount() : srcAccount);
-                return STAmount(Issue{el, account}, 1u, 0, true);
-            }
-            else
-                return STAmount(el, 1u, 0, true);
+    return pathAsset.visit(
+        [&](Currency const& currency) {
+            auto const& account =
+                srcIssuer.value_or(isXRP(currency) ? xrpAccount() : srcAccount);
+            return STAmount(Issue{currency, account}, 1u, 0, true);
         },
-        pathAsset.value());
+        [&](MPTID const& mpt) { return STAmount(mpt, 1u, 0, true); });
 }
 
 Asset
 assetFromPathAsset(PathAsset const& pathAsset, AccountID const& account)
 {
-    return std::visit(
-        [&]<ValidPathAsset T>(T const& el) {
-            if constexpr (std::is_same_v<T, Currency>)
-                return Asset{Issue{el, account}};
-            else
-                return Asset{el};
+    return pathAsset.visit(
+        [&](Currency const& currency) {
+            return Asset{Issue{currency, account}};
         },
-        pathAsset.value());
+        [&](MPTID const& mpt) { return Asset{mpt}; });
 }
 
 }  // namespace

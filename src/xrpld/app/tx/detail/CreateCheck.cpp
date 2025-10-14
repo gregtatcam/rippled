@@ -126,60 +126,55 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                 JLOG(ctx.j.warn()) << "Creating a check for frozen asset";
                 return tecFROZEN;
             }
-            auto const err = std::visit(
-                [&]<ValidIssueType TIss>(
-                    TIss const& issue) -> std::optional<TER> {
-                    if constexpr (is_issue_v<TIss>)
+            auto const err = sendMax.asset().visit(
+                [&](Issue const& issue) -> std::optional<TER> {
+                    // If this account has a trustline for the currency,
+                    // that trustline may not be frozen.
+                    //
+                    // Note that we DO allow create check for a currency
+                    // that the account does not yet have a trustline to.
+                    if (issuerId != srcId)
                     {
-                        // If this account has a trustline for the currency,
-                        // that trustline may not be frozen.
-                        //
-                        // Note that we DO allow create check for a currency
-                        // that the account does not yet have a trustline to.
-                        if (issuerId != srcId)
+                        // Check if the issuer froze the line
+                        auto const sleTrust = ctx.view.read(
+                            keylet::line(srcId, issuerId, issue.currency));
+                        if (sleTrust &&
+                            sleTrust->isFlag(
+                                (issuerId > srcId) ? lsfHighFreeze
+                                                   : lsfLowFreeze))
                         {
-                            // Check if the issuer froze the line
-                            auto const sleTrust = ctx.view.read(
-                                keylet::line(srcId, issuerId, issue.currency));
-                            if (sleTrust &&
-                                sleTrust->isFlag(
-                                    (issuerId > srcId) ? lsfHighFreeze
-                                                       : lsfLowFreeze))
-                            {
-                                JLOG(ctx.j.warn())
-                                    << "Creating a check for frozen trustline.";
-                                return tecFROZEN;
-                            }
-                        }
-                        if (issuerId != dstId)
-                        {
-                            // Check if dst froze the line.
-                            auto const sleTrust = ctx.view.read(
-                                keylet::line(issuerId, dstId, issue.currency));
-                            if (sleTrust &&
-                                sleTrust->isFlag(
-                                    (dstId > issuerId) ? lsfHighFreeze
-                                                       : lsfLowFreeze))
-                            {
-                                JLOG(ctx.j.warn())
-                                    << "Creating a check for "
-                                       "destination frozen trustline.";
-                                return tecFROZEN;
-                            }
+                            JLOG(ctx.j.warn())
+                                << "Creating a check for frozen trustline.";
+                            return tecFROZEN;
                         }
                     }
-                    else
+                    if (issuerId != dstId)
                     {
-                        if (srcId != issuerId &&
-                            isFrozen(ctx.view, srcId, issue))
+                        // Check if dst froze the line.
+                        auto const sleTrust = ctx.view.read(
+                            keylet::line(issuerId, dstId, issue.currency));
+                        if (sleTrust &&
+                            sleTrust->isFlag(
+                                (dstId > issuerId) ? lsfHighFreeze
+                                                   : lsfLowFreeze))
+                        {
+                            JLOG(ctx.j.warn())
+                                << "Creating a check for "
+                                   "destination frozen trustline.";
                             return tecFROZEN;
-                        if (dstId != issuerId &&
-                            isFrozen(ctx.view, dstId, issue))
-                            return tecFROZEN;
+                        }
                     }
+
                     return std::nullopt;
                 },
-                sendMax.asset().value());
+                [&](MPTIssue const& issue) -> std::optional<TER> {
+                    if (srcId != issuerId && isFrozen(ctx.view, srcId, issue))
+                        return tecFROZEN;
+                    if (dstId != issuerId && isFrozen(ctx.view, dstId, issue))
+                        return tecFROZEN;
+
+                    return std::nullopt;
+                });
             if (err)
                 return *err;
         }

@@ -275,78 +275,73 @@ CreateOffer::checkAcceptAsset(
         // An account can always accept its own issuance.
         return tesSUCCESS;
 
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) -> TER {
+    return asset.visit(
+        [&](Issue const& issue) -> TER {
             auto const& issuer = issue.getIssuer();
-            if constexpr (is_issue_v<TIss>)
+            if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
             {
-                if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
-                {
-                    auto const trustLine =
-                        view.read(keylet::line(id, issuer, issue.currency));
-
-                    if (!trustLine)
-                    {
-                        return (flags & tapRETRY) ? TER{terNO_LINE}
-                                                  : TER{tecNO_LINE};
-                    }
-
-                    // Entries have a canonical representation, determined by a
-                    // lexicographical "greater than" comparison employing
-                    // strict weak ordering. Determine which entry we need to
-                    // access.
-                    bool const canonical_gt(id > issuer);
-
-                    bool const is_authorized(
-                        (*trustLine)[sfFlags] &
-                        (canonical_gt ? lsfLowAuth : lsfHighAuth));
-
-                    if (!is_authorized)
-                    {
-                        JLOG(j.debug()) << "delay: can't receive IOUs from "
-                                           "issuer without auth.";
-
-                        return (flags & tapRETRY) ? TER{terNO_AUTH}
-                                                  : TER{tecNO_AUTH};
-                    }
-                }
-
-                // An account can not create a trustline to itself, so no line
-                // can exist to be frozen. Additionally, an issuer can always
-                // accept its own issuance.
-                if (issue.account == id)
-                {
-                    return tesSUCCESS;
-                }
-
                 auto const trustLine =
-                    view.read(keylet::line(id, issue.account, issue.currency));
+                    view.read(keylet::line(id, issuer, issue.currency));
 
                 if (!trustLine)
                 {
-                    return tesSUCCESS;
+                    return (flags & tapRETRY) ? TER{terNO_LINE}
+                                              : TER{tecNO_LINE};
                 }
 
-                // There's no difference which side enacted deep freeze,
-                // accepting tokens shouldn't be possible.
-                bool const deepFrozen = (*trustLine)[sfFlags] &
-                    (lsfLowDeepFreeze | lsfHighDeepFreeze);
+                // Entries have a canonical representation, determined by a
+                // lexicographical "greater than" comparison employing
+                // strict weak ordering. Determine which entry we need to
+                // access.
+                bool const canonical_gt(id > issuer);
 
-                if (deepFrozen)
+                bool const is_authorized(
+                    (*trustLine)[sfFlags] &
+                    (canonical_gt ? lsfLowAuth : lsfHighAuth));
+
+                if (!is_authorized)
                 {
-                    return tecFROZEN;
-                }
+                    JLOG(j.debug()) << "delay: can't receive IOUs from "
+                                       "issuer without auth.";
 
+                    return (flags & tapRETRY) ? TER{terNO_AUTH}
+                                              : TER{tecNO_AUTH};
+                }
+            }
+
+            // An account can not create a trustline to itself, so no line
+            // can exist to be frozen. Additionally, an issuer can always
+            // accept its own issuance.
+            if (issue.account == id)
+            {
                 return tesSUCCESS;
             }
-            else
+
+            auto const trustLine =
+                view.read(keylet::line(id, issue.account, issue.currency));
+
+            if (!trustLine)
             {
-                // WeakAuth - don't check if MPToken exists since it's created
-                // if needed.
-                return requireAuth(view, issue, id, AuthType::WeakAuth);
+                return tesSUCCESS;
             }
+
+            // There's no difference which side enacted deep freeze,
+            // accepting tokens shouldn't be possible.
+            bool const deepFrozen =
+                (*trustLine)[sfFlags] & (lsfLowDeepFreeze | lsfHighDeepFreeze);
+
+            if (deepFrozen)
+            {
+                return tecFROZEN;
+            }
+
+            return tesSUCCESS;
         },
-        asset.value());
+        [&](MPTIssue const& issue) -> TER {
+            // WeakAuth - don't check if MPToken exists since it's created
+            // if needed.
+            return requireAuth(view, issue, id, AuthType::WeakAuth);
+        });
 }
 
 std::pair<TER, Amounts>
@@ -571,14 +566,9 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                txt += to_string(issue.currency);
-            else
-                txt += to_string(issue);
-        },
-        amount.asset().value());
+    amount.asset().visit(
+        [&](Issue const& issue) { txt += to_string(issue.currency); },
+        [&](MPTIssue const& issue) { txt += to_string(issue); });
     return txt;
 }
 
@@ -930,32 +920,22 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
 
     auto setBookDir = [&](SLE::ref sle,
                           std::optional<uint256> const& maybeDomain) {
-        std::visit(
-            [&]<ValidIssueType TIss>(TIss const& issue) {
-                if constexpr (is_issue_v<TIss>)
-                {
-                    sle->setFieldH160(sfTakerPaysCurrency, issue.currency);
-                    sle->setFieldH160(sfTakerPaysIssuer, issue.account);
-                }
-                else
-                {
-                    sle->setFieldH192(sfTakerPaysMPT, issue.getMptID());
-                }
+        saTakerPays.asset().visit(
+            [&](Issue const& issue) {
+                sle->setFieldH160(sfTakerPaysCurrency, issue.currency);
+                sle->setFieldH160(sfTakerPaysIssuer, issue.account);
             },
-            saTakerPays.asset().value());
-        std::visit(
-            [&]<ValidIssueType TIss>(TIss const& issue) {
-                if constexpr (is_issue_v<TIss>)
-                {
-                    sle->setFieldH160(sfTakerGetsCurrency, issue.currency);
-                    sle->setFieldH160(sfTakerGetsIssuer, issue.account);
-                }
-                else
-                {
-                    sle->setFieldH192(sfTakerGetsMPT, issue.getMptID());
-                }
+            [&](MPTIssue const& issue) {
+                sle->setFieldH192(sfTakerPaysMPT, issue.getMptID());
+            });
+        saTakerGets.asset().visit(
+            [&](Issue const& issue) {
+                sle->setFieldH160(sfTakerGetsCurrency, issue.currency);
+                sle->setFieldH160(sfTakerGetsIssuer, issue.account);
             },
-            saTakerGets.asset().value());
+            [&](MPTIssue const& issue) {
+                sle->setFieldH192(sfTakerGetsMPT, issue.getMptID());
+            });
         sle->setFieldU64(sfExchangeRate, uRate);
         if (maybeDomain)
             sle->setFieldH256(sfDomainID, *maybeDomain);

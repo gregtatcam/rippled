@@ -226,14 +226,11 @@ isAnyFrozen(
     Asset const& asset,
     int depth = 0)
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                return isAnyFrozen(view, accounts, issue);
-            else
-                return isAnyFrozen(view, accounts, issue, depth);
-        },
-        asset.value());
+    return asset.visit(
+        [&](Issue const& issue) { return isAnyFrozen(view, accounts, issue); },
+        [&](MPTIssue const& issue) {
+            return isAnyFrozen(view, accounts, issue, depth);
+        });
 }
 
 [[nodiscard]] bool
@@ -301,15 +298,14 @@ accountHolds(
     AuthHandling zeroIfUnauthorized,
     beast::Journal j)
 {
-    return std::visit(
-        [&]<typename TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                return accountHolds(view, account, issue, zeroIfFrozen, j);
-            else
-                return accountHolds(
-                    view, account, issue, zeroIfFrozen, zeroIfUnauthorized, j);
+    return asset.visit(
+        [&](Issue const& issue) {
+            return accountHolds(view, account, issue, zeroIfFrozen, j);
         },
-        asset.value());
+        [&](MPTIssue const& issue) {
+            return accountHolds(
+                view, account, issue, zeroIfFrozen, zeroIfUnauthorized, j);
+        });
 }
 
 // Returns the amount an account can spend of the currency type saDefault, or
@@ -439,14 +435,13 @@ transferRate(ReadView const& view, MPTID const& issuanceID);
 [[nodiscard]] inline Rate
 transferRate(ReadView const& view, STAmount const& amount)
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_issue_v<TIss>)
-                return transferRate(view, issue.getIssuer());
-            else
-                return transferRate(view, issue.getMptID());
+    return amount.asset().visit(
+        [&](Issue const& issue) {
+            return transferRate(view, issue.getIssuer());
         },
-        amount.asset().value());
+        [&](MPTIssue const& issue) {
+            return transferRate(view, issue.getMptID());
+        });
 }
 
 /** Returns `true` if the directory is empty

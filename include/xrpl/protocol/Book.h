@@ -180,20 +180,15 @@ public:
     value_type
     operator()(argument_type const& asset) const
     {
-        return std::visit(
-            [&]<ripple::ValidIssueType TIss>(TIss const& issue) {
-                if constexpr (ripple::is_issue_v<TIss>)
-                {
-                    value_type result(m_issue_hasher(issue));
-                    return result;
-                }
-                else
-                {
-                    value_type result(m_mptissue_hasher(issue));
-                    return result;
-                }
+        return asset.visit(
+            [&](ripple::Issue const& issue) {
+                value_type result(m_issue_hasher(issue));
+                return result;
             },
-            asset.value());
+            [&](ripple::MPTIssue const& issue) {
+                value_type result(m_mptissue_hasher(issue));
+                return result;
+            });
     }
 };
 

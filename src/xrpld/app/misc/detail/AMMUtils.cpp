@@ -217,39 +217,34 @@ ammAccountHolds(
     Asset const& asset)
 {
     // Get the actual AMM balance without factoring in the balance hook
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_mptissue_v<TIss>)
-            {
-                if (auto const sle =
-                        view.read(keylet::mptoken(issue, ammAccountID));
-                    sle && !isFrozen(view, ammAccountID, issue))
-                    return STAmount{issue, (*sle)[sfMPTAmount]};
-            }
-            else
-            {
-                if (isXRP(issue))
-                {
-                    if (auto const sle =
-                            view.read(keylet::account(ammAccountID)))
-                        return (*sle)[sfBalance];
-                }
-                else if (auto const sle = view.read(keylet::line(
-                             ammAccountID, issue.account, issue.currency));
-                         sle &&
-                         !isFrozen(
-                             view, ammAccountID, issue.currency, issue.account))
-                {
-                    STAmount amount = (*sle)[sfBalance];
-                    if (ammAccountID > issue.account)
-                        amount.negate();
-                    amount.get<Issue>().account = issue.account;
-                    return amount;
-                }
-            }
+    return asset.visit(
+        [&](MPTIssue const& issue) {
+            if (auto const sle =
+                    view.read(keylet::mptoken(issue, ammAccountID));
+                sle && !isFrozen(view, ammAccountID, issue))
+                return STAmount{issue, (*sle)[sfMPTAmount]};
             return STAmount{asset};
         },
-        asset.value());
+        [&](Issue const& issue) {
+            if (isXRP(issue))
+            {
+                if (auto const sle = view.read(keylet::account(ammAccountID)))
+                    return (*sle)[sfBalance];
+            }
+            else if (auto const sle = view.read(keylet::line(
+                         ammAccountID, issue.account, issue.currency));
+                     sle &&
+                     !isFrozen(
+                         view, ammAccountID, issue.currency, issue.account))
+            {
+                STAmount amount = (*sle)[sfBalance];
+                if (ammAccountID > issue.account)
+                    amount.negate();
+                amount.get<Issue>().account = issue.account;
+                return amount;
+            }
+            return STAmount{asset};
+        });
 }
 
 static TER

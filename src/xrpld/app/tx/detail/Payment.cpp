@@ -55,24 +55,17 @@ getMaxSourceAmount(
 {
     if (sendMax)
         return *sendMax;
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (is_mptissue_v<TIss>)
-            {
+    return dstAmount.asset().visit(
+        [&](MPTIssue const& issue) { return dstAmount; },
+        [&](Issue const& issue) {
+            if (issue.native())
                 return dstAmount;
-            }
-            else
-            {
-                if (issue.native())
-                    return dstAmount;
-                return STAmount(
-                    Issue{issue.currency, account},
-                    dstAmount.mantissa(),
-                    dstAmount.exponent(),
-                    dstAmount < beast::zero);
-            }
-        },
-        dstAmount.asset().value());
+            return STAmount(
+                Issue{issue.currency, account},
+                dstAmount.mantissa(),
+                dstAmount.exponent(),
+                dstAmount < beast::zero);
+        });
 }
 
 bool
