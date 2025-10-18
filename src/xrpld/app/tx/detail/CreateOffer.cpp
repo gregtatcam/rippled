@@ -32,6 +32,8 @@
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/st.h>
 
+#include "test/jtx/amount.h"
+
 namespace ripple {
 TxConsequences
 CreateOffer::makeTxConsequences(PreflightContext const& ctx)
@@ -426,19 +428,23 @@ CreateOffer::flowCross(
             // We are selling, so we will accept *more* than the offer
             // specified.  Since we don't know how much they might offer,
             // we allow delivery of the largest possible amount.
-            if (deliver.native())
-                deliver = STAmount{STAmount::cMaxNative};
-            // We can't use the maximum possible currency here because
-            // there might be a gateway transfer rate to account for.
-            // Since the transfer rate cannot exceed 200%, we use 1/2
-            // maxValue for our limit.
-            else if (deliver.holds<Issue>())
-                deliver = STAmount{
-                    deliverAsset,
-                    STAmount::cMaxValue / 2,
-                    STAmount::cMaxOffset};
-            else
-                deliver = STAmount{deliverAsset, maxMPTokenAmount / 2};
+            deliver.asset().visit(
+                [&](Issue const& issue) {
+                    if (issue.native())
+                        deliver = STAmount{STAmount::cMaxNative};
+                    // We can't use the maximum possible currency here because
+                    // there might be a gateway transfer rate to account for.
+                    // Since the transfer rate cannot exceed 200%, we use 1/2
+                    // maxValue for our limit.
+                    else
+                        deliver = STAmount{
+                            deliverAsset,
+                            STAmount::cMaxValue / 2,
+                            STAmount::cMaxOffset};
+                },
+                [&](MPTIssue const&) {
+                    deliver = STAmount{deliverAsset, maxMPTokenAmount / 2};
+                });
         }
 
         // Call the payment engine's flow() to do the actual work.

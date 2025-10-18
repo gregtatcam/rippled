@@ -296,9 +296,9 @@ toStrand(
         auto const t = [&]() {
             auto const t =
                 STPathElement::typeAccount | STPathElement::typeIssuer;
-            if (curAsset.holds<MPTIssue>())
-                return t | STPathElement::typeMPT;
-            return t | STPathElement::typeCurrency;
+            return curAsset.visit(
+                [&](MPTIssue const&) { return t | STPathElement::typeMPT; },
+                [&](Issue const&) { return t | STPathElement::typeCurrency; });
         }();
         // If MPT then the issuer is the actual issuer, it is never the source
         // account.
@@ -417,13 +417,14 @@ toStrand(
 
         // Can only update the account for Issue since MPTIssue's account
         // is immutable as it is part of MPTID.
-        if (curAsset.holds<Issue>())
-        {
-            if (cur->isAccount())
-                curAsset.get<Issue>().account = cur->getAccountID();
-            else if (cur->hasIssuer())
-                curAsset.get<Issue>().account = cur->getIssuerID();
-        }
+        curAsset.visit(
+            [&](Issue const&) {
+                if (cur->isAccount())
+                    curAsset.get<Issue>().account = cur->getAccountID();
+                else if (cur->hasIssuer())
+                    curAsset.get<Issue>().account = cur->getIssuerID();
+            },
+            [](MPTIssue const&) {});
 
         if (cur->hasCurrency())
         {

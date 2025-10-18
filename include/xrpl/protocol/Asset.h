@@ -122,12 +122,6 @@ public:
     STAmount
     operator()(Number const&) const;
 
-    constexpr bool
-    native() const
-    {
-        return holds<Issue>() && get<Issue>().native();
-    }
-
     constexpr AmtType
     getAmountType() const;
 
@@ -139,6 +133,14 @@ public:
         // Simple delegation to the reusable utility, passing the internal
         // variant data.
         return detail::visit(issue_, std::forward<Visitors>(visitors)...);
+    }
+
+    constexpr bool
+    native() const
+    {
+        return visit(
+            [&](Issue const& issue) { return issue.native(); },
+            [](MPTIssue const&) { return false; });
     }
 
     friend constexpr bool
@@ -266,7 +268,9 @@ operator<=>(Asset const& lhs, Asset const& rhs)
 constexpr bool
 operator==(Currency const& lhs, Asset const& rhs)
 {
-    return rhs.holds<Issue>() && rhs.get<Issue>().currency == lhs;
+    return rhs.visit(
+        [&](Issue const& issue) { return issue.currency == lhs; },
+        [](MPTIssue const& issue) { return false; });
 }
 
 constexpr bool

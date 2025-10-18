@@ -518,11 +518,13 @@ inline STAmount::operator bool() const noexcept
 
 inline STAmount::operator Number() const
 {
-    if (native())
-        return xrp();
-    if (mAsset.holds<MPTIssue>())
-        return mpt();
-    return iou();
+    return asset().visit(
+        [&](Issue const& issue) -> Number {
+            if (issue.native())
+                return xrp();
+            return iou();
+        },
+        [&](MPTIssue const&) -> Number { return mpt(); });
 }
 
 inline STAmount&

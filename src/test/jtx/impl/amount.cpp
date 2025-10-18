@@ -53,37 +53,39 @@ to_places(T const d, std::uint8_t places)
 std::ostream&
 operator<<(std::ostream& os, PrettyAmount const& amount)
 {
-    if (amount.value().native())
-    {
-        // measure in hundredths
-        auto const c = dropsPerXRP.drops() / 100;
-        auto const n = amount.value().mantissa();
-        if (n < c)
-        {
-            if (amount.value().negative())
-                os << "-" << n << " drops";
-            else
-                os << n << " drops";
-            return os;
-        }
-        auto const d = double(n) / dropsPerXRP.drops();
-        if (amount.value().negative())
-            os << "-";
+    amount.value().asset().visit(
+        [&](Issue const& issue) {
+            if (issue.native())
+            {
+                // measure in hundredths
+                auto const c = dropsPerXRP.drops() / 100;
+                auto const n = amount.value().mantissa();
+                if (n < c)
+                {
+                    if (amount.value().negative())
+                        os << "-" << n << " drops";
+                    else
+                        os << n << " drops";
+                }
+                else
+                {
+                    auto const d = double(n) / dropsPerXRP.drops();
+                    if (amount.value().negative())
+                        os << "-";
 
-        os << to_places(d, 6) << " XRP";
-    }
-    else if (amount.value().holds<Issue>())
-    {
-        os << amount.value().getText() << "/"
-           << to_string(amount.value().get<Issue>().currency) << "("
-           << amount.name() << ")";
-    }
-    else
-    {
-        os << amount.value().getText() << "/"
-           << to_string(amount.value().get<MPTIssue>()) << "(" << amount.name()
-           << ")";
-    }
+                    os << to_places(d, 6) << " XRP";
+                }
+            }
+            else
+            {
+                os << amount.value().getText() << "/"
+                   << to_string(issue.currency) << "(" << amount.name() << ")";
+            }
+        },
+        [&](MPTIssue const& issue) {
+            os << amount.value().getText() << "/" << to_string(issue) << "("
+               << amount.name() << ")";
+        });
     return os;
 }
 

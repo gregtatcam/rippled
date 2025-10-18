@@ -762,7 +762,7 @@ Pathfinder::getPathsOut(
     if (!sleAccount)
         return 0;
 
-    int aFlags = sleAccount->getFieldU32(sfFlags);
+    auto const aFlags = sleAccount->getFieldU32(sfFlags);
     bool const bAuthRequired = [&]() {
         if (pathAsset.holds<Currency>())
             return (aFlags & lsfRequireAuth) != 0;
@@ -781,71 +781,75 @@ Pathfinder::getPathsOut(
     {
         count = app_.getOrderBookDB().getBookSize(asset, mDomain);
 
-        if (asset.holds<Issue>())
-        {
-            if (auto const lines =
-                    mAssetCache->getRippleLines(account, direction))
-            {
-                for (auto const& rspEntry : *lines)
+        asset.visit(
+            [&](Issue const&) {
+                if (auto const lines =
+                        mAssetCache->getRippleLines(account, direction))
                 {
-                    if (pathAsset.get<Currency>() !=
-                        rspEntry.getLimit().get<Issue>().currency)
+                    for (auto const& rspEntry : *lines)
                     {
+                        if (pathAsset.get<Currency>() !=
+                            rspEntry.getLimit().get<Issue>().currency)
+                        {
+                        }
+                        else if (
+                            rspEntry.getBalance() <= beast::zero &&
+                            (!rspEntry.getLimitPeer() ||
+                             -rspEntry.getBalance() >=
+                                 rspEntry.getLimitPeer() ||
+                             (bAuthRequired && !rspEntry.getAuth())))
+                        {
+                        }
+                        else if (
+                            isDstAsset &&
+                            dstAccount == rspEntry.getAccountIDPeer())
+                        {
+                            count +=
+                                10000;  // count a path to the destination extra
+                        }
+                        else if (rspEntry.getNoRipplePeer())
+                        {
+                            // This probably isn't a useful path out
+                        }
+                        else if (rspEntry.getFreezePeer())
+                        {
+                            // Not a useful path out
+                        }
+                        else
+                        {
+                            ++count;
+                        }
                     }
-                    else if (
-                        rspEntry.getBalance() <= beast::zero &&
-                        (!rspEntry.getLimitPeer() ||
-                         -rspEntry.getBalance() >= rspEntry.getLimitPeer() ||
-                         (bAuthRequired && !rspEntry.getAuth())))
+                }
+            },
+            [&](MPTIssue const&) {
+                if (auto const mpts = mAssetCache->getMPTs(account))
+                {
+                    for (auto const& mpt : *mpts)
                     {
+                        if (pathAsset.get<MPTID>() != mpt.getMptID())
+                        {
+                        }
+                        else if (mpt.isZeroBalance() || mpt.isMaxedOut())
+                        {
+                        }
+                        else if (bAuthRequired)
+                        {
+                        }
+                        else if (isDstAsset && dstAccount == getMPTIssuer(mpt))
+                        {
+                            count += 10000;
+                        }
+                        else if (bFrozen)
+                        {
+                        }
+                        else
+                        {
+                            ++count;
+                        }
                     }
-                    else if (
-                        isDstAsset && dstAccount == rspEntry.getAccountIDPeer())
-                    {
-                        count +=
-                            10000;  // count a path to the destination extra
-                    }
-                    else if (rspEntry.getNoRipplePeer())
-                    {
-                        // This probably isn't a useful path out
-                    }
-                    else if (rspEntry.getFreezePeer())
-                    {
-                        // Not a useful path out
-                    }
-                    else
-                    {
-                        ++count;
-                    }
                 }
-            }
-        }
-        else if (auto const mpts = mAssetCache->getMPTs(account))
-        {
-            for (auto const& mpt : *mpts)
-            {
-                if (pathAsset.get<MPTID>() != mpt.getMptID())
-                {
-                }
-                else if (mpt.isZeroBalance() || mpt.isMaxedOut())
-                {
-                }
-                else if (bAuthRequired)
-                {
-                }
-                else if (isDstAsset && dstAccount == getMPTIssuer(mpt))
-                {
-                    count += 10000;
-                }
-                else if (bFrozen)
-                {
-                }
-                else
-                {
-                    ++count;
-                }
-            }
-        }
+            });
     }
     it->second = count;
     return count;
@@ -1187,20 +1191,22 @@ Pathfinder::addLink(
                     }
                 };
 
-                if (uEndPathAsset.holds<Currency>())
-                {
-                    if (auto const lines = mAssetCache->getRippleLines(
-                            uEndAccount,
-                            bIsNoRippleOut ? LineDirection::incoming
-                                           : LineDirection::outgoing))
-                    {
-                        forAssets(*lines);
-                    }
-                }
-                else if (auto const mpts = mAssetCache->getMPTs(uEndAccount))
-                {
-                    forAssets(*mpts);
-                }
+                uEndPathAsset.visit(
+                    [&](Currency const&) {
+                        if (auto const lines = mAssetCache->getRippleLines(
+                                uEndAccount,
+                                bIsNoRippleOut ? LineDirection::incoming
+                                               : LineDirection::outgoing))
+                        {
+                            forAssets(*lines);
+                        }
+                    },
+                    [&](MPTID const&) {
+                        if (auto const mpts = mAssetCache->getMPTs(uEndAccount))
+                        {
+                            forAssets(*mpts);
+                        }
+                    });
 
                 if (!candidates.empty())
                 {

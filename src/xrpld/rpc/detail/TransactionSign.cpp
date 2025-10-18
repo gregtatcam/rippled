@@ -254,8 +254,11 @@ checkPayment(
         {
             // If no SendMax, default to Amount with sender as issuer if Issue.
             sendMax = amount;
-            if (sendMax.holds<Issue>())
-                sendMax.get<Issue>().account = srcAddressID;
+            sendMax.asset().visit(
+                [&](Issue const&) {
+                    sendMax.get<Issue>().account = srcAddressID;
+                },
+                [](MPTIssue const&) {});
         }
 
         if (sendMax.native() && amount.native())

@@ -194,13 +194,13 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
     jvObj[jss::changes] = Json::arrayValue;
 
     auto volToStr = [](STAmount const& vol) {
-        if (vol.holds<Issue>())
-        {
-            if (isXRP(vol))
-                return to_string(vol.xrp());
-            return to_string(vol.iou());
-        }
-        return to_string(vol.mpt());
+        return vol.asset().visit(
+            [&](Issue const& issue) {
+                if (isXRP(issue))
+                    return to_string(vol.xrp());
+                return to_string(vol.iou());
+            },
+            [&](MPTIssue const&) { return to_string(vol.mpt()); });
     };
 
     for (auto const& entry : tally)
@@ -210,17 +210,23 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
         STAmount volA = std::get<0>(entry.second);
         STAmount volB = std::get<1>(entry.second);
 
-        if (volA.holds<Issue>())
-            inner[jss::currency_a] =
-                (isXRP(volA) ? "XRP_drops" : to_string(volA.asset()));
-        else
-            inner[jss::mpt_issuance_id_a] = to_string(volA.asset());
+        volA.asset().visit(
+            [&](Issue const&) {
+                inner[jss::currency_a] =
+                    (isXRP(volA) ? "XRP_drops" : to_string(volA.asset()));
+            },
+            [&](MPTIssue const&) {
+                inner[jss::mpt_issuance_id_a] = to_string(volA.asset());
+            });
 
-        if (volB.holds<Issue>())
-            inner[jss::currency_b] =
-                (isXRP(volB) ? "XRP_drops" : to_string(volB.asset()));
-        else
-            inner[jss::mpt_issuance_id_b] = to_string(volB.asset());
+        volB.asset().visit(
+            [&](Issue const&) {
+                inner[jss::currency_b] =
+                    (isXRP(volB) ? "XRP_drops" : to_string(volB.asset()));
+            },
+            [&](MPTIssue const&) {
+                inner[jss::mpt_issuance_id_b] = to_string(volB.asset());
+            });
 
         inner[jss::volume_a] = volToStr(volA);
         inner[jss::volume_b] = volToStr(volB);

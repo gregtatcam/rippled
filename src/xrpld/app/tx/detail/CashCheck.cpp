@@ -390,12 +390,17 @@ CashCheck::doApply()
             // transfer rate to account for.  Since the transfer rate cannot
             // exceed 200%, we use 1/2 maxValue as our limit.
             auto const maxDeliverMin = [&]() {
-                if (optDeliverMin->holds<Issue>())
-                    return STAmount(
-                        optDeliverMin->asset(),
-                        STAmount::cMaxValue / 2,
-                        STAmount::cMaxOffset);
-                return STAmount(optDeliverMin->asset(), maxMPTokenAmount / 2);
+                return optDeliverMin->asset().visit(
+                    [&](Issue const&) {
+                        return STAmount(
+                            optDeliverMin->asset(),
+                            STAmount::cMaxValue / 2,
+                            STAmount::cMaxOffset);
+                    },
+                    [&](MPTIssue const&) {
+                        return STAmount(
+                            optDeliverMin->asset(), maxMPTokenAmount / 2);
+                    });
             };
             STAmount const flowDeliver{
                 optDeliverMin ? maxDeliverMin()

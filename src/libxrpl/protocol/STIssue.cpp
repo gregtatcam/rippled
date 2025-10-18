@@ -134,7 +134,9 @@ STIssue::isEquivalent(STBase const& t) const
 bool
 STIssue::isDefault() const
 {
-    return holds<Issue>() && asset_.get<Issue>() == xrpIssue();
+    return asset_.visit(
+        [&](Issue const& issue) { return issue == xrpIssue(); },
+        [](MPTIssue const&) { return false; });
 }
 
 STBase*
