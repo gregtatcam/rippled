@@ -1201,7 +1201,7 @@ EscrowFinish::doApply()
             {
                 // LCOV_EXCL_START
                 JLOG(j_.fatal()) << "Unable to delete Escrow from recipient.";
-                return tefBAD_LEDGER;  // LCOV_EXCL_LINE
+                return tefBAD_LEDGER;
                 // LCOV_EXCL_STOP
             }
         }
