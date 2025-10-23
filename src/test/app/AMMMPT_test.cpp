@@ -4550,6 +4550,7 @@ private:
     {
         testcase("Invalid AMM Payment");
         using namespace jtx;
+        using namespace jtx::paychan;
         using namespace std::chrono;
         using namespace std::literals::chrono_literals;
 
