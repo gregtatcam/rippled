@@ -308,7 +308,7 @@ var searchData=
   ['maxmantissa_305',['maxmantissa',['../namespaceripple.html#a63cd5edfd2fd5b04cd3e417bfdccccf1',1,'ripple::maxMantissa'],['../classripple_1_1Number.html#a18f3cb87112cf4436f8730a4f3333550',1,'ripple::Number::maxMantissa']]],
   ['maxmptokenamount_306',['maxMPTokenAmount',['../namespaceripple.html#a47fbaf29602fea01a79eb987cc21371c',1,'ripple']]],
   ['maxmptokenmetadatalength_307',['maxMPTokenMetadataLength',['../namespaceripple.html#a7c331b12061c28687432e262c819a8b5',1,'ripple']]],
-  ['maxofferstoconsume_5f_308',['maxOffersToConsume_',['../classripple_1_1BookStep.html#a925c57512ede5d203352ce86ae740818',1,'ripple::BookStep']]],
+  ['maxofferstoconsume_308',['MaxOffersToConsume',['../classripple_1_1BookStep.html#aa2bf77c28f1372f450ac5d251824ecfc',1,'ripple::BookStep']]],
   ['maxoracledataseries_309',['maxOracleDataSeries',['../namespaceripple.html#acfb6320cd891dd784aa2138f266b2554',1,'ripple']]],
   ['maxoracleprovider_310',['maxOracleProvider',['../namespaceripple.html#a5785a9e30238dbeb3c22f5fc64904f1e',1,'ripple']]],
   ['maxoraclesymbolclass_311',['maxOracleSymbolClass',['../namespaceripple.html#aaa54093b4a9bb87c38d6d5846d4324f0',1,'ripple']]],
