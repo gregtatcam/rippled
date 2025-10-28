@@ -61,7 +61,7 @@ protected:
     /** Number of offers consumed or partially consumed the last time
         the step ran, including expired and unfunded offers.
 
-        N.B. This this not the total number offers consumed by this step for the
+        N.B. This is not the total number offers consumed by this step for the
         entire payment, it is only the number the last time it ran. Offers may
         be partially consumed multiple times during a payment.
     */
@@ -85,7 +85,7 @@ protected:
     std::optional<Cache> cache_;
 
 public:
-    BookStep(StrandContext const& ctx, Issue const& in, Issue const& out)
+    BookStep(StrandContext const& ctx, Asset const& in, Asset const& out)
         : book_(in, out, ctx.domainID)
         , strandSrc_(ctx.strandSrc)
         , strandDst_(ctx.strandDst)
