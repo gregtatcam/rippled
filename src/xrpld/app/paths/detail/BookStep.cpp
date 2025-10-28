@@ -49,7 +49,7 @@ class BookStep : public StepImp<TIn, TOut, BookStep<TIn, TOut, TDerived>>
 protected:
     enum class OfferType { AMM, CLOB };
 
-    uint32_t const maxOffersToConsume_;
+    static constexpr uint32_t MaxOffersToConsume{1000};
     Book book_;
     AccountID strandSrc_;
     AccountID strandDst_;
@@ -61,7 +61,7 @@ protected:
     /** Number of offers consumed or partially consumed the last time
         the step ran, including expired and unfunded offers.
 
-        N.B. This this not the total number offers consumed by this step for the
+        N.B. This is not the total number offers consumed by this step for the
         entire payment, it is only the number the last time it ran. Offers may
         be partially consumed multiple times during a payment.
     */
@@ -84,16 +84,9 @@ protected:
 
     std::optional<Cache> cache_;
 
-    static uint32_t
-    getMaxOffersToConsume(StrandContext const& ctx)
-    {
-        return 1000;
-    }
-
 public:
     BookStep(StrandContext const& ctx, Asset const& in, Asset const& out)
-        : maxOffersToConsume_(getMaxOffersToConsume(ctx))
-        , book_(in, out, ctx.domainID)
+        : book_(in, out, ctx.domainID)
         , strandSrc_(ctx.strandSrc)
         , strandDst_(ctx.strandDst)
         , prevStep_(ctx.prevStep)
@@ -728,7 +721,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         : QUALITY_ONE;
 
     typename FlowOfferStream<TIn, TOut>::StepCounter counter(
-        maxOffersToConsume_, j_);
+        MaxOffersToConsume, j_);
 
     FlowOfferStream<TIn, TOut> offers(
         sb, afView, book_, sb.parentCloseTime(), counter, j_);
@@ -1123,10 +1116,9 @@ BookStep<TIn, TOut, TDerived>::revImp(
         offersUsed_ = offersConsumed;
         SetUnion(ofrsToRm, toRm);
 
-        if (offersConsumed >= maxOffersToConsume_)
+        // Too many iterations, mark this strand as inactive
+        if (offersConsumed >= MaxOffersToConsume)
         {
-            // Use the liquidity, but use this to mark the strand as inactive so
-            // it's not used further
             inactive_ = true;
         }
     }
@@ -1288,10 +1280,9 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
         offersUsed_ = offersConsumed;
         SetUnion(ofrsToRm, toRm);
 
-        if (offersConsumed >= maxOffersToConsume_)
+        // Too many iterations, mark this strand as inactive (dry)
+        if (offersConsumed >= MaxOffersToConsume)
         {
-            // Use the liquidity, but use this to mark the strand as inactive so
-            // it's not used further
             inactive_ = true;
         }
     }
