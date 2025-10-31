@@ -382,7 +382,7 @@ XRPEndpointStep<TDerived>::check(StrandContext const& ctx) const
         return ter;
 
     auto const issuesIndex = isLast_ ? 0 : 1;
-    if (!ctx.seenDirectIssues[issuesIndex].insert(xrpIssue()).second)
+    if (!ctx.seenDirectAssets[issuesIndex].insert(xrpIssue()).second)
     {
         JLOG(j_.debug()) << "XRPEndpointStep: loop detected: Index: "
                          << ctx.strandSize << ' ' << *this;
