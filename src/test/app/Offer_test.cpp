@@ -782,13 +782,8 @@ public:
         // Fill or Kill - unless we fully cross, just charge a fee and don't
         // place the offer on the books.  But also clean up expired offers
         // that are discovered along the way.
-        //
-        // fix1578 changes the return code.  Verify expected behavior
-        // without and with fix1578.
-        for (auto const& tweakedFeatures :
-             {features - fix1578, features | fix1578})
         {
-            Env env{*this, tweakedFeatures};
+            Env env{*this, features};
 
             auto const f = env.current()->fees().base;
 
@@ -814,9 +809,7 @@ public:
 
             // Order that can't be filled but will remove bob's expired offer:
             {
-                TER const killedCode{
-                    tweakedFeatures[fix1578] ? TER{tecKILLED}
-                                             : TER{tesSUCCESS}};
+                TER const killedCode{TER{tecKILLED}};
                 env(offer(alice, XRP(1000), USD(1000)),
                     txflags(tfFillOrKill),
                     ter(killedCode));
@@ -2943,8 +2936,7 @@ public:
         env.close();
 
         // Code returned if an offer is killed.
-        TER const killedCode{
-            features[fix1578] ? TER{tecKILLED} : TER{tesSUCCESS}};
+        TER const killedCode{TER{tecKILLED}};
 
         // bob offers XRP for USD.
         env(trust(bob, USD(200)));
@@ -5301,14 +5293,12 @@ public:
     {
         using namespace jtx;
         static FeatureBitset const all{testable_amendments()};
-        static FeatureBitset const takerDryOffer{fixTakerDryOfferRemoval};
         static FeatureBitset const immediateOfferKilled{
             featureImmediateOfferKilled};
         FeatureBitset const fillOrKill{fixFillOrKill};
         FeatureBitset const permDEX{featurePermissionedDEX};
 
-        static std::array<FeatureBitset, 6> const feats{
-            all - takerDryOffer - immediateOfferKilled - permDEX,
+        static std::array<FeatureBitset, 5> const feats{
             all - immediateOfferKilled - permDEX,
             all - immediateOfferKilled - fillOrKill - permDEX,
             all - fillOrKill - permDEX,
@@ -5330,7 +5320,7 @@ public:
     }
 };
 
-class OfferWTakerDryOffer_test : public OfferBaseUtil_test
+class OfferWOSmallQOffers_test : public OfferBaseUtil_test
 {
     void
     run() override
@@ -5339,7 +5329,7 @@ class OfferWTakerDryOffer_test : public OfferBaseUtil_test
     }
 };
 
-class OfferWOSmallQOffers_test : public OfferBaseUtil_test
+class OfferWOFillOrKill_test : public OfferBaseUtil_test
 {
     void
     run() override
@@ -5348,7 +5338,7 @@ class OfferWOSmallQOffers_test : public OfferBaseUtil_test
     }
 };
 
-class OfferWOFillOrKill_test : public OfferBaseUtil_test
+class OfferWOPermDEX_test : public OfferBaseUtil_test
 {
     void
     run() override
@@ -5357,21 +5347,12 @@ class OfferWOFillOrKill_test : public OfferBaseUtil_test
     }
 };
 
-class OfferWOPermDEX_test : public OfferBaseUtil_test
-{
-    void
-    run() override
-    {
-        OfferBaseUtil_test::run(4);
-    }
-};
-
 class OfferAllFeatures_test : public OfferBaseUtil_test
 {
     void
     run() override
     {
-        OfferBaseUtil_test::run(5, true);
+        OfferBaseUtil_test::run(4, true);
     }
 };
 
@@ -5383,7 +5364,6 @@ class Offer_manual_test : public OfferBaseUtil_test
         using namespace jtx;
         FeatureBitset const all{testable_amendments()};
         FeatureBitset const immediateOfferKilled{featureImmediateOfferKilled};
-        FeatureBitset const takerDryOffer{fixTakerDryOfferRemoval};
         FeatureBitset const fillOrKill{fixFillOrKill};
         FeatureBitset const permDEX{featurePermissionedDEX};
 
@@ -5392,13 +5372,10 @@ class Offer_manual_test : public OfferBaseUtil_test
         testAll(all - fillOrKill - permDEX);
         testAll(all - permDEX);
         testAll(all);
-
-        testAll(all - takerDryOffer - permDEX);
     }
 };
 
 BEAST_DEFINE_TESTSUITE_PRIO(OfferBaseUtil, app, ripple, 2);
-BEAST_DEFINE_TESTSUITE_PRIO(OfferWTakerDryOffer, app, ripple, 2);
 BEAST_DEFINE_TESTSUITE_PRIO(OfferWOSmallQOffers, app, ripple, 2);
 BEAST_DEFINE_TESTSUITE_PRIO(OfferWOFillOrKill, app, ripple, 2);
 BEAST_DEFINE_TESTSUITE_PRIO(OfferWOPermDEX, app, ripple, 2);
