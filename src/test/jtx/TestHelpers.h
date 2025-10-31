@@ -783,14 +783,14 @@ create(
 
 }  // namespace check
 
+static constexpr FeeLevel64 baseFeeLevel{TxQ::baseLevel};
+static constexpr FeeLevel64 minEscalationFeeLevel = baseFeeLevel * 500;
+
 inline uint256
 getCheckIndex(AccountID const& account, std::uint32_t uSequence)
 {
     return keylet::check(account, uSequence).key;
 }
-
-static constexpr FeeLevel64 baseFeeLevel{256};
-static constexpr FeeLevel64 minEscalationFeeLevel = baseFeeLevel * 500;
 
 template <class Suite>
 void
