@@ -196,11 +196,8 @@ Functions</h2></td></tr>
 <tr class="memitem:a58fb48a81509167c40346305cea629c5" id="r_a58fb48a81509167c40346305cea629c5"><td class="memTemplParams" colspan="2">template&lt;class GetLedgerIndex , class GetCloseTime &gt; </td></tr>
 <tr class="memitem:a58fb48a81509167c40346305cea629c5"><td class="memTemplItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1RPC.html#a58fb48a81509167c40346305cea629c5">getDeliveredAmount</a> (GetLedgerIndex const &amp;getLedgerIndex, GetCloseTime const &amp;getCloseTime, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1STTx.html">STTx</a> const &gt; const &amp;serializedTx, <a class="el" href="classripple_1_1TxMeta.html">TxMeta</a> const &amp;transactionMeta)</td></tr>
 <tr class="separator:a58fb48a81509167c40346305cea629c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7629f5798a689bb1847923cb490c8b74" id="r_a7629f5798a689bb1847923cb490c8b74"><td class="memTemplParams" colspan="2">template&lt;class GetFix1623Enabled &gt; </td></tr>
-<tr class="memitem:a7629f5798a689bb1847923cb490c8b74"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1RPC.html#a7629f5798a689bb1847923cb490c8b74">canHaveDeliveredAmountHelp</a> (GetFix1623Enabled const &amp;getFix1623Enabled, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1STTx.html">STTx</a> const &gt; const &amp;serializedTx, <a class="el" href="classripple_1_1TxMeta.html">TxMeta</a> const &amp;transactionMeta)</td></tr>
-<tr class="separator:a7629f5798a689bb1847923cb490c8b74"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18a4e6b6cfc28aedcb6788f4a66e3093" id="r_a18a4e6b6cfc28aedcb6788f4a66e3093"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1RPC.html#a18a4e6b6cfc28aedcb6788f4a66e3093">canHaveDeliveredAmount</a> (<a class="el" href="structripple_1_1RPC_1_1Context.html">RPC::Context</a> const &amp;context, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1STTx.html">STTx</a> const &gt; const &amp;serializedTx, <a class="el" href="classripple_1_1TxMeta.html">TxMeta</a> const &amp;transactionMeta)</td></tr>
-<tr class="separator:a18a4e6b6cfc28aedcb6788f4a66e3093"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2dba747db554b22ac5bb723555ce5d8" id="r_af2dba747db554b22ac5bb723555ce5d8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1RPC.html#af2dba747db554b22ac5bb723555ce5d8">canHaveDeliveredAmount</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1STTx.html">STTx</a> const &gt; const &amp;serializedTx, <a class="el" href="classripple_1_1TxMeta.html">TxMeta</a> const &amp;transactionMeta)</td></tr>
+<tr class="separator:af2dba747db554b22ac5bb723555ce5d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81a899ab4c4d932032421f36b17af879" id="r_a81a899ab4c4d932032421f36b17af879"><td class="memTemplParams" colspan="2">template&lt;class GetLedgerIndex &gt; </td></tr>
 <tr class="memitem:a81a899ab4c4d932032421f36b17af879"><td class="memTemplItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1STAmount.html">STAmount</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1RPC.html#a81a899ab4c4d932032421f36b17af879">getDeliveredAmount</a> (<a class="el" href="structripple_1_1RPC_1_1Context.html">RPC::Context</a> const &amp;context, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1STTx.html">STTx</a> const &gt; const &amp;serializedTx, <a class="el" href="classripple_1_1TxMeta.html">TxMeta</a> const &amp;transactionMeta, GetLedgerIndex const &amp;getLedgerIndex)</td></tr>
 <tr class="separator:a81a899ab4c4d932032421f36b17af879"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1554,7 +1551,7 @@ template&lt;typename T &gt; </div>
 <p>Add a <code>delivered_amount</code> field to the <code>meta</code> input/output parameter. </p>
 <p>The field is only added to successful payment and check cash transactions. If a delivered amount field is available in the <a class="el" href="classripple_1_1TxMeta.html">TxMeta</a> parameter, that value is used. Otherwise, the transaction's <code>Amount</code> field is used. If neither is available, then the delivered amount is set to "unavailable". </p>
 
-<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00129">129</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00103">103</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
 
 </div>
 </div>
@@ -1596,7 +1593,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00198">198</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00168">168</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
 
 </div>
 </div>
@@ -1638,7 +1635,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00209">209</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00179">179</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
 
 </div>
 </div>
@@ -1680,7 +1677,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00185">185</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00155">155</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
 
 </div>
 </div>
@@ -1728,46 +1725,8 @@ template&lt;class GetLedgerIndex , class GetCloseTime &gt; </div>
 
 </div>
 </div>
-<a id="a7629f5798a689bb1847923cb490c8b74" name="a7629f5798a689bb1847923cb490c8b74"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7629f5798a689bb1847923cb490c8b74">&#9670;&#160;</a></span>canHaveDeliveredAmountHelp()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class GetFix1623Enabled &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ripple::RPC::canHaveDeliveredAmountHelp </td>
-          <td>(</td>
-          <td class="paramtype">GetFix1623Enabled const &amp;&#160;</td>
-          <td class="paramname"><em>getFix1623Enabled</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1STTx.html">STTx</a> const &gt; const &amp;&#160;</td>
-          <td class="paramname"><em>serializedTx</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classripple_1_1TxMeta.html">TxMeta</a> const &amp;&#160;</td>
-          <td class="paramname"><em>transactionMeta</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00084">84</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a18a4e6b6cfc28aedcb6788f4a66e3093" name="a18a4e6b6cfc28aedcb6788f4a66e3093"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a18a4e6b6cfc28aedcb6788f4a66e3093">&#9670;&#160;</a></span>canHaveDeliveredAmount()</h2>
+<a id="af2dba747db554b22ac5bb723555ce5d8" name="af2dba747db554b22ac5bb723555ce5d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2dba747db554b22ac5bb723555ce5d8">&#9670;&#160;</a></span>canHaveDeliveredAmount()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1775,12 +1734,6 @@ template&lt;class GetFix1623Enabled &gt; </div>
         <tr>
           <td class="memname">bool ripple::RPC::canHaveDeliveredAmount </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structripple_1_1RPC_1_1Context.html">RPC::Context</a> const &amp;&#160;</td>
-          <td class="paramname"><em>context</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1STTx.html">STTx</a> const &gt; const &amp;&#160;</td>
           <td class="paramname"><em>serializedTx</em>, </td>
         </tr>
@@ -1798,7 +1751,7 @@ template&lt;class GetFix1623Enabled &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00111">111</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00083">83</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
 
 </div>
 </div>
@@ -1850,7 +1803,7 @@ template&lt;class GetLedgerIndex &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00164">164</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="DeliveredAmount_8cpp_source.html#l00134">134</a> of file <a class="el" href="DeliveredAmount_8cpp_source.html">DeliveredAmount.cpp</a>.</p>
 
 </div>
 </div>
@@ -3262,7 +3215,7 @@ template&lt;class Object &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00765">765</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00814">814</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
 
 </div>
 </div>
@@ -3328,7 +3281,7 @@ template&lt;class Object &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00839">839</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00888">888</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
 
 </div>
 </div>
@@ -3403,7 +3356,7 @@ template&lt;class Object &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A JSON object containing the error results, if any </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00880">880</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00929">929</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
 
 </div>
 </div>
@@ -3459,7 +3412,7 @@ template&lt;class Object &gt; </div>
 
 <p>Returns a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6" title="object value (collection of name/value pairs).">Json::objectValue</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00949">949</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00998">998</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
 
 </div>
 </div>
@@ -3521,7 +3474,7 @@ template&lt;class Object &gt; </div>
 
 <p>Returns a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6" title="object value (collection of name/value pairs).">Json::objectValue</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l00983">983</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l01032">1032</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
 
 </div>
 </div>
@@ -3577,7 +3530,7 @@ template&lt;class Object &gt; </div>
 
 <p>Returns a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6" title="object value (collection of name/value pairs).">Json::objectValue</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l01113">1113</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l01162">1162</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
 
 </div>
 </div>
@@ -3639,7 +3592,7 @@ template&lt;class Object &gt; </div>
 
 <p>Returns a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6" title="object value (collection of name/value pairs).">Json::objectValue</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l01223">1223</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TransactionSign_8cpp_source.html#l01278">1278</a> of file <a class="el" href="TransactionSign_8cpp_source.html">TransactionSign.cpp</a>.</p>
 
 </div>
 </div>
