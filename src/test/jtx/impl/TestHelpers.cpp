@@ -617,14 +617,14 @@ STPathElement
 cpe(PathAsset const& pa)
 {
     return pa.visit(
-        [&](Currency const& currency) {
+        [](Currency const& currency) {
             return STPathElement(
                 STPathElement::typeCurrency,
                 xrpAccount(),
                 currency,
                 xrpAccount());
         },
-        [&](MPTID const& mpt) {
+        [](MPTID const& mpt) {
             return STPathElement(
                 STPathElement::typeMPT, xrpAccount(), mpt, xrpAccount());
         });
@@ -641,7 +641,7 @@ ipe(Asset const& asset)
                 issue.currency,
                 issue.account);
         },
-        [&](MPTIssue const& issue) {
+        [](MPTIssue const& issue) {
             return STPathElement(
                 STPathElement::typeMPT | STPathElement::typeIssuer,
                 xrpAccount(),

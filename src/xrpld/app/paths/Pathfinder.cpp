@@ -173,7 +173,7 @@ amountFromPathAsset(
                 srcIssuer.value_or(isXRP(currency) ? xrpAccount() : srcAccount);
             return STAmount(Issue{currency, account}, 1u, 0, true);
         },
-        [&](MPTID const& mpt) { return STAmount(mpt, 1u, 0, true); });
+        [](MPTID const& mpt) { return STAmount(mpt, 1u, 0, true); });
 }
 
 Asset
@@ -183,7 +183,7 @@ assetFromPathAsset(PathAsset const& pathAsset, AccountID const& account)
         [&](Currency const& currency) {
             return Asset{Issue{currency, account}};
         },
-        [&](MPTID const& mpt) { return Asset{mpt}; });
+        [](MPTID const& mpt) { return Asset{mpt}; });
 }
 
 }  // namespace

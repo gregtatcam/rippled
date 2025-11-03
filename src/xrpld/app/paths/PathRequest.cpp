@@ -624,7 +624,7 @@ PathRequest::findPaths(
                     return STAmount(
                         Issue{issue.currency, sourceAccount}, 1u, 0, true);
                 },
-                [&](MPTIssue const& issue) {
+                [](MPTIssue const& issue) {
                     return STAmount(issue, 1u, 0, true);
                 });
         }();

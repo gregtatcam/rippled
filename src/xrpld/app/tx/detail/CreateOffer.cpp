@@ -17,6 +17,8 @@
 */
 //==============================================================================
 
+#include <test/jtx/amount.h>
+
 #include <xrpld/app/ledger/OrderBookDB.h>
 #include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/misc/PermissionedDEXHelpers.h>
@@ -24,15 +26,11 @@
 #include <xrpld/app/tx/detail/CreateOffer.h>
 
 #include <xrpl/basics/base_uint.h>
-#include <xrpl/beast/utility/WrappedSink.h>
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
-#include <xrpl/protocol/st.h>
-
-#include "test/jtx/amount.h"
 
 namespace ripple {
 TxConsequences

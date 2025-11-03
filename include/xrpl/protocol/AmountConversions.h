@@ -215,7 +215,7 @@ toMaxAmount(Asset const& asset)
                 return STAmount(
                     issue, STAmount::cMaxValue, STAmount::cMaxOffset);
             },
-            [&](MPTIssue const& issue) {
+            [](MPTIssue const& issue) {
                 return STAmount(issue, maxMPTokenAmount);
             });
     }

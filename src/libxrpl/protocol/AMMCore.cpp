@@ -79,12 +79,12 @@ invalidAMMAsset(
     std::optional<std::pair<Asset, Asset>> const& pair)
 {
     auto const err = asset.visit(
-        [&](MPTIssue const& issue) -> std::optional<NotTEC> {
+        [](MPTIssue const& issue) -> std::optional<NotTEC> {
             if (issue.getIssuer() == beast::zero)
                 return temBAD_MPT;
             return std::nullopt;
         },
-        [&](Issue const& issue) -> std::optional<NotTEC> {
+        [](Issue const& issue) -> std::optional<NotTEC> {
             if (badCurrency() == issue.currency)
                 return temBAD_CURRENCY;
             if (isXRP(issue) && issue.getIssuer().isNonZero())

@@ -31,51 +31,34 @@ doBalance(
     STAmount const& value,
     Issue const& issue)
 {
-    value.asset().visit(
-        [&](Issue const& issue) {
-            if (isXRP(issue))
-            {
-                auto const sle = env.le(keylet::account(account));
-                if (none)
-                {
-                    env.test.expect(!sle);
-                }
-                else if (env.test.expect(sle))
-                {
-                    env.test.expect(sle->getFieldAmount(sfBalance) == value);
-                }
-            }
-            else
-            {
-                auto const sle = env.le(keylet::line(account, issue));
-                if (none)
-                {
-                    env.test.expect(!sle);
-                }
-                else if (env.test.expect(sle))
-                {
-                    auto amount = sle->getFieldAmount(sfBalance);
-                    amount.get<Issue>().account = value.getIssuer();
-                    if (account > value.getIssuer())
-                        amount.negate();
-                    env.test.expect(amount == value);
-                }
-            }
-        },
-        [&](MPTIssue const& issue) {
-            auto const issuanceKey = keylet::mptIssuance(issue.getMptID());
-            auto const mptokenKey = keylet::mptoken(issuanceKey.key, account);
-            auto const sle = env.le(mptokenKey);
-            if (none)
-            {
-                env.test.expect(!sle);
-            }
-            else if (env.test.expect(sle))
-            {
-                auto amount = sle->getFieldU64(sfMPTAmount);
-                env.test.expect(amount == value.mpt().value());
-            }
-        });
+    if (isXRP(issue))
+    {
+        auto const sle = env.le(keylet::account(account));
+        if (none)
+        {
+            env.test.expect(!sle);
+        }
+        else if (env.test.expect(sle))
+        {
+            env.test.expect(sle->getFieldAmount(sfBalance) == value);
+        }
+    }
+    else
+    {
+        auto const sle = env.le(keylet::line(account, issue));
+        if (none)
+        {
+            env.test.expect(!sle);
+        }
+        else if (env.test.expect(sle))
+        {
+            auto amount = sle->getFieldAmount(sfBalance);
+            amount.get<Issue>().account = value.getIssuer();
+            if (account > value.getIssuer())
+                amount.negate();
+            env.test.expect(amount == value);
+        }
+    }
 }
 
 void

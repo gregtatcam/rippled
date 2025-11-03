@@ -135,7 +135,7 @@ bool
 STIssue::isDefault() const
 {
     return asset_.visit(
-        [&](Issue const& issue) { return issue == xrpIssue(); },
+        [](Issue const& issue) { return issue == xrpIssue(); },
         [](MPTIssue const&) { return false; });
 }
 

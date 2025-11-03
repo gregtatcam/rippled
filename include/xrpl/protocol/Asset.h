@@ -27,8 +27,6 @@
 #include <xrpl/protocol/MPTIssue.h>
 #include <xrpl/protocol/Rules.h>
 
-#include "Concepts.h"
-
 namespace ripple {
 
 class STAmount;
@@ -277,10 +275,10 @@ constexpr bool
 operator==(BadAsset const&, Asset const& rhs)
 {
     return rhs.visit(
-        [&](Issue const& issue) -> bool {
+        [](Issue const& issue) -> bool {
             return badCurrency() == issue.currency;
         },
-        [&](MPTIssue const& issue) -> bool {
+        [](MPTIssue const& issue) -> bool {
             return issue.getIssuer() == xrpAccount();
         });
 }
@@ -327,18 +325,18 @@ inline bool
 isConsistent(Asset const& asset)
 {
     return asset.visit(
-        [&](Issue const& issue) { return isConsistent(issue); },
-        [&](MPTIssue const&) { return true; });
+        [](Issue const& issue) { return isConsistent(issue); },
+        [](MPTIssue const&) { return true; });
 }
 
 inline bool
 validAsset(Asset const& asset)
 {
     return asset.visit(
-        [&](Issue const& issue) {
+        [](Issue const& issue) {
             return isConsistent(issue) && issue.currency != badCurrency();
         },
-        [&](MPTIssue const& issue) {
+        [](MPTIssue const& issue) {
             return issue.getIssuer() != xrpAccount();
         });
 }
