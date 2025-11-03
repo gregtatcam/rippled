@@ -126,52 +126,57 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                 JLOG(ctx.j.warn()) << "Creating a check for frozen asset";
                 return tecFROZEN;
             }
-            if (sendMax.holds<Issue>())
-            {
-                // If this account has a trustline for the currency, that
-                // trustline may not be frozen.
-                //
-                // Note that we DO allow create check for a currency that the
-                // account does not yet have a trustline to.
-                if (issuerId != srcId)
-                {
-                    // Check if the issuer froze the line
-                    auto const sleTrust = ctx.view.read(keylet::line(
-                        srcId, issuerId, sendMax.get<Issue>().currency));
-                    if (sleTrust &&
-                        sleTrust->isFlag(
-                            (issuerId > srcId) ? lsfHighFreeze : lsfLowFreeze))
+            auto const err = sendMax.asset().visit(
+                [&](Issue const& issue) -> std::optional<TER> {
+                    // If this account has a trustline for the currency,
+                    // that trustline may not be frozen.
+                    //
+                    // Note that we DO allow create check for a currency
+                    // that the account does not yet have a trustline to.
+                    if (issuerId != srcId)
                     {
-                        JLOG(ctx.j.warn())
-                            << "Creating a check for frozen trustline.";
-                        return tecFROZEN;
+                        // Check if the issuer froze the line
+                        auto const sleTrust = ctx.view.read(
+                            keylet::line(srcId, issuerId, issue.currency));
+                        if (sleTrust &&
+                            sleTrust->isFlag(
+                                (issuerId > srcId) ? lsfHighFreeze
+                                                   : lsfLowFreeze))
+                        {
+                            JLOG(ctx.j.warn())
+                                << "Creating a check for frozen trustline.";
+                            return tecFROZEN;
+                        }
                     }
-                }
-                if (issuerId != dstId)
-                {
-                    // Check if dst froze the line.
-                    auto const sleTrust = ctx.view.read(keylet::line(
-                        issuerId, dstId, sendMax.get<Issue>().currency));
-                    if (sleTrust &&
-                        sleTrust->isFlag(
-                            (dstId > issuerId) ? lsfHighFreeze : lsfLowFreeze))
+                    if (issuerId != dstId)
                     {
-                        JLOG(ctx.j.warn()) << "Creating a check for "
-                                              "destination frozen trustline.";
-                        return tecFROZEN;
+                        // Check if dst froze the line.
+                        auto const sleTrust = ctx.view.read(
+                            keylet::line(issuerId, dstId, issue.currency));
+                        if (sleTrust &&
+                            sleTrust->isFlag(
+                                (dstId > issuerId) ? lsfHighFreeze
+                                                   : lsfLowFreeze))
+                        {
+                            JLOG(ctx.j.warn())
+                                << "Creating a check for "
+                                   "destination frozen trustline.";
+                            return tecFROZEN;
+                        }
                     }
-                }
-            }
-            else
-            {
-                auto const& mptIssue = sendMax.get<MPTIssue>();
-                if (srcId != mptIssue.getIssuer() &&
-                    isFrozen(ctx.view, srcId, mptIssue))
-                    return tecFROZEN;
-                if (dstId != mptIssue.getIssuer() &&
-                    isFrozen(ctx.view, dstId, mptIssue))
-                    return tecFROZEN;
-            }
+
+                    return std::nullopt;
+                },
+                [&](MPTIssue const& issue) -> std::optional<TER> {
+                    if (srcId != issuerId && isFrozen(ctx.view, srcId, issue))
+                        return tecFROZEN;
+                    if (dstId != issuerId && isFrozen(ctx.view, dstId, issue))
+                        return tecFROZEN;
+
+                    return std::nullopt;
+                });
+            if (err)
+                return *err;
         }
     }
     if (hasExpired(ctx.view, ctx.tx[~sfExpiration]))

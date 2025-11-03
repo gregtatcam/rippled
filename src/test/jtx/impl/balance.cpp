@@ -31,7 +31,7 @@ doBalance(
     STAmount const& value,
     Issue const& issue)
 {
-    if (isXRP(value.asset()))
+    if (isXRP(issue))
     {
         auto const sle = env.le(keylet::account(account));
         if (none)
@@ -43,9 +43,9 @@ doBalance(
             env.test.expect(sle->getFieldAmount(sfBalance) == value);
         }
     }
-    else if (value.holds<Issue>())
+    else
     {
-        auto const sle = env.le(keylet::line(account, value.get<Issue>()));
+        auto const sle = env.le(keylet::line(account, issue));
         if (none)
         {
             env.test.expect(!sle);
@@ -57,22 +57,6 @@ doBalance(
             if (account > value.getIssuer())
                 amount.negate();
             env.test.expect(amount == value);
-        }
-    }
-    else
-    {
-        auto const issuanceKey =
-            keylet::mptIssuance(value.get<MPTIssue>().getMptID());
-        auto const mptokenKey = keylet::mptoken(issuanceKey.key, account);
-        auto const sle = env.le(mptokenKey);
-        if (none)
-        {
-            env.test.expect(!sle);
-        }
-        else if (env.test.expect(sle))
-        {
-            auto amount = sle->getFieldU64(sfMPTAmount);
-            env.test.expect(amount == value.mpt().value());
         }
     }
 }

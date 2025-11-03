@@ -616,37 +616,38 @@ n_offers(
 STPathElement
 cpe(PathAsset const& pa)
 {
-    return std::visit(
-        []<ValidPathAsset Tpa>(Tpa const& a) {
-            if constexpr (std::is_same_v<Tpa, Currency>)
-                return STPathElement(
-                    STPathElement::typeCurrency, xrpAccount(), a, xrpAccount());
-            else
-                return STPathElement(
-                    STPathElement::typeMPT, xrpAccount(), a, xrpAccount());
+    return pa.visit(
+        [](Currency const& currency) {
+            return STPathElement(
+                STPathElement::typeCurrency,
+                xrpAccount(),
+                currency,
+                xrpAccount());
         },
-        pa.value());
+        [](MPTID const& mpt) {
+            return STPathElement(
+                STPathElement::typeMPT, xrpAccount(), mpt, xrpAccount());
+        });
 };
 
 STPathElement
 ipe(Asset const& asset)
 {
-    return std::visit(
-        []<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                return STPathElement(
-                    STPathElement::typeCurrency | STPathElement::typeIssuer,
-                    xrpAccount(),
-                    issue.currency,
-                    issue.account);
-            else
-                return STPathElement(
-                    STPathElement::typeMPT | STPathElement::typeIssuer,
-                    xrpAccount(),
-                    issue.getMptID(),
-                    issue.getIssuer());
+    return asset.visit(
+        [](Issue const& issue) {
+            return STPathElement(
+                STPathElement::typeCurrency | STPathElement::typeIssuer,
+                xrpAccount(),
+                issue.currency,
+                issue.account);
         },
-        asset.value());
+        [](MPTIssue const& issue) {
+            return STPathElement(
+                STPathElement::typeMPT | STPathElement::typeIssuer,
+                xrpAccount(),
+                issue.getMptID(),
+                issue.getIssuer());
+        });
 };
 
 // Issuer path element

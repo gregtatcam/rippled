@@ -333,14 +333,9 @@ inline STPathElement::STPathElement(
 {
     // uType could be assetType; i.e. either Currency or MPTID.
     // Get the actual type.
-    std::visit(
-        [&]<ValidPathAsset TPA>(TPA const&) {
-            if constexpr (std::is_same_v<TPA, Currency>)
-                mType = mType & (~Type::typeMPT);
-            else
-                mType = mType & (~Type::typeCurrency);
-        },
-        mAssetID.value());
+    mAssetID.visit(
+        [&](Currency const&) { mType = mType & (~Type::typeMPT); },
+        [&](MPTID const&) { mType = mType & (~Type::typeCurrency); });
     hash_value_ = get_hash(*this);
 }
 

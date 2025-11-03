@@ -55,14 +55,17 @@ getMaxSourceAmount(
 {
     if (sendMax)
         return *sendMax;
-    else if (dstAmount.native() || dstAmount.holds<MPTIssue>())
-        return dstAmount;
-    else
-        return STAmount(
-            Issue{dstAmount.get<Issue>().currency, account},
-            dstAmount.mantissa(),
-            dstAmount.exponent(),
-            dstAmount < beast::zero);
+    return dstAmount.asset().visit(
+        [&](MPTIssue const& issue) { return dstAmount; },
+        [&](Issue const& issue) {
+            if (issue.native())
+                return dstAmount;
+            return STAmount(
+                Issue{issue.currency, account},
+                dstAmount.mantissa(),
+                dstAmount.exponent(),
+                dstAmount < beast::zero);
+        });
 }
 
 bool

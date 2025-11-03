@@ -206,21 +206,18 @@ toMaxAmount(Asset const& asset)
         return MPTAmount(maxMPTokenAmount);
     else if constexpr (std::is_same_v<STAmount, T>)
     {
-        return std::visit(
-            []<ValidIssueType TIss>(TIss const& issue) {
-                if constexpr (std::is_same_v<TIss, Issue>)
-                {
-                    if (isXRP(issue))
-                        return STAmount(
-                            issue,
-                            static_cast<std::int64_t>(STAmount::cMaxNativeN));
+        return asset.visit(
+            [](Issue const& issue) {
+                if (isXRP(issue))
                     return STAmount(
-                        issue, STAmount::cMaxValue, STAmount::cMaxOffset);
-                }
-                else
-                    return STAmount(issue, maxMPTokenAmount);
+                        issue,
+                        static_cast<std::int64_t>(STAmount::cMaxNativeN));
+                return STAmount(
+                    issue, STAmount::cMaxValue, STAmount::cMaxOffset);
             },
-            asset.value());
+            [](MPTIssue const& issue) {
+                return STAmount(issue, maxMPTokenAmount);
+            });
     }
     else
     {

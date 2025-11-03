@@ -53,15 +53,12 @@ STPathElement::get_hash(STPathElement const& element)
     // Check pathAsset type instead of element's mType
     // In some cases mType might be account but the asset
     // is still set to either MPT or currency (see Pathfinder::addLink())
-    if (element.getPathAsset().holds<MPTID>())
-    {
-        hash_currency += beast::uhash<>{}(element.getPathAsset().get<MPTID>());
-    }
-    else
-    {
-        for (auto const x : element.getPathAsset().get<Currency>())
-            hash_currency += (hash_currency * 509) ^ x;
-    }
+    element.getPathAsset().visit(
+        [&](MPTID const& mpt) { hash_currency += beast::uhash<>{}(mpt); },
+        [&](Currency const& currency) {
+            for (auto const x : currency)
+                hash_currency += (hash_currency * 509) ^ x;
+        });
 
     for (auto const x : element.getIssuerID())
         hash_issuer += (hash_issuer * 911) ^ x;

@@ -109,17 +109,21 @@ toStep(
 
     if (e1->isAccount() && e2->isAccount())
     {
-        if (curAsset.holds<MPTIssue>())
-            return make_MPTEndpointStep(
-                ctx,
-                e1->getAccountID(),
-                e2->getAccountID(),
-                curAsset.get<MPTIssue>().getMptID());
-        return make_DirectStepI(
-            ctx,
-            e1->getAccountID(),
-            e2->getAccountID(),
-            curAsset.get<Issue>().currency);
+        return curAsset.visit(
+            [&](MPTIssue const& issue) {
+                return make_MPTEndpointStep(
+                    ctx,
+                    e1->getAccountID(),
+                    e2->getAccountID(),
+                    issue.getMptID());
+            },
+            [&](Issue const& issue) {
+                return make_DirectStepI(
+                    ctx,
+                    e1->getAccountID(),
+                    e2->getAccountID(),
+                    issue.currency);
+            });
     }
 
     if (e1->isOffer() && e2->isAccount())
@@ -154,32 +158,39 @@ toStep(
 
     if (outAsset.isXRP())
     {
-        if (curAsset.holds<MPTIssue>())
-            return make_BookStepMX(ctx, curAsset.get<MPTIssue>());
-        return make_BookStepIX(ctx, curAsset.get<Issue>());
+        return curAsset.visit(
+            [&](MPTIssue const& issue) { return make_BookStepMX(ctx, issue); },
+            [&](Issue const& issue) { return make_BookStepIX(ctx, issue); });
     }
 
     if (isXRP(curAsset))
     {
-        if (outAsset.holds<MPTID>())
-            return make_BookStepXM(ctx, outAsset.get<MPTID>());
-        return make_BookStepXI(ctx, {outAsset.get<Currency>(), outIssuer});
+        return outAsset.visit(
+            [&](MPTID const& mpt) { return make_BookStepXM(ctx, mpt); },
+            [&](Currency const& currency) {
+                return make_BookStepXI(ctx, {currency, outIssuer});
+            });
     }
 
-    if (curAsset.holds<MPTIssue>() && outAsset.holds<Currency>())
-        return make_BookStepMI(
-            ctx,
-            curAsset.get<MPTIssue>(),
-            {outAsset.get<Currency>(), outIssuer});
-    if (curAsset.holds<Issue>() && outAsset.holds<MPTID>())
-        return make_BookStepIM(
-            ctx, curAsset.get<Issue>(), outAsset.get<MPTID>());
-
-    if (curAsset.holds<MPTIssue>())
-        return make_BookStepMM(
-            ctx, curAsset.get<MPTIssue>(), outAsset.get<MPTID>());
-    return make_BookStepII(
-        ctx, curAsset.get<Issue>(), {outAsset.get<Currency>(), outIssuer});
+    return curAsset.visit(
+        [&](MPTIssue const& issue) {
+            return outAsset.visit(
+                [&](Currency const& currency) {
+                    return make_BookStepMI(ctx, issue, {currency, outIssuer});
+                },
+                [&](MPTID const& mpt) {
+                    return make_BookStepMM(ctx, issue, mpt);
+                });
+        },
+        [&](Issue const& issue) {
+            return outAsset.visit(
+                [&](MPTID const& mpt) {
+                    return make_BookStepIM(ctx, issue, mpt);
+                },
+                [&](Currency const& currency) {
+                    return make_BookStepII(ctx, issue, {currency, outIssuer});
+                });
+        });
 }
 
 std::pair<TER, Strand>
@@ -259,12 +270,14 @@ toStrand(
 
     Asset curAsset = [&]() -> Asset {
         auto const& asset = sendMaxAsset ? *sendMaxAsset : deliver;
-        if (isXRP(asset))
-            return xrpIssue();
-        if (asset.holds<MPTIssue>())
-            return asset;
-        // First step ripples from the source to the issuer.
-        return Issue{asset.get<Issue>().currency, src};
+        return asset.visit(
+            [&](MPTIssue const& issue) -> Asset { return asset; },
+            [&](Issue const& issue) -> Asset {
+                if (isXRP(asset))
+                    return xrpIssue();
+                // First step ripples from the source to the issuer.
+                return Issue{issue.currency, src};
+            });
     }();
 
     // Currency or MPT
@@ -283,9 +296,9 @@ toStrand(
         auto const t = [&]() {
             auto const t =
                 STPathElement::typeAccount | STPathElement::typeIssuer;
-            if (curAsset.holds<MPTIssue>())
-                return t | STPathElement::typeMPT;
-            return t | STPathElement::typeCurrency;
+            return curAsset.visit(
+                [&](MPTIssue const&) { return t | STPathElement::typeMPT; },
+                [&](Issue const&) { return t | STPathElement::typeCurrency; });
         }();
         // If MPT then the issuer is the actual issuer, it is never the source
         // account.
@@ -404,13 +417,14 @@ toStrand(
 
         // Can only update the account for Issue since MPTIssue's account
         // is immutable as it is part of MPTID.
-        if (curAsset.holds<Issue>())
-        {
-            if (cur->isAccount())
-                curAsset.get<Issue>().account = cur->getAccountID();
-            else if (cur->hasIssuer())
-                curAsset.get<Issue>().account = cur->getIssuerID();
-        }
+        curAsset.visit(
+            [&](Issue const&) {
+                if (cur->isAccount())
+                    curAsset.get<Issue>().account = cur->getAccountID();
+                else if (cur->hasIssuer())
+                    curAsset.get<Issue>().account = cur->getIssuerID();
+            },
+            [](MPTIssue const&) {});
 
         if (cur->hasCurrency())
         {
@@ -421,17 +435,18 @@ toStrand(
         else if (cur->hasMPT())
             curAsset = cur->getPathAsset().get<MPTID>();
 
-        auto getImpliedStep =
-            [&](AccountID const& src_,
-                AccountID const& dst_,
-                Asset const& asset_) -> std::pair<TER, std::unique_ptr<Step>> {
-            if (asset_.holds<MPTIssue>())
-            {
-                JLOG(j.error()) << "MPT is invalid with rippling";
-                return {temBAD_PATH, nullptr};
-            }
-            return make_DirectStepI(
-                ctx(), src_, dst_, asset_.get<Issue>().currency);
+        using ImpliedStepRet = std::pair<TER, std::unique_ptr<Step>>;
+        auto getImpliedStep = [&](AccountID const& src_,
+                                  AccountID const& dst_,
+                                  Asset const& asset_) -> ImpliedStepRet {
+            return asset_.visit(
+                [&](MPTIssue const&) -> ImpliedStepRet {
+                    JLOG(j.error()) << "MPT is invalid with rippling";
+                    return {temBAD_PATH, nullptr};
+                },
+                [&](Issue const& issue) -> ImpliedStepRet {
+                    return make_DirectStepI(ctx(), src_, dst_, issue.currency);
+                });
         };
 
         if (cur->isAccount() && next->isAccount())
@@ -547,11 +562,13 @@ toStrand(
         auto curAcc = src;
         auto curAsset = [&]() -> Asset {
             auto const& asset = sendMaxAsset ? *sendMaxAsset : deliver;
-            if (isXRP(asset))
-                return xrpIssue();
-            if (asset.holds<MPTIssue>())
-                return asset;
-            return Issue{asset.get<Issue>().currency, src};
+            return asset.visit(
+                [&](MPTIssue const&) -> Asset { return asset; },
+                [&](Issue const& issue) -> Asset {
+                    if (isXRP(asset))
+                        return xrpIssue();
+                    return Issue{issue.currency, src};
+                });
         }();
 
         for (auto const& s : result)

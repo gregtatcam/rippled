@@ -432,37 +432,35 @@ PathRequest::parseJson(Json::Value const& jvParams)
 
                     // If both are the source, use the source.
                     // Otherwise, use the one that's not the source.
-                    if (srcPathAsset.holds<Currency>())
-                    {
-                        if (srcIssuerID != *raSrcAccount)
-                        {
-                            sciSourceAssets.insert(Issue{
-                                srcPathAsset.get<Currency>(), srcIssuerID});
-                        }
-                        else if (saSendMax->getIssuer() != *raSrcAccount)
-                        {
-                            sciSourceAssets.insert(Issue{
-                                srcPathAsset.get<Currency>(),
-                                saSendMax->getIssuer()});
-                        }
-                        else
-                        {
-                            sciSourceAssets.insert(Issue{
-                                srcPathAsset.get<Currency>(), *raSrcAccount});
-                        }
-                    }
-                    else
-                        sciSourceAssets.insert(srcPathAsset.get<MPTID>());
+                    srcPathAsset.visit(
+                        [&](Currency const& currency) {
+                            if (srcIssuerID != *raSrcAccount)
+                            {
+                                sciSourceAssets.insert(
+                                    Issue{currency, srcIssuerID});
+                            }
+                            else if (saSendMax->getIssuer() != *raSrcAccount)
+                            {
+                                sciSourceAssets.insert(
+                                    Issue{currency, saSendMax->getIssuer()});
+                            }
+                            {
+                                sciSourceAssets.insert(
+                                    Issue{currency, *raSrcAccount});
+                            }
+                        },
+                        [&](MPTID const& mpt) { sciSourceAssets.insert(mpt); });
                 }
-            }
-            else if (srcPathAsset.holds<Currency>())
-            {
-                sciSourceAssets.insert(
-                    Issue{srcPathAsset.get<Currency>(), srcIssuerID});
             }
             else
             {
-                sciSourceAssets.insert(MPTIssue{srcPathAsset.get<MPTID>()});
+                srcPathAsset.visit(
+                    [&](Currency const& currency) {
+                        sciSourceAssets.insert(Issue{currency, srcIssuerID});
+                    },
+                    [&](MPTID const& mpt) {
+                        sciSourceAssets.insert(MPTIssue{mpt});
+                    });
             }
         }
     }
@@ -621,13 +619,14 @@ PathRequest::findPaths(
         STAmount saMaxAmount = [&]() {
             if (saSendMax)
                 return *saSendMax;
-            if (asset.holds<Issue>())
-                return STAmount(
-                    Issue{asset.get<Issue>().currency, sourceAccount},
-                    1u,
-                    0,
-                    true);
-            return STAmount(asset.get<MPTIssue>(), 1u, 0, true);
+            return asset.visit(
+                [&](Issue const& issue) {
+                    return STAmount(
+                        Issue{issue.currency, sourceAccount}, 1u, 0, true);
+                },
+                [](MPTIssue const& issue) {
+                    return STAmount(issue, 1u, 0, true);
+                });
         }();
 
         JLOG(m_journal.debug())

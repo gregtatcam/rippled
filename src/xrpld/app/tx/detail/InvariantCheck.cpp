@@ -369,25 +369,29 @@ NoZeroEscrow::visitEntry(
         }
         else
         {
-            // IOU case
-            if (amount.holds<Issue>())
-            {
-                if (amount <= beast::zero)
-                    return true;
+            return amount.asset().visit(
+                [&](Issue const& issue) {
+                    // IOU case
+                    if (amount <= beast::zero)
+                        return true;
 
-                if (badCurrency() == amount.get<Issue>().currency)
-                    return true;
-            }
+                    if (badCurrency() == issue.currency)
+                        return true;
 
-            // MPT case
-            if (amount.holds<MPTIssue>())
-            {
-                if (amount <= beast::zero)
-                    return true;
+                    return false;
+                }
 
-                if (amount.mpt() > MPTAmount{maxMPTokenAmount})
-                    return true;  // LCOV_EXCL_LINE
-            }
+                // MPT case
+                ,
+                [&](MPTIssue const&) {
+                    if (amount <= beast::zero)
+                        return true;
+
+                    if (amount.mpt() > MPTAmount{maxMPTokenAmount})
+                        return true;  // LCOV_EXCL_LINE
+
+                    return false;
+                });
         }
         return false;
     };
@@ -1404,23 +1408,20 @@ ValidClawback::finalize(
             AccountID const issuer = tx.getAccountID(sfAccount);
             STAmount const& amount = tx.getFieldAmount(sfAmount);
             AccountID const& holder = amount.getIssuer();
-            STAmount const holderBalance = [&]() {
-                if (amount.holds<Issue>())
+            STAmount const holderBalance = amount.asset().visit(
+                [&](Issue const& issue) {
                     return accountHolds(
                         view,
                         holder,
-                        amount.get<Issue>().currency,
+                        issue.currency,
                         issuer,
                         fhIGNORE_FREEZE,
                         j);
-                return accountHolds(
-                    view,
-                    issuer,
-                    amount.get<MPTIssue>(),
-                    fhIGNORE_FREEZE,
-                    ahIGNORE_AUTH,
-                    j);
-            }();
+                },
+                [&](MPTIssue const& issue) {
+                    return accountHolds(
+                        view, issuer, issue, fhIGNORE_FREEZE, ahIGNORE_AUTH, j);
+                });
 
             if (holderBalance.signum() < 0)
             {

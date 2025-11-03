@@ -17,6 +17,8 @@
 */
 //==============================================================================
 
+#include <test/jtx/amount.h>
+
 #include <xrpld/app/ledger/OrderBookDB.h>
 #include <xrpld/app/misc/MPTUtils.h>
 #include <xrpld/app/misc/PermissionedDEXHelpers.h>
@@ -24,13 +26,11 @@
 #include <xrpld/app/tx/detail/CreateOffer.h>
 
 #include <xrpl/basics/base_uint.h>
-#include <xrpl/beast/utility/WrappedSink.h>
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
-#include <xrpl/protocol/st.h>
 
 namespace ripple {
 TxConsequences
@@ -275,69 +275,73 @@ CreateOffer::checkAcceptAsset(
         // An account can always accept its own issuance.
         return tesSUCCESS;
 
-    if (asset.holds<Issue>())
-    {
-        auto const& issue = asset.get<Issue>();
-        if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
-        {
+    return asset.visit(
+        [&](Issue const& issue) -> TER {
+            auto const& issuer = issue.getIssuer();
+            if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
+            {
+                auto const trustLine =
+                    view.read(keylet::line(id, issuer, issue.currency));
+
+                if (!trustLine)
+                {
+                    return (flags & tapRETRY) ? TER{terNO_LINE}
+                                              : TER{tecNO_LINE};
+                }
+
+                // Entries have a canonical representation, determined by a
+                // lexicographical "greater than" comparison employing
+                // strict weak ordering. Determine which entry we need to
+                // access.
+                bool const canonical_gt(id > issuer);
+
+                bool const is_authorized(
+                    (*trustLine)[sfFlags] &
+                    (canonical_gt ? lsfLowAuth : lsfHighAuth));
+
+                if (!is_authorized)
+                {
+                    JLOG(j.debug()) << "delay: can't receive IOUs from "
+                                       "issuer without auth.";
+
+                    return (flags & tapRETRY) ? TER{terNO_AUTH}
+                                              : TER{tecNO_AUTH};
+                }
+            }
+
+            // An account can not create a trustline to itself, so no line
+            // can exist to be frozen. Additionally, an issuer can always
+            // accept its own issuance.
+            if (issue.account == id)
+            {
+                return tesSUCCESS;
+            }
+
             auto const trustLine =
-                view.read(keylet::line(id, asset.getIssuer(), issue.currency));
+                view.read(keylet::line(id, issue.account, issue.currency));
 
             if (!trustLine)
             {
-                return (flags & tapRETRY) ? TER{terNO_LINE} : TER{tecNO_LINE};
+                return tesSUCCESS;
             }
 
-            // Entries have a canonical representation, determined by a
-            // lexicographical "greater than" comparison employing strict weak
-            // ordering. Determine which entry we need to access.
-            bool const canonical_gt(id > asset.getIssuer());
+            // There's no difference which side enacted deep freeze,
+            // accepting tokens shouldn't be possible.
+            bool const deepFrozen =
+                (*trustLine)[sfFlags] & (lsfLowDeepFreeze | lsfHighDeepFreeze);
 
-            bool const is_authorized(
-                (*trustLine)[sfFlags] &
-                (canonical_gt ? lsfLowAuth : lsfHighAuth));
-
-            if (!is_authorized)
+            if (deepFrozen)
             {
-                JLOG(j.debug())
-                    << "delay: can't receive IOUs from issuer without auth.";
-
-                return (flags & tapRETRY) ? TER{terNO_AUTH} : TER{tecNO_AUTH};
+                return tecFROZEN;
             }
-        }
 
-        // An account can not create a trustline to itself, so no line can exist
-        // to be frozen. Additionally, an issuer can always accept its own
-        // issuance.
-        if (issue.account == id)
-        {
             return tesSUCCESS;
-        }
-
-        auto const trustLine =
-            view.read(keylet::line(id, issue.account, issue.currency));
-
-        if (!trustLine)
-        {
-            return tesSUCCESS;
-        }
-
-        // There's no difference which side enacted deep freeze, accepting
-        // tokens shouldn't be possible.
-        bool const deepFrozen =
-            (*trustLine)[sfFlags] & (lsfLowDeepFreeze | lsfHighDeepFreeze);
-
-        if (deepFrozen)
-        {
-            return tecFROZEN;
-        }
-
-        return tesSUCCESS;
-    }
-    else
-        // WeakAuth - don't check if MPToken exists since it's created if
-        // needed.
-        return requireAuth(view, asset.get<MPTIssue>(), id, AuthType::WeakAuth);
+        },
+        [&](MPTIssue const& issue) -> TER {
+            // WeakAuth - don't check if MPToken exists since it's created
+            // if needed.
+            return requireAuth(view, issue, id, AuthType::WeakAuth);
+        });
 }
 
 std::pair<TER, Amounts>
@@ -422,19 +426,23 @@ CreateOffer::flowCross(
             // We are selling, so we will accept *more* than the offer
             // specified.  Since we don't know how much they might offer,
             // we allow delivery of the largest possible amount.
-            if (deliver.native())
-                deliver = STAmount{STAmount::cMaxNative};
-            // We can't use the maximum possible currency here because
-            // there might be a gateway transfer rate to account for.
-            // Since the transfer rate cannot exceed 200%, we use 1/2
-            // maxValue for our limit.
-            else if (deliver.holds<Issue>())
-                deliver = STAmount{
-                    deliverAsset,
-                    STAmount::cMaxValue / 2,
-                    STAmount::cMaxOffset};
-            else
-                deliver = STAmount{deliverAsset, maxMPTokenAmount / 2};
+            deliver.asset().visit(
+                [&](Issue const& issue) {
+                    if (issue.native())
+                        deliver = STAmount{STAmount::cMaxNative};
+                    // We can't use the maximum possible currency here because
+                    // there might be a gateway transfer rate to account for.
+                    // Since the transfer rate cannot exceed 200%, we use 1/2
+                    // maxValue for our limit.
+                    else
+                        deliver = STAmount{
+                            deliverAsset,
+                            STAmount::cMaxValue / 2,
+                            STAmount::cMaxOffset};
+                },
+                [&](MPTIssue const&) {
+                    deliver = STAmount{deliverAsset, maxMPTokenAmount / 2};
+                });
         }
 
         // Call the payment engine's flow() to do the actual work.
@@ -562,10 +570,9 @@ CreateOffer::format_amount(STAmount const& amount)
 {
     std::string txt = amount.getText();
     txt += "/";
-    if (amount.holds<Issue>())
-        txt += to_string(amount.get<Issue>().currency);
-    else
-        txt += to_string(amount.get<MPTIssue>());
+    amount.asset().visit(
+        [&](Issue const& issue) { txt += to_string(issue.currency); },
+        [&](MPTIssue const& issue) { txt += to_string(issue); });
     return txt;
 }
 
@@ -917,30 +924,22 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
 
     auto setBookDir = [&](SLE::ref sle,
                           std::optional<uint256> const& maybeDomain) {
-        if (saTakerPays.holds<Issue>())
-        {
-            sle->setFieldH160(
-                sfTakerPaysCurrency, saTakerPays.get<Issue>().currency);
-            sle->setFieldH160(
-                sfTakerPaysIssuer, saTakerPays.get<Issue>().account);
-        }
-        else
-        {
-            sle->setFieldH192(
-                sfTakerPaysMPT, saTakerPays.get<MPTIssue>().getMptID());
-        }
-        if (saTakerGets.holds<Issue>())
-        {
-            sle->setFieldH160(
-                sfTakerGetsCurrency, saTakerGets.get<Issue>().currency);
-            sle->setFieldH160(
-                sfTakerGetsIssuer, saTakerGets.get<Issue>().account);
-        }
-        else
-        {
-            sle->setFieldH192(
-                sfTakerGetsMPT, saTakerGets.get<MPTIssue>().getMptID());
-        }
+        saTakerPays.asset().visit(
+            [&](Issue const& issue) {
+                sle->setFieldH160(sfTakerPaysCurrency, issue.currency);
+                sle->setFieldH160(sfTakerPaysIssuer, issue.account);
+            },
+            [&](MPTIssue const& issue) {
+                sle->setFieldH192(sfTakerPaysMPT, issue.getMptID());
+            });
+        saTakerGets.asset().visit(
+            [&](Issue const& issue) {
+                sle->setFieldH160(sfTakerGetsCurrency, issue.currency);
+                sle->setFieldH160(sfTakerGetsIssuer, issue.account);
+            },
+            [&](MPTIssue const& issue) {
+                sle->setFieldH192(sfTakerGetsMPT, issue.getMptID());
+            });
         sle->setFieldU64(sfExchangeRate, uRate);
         if (maybeDomain)
             sle->setFieldH256(sfDomainID, *maybeDomain);

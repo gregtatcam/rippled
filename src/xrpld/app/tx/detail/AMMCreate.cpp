@@ -213,27 +213,28 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     // Disallow AMM if the issuer has clawback enabled when featureAMMClawback
     // is not enabled
     auto clawbackDisabled = [&](Asset const& asset) -> TER {
-        if (isXRP(asset))
-            return tesSUCCESS;
-        if (asset.holds<MPTIssue>())
-        {
-            if (auto const sle = ctx.view.read(
-                    keylet::mptIssuance(asset.get<MPTIssue>().getMptID()));
-                !sle)
-                return tecINTERNAL;
-            else if (sle->getFlags() & lsfMPTCanClawback)
-                return tecNO_PERMISSION;
-        }
-        else
-        {
-            if (auto const sle =
-                    ctx.view.read(keylet::account(asset.getIssuer()));
-                !sle)
-                return tecINTERNAL;
-            else if (sle->getFlags() & lsfAllowTrustLineClawback)
-                return tecNO_PERMISSION;
-        }
-        return tesSUCCESS;
+        return asset.visit(
+            [&](MPTIssue const& issue) -> TER {
+                if (auto const sle =
+                        ctx.view.read(keylet::mptIssuance(issue.getMptID()));
+                    !sle)
+                    return tecINTERNAL;
+                else if (sle->getFlags() & lsfMPTCanClawback)
+                    return tecNO_PERMISSION;
+                return tesSUCCESS;
+            },
+            [&](Issue const& issue) -> TER {
+                if (isXRP(issue))
+                    return tesSUCCESS;
+
+                if (auto const sle =
+                        ctx.view.read(keylet::account(asset.getIssuer()));
+                    !sle)
+                    return tecINTERNAL;
+                else if (sle->getFlags() & lsfAllowTrustLineClawback)
+                    return tecNO_PERMISSION;
+                return tesSUCCESS;
+            });
     };
 
     if (auto const ter = clawbackDisabled(amount.asset()); ter != tesSUCCESS)
@@ -312,56 +313,62 @@ applyCreate(
     }
 
     auto sendAndInitTrustOrMPT = [&](STAmount const& amount) -> TER {
-        // Authorize MPT
-        if (amount.holds<MPTIssue>())
-        {
-            auto const& mptIssue = amount.get<MPTIssue>();
-            auto const& mptID = mptIssue.getMptID();
-            std::uint32_t flags = lsfMPTAMM;
-            if (auto const err = requireAuth(
-                    ctx_.view(), mptIssue, accountId, AuthType::WeakAuth);
-                err != tesSUCCESS)
-            {
-                if (err == tecNO_AUTH)
-                    flags |= lsfMPTAuthorized;
-                else
-                    return err;
-            }
-
-            if (auto const err = MPTokenAuthorize::createMPToken(
-                    sb, mptID, accountId, flags);
-                err != tesSUCCESS)
-                return err;
-            // Don't adjust AMM owner count.
-            // It's irrelevant for pseudo-account like AMM.
-        }
-
-        if (auto const res = accountSend(
+        auto doSend = [&]() {
+            return accountSend(
                 sb,
                 account_,
                 accountId,
                 amount,
                 ctx_.journal,
                 WaiveTransferFee::Yes,
-                AllowMPTOverflow::No))
-            return res;
+                AllowMPTOverflow::No);
+        };
+        // Authorize MPT
+        return amount.asset().visit(
+            [&](MPTIssue const& issue) -> TER {
+                // Authorize MPT
+                auto const& mptIssue = issue;
+                auto const& mptID = mptIssue.getMptID();
+                std::uint32_t flags = lsfMPTAMM;
+                if (auto const err = requireAuth(
+                        ctx_.view(), mptIssue, accountId, AuthType::WeakAuth);
+                    err != tesSUCCESS)
+                {
+                    if (err == tecNO_AUTH)
+                        flags |= lsfMPTAuthorized;
+                    else
+                        return err;
+                }
 
-        // Set AMM flag on AMM trustline
-        if (amount.holds<Issue>() && !isXRP(amount))
-        {
-            if (SLE::pointer sleRippleState =
-                    sb.peek(keylet::line(accountId, amount.get<Issue>()));
-                !sleRippleState)
-                return tecINTERNAL;  // LCOV_EXCL_LINE
-            else
-            {
-                auto const flags = sleRippleState->getFlags();
-                sleRippleState->setFieldU32(sfFlags, flags | lsfAMMNode);
-                sb.update(sleRippleState);
-            }
-        }
+                if (auto const err = MPTokenAuthorize::createMPToken(
+                        sb, mptID, accountId, flags);
+                    err != tesSUCCESS)
+                    return err;
+                // Don't adjust AMM owner count.
+                // It's irrelevant for pseudo-account like AMM.
+                return doSend();
+            },
+            // Set AMM flag on AMM trustline
+            [&](Issue const& issue) -> TER {
+                if (auto const err = doSend(); err != tesSUCCESS)
+                    return err;
 
-        return tesSUCCESS;
+                if (!isXRP(issue))
+                {
+                    if (SLE::pointer sleRippleState = sb.peek(
+                            keylet::line(accountId, amount.get<Issue>()));
+                        !sleRippleState)
+                        return tecINTERNAL;
+                    else
+                    {
+                        auto const flags = sleRippleState->getFlags();
+                        sleRippleState->setFieldU32(
+                            sfFlags, flags | lsfAMMNode);
+                        sb.update(sleRippleState);
+                    }
+                }
+                return tesSUCCESS;
+            });
     };
 
     // Send asset1.

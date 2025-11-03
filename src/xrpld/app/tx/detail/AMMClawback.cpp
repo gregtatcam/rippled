@@ -135,26 +135,27 @@ AMMClawback::preclaim(PreclaimContext const& ctx)
     }
 
     auto const checkClawAsset = [&](Asset const asset) -> bool {
-        if (asset.native())
-            return false;  // LCOV_EXCL_LINE
+        return asset.visit(
+            [&](Issue const& issue) {
+                if (issue.native())
+                    return false;  // LCOV_EXCL_LINE
 
-        if (asset.holds<Issue>())
-        {
-            if (!(issuerFlagsIn & lsfAllowTrustLineClawback) ||
-                (issuerFlagsIn & lsfNoFreeze))
-                return false;
-        }
-        else if (asset.holds<MPTIssue>())
-        {
-            auto const sleIssuance = ctx.view.read(
-                keylet::mptIssuance(asset.get<MPTIssue>().getMptID()));
+                if (!(issuerFlagsIn & lsfAllowTrustLineClawback) ||
+                    (issuerFlagsIn & lsfNoFreeze))
+                    return false;
 
-            if (!sleIssuance || !sleIssuance->isFlag(lsfMPTCanClawback) ||
-                sleIssuance->getAccountID(sfIssuer) != ctx.tx[sfAccount])
-                return false;
-        }
+                return true;
+            },
+            [&](MPTIssue const& issue) {
+                auto const sleIssuance =
+                    ctx.view.read(keylet::mptIssuance(issue.getMptID()));
 
-        return true;
+                if (!sleIssuance || !sleIssuance->isFlag(lsfMPTCanClawback) ||
+                    sleIssuance->getAccountID(sfIssuer) != ctx.tx[sfAccount])
+                    return false;
+
+                return true;
+            });
     };
 
     if (!checkClawAsset(asset))
@@ -279,12 +280,8 @@ AMMClawback::applyGuts(Sandbox& sb)
         << " old balance: " << to_string(lptAMMBalance.iou());
 
     auto sendAmount = [&](STAmount const& saAmount) -> TER {
-        if (saAmount.asset().holds<Issue>())
-            return rippleCredit(sb, holder, issuer, saAmount, true, j_);
-        else if (saAmount.asset().holds<MPTIssue>())
-            return rippleCredit(sb, holder, issuer, saAmount, false, j_);
-        else
-            return tefINTERNAL;  // LCOV_EXCL_LINE
+        bool const checkIssuer = saAmount.holds<Issue>();
+        return rippleCredit(sb, holder, issuer, saAmount, checkIssuer, j_);
     };
 
     auto const ter = sendAmount(amountWithdraw);

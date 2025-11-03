@@ -78,13 +78,21 @@ invalidAMMAsset(
     Asset const& asset,
     std::optional<std::pair<Asset, Asset>> const& pair)
 {
-    if (asset.holds<MPTIssue>() &&
-        asset.get<MPTIssue>().getIssuer() == beast::zero)
-        return temBAD_MPT;
-    if (asset.holds<Issue>() && badCurrency() == asset.get<Issue>().currency)
-        return temBAD_CURRENCY;
-    if (isXRP(asset) && asset.getIssuer().isNonZero())
-        return temBAD_ISSUER;
+    auto const err = asset.visit(
+        [](MPTIssue const& issue) -> std::optional<NotTEC> {
+            if (issue.getIssuer() == beast::zero)
+                return temBAD_MPT;
+            return std::nullopt;
+        },
+        [](Issue const& issue) -> std::optional<NotTEC> {
+            if (badCurrency() == issue.currency)
+                return temBAD_CURRENCY;
+            if (isXRP(issue) && issue.getIssuer().isNonZero())
+                return temBAD_ISSUER;
+            return std::nullopt;
+        });
+    if (err)
+        return *err;
     if (pair && asset != pair->first && asset != pair->second)
         return temBAD_AMM_TOKENS;
     return tesSUCCESS;

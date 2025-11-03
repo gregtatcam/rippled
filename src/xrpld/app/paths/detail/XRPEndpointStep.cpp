@@ -204,22 +204,18 @@ private:
     {
         if (ctx.isFirst)
         {
-            return std::visit(
-                [&]<ValidIssueType TIss>(TIss const& issue) {
-                    if constexpr (std::is_same_v<TIss, Issue>)
-                    {
-                        if (!ctx.view.exists(keylet::line(acc, issue)))
-                            return -1;
-                    }
-                    else
-                    {
-                        if (!ctx.view.exists(
-                                keylet::mptoken(issue.getMptID(), acc)))
-                            return -1;
-                    }
+            return ctx.strandDeliver.visit(
+                [&](Issue const& issue) {
+                    if (!ctx.view.exists(keylet::line(acc, issue)))
+                        return -1;
                     return 0;
                 },
-                ctx.strandDeliver.value());
+                [&](MPTIssue const& issue) {
+                    if (!ctx.view.exists(
+                            keylet::mptoken(issue.getMptID(), acc)))
+                        return -1;
+                    return 0;
+                });
         }
         return 0;
     }

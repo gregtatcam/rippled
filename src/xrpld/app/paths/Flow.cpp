@@ -71,11 +71,13 @@ flow(
     Asset const srcAsset = [&]() -> Asset {
         if (sendMax)
             return sendMax->asset();
-        if (isXRP(deliver))
-            return xrpIssue();
-        if (deliver.holds<Issue>())
-            return Issue(deliver.get<Issue>().currency, src);
-        return deliver.asset();
+        return deliver.asset().visit(
+            [&](Issue const& issue) -> Asset {
+                if (isXRP(issue))
+                    return xrpIssue();
+                return Issue(issue.currency, src);
+            },
+            [&](MPTIssue const&) { return deliver.asset(); });
     }();
 
     Asset const dstAsset = deliver.asset();

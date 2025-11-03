@@ -199,14 +199,11 @@ isGlobalFrozen(ReadView const& view, MPTIssue const& mptIssue)
 bool
 isGlobalFrozen(ReadView const& view, Asset const& asset)
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                return isGlobalFrozen(view, issue.getIssuer());
-            else
-                return isGlobalFrozen(view, issue);
+    return asset.visit(
+        [&](Issue const& issue) {
+            return isGlobalFrozen(view, issue.getIssuer());
         },
-        asset.value());
+        [&](MPTIssue const& issue) { return isGlobalFrozen(view, issue); });
 }
 
 bool
@@ -2283,22 +2280,21 @@ accountSend(
     WaiveTransferFee waiveFee,
     AllowMPTOverflow allowOverflow)
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                return accountSendIOU(
-                    view, uSenderID, uReceiverID, saAmount, j, waiveFee);
-            else
-                return accountSendMPT(
-                    view,
-                    uSenderID,
-                    uReceiverID,
-                    saAmount,
-                    j,
-                    waiveFee,
-                    allowOverflow);
+    return saAmount.asset().visit(
+        [&](Issue const&) {
+            return accountSendIOU(
+                view, uSenderID, uReceiverID, saAmount, j, waiveFee);
         },
-        saAmount.asset().value());
+        [&](MPTIssue const&) {
+            return accountSendMPT(
+                view,
+                uSenderID,
+                uReceiverID,
+                saAmount,
+                j,
+                waiveFee,
+                allowOverflow);
+        });
 }
 
 static bool
@@ -2645,15 +2641,14 @@ requireAuth(
                 return tefINTERNAL;  // LCOV_EXCL_LINE
 
             auto const asset = sleVault->at(sfAsset);
-            if (auto const err = std::visit(
-                    [&]<ValidIssueType TIss>(TIss const& issue) {
-                        if constexpr (std::is_same_v<TIss, Issue>)
-                            return requireAuth(view, issue, account, authType);
-                        else
-                            return requireAuth(
-                                view, issue, account, authType, depth + 1);
+            if (auto const err = asset.visit(
+                    [&](Issue const& issue) {
+                        return requireAuth(view, issue, account, authType);
                     },
-                    asset.value());
+                    [&](MPTIssue const& issue) {
+                        return requireAuth(
+                            view, issue, account, authType, depth + 1);
+                    });
                 !isTesSuccess(err))
                 return err;
         }
@@ -2977,23 +2972,16 @@ rippleCredit(
     bool bCheckIssuer,
     beast::Journal j)
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-            {
-                return rippleCreditIOU(
-                    view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
-            }
-            else
-            {
-                XRPL_ASSERT(
-                    !bCheckIssuer,
-                    "ripple::rippleCredit : not checking issuer");
-                return rippleCreditMPT(
-                    view, uSenderID, uReceiverID, saAmount, j);
-            }
+    return saAmount.asset().visit(
+        [&](Issue const&) {
+            return rippleCreditIOU(
+                view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
         },
-        saAmount.asset().value());
+        [&](MPTIssue const&) {
+            XRPL_ASSERT(
+                !bCheckIssuer, "ripple::rippleCredit : not checking issuer");
+            return rippleCreditMPT(view, uSenderID, uReceiverID, saAmount, j);
+        });
 }
 
 [[nodiscard]] std::optional<STAmount>
