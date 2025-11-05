@@ -828,12 +828,9 @@ public:
 
             // No cross:
             {
-                TER const expectedCode = features[featureImmediateOfferKilled]
-                    ? static_cast<TER>(tecKILLED)
-                    : static_cast<TER>(tesSUCCESS);
                 env(offer(alice, XRP(1'000), USD(1000)),
                     txflags(tfImmediateOrCancel),
-                    ter(expectedCode));
+                    ter(tecKILLED));
             }
 
             env.require(

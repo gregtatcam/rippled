@@ -501,7 +501,7 @@ CreateOffer::flowCross(
                         afterCross.in.clear();
 
                     afterCross.out = divRoundStrict(
-                        afterCross.in, rate, takerAmount.out.issue(), false);
+                        afterCross.in, rate, takerAmount.out.asset(), false);
                 }
                 else
                 {
