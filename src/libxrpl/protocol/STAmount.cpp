@@ -1588,7 +1588,7 @@ mulRoundImpl(
     // range. Dividing their product by 10^14 maintains the
     // precision, by scaling the result to 10^16 to 10^18.
     //
-    // If the we're rounding up, we want to round up away
+    // If we're rounding up, we want to round up away
     // from zero, and if we're rounding down, truncation
     // is implicit.
     std::uint64_t amount = muldiv_round(
@@ -1608,7 +1608,7 @@ mulRoundImpl(
 
     if (roundUp && !resultNegative && !result)
     {
-        if (xrp)
+        if (xrp || asset.holds<MPTIssue>())
         {
             // return the smallest value above zero
             amount = 1;
