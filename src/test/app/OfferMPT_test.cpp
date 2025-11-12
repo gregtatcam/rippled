@@ -181,13 +181,10 @@ public:
         // an offer.  Show that the attempt to remove the offer fails.
         env.require(offers(alice, 2));
 
-        // featureDepositPreauths changes the return code on an expired Offer.
-        // Adapt to that.
-        bool const featPreauth{features[featureDepositPreauth]};
         env(offer(alice, XRP(5), USD(2)),
             json(sfExpiration.fieldName, lastClose(env)),
             json(jss::OfferSequence, offer2Seq),
-            ter(featPreauth ? TER{tecEXPIRED} : TER{tesSUCCESS}));
+            ter(TER{tecEXPIRED}));
         env.close();
 
         env.require(offers(alice, 2));
@@ -1038,12 +1035,9 @@ public:
             owners(alice, 1));
 
         // Place an offer that should have already expired.
-        // The DepositPreauth amendment changes the return code; adapt to that.
-        bool const featPreauth{features[featureDepositPreauth]};
-
         env(offer(alice, xrpOffer, usdOffer),
             json(sfExpiration.fieldName, lastClose(env)),
-            ter(featPreauth ? TER{tecEXPIRED} : TER{tesSUCCESS}));
+            ter(TER{tecEXPIRED}));
 
         env.require(
             balance(alice, startBalance - f - f),

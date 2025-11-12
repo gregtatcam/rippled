@@ -171,50 +171,50 @@ Env::balance(Account const& account) const
 }
 
 PrettyAmount
-Env::balance(Account const& account, Issue const& issue) const
+Env::balance(Account const& account, Asset const& asset) const
 {
-    if (isXRP(issue.currency))
-        return balance(account);
-    auto const sle = le(keylet::line(account.id(), issue));
-    if (!sle)
-        return {STAmount(issue, 0), account.name()};
-    auto amount = sle->getFieldAmount(sfBalance);
-    amount.get<Issue>().account = issue.account;
-    if (account.id() > issue.account)
-        amount.negate();
-    return {amount, lookup(issue.account).name()};
-}
+    return asset.visit(
+        [&](Issue const& issue) -> PrettyAmount {
+            if (isXRP(issue.currency))
+                return balance(account);
+            auto const sle = le(keylet::line(account.id(), issue));
+            if (!sle)
+                return {STAmount(issue, 0), account.name()};
+            auto amount = sle->getFieldAmount(sfBalance);
+            amount.get<Issue>().account = issue.account;
+            if (account.id() > issue.account)
+                amount.negate();
+            return {amount, lookup(issue.account).name()};
+        },
+        [&](MPTIssue const& mptIssue) -> PrettyAmount {
+            MPTID const& id = mptIssue.getMptID();
+            if (!id)
+                return {STAmount(mptIssue, 0), account.name()};
 
-PrettyAmount
-Env::balance(Account const& account, MPTIssue const& mptIssue) const
-{
-    MPTID const& id = mptIssue.getMptID();
-    if (!id)
-        return {STAmount(mptIssue, 0), account.name()};
+            AccountID const& issuer = mptIssue.getIssuer();
+            if (account.id() == issuer)
+            {
+                // Issuer balance
+                auto const sle = le(keylet::mptIssuance(id));
+                if (!sle)
+                    return {STAmount(mptIssue, 0), account.name()};
 
-    AccountID const& issuer = mptIssue.getIssuer();
-    if (account.id() == issuer)
-    {
-        // Issuer balance
-        auto const sle = le(keylet::mptIssuance(id));
-        if (!sle)
-            return {STAmount(mptIssue, 0), account.name()};
+                // Make it negative
+                STAmount const amount{
+                    mptIssue, sle->getFieldU64(sfOutstandingAmount), 0, true};
+                return {amount, lookup(issuer).name()};
+            }
+            else
+            {
+                // Holder balance
+                auto const sle = le(keylet::mptoken(id, account));
+                if (!sle)
+                    return {STAmount(mptIssue, 0), account.name()};
 
-        // Make it negative
-        STAmount const amount{
-            mptIssue, sle->getFieldU64(sfOutstandingAmount), 0, true};
-        return {amount, lookup(issuer).name()};
-    }
-    else
-    {
-        // Holder balance
-        auto const sle = le(keylet::mptoken(id, account));
-        if (!sle)
-            return {STAmount(mptIssue, 0), account.name()};
-
-        STAmount const amount{mptIssue, sle->getFieldU64(sfMPTAmount)};
-        return {amount, lookup(issuer).name()};
-    }
+                STAmount const amount{mptIssue, sle->getFieldU64(sfMPTAmount)};
+                return {amount, lookup(issuer).name()};
+            }
+        });
 }
 
 PrettyAmount

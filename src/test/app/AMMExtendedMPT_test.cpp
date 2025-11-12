@@ -3207,8 +3207,6 @@ private:
         using namespace jtx;
         Account const becky{"becky"};
 
-        bool const supportsPreauth = {features[featureDepositPreauth]};
-
         Env env(*this, features);
         fund(env, gw, {alice, becky}, XRP(5'000));
 
@@ -3234,15 +3232,11 @@ private:
         env(fset(becky, asfDepositAuth));
         env.close();
 
-        // becky pays herself again.  Whether it succeeds depends on
-        // whether featureDepositPreauth is enabled.
-        TER const expect{
-            supportsPreauth ? TER{tesSUCCESS} : TER{tecNO_PERMISSION}};
-
+        // becky pays herself again.
         env(pay(becky, becky, BTC(10'000)),
             path(~MPT(BTC)),
             sendmax(XRP(10)),
-            ter(expect));
+            ter(tesSUCCESS));
 
         env.close();
     }
@@ -3907,7 +3901,6 @@ private:
     testDepositAuth()
     {
         auto const supported{jtx::testable_amendments()};
-        testPayment(supported - featureDepositPreauth);
         testPayment(supported);
         testPayMPT();
     }
