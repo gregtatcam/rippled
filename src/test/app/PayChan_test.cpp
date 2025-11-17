@@ -1889,7 +1889,6 @@ struct PayChan_test : public beast::unit_test::suite
             BEAST_EXPECT(channelAmount(*env.current(), chan) == XRP(1000));
 
             rmAccount(env, alice, carol, tecHAS_OBLIGATIONS);
-            // can only remove bob if the channel isn't in their owner direcotry
             rmAccount(env, bob, carol, TER(tecHAS_OBLIGATIONS));
 
             auto const feeDrops = env.current()->fees().base;
@@ -1904,7 +1903,6 @@ struct PayChan_test : public beast::unit_test::suite
             auto authAmt = reqBal + XRP(100);
             assert(reqBal <= chanAmt);
 
-            // claim should fail if the dst was removed
             env(claim(alice, chan, reqBal, authAmt));
             env.close();
             BEAST_EXPECT(channelBalance(*env.current(), chan) == reqBal);
@@ -1912,7 +1910,6 @@ struct PayChan_test : public beast::unit_test::suite
             BEAST_EXPECT(env.balance(bob) == preBob + delta);
             chanBal = reqBal;
 
-            // fund should fail if the dst was removed
             auto const preAlice = env.balance(alice);
             env(fund(alice, chan, XRP(1000)));
             env.close();
@@ -1925,7 +1922,7 @@ struct PayChan_test : public beast::unit_test::suite
                 // Owner closes, will close after settleDelay
                 env(claim(alice, chan), txflags(tfClose));
                 env.close();
-                // settle delay hasn't ellapsed. Channels should exist.
+                // settle delay hasn't elapsed. Channels should exist.
                 BEAST_EXPECT(channelExists(*env.current(), chan));
                 auto const closeTime = env.current()->info().parentCloseTime;
                 auto const minExpiration = closeTime + settleDelay;
