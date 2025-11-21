@@ -3,8 +3,8 @@
 
 #include <test/jtx/Env.h>
 
-#include <xrpld/app/paths/detail/Steps.h>
 #include <xrpld/app/misc/TxQ.h>
+#include <xrpld/app/paths/detail/Steps.h>
 
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/json/json_value.h>
