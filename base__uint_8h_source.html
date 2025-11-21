@@ -697,7 +697,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>    <span class="comment">// This comparison might seem wrong on a casual inspection because it</span></div>
 <div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>    <span class="comment">// compares data internally stored as std::uint32_t byte-by-byte. But</span></div>
 <div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>    <span class="comment">// note that the underlying data is stored in big endian, even if the</span></div>
-<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>    <span class="comment">// plaform is little endian. This makes the comparison correct.</span></div>
+<div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>    <span class="comment">// platform is little endian. This makes the comparison correct.</span></div>
 <div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>    <span class="comment">//</span></div>
 <div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>    <span class="comment">// FIXME: use std::lexicographical_compare_three_way once support is</span></div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>    <span class="comment">//        added to MacOS.</span></div>
