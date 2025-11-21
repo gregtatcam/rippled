@@ -72,6 +72,7 @@ test.csf > xrpl.protocol
 test.json > test.jtx
 test.json > xrpl.json
 test.jtx > xrpl.basics
+test.jtx > xrpld.app
 test.jtx > xrpld.core
 test.jtx > xrpld.rpc
 test.jtx > xrpl.json

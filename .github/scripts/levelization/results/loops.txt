@@ -4,9 +4,6 @@ Loop: test.jtx test.toplevel
 Loop: test.jtx test.unit_test
   test.unit_test == test.jtx
 
-Loop: test.jtx xrpld.app
-  test.jtx > xrpld.app
-
 Loop: xrpld.app xrpld.core
   xrpld.app > xrpld.core
 
