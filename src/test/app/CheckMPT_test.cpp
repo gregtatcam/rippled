@@ -26,8 +26,6 @@ namespace ripple {
 
 class CheckMPT_test : public beast::unit_test::suite
 {
-    FeatureBitset const disallowIncoming{featureDisallowIncoming};
-
     // Helper function that returns the Checks on an account.
     static std::vector<std::shared_ptr<SLE const>>
     checksOnAccount(test::jtx::Env& env, test::jtx::Account account)
@@ -182,7 +180,7 @@ class CheckMPT_test : public beast::unit_test::suite
         Account const alice{"alice"};
         Account const bob{"bob"};
 
-        Env env{*this, features | disallowIncoming};
+        Env env{*this, features};
 
         STAmount const startBalance{XRP(1'000).value()};
         env.fund(startBalance, gw, alice, bob);

@@ -18,9 +18,6 @@ namespace ripple {
 bool
 CashCheck::checkExtraFeatures(ripple::PreflightContext const& ctx)
 {
-    if (!ctx.rules.enabled(featureChecks))
-        return false;
-
     auto const optAmount = ctx.tx[~sfAmount];
     auto const optDeliverMin = ctx.tx[~sfDeliverMin];
 
