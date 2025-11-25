@@ -7,8 +7,6 @@ namespace ripple {
 
 class Check_test : public beast::unit_test::suite
 {
-    FeatureBitset const disallowIncoming{featureDisallowIncoming};
-
     static uint256
     getCheckIndex(AccountID const& account, std::uint32_t uSequence)
     {
@@ -65,25 +63,6 @@ class Check_test : public beast::unit_test::suite
 
         using namespace test::jtx;
         Account const alice{"alice"};
-        {
-            // If the Checks amendment is not enabled, you should not be able
-            // to create, cash, or cancel checks.
-            Env env{*this, features - featureChecks};
-
-            env.fund(XRP(1000), alice);
-            env.close();
-
-            uint256 const checkId{
-                getCheckIndex(env.master, env.seq(env.master))};
-            env(check::create(env.master, alice, XRP(100)), ter(temDISABLED));
-            env.close();
-
-            env(check::cash(alice, checkId, XRP(100)), ter(temDISABLED));
-            env.close();
-
-            env(check::cancel(alice, checkId), ter(temDISABLED));
-            env.close();
-        }
         {
             // If the Checks amendment is enabled all check-related
             // facilities should be available.
@@ -217,24 +196,12 @@ class Check_test : public beast::unit_test::suite
 
         using namespace test::jtx;
 
-        // test flag doesn't set unless amendment enabled
-        {
-            Env env{*this, features - disallowIncoming};
-            Account const alice{"alice"};
-            env.fund(XRP(10000), alice);
-            env(fset(alice, asfDisallowIncomingCheck));
-            env.close();
-            auto const sle = env.le(alice);
-            uint32_t flags = sle->getFlags();
-            BEAST_EXPECT(!(flags & lsfDisallowIncomingCheck));
-        }
-
         Account const gw{"gateway"};
         Account const alice{"alice"};
         Account const bob{"bob"};
         IOU const USD{gw["USD"]};
 
-        Env env{*this, features | disallowIncoming};
+        Env env{*this, features};
 
         STAmount const startBalance{XRP(1000).value()};
         env.fund(startBalance, gw, alice, bob);
@@ -2552,7 +2519,6 @@ public:
     {
         using namespace test::jtx;
         auto const sa = testable_amendments();
-        testWithFeats(sa - disallowIncoming);
         testWithFeats(sa);
         testTrustLineCreation(sa);
     }
