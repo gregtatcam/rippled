@@ -1245,10 +1245,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l01114" name="l01114"></a><span class="lineno"> 1114</span>                <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l01115" name="l01115"></a><span class="lineno"> 1115</span>        }</div>
 <div class="line"><a id="l01116" name="l01116"></a><span class="lineno"> 1116</span> </div>
-<div class="line"><a id="l01117" name="l01117"></a><span class="lineno"> 1117</span>        <span class="comment">// There should be at least 5 amendments.  Don&#39;t do exact comparison</span></div>
+<div class="line"><a id="l01117" name="l01117"></a><span class="lineno"> 1117</span>        <span class="comment">// There should be at least 3 amendments.  Don&#39;t do exact comparison</span></div>
 <div class="line"><a id="l01118" name="l01118"></a><span class="lineno"> 1118</span>        <span class="comment">// to avoid maintenance as more amendments are added in the future.</span></div>
 <div class="line"><a id="l01119" name="l01119"></a><span class="lineno"> 1119</span>        BEAST_EXPECT(i == 254);</div>
-<div class="line"><a id="l01120" name="l01120"></a><span class="lineno"> 1120</span>        BEAST_EXPECT(majorities.size() &gt;= 5);</div>
+<div class="line"><a id="l01120" name="l01120"></a><span class="lineno"> 1120</span>        BEAST_EXPECT(majorities.size() &gt;= 3);</div>
 <div class="line"><a id="l01121" name="l01121"></a><span class="lineno"> 1121</span> </div>
 <div class="line"><a id="l01122" name="l01122"></a><span class="lineno"> 1122</span>        <span class="comment">// None of the amendments should be enabled yet.</span></div>
 <div class="line"><a id="l01123" name="l01123"></a><span class="lineno"> 1123</span>        <span class="keyword">auto</span> enableds = <a class="code hl_function" href="namespaceripple.html#a6f8b0cab74710c17299c1d37f3e05b48">getEnabledAmendments</a>(*env.closed());</div>
@@ -1266,7 +1266,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l01135" name="l01135"></a><span class="lineno"> 1135</span>                <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l01136" name="l01136"></a><span class="lineno"> 1136</span>        }</div>
 <div class="line"><a id="l01137" name="l01137"></a><span class="lineno"> 1137</span>        BEAST_EXPECT(i == 255);</div>
-<div class="line"><a id="l01138" name="l01138"></a><span class="lineno"> 1138</span>        BEAST_EXPECT(enableds.size() &gt;= 5);</div>
+<div class="line"><a id="l01138" name="l01138"></a><span class="lineno"> 1138</span>        BEAST_EXPECT(enableds.size() &gt;= 3);</div>
 <div class="line"><a id="l01139" name="l01139"></a><span class="lineno"> 1139</span>    }</div>
 </div>
 <div class="line"><a id="l01140" name="l01140"></a><span class="lineno"> 1140</span> </div>

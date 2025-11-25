@@ -3577,9 +3577,9 @@ requires requires { <a class="el" href="namespaceripple.html#afa35799caaa5a9f071
 <tr class="memitem:a1ca5a15d8ff4637d8436cfcc7df7e69c" id="r_a1ca5a15d8ff4637d8436cfcc7df7e69c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a1ca5a15d8ff4637d8436cfcc7df7e69c">verifyDigest</a> (<a class="el" href="classripple_1_1PublicKey.html">PublicKey</a> const &amp;publicKey, <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const &amp;<a class="el" href="namespaceripple.html#a91e9fe7a4e92dba79c3812fd3edcaacc">digest</a>, <a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;sig, bool mustBeFullyCanonical=true) noexcept</td></tr>
 <tr class="memdesc:a1ca5a15d8ff4637d8436cfcc7df7e69c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify a secp256k1 signature on the digest of a message.  <br /></td></tr>
 <tr class="separator:a1ca5a15d8ff4637d8436cfcc7df7e69c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3549cb4c3d81efe240ad20c147e48ac7" id="r_a3549cb4c3d81efe240ad20c147e48ac7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a3549cb4c3d81efe240ad20c147e48ac7">verify</a> (<a class="el" href="classripple_1_1PublicKey.html">PublicKey</a> const &amp;publicKey, <a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;m, <a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;sig, bool mustBeFullyCanonical=true) noexcept</td></tr>
-<tr class="memdesc:a3549cb4c3d81efe240ad20c147e48ac7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify a signature on a message.  <br /></td></tr>
-<tr class="separator:a3549cb4c3d81efe240ad20c147e48ac7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a239d2626985d5fd4c57e22c12e6fb55e" id="r_a239d2626985d5fd4c57e22c12e6fb55e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a239d2626985d5fd4c57e22c12e6fb55e">verify</a> (<a class="el" href="classripple_1_1PublicKey.html">PublicKey</a> const &amp;publicKey, <a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;m, <a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;sig) noexcept</td></tr>
+<tr class="memdesc:a239d2626985d5fd4c57e22c12e6fb55e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Verify a signature on a message.  <br /></td></tr>
+<tr class="separator:a239d2626985d5fd4c57e22c12e6fb55e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa2a27f242f6d150ff52f2ad0b2e2a512" id="r_aa2a27f242f6d150ff52f2ad0b2e2a512"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespaceripple.html#a4e412a5834900d9affa8db3ac1a27209">NodeID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#aa2a27f242f6d150ff52f2ad0b2e2a512">calcNodeID</a> (<a class="el" href="classripple_1_1PublicKey.html">PublicKey</a> const &amp;)</td></tr>
 <tr class="memdesc:aa2a27f242f6d150ff52f2ad0b2e2a512"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the 160-bit node ID from a node public key.  <br /></td></tr>
 <tr class="separator:aa2a27f242f6d150ff52f2ad0b2e2a512"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4075,10 +4075,10 @@ requires requires(T const&amp; t) { { t.getJson(<a class="el" href="structripple
 <tr class="separator:a6381519cb9d7608cf89fdee87c667afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab991d1fb7d66c12c1c7e287aa0c8ea56" id="r_ab991d1fb7d66c12c1c7e287aa0c8ea56"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespaceripple.html#ab1f2184bb5938b5508798cd47a561a21">Blob</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#ab991d1fb7d66c12c1c7e287aa0c8ea56">getSigningData</a> (<a class="el" href="classripple_1_1STTx.html">STTx</a> const &amp;that)</td></tr>
 <tr class="separator:ab991d1fb7d66c12c1c7e287aa0c8ea56"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adfcfb384ab8c9d98aad9e2d677ad2e3b" id="r_adfcfb384ab8c9d98aad9e2d677ad2e3b"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classripple_1_1Expected.html">Expected</a>&lt; void, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#adfcfb384ab8c9d98aad9e2d677ad2e3b">singleSignHelper</a> (<a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;sigObject, <a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;data, bool const <a class="el" href="namespaceripple.html#a286745fec5429abb3893001b4982522ba3e23eeda3fe3fb70d1e274eab59199d1">fullyCanonical</a>)</td></tr>
-<tr class="separator:adfcfb384ab8c9d98aad9e2d677ad2e3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad16bccd906011f79087d42c12693e68c" id="r_ad16bccd906011f79087d42c12693e68c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Expected.html">Expected</a>&lt; void, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#ad16bccd906011f79087d42c12693e68c">multiSignHelper</a> (<a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;sigObject, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> &gt; txnAccountID, bool const <a class="el" href="namespaceripple.html#a286745fec5429abb3893001b4982522ba3e23eeda3fe3fb70d1e274eab59199d1">fullyCanonical</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; <a class="el" href="classripple_1_1Serializer.html">Serializer</a>(<a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;)&gt; makeMsg, <a class="el" href="classripple_1_1Rules.html">Rules</a> const &amp;rules)</td></tr>
-<tr class="separator:ad16bccd906011f79087d42c12693e68c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c5c898048ff97625b4c9f8dedefbad7" id="r_a0c5c898048ff97625b4c9f8dedefbad7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classripple_1_1Expected.html">Expected</a>&lt; void, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a0c5c898048ff97625b4c9f8dedefbad7">singleSignHelper</a> (<a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;sigObject, <a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;data)</td></tr>
+<tr class="separator:a0c5c898048ff97625b4c9f8dedefbad7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b6cf2fda67777d2fd59f250b7fb6227" id="r_a3b6cf2fda67777d2fd59f250b7fb6227"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classripple_1_1Expected.html">Expected</a>&lt; void, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a3b6cf2fda67777d2fd59f250b7fb6227">multiSignHelper</a> (<a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;sigObject, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> &gt; txnAccountID, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a>&lt; <a class="el" href="classripple_1_1Serializer.html">Serializer</a>(<a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;)&gt; makeMsg, <a class="el" href="classripple_1_1Rules.html">Rules</a> const &amp;rules)</td></tr>
+<tr class="separator:a3b6cf2fda67777d2fd59f250b7fb6227"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a357a6c9ad78832418b5c0f1f19e94320" id="r_a357a6c9ad78832418b5c0f1f19e94320"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a357a6c9ad78832418b5c0f1f19e94320">isMemoOkay</a> (<a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;st, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &amp;reason)</td></tr>
 <tr class="separator:a357a6c9ad78832418b5c0f1f19e94320"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a214b2c11cd300c202879b429668be5e1" id="r_a214b2c11cd300c202879b429668be5e1"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple.html#a214b2c11cd300c202879b429668be5e1">isAccountFieldOkay</a> (<a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;st)</td></tr>
@@ -21602,8 +21602,8 @@ template&lt;&gt; </div>
 
 </div>
 </div>
-<a id="a3549cb4c3d81efe240ad20c147e48ac7" name="a3549cb4c3d81efe240ad20c147e48ac7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3549cb4c3d81efe240ad20c147e48ac7">&#9670;&#160;</a></span>verify() <span class="overload">[1/2]</span></h2>
+<a id="a239d2626985d5fd4c57e22c12e6fb55e" name="a239d2626985d5fd4c57e22c12e6fb55e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a239d2626985d5fd4c57e22c12e6fb55e">&#9670;&#160;</a></span>verify() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -21627,13 +21627,7 @@ template&lt;&gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;&#160;</td>
-          <td class="paramname"><em>sig</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>mustBeFullyCanonical</em> = <code>true</code>&#160;</td>
+          <td class="paramname"><em>sig</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -21673,7 +21667,7 @@ template&lt;&gt; </div>
 
 <p>Calculate the 160-bit node ID from a node public key. </p>
 
-<p class="definition">Definition at line <a class="el" href="PublicKey_8cpp_source.html#l00301">301</a> of file <a class="el" href="PublicKey_8cpp_source.html">PublicKey.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PublicKey_8cpp_source.html#l00296">296</a> of file <a class="el" href="PublicKey_8cpp_source.html">PublicKey.cpp</a>.</p>
 
 </div>
 </div>
@@ -21729,7 +21723,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="PublicKey_8h_source.html#l00250">250</a> of file <a class="el" href="PublicKey_8h_source.html">PublicKey.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="PublicKey_8h_source.html#l00246">246</a> of file <a class="el" href="PublicKey_8h_source.html">PublicKey.h</a>.</p>
 
 </div>
 </div>
@@ -24774,7 +24768,7 @@ template&lt;class U &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00812">812</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00774">774</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -24797,7 +24791,7 @@ template&lt;class U &gt; </div>
 <p>Sterilize a transaction. </p>
 <p>The transaction is serialized and then deserialized, ensuring that all equivalent transactions are in canonical form. This also ensures that program metadata such as the transaction's digest, are all computed. </p>
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00842">842</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00804">804</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -24819,7 +24813,7 @@ template&lt;class U &gt; </div>
 
 <p>Check whether a transaction is a pseudo-transaction. </p>
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00851">851</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00813">813</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -28642,8 +28636,8 @@ template&lt;typename MightSaveRound &gt; </div>
 
 </div>
 </div>
-<a id="adfcfb384ab8c9d98aad9e2d677ad2e3b" name="adfcfb384ab8c9d98aad9e2d677ad2e3b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adfcfb384ab8c9d98aad9e2d677ad2e3b">&#9670;&#160;</a></span>singleSignHelper()</h2>
+<a id="a0c5c898048ff97625b4c9f8dedefbad7" name="a0c5c898048ff97625b4c9f8dedefbad7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c5c898048ff97625b4c9f8dedefbad7">&#9670;&#160;</a></span>singleSignHelper()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -28661,13 +28655,7 @@ template&lt;typename MightSaveRound &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classripple_1_1Slice.html">Slice</a> const &amp;&#160;</td>
-          <td class="paramname"><em>data</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool const&#160;</td>
-          <td class="paramname"><em>fullyCanonical</em>&#160;</td>
+          <td class="paramname"><em>data</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -28682,12 +28670,12 @@ template&lt;typename MightSaveRound &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00398">398</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00390">390</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
-<a id="ad16bccd906011f79087d42c12693e68c" name="ad16bccd906011f79087d42c12693e68c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad16bccd906011f79087d42c12693e68c">&#9670;&#160;</a></span>multiSignHelper()</h2>
+<a id="a3b6cf2fda67777d2fd59f250b7fb6227" name="a3b6cf2fda67777d2fd59f250b7fb6227"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b6cf2fda67777d2fd59f250b7fb6227">&#9670;&#160;</a></span>multiSignHelper()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -28703,12 +28691,6 @@ template&lt;typename MightSaveRound &gt; </div>
           <td></td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> &gt;&#160;</td>
           <td class="paramname"><em>txnAccountID</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool const&#160;</td>
-          <td class="paramname"><em>fullyCanonical</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -28730,7 +28712,7 @@ template&lt;typename MightSaveRound &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00458">458</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00436">436</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -28768,7 +28750,7 @@ template&lt;typename MightSaveRound &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00637">637</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00599">599</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -28796,7 +28778,7 @@ template&lt;typename MightSaveRound &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00729">729</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00691">691</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -28824,7 +28806,7 @@ template&lt;typename MightSaveRound &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00742">742</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00704">704</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -28862,7 +28844,7 @@ template&lt;typename MightSaveRound &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00770">770</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STTx_8cpp_source.html#l00732">732</a> of file <a class="el" href="STTx_8cpp_source.html">STTx.cpp</a>.</p>
 
 </div>
 </div>
@@ -39173,7 +39155,7 @@ template&lt;class FlowResult &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SQLiteDatabase_8cpp_source.html#l00837">837</a> of file <a class="el" href="SQLiteDatabase_8cpp_source.html">SQLiteDatabase.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SQLiteDatabase_8cpp_source.html#l00836">836</a> of file <a class="el" href="SQLiteDatabase_8cpp_source.html">SQLiteDatabase.cpp</a>.</p>
 
 </div>
 </div>
@@ -40297,7 +40279,7 @@ template&lt;class T , class C &gt; </div>
 <dl class="section note"><dt>Note</dt><dd>Can only raise the validity to a more valid state, and can not override anything cached bad.</dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceripple.html#adb47f5675e01882e14c2cf9cc5700648" title="Checks transaction signature and local checks.">checkValidity</a>, <a class="el" href="namespaceripple.html#abcad59b0151763334cc398263373bcdd" title="Describes the pre-processing validity of a transaction.">Validity</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00099">99</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00093">93</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
 
 </div>
 </div>
@@ -40368,7 +40350,7 @@ template&lt;class T , class C &gt; </div>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceripple.html#a24280b80536d1afd09e24a75f4596922" title="Gate a transaction based on static information.">preflight</a>, <a class="el" href="namespaceripple.html#a5027a5209e954b9478fab70357963466" title="Gate a transaction based on static ledger information.">preclaim</a>, <a class="el" href="namespaceripple.html#a2b59523126e4050b583017ce8465f3b6" title="Apply a prechecked transaction to an OpenView.">doApply</a></dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>A pair with the <code>TER</code> and a <code>bool</code> indicating whether or not the transaction was applied. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00127">127</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00121">121</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
 
 </div>
 </div>
@@ -40426,7 +40408,7 @@ template&lt;class T , class C &gt; </div>
 <p>Provides more detailed logging and decodes the correct behavior based on the <code>TER</code> type</p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="namespaceripple.html#a3352ead78ab1510016d3f728004acd63" title="Enum class for return value from applyTransaction">ApplyTransactionResult</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00220">220</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00214">214</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
 
 </div>
 </div>
@@ -41086,7 +41068,7 @@ template&lt;typename PreflightChecks &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00120">120</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00114">114</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
 
 </div>
 </div>
@@ -41140,7 +41122,7 @@ template&lt;typename PreflightChecks &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00140">140</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00134">134</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
 
 </div>
 </div>
@@ -41190,7 +41172,7 @@ template&lt;typename PreflightChecks &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00154">154</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="apply_8cpp_source.html#l00148">148</a> of file <a class="el" href="apply_8cpp_source.html">apply.cpp</a>.</p>
 
 </div>
 </div>
@@ -41900,7 +41882,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00176">176</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00170">170</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -41944,7 +41926,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00254">254</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00248">248</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42050,7 +42032,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00379">379</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00373">373</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42100,7 +42082,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00404">404</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00398">398</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42138,7 +42120,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00553">553</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00547">547</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42220,7 +42202,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00644">644</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00638">638</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42258,7 +42240,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00668">668</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00662">662</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42424,7 +42406,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00751">751</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00745">745</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42504,7 +42486,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00884">884</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l00878">878</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42586,7 +42568,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l01145">1145</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l01139">1139</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42624,7 +42606,7 @@ template&lt;&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l01165">1165</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Escrow_8cpp_source.html#l01159">1159</a> of file <a class="el" href="Escrow_8cpp_source.html">Escrow.cpp</a>.</p>
 
 </div>
 </div>
@@ -42742,7 +42724,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="InvariantCheck_8cpp_source.html#l01898">1898</a> of file <a class="el" href="InvariantCheck_8cpp_source.html">InvariantCheck.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="InvariantCheck_8cpp_source.html#l01893">1893</a> of file <a class="el" href="InvariantCheck_8cpp_source.html">InvariantCheck.cpp</a>.</p>
 
 </div>
 </div>

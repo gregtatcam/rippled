@@ -331,9 +331,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a09889694dc0604db676d0f912f031f61" id="r_a09889694dc0604db676d0f912f031f61"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1RelationalDatabase_1_1CountMinMax.html">RelationalDatabase::CountMinMax</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a09889694dc0604db676d0f912f031f61">getRowsMinMax</a> (soci::session &amp;session, <a class="el" href="namespaceripple_1_1detail.html#a389870f45417a1e9cef591f28a0c05b0">TableType</a> type)</td></tr>
 <tr class="memdesc:a09889694dc0604db676d0f912f031f61"><td class="mdescLeft">&#160;</td><td class="mdescRight">getRowsMinMax Returns minimum ledger sequence, maximum ledger sequence and total number of rows in given table.  <br /></td></tr>
 <tr class="separator:a09889694dc0604db676d0f912f031f61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a80dd3eeb84bfc98b57ecd2dae31116be" id="r_a80dd3eeb84bfc98b57ecd2dae31116be"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a80dd3eeb84bfc98b57ecd2dae31116be">saveValidatedLedger</a> (<a class="el" href="classripple_1_1DatabaseCon.html">DatabaseCon</a> &amp;ldgDB, <a class="el" href="classripple_1_1DatabaseCon.html">DatabaseCon</a> &amp;txnDB, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1Ledger.html">Ledger</a> const  &gt; const  &amp;ledger, bool <a class="el" href="namespaceripple.html#a6434c1a0fd22b77e2e4a228c0eca79eba43b5c9175984c071f30b873fdce0a000">current</a>)</td></tr>
-<tr class="memdesc:a80dd3eeb84bfc98b57ecd2dae31116be"><td class="mdescLeft">&#160;</td><td class="mdescRight">saveValidatedLedger Saves ledger into database.  <br /></td></tr>
-<tr class="separator:a80dd3eeb84bfc98b57ecd2dae31116be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a800ed37a6099acd0464b99e71b6f97" id="r_a8a800ed37a6099acd0464b99e71b6f97"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#a8a800ed37a6099acd0464b99e71b6f97">saveValidatedLedger</a> (<a class="el" href="classripple_1_1DatabaseCon.html">DatabaseCon</a> &amp;ldgDB, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/unique_ptr.html">std::unique_ptr</a>&lt; <a class="el" href="classripple_1_1DatabaseCon.html">DatabaseCon</a> &gt; const  &amp;txnDB, <a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classripple_1_1Ledger.html">Ledger</a> const  &gt; const  &amp;ledger, bool <a class="el" href="namespaceripple.html#a6434c1a0fd22b77e2e4a228c0eca79eba43b5c9175984c071f30b873fdce0a000">current</a>)</td></tr>
+<tr class="memdesc:a8a800ed37a6099acd0464b99e71b6f97"><td class="mdescLeft">&#160;</td><td class="mdescRight">saveValidatedLedger Saves ledger into database.  <br /></td></tr>
+<tr class="separator:a8a800ed37a6099acd0464b99e71b6f97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae93cc399fa745d41f09ff23e70a08659" id="r_ae93cc399fa745d41f09ff23e70a08659"><td class="memItemLeft" align="right" valign="top">static <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#aaf521cde20561da32d6a54a105363555">LedgerInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceripple_1_1detail.html#ae93cc399fa745d41f09ff23e70a08659">getLedgerInfo</a> (soci::session &amp;session, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;sqlSuffix, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="memdesc:ae93cc399fa745d41f09ff23e70a08659"><td class="mdescLeft">&#160;</td><td class="mdescRight">getLedgerInfo Returns the info of the ledger retrieved from the database by using the provided SQL query suffix.  <br /></td></tr>
 <tr class="separator:ae93cc399fa745d41f09ff23e70a08659"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1818,8 +1818,8 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="a80dd3eeb84bfc98b57ecd2dae31116be" name="a80dd3eeb84bfc98b57ecd2dae31116be"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a80dd3eeb84bfc98b57ecd2dae31116be">&#9670;&#160;</a></span>saveValidatedLedger()</h2>
+<a id="a8a800ed37a6099acd0464b99e71b6f97" name="a8a800ed37a6099acd0464b99e71b6f97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a800ed37a6099acd0464b99e71b6f97">&#9670;&#160;</a></span>saveValidatedLedger()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1833,7 +1833,7 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classripple_1_1DatabaseCon.html">DatabaseCon</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/unique_ptr.html">std::unique_ptr</a>&lt; <a class="el" href="classripple_1_1DatabaseCon.html">DatabaseCon</a> &gt; const &amp;&#160;</td>
           <td class="paramname"><em>txnDB</em>, </td>
         </tr>
         <tr>
@@ -1930,7 +1930,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or no value if the ledger was not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00382">382</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00390">390</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -1977,7 +1977,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Ledger.html" title="Holds a ledger.">Ledger</a> or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00452">452</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00460">460</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2017,7 +2017,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00463">463</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00471">471</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2064,7 +2064,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00471">471</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00479">479</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2111,7 +2111,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00483">483</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00491">491</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2158,7 +2158,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Ledger.html" title="Holds a ledger.">Ledger</a> or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00495">495</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00503">503</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2198,7 +2198,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Hash of the ledger. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00506">506</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00514">514</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2245,7 +2245,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Struct <a class="el" href="structripple_1_1LedgerHashPair.html">LedgerHashPair</a> which contain hashes of the ledger and its parent ledger. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00536">536</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00544">544</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2299,7 +2299,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Map which points sequence number of found ledger to the struct <a class="el" href="structripple_1_1LedgerHashPair.html">LedgerHashPair</a> which contains ledger hash and its parent hash. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00567">567</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00575">575</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2353,7 +2353,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of shared pointers to transactions sorted in descending order by ledger sequence. Also number of transactions if count == true. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00612">612</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00620">620</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2436,7 +2436,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SQL query string. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00679">679</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00687">687</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2512,7 +2512,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted by account sequence in the specified order along with the number of transactions processed or skipped. If this number is &gt;= 0, then it represents the number of transactions processed, if it is &lt; 0, then -number represents the number of transactions skipped. We need to skip some number of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00775">775</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00783">783</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2573,7 +2573,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted in ascending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00855">855</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00863">863</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2634,7 +2634,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted in descending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00866">866</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00874">874</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2703,7 +2703,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples each containing (the found transactions, their metadata, and their account sequences) sorted by account sequence in the specified order along with the number of transactions processed or skipped. If this number is &gt;= 0, then it represents the number of transactions processed, if it is &lt; 0, then -number represents the number of transactions skipped. We need to skip some number of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00897">897</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00905">905</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2757,7 +2757,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in ascending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00955">955</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00963">963</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2811,7 +2811,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in descending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00965">965</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00973">973</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2887,7 +2887,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in the specified order by account sequence, a marker for the next search if the search was not finished and the number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00994">994</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01002">1002</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2948,7 +2948,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in ascending order by account sequence and marker for next search if search not finished. Also number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01148">1148</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01156">1156</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3009,7 +3009,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in descending order by account sequence and marker for next search if search not finished. Also number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01162">1162</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01170">1170</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3070,7 +3070,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classripple_1_1Transaction.html">Transaction</a> and its metadata if found, <a class="el" href="namespaceripple.html#a7ffb3f54d739bb8f967d695f08fb66ccaa181a603769c1f98ad927e7367c7aa51">TxSearched::all</a> if range given and all ledgers from range are present in the database, <a class="el" href="namespaceripple.html#a7ffb3f54d739bb8f967d695f08fb66cca03d59e663c1af9ac33a9949d1193505a">TxSearched::some</a> if range given and not all ledgers are present, <a class="el" href="namespaceripple.html#a7ffb3f54d739bb8f967d695f08fb66ccaad921d60486366258809553a3db49a4a">TxSearched::unknown</a> if range not given or deserializing error occured. In the last case error code modified in ec link parameter, in other cases default error code remained. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01176">1176</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01184">1184</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3117,7 +3117,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if space is available. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01257">1257</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01265">1265</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
