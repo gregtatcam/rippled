@@ -130,17 +130,21 @@ Set Up Conan</h3>
 <p>After you have a <a class="el" href="md__2____w_2rippled_2rippled_2docs_2build_2environment.html">C++ development environment</a> ready with Git, Python, Conan, CMake, and a C++ compiler, you may need to set up your Conan profile.</p>
 <p>These instructions assume a basic familiarity with Conan and CMake. If you are unfamiliar with Conan, then please read <a class="el" href="md__2____w_2rippled_2rippled_2docs_2build_2conan.html">this crash course</a> or the official <a href="https://docs.conan.io/en/latest/getting_started.html">Getting Started</a> walkthrough.</p>
 <h4><a class="anchor" id="autotoc_md34"></a>
+Conan lockfile</h4>
+<p>To achieve reproducible dependencies, we use a <a href="https://docs.conan.io/2/tutorial/versioning/lockfiles.html">Conan lockfile</a>, which has to be updated every time dependencies change.</p>
+<p>Please see the <a class="el" href="md__2____w_2rippled_2rippled_2conan_2lockfile_2README.html">instructions on how to regenerate the lockfile</a>.</p>
+<h4><a class="anchor" id="autotoc_md35"></a>
 Default profile</h4>
 <p>We recommend that you import the provided <code>conan/profiles/default</code> profile:</p>
 <div class="fragment"><div class="line">conan config install conan/profiles/ -tf $(conan config home)/profiles/</div>
 </div><!-- fragment --><p>You can check your Conan profile by running:</p>
 <div class="fragment"><div class="line">conan profile show</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md35"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md36"></a>
 Custom profile</h4>
 <p>If the default profile does not work for you and you do not yet have a Conan profile, you can create one by running:</p>
 <div class="fragment"><div class="line">conan profile detect</div>
 </div><!-- fragment --><p>You may need to make changes to the profile to suit your environment. You can refer to the provided <code>conan/profiles/default</code> profile for inspiration, and you may also need to apply the required tweaks to this default profile.</p>
-<h3><a class="anchor" id="autotoc_md36"></a>
+<h3><a class="anchor" id="autotoc_md37"></a>
 Patched recipes</h3>
 <p>The recipes in Conan Center occasionally need to be patched for compatibility with the latest version of <code>rippled</code>. We maintain a fork of the Conan Center <a href="https://github.com/XRPLF/conan-center-index/">here</a> containing the patches.</p>
 <p>To ensure our patched recipes are used, you must add our Conan remote at a higher index than the default Conan Center remote, so it is consulted first. You can do this by running:</p>
@@ -150,10 +154,12 @@ Patched recipes</h3>
 <div class="line">git init</div>
 <div class="line">git remote add origin git@github.com:XRPLF/conan-center-index.git</div>
 <div class="line">git sparse-checkout init</div>
-<div class="line">git sparse-checkout set recipes/snappy</div>
+<div class="line">git sparse-checkout set recipes/ed25519</div>
+<div class="line">git sparse-checkout add recipes/snappy</div>
 <div class="line">git sparse-checkout add recipes/soci</div>
 <div class="line">git fetch origin master</div>
 <div class="line">git checkout master</div>
+<div class="line">conan export --version 2015.03 recipes/ed25519/all</div>
 <div class="line">conan export --version 1.1.10 recipes/snappy/all</div>
 <div class="line">conan export --version 4.0.3 recipes/soci/all</div>
 <div class="line">rm -rf .git</div>
@@ -161,9 +167,9 @@ Patched recipes</h3>
 <blockquote class="doxtable">
 <p>&zwj;[!NOTE] You might need to add <code>--lockfile=""</code> to your <code>conan install</code> command to avoid automatic use of the existing <code>conan.lock</code> file when you run <code>conan export</code> manually on your machine </p>
 </blockquote>
-<h3><a class="anchor" id="autotoc_md37"></a>
+<h3><a class="anchor" id="autotoc_md38"></a>
 Conan profile tweaks</h3>
-<h4><a class="anchor" id="autotoc_md38"></a>
+<h4><a class="anchor" id="autotoc_md39"></a>
 Missing compiler version</h4>
 <p>If you see an error similar to the following after running <code>conan profile show</code>:</p>
 <div class="fragment"><div class="line">ERROR: Invalid setting &#39;17&#39; is not a valid &#39;settings.compiler.version&#39; value.</div>
@@ -200,7 +206,7 @@ Missing compiler version</h4>
 <div class="line">      &quot;17&quot;,</div>
 <div class="line">      &quot;17.0&quot;,</div>
 <div class="line">    ]</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md39"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md40"></a>
 Multiple compilers</h4>
 <p>If you have multiple compilers installed, make sure to select the one to use in your default Conan configuration <b>before</b> running <code>conan profile detect</code>, by setting the <code>CC</code> and <code>CXX</code> environment variables.</p>
 <p>For example, if you are running MacOS and have <a href="https://formulae.brew.sh/formula/llvm@18">homebrew LLVM@18</a>, and want to use it as a compiler in the new Conan profile:</p>
@@ -210,25 +216,25 @@ Multiple compilers</h4>
 </div><!-- fragment --><p>You should also explicitly set the path to the compiler in the profile file, which helps to avoid errors when <code>CC</code> and/or <code>CXX</code> are set and disagree with the selected Conan profile. For example:</p>
 <div class="fragment"><div class="line">[conf]</div>
 <div class="line">tools.build:compiler_executables={&#39;c&#39;:&#39;/usr/bin/gcc&#39;,&#39;cpp&#39;:&#39;/usr/bin/g++&#39;}</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md40"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md41"></a>
 Multiple profiles</h4>
 <p>You can manage multiple Conan profiles in the directory <code>$(conan config home)/profiles</code>, for example renaming <code>default</code> to a different name and then creating a new <code>default</code> profile for a different compiler.</p>
-<h4><a class="anchor" id="autotoc_md41"></a>
+<h4><a class="anchor" id="autotoc_md42"></a>
 Select language</h4>
 <p>The default profile created by Conan will typically select different C++ dialect than C++20 used by this project. You should set <code>20</code> in the profile line starting with <code>compiler.cppstd=</code>. For example:</p>
 <div class="fragment"><div class="line">sed -i.bak -e &#39;s|^compiler\.cppstd=.*$|compiler.cppstd=20|&#39; $(conan config home)/profiles/default</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md42"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md43"></a>
 Select standard library in Linux</h4>
 <p><b>Linux</b> developers will commonly have a default Conan <a href="https://docs.conan.io/en/latest/reference/profiles.html">profile</a> that compiles with GCC and links with libstdc++. If you are linking with libstdc++ (see profile setting <code>compiler.libcxx</code>), then you will need to choose the <code>libstdc++11</code> ABI:</p>
 <div class="fragment"><div class="line">sed -i.bak -e &#39;s|^compiler\.libcxx=.*$|compiler.libcxx=libstdc++11|&#39; $(conan config home)/profiles/default</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md43"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md44"></a>
 Select architecture and runtime in Windows</h4>
 <p><b>Windows</b> developers may need to use the x64 native build tools. An easy way to do that is to run the shortcut "x64 Native Tools Command Prompt" for the version of Visual Studio that you have installed.</p>
 <p>Windows developers must also build <code>rippled</code> and its dependencies for the x64 architecture:</p>
 <div class="fragment"><div class="line">sed -i.bak -e &#39;s|^arch=.*$|arch=x86_64|&#39; $(conan config home)/profiles/default</div>
 </div><!-- fragment --><p><b>Windows</b> developers also must select static runtime:</p>
 <div class="fragment"><div class="line">sed -i.bak -e &#39;s|^compiler\.runtime=.*$|compiler.runtime=static|&#39; $(conan config home)/profiles/default</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md44"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md45"></a>
 Clang workaround for grpc</h4>
 <p>If your compiler is clang, version 19 or later, or apple-clang, version 17 or later, you may encounter a compilation error while building the <code>grpc</code> dependency:</p>
 <div class="fragment"><div class="line">In file included from .../lib/promise/try_seq.h:26:</div>
@@ -238,7 +244,7 @@ Clang workaround for grpc</h4>
 </div><!-- fragment --><p>The workaround for this error is to add two lines to profile:</p>
 <div class="fragment"><div class="line">[conf]</div>
 <div class="line">tools.build:cxxflags=[&#39;-Wno-missing-template-arg-list-after-template-kw&#39;]</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md45"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md46"></a>
 Workaround for gcc 12</h4>
 <p>If your compiler is gcc, version 12, and you have enabled <code>werr</code> option, you may encounter a compilation error such as:</p>
 <div class="fragment"><div class="line">/usr/include/c++/12/bits/char_traits.h:435:56: error: &#39;void* __builtin_memcpy(void*, const void*, long unsigned int)&#39; accessing 9223372036854775810 or more bytes at offsets [2, 9223372036854775807] and 1 may overlap up to 9223372036854775813 bytes at offset -3 [-Werror=restrict]</div>
@@ -248,7 +254,7 @@ Workaround for gcc 12</h4>
 </div><!-- fragment --><p>The workaround for this error is to add two lines to your profile:</p>
 <div class="fragment"><div class="line">[conf]</div>
 <div class="line">tools.build:cxxflags=[&#39;-Wno-restrict&#39;]</div>
-</div><!-- fragment --><h4><a class="anchor" id="autotoc_md46"></a>
+</div><!-- fragment --><h4><a class="anchor" id="autotoc_md47"></a>
 Workaround for clang 16</h4>
 <p>If your compiler is clang, version 16, you may encounter compilation error such as:</p>
 <div class="fragment"><div class="line">In file included from .../boost/beast/websocket/stream.hpp:2857:</div>
@@ -258,7 +264,7 @@ Workaround for clang 16</h4>
 </div><!-- fragment --><p>The workaround for this error is to add two lines to your profile:</p>
 <div class="fragment"><div class="line">[conf]</div>
 <div class="line">tools.build:cxxflags=[&#39;-DBOOST_ASIO_DISABLE_CONCEPTS&#39;]</div>
-</div><!-- fragment --><h3><a class="anchor" id="autotoc_md47"></a>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md48"></a>
 Build and Test</h3>
 <ol type="1">
 <li><p class="startli">Create a build directory and move into it.</p>
@@ -306,24 +312,6 @@ Build and Test</h3>
 <p class="startli">The location of <code>rippled</code> binary in your build directory depends on your CMake generator. Pass <code>--help</code> to see the rest of the command line options.</p>
 </li>
 </ol>
-<h4><a class="anchor" id="autotoc_md48"></a>
-Conan lockfile</h4>
-<p>To achieve reproducible dependencies, we use <a href="https://docs.conan.io/2/tutorial/versioning/lockfiles.html">Conan lockfile</a>.</p>
-<p>The <code>conan.lock</code> file in the repository contains a "snapshot" of the current dependencies. It is implicitly used when running <code>conan</code> commands, you don't need to specify it.</p>
-<p>You have to update this file every time you add a new dependency or change a revision or version of an existing dependency.</p>
-<blockquote class="doxtable">
-<p>&zwj;[!NOTE] Conan uses local cache by default when creating a lockfile.</p>
-<p>To ensure, that lockfile creation works the same way on all developer machines, you should clear the local cache before creating a new lockfile. </p>
-</blockquote>
-<p>To create a new lockfile, run the following commands in the repository root:</p>
-<div class="fragment"><div class="line">conan remove &#39;*&#39; --confirm</div>
-<div class="line">rm conan.lock</div>
-<div class="line"># This ensure that xrplf remote is the first to be consulted</div>
-<div class="line">conan remote add --force --index 0 xrplf https://conan.ripplex.io</div>
-<div class="line">conan lock create . -o &#39;&amp;:jemalloc=True&#39; -o &#39;&amp;:rocksdb=True&#39;</div>
-</div><!-- fragment --><blockquote class="doxtable">
-<p>&zwj;[!NOTE] If some dependencies are exclusive for some OS, you may need to run the last command for them adding <code>--profile:all &lt;PROFILE&gt;</code>. </p>
-</blockquote>
 <h2><a class="anchor" id="autotoc_md49"></a>
 Coverage report</h2>
 <p>The coverage report is intended for developers using compilers GCC or Clang (including Apple Clang). It is generated by the build target <code>coverage</code>, which is only enabled when the <code>coverage</code> option is set, e.g. with <code>--options coverage=True</code> in <code>conan</code> or <code>-Dcoverage=ON</code> variable in <code>cmake</code></p>
