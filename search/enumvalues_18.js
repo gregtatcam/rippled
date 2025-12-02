@@ -3,6 +3,6 @@ var searchData=
   ['xchain_5fclaim_5fid_0',['XCHAIN_CLAIM_ID',['../namespaceripple.html#a22768e0a41b646442c98d38f2f2a307baa20258daf3591445a0b80fa9284852d1',1,'ripple']]],
   ['xchain_5fcreate_5faccount_5fclaim_5fid_1',['XCHAIN_CREATE_ACCOUNT_CLAIM_ID',['../namespaceripple.html#a22768e0a41b646442c98d38f2f2a307ba0c7ef893d91d8aa253e093f57a0d35ce',1,'ripple']]],
   ['xmacro_2',['XMACRO',['../namespaceripple.html#a3e7e3f29aef85bcca06706da54e950fcae6deedfbb7ffeea83324aaf14a72f62c',1,'ripple']]],
-  ['xrp_3',['xrp',['../classripple_1_1test_1_1ElementComboIter.html#a4a14ce172d72da140cb8ae49a8f132dca295635e63aa72d18e14800198e3c447b',1,'ripple::test::ElementComboIter']]],
+  ['xrp_3',['xrp',['../classripple_1_1test_1_1Loan__test.html#a87c26b362ae7c7ff752efe201d6ea18eab963e1952393b6f6899c6978de03a6f6',1,'ripple::test::Loan_test::XRP'],['../classripple_1_1test_1_1ElementComboIter.html#a4a14ce172d72da140cb8ae49a8f132dca295635e63aa72d18e14800198e3c447b',1,'ripple::test::ElementComboIter::xrp']]],
   ['xrp_5fpayment_5fchannel_4',['XRP_PAYMENT_CHANNEL',['../namespaceripple.html#a22768e0a41b646442c98d38f2f2a307babfbd5f0886f506b4a646d5019f3db0f6',1,'ripple']]]
 ];

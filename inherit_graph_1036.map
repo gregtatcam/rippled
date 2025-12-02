@@ -1,13 +1,37 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integral_constant.html" title=" " alt="" coords="5,91,209,175"/>
-<area shape="rect" id="Node000001" href="$structbeast_1_1is__uniquely__represented.html" title=" " alt="" coords="257,113,403,153"/>
-<area shape="poly" id="edge794_Node000000_Node000001" title=" " alt="" coords="223,131,257,131,257,136,223,136"/>
-<area shape="rect" id="Node000002" href="$structbeast_1_1is__uniquely__represented_3_01T_01const_01_4.html" title=" " alt="" coords="458,5,642,45"/>
-<area shape="poly" id="edge795_Node000001_Node000002" title=" " alt="" coords="368,103,407,78,450,55,479,43,481,48,452,60,409,83,371,108"/>
-<area shape="rect" id="Node000003" href="$structbeast_1_1is__uniquely__represented_3_01T_01const_01volatile_01_4.html" title=" " alt="" coords="465,70,635,125"/>
-<area shape="poly" id="edge796_Node000001_Node000003" title=" " alt="" coords="416,117,465,109,466,114,417,122"/>
-<area shape="rect" id="Node000004" href="$structbeast_1_1is__uniquely__represented_3_01T_01volatile_01_4.html" title=" " alt="" coords="451,149,649,189"/>
-<area shape="poly" id="edge797_Node000001_Node000004" title=" " alt="" coords="417,145,451,150,450,156,416,150"/>
-<area shape="rect" id="Node000005" href="$structbeast_1_1is__uniquely__represented_3_01T_0fN_0e_4.html" title=" " alt="" coords="469,213,631,253"/>
-<area shape="poly" id="edge798_Node000001_Node000005" title=" " alt="" coords="376,158,452,199,482,211,480,216,450,204,373,163"/>
+<area shape="rect" id="Node000000" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="5,37,207,77"/>
+<area shape="rect" id="Node000001" href="$classbeast_1_1insight_1_1CounterImpl.html" title=" " alt="" coords="255,45,453,70"/>
+<area shape="poly" id="edge732_Node000000_Node000001" title=" " alt="" coords="220,55,254,55,254,60,220,60"/>
+<area shape="rect" id="Node000002" href="$classbeast_1_1insight_1_1detail_1_1NullCounterImpl.html" title=" " alt="" coords="501,5,656,45"/>
+<area shape="poly" id="edge733_Node000001_Node000002" title=" " alt="" coords="457,40,501,34,501,39,458,45"/>
+<area shape="rect" id="Node000003" href="$classbeast_1_1insight_1_1detail_1_1StatsDCounterImpl.html" title=" " alt="" coords="501,69,656,109"/>
+<area shape="poly" id="edge734_Node000001_Node000003" title=" " alt="" coords="458,69,501,76,501,81,457,75"/>
+<area shape="rect" id="Node000008" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="10,165,202,205"/>
+<area shape="rect" id="Node000006" href="$classbeast_1_1insight_1_1GaugeImpl.html" title=" " alt="" coords="259,173,449,198"/>
+<area shape="poly" id="edge735_Node000008_Node000006" title=" " alt="" coords="216,183,259,183,259,188,216,188"/>
+<area shape="rect" id="Node000007" href="$classbeast_1_1insight_1_1detail_1_1NullGaugeImpl.html" title=" " alt="" coords="501,133,656,173"/>
+<area shape="poly" id="edge736_Node000006_Node000007" title=" " alt="" coords="457,168,501,162,501,167,458,173"/>
+<area shape="rect" id="Node000005" href="$classbeast_1_1insight_1_1detail_1_1StatsDGaugeImpl.html" title=" " alt="" coords="501,197,656,237"/>
+<area shape="poly" id="edge737_Node000006_Node000005" title=" " alt="" coords="458,197,501,204,501,209,457,203"/>
+<area shape="rect" id="Node000012" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="14,333,198,373"/>
+<area shape="rect" id="Node000010" href="$classbeast_1_1insight_1_1HookImpl.html" title=" " alt="" coords="263,341,445,366"/>
+<area shape="poly" id="edge738_Node000012_Node000010" title=" " alt="" coords="212,351,263,351,263,356,212,356"/>
+<area shape="rect" id="Node000011" href="$classbeast_1_1insight_1_1detail_1_1NullHookImpl.html" title=" " alt="" coords="501,389,656,429"/>
+<area shape="poly" id="edge739_Node000010_Node000011" title=" " alt="" coords="419,367,502,387,500,393,418,372"/>
+<area shape="rect" id="Node000009" href="$classbeast_1_1insight_1_1detail_1_1StatsDHookImpl.html" title=" " alt="" coords="501,261,656,301"/>
+<area shape="poly" id="edge740_Node000010_Node000009" title=" " alt="" coords="406,334,515,299,516,304,408,339"/>
+<area shape="rect" id="Node000016" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="12,419,200,459"/>
+<area shape="rect" id="Node000014" href="$classbeast_1_1insight_1_1MeterImpl.html" title=" " alt="" coords="261,426,447,451"/>
+<area shape="poly" id="edge741_Node000016_Node000014" title=" " alt="" coords="214,436,261,436,261,441,214,441"/>
+<area shape="rect" id="Node000015" href="$classbeast_1_1insight_1_1detail_1_1NullMeterImpl.html" title=" " alt="" coords="501,453,656,493"/>
+<area shape="poly" id="edge742_Node000014_Node000015" title=" " alt="" coords="451,451,502,459,501,464,450,456"/>
+<area shape="rect" id="Node000013" href="$classbeast_1_1insight_1_1detail_1_1StatsDMeterImpl.html" title=" " alt="" coords="501,325,656,365"/>
+<area shape="poly" id="edge743_Node000014_Node000013" title=" " alt="" coords="397,418,528,363,530,368,399,423"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="63,266,149,291"/>
+<area shape="rect" id="Node000004" href="$classbeast_1_1insight_1_1detail_1_1StatsDMetricBase.html" title=" " alt="" coords="277,259,431,299"/>
+<area shape="poly" id="edge744_Node000017_Node000004" title=" " alt="" coords="163,276,276,276,276,281,163,281"/>
+<area shape="poly" id="edge745_Node000004_Node000003" title=" " alt="" coords="402,249,428,230,451,208,466,185,474,163,482,142,500,119,517,107,520,112,503,123,486,144,479,165,471,187,455,211,431,234,405,253"/>
+<area shape="poly" id="edge746_Node000004_Node000005" title=" " alt="" coords="440,252,504,235,506,240,442,258"/>
+<area shape="poly" id="edge747_Node000004_Node000009" title=" " alt="" coords="445,277,501,278,501,283,445,282"/>
+<area shape="poly" id="edge748_Node000004_Node000013" title=" " alt="" coords="436,300,511,323,510,328,434,305"/>
 </map>

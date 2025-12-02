@@ -1,5 +1,5 @@
 <map id="ripple::ValidVault" name="ripple::ValidVault">
-<area shape="rect" id="Node000001" title="Invariants: Vault object and MPTokenIssuance for vault shares." alt="" coords="1828,437,1960,462"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1828,437,1960,462"/>
 <area shape="rect" id="Node000002" href="$classripple_1_1Number.html" title=" " alt="" coords="571,519,689,545"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="703,544,826,564,896,571,965,573,1617,573,1657,570,1697,560,1735,546,1771,529,1833,492,1875,460,1879,465,1836,496,1774,534,1737,551,1699,565,1658,575,1617,579,965,579,895,576,825,569,703,550"/>
 <area shape="rect" id="Node000005" href="$structripple_1_1ValidVault_1_1Vault.html" title=" " alt="" coords="901,332,1033,372"/>

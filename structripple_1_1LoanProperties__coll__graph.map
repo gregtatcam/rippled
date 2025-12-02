@@ -1,0 +1,9 @@
+<map id="ripple::LoanProperties" name="ripple::LoanProperties">
+<area shape="rect" id="Node000001" title=" " alt="" coords="100,255,264,280"/>
+<area shape="rect" id="Node000002" href="$classripple_1_1Number.html" title=" " alt="" coords="5,123,124,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="60,162,57,196,60,214,68,229,83,243,101,253,98,257,79,247,64,232,55,215,52,197,55,162"/>
+<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="17,5,112,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="67,44,67,123,62,123,62,44"/>
+<area shape="rect" id="Node000004" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="252,123,347,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="300,162,292,198,284,216,272,232,254,247,233,257,231,252,251,243,268,229,279,213,287,196,295,161"/>
+</map>

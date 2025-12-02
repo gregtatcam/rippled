@@ -96,6 +96,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:acd73f2f41a62cf53d57b3ff1530ea947"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html">PrettyAmount</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structripple_1_1test_1_1jtx_1_1XRP__t.html#acd73f2f41a62cf53d57b3ff1530ea947">operator()</a> (T v) const</td></tr>
 <tr class="memdesc:acd73f2f41a62cf53d57b3ff1530ea947"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns an amount of XRP as <a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html" title="Represents an XRP or IOU quantity This customizes the string conversion and supports XRP conversions ...">PrettyAmount</a>, which is trivially convertible to <a class="el" href="classripple_1_1STAmount.html">STAmount</a>.  <br /></td></tr>
 <tr class="separator:acd73f2f41a62cf53d57b3ff1530ea947"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7002b40747b305c00c159c5f4b0c4980" id="r_a7002b40747b305c00c159c5f4b0c4980"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html">PrettyAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structripple_1_1test_1_1jtx_1_1XRP__t.html#a7002b40747b305c00c159c5f4b0c4980">operator()</a> (<a class="el" href="classripple_1_1Number.html">Number</a> v) const</td></tr>
+<tr class="memdesc:a7002b40747b305c00c159c5f4b0c4980"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns an amount of XRP as <a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html" title="Represents an XRP or IOU quantity This customizes the string conversion and supports XRP conversions ...">PrettyAmount</a>, which is trivially convertable to <a class="el" href="classripple_1_1STAmount.html">STAmount</a>.  <br /></td></tr>
+<tr class="separator:a7002b40747b305c00c159c5f4b0c4980"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:accb72c76206e2c2a1392807b284380db" id="r_accb72c76206e2c2a1392807b284380db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html">PrettyAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structripple_1_1test_1_1jtx_1_1XRP__t.html#accb72c76206e2c2a1392807b284380db">operator()</a> (double v) const</td></tr>
 <tr class="separator:accb72c76206e2c2a1392807b284380db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -106,7 +109,7 @@ Friends</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00233">233</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00252">252</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a91460ee83d7dc9df3878ca8db8f06f36" name="a91460ee83d7dc9df3878ca8db8f06f36"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a91460ee83d7dc9df3878ca8db8f06f36">&#9670;&#160;</a></span>operator Issue()</h2>
@@ -126,12 +129,12 @@ Friends</h2></td></tr>
 <p>Implicit conversion to <a class="el" href="classripple_1_1Issue.html" title="A currency issued by an account.">Issue</a>. </p>
 <p>This allows passing XRP where an <a class="el" href="classripple_1_1Issue.html" title="A currency issued by an account.">Issue</a> is expected. </p>
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00240">240</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00259">259</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
 <a id="acd73f2f41a62cf53d57b3ff1530ea947" name="acd73f2f41a62cf53d57b3ff1530ea947"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acd73f2f41a62cf53d57b3ff1530ea947">&#9670;&#160;</a></span>operator()() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#acd73f2f41a62cf53d57b3ff1530ea947">&#9670;&#160;</a></span>operator()() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -156,12 +159,40 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00253">253</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00272">272</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+
+</div>
+</div>
+<a id="a7002b40747b305c00c159c5f4b0c4980" name="a7002b40747b305c00c159c5f4b0c4980"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7002b40747b305c00c159c5f4b0c4980">&#9670;&#160;</a></span>operator()() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html">PrettyAmount</a> ripple::test::jtx::XRP_t::operator() </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classripple_1_1Number.html">Number</a>&#160;</td>
+          <td class="paramname"><em>v</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns an amount of XRP as <a class="el" href="structripple_1_1test_1_1jtx_1_1PrettyAmount.html" title="Represents an XRP or IOU quantity This customizes the string conversion and supports XRP conversions ...">PrettyAmount</a>, which is trivially convertable to <a class="el" href="classripple_1_1STAmount.html">STAmount</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The <a class="el" href="classripple_1_1Number.html">Number</a> of XRP (not drops). May be fractional. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00285">285</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
 <a id="accb72c76206e2c2a1392807b284380db" name="accb72c76206e2c2a1392807b284380db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accb72c76206e2c2a1392807b284380db">&#9670;&#160;</a></span>operator()() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#accb72c76206e2c2a1392807b284380db">&#9670;&#160;</a></span>operator()() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -176,12 +207,12 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00261">261</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00295">295</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
 <a id="a8b2da2e9c33b5afa34e4c9484ecf6a1f" name="a8b2da2e9c33b5afa34e4c9484ecf6a1f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b2da2e9c33b5afa34e4c9484ecf6a1f">&#9670;&#160;</a></span>operator()() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b2da2e9c33b5afa34e4c9484ecf6a1f">&#9670;&#160;</a></span>operator()() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -198,7 +229,7 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
 
 <p>Returns None-of-XRP. </p>
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00280">280</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00314">314</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
@@ -227,7 +258,7 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00286">286</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00320">320</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>

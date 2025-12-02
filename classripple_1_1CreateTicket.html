@@ -305,8 +305,8 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-methods" name="pro-static-methods"></a>
 Static Protected Member Functions</h2></td></tr>
-<tr class="memitem:a100339c220fcd3fbe1b528684a716a4e" id="r_a100339c220fcd3fbe1b528684a716a4e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespaceripple.html#af99ba2263d2a1e29207c40a35fc9f6b3">NotTEC</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#a100339c220fcd3fbe1b528684a716a4e">checkSign</a> (<a class="el" href="classripple_1_1ReadView.html">ReadView</a> const &amp;<a class="el" href="classripple_1_1Transactor.html#a9acc4edc9b8f2a11a27fbcf5e93e2fe2">view</a>, <a class="el" href="namespaceripple.html#ad2487abbcc1a5d6064b72144b461df6e">ApplyFlags</a> flags, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;idAccount, <a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;sigObject, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const j)</td></tr>
-<tr class="separator:a100339c220fcd3fbe1b528684a716a4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc89319ccd8e2da7957e5eb2a41346f3" id="r_acc89319ccd8e2da7957e5eb2a41346f3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespaceripple.html#af99ba2263d2a1e29207c40a35fc9f6b3">NotTEC</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#acc89319ccd8e2da7957e5eb2a41346f3">checkSign</a> (<a class="el" href="classripple_1_1ReadView.html">ReadView</a> const &amp;<a class="el" href="classripple_1_1Transactor.html#a9acc4edc9b8f2a11a27fbcf5e93e2fe2">view</a>, <a class="el" href="namespaceripple.html#ad2487abbcc1a5d6064b72144b461df6e">ApplyFlags</a> flags, <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const &gt; const &amp;parentBatchId, <a class="el" href="namespaceripple.html#a00ae0d729cb3e35b6bcac9a27ebb5284">AccountID</a> const &amp;idAccount, <a class="el" href="classripple_1_1STObject.html">STObject</a> const &amp;sigObject, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> const j)</td></tr>
+<tr class="separator:acc89319ccd8e2da7957e5eb2a41346f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c4568739676c5335b8d63dc375f7920" id="r_a5c4568739676c5335b8d63dc375f7920"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classripple_1_1XRPAmount.html">XRPAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#a5c4568739676c5335b8d63dc375f7920">minimumFee</a> (<a class="el" href="classripple_1_1Application.html">Application</a> &amp;app, <a class="el" href="classripple_1_1XRPAmount.html">XRPAmount</a> baseFee, <a class="el" href="structripple_1_1Fees.html">Fees</a> const &amp;fees, <a class="el" href="namespaceripple.html#ad2487abbcc1a5d6064b72144b461df6e">ApplyFlags</a> flags)</td></tr>
 <tr class="memdesc:a5c4568739676c5335b8d63dc375f7920"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the minimum fee required to process a transaction with a given baseFee based on the current server load.  <br /></td></tr>
 <tr class="separator:a5c4568739676c5335b8d63dc375f7920"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -320,12 +320,20 @@ Static Protected Member Functions</h2></td></tr>
 <tr class="separator:a23f4d5514782adc75f83ecea8dc38919"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae712325305cd393621133f145635a5a1" id="r_ae712325305cd393621133f145635a5a1"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#ae712325305cd393621133f145635a5a1">validDataLength</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="classripple_1_1Slice.html">Slice</a> &gt; const &amp;slice, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> maxLength)</td></tr>
 <tr class="separator:ae712325305cd393621133f145635a5a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab3c616f41c291e042564c44a135f2a01" id="r_ab3c616f41c291e042564c44a135f2a01"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:ab3c616f41c291e042564c44a135f2a01"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#ab3c616f41c291e042564c44a135f2a01">validNumericRange</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt; value, T max, T min={})</td></tr>
-<tr class="separator:ab3c616f41c291e042564c44a135f2a01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a94a56c84ec8b6c10bea0c01e37ed18" id="r_a6a94a56c84ec8b6c10bea0c01e37ed18"><td class="memTemplParams" colspan="2">template&lt;class T , class Unit &gt; </td></tr>
-<tr class="memitem:a6a94a56c84ec8b6c10bea0c01e37ed18"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#a6a94a56c84ec8b6c10bea0c01e37ed18">validNumericRange</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt; value, <a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt; max, <a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt; min={})</td></tr>
-<tr class="separator:a6a94a56c84ec8b6c10bea0c01e37ed18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae259e2ca083bb30f167b1d56508f8210" id="r_ae259e2ca083bb30f167b1d56508f8210"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:ae259e2ca083bb30f167b1d56508f8210"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#ae259e2ca083bb30f167b1d56508f8210">validNumericRange</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt; value, T max, T min=T{})</td></tr>
+<tr class="separator:ae259e2ca083bb30f167b1d56508f8210"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ef4d775cbc5f635b20cf6072d870aa8" id="r_a9ef4d775cbc5f635b20cf6072d870aa8"><td class="memTemplParams" colspan="2">template&lt;class T , class Unit &gt; </td></tr>
+<tr class="memitem:a9ef4d775cbc5f635b20cf6072d870aa8"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#a9ef4d775cbc5f635b20cf6072d870aa8">validNumericRange</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt; value, <a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt; max, <a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt; min=<a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt;{})</td></tr>
+<tr class="separator:a9ef4d775cbc5f635b20cf6072d870aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae886c40d049fa745758e26914126bce2" id="r_ae886c40d049fa745758e26914126bce2"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:ae886c40d049fa745758e26914126bce2"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#ae886c40d049fa745758e26914126bce2">validNumericMinimum</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt; value, T min=T{})</td></tr>
+<tr class="memdesc:ae886c40d049fa745758e26914126bce2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum will usually be zero.  <br /></td></tr>
+<tr class="separator:ae886c40d049fa745758e26914126bce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99856deaa54d3cdadb61bbd0c7083881" id="r_a99856deaa54d3cdadb61bbd0c7083881"><td class="memTemplParams" colspan="2">template&lt;class T , class Unit &gt; </td></tr>
+<tr class="memitem:a99856deaa54d3cdadb61bbd0c7083881"><td class="memTemplItemLeft" align="right" valign="top">static bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classripple_1_1Transactor.html#a99856deaa54d3cdadb61bbd0c7083881">validNumericMinimum</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt; value, <a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt; min=<a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt;{})</td></tr>
+<tr class="memdesc:a99856deaa54d3cdadb61bbd0c7083881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum will usually be zero.  <br /></td></tr>
+<tr class="separator:a99856deaa54d3cdadb61bbd0c7083881"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -575,7 +583,7 @@ Static Private Member Functions</h2></td></tr>
 
 <p>Process the transaction. </p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01105">1105</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01129">1129</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -673,7 +681,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00415">415</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00426">426</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -701,7 +709,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00486">486</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00497">497</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -739,7 +747,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00315">315</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00326">326</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -767,12 +775,12 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00699">699</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00722">722</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a100339c220fcd3fbe1b528684a716a4e" name="a100339c220fcd3fbe1b528684a716a4e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a100339c220fcd3fbe1b528684a716a4e">&#9670;&#160;</a></span>checkSign() <span class="overload">[2/2]</span></h2>
+<a id="acc89319ccd8e2da7957e5eb2a41346f3" name="acc89319ccd8e2da7957e5eb2a41346f3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc89319ccd8e2da7957e5eb2a41346f3">&#9670;&#160;</a></span>checkSign() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -791,6 +799,12 @@ Static Private Member Functions</h2></td></tr>
           <td></td>
           <td class="paramtype"><a class="el" href="namespaceripple.html#ad2487abbcc1a5d6064b72144b461df6e">ApplyFlags</a>&#160;</td>
           <td class="paramname"><em>flags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespaceripple.html#a356c68147333a9a48a344718038576d9">uint256</a> const &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>parentBatchId</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -823,7 +837,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00642">642</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00653">653</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -851,7 +865,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00708">708</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00732">732</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -889,7 +903,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00266">266</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00277">277</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -919,7 +933,7 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00380">380</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00393">393</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
 
 </div>
 </div>
@@ -1015,7 +1029,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00250">250</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00261">261</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1065,7 +1079,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00535">535</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00546">546</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1092,7 +1106,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00605">605</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00616">616</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1121,7 +1135,7 @@ template&lt;&gt; </div>
 
 <p>Reimplemented in <a class="el" href="classripple_1_1Change.html#a69cd5bf7979d79ffc7d2a7b813ff967e">ripple::Change</a>, and <a class="el" href="classripple_1_1SetSignerList.html#a81cc900e9e0dc4096c3c8f63c1371ffe">ripple::SetSignerList</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00597">597</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00608">608</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1188,7 +1202,7 @@ template&lt;&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00305">305</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00316">316</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1226,7 +1240,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00285">285</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00296">296</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1254,7 +1268,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00344">344</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00357">357</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
 
 </div>
 </div>
@@ -1282,7 +1296,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00238">238</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00249">249</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1310,7 +1324,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00244">244</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00255">255</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1348,12 +1362,12 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00228">228</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00239">239</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
-<a id="ab3c616f41c291e042564c44a135f2a01" name="ab3c616f41c291e042564c44a135f2a01"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3c616f41c291e042564c44a135f2a01">&#9670;&#160;</a></span>validNumericRange() <span class="overload">[1/2]</span></h2>
+<a id="ae259e2ca083bb30f167b1d56508f8210" name="ae259e2ca083bb30f167b1d56508f8210"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae259e2ca083bb30f167b1d56508f8210">&#9670;&#160;</a></span>validNumericRange() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1379,7 +1393,7 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">T&#160;</td>
-          <td class="paramname"><em>min</em> = <code>{}</code>&#160;</td>
+          <td class="paramname"><em>min</em> = <code>T{}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1394,12 +1408,12 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00407">407</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00420">420</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
 
 </div>
 </div>
-<a id="a6a94a56c84ec8b6c10bea0c01e37ed18" name="a6a94a56c84ec8b6c10bea0c01e37ed18"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6a94a56c84ec8b6c10bea0c01e37ed18">&#9670;&#160;</a></span>validNumericRange() <span class="overload">[2/2]</span></h2>
+<a id="a9ef4d775cbc5f635b20cf6072d870aa8" name="a9ef4d775cbc5f635b20cf6072d870aa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ef4d775cbc5f635b20cf6072d870aa8">&#9670;&#160;</a></span>validNumericRange() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1425,7 +1439,7 @@ template&lt;class T , class Unit &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt;&#160;</td>
-          <td class="paramname"><em>min</em> = <code>{}</code>&#160;</td>
+          <td class="paramname"><em>min</em> = <code><a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt;Unit,&#160;T&gt;{}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1440,7 +1454,91 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00416">416</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00429">429</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
+
+</div>
+</div>
+<a id="ae886c40d049fa745758e26914126bce2" name="ae886c40d049fa745758e26914126bce2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae886c40d049fa745758e26914126bce2">&#9670;&#160;</a></span>validNumericMinimum() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ripple::Transactor::validNumericMinimum </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt;&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T&#160;</td>
+          <td class="paramname"><em>min</em> = <code>T{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">inherited</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Minimum will usually be zero. </p>
+
+<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00439">439</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
+
+</div>
+</div>
+<a id="a99856deaa54d3cdadb61bbd0c7083881" name="a99856deaa54d3cdadb61bbd0c7083881"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99856deaa54d3cdadb61bbd0c7083881">&#9670;&#160;</a></span>validNumericMinimum() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T , class Unit &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ripple::Transactor::validNumericMinimum </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; T &gt;&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt; Unit, T &gt;&#160;</td>
+          <td class="paramname"><em>min</em> = <code><a class="el" href="classripple_1_1unit_1_1ValueUnit.html">unit::ValueUnit</a>&lt;Unit,&#160;T&gt;{}</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">protected</span><span class="mlabel">inherited</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Minimum will usually be zero. </p>
+
+<p class="definition">Definition at line <a class="el" href="Transactor_8h_source.html#l00448">448</a> of file <a class="el" href="Transactor_8h_source.html">Transactor.h</a>.</p>
 
 </div>
 </div>
@@ -1477,7 +1575,7 @@ template&lt;class T , class Unit &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pair containing the transaction result and the actual fee charged. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01043">1043</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01067">1067</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1505,7 +1603,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00516">516</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00527">527</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1532,7 +1630,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00380">380</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00391">391</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1588,7 +1686,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00754">754</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00778">778</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1644,7 +1742,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00786">786</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00810">810</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1672,7 +1770,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01098">1098</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01122">1122</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>

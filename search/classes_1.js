@@ -157,10 +157,12 @@ var searchData=
   ['bridgemodify_154',['BridgeModify',['../classripple_1_1BridgeModify.html',1,'ripple']]],
   ['broadcastmesg_155',['BroadcastMesg',['../structripple_1_1test_1_1csf_1_1Peer_1_1BroadcastMesg.html',1,'ripple::test::csf::Peer']]],
   ['brokerfee_156',['brokerFee',['../classripple_1_1test_1_1jtx_1_1token_1_1brokerFee.html',1,'ripple::test::jtx::token']]],
-  ['buckets_157',['Buckets',['../classbeast_1_1detail_1_1aged__unordered__container_1_1Buckets.html',1,'beast::detail::aged_unordered_container']]],
-  ['buffer_158',['buffer',['../structripple_1_1BaseHTTPPeer_1_1buffer.html',1,'ripple::BaseHTTPPeer&lt; Handler, Impl &gt;::buffer'],['../classripple_1_1Buffer.html',1,'ripple::Buffer']]],
-  ['buffer_5ftest_159',['Buffer_test',['../structripple_1_1test_1_1Buffer__test.html',1,'ripple::test']]],
-  ['buildinfo_5ftest_160',['BuildInfo_test',['../classripple_1_1BuildInfo__test.html',1,'ripple']]],
-  ['byte_161',['byte',['http://en.cppreference.com/w/cpp/types/byte.html',1,'std']]],
-  ['byzantinefailuresim_5ftest_162',['ByzantineFailureSim_test',['../classripple_1_1test_1_1ByzantineFailureSim__test.html',1,'ripple::test']]]
+  ['brokerinfo_157',['brokerinfo',['../structripple_1_1test_1_1Loan__test_1_1BrokerInfo.html',1,'ripple::test::Loan_test::BrokerInfo'],['../structripple_1_1ValidLoanBroker_1_1BrokerInfo.html',1,'ripple::ValidLoanBroker::BrokerInfo']]],
+  ['brokerparameters_158',['BrokerParameters',['../structripple_1_1test_1_1Loan__test_1_1BrokerParameters.html',1,'ripple::test::Loan_test']]],
+  ['buckets_159',['Buckets',['../classbeast_1_1detail_1_1aged__unordered__container_1_1Buckets.html',1,'beast::detail::aged_unordered_container']]],
+  ['buffer_160',['buffer',['../structripple_1_1BaseHTTPPeer_1_1buffer.html',1,'ripple::BaseHTTPPeer&lt; Handler, Impl &gt;::buffer'],['../classripple_1_1Buffer.html',1,'ripple::Buffer']]],
+  ['buffer_5ftest_161',['Buffer_test',['../structripple_1_1test_1_1Buffer__test.html',1,'ripple::test']]],
+  ['buildinfo_5ftest_162',['BuildInfo_test',['../classripple_1_1BuildInfo__test.html',1,'ripple']]],
+  ['byte_163',['byte',['http://en.cppreference.com/w/cpp/types/byte.html',1,'std']]],
+  ['byzantinefailuresim_5ftest_164',['ByzantineFailureSim_test',['../classripple_1_1test_1_1ByzantineFailureSim__test.html',1,'ripple::test']]]
 ];

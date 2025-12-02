@@ -1,0 +1,7 @@
+<map id="ripple::LoanState" name="ripple::LoanState">
+<area shape="rect" id="Node000001" title="This structure captures the parts of a loan state." alt="" coords="5,255,137,280"/>
+<area shape="rect" id="Node000002" href="$classripple_1_1Number.html" title=" " alt="" coords="12,123,131,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,162,74,254,69,254,69,162"/>
+<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="24,5,119,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="74,44,74,123,69,123,69,44"/>
+</map>

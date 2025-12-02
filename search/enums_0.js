@@ -9,8 +9,9 @@ var searchData=
   ['amendmentvote_6',['AmendmentVote',['../namespaceripple.html#a1dcb4cf27e683bd94d11f5322836c689',1,'ripple']]],
   ['applyflags_7',['ApplyFlags',['../namespaceripple.html#ad2487abbcc1a5d6064b72144b461df6e',1,'ripple']]],
   ['applytransactionresult_8',['ApplyTransactionResult',['../namespaceripple.html#a3352ead78ab1510016d3f728004acd63',1,'ripple']]],
-  ['attestationmatch_9',['AttestationMatch',['../namespaceripple.html#aad512dea42da4cc179f20c67de593c26',1,'ripple']]],
-  ['authhandling_10',['AuthHandling',['../namespaceripple.html#a5b188f8f22827b2e24b506ef852ffd69',1,'ripple']]],
-  ['authtype_11',['AuthType',['../namespaceripple.html#a4e070aef85986336795216a3e5336f8d',1,'ripple']]],
-  ['avalanchestate_12',['AvalancheState',['../structripple_1_1ConsensusParms.html#a57f6518dd29b3e8224b4ef9fe1692230',1,'ripple::ConsensusParms']]]
+  ['assettype_9',['AssetType',['../classripple_1_1test_1_1Loan__test.html#a87c26b362ae7c7ff752efe201d6ea18e',1,'ripple::test::Loan_test']]],
+  ['attestationmatch_10',['AttestationMatch',['../namespaceripple.html#aad512dea42da4cc179f20c67de593c26',1,'ripple']]],
+  ['authhandling_11',['AuthHandling',['../namespaceripple.html#a5b188f8f22827b2e24b506ef852ffd69',1,'ripple']]],
+  ['authtype_12',['AuthType',['../namespaceripple.html#a4e070aef85986336795216a3e5336f8d',1,'ripple']]],
+  ['avalanchestate_13',['AvalancheState',['../structripple_1_1ConsensusParms.html#a57f6518dd29b3e8224b4ef9fe1692230',1,'ripple::ConsensusParms']]]
 ];
