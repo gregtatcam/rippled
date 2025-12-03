@@ -284,7 +284,7 @@ public:
     }
 
 private:
-    using SLEP = std::shared_ptr<SLE const>;
+    using SLEP = SLE::const_pointer;
     bool
     forObject(
         std::function<bool(SLEP const& sle)> const& cb,

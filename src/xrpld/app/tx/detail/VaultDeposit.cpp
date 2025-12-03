@@ -36,48 +36,20 @@ VaultDeposit::preclaim(PreclaimContext const& ctx)
     if (!vault)
         return tecNO_ENTRY;
 
-    auto const account = ctx.tx[sfAccount];
+    auto const& account = ctx.tx[sfAccount];
     auto const assets = ctx.tx[sfAmount];
     auto const vaultAsset = vault->at(sfAsset);
     if (assets.asset() != vaultAsset)
         return tecWRONG_ASSET;
 
-    auto const err = vaultAsset.visit(
-        [&](MPTIssue const& issue) -> std::optional<TER> {
-            auto const& mptID = issue.getMptID();
-            auto issuance = ctx.view.read(keylet::mptIssuance(mptID));
-            if (!issuance)
-                return tecOBJECT_NOT_FOUND;
-            if (!issuance->isFlag(lsfMPTCanTransfer))
-            {
-                // LCOV_EXCL_START
-                JLOG(ctx.j.error())
-                    << "VaultDeposit: vault assets are non-transferable.";
-                return tecNO_AUTH;
-                // LCOV_EXCL_STOP
-            }
-
-            return std::nullopt;
-        },
-        [&](Issue const& issue) -> std::optional<TER> {
-            if (issue.native())
-                return std::nullopt;  // No special checks for XRP
-
-            auto const issuer =
-                ctx.view.read(keylet::account(vaultAsset.getIssuer()));
-            if (!issuer)
-            {
-                // LCOV_EXCL_START
-                JLOG(ctx.j.error())
-                    << "VaultDeposit: missing issuer of vault assets.";
-                return tefINTERNAL;
-                // LCOV_EXCL_STOP
-            }
-
-            return std::nullopt;
-        });
-    if (err)
-        return *err;
+    auto const& vaultAccount = vault->at(sfAccount);
+    if (auto ter = canTransfer(ctx.view, vaultAsset, account, vaultAccount);
+        !isTesSuccess(ter))
+    {
+        JLOG(ctx.j.debug())
+            << "VaultDeposit: vault assets are non-transferable.";
+        return ter;
+    }
 
     auto const mptIssuanceID = vault->at(sfShareMPTID);
     auto const vaultShare = MPTIssue(mptIssuanceID);

@@ -117,9 +117,27 @@ public:
     constexpr bool
     native() const
     {
-        return visit(
-            [&](Issue const& issue) { return issue.native(); },
-            [](MPTIssue const&) { return false; });
+        return std::visit(
+            [&]<ValidIssueType TIss>(TIss const& issue) {
+                if constexpr (std::is_same_v<TIss, Issue>)
+                    return issue.native();
+                if constexpr (std::is_same_v<TIss, MPTIssue>)
+                    return false;
+            },
+            issue_);
+    }
+
+    bool
+    integral() const
+    {
+        return std::visit(
+            [&]<ValidIssueType TIss>(TIss const& issue) {
+                if constexpr (std::is_same_v<TIss, Issue>)
+                    return issue.native();
+                if constexpr (std::is_same_v<TIss, MPTIssue>)
+                    return true;
+            },
+            issue_);
     }
 
     friend constexpr bool
