@@ -956,7 +956,7 @@ protected:
         auto const borrowerInitialBalance =
             env.balance(borrower, broker.asset).number();
         auto const initialState = state;
-        detail::PaymentComponents totalPaid{
+        ripple::detail::PaymentComponents totalPaid{
             .trackedValueDelta = 0,
             .trackedPrincipalDelta = 0,
             .trackedManagementFeeDelta = 0};
@@ -996,21 +996,22 @@ protected:
         {
             validateBorrowerBalance();
             // Compute the expected principal amount
-            auto const paymentComponents = detail::computePaymentComponents(
-                broker.asset.raw(),
-                state.loanScale,
-                state.totalValue,
-                state.principalOutstanding,
-                state.managementFeeOutstanding,
-                state.periodicPayment,
-                periodicRate,
-                state.paymentRemaining,
-                broker.params.managementFeeRate);
+            auto const paymentComponents =
+                ripple::detail::computePaymentComponents(
+                    broker.asset.raw(),
+                    state.loanScale,
+                    state.totalValue,
+                    state.principalOutstanding,
+                    state.managementFeeOutstanding,
+                    state.periodicPayment,
+                    periodicRate,
+                    state.paymentRemaining,
+                    broker.params.managementFeeRate);
 
             BEAST_EXPECT(
                 paymentComponents.trackedValueDelta <= roundedPeriodicPayment ||
                 (paymentComponents.specialCase ==
-                     detail::PaymentSpecialCase::final &&
+                     ripple::detail::PaymentSpecialCase::final &&
                  paymentComponents.trackedValueDelta >=
                      roundedPeriodicPayment));
             BEAST_EXPECT(
@@ -1024,14 +1025,14 @@ protected:
                 periodicRate,
                 state.paymentRemaining - 1,
                 broker.params.managementFeeRate);
-            detail::LoanStateDeltas const deltas =
+            ripple::detail::LoanStateDeltas const deltas =
                 currentTrueState - nextTrueState;
             BEAST_EXPECT(
                 deltas.total() ==
                 deltas.principal + deltas.interest + deltas.managementFee);
             BEAST_EXPECT(
                 paymentComponents.specialCase ==
-                    detail::PaymentSpecialCase::final ||
+                    ripple::detail::PaymentSpecialCase::final ||
                 deltas.total() == state.periodicPayment ||
                 (state.loanScale -
                  (deltas.total() - state.periodicPayment).exponent()) > 14);
@@ -1047,10 +1048,10 @@ protected:
                     << paymentComponents.trackedInterestPart() << ", "
                     << paymentComponents.trackedManagementFeeDelta << ", "
                     << (paymentComponents.specialCase ==
-                                detail::PaymentSpecialCase::final
+                                ripple::detail::PaymentSpecialCase::final
                             ? "final"
                             : paymentComponents.specialCase ==
-                                detail::PaymentSpecialCase::extra
+                                ripple::detail::PaymentSpecialCase::extra
                             ? "extra"
                             : "none")
                     << std::endl;
@@ -1069,7 +1070,7 @@ protected:
                 Number const diff = totalDue - totalDueAmount;
                 BEAST_EXPECT(
                     paymentComponents.specialCase ==
-                        detail::PaymentSpecialCase::final ||
+                        ripple::detail::PaymentSpecialCase::final ||
                     diff == beast::zero ||
                     (diff > beast::zero &&
                      ((broker.asset.integral() &&
@@ -1082,7 +1083,7 @@ protected:
                         state.principalOutstanding);
                 BEAST_EXPECT(
                     paymentComponents.specialCase !=
-                        detail::PaymentSpecialCase::final ||
+                        ripple::detail::PaymentSpecialCase::final ||
                     paymentComponents.trackedPrincipalDelta ==
                         state.principalOutstanding);
             }
@@ -1150,7 +1151,7 @@ protected:
             --state.paymentRemaining;
             state.previousPaymentDate = state.nextPaymentDate;
             if (paymentComponents.specialCase ==
-                detail::PaymentSpecialCase::final)
+                ripple::detail::PaymentSpecialCase::final)
             {
                 state.paymentRemaining = 0;
                 state.nextPaymentDate = 0;
@@ -2698,7 +2699,7 @@ protected:
                         Number::upward));
 
                 auto const initialState = state;
-                detail::PaymentComponents totalPaid{
+                ripple::detail::PaymentComponents totalPaid{
                     .trackedValueDelta = 0,
                     .trackedPrincipalDelta = 0,
                     .trackedManagementFeeDelta = 0};
@@ -2715,7 +2716,7 @@ protected:
                 {
                     // Compute the expected principal amount
                     auto const paymentComponents =
-                        detail::computePaymentComponents(
+                        ripple::detail::computePaymentComponents(
                             broker.asset.raw(),
                             state.loanScale,
                             state.totalValue,
@@ -2735,7 +2736,7 @@ protected:
                         periodicRate,
                         state.paymentRemaining - 1,
                         broker.params.managementFeeRate);
-                    detail::LoanStateDeltas const deltas =
+                    ripple::detail::LoanStateDeltas const deltas =
                         currentTrueState - nextTrueState;
 
                     testcase
@@ -2748,10 +2749,10 @@ protected:
                         << paymentComponents.trackedInterestPart() << ", "
                         << paymentComponents.trackedManagementFeeDelta << ", "
                         << (paymentComponents.specialCase ==
-                                    detail::PaymentSpecialCase::final
+                                    ripple::detail::PaymentSpecialCase::final
                                 ? "final"
                                 : paymentComponents.specialCase ==
-                                    detail::PaymentSpecialCase::extra
+                                    ripple::detail::PaymentSpecialCase::extra
                                 ? "extra"
                                 : "none");
 
@@ -2769,7 +2770,7 @@ protected:
                     Number const diff = totalDue - totalDueAmount;
                     BEAST_EXPECT(
                         paymentComponents.specialCase ==
-                            detail::PaymentSpecialCase::final ||
+                            ripple::detail::PaymentSpecialCase::final ||
                         diff == beast::zero ||
                         (diff > beast::zero &&
                          ((broker.asset.integral() &&
@@ -2805,12 +2806,12 @@ protected:
                             state.principalOutstanding);
                     BEAST_EXPECT(
                         paymentComponents.specialCase !=
-                            detail::PaymentSpecialCase::final ||
+                            ripple::detail::PaymentSpecialCase::final ||
                         paymentComponents.trackedPrincipalDelta ==
                             state.principalOutstanding);
                     BEAST_EXPECT(
                         paymentComponents.specialCase ==
-                            detail::PaymentSpecialCase::final ||
+                            ripple::detail::PaymentSpecialCase::final ||
                         (state.periodicPayment.exponent() -
                          (deltas.principal + deltas.interest +
                           deltas.managementFee - state.periodicPayment)
@@ -2848,7 +2849,7 @@ protected:
                     --state.paymentRemaining;
                     state.previousPaymentDate = state.nextPaymentDate;
                     if (paymentComponents.specialCase ==
-                        detail::PaymentSpecialCase::final)
+                        ripple::detail::PaymentSpecialCase::final)
                     {
                         state.paymentRemaining = 0;
                         state.nextPaymentDate = 0;
@@ -5651,14 +5652,14 @@ protected:
     }
 
     void
-    testCoverDepositWithdrawNonTransferableMPT()
+    testCoverDepositWithdrawNonTransferableMPT(FeatureBitset feature)
     {
         testcase(
             "CoverDeposit and CoverWithdraw reject MPT without CanTransfer");
         using namespace jtx;
         using namespace loanBroker;
 
-        Env env(*this, all);
+        Env env(*this, feature);
 
         Account const issuer{"issuer"};
         Account const alice{"alice"};
@@ -5705,7 +5706,9 @@ protected:
         env.close();
 
         // Standard Payment path should forbid third-party transfers.
-        env(pay(alice, pseudoAccount, asset(1)), ter(tecNO_AUTH));
+        auto const err =
+            feature[featureMPTokensV2] ? tecNO_PERMISSION : tecNO_AUTH;
+        env(pay(alice, pseudoAccount, asset(1)), ter(err));
         env.close();
 
         // Cover cannot be transferred to broker account
@@ -6106,7 +6109,7 @@ protected:
         auto state = getCurrentState(env, broker, loanKeylet);
         Number const periodicRate =
             loanPeriodicRate(state.interestRate, state.paymentInterval);
-        auto const components = detail::computePaymentComponents(
+        auto const components = ripple::detail::computePaymentComponents(
             asset.raw(),
             state.loanScale,
             state.totalValue,
@@ -7034,7 +7037,9 @@ public:
         testLoanPayLateFullPaymentBypassesPenalties();
         testLoanCoverMinimumRoundingExploit();
 #endif
-        testCoverDepositWithdrawNonTransferableMPT();
+        auto const all = jtx::testable_amendments();
+        testCoverDepositWithdrawNonTransferableMPT(all);
+        testCoverDepositWithdrawNonTransferableMPT(all - featureMPTokensV2);
         testPoC_UnsignedUnderflowOnFullPayAfterEarlyPeriodic();
 
         testDisabled();

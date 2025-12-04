@@ -1559,6 +1559,7 @@ ValidMPTIssuance::finalize(
 
         bool const lendingProtocolEnabled =
             view.rules().enabled(featureLendingProtocol);
+        bool const mptV2Enabled = view.rules().enabled(featureMPTokensV2);
         // ttESCROW_FINISH may authorize an MPT, but it can't have the
         // mayAuthorizeMPT privilege, because that may cause
         // non-amendment-gated side effects.
@@ -1569,8 +1570,6 @@ ValidMPTIssuance::finalize(
             enforceEscrowFinish)
         {
             bool const submittedByIssuer = tx.isFieldPresent(sfHolder);
-            bool const ammWithdrawOrClawback =
-                txnType == ttAMM_WITHDRAW || txnType == ttAMM_CLAWBACK;
 
             if (mptIssuancesCreated_ > 0)
             {
@@ -1585,14 +1584,8 @@ ValidMPTIssuance::finalize(
                 return false;
             }
             else if (
-                lendingProtocolEnabled &&
-                mptokensCreated_ + mptokensDeleted_ > 1)
-            {
-                JLOG(j.fatal()) << "Invariant failed: MPT authorize succeeded "
-                                   "but created/deleted bad number mptokens";
-                return false;
-            }
-            else if (hasPrivilege(tx, mayAuthorizeMPT) && ammWithdrawOrClawback)
+                mptV2Enabled && hasPrivilege(tx, mayAuthorizeMPT) &&
+                (txnType == ttAMM_WITHDRAW || txnType == ttAMM_CLAWBACK))
             {
                 if (submittedByIssuer && txnType == ttAMM_WITHDRAW &&
                     mptokensCreated_ > 0)
@@ -1609,6 +1602,14 @@ ValidMPTIssuance::finalize(
                            "but created/deleted bad number of mptokens";
                     return false;
                 }
+            }
+            else if (
+                lendingProtocolEnabled &&
+                (mptokensCreated_ + mptokensDeleted_) > 1)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize succeeded "
+                                   "but created/deleted bad number mptokens";
+                return false;
             }
             else if (
                 submittedByIssuer &&

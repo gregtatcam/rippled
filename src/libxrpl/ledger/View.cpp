@@ -398,18 +398,15 @@ getLineIfUsable(
                 auto const sleAmm =
                     view.read(keylet::amm((*sleIssuer)[sfAMMID]));
 
-                    if (!sleAmm ||
-                        isLPTokenFrozen(
-                            view,
-                            account,
-                            (*sleAmm)[sfAsset],
-                            (*sleAmm)[sfAsset2]))
-                    {
-                        return false;
-                    }
+                if (!sleAmm ||
+                    isLPTokenFrozen(
+                        view, account, (*sleAmm)[sfAsset], (*sleAmm)[sfAsset2]))
+                {
+                    return nullptr;
                 }
             }
         }
+    }
 
     return sle;
 }
@@ -473,18 +470,6 @@ accountHolds(
         getLineIfUsable(view, account, currency, issuer, zeroIfFrozen, j);
 
     return getTrustLineBalance(view, sle, account, currency, issuer, false, j);
-}
-
-STAmount
-accountHolds(
-    ReadView const& view,
-    AccountID const& account,
-    Issue const& issue,
-    FreezeHandling zeroIfFrozen,
-    beast::Journal j)
-{
-    return accountHolds(
-        view, account, issue.currency, issue.account, zeroIfFrozen, j);
 }
 
 // MaximumAmount doesn't exceed 2**63-1
@@ -2518,7 +2503,7 @@ accountSendMultiIOU(
             // Increment XRP balance.
             auto const rcvBal = receiver->getFieldAmount(sfBalance);
             receiver->setFieldAmount(sfBalance, rcvBal + amount);
-            view.creditHook(xrpAccount(), receiverID, amount, -rcvBal);
+            view.creditHookIOU(xrpAccount(), receiverID, amount, -rcvBal);
 
             view.update(receiver);
 
@@ -2549,7 +2534,7 @@ accountSendMultiIOU(
         else
         {
             auto const sndBal = sender->getFieldAmount(sfBalance);
-            view.creditHook(senderID, xrpAccount(), takeFromSender, sndBal);
+            view.creditHookIOU(senderID, xrpAccount(), takeFromSender, sndBal);
 
             // Decrement XRP balance.
             sender->setFieldAmount(sfBalance, sndBal - takeFromSender);
