@@ -239,9 +239,9 @@ public:
 // Specifies an order book
 struct BookSpec
 {
-    ripple::Asset asset;
+    xrpl::Asset asset;
 
-    BookSpec(ripple::Asset const& asset_) : asset(asset_)
+    BookSpec(xrpl::Asset const& asset_) : asset(asset_)
     {
     }
 };
@@ -522,11 +522,11 @@ public:
     {
         return asset();
     }
-    operator ripple::Asset() const
+    operator xrpl::Asset() const
     {
         return mpt();
     }
-    operator ripple::MPTID() const
+    operator xrpl::MPTID() const
     {
         return mpt();
     }

@@ -9,7 +9,7 @@
 #include <xrpl/protocol/TxFormats.h>
 #include <xrpl/protocol/UintTypes.h>
 
-namespace ripple {
+namespace xrpl {
 
 class Asset;
 class ReadView;
@@ -39,6 +39,6 @@ maxMPTAmount(SLE const& sleIssuance)
     return sleIssuance[~sfMaximumAmount].value_or(maxMPTokenAmount);
 }
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_APP_MISC_MPTUTILS_H_INLCUDED

@@ -122,17 +122,17 @@ public:
 };
 
 template <>
-struct hash<ripple::MPTIssue>
-    : private boost::base_from_member<std::hash<ripple::MPTID>, 0>
+struct hash<xrpl::MPTIssue>
+    : private boost::base_from_member<std::hash<xrpl::MPTID>, 0>
 {
 private:
-    using id_hash_type = boost::base_from_member<std::hash<ripple::MPTID>, 0>;
+    using id_hash_type = boost::base_from_member<std::hash<xrpl::MPTID>, 0>;
 
 public:
     explicit hash() = default;
 
     using value_type = std::size_t;
-    using argument_type = ripple::MPTIssue;
+    using argument_type = xrpl::MPTIssue;
 
     value_type
     operator()(argument_type const& value) const
@@ -143,14 +143,14 @@ public:
 };
 
 template <>
-struct hash<ripple::Asset>
+struct hash<xrpl::Asset>
 {
 private:
     using value_type = std::size_t;
-    using argument_type = ripple::Asset;
+    using argument_type = xrpl::Asset;
 
-    using issue_hasher = std::hash<ripple::Issue>;
-    using mptissue_hasher = std::hash<ripple::MPTIssue>;
+    using issue_hasher = std::hash<xrpl::Issue>;
+    using mptissue_hasher = std::hash<xrpl::MPTIssue>;
 
     issue_hasher m_issue_hasher;
     mptissue_hasher m_mptissue_hasher;
@@ -162,11 +162,11 @@ public:
     operator()(argument_type const& asset) const
     {
         return asset.visit(
-            [&](ripple::Issue const& issue) {
+            [&](xrpl::Issue const& issue) {
                 value_type result(m_issue_hasher(issue));
                 return result;
             },
-            [&](ripple::MPTIssue const& issue) {
+            [&](xrpl::MPTIssue const& issue) {
                 value_type result(m_mptissue_hasher(issue));
                 return result;
             });
@@ -179,8 +179,8 @@ template <>
 struct hash<xrpl::Book>
 {
 private:
-    using asset_hasher = std::hash<ripple::Asset>;
-    using uint256_hasher = ripple::uint256::hasher;
+    using asset_hasher = std::hash<xrpl::Asset>;
+    using uint256_hasher = xrpl::uint256::hasher;
 
     asset_hasher m_asset_hasher;
     uint256_hasher m_uint256_hasher;
@@ -221,19 +221,19 @@ struct hash<xrpl::Issue> : std::hash<xrpl::Issue>
 };
 
 template <>
-struct hash<ripple::MPTIssue> : std::hash<ripple::MPTIssue>
+struct hash<xrpl::MPTIssue> : std::hash<xrpl::MPTIssue>
 {
     explicit hash() = default;
 
-    using Base = std::hash<ripple::MPTIssue>;
+    using Base = std::hash<xrpl::MPTIssue>;
 };
 
 template <>
-struct hash<ripple::Asset> : std::hash<ripple::Asset>
+struct hash<xrpl::Asset> : std::hash<xrpl::Asset>
 {
     explicit hash() = default;
 
-    using Base = std::hash<ripple::Asset>;
+    using Base = std::hash<xrpl::Asset>;
 };
 
 template <>

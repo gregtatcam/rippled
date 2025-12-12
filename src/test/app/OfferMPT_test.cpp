@@ -7,7 +7,7 @@
 #include <xrpl/protocol/Quality.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 class OfferMPT_test : public beast::unit_test::suite
@@ -21,7 +21,10 @@ class OfferMPT_test : public beast::unit_test::suite
     std::uint32_t
     lastClose(jtx::Env& env)
     {
-        return env.current()->info().parentCloseTime.time_since_epoch().count();
+        return env.current()
+            ->header()
+            .parentCloseTime.time_since_epoch()
+            .count();
     }
 
 public:
@@ -4782,7 +4785,7 @@ public:
     }
 };
 
-BEAST_DEFINE_TESTSUITE_PRIO(OfferMPT, tx, ripple, 2);
+BEAST_DEFINE_TESTSUITE_PRIO(OfferMPT, tx, xrpl, 2);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

@@ -6,7 +6,7 @@
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/XRPAmount.h>
 
-namespace ripple {
+namespace xrpl {
 
 struct EitherAmount
 {
@@ -55,6 +55,6 @@ get(EitherAmount const& amt)
     return amt.get<T>();
 }
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

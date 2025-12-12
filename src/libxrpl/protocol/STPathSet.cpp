@@ -91,7 +91,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
 
             XRPL_ASSERT(
                 !(hasCurrency && hasMPT),
-                "ripple::STPathSet::STPathSet : not has Currency and MPT");
+                "xrpl::STPathSet::STPathSet : not has Currency and MPT");
             if (hasCurrency)
                 asset = static_cast<Currency>(sit.get160());
 
@@ -186,7 +186,7 @@ STPath::getJson(JsonOptions) const
         XRPL_ASSERT(
             !(iType & STPathElement::typeCurrency &&
               iType & STPathElement::typeMPT),
-            "ripple::STPath::getJson : not type Currency and MPT");
+            "xrpl::STPath::getJson : not type Currency and MPT");
         if (iType & STPathElement::typeCurrency)
             elem[jss::currency] = to_string(it.getCurrency());
 

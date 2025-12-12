@@ -725,7 +725,7 @@ bool
 equal(std::unique_ptr<Step> const& s1, XRPEndpointStepInfo const& xrpsi);
 
 bool
-equal(std::unique_ptr<Step> const& s1, ripple::Book const& bsi);
+equal(std::unique_ptr<Step> const& s1, xrpl::Book const& bsi);
 
 template <class Iter>
 bool

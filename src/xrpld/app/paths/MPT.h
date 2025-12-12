@@ -3,7 +3,7 @@
 
 #include <xrpl/protocol/MPTIssue.h>
 
-namespace ripple {
+namespace xrpl {
 
 class PathFindMPT final
 {
@@ -44,6 +44,6 @@ public:
     }
 };
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_APP_PATHS_MPT_H_INCLUDED

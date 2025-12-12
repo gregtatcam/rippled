@@ -1,7 +1,7 @@
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/PathAsset.h>
 
-namespace ripple {
+namespace xrpl {
 
 std::string
 to_string(PathAsset const& asset)
@@ -17,4 +17,4 @@ operator<<(std::ostream& os, PathAsset const& x)
     return os;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

@@ -799,8 +799,7 @@ STAmount::add(Serializer& s) const
         [&](Issue const& issue) {
             if (native())
             {
-                XRPL_ASSERT(
-                    mOffset == 0, "ripple::STAmount::add : zero offset");
+                XRPL_ASSERT(mOffset == 0, "xrpl::STAmount::add : zero offset");
 
                 if (!mIsNegative)
                     s.add64(mValue | cPositive);

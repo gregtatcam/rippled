@@ -5,7 +5,7 @@
 
 #include <type_traits>
 
-namespace ripple {
+namespace xrpl {
 
 class STAmount;
 class Asset;
@@ -91,6 +91,6 @@ visit(Variant&& v, Visitors&&... visitors) -> decltype(auto)
 
 }  // namespace detail
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_PROTOCOL_CONCEPTS_H_INCLUDED

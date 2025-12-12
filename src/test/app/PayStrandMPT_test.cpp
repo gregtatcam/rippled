@@ -10,7 +10,7 @@
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 struct PayStrandMPT_test : public beast::unit_test::suite
@@ -45,7 +45,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
         auto const gw = Account("gw");
 
         using M = MPTEndpointStepInfo;
-        using B = ripple::Book;
+        using B = xrpl::Book;
         using XRPS = XRPEndpointStepInfo;
 
         AMMContext ammContext(alice, false);
@@ -577,13 +577,13 @@ struct PayStrandMPT_test : public beast::unit_test::suite
         AccountID const srcAcc = alice.id();
         AccountID dstAcc = bob.id();
         STPathSet pathSet;
-        ::ripple::path::RippleCalc::Input inputs;
+        ::xrpl::path::RippleCalc::Input inputs;
         inputs.defaultPathsAllowed = true;
         try
         {
             PaymentSandbox sb{env.current().get(), tapNONE};
             {
-                auto const r = ::ripple::path::RippleCalc::rippleCalculate(
+                auto const r = ::xrpl::path::RippleCalc::rippleCalculate(
                     sb,
                     sendMax,
                     deliver,
@@ -596,7 +596,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(r.result() == temBAD_PATH);
             }
             {
-                auto const r = ::ripple::path::RippleCalc::rippleCalculate(
+                auto const r = ::xrpl::path::RippleCalc::rippleCalculate(
                     sb,
                     sendMax,
                     deliver,
@@ -609,7 +609,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(r.result() == temBAD_PATH);
             }
             {
-                auto const r = ::ripple::path::RippleCalc::rippleCalculate(
+                auto const r = ::xrpl::path::RippleCalc::rippleCalculate(
                     sb,
                     noAccountAmount,
                     deliver,
@@ -622,7 +622,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(r.result() == temBAD_PATH);
             }
             {
-                auto const r = ::ripple::path::RippleCalc::rippleCalculate(
+                auto const r = ::xrpl::path::RippleCalc::rippleCalculate(
                     sb,
                     sendMax,
                     noAccountAmount,
@@ -656,7 +656,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
     }
 };
 
-BEAST_DEFINE_TESTSUITE(PayStrandMPT, app, ripple);
+BEAST_DEFINE_TESTSUITE(PayStrandMPT, app, xrpl);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

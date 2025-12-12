@@ -21,7 +21,7 @@ AMMClawback::getFlagsMask(PreflightContext const& ctx)
 }
 
 bool
-AMMClawback::checkExtraFeatures(ripple::PreflightContext const& ctx)
+AMMClawback::checkExtraFeatures(xrpl::PreflightContext const& ctx)
 {
     if (!ctx.rules.enabled(featureAMMClawback))
         return false;

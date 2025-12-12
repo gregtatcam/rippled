@@ -118,12 +118,12 @@ doAMMInfo(RPC::JsonContext& context)
         XRPL_ASSERT(
             (asset1.has_value() == asset2.has_value()) &&
                 (asset1.has_value() != ammID.has_value()),
-            "ripple::doAMMInfo : asset1 and asset2 do match");
+            "xrpl::doAMMInfo : asset1 and asset2 do match");
 
         auto const ammKeylet = [&]() {
             if (asset1 && asset2)
                 return keylet::amm(*asset1, *asset2);
-            XRPL_ASSERT(ammID, "ripple::doAMMInfo::ammKeylet : ammID is set");
+            XRPL_ASSERT(ammID, "xrpl::doAMMInfo::ammKeylet : ammID is set");
             return keylet::amm(*ammID);
         }();
         auto const amm = ledger->read(ammKeylet);

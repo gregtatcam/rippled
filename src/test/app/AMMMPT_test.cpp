@@ -10,7 +10,7 @@
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/Feature.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 /**
@@ -4610,7 +4610,7 @@ private:
                 auto const pk = carol.pk();
                 auto const settleDelay = 10s;
                 NetClock::time_point const cancelAfter =
-                    env.current()->info().parentCloseTime + 20s;
+                    env.current()->header().parentCloseTime + 20s;
                 env(create(
                         carol,
                         ammAlice.ammAccount(),
@@ -7815,7 +7815,7 @@ private:
     }
 };
 
-BEAST_DEFINE_TESTSUITE_PRIO(AMMMPT, app, ripple, 1);
+BEAST_DEFINE_TESTSUITE_PRIO(AMMMPT, app, xrpl, 1);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

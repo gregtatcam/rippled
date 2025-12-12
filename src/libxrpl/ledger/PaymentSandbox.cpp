@@ -78,13 +78,13 @@ DeferredCredits::creditMPT(
 {
     XRPL_ASSERT(
         amount.holds<MPTIssue>(),
-        "ripple::detail::DeferredCredits::creditMPT : amount is for MPTIssue");
+        "xrpl::detail::DeferredCredits::creditMPT : amount is for MPTIssue");
     XRPL_ASSERT(
         !amount.negative(),
-        "ripple::detail::DeferredCredits::creditMPT : positive amount");
+        "xrpl::detail::DeferredCredits::creditMPT : positive amount");
     XRPL_ASSERT(
         sender != receiver,
-        "ripple::detail::DeferredCredits::creditMPT : sender is not receiver");
+        "xrpl::detail::DeferredCredits::creditMPT : sender is not receiver");
 
     auto const mptAmtVal = amount.mpt().value();
     auto const& issuer = amount.getIssuer();
@@ -211,7 +211,7 @@ DeferredCredits::adjustmentsIOU(
 }
 
 auto
-DeferredCredits::adjustmentsMPT(ripple::MPTID const& mptID) const
+DeferredCredits::adjustmentsMPT(xrpl::MPTID const& mptID) const
     -> std::optional<AdjustmentMPT>
 {
     auto i = creditsMPT_.find(mptID);
@@ -361,7 +361,7 @@ PaymentSandbox::balanceHookMPT(
 
 STAmount
 PaymentSandbox::balanceHookSelfIssueMPT(
-    ripple::MPTIssue const& issue,
+    xrpl::MPTIssue const& issue,
     std::int64_t amount) const
 {
     std::int64_t selfDebited = 0;

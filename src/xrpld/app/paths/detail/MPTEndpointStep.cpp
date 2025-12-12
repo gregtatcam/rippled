@@ -14,7 +14,7 @@
 #include <numeric>
 #include <sstream>
 
-namespace ripple {
+namespace xrpl {
 
 template <class TDerived>
 class MPTEndpointStep
@@ -401,7 +401,7 @@ MPTEndpointOfferCrossingStep::check(
 TER
 MPTEndpointOfferCrossingStep::checkCreateMPT(
     ApplyView& view,
-    ripple::DebtDirection srcDebtDir)
+    xrpl::DebtDirection srcDebtDir)
 {
     // TakerPays is the last step if offer crossing
     if (isLast_)
@@ -883,7 +883,7 @@ MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
         if (!ctx.prevStep)
         {
             UNREACHABLE(
-                "ripple::MPTEndpointStep::check : prev seen book without a "
+                "xrpl::MPTEndpointStep::check : prev seen book without a "
                 "prev step");
             return temBAD_PATH_LOOP;
         }
@@ -925,7 +925,7 @@ MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
 
 template <class TDerived>
 void
-MPTEndpointStep<TDerived>::resetCache(ripple::DebtDirection dir)
+MPTEndpointStep<TDerived>::resetCache(xrpl::DebtDirection dir)
 {
     cache_.emplace(
         MPTAmount(beast::zero),
@@ -983,4 +983,4 @@ mptEndpointStepEqual(
 }
 }  // namespace test
 
-}  // namespace ripple
+}  // namespace xrpl

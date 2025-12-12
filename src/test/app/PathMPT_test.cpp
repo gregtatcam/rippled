@@ -3,7 +3,6 @@
 #include <test/jtx/envconfig.h>
 
 #include <xrpld/app/paths/AccountAssets.h>
-#include <xrpld/core/JobQueue.h>
 #include <xrpld/rpc/Context.h>
 #include <xrpld/rpc/RPCHandler.h>
 #include <xrpld/rpc/detail/RPCHelpers.h>
@@ -11,20 +10,21 @@
 
 #include <xrpl/basics/contract.h>
 #include <xrpl/beast/unit_test.h>
+#include <xrpl/core/JobQueue.h>
 #include <xrpl/json/json_reader.h>
 #include <xrpl/protocol/STParsedJSON.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/jss.h>
 #include <xrpl/resource/Fees.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 namespace detail {
 
 static Json::Value
 rpf(jtx::Account const& src,
     jtx::Account const& dst,
-    ripple::test::jtx::MPT const& USD,
+    xrpl::test::jtx::MPT const& USD,
     std::vector<MPTID> const& num_src)
 {
     Json::Value jv = Json::objectValue;
@@ -116,7 +116,7 @@ public:
         app.getJobQueue().postCoro(
             jtCLIENT, "RPC-Client", [&](auto const& coro) {
                 context.params =
-                    ripple::test::detail::rpf(alice, bob, USD, num_src);
+                    xrpl::test::detail::rpf(alice, bob, USD, num_src);
                 context.coro = coro;
                 RPC::doCommand(context, result);
                 g.signal();
@@ -129,7 +129,7 @@ public:
         app.getJobQueue().postCoro(
             jtCLIENT, "RPC-Client", [&](auto const& coro) {
                 context.params =
-                    ripple::test::detail::rpf(alice, bob, USD, num_src);
+                    xrpl::test::detail::rpf(alice, bob, USD, num_src);
                 context.coro = coro;
                 RPC::doCommand(context, result);
                 g.signal();
@@ -147,7 +147,7 @@ public:
         }
         app.getJobQueue().postCoro(
             jtCLIENT, "RPC-Client", [&](auto const& coro) {
-                context.params = ripple::test::detail::rpf(alice, bob, USD, {});
+                context.params = xrpl::test::detail::rpf(alice, bob, USD, {});
                 context.coro = coro;
                 RPC::doCommand(context, result);
                 g.signal();
@@ -159,7 +159,7 @@ public:
         auto CURM = MPTTester({.env = env, .issuer = alice, .holders = {bob}});
         app.getJobQueue().postCoro(
             jtCLIENT, "RPC-Client", [&](auto const& coro) {
-                context.params = ripple::test::detail::rpf(alice, bob, USD, {});
+                context.params = xrpl::test::detail::rpf(alice, bob, USD, {});
                 context.coro = coro;
                 RPC::doCommand(context, result);
                 g.signal();
@@ -482,7 +482,7 @@ public:
     }
 };
 
-BEAST_DEFINE_TESTSUITE(PathMPT, app, ripple);
+BEAST_DEFINE_TESTSUITE(PathMPT, app, xrpl);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

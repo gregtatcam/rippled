@@ -123,7 +123,7 @@ operator<<(std::ostream& os, MPTIssue const& x);
 namespace std {
 
 template <>
-struct hash<ripple::MPTID> : ripple::MPTID::hasher
+struct hash<xrpl::MPTID> : xrpl::MPTID::hasher
 {
     explicit hash() = default;
 };

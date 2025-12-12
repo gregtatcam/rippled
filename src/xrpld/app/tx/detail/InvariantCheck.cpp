@@ -898,7 +898,7 @@ TransfersNotFrozen::recordBalanceChanges(
 {
     XRPL_ASSERT(
         after->at(sfBalance).holds<Issue>(),
-        "ripple::TransfersNotFrozen::recordBalanceChanges : after is Issue");
+        "xrpl::TransfersNotFrozen::recordBalanceChanges : after is Issue");
     auto const balanceChangeSign = balanceChange.signum();
     auto const currency = after->at(sfBalance).get<Issue>().currency;
 

@@ -12,7 +12,7 @@
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/protocol/Feature.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 /**
@@ -3931,7 +3931,7 @@ private:
     }
 };
 
-BEAST_DEFINE_TESTSUITE_PRIO(AMMExtendedMPT, app, ripple, 1);
+BEAST_DEFINE_TESTSUITE_PRIO(AMMExtendedMPT, app, xrpl, 1);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

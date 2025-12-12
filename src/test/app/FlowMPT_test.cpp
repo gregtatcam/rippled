@@ -11,7 +11,7 @@
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 struct FlowMPT_test : public beast::unit_test::suite
@@ -2238,7 +2238,7 @@ struct FlowMPT_test : public beast::unit_test::suite
     }
 };
 
-BEAST_DEFINE_TESTSUITE_PRIO(FlowMPT, app, ripple, 2);
+BEAST_DEFINE_TESTSUITE_PRIO(FlowMPT, app, xrpl, 2);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

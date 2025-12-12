@@ -4,7 +4,7 @@
 #include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Concepts.h>
 
-namespace ripple {
+namespace xrpl {
 
 /* Represent STPathElement's asset, which can be Currency or MPTID.
  */
@@ -91,7 +91,7 @@ constexpr bool
 PathAsset::isXRP() const
 {
     return visit(
-        [&](Currency const& currency) { return ripple::isXRP(currency); },
+        [&](Currency const& currency) { return xrpl::isXRP(currency); },
         [](MPTID const&) { return false; });
 }
 
@@ -131,6 +131,6 @@ to_string(PathAsset const& asset);
 std::ostream&
 operator<<(std::ostream& os, PathAsset const& x);
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_APP_PATHASSET_H_INCLUDED

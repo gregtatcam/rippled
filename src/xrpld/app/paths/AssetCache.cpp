@@ -81,8 +81,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
     if (inserted)
     {
         XRPL_ASSERT(
-            it->second == nullptr,
-            "xrpl::Asset::getRippleLines : null lines");
+            it->second == nullptr, "xrpl::Asset::getRippleLines : null lines");
         auto lines =
             PathFindTrustLine::getItems(accountID, *ledger_, direction);
         if (lines.size())
@@ -111,7 +110,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
 }
 
 std::shared_ptr<std::vector<PathFindMPT>> const&
-AssetCache::getMPTs(ripple::AccountID const& account)
+AssetCache::getMPTs(xrpl::AccountID const& account)
 {
     std::lock_guard sl(mLock);
 

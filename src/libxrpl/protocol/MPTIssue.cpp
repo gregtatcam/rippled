@@ -17,7 +17,7 @@ MPTIssue::MPTIssue(MPTID const& issuanceID) : mptID_(issuanceID)
 }
 
 MPTIssue::MPTIssue(std::uint32_t sequence, AccountID const& account)
-    : MPTIssue(ripple::makeMptID(sequence, account))
+    : MPTIssue(xrpl::makeMptID(sequence, account))
 {
 }
 

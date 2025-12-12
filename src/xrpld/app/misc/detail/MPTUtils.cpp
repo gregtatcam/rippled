@@ -4,7 +4,7 @@
 #include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Indexes.h>
 
-namespace ripple {
+namespace xrpl {
 
 static TER
 checkMPTAllowed(
@@ -23,7 +23,7 @@ checkMPTAllowed(
         txType == ttAMM_WITHDRAW || txType == ttOFFER_CREATE ||
         txType == ttCHECK_CREATE || txType == ttCHECK_CASH ||
         txType == ttPAYMENT || isDEX;
-    XRPL_ASSERT(validTx, "ripple::checkMPTAllowed : all MPT tx or DEX");
+    XRPL_ASSERT(validTx, "xrpl::checkMPTAllowed : all MPT tx or DEX");
     if (!validTx)
         return tefINTERNAL;
 
@@ -74,7 +74,7 @@ checkMPTTxAllowed(
     std::optional<AccountID> const& destAccount)
 {
     // use isDEXAllowed for payment/offer crossing
-    XRPL_ASSERT(txType != ttPAYMENT, "ripple::checkMPTTxAllowed : not payment");
+    XRPL_ASSERT(txType != ttPAYMENT, "xrpl::checkMPTTxAllowed : not payment");
     return checkMPTAllowed(view, txType, asset, accountID, destAccount);
 }
 
@@ -89,4 +89,4 @@ checkMPTDEXAllowed(
     return checkMPTAllowed(view, ttPAYMENT, asset, accountID, dest);
 }
 
-}  // namespace ripple
+}  // namespace xrpl

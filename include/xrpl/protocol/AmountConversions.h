@@ -13,7 +13,7 @@ namespace xrpl {
 inline STAmount
 toSTAmount(IOUAmount const& iou, Asset const& asset)
 {
-    XRPL_ASSERT(asset.holds<Issue>(), "ripple::toSTAmount : is Issue");
+    XRPL_ASSERT(asset.holds<Issue>(), "xrpl::toSTAmount : is Issue");
     bool const isNeg = iou.signum() < 0;
     std::uint64_t const umant = isNeg ? -iou.mantissa() : iou.mantissa();
     return STAmount(asset, umant, iou.exponent(), isNeg, STAmount::unchecked());
@@ -36,7 +36,7 @@ toSTAmount(XRPAmount const& xrp)
 inline STAmount
 toSTAmount(XRPAmount const& xrp, Asset const& asset)
 {
-    XRPL_ASSERT(isXRP(asset), "ripple::toSTAmount : is XRP");
+    XRPL_ASSERT(isXRP(asset), "xrpl::toSTAmount : is XRP");
     return toSTAmount(xrp);
 }
 
@@ -49,7 +49,7 @@ toSTAmount(MPTAmount const& mpt)
 inline STAmount
 toSTAmount(MPTAmount const& mpt, Asset const& asset)
 {
-    XRPL_ASSERT(asset.holds<MPTIssue>(), "ripple::toSTAmount : is MPT");
+    XRPL_ASSERT(asset.holds<MPTIssue>(), "xrpl::toSTAmount : is MPT");
     return STAmount(mpt, asset.get<MPTIssue>());
 }
 
@@ -101,7 +101,7 @@ toAmount<MPTAmount>(STAmount const& amt)
     XRPL_ASSERT(
         amt.holds<MPTIssue>() && amt.mantissa() <= maxMPTokenAmount &&
             amt.exponent() == 0,
-        "ripple::toAmount<MPTAmount> : maximum mantissa");
+        "xrpl::toAmount<MPTAmount> : maximum mantissa");
     if (amt.mantissa() > maxMPTokenAmount || amt.exponent() != 0)
         Throw<std::runtime_error>(
             "toAmount<MPTAmount>: invalid mantissa or exponent");

@@ -6,7 +6,7 @@
 
 #include <xrpl/protocol/Feature.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 class AMMClawbackMPT_test : public beast::unit_test::suite
 {
@@ -1920,7 +1920,7 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
     }
 };
 
-BEAST_DEFINE_TESTSUITE(AMMClawbackMPT, app, ripple);
+BEAST_DEFINE_TESTSUITE(AMMClawbackMPT, app, xrpl);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

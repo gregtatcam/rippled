@@ -16,7 +16,7 @@
 namespace xrpl {
 
 bool
-CashCheck::checkExtraFeatures(ripple::PreflightContext const& ctx)
+CashCheck::checkExtraFeatures(xrpl::PreflightContext const& ctx)
 {
     auto const optAmount = ctx.tx[~sfAmount];
     auto const optDeliverMin = ctx.tx[~sfDeliverMin];

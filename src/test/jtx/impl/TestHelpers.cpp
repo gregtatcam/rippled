@@ -655,7 +655,7 @@ allpe(AccountID const& a, Asset const& asset)
 };
 
 bool
-equal(std::unique_ptr<ripple::Step> const& s1, DirectStepInfo const& dsi)
+equal(std::unique_ptr<xrpl::Step> const& s1, DirectStepInfo const& dsi)
 {
     if (!s1)
         return false;
@@ -663,7 +663,7 @@ equal(std::unique_ptr<ripple::Step> const& s1, DirectStepInfo const& dsi)
 }
 
 bool
-equal(std::unique_ptr<ripple::Step> const& s1, MPTEndpointStepInfo const& dsi)
+equal(std::unique_ptr<xrpl::Step> const& s1, MPTEndpointStepInfo const& dsi)
 {
     if (!s1)
         return false;
@@ -671,7 +671,7 @@ equal(std::unique_ptr<ripple::Step> const& s1, MPTEndpointStepInfo const& dsi)
 }
 
 bool
-equal(std::unique_ptr<ripple::Step> const& s1, XRPEndpointStepInfo const& xrpsi)
+equal(std::unique_ptr<xrpl::Step> const& s1, XRPEndpointStepInfo const& xrpsi)
 {
     if (!s1)
         return false;
@@ -679,7 +679,7 @@ equal(std::unique_ptr<ripple::Step> const& s1, XRPEndpointStepInfo const& xrpsi)
 }
 
 bool
-equal(std::unique_ptr<ripple::Step> const& s1, ripple::Book const& bsi)
+equal(std::unique_ptr<xrpl::Step> const& s1, xrpl::Book const& bsi)
 {
     if (!s1)
         return false;

@@ -41,9 +41,9 @@ public:
 
     static TER
     checkCreateMPT(
-        ripple::ApplyView& view,
-        ripple::MPTIssue const& mptIssue,
-        ripple::AccountID const& holder,
+        xrpl::ApplyView& view,
+        xrpl::MPTIssue const& mptIssue,
+        xrpl::AccountID const& holder,
         beast::Journal j);
 
     TER

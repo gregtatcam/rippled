@@ -10,7 +10,7 @@
 namespace xrpl {
 
 bool
-CreateCheck::checkExtraFeatures(ripple::PreflightContext const& ctx)
+CreateCheck::checkExtraFeatures(xrpl::PreflightContext const& ctx)
 {
     if (!ctx.rules.enabled(featureMPTokensV2) &&
         ctx.tx[sfSendMax].holds<MPTIssue>())
