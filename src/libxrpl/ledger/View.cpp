@@ -668,8 +668,7 @@ accountFunds(
     beast::Journal j)
 {
     XRPL_ASSERT(
-        saDefault.holds<Issue>(),
-        "ripple::accountFunds: saDefault holds Issue");
+        saDefault.holds<Issue>(), "xrpl::accountFunds: saDefault holds Issue");
 
     if (!saDefault.native() && saDefault.getIssuer() == id)
         return saDefault;
