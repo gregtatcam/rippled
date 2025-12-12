@@ -15,7 +15,7 @@
 
 #include <boost/format.hpp>
 
-namespace ripple {
+namespace xrpl {
 
 std::optional<Json::Value>
 validateTakerJSON(Json::Value const& taker, Json::StaticString const& name)
@@ -267,4 +267,4 @@ doBookChanges(RPC::JsonContext& context)
     return RPC::computeBookChanges(ledger);
 }
 
-}  // namespace ripple
+}  // namespace xrpl

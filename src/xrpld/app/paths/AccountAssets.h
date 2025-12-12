@@ -5,7 +5,7 @@
 
 #include <xrpl/protocol/UintTypes.h>
 
-namespace ripple {
+namespace xrpl {
 
 hash_set<PathAsset>
 accountDestAssets(
@@ -19,6 +19,6 @@ accountSourceAssets(
     std::shared_ptr<AssetCache> const& lrLedger,
     bool includeXRP);
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

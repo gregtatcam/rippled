@@ -12,7 +12,7 @@
 #include <xrpl/protocol/XChainAttestations.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 namespace jtx {
 
@@ -488,4 +488,4 @@ XChainBridgeObjects::createBridgeObjects(Env& mcEnv, Env& scEnv)
 }
 }  // namespace jtx
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

@@ -22,7 +22,7 @@
 #include <numeric>
 #include <sstream>
 
-namespace ripple {
+namespace xrpl {
 
 template <class TIn, class TOut, class TDerived>
 class BookStep : public StepImp<TIn, TOut, BookStep<TIn, TOut, TDerived>>
@@ -357,7 +357,7 @@ private:
         // It's really a programming error if the quality is missing.
         XRPL_ASSERT(
             limitQuality,
-            "ripple::BookOfferCrossingStep::getQuality : nonzero quality");
+            "xrpl::BookOfferCrossingStep::getQuality : nonzero quality");
         if (!limitQuality)
             Throw<FlowException>(tefINTERNAL, "Offer requires quality.");
         return *limitQuality;
@@ -1111,7 +1111,7 @@ BookStep<TIn, TOut, TDerived>::revImp(
             // LCOV_EXCL_START
             JLOG(j_.error())
                 << "BookStep remainingOut < 0 " << to_string(remainingOut);
-            UNREACHABLE("ripple::BookStep::revImp : remaining less than zero");
+            UNREACHABLE("xrpl::BookStep::revImp : remaining less than zero");
             cache_.emplace(beast::zero, beast::zero);
             return {beast::zero, beast::zero};
             // LCOV_EXCL_STOP
@@ -1135,7 +1135,7 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
     boost::container::flat_set<uint256>& ofrsToRm,
     TIn const& in)
 {
-    XRPL_ASSERT(cache_, "ripple::BookStep::fwdImp : cache is set");
+    XRPL_ASSERT(cache_, "xrpl::BookStep::fwdImp : cache is set");
 
     TAmounts<TIn, TOut> result(beast::zero, beast::zero);
 
@@ -1154,8 +1154,7 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
                          TOut const& ownerGives,
                          std::uint32_t transferRateIn,
                          std::uint32_t transferRateOut) mutable -> bool {
-        XRPL_ASSERT(
-            cache_, "ripple::BookStep::fwdImp::eachOffer : cache is set");
+        XRPL_ASSERT(cache_, "xrpl::BookStep::fwdImp::eachOffer : cache is set");
 
         if (remainingIn <= beast::zero)
             return false;
@@ -1275,7 +1274,7 @@ BookStep<TIn, TOut, TDerived>::fwdImp(
             // something went very wrong
             JLOG(j_.error())
                 << "BookStep remainingIn < 0 " << to_string(remainingIn);
-            UNREACHABLE("ripple::BookStep::fwdImp : remaining less than zero");
+            UNREACHABLE("xrpl::BookStep::fwdImp : remaining less than zero");
             cache_.emplace(beast::zero, beast::zero);
             return {beast::zero, beast::zero};
             // LCOV_EXCL_STOP
@@ -1438,7 +1437,7 @@ namespace test {
 
 template <class TIn, class TOut, class TDerived>
 static bool
-equalHelper(Step const& step, ripple::Book const& book)
+equalHelper(Step const& step, xrpl::Book const& book)
 {
     if (auto bs = dynamic_cast<BookStep<TIn, TOut, TDerived> const*>(&step))
         return book == bs->book();
@@ -1446,12 +1445,12 @@ equalHelper(Step const& step, ripple::Book const& book)
 }
 
 bool
-bookStepEqual(Step const& step, ripple::Book const& book)
+bookStepEqual(Step const& step, xrpl::Book const& book)
 {
     if (isXRP(book.in) && isXRP(book.out))
     {
         // LCOV_EXCL_START
-        UNREACHABLE("ripple::test::bookStepEqual : no XRP to XRP book step");
+        UNREACHABLE("xrpl::test::bookStepEqual : no XRP to XRP book step");
         return false;  // no such thing as xrp/xrp book step
         // LCOV_EXCL_STOP
     }
@@ -1547,4 +1546,4 @@ make_BookStepXM(StrandContext const& ctx, MPTIssue const& out)
     return make_BookStepHelper<XRPAmount, MPTAmount>(ctx, xrpIssue(), out);
 }
 
-}  // namespace ripple
+}  // namespace xrpl

@@ -6,7 +6,7 @@
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/TxFlags.h>
 
-namespace ripple {
+namespace xrpl {
 
 bool
 AMMVote::checkExtraFeatures(PreflightContext const& ctx)
@@ -184,7 +184,7 @@ applyVote(
     XRPL_ASSERT(
         !ctx_.view().rules().enabled(fixInnerObjTemplate) ||
             ammSle->isFieldPresent(sfAuctionSlot),
-        "ripple::applyVote : has auction slot");
+        "xrpl::applyVote : has auction slot");
 
     // Update the vote entries and the trading/discounted fee.
     ammSle->setFieldArray(sfVoteSlots, updatedVoteSlots);
@@ -231,4 +231,4 @@ AMMVote::doApply()
     return result.first;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

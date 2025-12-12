@@ -6,7 +6,7 @@
 #include <xrpl/ledger/View.h>
 #include <xrpl/protocol/Feature.h>
 
-namespace ripple {
+namespace xrpl {
 
 namespace {
 bool
@@ -38,7 +38,7 @@ TOfferStreamBase<TIn, TOut>::TOfferStreamBase(
     , counter_(counter)
 {
     XRPL_ASSERT(
-        validBook_, "ripple::TOfferStreamBase::TOfferStreamBase : valid book");
+        validBook_, "xrpl::TOfferStreamBase::TOfferStreamBase : valid book");
 }
 
 // Handle the case where a directory item with no corresponding ledger entry
@@ -349,4 +349,4 @@ template class TOfferStreamBase<XRPAmount, MPTAmount>;
 template class TOfferStreamBase<MPTAmount, XRPAmount>;
 template class TOfferStreamBase<IOUAmount, MPTAmount>;
 template class TOfferStreamBase<MPTAmount, IOUAmount>;
-}  // namespace ripple
+}  // namespace xrpl

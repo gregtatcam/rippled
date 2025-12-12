@@ -3,7 +3,7 @@
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 
 class Check_test : public beast::unit_test::suite
 {
@@ -1851,7 +1851,7 @@ class Check_test : public beast::unit_test::suite
                 return acct;
             }
 
-            operator ripple::AccountID() const
+            operator xrpl::AccountID() const
             {
                 return acct.id();
             }
@@ -2524,6 +2524,6 @@ public:
     }
 };
 
-BEAST_DEFINE_TESTSUITE(Check, app, ripple);
+BEAST_DEFINE_TESTSUITE(Check, app, xrpl);
 
-}  // namespace ripple
+}  // namespace xrpl

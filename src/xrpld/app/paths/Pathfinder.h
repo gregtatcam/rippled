@@ -3,14 +3,14 @@
 
 #include <xrpld/app/ledger/Ledger.h>
 #include <xrpld/app/paths/AssetCache.h>
-#include <xrpld/core/LoadEvent.h>
 
 #include <xrpl/basics/CountedObject.h>
+#include <xrpl/core/LoadEvent.h>
 #include <xrpl/protocol/PathAsset.h>
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/STPathSet.h>
 
-namespace ripple {
+namespace xrpl {
 
 /** Calculates payment paths.
 
@@ -220,6 +220,6 @@ private:
     static std::uint32_t const afAC_LAST = 0x080;
 };
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

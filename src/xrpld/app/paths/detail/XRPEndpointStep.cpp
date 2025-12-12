@@ -14,7 +14,7 @@
 
 #include <sstream>
 
-namespace ripple {
+namespace xrpl {
 
 template <class TDerived>
 class XRPEndpointStep
@@ -106,7 +106,7 @@ protected:
     XRPAmount
     xrpLiquidImpl(ReadView& sb, std::int32_t reserveReduction) const
     {
-        return ripple::xrpLiquid(sb, acc_, reserveReduction, j_);
+        return xrpl::xrpLiquid(sb, acc_, reserveReduction, j_);
     }
 
     std::string
@@ -276,7 +276,7 @@ XRPEndpointStep<TDerived>::fwdImp(
     boost::container::flat_set<uint256>& ofrsToRm,
     XRPAmount const& in)
 {
-    XRPL_ASSERT(cache_, "ripple::XRPEndpointStep::fwdImp : cache is set");
+    XRPL_ASSERT(cache_, "xrpl::XRPEndpointStep::fwdImp : cache is set");
     auto const balance = static_cast<TDerived const*>(this)->xrpLiquid(sb);
 
     auto const result = isLast_ ? in : std::min(balance, in);
@@ -306,7 +306,7 @@ XRPEndpointStep<TDerived>::validFwd(
 
     XRPL_ASSERT(
         in.holds<XRPAmount>(),
-        "ripple::XRPEndpointStep::validFwd : input is XRP");
+        "xrpl::XRPEndpointStep::validFwd : input is XRP");
 
     auto const& xrpIn = in.get<XRPAmount>();
     auto const balance = static_cast<TDerived const*>(this)->xrpLiquid(sb);
@@ -411,4 +411,4 @@ make_XRPEndpointStep(StrandContext const& ctx, AccountID const& acc)
     return {tesSUCCESS, std::move(r)};
 }
 
-}  // namespace ripple
+}  // namespace xrpl

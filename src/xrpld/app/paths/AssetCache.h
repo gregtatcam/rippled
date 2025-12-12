@@ -12,7 +12,7 @@
 #include <mutex>
 #include <vector>
 
-namespace ripple {
+namespace xrpl {
 
 // Used by Pathfinder
 class AssetCache final : public CountedObject<AssetCache>
@@ -50,7 +50,7 @@ public:
 private:
     std::mutex mLock;
 
-    ripple::hardened_hash<> hasher_;
+    xrpl::hardened_hash<> hasher_;
     std::shared_ptr<ReadView const> ledger_;
 
     beast::Journal journal_;
@@ -113,6 +113,6 @@ private:
     hash_map<AccountID, std::shared_ptr<std::vector<PathFindMPT>>> mpts_;
 };
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

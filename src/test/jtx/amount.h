@@ -15,7 +15,7 @@
 #include <string>
 #include <type_traits>
 
-namespace ripple {
+namespace xrpl {
 namespace detail {
 
 struct epsilon_multiple
@@ -386,9 +386,9 @@ class IOU
 {
 public:
     Account account;
-    ripple::Currency currency;
+    xrpl::Currency currency;
 
-    IOU(Account const& account_, ripple::Currency const& currency_)
+    IOU(Account const& account_, xrpl::Currency const& currency_)
         : account(account_), currency(currency_)
     {
     }
@@ -472,9 +472,9 @@ class MPT
 {
 public:
     std::string name;
-    ripple::MPTID issuanceID;
+    xrpl::MPTID issuanceID;
 
-    MPT(std::string const& n, ripple::MPTID const& issuanceID_)
+    MPT(std::string const& n, xrpl::MPTID const& issuanceID_)
         : name(n), issuanceID(issuanceID_)
     {
     }
@@ -489,7 +489,7 @@ public:
     {
     }
 
-    ripple::MPTID const&
+    xrpl::MPTID const&
     mpt() const
     {
         return issuanceID;
@@ -497,7 +497,7 @@ public:
 
     /** Explicit conversion to MPTIssue or asset.
      */
-    ripple::MPTIssue
+    xrpl::MPTIssue
     mptIssue() const
     {
         return MPTIssue{issuanceID};
@@ -513,7 +513,7 @@ public:
         This allows passing an MPT
         value where an MPTIssue is expected.
     */
-    operator ripple::MPTIssue() const
+    operator xrpl::MPTIssue() const
     {
         return mptIssue();
     }
@@ -612,6 +612,6 @@ extern any_t const any;
 
 }  // namespace jtx
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

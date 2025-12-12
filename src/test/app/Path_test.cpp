@@ -5,11 +5,11 @@
 #include <test/jtx/permissioned_dex.h>
 
 #include <xrpld/app/paths/AccountAssets.h>
-#include <xrpld/core/JobQueue.h>
 #include <xrpld/rpc/RPCHandler.h>
 #include <xrpld/rpc/detail/Tuning.h>
 
 #include <xrpl/beast/unit_test.h>
+#include <xrpl/core/JobQueue.h>
 #include <xrpl/json/json_reader.h>
 #include <xrpl/protocol/ApiVersion.h>
 #include <xrpl/protocol/STParsedJSON.h>
@@ -21,7 +21,7 @@
 #include <optional>
 #include <string>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 //------------------------------------------------------------------------------
@@ -2107,7 +2107,7 @@ public:
     }
 };
 
-BEAST_DEFINE_TESTSUITE(Path, app, ripple);
+BEAST_DEFINE_TESTSUITE(Path, app, xrpl);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

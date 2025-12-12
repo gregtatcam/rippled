@@ -10,7 +10,7 @@
 #include <xrpl/protocol/Concepts.h>
 #include <xrpl/protocol/Quality.h>
 
-namespace ripple {
+namespace xrpl {
 
 template <StepAmount TIn, StepAmount TOut>
 class AMMOffer;
@@ -131,6 +131,6 @@ private:
     maxOffer(TAmounts<TIn, TOut> const& balances, Rules const& rules) const;
 };
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_APP_TX_AMMLIQUIDITY_H_INCLUDED

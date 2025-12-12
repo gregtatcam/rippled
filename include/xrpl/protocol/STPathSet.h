@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <optional>
 
-namespace ripple {
+namespace xrpl {
 
 class STPathElement final : public CountedObject<STPathElement>
 {
@@ -257,7 +257,7 @@ inline STPathElement::STPathElement(
         mType |= typeAccount;
         XRPL_ASSERT(
             mAccountID != noAccount(),
-            "ripple::STPathElement::STPathElement : account is set");
+            "xrpl::STPathElement::STPathElement : account is set");
     }
 
     if (asset)
@@ -272,7 +272,7 @@ inline STPathElement::STPathElement(
         mType |= typeIssuer;
         XRPL_ASSERT(
             mIssuerID != noAccount(),
-            "ripple::STPathElement::STPathElement : issuer is set");
+            "xrpl::STPathElement::STPathElement : issuer is set");
     }
 
     hash_value_ = get_hash(*this);
@@ -549,6 +549,6 @@ STPathSet::emplace_back(Args&&... args)
     value.emplace_back(std::forward<Args>(args)...);
 }
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

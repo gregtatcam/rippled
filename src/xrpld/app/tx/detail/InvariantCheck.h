@@ -13,7 +13,7 @@
 #include <tuple>
 #include <unordered_set>
 
-namespace ripple {
+namespace xrpl {
 
 class ReadView;
 
@@ -972,7 +972,7 @@ using InvariantChecks = std::tuple<
  * @return std::tuple of instances that implement the required invariant check
  * methods
  *
- * @see ripple::InvariantChecker_PROTOTYPE
+ * @see xrpl::InvariantChecker_PROTOTYPE
  */
 inline InvariantChecks
 getInvariantChecks()
@@ -980,6 +980,6 @@ getInvariantChecks()
     return InvariantChecks{};
 }
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

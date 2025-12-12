@@ -1,7 +1,6 @@
 #include <xrpld/app/ledger/LedgerMaster.h>
 #include <xrpld/app/misc/AMMUtils.h>
 #include <xrpld/rpc/Context.h>
-#include <xrpld/rpc/detail/RPCHelpers.h>
 #include <xrpld/rpc/detail/RPCLedgerHelpers.h>
 
 #include <xrpl/json/json_value.h>
@@ -11,23 +10,7 @@
 
 #include <grpcpp/support/status.h>
 
-namespace ripple {
-
-std::optional<AccountID>
-getAccount(Json::Value const& v, Json::Value& result)
-{
-    std::string strIdent(v.asString());
-    AccountID accountID;
-
-    if (auto jv = RPC::accountFromString(accountID, strIdent))
-    {
-        for (auto it = jv.begin(); it != jv.end(); ++it)
-            result[it.memberName()] = (*it);
-
-        return std::nullopt;
-    }
-    return std::optional<AccountID>(accountID);
-}
+namespace xrpl {
 
 Expected<Asset, error_code_i>
 getAsset(Json::Value const& v, beast::Journal j)
@@ -109,7 +92,8 @@ doAMMInfo(RPC::JsonContext& context)
 
         if (params.isMember(jss::amm_account))
         {
-            auto const id = getAccount(params[jss::amm_account], result);
+            auto const id =
+                parseBase58<AccountID>((params[jss::amm_account].asString()));
             if (!id)
                 return Unexpected(rpcACT_MALFORMED);
             auto const sle = ledger->read(keylet::account(*id));
@@ -122,7 +106,7 @@ doAMMInfo(RPC::JsonContext& context)
 
         if (params.isMember(jss::account))
         {
-            accountID = getAccount(params[jss::account], result);
+            accountID = parseBase58<AccountID>(params[jss::account].asString());
             if (!accountID || !ledger->read(keylet::account(*accountID)))
                 return Unexpected(rpcACT_MALFORMED);
         }
@@ -202,7 +186,7 @@ doAMMInfo(RPC::JsonContext& context)
     XRPL_ASSERT(
         !ledger->rules().enabled(fixInnerObjTemplate) ||
             amm->isFieldPresent(sfAuctionSlot),
-        "ripple::doAMMInfo : auction slot is set");
+        "xrpl::doAMMInfo : auction slot is set");
     if (amm->isFieldPresent(sfAuctionSlot))
     {
         auto const& auctionSlot =
@@ -211,7 +195,7 @@ doAMMInfo(RPC::JsonContext& context)
         {
             Json::Value auction;
             auto const timeSlot = ammAuctionTimeSlot(
-                ledger->info().parentCloseTime.time_since_epoch().count(),
+                ledger->header().parentCloseTime.time_since_epoch().count(),
                 auctionSlot);
             auction[jss::time_interval] =
                 timeSlot ? *timeSlot : AUCTION_SLOT_TIME_INTERVALS;
@@ -245,10 +229,10 @@ doAMMInfo(RPC::JsonContext& context)
     result[jss::amm] = std::move(ammResult);
     if (!result.isMember(jss::ledger_index) &&
         !result.isMember(jss::ledger_hash))
-        result[jss::ledger_current_index] = ledger->info().seq;
+        result[jss::ledger_current_index] = ledger->header().seq;
     result[jss::validated] = context.ledgerMaster.isValidated(*ledger);
 
     return result;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

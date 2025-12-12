@@ -6,7 +6,7 @@
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
 
-namespace ripple {
+namespace xrpl {
 
 bool
 AMMDelete::checkExtraFeatures(PreflightContext const& ctx)
@@ -61,4 +61,4 @@ AMMDelete::doApply()
     return ter;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

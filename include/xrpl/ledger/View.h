@@ -20,7 +20,7 @@
 #include <map>
 #include <utility>
 
-namespace ripple {
+namespace xrpl {
 
 enum class WaiveTransferFee : bool { No = false, Yes };
 enum class AllowMPTOverflow : bool { No = false, Yes };
@@ -1247,6 +1247,6 @@ sharesToAssetsWithdraw(
 bool
 after(NetClock::time_point now, std::uint32_t mark);
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

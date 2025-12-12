@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace ripple {
+namespace xrpl {
 
 MPTIssue::MPTIssue(MPTID const& issuanceID) : mptID_(issuanceID)
 {
@@ -99,4 +99,4 @@ operator<<(std::ostream& os, MPTIssue const& x)
     return os;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

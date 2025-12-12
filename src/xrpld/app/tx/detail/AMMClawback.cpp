@@ -12,7 +12,7 @@
 
 #include <tuple>
 
-namespace ripple {
+namespace xrpl {
 
 std::uint32_t
 AMMClawback::getFlagsMask(PreflightContext const& ctx)
@@ -378,4 +378,4 @@ AMMClawback::equalWithdrawMatchingOneAmount(
         ctx_.journal);
 }
 
-}  // namespace ripple
+}  // namespace xrpl

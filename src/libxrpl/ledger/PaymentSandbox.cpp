@@ -3,7 +3,7 @@
 #include <xrpl/ledger/View.h>
 #include <xrpl/protocol/SField.h>
 
-namespace ripple {
+namespace xrpl {
 
 namespace detail {
 
@@ -28,13 +28,13 @@ DeferredCredits::creditIOU(
 {
     XRPL_ASSERT(
         sender != receiver,
-        "ripple::detail::DeferredCredits::creditIOU : sender is not receiver");
+        "xrpl::detail::DeferredCredits::creditIOU : sender is not receiver");
     XRPL_ASSERT(
         !amount.negative(),
-        "ripple::detail::DeferredCredits::creditIOU : positive amount");
+        "xrpl::detail::DeferredCredits::creditIOU : positive amount");
     XRPL_ASSERT(
         amount.holds<Issue>(),
-        "ripple::detail::DeferredCredits::creditIOU : amount is for Issue");
+        "xrpl::detail::DeferredCredits::creditIOU : amount is for Issue");
 
     auto const k = makeKeyIOU(sender, receiver, amount.get<Issue>().currency);
     auto i = creditsIOU_.find(k);
@@ -446,14 +446,14 @@ PaymentSandbox::adjustOwnerCountHook(
 void
 PaymentSandbox::apply(RawView& to)
 {
-    XRPL_ASSERT(!ps_, "ripple::PaymentSandbox::apply : non-null sandbox");
+    XRPL_ASSERT(!ps_, "xrpl::PaymentSandbox::apply : non-null sandbox");
     items_.apply(to);
 }
 
 void
 PaymentSandbox::apply(PaymentSandbox& to)
 {
-    XRPL_ASSERT(ps_ == &to, "ripple::PaymentSandbox::apply : matching sandbox");
+    XRPL_ASSERT(ps_ == &to, "xrpl::PaymentSandbox::apply : matching sandbox");
     items_.apply(to);
     tab_.apply(to.tab_);
 }
@@ -539,7 +539,7 @@ PaymentSandbox::balanceChanges(ReadView const& view) const
             auto const at = after->getType();
             XRPL_ASSERT(
                 at == before->getType(),
-                "ripple::PaymentSandbox::balanceChanges : after and before "
+                "xrpl::PaymentSandbox::balanceChanges : after and before "
                 "types matching");
             switch (at)
             {
@@ -589,4 +589,4 @@ PaymentSandbox::xrpDestroyed() const
     return items_.dropsDestroyed();
 }
 
-}  // namespace ripple
+}  // namespace xrpl

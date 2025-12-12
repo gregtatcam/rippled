@@ -13,7 +13,7 @@
 
 #include <algorithm>
 
-namespace ripple {
+namespace xrpl {
 
 bool
 CashCheck::checkExtraFeatures(ripple::PreflightContext const& ctx)
@@ -602,4 +602,4 @@ CashCheck::doApply()
     return tesSUCCESS;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

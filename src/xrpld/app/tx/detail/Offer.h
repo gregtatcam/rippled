@@ -12,7 +12,7 @@
 
 #include <stdexcept>
 
-namespace ripple {
+namespace xrpl {
 
 template <StepAmount TIn, StepAmount TOut>
 class TOffer
@@ -250,6 +250,6 @@ operator<<(std::ostream& os, TOffer<TIn, TOut> const& offer)
     return os << offer.id();
 }
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

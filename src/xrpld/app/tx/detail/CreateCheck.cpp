@@ -7,7 +7,7 @@
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/TER.h>
 
-namespace ripple {
+namespace xrpl {
 
 bool
 CreateCheck::checkExtraFeatures(ripple::PreflightContext const& ctx)
@@ -248,4 +248,4 @@ CreateCheck::doApply()
     return tesSUCCESS;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

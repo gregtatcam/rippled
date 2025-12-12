@@ -8,7 +8,7 @@
 
 #include <type_traits>
 
-namespace ripple {
+namespace xrpl {
 
 inline STAmount
 toSTAmount(IOUAmount const& iou, Asset const& asset)
@@ -70,12 +70,12 @@ toAmount<IOUAmount>(STAmount const& amt)
 {
     XRPL_ASSERT(
         amt.mantissa() < std::numeric_limits<std::int64_t>::max(),
-        "ripple::toAmount<IOUAmount> : maximum mantissa");
+        "xrpl::toAmount<IOUAmount> : maximum mantissa");
     bool const isNeg = amt.negative();
     std::int64_t const sMant =
         isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
 
-    XRPL_ASSERT(!isXRP(amt), "ripple::toAmount<IOUAmount> : is not XRP");
+    XRPL_ASSERT(!isXRP(amt), "xrpl::toAmount<IOUAmount> : is not XRP");
     return IOUAmount(sMant, amt.exponent());
 }
 
@@ -85,12 +85,12 @@ toAmount<XRPAmount>(STAmount const& amt)
 {
     XRPL_ASSERT(
         amt.mantissa() < std::numeric_limits<std::int64_t>::max(),
-        "ripple::toAmount<XRPAmount> : maximum mantissa");
+        "xrpl::toAmount<XRPAmount> : maximum mantissa");
     bool const isNeg = amt.negative();
     std::int64_t const sMant =
         isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
 
-    XRPL_ASSERT(isXRP(amt), "ripple::toAmount<XRPAmount> : is XRP");
+    XRPL_ASSERT(isXRP(amt), "xrpl::toAmount<XRPAmount> : is XRP");
     return XRPAmount(sMant);
 }
 
@@ -254,6 +254,6 @@ get(STAmount const& a)
     }
 }
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

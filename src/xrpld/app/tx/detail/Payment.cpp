@@ -11,7 +11,7 @@
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 
 TxConsequences
 Payment::makeTxConsequences(PreflightContext const& ctx)
@@ -586,7 +586,7 @@ Payment::doApply()
         return res;
     }
 
-    XRPL_ASSERT(dstAmount.native(), "ripple::Payment::doApply : amount is XRP");
+    XRPL_ASSERT(dstAmount.native(), "xrpl::Payment::doApply : amount is XRP");
 
     // Direct XRP payment.
 
@@ -676,4 +676,4 @@ Payment::doApply()
     return tesSUCCESS;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

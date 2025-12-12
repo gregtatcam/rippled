@@ -1,6 +1,6 @@
 #include <xrpld/app/paths/AccountAssets.h>
 
-namespace ripple {
+namespace xrpl {
 
 hash_set<PathAsset>
 accountSourceAssets(
@@ -86,4 +86,4 @@ accountDestAssets(
     return assets;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

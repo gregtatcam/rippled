@@ -2,19 +2,19 @@
 #include <xrpld/app/paths/AssetCache.h>
 #include <xrpld/app/paths/TrustLine.h>
 
-namespace ripple {
+namespace xrpl {
 
 AssetCache::AssetCache(
     std::shared_ptr<ReadView const> const& ledger,
     beast::Journal j)
     : ledger_(ledger), journal_(j)
 {
-    JLOG(journal_.debug()) << "created for ledger " << ledger_->info().seq;
+    JLOG(journal_.debug()) << "created for ledger " << ledger_->header().seq;
 }
 
 AssetCache::~AssetCache()
 {
-    JLOG(journal_.debug()) << "destroyed for ledger " << ledger_->info().seq
+    JLOG(journal_.debug()) << "destroyed for ledger " << ledger_->header().seq
                            << " with " << lines_.size() << " accounts and "
                            << totalLineCount_ << " distinct trust lines.";
 }
@@ -60,7 +60,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
                 // for either value of outgoing.
                 XRPL_ASSERT(
                     size <= totalLineCount_,
-                    "ripple::AssetCache::getRippleLines : maximum lines");
+                    "xrpl::AssetCache::getRippleLines : maximum lines");
                 totalLineCount_ -= size;
                 lines_.erase(otheriter);
             }
@@ -82,7 +82,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
     {
         XRPL_ASSERT(
             it->second == nullptr,
-            "ripple::Asset::getRippleLines : null lines");
+            "xrpl::Asset::getRippleLines : null lines");
         auto lines =
             PathFindTrustLine::getItems(accountID, *ledger_, direction);
         if (lines.size())
@@ -95,10 +95,10 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
 
     XRPL_ASSERT(
         !it->second || (it->second->size() > 0),
-        "ripple::AssetCache::getRippleLines : null or nonempty lines");
+        "xrpl::AssetCache::getRippleLines : null or nonempty lines");
     auto const size = it->second ? it->second->size() : 0;
     JLOG(journal_.trace()) << "getRippleLines for ledger "
-                           << ledger_->info().seq << " found " << size
+                           << ledger_->header().seq << " found " << size
                            << (key.direction_ == LineDirection::outgoing
                                    ? " outgoing"
                                    : " incoming")
@@ -156,4 +156,4 @@ AssetCache::getMPTs(ripple::AccountID const& account)
     return mpts_[account];
 }
 
-}  // namespace ripple
+}  // namespace xrpl

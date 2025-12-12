@@ -11,7 +11,7 @@
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/resource/Fees.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 namespace jtx {
 
@@ -861,4 +861,4 @@ pay(AccountID const& account,
 }  // namespace loan
 }  // namespace jtx
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

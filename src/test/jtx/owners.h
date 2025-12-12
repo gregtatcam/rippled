@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace ripple {
+namespace xrpl {
 
 namespace detail {
 
@@ -77,6 +77,6 @@ using mptokens = owner_count<ltMPTOKEN>;
 
 }  // namespace jtx
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif

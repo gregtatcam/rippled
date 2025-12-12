@@ -11,7 +11,7 @@
 #include <string>
 #include <variant>
 
-namespace ripple {
+namespace xrpl {
 
 AccountID const&
 Asset::getIssuer() const
@@ -75,4 +75,4 @@ operator<<(std::ostream& os, Asset const& x)
     return os;
 }
 
-}  // namespace ripple
+}  // namespace xrpl

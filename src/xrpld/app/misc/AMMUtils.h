@@ -8,7 +8,7 @@
 #include <xrpl/protocol/STLedgerEntry.h>
 #include <xrpl/protocol/TER.h>
 
-namespace ripple {
+namespace xrpl {
 
 class ReadView;
 class ApplyView;
@@ -118,6 +118,6 @@ verifyAndAdjustLPTokenBalance(
     std::shared_ptr<SLE>& ammSle,
     AccountID const& account);
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_APP_MISC_AMMUTILS_H_INCLUDED

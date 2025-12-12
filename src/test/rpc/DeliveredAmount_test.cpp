@@ -5,7 +5,7 @@
 #include <xrpl/beast/unit_test/suite.h>
 #include <xrpl/protocol/jss.h>
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 
 // Helper class to track the expected number `delivered_amount` results.
@@ -404,7 +404,7 @@ public:
     }
 };
 
-BEAST_DEFINE_TESTSUITE(DeliveredAmount, rpc, ripple);
+BEAST_DEFINE_TESTSUITE(DeliveredAmount, rpc, xrpl);
 
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl

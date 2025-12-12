@@ -3,7 +3,7 @@
 
 #include <xrpl/protocol/QualityFunction.h>
 
-namespace ripple {
+namespace xrpl {
 
 template <StepAmount TIn, StepAmount TOut>
 AMMOffer<TIn, TOut>::AMMOffer(
@@ -166,4 +166,4 @@ template class AMMOffer<MPTAmount, XRPAmount>;
 template class AMMOffer<IOUAmount, MPTAmount>;
 template class AMMOffer<MPTAmount, IOUAmount>;
 
-}  // namespace ripple
+}  // namespace xrpl

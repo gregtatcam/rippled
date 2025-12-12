@@ -1,7 +1,7 @@
 #include <xrpld/app/paths/AMMLiquidity.h>
 #include <xrpld/app/paths/AMMOffer.h>
 
-namespace ripple {
+namespace xrpl {
 
 template <typename TIn, typename TOut>
 AMMLiquidity<TIn, TOut>::AMMLiquidity(
@@ -60,7 +60,7 @@ AMMLiquidity<TIn, TOut>::generateFibSeqOffer(
 
     XRPL_ASSERT(
         !ammContext_.maxItersReached(),
-        "ripple::AMMLiquidity::generateFibSeqOffer : maximum iterations");
+        "xrpl::AMMLiquidity::generateFibSeqOffer : maximum iterations");
 
     cur.out = toAmount<TOut>(
         getAsset(balances.out),
@@ -251,4 +251,4 @@ template class AMMLiquidity<MPTAmount, XRPAmount>;
 template class AMMLiquidity<MPTAmount, IOUAmount>;
 template class AMMLiquidity<IOUAmount, MPTAmount>;
 
-}  // namespace ripple
+}  // namespace xrpl

@@ -8,7 +8,7 @@
 #include <xrpl/protocol/MPTIssue.h>
 #include <xrpl/protocol/Rules.h>
 
-namespace ripple {
+namespace xrpl {
 
 class STAmount;
 
@@ -353,6 +353,6 @@ hash_append(Hasher& h, Asset const& r)
 std::ostream&
 operator<<(std::ostream& os, Asset const& x);
 
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_PROTOCOL_ASSET_H_INCLUDED

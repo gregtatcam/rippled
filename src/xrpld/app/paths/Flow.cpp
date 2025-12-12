@@ -9,7 +9,7 @@
 #include <xrpl/protocol/IOUAmount.h>
 #include <xrpl/protocol/XRPAmount.h>
 
-namespace ripple {
+namespace xrpl {
 
 template <class FlowResult>
 static auto
@@ -140,4 +140,4 @@ flow(
         dstAsset.getAmountType());
 }
 
-}  // namespace ripple
+}  // namespace xrpl

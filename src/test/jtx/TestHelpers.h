@@ -24,7 +24,7 @@ using source_location = std::experimental::source_location;
 using std::source_location;
 #endif
 
-namespace ripple {
+namespace xrpl {
 namespace test {
 namespace jtx {
 
@@ -1103,6 +1103,6 @@ testHelper3TokensMix(TTester&& tester)
 
 }  // namespace jtx
 }  // namespace test
-}  // namespace ripple
+}  // namespace xrpl
 
 #endif  // XRPL_TEST_JTX_TESTHELPERS_H_INCLUDED
