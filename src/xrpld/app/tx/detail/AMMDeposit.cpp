@@ -231,14 +231,13 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
                 return tecUNFUNDED_AMM;
             return tecINSUF_RESERVE_LINE;
         }
-        return (accountID == deposit.asset().getIssuer() ||
-                accountHolds(
-                    ctx.view,
-                    accountID,
-                    deposit.asset(),
-                    FreezeHandling::fhIGNORE_FREEZE,
-                    AuthHandling::ahIGNORE_AUTH,
-                    ctx.j) >= deposit)
+        return accountFunds(
+                   ctx.view,
+                   accountID,
+                   deposit,
+                   FreezeHandling::fhIGNORE_FREEZE,
+                   AuthHandling::ahIGNORE_AUTH,
+                   ctx.j) >= deposit
             ? TER(tesSUCCESS)
             : tecUNFUNDED_AMM;
     };
@@ -538,11 +537,10 @@ AMMDeposit::deposit(
                 return tesSUCCESS;
         }
         else if (
-            account_ == depositAmount.asset().getIssuer() ||
-            accountHolds(
+            accountFunds(
                 view,
                 account_,
-                depositAmount.asset(),
+                depositAmount,
                 FreezeHandling::fhIGNORE_FREEZE,
                 AuthHandling::ahIGNORE_AUTH,
                 ctx_.journal) >= depositAmount)

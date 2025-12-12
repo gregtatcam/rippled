@@ -371,12 +371,12 @@ private:
                 {.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 100});
 
             // OutstandingAmount is 0, issuer issues 10 over MaximumAmount
-            AMM amm(env, gw, XRP(100), BTC(110), ter(tecPATH_DRY));
+            AMM amm(env, gw, XRP(100), BTC(110), ter(tecUNFUNDED_AMM));
 
             env(pay(gw, alice, BTC(100)));
 
             // OutstandingAmount is 100, issuer issues 100 over MaximumAmount
-            AMM amm1(env, gw, XRP(100), BTC(100), ter(tecPATH_DRY));
+            AMM amm1(env, gw, XRP(100), BTC(100), ter(tecUNFUNDED_AMM));
             // This is fine - alice transfers 100 to AMM. OutstandingAmount
             // is 100.
             AMM ammAlice(env, alice, XRP(100), BTC(100));
@@ -1238,13 +1238,17 @@ private:
             AMM amm(env, gw, XRP(100), BTC(90));
             // OutstandingAmount is 90, issuer issues 1 over MaximumAmount
             amm.deposit(DepositArg{
-                .account = gw, .asset1In = BTC(11), .err = ter(tecPATH_DRY)});
+                .account = gw,
+                .asset1In = BTC(11),
+                .err = ter(tecUNFUNDED_AMM)});
 
             env(pay(gw, alice, BTC(10)));
 
             // OutstandingAmount is 100, issuer issues 10 over MaximumAmount
             amm.deposit(DepositArg{
-                .account = gw, .asset1In = BTC(10), .err = ter(tecPATH_DRY)});
+                .account = gw,
+                .asset1In = BTC(10),
+                .err = ter(tecUNFUNDED_AMM)});
             // This is fine - alice transfers 10 to AMM. OutstandingAmount
             // is 100.
             amm.deposit(DepositArg{.account = alice, .asset1In = BTC(10)});

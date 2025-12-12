@@ -837,6 +837,7 @@ class CheckMPT_test : public beast::unit_test::suite
         Account const alice{"alice"};
         Account const bob{"bob"};
         Account const zoe{"zoe"};
+        std::int64_t maxAmt{20};
 
         Env env(*this, features);
 
@@ -847,7 +848,7 @@ class CheckMPT_test : public beast::unit_test::suite
              .issuer = gw,
              .holders = {alice},
              .flags = MPTDEXFlags | tfMPTCanLock,
-             .maxAmt = 20});
+             .maxAmt = maxAmt});
         MPT const USD = USDM;
 
         env(pay(gw, alice, USD(20)));
@@ -1073,6 +1074,28 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
             env.require(balance(alice, USD(11)));
             env.require(balance(bob, USD(9)));
+        }
+
+        // OutstandingAmount exceeds MaximumAmount
+        {
+            // Already at maximum
+            BEAST_EXPECT(env.balance(gw, USDM) == USDM(-maxAmt));
+
+            uint256 const chkId{getCheckIndex(gw, env.seq(gw))};
+            env(check::create(gw, bob, USDM(10)));
+            env.close();
+
+            // Exceeds MaximumAmount (20 + 10) = 30 > 20
+            env(check::cash(bob, chkId, USDM(10)), ter(tecPATH_PARTIAL));
+            env.close();
+
+            // Redeem some tokens (20 - 9) = 11
+            env(pay(alice, gw, USDM(9)));
+            env.close();
+
+            // Still exceeds MaximumAmount (11 + 10) = 21 > 20
+            env(check::cash(bob, chkId, USDM(10)), ter(tecPATH_PARTIAL));
+            env.close();
         }
     }
 

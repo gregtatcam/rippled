@@ -810,10 +810,10 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         if (isAssetInMPT && !prevStep_ && offer.owner() != issuer)
         {
             // Funds available to issue
-            auto const available = toAmount<TIn>(accountHolds(
+            auto const available = toAmount<TIn>(accountFunds(
                 sb,
                 issuer,
-                assetIn,
+                assetIn,  // STAmount{0}, but the default is not used
                 FreezeHandling::fhIGNORE_FREEZE,
                 AuthHandling::ahIGNORE_AUTH,
                 j_));

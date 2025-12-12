@@ -166,7 +166,9 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
         ter != tesSUCCESS)
         return ter;
 
-    if (accountFunds(
+    // Allow unfunded MPT for issuer (OutstandingAmount >= MaximumAmount)
+    if ((!saTakerGets.holds<MPTIssue>() || saTakerGets.getIssuer() != id) &&
+        accountFunds(
             ctx.view,
             id,
             saTakerGets,
@@ -335,7 +337,10 @@ CreateOffer::flowCross(
             fhZERO_IF_FROZEN,
             ahZERO_IF_UNAUTHORIZED,
             j_);
-        if (inStartBalance <= beast::zero)
+        // Allow unfunded MPT issuer
+        auto const allowUnfunded = !inStartBalance.holds<MPTIssue>() ||
+            inStartBalance.getIssuer() != account_;
+        if (allowUnfunded && inStartBalance <= beast::zero)
         {
             // The account balance can't cover even part of the offer.
             JLOG(j_.debug()) << "Not crossing: taker is unfunded.";
@@ -451,7 +456,7 @@ CreateOffer::flowCross(
                 ahZERO_IF_UNAUTHORIZED,
                 j_);
 
-            if (takerInBalance <= beast::zero)
+            if (allowUnfunded && takerInBalance <= beast::zero)
             {
                 // If offer crossing exhausted the account's funds don't
                 // create the offer.

@@ -120,7 +120,7 @@ VaultDeposit::preclaim(PreclaimContext const& ctx)
     // is limited by MaximumAmount.
     if ((vaultAsset.native() || vaultAsset.holds<MPTIssue>() ||
          vaultAsset.getIssuer() != account) &&
-        accountHolds(
+        accountSpendable(
             ctx.view,
             account,
             vaultAsset,
@@ -262,7 +262,7 @@ VaultDeposit::doApply()
         return ter;
 
     // Sanity check
-    if (accountHolds(
+    if (accountSpendable(
             view(),
             account_,
             assetsDeposited.asset(),

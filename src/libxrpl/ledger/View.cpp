@@ -508,18 +508,6 @@ accountHolds(
     beast::Journal j)
 {
     STAmount amount{mptIssue};
-    auto const& issuer = mptIssue.getIssuer();
-
-    bool const mptokensV2 = view.rules().enabled(featureMPTokensV2);
-
-    if (mptokensV2 && account == issuer)
-    {
-        auto const sle = view.read(keylet::mptIssuance(mptIssue));
-        if (!sle)
-            return amount;
-        auto const available = availableMPTAmount(*sle);
-        return view.balanceHookMPT(issuer, mptIssue, available);
-    }
 
     auto const sleMpt =
         view.read(keylet::mptoken(mptIssue.getMptID(), account));
@@ -556,7 +544,7 @@ accountHolds(
         }
     }
 
-    if (mptokensV2)
+    if (view.rules().enabled(featureMPTokensV2))
         return view.balanceHookMPT(account, mptIssue, amount.mpt().value());
     return amount;
 }
@@ -634,17 +622,14 @@ accountSpendable(
     {
         // if the account is the issuer, and the issuance exists, their limit is
         // the issuance limit minus the outstanding value
-        auto const issuance =
-            view.read(keylet::mptIssuance(mptIssue.getMptID()));
+        auto const issuance = view.read(keylet::mptIssuance(mptIssue));
 
         if (!issuance)
-        {
             return STAmount{mptIssue};
-        }
-        return STAmount{
-            mptIssue,
-            issuance->at(~sfMaximumAmount).value_or(maxMPTokenAmount) -
-                issuance->at(sfOutstandingAmount)};
+
+        auto const available = availableMPTAmount(*issuance);
+
+        return view.balanceHookMPT(mptIssue.getIssuer(), mptIssue, available);
     }
 
     return accountHolds(
@@ -682,6 +667,10 @@ accountFunds(
     FreezeHandling freezeHandling,
     beast::Journal j)
 {
+    XRPL_ASSERT(
+        saDefault.holds<Issue>(),
+        "ripple::accountFunds: saDefault holds Issue");
+
     if (!saDefault.native() && saDefault.getIssuer() == id)
         return saDefault;
 
@@ -703,11 +692,33 @@ accountFunds(
     AuthHandling authHandling,
     beast::Journal j)
 {
-    if (!saDefault.native() && saDefault.getIssuer() == id)
-        return saDefault;
+    return saDefault.asset().visit(
+        [&](Issue const& issue) {
+            return accountFunds(view, id, saDefault, freezeHandling, j);
+        },
+        [&](MPTIssue const& mptIssue) {
+            auto const mptokensV2 = view.rules().enabled(featureMPTokensV2);
+            STAmount amount{mptIssue};
+            auto const& issuer = mptIssue.getIssuer();
 
-    return accountHolds(
-        view, id, saDefault.asset(), freezeHandling, authHandling, j);
+            if (id == issuer)
+            {
+                if (!mptokensV2)
+                    return saDefault;
+
+                auto const sle = view.read(keylet::mptIssuance(mptIssue));
+
+                if (!sle)
+                    return amount;
+
+                auto const available = availableMPTAmount(*sle);
+
+                return view.balanceHookMPT(issuer, mptIssue, available);
+            }
+
+            return accountHolds(
+                view, id, mptIssue, freezeHandling, authHandling, j);
+        });
 }
 
 STAmount

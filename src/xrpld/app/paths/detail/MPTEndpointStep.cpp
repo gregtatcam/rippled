@@ -371,7 +371,7 @@ MPTEndpointPaymentStep::check(
 
     if (!prevStep_)
     {
-        auto const owed = accountHolds(
+        auto const owed = accountFunds(
             ctx.view, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
         // Already at MaximumAmount
         if (owed <= beast::zero)
@@ -430,7 +430,7 @@ std::pair<MPTAmount, DebtDirection>
 MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
 {
     auto const maxFlow =
-        accountHolds(sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
+        accountFunds(sb, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
 
     // From a holder to an issuer
     if (src_ != mptIssue_.getIssuer())
