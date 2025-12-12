@@ -1,0 +1,9 @@
+<map id="xrpl::QualityFunction" name="xrpl::QualityFunction">
+<area shape="rect" id="Node000001" title="Average quality of a path as a function of out: q(out) = m * out + b, where m = &#45;1 / poolGets,..." alt="" coords="64,225,221,251"/>
+<area shape="rect" id="Node000002" href="$classxrpl_1_1Number.html" title=" " alt="" coords="5,123,112,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,157,135,224,131,227,75,160"/>
+<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="11,5,106,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="61,44,61,123,56,123,56,44"/>
+<area shape="rect" id="Node000004" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/utility/optional.html" title=" " alt="" coords="137,123,317,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="210,160,154,227,150,224,206,157"/>
+</map>

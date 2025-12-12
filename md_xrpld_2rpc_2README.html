@@ -82,7 +82,7 @@ Introduction.</h1>
 </ul>
 <h1><a class="anchor" id="autotoc_md362"></a>
 The classes.</h1>
-<p>Suspension with continuation uses four <code><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a></code>s in the <code><a class="el" href="namespaceripple_1_1RPC.html" title="API version numbers used in later API versions.">ripple::RPC</a></code> namespace: </p><pre class="fragment">using Callback = std::function &lt;void ()&gt;;
+<p>Suspension with continuation uses four <code><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/function.html">std::function</a></code>s in the <code><a class="el" href="namespacexrpl_1_1RPC.html" title="API version numbers used in later API versions.">xrpl::RPC</a></code> namespace: </p><pre class="fragment">using Callback = std::function &lt;void ()&gt;;
 using Continuation = std::function &lt;void (Callback const&amp;)&gt;;
 using Suspend = std::function &lt;void (Continuation const&amp;)&gt;;
 using Coroutine = std::function &lt;void (Suspend const&amp;)&gt;;

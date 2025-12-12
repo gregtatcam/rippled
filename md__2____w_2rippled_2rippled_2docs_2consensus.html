@@ -338,11 +338,11 @@ Generic Consensus Interface</h2>
 <div class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> Adaptor&gt;</div>
 <div class="line"><span class="keyword">struct </span>ConsensusResult</div>
 <div class="line">{</div>
-<div class="line">    Adaptor::TxSet_t <a class="code hl_function" href="namespaceripple.html#a53f80df10254751781250aa20704e98f">set</a>;</div>
+<div class="line">    Adaptor::TxSet_t <a class="code hl_function" href="namespacexrpl.html#a0ad5d92e6f6f18567bbdf6cae19f1fcd">set</a>;</div>
 <div class="line"> </div>
 <div class="line">    ConsensusProposal&lt;...&gt; position;</div>
 <div class="line"> </div>
-<div class="line">    <a class="code hl_typedef" href="namespaceripple.html#a46c521271235f4e2715d7fa8b68940ca">hash_map</a>&lt;Adaptor::Tx_t::ID, DisputedTx&lt;...&gt;&gt; disputes;</div>
+<div class="line">    <a class="code hl_typedef" href="namespacexrpl.html#a4ca22ff68a1da282aba7711c70199ca2">hash_map</a>&lt;Adaptor::Tx_t::ID, DisputedTx&lt;...&gt;&gt; disputes;</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Set of TxSet ids we have already compared/created disputes</span></div>
 <div class="line">    hash_set&lt;typename Adaptor::TxSet_t::ID&gt; compares;</div>
@@ -352,7 +352,7 @@ Generic Consensus Interface</h2>
 <div class="line"> </div>
 <div class="line">    <span class="comment">// Indicates state in which consensus ended.  Once in the accept phase</span></div>
 <div class="line">    <span class="comment">// will be either Yes or MovedOn or Expired</span></div>
-<div class="line">    <a class="code hl_enumeration" href="namespaceripple.html#a79cc3b590c118bd551b693bb333fb9d1">ConsensusState</a> state = ConsensusState::No;</div>
+<div class="line">    <a class="code hl_enumeration" href="namespacexrpl.html#a7b535130885568516b37cbb912cc6f2f">ConsensusState</a> state = ConsensusState::No;</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> Adaptor&gt;</div>
@@ -381,9 +381,9 @@ Generic Consensus Interface</h2>
 <div class="line">    <span class="comment">// ... details</span></div>
 <div class="line">};</div>
 <div class="ttc" id="aduration_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/chrono/duration.html">std::chrono::milliseconds</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a46c521271235f4e2715d7fa8b68940ca"><div class="ttname"><a href="namespaceripple.html#a46c521271235f4e2715d7fa8b68940ca">ripple::hash_map</a></div><div class="ttdeci">std::unordered_map&lt; Key, Value, Hash, Pred, Allocator &gt; hash_map</div><div class="ttdef"><b>Definition</b> <a href="UnorderedContainers_8h_source.html#l00035">UnorderedContainers.h:35</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a53f80df10254751781250aa20704e98f"><div class="ttname"><a href="namespaceripple.html#a53f80df10254751781250aa20704e98f">ripple::set</a></div><div class="ttdeci">bool set(T &amp;target, std::string const &amp;name, Section const &amp;section)</div><div class="ttdoc">Set a value from a configuration Section If the named value is not found or doesn't parse as a T,...</div><div class="ttdef"><b>Definition</b> <a href="BasicConfig_8h_source.html#l00296">BasicConfig.h:296</a></div></div>
-<div class="ttc" id="anamespaceripple_html_a79cc3b590c118bd551b693bb333fb9d1"><div class="ttname"><a href="namespaceripple.html#a79cc3b590c118bd551b693bb333fb9d1">ripple::ConsensusState</a></div><div class="ttdeci">ConsensusState</div><div class="ttdoc">Whether we have or don't have a consensus.</div><div class="ttdef"><b>Definition</b> <a href="ConsensusTypes_8h_source.html#l00169">ConsensusTypes.h:169</a></div></div>
+<div class="ttc" id="anamespacexrpl_html_a0ad5d92e6f6f18567bbdf6cae19f1fcd"><div class="ttname"><a href="namespacexrpl.html#a0ad5d92e6f6f18567bbdf6cae19f1fcd">xrpl::set</a></div><div class="ttdeci">bool set(T &amp;target, std::string const &amp;name, Section const &amp;section)</div><div class="ttdoc">Set a value from a configuration Section If the named value is not found or doesn't parse as a T,...</div><div class="ttdef"><b>Definition</b> <a href="BasicConfig_8h_source.html#l00296">BasicConfig.h:296</a></div></div>
+<div class="ttc" id="anamespacexrpl_html_a4ca22ff68a1da282aba7711c70199ca2"><div class="ttname"><a href="namespacexrpl.html#a4ca22ff68a1da282aba7711c70199ca2">xrpl::hash_map</a></div><div class="ttdeci">std::unordered_map&lt; Key, Value, Hash, Pred, Allocator &gt; hash_map</div><div class="ttdef"><b>Definition</b> <a href="UnorderedContainers_8h_source.html#l00035">UnorderedContainers.h:35</a></div></div>
+<div class="ttc" id="anamespacexrpl_html_a7b535130885568516b37cbb912cc6f2f"><div class="ttname"><a href="namespacexrpl.html#a7b535130885568516b37cbb912cc6f2f">xrpl::ConsensusState</a></div><div class="ttdeci">ConsensusState</div><div class="ttdoc">Whether we have or don't have a consensus.</div><div class="ttdef"><b>Definition</b> <a href="ConsensusTypes_8h_source.html#l00169">ConsensusTypes.h:169</a></div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md156"></a>
 Adapting Generic Consensus</h2>
 <p>The stub below shows the set of callback/helper functions required in the implementing class.</p>

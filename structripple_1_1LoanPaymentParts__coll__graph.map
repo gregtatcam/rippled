@@ -1,7 +1,0 @@
-<map id="ripple::LoanPaymentParts" name="ripple::LoanPaymentParts">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,255,192,280"/>
-<area shape="rect" id="Node000002" href="$classripple_1_1Number.html" title=" " alt="" coords="39,123,158,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,162,101,254,96,254,96,162"/>
-<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="51,5,146,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,44,101,123,96,123,96,44"/>
-</map>

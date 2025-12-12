@@ -145,8 +145,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a32228cc84d83200cca8441451997996c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad9c4b65373e95fb81e01a721e00c065a" id="r_ad9c4b65373e95fb81e01a721e00c065a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classJson_1_1Value.html#ad9c4b65373e95fb81e01a721e00c065a">Value</a> (char const *value)</td></tr>
 <tr class="separator:ad9c4b65373e95fb81e01a721e00c065a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a773abb6291a57b2473632359ad70c654" id="r_a773abb6291a57b2473632359ad70c654"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classJson_1_1Value.html#a773abb6291a57b2473632359ad70c654">Value</a> (<a class="el" href="classripple_1_1Number.html">ripple::Number</a> const &amp;value)</td></tr>
-<tr class="separator:a773abb6291a57b2473632359ad70c654"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ed73d63c966f32053321e5bbd6ab343" id="r_a9ed73d63c966f32053321e5bbd6ab343"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classJson_1_1Value.html#a9ed73d63c966f32053321e5bbd6ab343">Value</a> (<a class="el" href="classxrpl_1_1Number.html">xrpl::Number</a> const &amp;value)</td></tr>
+<tr class="separator:a9ed73d63c966f32053321e5bbd6ab343"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e0e748ec11bea3e78b050449d311e6f" id="r_a8e0e748ec11bea3e78b050449d311e6f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classJson_1_1Value.html#a8e0e748ec11bea3e78b050449d311e6f">Value</a> (<a class="el" href="classJson_1_1StaticString.html">StaticString</a> const &amp;value)</td></tr>
 <tr class="memdesc:a8e0e748ec11bea3e78b050449d311e6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a value from a static string.  <br /></td></tr>
 <tr class="separator:a8e0e748ec11bea3e78b050449d311e6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -336,7 +336,7 @@ Friends</h2></td></tr>
 <li>an ordered list of <a class="el" href="classJson_1_1Value.html" title="Represents a JSON value.">Value</a></li>
 <li>collection of name/value pairs (javascript object)</li>
 </ul>
-<p>The type of the held value is represented by a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4e" title="Type of the value held by a Value object.">ValueType</a> and can be obtained using type().</p>
+<p>The type of the held value is represented by a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4e" title="Type of the value held by a Value object.">ValueType</a> and can be obtained using <a class="el" href="classJson_1_1Value.html#a8ce61157a011894f0252ceed232312de">type()</a>.</p>
 <p>values of an <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6" title="object value (collection of name/value pairs).">objectValue</a> or <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eadc8f264f36b55b063c78126b335415f4" title="array value (ordered list)">arrayValue</a> can be accessed using <a class="el" href="classJson_1_1Value.html#afe163a93dc00a1b5f26b036795f490f8" title="Access an array element (zero based index ).">operator[]()</a> methods. Non const methods will automatically create the a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4ea7d9899633b4409bd3fc107e6737f8391" title="&#39;null&#39; value">nullValue</a> element if it does not exist. The sequence of an <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eadc8f264f36b55b063c78126b335415f4" title="array value (ordered list)">arrayValue</a> will be automatically resize and initialized with <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4ea7d9899633b4409bd3fc107e6737f8391" title="&#39;null&#39; value">nullValue</a>. resize() can be used to enlarge or truncate an <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eadc8f264f36b55b063c78126b335415f4" title="array value (ordered list)">arrayValue</a>.</p>
 <p>The <a class="el" href="classJson_1_1Value.html#acd7f7ba84f8aba84bce7b742c87ea8d6" title="If the array contains at least index+1 elements, returns the element value, otherwise returns default...">get()</a> methods can be used to obtain a default value in the case the required element does not exist.</p>
 <p>It is possible to iterate over the list of a <a class="el" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6" title="object value (collection of name/value pairs).">objectValue</a> values using the <a class="el" href="classJson_1_1Value.html#a79d7725dce6260317333e69022367ac9" title="Return a list of the member names.">getMemberNames()</a> method. </p>
@@ -565,8 +565,8 @@ Friends</h2></td></tr>
 
 </div>
 </div>
-<a id="a773abb6291a57b2473632359ad70c654" name="a773abb6291a57b2473632359ad70c654"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a773abb6291a57b2473632359ad70c654">&#9670;&#160;</a></span>Value() <span class="overload">[6/11]</span></h2>
+<a id="a9ed73d63c966f32053321e5bbd6ab343" name="a9ed73d63c966f32053321e5bbd6ab343"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ed73d63c966f32053321e5bbd6ab343">&#9670;&#160;</a></span>Value() <span class="overload">[6/11]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -574,7 +574,7 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">Json::Value::Value </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classripple_1_1Number.html">ripple::Number</a> const &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">xrpl::Number</a> const &amp;&#160;</td>
           <td class="paramname"><em>value</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1260,8 +1260,8 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Remove all object members and array elements. </p>
-<dl class="section pre"><dt>Precondition</dt><dd>type() is arrayValue, objectValue, or nullValue </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd>type() is unchanged </dd></dl>
+<dl class="section pre"><dt>Precondition</dt><dd><a class="el" href="classJson_1_1Value.html#a8ce61157a011894f0252ceed232312de">type()</a> is arrayValue, objectValue, or nullValue </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd><a class="el" href="classJson_1_1Value.html#a8ce61157a011894f0252ceed232312de">type()</a> is unchanged </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="json__value_8cpp_source.html#l00834">834</a> of file <a class="el" href="json__value_8cpp_source.html">json_value.cpp</a>.</p>
 
@@ -1624,8 +1624,8 @@ Friends</h2></td></tr>
 
 <p>Remove and return the named member. </p>
 <p>Do nothing if it did not exist. </p><dl class="section return"><dt>Returns</dt><dd>the removed <a class="el" href="classJson_1_1Value.html" title="Represents a JSON value.">Value</a>, or null. </dd></dl>
-<dl class="section pre"><dt>Precondition</dt><dd>type() is objectValue or nullValue </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd>type() is unchanged </dd></dl>
+<dl class="section pre"><dt>Precondition</dt><dd><a class="el" href="classJson_1_1Value.html#a8ce61157a011894f0252ceed232312de">type()</a> is objectValue or nullValue </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd><a class="el" href="classJson_1_1Value.html#a8ce61157a011894f0252ceed232312de">type()</a> is unchanged </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="json__value_8cpp_source.html#l01003">1003</a> of file <a class="el" href="json__value_8cpp_source.html">json_value.cpp</a>.</p>
 
@@ -1735,8 +1735,8 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Return a list of the member names. </p>
-<p>If null, return an empty list. </p><dl class="section pre"><dt>Precondition</dt><dd>type() is objectValue or nullValue </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd>if type() was nullValue, it remains nullValue </dd></dl>
+<p>If null, return an empty list. </p><dl class="section pre"><dt>Precondition</dt><dd><a class="el" href="classJson_1_1Value.html#a8ce61157a011894f0252ceed232312de">type()</a> is objectValue or nullValue </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>if <a class="el" href="classJson_1_1Value.html#a8ce61157a011894f0252ceed232312de">type()</a> was nullValue, it remains nullValue </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="json__value_8cpp_source.html#l01052">1052</a> of file <a class="el" href="json__value_8cpp_source.html">json_value.cpp</a>.</p>
 

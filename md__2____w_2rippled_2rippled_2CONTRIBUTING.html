@@ -112,7 +112,7 @@ Before making a pull request</h2>
 <p>(Or marking a draft pull request as ready.)</p>
 <p>Changes that alter transaction processing must be guarded by an <a href="https://xrpl.org/amendments.html">Amendment</a>. All other changes that maintain the existing behavior do not need an Amendment.</p>
 <p>Ensure that your code compiles according to the build instructions in <a class="el" href="md__2____w_2rippled_2rippled_2BUILD.html">`BUILD.md`</a>.</p>
-<p>Please write tests for your code. If your test can be run offline, in under 60 seconds, then it can be an automatic test run by <code>rippled --unittest</code>. Otherwise, it must be a manual test.</p>
+<p>Please write tests for your code. If your test can be run offline, in under 60 seconds, then it can be an automatic test run by <code>xrpld --unittest</code>. Otherwise, it must be a manual test.</p>
 <p>If you create new source files, they must be organized as follows:</p>
 <ul>
 <li>If the files are in any of the <code>libxrpl</code> modules, the headers (<code>.h</code>) must go under <code>include/xrpl</code>, and source (<code>.cpp</code>) files must go under <code>src/libxrpl</code>.</li>
@@ -211,8 +211,8 @@ Formatting</h2>
 <div class="line">pre-commit install</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md66"></a>
 Contracts and instrumentation</h2>
-<p>We are using <a href="https://antithesis.com/">Antithesis</a> for continuous fuzzing, and keep a copy of <a href="https://github.com/antithesishq/antithesis-sdk-cpp/">Antithesis C++ SDK</a> in <code>external/antithesis-sdk</code>. One of the aims of fuzzing is to identify bugs by finding external conditions which cause contracts violations inside <code>rippled</code>. The contracts are expressed as <code>XRPL_ASSERT</code> or <code>UNREACHABLE</code> (defined in <code><a class="el" href="instrumentation_8h_source.html">include/xrpl/beast/utility/instrumentation.h</a></code>), which are effectively (outside of Antithesis) wrappers for <code>assert(...)</code> with added name. The purpose of name is to provide contracts with stable identity which does not rely on line numbers.</p>
-<p>When <code>rippled</code> is built with the Antithesis instrumentation enabled (using <code>voidstar</code> CMake option) and ran on the Antithesis platform, the contracts become <a href="https://antithesis.com/docs/using_antithesis/properties.html">test properties</a>; otherwise they are just like a regular <code>assert</code>. To learn more about Antithesis, see <a href="https://antithesis.com/docs/introduction/how_antithesis_works.html">How Antithesis Works</a> and <a href="https://antithesis.com/docs/using_antithesis/sdk/cpp/overview.html#">C++ SDK</a></p>
+<p>We are using <a href="https://antithesis.com/">Antithesis</a> for continuous fuzzing, and keep a copy of <a href="https://github.com/antithesishq/antithesis-sdk-cpp/">Antithesis C++ SDK</a> in <code>external/antithesis-sdk</code>. One of the aims of fuzzing is to identify bugs by finding external conditions which cause contracts violations inside <code>xrpld</code>. The contracts are expressed as <code>XRPL_ASSERT</code> or <code>UNREACHABLE</code> (defined in <code><a class="el" href="instrumentation_8h_source.html">include/xrpl/beast/utility/instrumentation.h</a></code>), which are effectively (outside of Antithesis) wrappers for <code>assert(...)</code> with added name. The purpose of name is to provide contracts with stable identity which does not rely on line numbers.</p>
+<p>When <code>xrpld</code> is built with the Antithesis instrumentation enabled (using <code>voidstar</code> CMake option) and ran on the Antithesis platform, the contracts become <a href="https://antithesis.com/docs/using_antithesis/properties.html">test properties</a>; otherwise they are just like a regular <code>assert</code>. To learn more about Antithesis, see <a href="https://antithesis.com/docs/introduction/how_antithesis_works.html">How Antithesis Works</a> and <a href="https://antithesis.com/docs/using_antithesis/sdk/cpp/overview.html#">C++ SDK</a></p>
 <p>We continue to use the old style <code>assert</code> or <code>assert(false)</code> in certain locations, where the reporting of contract violations on the Antithesis platform is either not possible or not useful.</p>
 <p>For this reason:</p>
 <ul>
@@ -228,7 +228,7 @@ Contracts and instrumentation</h2>
 <li>Contract description typically (except for <code>UNREACHABLE</code>) should describe the <em>expected</em> condition, as in "I assert that _expected_ is true".</li>
 <li>Contract description for <code>UNREACHABLE</code> should describe the <em>unexpected</em> situation which caused the line to have been reached.</li>
 <li>Example good name for an <code>UNREACHABLE</code> macro <code>"Json::operator==(Value, Value) : invalid type"</code>; example good name for an <code>XRPL_ASSERT</code> macro <code>"Json::Value::asCString : valid type"</code>.</li>
-<li>Example <b>bad</b> name <code>"RFC1751::insert(char* s, int x, int start, int length) : length is greater than or equal zero"</code> (missing namespace, unnecessary full function signature, description too verbose). Good name: <code>"ripple::RFC1751::insert : minimum length"</code>.</li>
+<li>Example <b>bad</b> name <code>"RFC1751::insert(char* s, int x, int start, int length) : length is greater than or equal zero"</code> (missing namespace, unnecessary full function signature, description too verbose). Good name: <code>"xrpl::RFC1751::insert : minimum length"</code>.</li>
 <li>In <b>few</b> well-justified cases a non-standard name can be used, in which case a comment should be placed to explain the rationale (example in <code>contract.cpp</code>)</li>
 <li>Do <b>not</b> rename a contract without a good reason (e.g. the name no longer reflects the location or the condition being checked)</li>
 <li>Do not use <code><a class="elRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::unreachable</a></code></li>
@@ -237,10 +237,10 @@ Contracts and instrumentation</h2>
 <h2><a class="anchor" id="autotoc_md67"></a>
 Unit Tests</h2>
 <p>To execute all unit tests:</p>
-<p><code>rippled --unittest --unittest-jobs=&lt;number of cores&gt;</code></p>
+<p><code>xrpld --unittest --unittest-jobs=&lt;number of cores&gt;</code></p>
 <p>(Note: Using multiple cores on a Mac M1 can cause spurious test failures. The cause is still under investigation. If you observe this problem, try specifying fewer jobs.)</p>
 <p>To run a specific set of test suites:</p>
-<div class="fragment"><div class="line">rippled --unittest TestSuiteName</div>
+<div class="fragment"><div class="line">xrpld --unittest TestSuiteName</div>
 </div><!-- fragment --><p>Note: In this example, all tests with prefix <code>TestSuiteName</code> will be run, so if <code>TestSuiteName1</code> and <code>TestSuiteName2</code> both exist, then both tests will run. Alternatively, if the unit test name finds an exact match, it will stop doing partial matches, i.e. if a unit test with a title of <code>TestSuiteName</code> exists, then no other unit test will be executed, apart from <code>TestSuiteName</code>.</p>
 <h2><a class="anchor" id="autotoc_md68"></a>
 Avoid</h2>

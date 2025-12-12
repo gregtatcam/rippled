@@ -90,7 +90,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/regex.html">regex</a>&gt;</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;<a class="codeRef" href="http://en.cppreference.com/w/cpp/header/sstream.html">sstream</a>&gt;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceripple.html">ripple</a> {</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacexrpl.html">xrpl</a> {</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span>RPC {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
@@ -105,7 +105,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">inline</span> <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;std::string&gt;</a></div>
 <div class="foldopen" id="foldopen00034" data-start="{" data-end="}">
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespaceripple_1_1RPC.html#a193a678f625ec77262c8d5f3ca91df03">   34</a></span><a class="code hl_function" href="namespaceripple_1_1RPC.html#a193a678f625ec77262c8d5f3ca91df03">encodeCTID</a>(uint32_t ledgerSeq, uint32_t txnIndex, uint32_t networkID) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespacexrpl_1_1RPC.html#a06a08835183fbd9d9ece0de5094a2741">   34</a></span><a class="code hl_function" href="namespacexrpl_1_1RPC.html#a06a08835183fbd9d9ece0de5094a2741">encodeCTID</a>(uint32_t ledgerSeq, uint32_t txnIndex, uint32_t networkID) <span class="keyword">noexcept</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>{</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keyword">constexpr</span> uint32_t maxLedgerSeq = 0x0FFF&#39;FFFF;</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">constexpr</span> uint32_t maxTxnIndex = 0xFFFF;</div>
@@ -129,7 +129,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="keyword">inline</span> <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;std::tuple&lt;uint32_t, uint16_t, uint16_t&gt;</a>&gt;</div>
 <div class="foldopen" id="foldopen00064" data-start="{" data-end="}">
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespaceripple_1_1RPC.html#ae4b48e37f1a6940816047cd107faebca">   64</a></span><a class="code hl_function" href="namespaceripple_1_1RPC.html#ae4b48e37f1a6940816047cd107faebca">decodeCTID</a>(T <span class="keyword">const</span> ctid) <span class="keyword">noexcept</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="namespacexrpl_1_1RPC.html#ac67959639d055543cb96464ae3e40998">   64</a></span><a class="code hl_function" href="namespacexrpl_1_1RPC.html#ac67959639d055543cb96464ae3e40998">decodeCTID</a>(T <span class="keyword">const</span> ctid) <span class="keyword">noexcept</span></div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>{</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    uint64_t ctidValue = 0;</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
@@ -182,7 +182,7 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>}  <span class="comment">// namespace RPC</span></div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>}  <span class="comment">// namespace ripple</span></div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>}  <span class="comment">// namespace xrpl</span></div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="abasic_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div></div>
@@ -190,9 +190,9 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="ahex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/manip/hex.html">std::hex</a></div><div class="ttdeci">T hex(T... args)</div></div>
 <div class="ttc" id="ais_same_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/is_same.html">std::is_same_v</a></div><div class="ttdeci">T is_same_v</div></div>
 <div class="ttc" id="amake_tuple_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/utility/tuple/make_tuple.html">std::make_tuple</a></div><div class="ttdeci">T make_tuple(T... args)</div></div>
-<div class="ttc" id="anamespaceripple_1_1RPC_html_a193a678f625ec77262c8d5f3ca91df03"><div class="ttname"><a href="namespaceripple_1_1RPC.html#a193a678f625ec77262c8d5f3ca91df03">ripple::RPC::encodeCTID</a></div><div class="ttdeci">std::optional&lt; std::string &gt; encodeCTID(uint32_t ledgerSeq, uint32_t txnIndex, uint32_t networkID) noexcept</div><div class="ttdoc">Encodes ledger sequence, transaction index, and network ID into a CTID string.</div><div class="ttdef"><b>Definition</b> <a href="CTID_8h_source.html#l00034">CTID.h:34</a></div></div>
-<div class="ttc" id="anamespaceripple_1_1RPC_html_ae4b48e37f1a6940816047cd107faebca"><div class="ttname"><a href="namespaceripple_1_1RPC.html#ae4b48e37f1a6940816047cd107faebca">ripple::RPC::decodeCTID</a></div><div class="ttdeci">std::optional&lt; std::tuple&lt; uint32_t, uint16_t, uint16_t &gt; &gt; decodeCTID(T const ctid) noexcept</div><div class="ttdoc">Decodes a CTID string or integer into its component parts.</div><div class="ttdef"><b>Definition</b> <a href="CTID_8h_source.html#l00064">CTID.h:64</a></div></div>
-<div class="ttc" id="anamespaceripple_html"><div class="ttname"><a href="namespaceripple.html">ripple</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition</b> <a href="algorithm_8h_source.html#l00006">algorithm.h:6</a></div></div>
+<div class="ttc" id="anamespacexrpl_1_1RPC_html_a06a08835183fbd9d9ece0de5094a2741"><div class="ttname"><a href="namespacexrpl_1_1RPC.html#a06a08835183fbd9d9ece0de5094a2741">xrpl::RPC::encodeCTID</a></div><div class="ttdeci">std::optional&lt; std::string &gt; encodeCTID(uint32_t ledgerSeq, uint32_t txnIndex, uint32_t networkID) noexcept</div><div class="ttdoc">Encodes ledger sequence, transaction index, and network ID into a CTID string.</div><div class="ttdef"><b>Definition</b> <a href="CTID_8h_source.html#l00034">CTID.h:34</a></div></div>
+<div class="ttc" id="anamespacexrpl_1_1RPC_html_ac67959639d055543cb96464ae3e40998"><div class="ttname"><a href="namespacexrpl_1_1RPC.html#ac67959639d055543cb96464ae3e40998">xrpl::RPC::decodeCTID</a></div><div class="ttdeci">std::optional&lt; std::tuple&lt; uint32_t, uint16_t, uint16_t &gt; &gt; decodeCTID(T const ctid) noexcept</div><div class="ttdoc">Decodes a CTID string or integer into its component parts.</div><div class="ttdef"><b>Definition</b> <a href="CTID_8h_source.html#l00064">CTID.h:64</a></div></div>
+<div class="ttc" id="anamespacexrpl_html"><div class="ttname"><a href="namespacexrpl.html">xrpl</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition</b> <a href="algorithm_8h_source.html#l00006">algorithm.h:6</a></div></div>
 <div class="ttc" id="aoptional_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/optional.html">optional</a></div></div>
 <div class="ttc" id="aregex_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/regex.html">regex</a></div></div>
 <div class="ttc" id="asetfill_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/io/manip/setfill.html">std::setfill</a></div><div class="ttdeci">T setfill(T... args)</div></div>

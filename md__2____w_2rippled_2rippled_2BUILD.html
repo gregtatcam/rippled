@@ -78,7 +78,7 @@ $(function() {
 </blockquote>
 <h2><a class="anchor" id="autotoc_md27"></a>
 Branches</h2>
-<p>For a stable release, choose the <code>master</code> branch or one of the <a href="https://github.com/ripple/rippled/releases">tagged releases</a>.</p>
+<p>For a stable release, choose the <code>master</code> branch or one of the <a href="https://github.com/XRPLF/rippled/releases">tagged releases</a>.</p>
 <div class="fragment"><div class="line">git checkout master</div>
 </div><!-- fragment --><p>For the latest release candidate, choose the <code>release</code> branch.</p>
 <div class="fragment"><div class="line">git checkout release</div>
@@ -87,7 +87,7 @@ Branches</h2>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md28"></a>
 Minimum Requirements</h2>
 <p>See <a href="https://xrpl.org/system-requirements.html">System Requirements</a>.</p>
-<p>Building rippled generally requires git, Python, Conan, CMake, and a C++ compiler. Some guidance on setting up such a <a class="el" href="md__2____w_2rippled_2rippled_2docs_2build_2environment.html">C++ development environment can be</a>found here".
+<p>Building xrpld generally requires git, Python, Conan, CMake, and a C++ compiler. Some guidance on setting up such a <a class="el" href="md__2____w_2rippled_2rippled_2docs_2build_2environment.html">C++ development environment can be</a>found here".
 
 - &lt;a href="<a href="https://www.python.org/downloads/">https://www.python.org/downloads/</a>" &gt;Python 3.11&lt;/a&gt;, or higher
 - &lt;a href="<a href="https://conan.io/downloads.html">https://conan.io/downloads.html</a>" &gt;Conan 2.17&lt;/a&gt;[^1], or higher
@@ -97,7 +97,7 @@ Minimum Requirements</h2>
     It is possible to build with Conan 1.60+, but the instructions are
     significantly different, which is why we are not recommending it.
 
-&lt;tt&gt;rippled&lt;/tt&gt; is written in the C++20 dialect and includes the &lt;tt&gt;\&lt;concepts\&gt;&lt;/tt&gt; header.
+&lt;tt&gt;xrpld&lt;/tt&gt; is written in the C++20 dialect and includes the &lt;tt&gt;\&lt;concepts\&gt;&lt;/tt&gt; header.
 The &lt;a href="<a href="https://en.cppreference.com/w/cpp/compiler_support/20">https://en.cppreference.com/w/cpp/compiler_support/20</a>" &gt;minimum compiler versions&lt;/a&gt; required are:
 
 &lt;table class="markdownTable"&gt;
@@ -117,7 +117,7 @@ Linux</h3>
 <p>Here are <a href="./docs/build/environment.md#linux">sample instructions for setting up a C++ development environment on Linux</a>.</p>
 <h3><a class="anchor" id="autotoc_md30"></a>
 Mac</h3>
-<p>Many rippled engineers use macOS for development.</p>
+<p>Many xrpld engineers use macOS for development.</p>
 <p>Here are <a href="./docs/build/environment.md#macos">sample instructions for setting up a C++ development environment on macOS</a>.</p>
 <h3><a class="anchor" id="autotoc_md31"></a>
 Windows</h3>
@@ -146,23 +146,41 @@ Custom profile</h4>
 </div><!-- fragment --><p>You may need to make changes to the profile to suit your environment. You can refer to the provided <code>conan/profiles/default</code> profile for inspiration, and you may also need to apply the required tweaks to this default profile.</p>
 <h3><a class="anchor" id="autotoc_md37"></a>
 Patched recipes</h3>
-<p>The recipes in Conan Center occasionally need to be patched for compatibility with the latest version of <code>rippled</code>. We maintain a fork of the Conan Center <a href="https://github.com/XRPLF/conan-center-index/">here</a> containing the patches.</p>
+<p>The recipes in Conan Center occasionally need to be patched for compatibility with the latest version of <code>xrpld</code>. We maintain a fork of the Conan Center <a href="https://github.com/XRPLF/conan-center-index/">here</a> containing the patches.</p>
 <p>To ensure our patched recipes are used, you must add our Conan remote at a higher index than the default Conan Center remote, so it is consulted first. You can do this by running:</p>
 <div class="fragment"><div class="line">conan remote add --index 0 xrplf https://conan.ripplex.io</div>
 </div><!-- fragment --><p>Alternatively, you can pull the patched recipes into the repository and use them locally:</p>
-<div class="fragment"><div class="line">cd external</div>
+<div class="fragment"><div class="line"># Extract the version number from the lockfile.</div>
+<div class="line">function extract_version {</div>
+<div class="line">  version=$(cat conan.lock | sed -nE &quot;s@.+${1}/(.+)#.+@\1@p&quot; | head -n1)</div>
+<div class="line">  echo ${version}</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"># Define which recipes to export.</div>
+<div class="line">recipes=(ed25519 grpc secp256k1 snappy soci)</div>
+<div class="line"> </div>
+<div class="line"># Selectively check out the recipes from our CCI fork.</div>
+<div class="line">cd external</div>
+<div class="line">mkdir -p conan-center-index</div>
+<div class="line">cd conan-center-index</div>
 <div class="line">git init</div>
 <div class="line">git remote add origin git@github.com:XRPLF/conan-center-index.git</div>
 <div class="line">git sparse-checkout init</div>
-<div class="line">git sparse-checkout set recipes/ed25519</div>
-<div class="line">git sparse-checkout add recipes/snappy</div>
-<div class="line">git sparse-checkout add recipes/soci</div>
+<div class="line">for recipe in ${recipes[@]}; do</div>
+<div class="line">  echo &quot;Checking out ${recipe}...&quot;</div>
+<div class="line">  git sparse-checkout add recipes/${recipe}/all</div>
+<div class="line">done</div>
 <div class="line">git fetch origin master</div>
 <div class="line">git checkout master</div>
-<div class="line">conan export --version 2015.03 recipes/ed25519/all</div>
-<div class="line">conan export --version 1.1.10 recipes/snappy/all</div>
-<div class="line">conan export --version 4.0.3 recipes/soci/all</div>
-<div class="line">rm -rf .git</div>
+<div class="line">cd ../..</div>
+<div class="line"> </div>
+<div class="line"># Export the recipes into the local cache.</div>
+<div class="line">for recipe in ${recipes[@]}; do</div>
+<div class="line">  version=$(extract_version ${recipe})</div>
+<div class="line">  echo &quot;Exporting ${recipe}/${version}...&quot;</div>
+<div class="line">  conan export --version $(extract_version ${recipe}) \</div>
+<div class="line">    external/conan-center-index/recipes/${recipe}/all</div>
+<div class="line">done</div>
 </div><!-- fragment --><p>In the case we switch to a newer version of a dependency that still requires a patch, it will be necessary for you to pull in the changes and re-export the updated dependencies with the newer version. However, if we switch to a newer version that no longer requires a patch, no action is required on your part, as the new recipe will be automatically pulled from the official Conan Center.</p>
 <blockquote class="doxtable">
 <p>&zwj;[!NOTE] You might need to add <code>--lockfile=""</code> to your <code>conan install</code> command to avoid automatic use of the existing <code>conan.lock</code> file when you run <code>conan export</code> manually on your machine </p>
@@ -230,7 +248,7 @@ Select standard library in Linux</h4>
 </div><!-- fragment --><h4><a class="anchor" id="autotoc_md44"></a>
 Select architecture and runtime in Windows</h4>
 <p><b>Windows</b> developers may need to use the x64 native build tools. An easy way to do that is to run the shortcut "x64 Native Tools Command Prompt" for the version of Visual Studio that you have installed.</p>
-<p>Windows developers must also build <code>rippled</code> and its dependencies for the x64 architecture:</p>
+<p>Windows developers must also build <code>xrpld</code> and its dependencies for the x64 architecture:</p>
 <div class="fragment"><div class="line">sed -i.bak -e &#39;s|^arch=.*$|arch=x86_64|&#39; $(conan config home)/profiles/default</div>
 </div><!-- fragment --><p><b>Windows</b> developers also must select static runtime:</p>
 <div class="fragment"><div class="line">sed -i.bak -e &#39;s|^compiler\.runtime=.*$|compiler.runtime=static|&#39; $(conan config home)/profiles/default</div>
@@ -279,12 +297,7 @@ Build and Test</h3>
 </div><!-- fragment --><p class="startli">To build Debug, in the next step, be sure to set <code>-DCMAKE_BUILD_TYPE=Debug</code></p>
 <p class="startli">For a single-configuration generator, e.g. <code>Unix Makefiles</code> or <code>Ninja</code>, you only need to run this command once. For a multi-configuration generator, e.g. <code>Visual Studio</code>, you may want to run it more than once.</p>
 <p class="startli">Each of these commands should also have a different <code>build_type</code> setting. A second command with the same <code>build_type</code> setting will overwrite the files generated by the first. You can pass the build type on the command line with <code>--settings build_type=$BUILD_TYPE</code> or in the profile itself, under the section <code>[settings]</code> with the key <code>build_type</code>.</p>
-<p class="startli">If you are using a Microsoft Visual C++ compiler, then you will need to ensure consistency between the <code>build_type</code> setting and the <code>compiler.runtime</code> setting.</p>
-<p class="startli">When <code>build_type</code> is <code>Release</code>, <code>compiler.runtime</code> should be <code>MT</code>.</p>
-<p class="startli">When <code>build_type</code> is <code>Debug</code>, <code>compiler.runtime</code> should be <code>MTd</code>.</p>
-<div class="fragment"><div class="line">conan install .. --output-folder . --build missing --settings build_type=Release --settings compiler.runtime=MT</div>
-<div class="line">conan install .. --output-folder . --build missing --settings build_type=Debug --settings compiler.runtime=MTd</div>
-</div><!-- fragment --></li>
+</li>
 <li><p class="startli">Configure CMake and pass the toolchain file generated by Conan, located at <code>$OUTPUT_FOLDER/build/generators/conan_toolchain.cmake</code>.</p>
 <p class="startli">Single-config generators:</p>
 <p class="startli">Pass the CMake variable <a href="https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html"><code>CMAKE_BUILD_TYPE</code></a> and make sure it matches the one of the <code>build_type</code> settings you chose in the previous step.</p>
@@ -292,9 +305,9 @@ Build and Test</h3>
 <div class="fragment"><div class="line">cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -Dxrpld=ON -Dtests=ON ..</div>
 </div><!-- fragment --><p class="startli">Multi-config generators:</p>
 <div class="fragment"><div class="line">cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake -Dxrpld=ON -Dtests=ON  ..</div>
-</div><!-- fragment --><p class="startli"><b>Note:</b> You can pass build options for <code>rippled</code> in this step.</p>
+</div><!-- fragment --><p class="startli"><b>Note:</b> You can pass build options for <code>xrpld</code> in this step.</p>
 </li>
-<li><p class="startli">Build <code>rippled</code>.</p>
+<li><p class="startli">Build <code>xrpld</code>.</p>
 <p class="startli">For a single-configuration generator, it will build whatever configuration you passed for <code>CMAKE_BUILD_TYPE</code>. For a multi-configuration generator, you must pass the option <code>--config</code> to select the build configuration.</p>
 <p class="startli">Single-config generators:</p>
 <div class="fragment"><div class="line">cmake --build .</div>
@@ -302,14 +315,14 @@ Build and Test</h3>
 <div class="fragment"><div class="line">cmake --build . --config Release</div>
 <div class="line">cmake --build . --config Debug</div>
 </div><!-- fragment --></li>
-<li><p class="startli">Test rippled.</p>
+<li><p class="startli">Test xrpld.</p>
 <p class="startli">Single-config generators:</p>
-<div class="fragment"><div class="line">./rippled --unittest --unittest-jobs N</div>
+<div class="fragment"><div class="line">./xrpld --unittest --unittest-jobs N</div>
 </div><!-- fragment --><p class="startli">Multi-config generators:</p>
-<div class="fragment"><div class="line">./Release/rippled --unittest --unittest-jobs N</div>
-<div class="line">./Debug/rippled --unittest --unittest-jobs N</div>
+<div class="fragment"><div class="line">./Release/xrpld --unittest --unittest-jobs N</div>
+<div class="line">./Debug/xrpld --unittest --unittest-jobs N</div>
 </div><!-- fragment --><p class="startli">Replace the <code>--unittest-jobs</code> parameter N with the desired unit tests concurrency. Recommended setting is half of the number of available CPU cores.</p>
-<p class="startli">The location of <code>rippled</code> binary in your build directory depends on your CMake generator. Pass <code>--help</code> to see the rest of the command line options.</p>
+<p class="startli">The location of <code>xrpld</code> binary in your build directory depends on your CMake generator. Pass <code>--help</code> to see the rest of the command line options.</p>
 </li>
 </ol>
 <h2><a class="anchor" id="autotoc_md49"></a>
@@ -324,11 +337,11 @@ Coverage report</h2>
 </ul>
 <p>A coverage report is created when the following steps are completed, in order:</p>
 <ol type="1">
-<li><code>rippled</code> binary built with instrumentation data, enabled by the <code>coverage</code> option mentioned above</li>
+<li><code>xrpld</code> binary built with instrumentation data, enabled by the <code>coverage</code> option mentioned above</li>
 <li>completed one or more run of the unit tests, which populates coverage capture data</li>
 <li>completed run of the <code>gcovr</code> tool (which internally invokes either <code>gcov</code> or <code>llvm-cov</code>) to assemble both instrumentation data and the coverage capture data into a coverage report</li>
 </ol>
-<p>The last step of the above is automated into a single target <code>coverage</code>. The instrumented <code>rippled</code> binary can also be used for regular development or testing work, at the cost of extra disk space utilization and a small performance hit (to store coverage capture data). Since <code>rippled</code> binary is simply a dependency of the coverage report target, it is possible to re-run the <code>coverage</code> target without rebuilding the <code>rippled</code> binary. Note, running of the unit tests before the <code>coverage</code> target is left to the developer. Each such run will append to the coverage data collected in the build directory.</p>
+<p>The last step of the above is automated into a single target <code>coverage</code>. The instrumented <code>xrpld</code> binary can also be used for regular development or testing work, at the cost of extra disk space utilization and a small performance hit (to store coverage capture data). Since <code>xrpld</code> binary is simply a dependency of the coverage report target, it is possible to re-run the <code>coverage</code> target without rebuilding the <code>xrpld</code> binary. Note, running of the unit tests before the <code>coverage</code> target is left to the developer. Each such run will append to the coverage data collected in the build directory.</p>
 <p>The default coverage report format is <code>html-details</code>, but the user can override it to any of the formats listed in <code>Builds/CMake/CodeCoverage.cmake</code> by setting the <code>coverage_format</code> variable in <code>cmake</code>. It is also possible to generate more than one format at a time by setting the <code>coverage_extra_args</code> variable in <code>cmake</code>. The specific command line used to run the <code>gcovr</code> tool will be displayed if the <code>CODE_COVERAGE_VERBOSE</code> variable is set.</p>
 <p>Example use with some cmake variables set:</p>
 <div class="fragment"><div class="line">cd .build</div>
@@ -356,7 +369,7 @@ Options</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>unity</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Configure a unity build.    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>xrpld</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build the xrpld (<code>rippled</code>) application, and not just the libxrpl library.    </td></tr>
+<td class="markdownTableBodyNone"><code>xrpld</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Build the xrpld application, and not just the libxrpl library.    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>werr</code>   </td><td class="markdownTableBodyNone">OFF   </td><td class="markdownTableBodyNone">Treat compilation warnings as errors    </td></tr>
 <tr class="markdownTableRowEven">
@@ -386,7 +399,7 @@ ERROR: Package not resolved</h4>
 <h3><a class="anchor" id="autotoc_md54"></a>
 &lt;tt&gt;protobuf/port_def.inc&lt;/tt&gt; file not found</h3>
 <p>If <code>cmake --build .</code> results in an error due to a missing a protobuf file, then you might have generated CMake files for a different <code>build_type</code> than the <code>CMAKE_BUILD_TYPE</code> you passed to Conan.</p>
-<div class="fragment"><div class="line">/rippled/.build/pb-xrpl.libpb/xrpl/proto/xrpl.pb.h:10:10: fatal error: &#39;google/protobuf/port_def.inc&#39; file not found</div>
+<div class="fragment"><div class="line">/xrpld/.build/pb-xrpl.libpb/xrpl/proto/xrpl.pb.h:10:10: fatal error: &#39;google/protobuf/port_def.inc&#39; file not found</div>
 <div class="line">   10 | #include &lt;google/protobuf/port_def.inc&gt;</div>
 <div class="line">      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</div>
 <div class="line">1 error generated.</div>

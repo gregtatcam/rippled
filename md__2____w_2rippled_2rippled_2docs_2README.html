@@ -113,8 +113,8 @@ Build</h1>
 <p>There is a <code>docs</code> target in the CMake configuration.</p>
 <div class="fragment"><div class="line">mkdir build</div>
 <div class="line">cd build</div>
-<div class="line">cmake ..</div>
-<div class="line">cmake --build . --target docs</div>
+<div class="line">cmake -Donly_docs=ON ..</div>
+<div class="line">cmake --build . --target docs --parallel</div>
 </div><!-- fragment --><p>The output will be in <code>build/docs/html</code>. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

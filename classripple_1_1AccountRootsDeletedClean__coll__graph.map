@@ -1,7 +1,0 @@
-<map id="ripple::AccountRootsDeletedClean" name="ripple::AccountRootsDeletedClean">
-<area shape="rect" id="Node000001" title="Invariant: a deleted account must not have any objects left." alt="" coords="733,27,940,67"/>
-<area shape="rect" id="Node000002" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/container/vector.html" title=" " alt="" coords="364,5,564,89"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="578,45,733,45,733,50,578,50"/>
-<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/utility/pair.html" title=" " alt="" coords="5,13,251,82"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="265,45,364,45,364,50,265,50"/>
-</map>
