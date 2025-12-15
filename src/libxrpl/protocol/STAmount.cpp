@@ -1288,7 +1288,7 @@ divide(STAmount const& num, STAmount const& den, Asset const& asset)
     int numOffset = num.exponent();
     int denOffset = den.exponent();
 
-    if (num.native() || num.holds<MPTIssue>())
+    if (num.integral())
     {
         while (numVal < STAmount::cMinValue)
         {
@@ -1298,7 +1298,7 @@ divide(STAmount const& num, STAmount const& den, Asset const& asset)
         }
     }
 
-    if (den.native() || den.holds<MPTIssue>())
+    if (den.integral())
     {
         while (denVal < STAmount::cMinValue)
         {
@@ -1363,7 +1363,7 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
     int offset1 = v1.exponent();
     int offset2 = v2.exponent();
 
-    if (v1.native() || v1.holds<MPTIssue>())
+    if (v1.integral())
     {
         while (value1 < STAmount::cMinValue)
         {
@@ -1372,7 +1372,7 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
         }
     }
 
-    if (v2.native() || v2.holds<MPTIssue>())
+    if (v2.integral())
     {
         while (value2 < STAmount::cMinValue)
         {
@@ -1589,7 +1589,7 @@ mulRoundImpl(
     std::uint64_t value1 = v1.mantissa(), value2 = v2.mantissa();
     int offset1 = v1.exponent(), offset2 = v2.exponent();
 
-    if (v1.native() || v1.holds<MPTIssue>())
+    if (v1.integral())
     {
         while (value1 < STAmount::cMinValue)
         {
@@ -1598,7 +1598,7 @@ mulRoundImpl(
         }
     }
 
-    if (v2.native() || v2.holds<MPTIssue>())
+    if (v2.integral())
     {
         while (value2 < STAmount::cMinValue)
         {
@@ -1634,7 +1634,7 @@ mulRoundImpl(
 
     if (roundUp && !resultNegative && !result)
     {
-        if (xrp || asset.holds<MPTIssue>())
+        if (asset.integral())
         {
             // return the smallest value above zero
             amount = 1;
@@ -1692,7 +1692,7 @@ divRoundImpl(
     std::uint64_t numVal = num.mantissa(), denVal = den.mantissa();
     int numOffset = num.exponent(), denOffset = den.exponent();
 
-    if (num.native() || num.holds<MPTIssue>())
+    if (num.integral())
     {
         while (numVal < STAmount::cMinValue)
         {
@@ -1701,7 +1701,7 @@ divRoundImpl(
         }
     }
 
-    if (den.native() || den.holds<MPTIssue>())
+    if (den.integral())
     {
         while (denVal < STAmount::cMinValue)
         {
@@ -1726,8 +1726,7 @@ divRoundImpl(
     int offset = numOffset - denOffset - 17;
 
     if (resultNegative != roundUp)
-        canonicalizeRound(
-            asset.native() || asset.holds<MPTIssue>(), amount, offset, roundUp);
+        canonicalizeRound(asset.integral(), amount, offset, roundUp);
 
     STAmount result = [&]() {
         // If appropriate, tell Number the rounding mode we are using.
@@ -1741,7 +1740,7 @@ divRoundImpl(
 
     if (roundUp && !resultNegative && !result)
     {
-        if (asset.native() || asset.holds<MPTIssue>())
+        if (asset.integral())
         {
             // return the smallest value above zero
             amount = 1;
