@@ -80,7 +80,7 @@ private:
             txflags(tfPartialPayment));
 
         BEAST_EXPECT(ammCarol.expectBalances(
-            BTC(1'001'000'000'374'815),
+            BTC(1'001'000'000'374'816),
             ETH(100'000'000'000'000'000),
             ammCarol.tokens()));
 
@@ -1150,7 +1150,7 @@ private:
             cam,
             1,
             {{Amounts{
-                B_BUX(200'215'509'984'418), A_BUX(200'215'509'984'418)}}}));
+                B_BUX(200'215'509'984'418), A_BUX(200'215'509'984'419)}}}));
     }
 
     void
@@ -2470,25 +2470,25 @@ private:
             // and pays 25% tr fee on 56.3368e12GBP
             // 1,400e12 - 56.3368e12*1.25 = 1400e12 - 70.4210e12 =
             // 1329.5789e12GBP
-            env.require(balance(alice, GBP(1'329'578'947'368'421)));
+            env.require(balance(alice, GBP(1'329'578'947'368'420)));
             //// 25% on 56.3368e12ETH is paid in tr fee 56.3368e12*1.25
             ///= 70.4210e12ETH
             // 56.3368e12GBP is swapped in for 53.3322e12ETH
             BEAST_EXPECT(amm.expectBalances(
-                GBP(1'056'336'842'105'263),
-                ETH(946'667'729'591'837),
+                GBP(1'056'336'842'105'264),
+                ETH(946'667'729'591'836),
                 amm.tokens()));
 
             // 25% on 42.6658e12ETH is paid in tr fee 42.6658e12*1.25
             // = 53.3322e12ETH 42.6658e12ETH/59.7321e12BTC
             env.require(balance(ed, BTC(1'340'267'857'142'857)));
-            env.require(balance(ed, ETH(1'442'665'816'326'530)));
+            env.require(balance(ed, ETH(1'442'665'816'326'531)));
             BEAST_EXPECT(expectOffers(
                 env,
                 ed,
                 1,
                 {Amounts{
-                    ETH(957'334'183'673'470), BTC(1'340'267'857'142'857)}}));
+                    ETH(957'334'183'673'469), BTC(1'340'267'857'142'857)}}));
             // 25% on 47.7857e12BTC is paid in tr fee 47.7857e12*1.25
             // = 59.7321e12BTC
             env.require(balance(carol, BTC(1'447'785714285714)));

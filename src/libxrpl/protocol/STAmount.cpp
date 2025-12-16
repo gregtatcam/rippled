@@ -1396,7 +1396,7 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
 // for years, so it is deeply embedded in the behavior of cross-currency
 // transactions.
 //
-// However in 2022 it was noticed that the rounding characteristics were
+// However, in 2022 it was noticed that the rounding characteristics were
 // surprising.  When the code converts from IOU-like to XRP-like there may
 // be a fraction of the IOU-like representation that is too small to be
 // represented in drops.  `canonicalizeRound()` currently does some unusual
@@ -1413,9 +1413,9 @@ multiply(STAmount const& v1, STAmount const& v2, Asset const& asset)
 // So an alternative rounding approach was introduced.  You'll see that
 // alternative below.
 static void
-canonicalizeRound(bool native, std::uint64_t& value, int& offset, bool)
+canonicalizeRound(bool integral, std::uint64_t& value, int& offset, bool)
 {
-    if (native)
+    if (integral)
     {
         if (offset < 0)
         {
@@ -1453,12 +1453,12 @@ canonicalizeRound(bool native, std::uint64_t& value, int& offset, bool)
 // the value being rounded.
 static void
 canonicalizeRoundStrict(
-    bool native,
+    bool integral,
     std::uint64_t& value,
     int& offset,
     bool roundUp)
 {
-    if (native)
+    if (integral)
     {
         if (offset < 0)
         {
@@ -1513,7 +1513,7 @@ roundToScale(
         value.asset(), STAmount::cMinValue, scale, value.negative()};
 
     NumberRoundModeGuard mg(rounding);
-    // With an IOU, the the result of addition will be truncated to the
+    // With an IOU, the result of addition will be truncated to the
     // precision of the larger value, which in this case is referenceValue. Then
     // remove the reference value via subtraction, and we're left with the
     // rounded value.
@@ -1556,9 +1556,7 @@ mulRoundImpl(
     if (v1 == beast::zero || v2 == beast::zero)
         return {asset};
 
-    bool const xrp = asset.native();
-
-    if (v1.native() && v2.native() && xrp)
+    if (v1.native() && v2.native() && asset.native())
     {
         std::uint64_t minV = std::min(getSNValue(v1), getSNValue(v2));
         std::uint64_t maxV = std::max(getSNValue(v1), getSNValue(v2));
@@ -1623,7 +1621,7 @@ mulRoundImpl(
     int offset = offset1 + offset2 + 14;
     if (resultNegative != roundUp)
     {
-        CanonicalizeFunc(xrp, amount, offset, roundUp);
+        CanonicalizeFunc(asset.integral(), amount, offset, roundUp);
     }
     STAmount result = [&]() {
         // If appropriate, tell Number to round down.  This gives the desired
@@ -1731,7 +1729,7 @@ divRoundImpl(
     STAmount result = [&]() {
         // If appropriate, tell Number the rounding mode we are using.
         // Note that "roundUp == true" actually means "round away from zero".
-        // Otherwise round toward zero.
+        // Otherwise, round toward zero.
         using enum Number::rounding_mode;
         MightSaveRound const savedRound(
             roundUp ^ resultNegative ? upward : downward);

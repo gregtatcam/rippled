@@ -125,6 +125,7 @@ class AMM
     AccountID const ammAccount_;
     Issue const lptIssue_;
     IOUAmount const initialLPTokens_;
+    static inline bool ammOutPoolOnlyModifier_ = false;
 
 public:
     AMM(Env& env,
@@ -354,7 +355,24 @@ public:
     operator<<(std::ostream& s, AMM const& amm)
     {
         if (auto const res = amm.ammRpcInfo())
-            s << res.toStyledString();
+        {
+            if (ammOutPoolOnlyModifier_)
+            {
+                auto const& ammRes = res[jss::amm];
+                auto outAmt = [&](Json::Value const& jv) {
+                    STAmount amt;
+                    amountFromJsonNoThrow(amt, jv);
+                    std::cout << amt.getText();
+                };
+                outAmt(ammRes[jss::amount]);
+                s << " ";
+                outAmt(ammRes[jss::amount2]);
+                s << std::endl;
+                ammOutPoolOnlyModifier_ = false;
+            }
+            else
+                s << res.toStyledString();
+        }
         return s;
     }
 
@@ -404,6 +422,15 @@ public:
         if (i > 1)
             Throw<std::runtime_error>("AMM: operator[], invalid index");
         return i == 0 ? asset1_.asset() : asset2_.asset();
+    }
+
+    /* Modify amm output operator behavior - print only the pool balances
+     */
+    static std::string
+    poolOnly()
+    {
+        ammOutPoolOnlyModifier_ = true;
+        return "";
     }
 
 private:

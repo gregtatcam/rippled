@@ -1914,10 +1914,10 @@ public:
         env(offer(bob, XRP(100), CUR(100)));
 
         auto jrr = ledgerEntryMPT(env, alice, CUR);
-        BEAST_EXPECT(jrr[jss::node][sfMPTAmount.fieldName] == "33");
+        BEAST_EXPECT(jrr[jss::node][sfMPTAmount.fieldName] == "34");
 
         jrr = ledgerEntryMPT(env, bob, CUR);
-        BEAST_EXPECT(jrr[jss::node][sfMPTAmount.fieldName] == "65");
+        BEAST_EXPECT(jrr[jss::node][sfMPTAmount.fieldName] == "64");
     }
 
     void

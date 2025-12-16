@@ -864,8 +864,8 @@ struct FlowMPT_test : public beast::unit_test::suite
     template <typename TGets, typename TPays>
     struct TokenData
     {
-        TGets EUR;
-        TPays USD;
+        TGets gets;
+        TPays pays;
         jtx::PrettyAmount remTakerGets;
         jtx::PrettyAmount remTakerPays;
     };
@@ -893,7 +893,24 @@ struct FlowMPT_test : public beast::unit_test::suite
             // OutstandingAmount since it doesn't know if the
             // BookStep redeems or not. The BookStep then has 600EUR
             // available. Consequently, the entire offer is crossed.
-            return TokenData<MPT, MPT>{EUR, USD, EUR(540), USD(450)};
+            // Note remaining takerGets is 541 rather than 540 due to integral
+            // rounding. XRP has a similar result.
+            return TokenData<MPT, MPT>{EUR, USD, EUR(541), USD(450)};
+        };
+
+        auto initXRP = [&](Env& env) {
+            MPT const USD = MPTTester(
+                {.env = env,
+                 .issuer = gw1,
+                 .holders = {alice},
+                 .maxAmt = 1'000});
+            // Payment's engine last step overflows
+            // OutstandingAmount since it doesn't know if the
+            // BookStep redeems or not. The BookStep then has 600EUR
+            // available. Consequently, the entire offer is crossed.
+            // Note remaining takerGets is 540.000001 rather than 540 due to
+            // integral rounding.
+            return TokenData<XRP_t, MPT>{XRP, USD, XRP(540.000001), USD(450)};
         };
 
         auto initIOU = [&](Env& env) {
@@ -923,30 +940,32 @@ struct FlowMPT_test : public beast::unit_test::suite
         auto test = [&](auto&& initToken) {
             Env env(*this, features);
 
-            env.fund(XRP(1'000'000), gw1, gw2);
+            env.fund(XRP(2'000), gw1, gw2, alice);
             env.close();
 
-            // The fee that's charged for transactions.
             auto const f = env.current()->fees().base;
-
-            env.fund(reserve(env, 3) + f * 4, alice);
-            env.close();
 
             auto const tok = initToken(env);
 
-            auto const& USD = tok.USD;
-            auto const& EUR = tok.EUR;
+            auto const& TOK1 = tok.pays;
+            auto const& TOK2 = tok.gets;
+            bool const isTakerGetsXRP = isXRP(Asset{TOK2});
+            std::uint32_t const ownerCnt = isTakerGetsXRP ? 2 : 3;
 
-            env(pay(gw1, alice, USD(500)));
-            env(pay(gw2, alice, EUR(600)));
+            env(pay(gw1, alice, TOK1(500)));
+            if (!isTakerGetsXRP)
+                env(pay(gw2, alice, TOK2(600)));
             env.close();
 
-            env(offer(alice, USD(500), EUR(600)));
+            env(offer(alice, TOK1(500), TOK2(600)));
             env.close();
 
-            env.require(owners(alice, 3));
-            env.require(balance(alice, USD(500)));
-            env.require(balance(alice, EUR(600)));
+            env.require(owners(alice, ownerCnt));
+            env.require(balance(alice, TOK1(500)));
+            if (isTakerGetsXRP)
+                env.require(balance(alice, TOK2(2'000) - 2 * f));
+            else
+                env.require(balance(alice, TOK2(600)));
 
             auto aliceOffers = offersOnAccount(env, alice);
             BEAST_EXPECT(aliceOffers.size() == 1);
@@ -954,18 +973,21 @@ struct FlowMPT_test : public beast::unit_test::suite
             {
                 auto const offer = *offerPtr;
                 BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
-                BEAST_EXPECT(offer[sfTakerGets] == EUR(600));
-                BEAST_EXPECT(offer[sfTakerPays] == USD(500));
+                BEAST_EXPECT(offer[sfTakerGets] == TOK2(600));
+                BEAST_EXPECT(offer[sfTakerPays] == TOK1(500));
             }
 
-            env(pay(alice, alice, EUR(60)),
-                sendmax(USD(50)),
+            env(pay(alice, alice, TOK2(60)),
+                sendmax(TOK1(50)),
                 txflags(tfPartialPayment));
             env.close();
 
-            env.require(owners(alice, 3));
-            env.require(balance(alice, USD(500)));
-            env.require(balance(alice, EUR(600)));
+            env.require(owners(alice, ownerCnt));
+            env.require(balance(alice, TOK1(500)));
+            if (isTakerGetsXRP)
+                env.require(balance(alice, TOK2(2'000) - 3 * f));
+            else
+                env.require(balance(alice, TOK2(600)));
             aliceOffers = offersOnAccount(env, alice);
             BEAST_EXPECT(aliceOffers.size() == 1);
             for (auto const& offerPtr : aliceOffers)
@@ -977,6 +999,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             }
         };
 
+        test(initXRP);
         test(initMPT);
         test(initIOU);
         test(initIOU1);
