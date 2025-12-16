@@ -153,10 +153,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0d75d5a25680abfccfd469d9b24a9604" id="r_a0d75d5a25680abfccfd469d9b24a9604"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#af6fadbc1b2101eff5fa78e7e2a50b76f">error_code_i</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1RPC_1_1Status.html#a0d75d5a25680abfccfd469d9b24a9604">toErrorCode</a> () const</td></tr>
 <tr class="memdesc:a0d75d5a25680abfccfd469d9b24a9604"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the <a class="el" href="structxrpl_1_1RPC_1_1Status.html" title="Status represents the results of an operation that might fail.">Status</a> as an error_code_i.  <br /></td></tr>
 <tr class="separator:a0d75d5a25680abfccfd469d9b24a9604"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7160c003bef50e8962eb8235de5eaf97" id="r_a7160c003bef50e8962eb8235de5eaf97"><td class="memTemplParams" colspan="2">template&lt;class Object &gt; </td></tr>
-<tr class="memitem:a7160c003bef50e8962eb8235de5eaf97"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structxrpl_1_1RPC_1_1Status.html#a7160c003bef50e8962eb8235de5eaf97">inject</a> (Object &amp;object) const</td></tr>
-<tr class="memdesc:a7160c003bef50e8962eb8235de5eaf97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the <a class="el" href="structxrpl_1_1RPC_1_1Status.html" title="Status represents the results of an operation that might fail.">Status</a> to a JsonObject.  <br /></td></tr>
-<tr class="separator:a7160c003bef50e8962eb8235de5eaf97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a445a11f386d2b9cd0621469550530096" id="r_a445a11f386d2b9cd0621469550530096"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1RPC_1_1Status.html#a445a11f386d2b9cd0621469550530096">inject</a> (<a class="el" href="classJson_1_1Value.html">Json::Value</a> &amp;object) const</td></tr>
+<tr class="memdesc:a445a11f386d2b9cd0621469550530096"><td class="mdescLeft">&#160;</td><td class="mdescRight">Apply the <a class="el" href="structxrpl_1_1RPC_1_1Status.html" title="Status represents the results of an operation that might fail.">Status</a> to a JsonObject.  <br /></td></tr>
+<tr class="separator:a445a11f386d2b9cd0621469550530096"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a058931594b25b33051b98b3cdabe6f86" id="r_a058931594b25b33051b98b3cdabe6f86"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1RPC_1_1Status.html#a3b6c1b9ebd7c9818edf8f5ddc6276523">Strings</a> const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1RPC_1_1Status.html#a058931594b25b33051b98b3cdabe6f86">messages</a> () const</td></tr>
 <tr class="separator:a058931594b25b33051b98b3cdabe6f86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a244bed8cce40413bcce9929f1bd36e35" id="r_a244bed8cce40413bcce9929f1bd36e35"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1RPC_1_1Status.html#a244bed8cce40413bcce9929f1bd36e35">message</a> () const</td></tr>
@@ -509,18 +508,16 @@ template&lt;typename T , typename  = std::enable_if_t&lt;std::is_integral&lt;T&g
 
 </div>
 </div>
-<a id="a7160c003bef50e8962eb8235de5eaf97" name="a7160c003bef50e8962eb8235de5eaf97"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7160c003bef50e8962eb8235de5eaf97">&#9670;&#160;</a></span>inject()</h2>
+<a id="a445a11f386d2b9cd0621469550530096" name="a445a11f386d2b9cd0621469550530096"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a445a11f386d2b9cd0621469550530096">&#9670;&#160;</a></span>inject()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;class Object &gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void xrpl::RPC::Status::inject </td>
           <td>(</td>
-          <td class="paramtype">Object &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classJson_1_1Value.html">Json::Value</a> &amp;&#160;</td>
           <td class="paramname"><em>object</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -529,7 +526,7 @@ template&lt;class Object &gt; </div>
 
 <p>Apply the <a class="el" href="structxrpl_1_1RPC_1_1Status.html" title="Status represents the results of an operation that might fail.">Status</a> to a JsonObject. </p>
 
-<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00099">99</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00098">98</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
 
 </div>
 </div>
@@ -548,7 +545,7 @@ template&lt;class Object &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00111">111</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00110">110</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
 
 </div>
 </div>
@@ -588,7 +585,7 @@ template&lt;class Object &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00121">121</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00120">120</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
 
 </div>
 </div>
@@ -679,7 +676,7 @@ template&lt;class Object &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00136">136</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00135">135</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
 
 </div>
 </div>
@@ -703,7 +700,7 @@ template&lt;class Object &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00137">137</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00136">136</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
 
 </div>
 </div>
@@ -727,7 +724,7 @@ template&lt;class Object &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00138">138</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Status_8h_source.html#l00137">137</a> of file <a class="el" href="Status_8h_source.html">Status.h</a>.</p>
 
 </div>
 </div>

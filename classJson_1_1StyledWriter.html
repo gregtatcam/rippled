@@ -167,12 +167,12 @@ Private Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Writes a <a class="el" href="classJson_1_1Value.html" title="Represents a JSON value.">Value</a> in <a href="http://www.json.org">JSON</a> format in a human friendly way. </p>
 <p>The rules for line break and indent are as follow:</p><ul>
-<li><a class="el" href="classJson_1_1Object.html" title="Represents a JSON object being written to a Writer.">Object</a> value:<ul>
+<li>Object value:<ul>
 <li>if empty then print {} without indent and line break</li>
 <li>if not empty the print '{', line break &amp; indent, print one value per line and then unindent and line break and print '}'.</li>
 </ul>
 </li>
-<li><a class="el" href="classJson_1_1Array.html" title="Represents a JSON array being written to a Writer.">Array</a> value:<ul>
+<li>Array value:<ul>
 <li>if empty then print [] without indent and line break</li>
 <li>if the array contains no object value, empty array or some other value types, and all the values fit on one lines, then print the array on a single line.</li>
 <li>otherwise, it the values do not fit on one line, or the array contains object or non empty array, then print one value per line.</li>

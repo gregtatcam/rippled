@@ -88,7 +88,7 @@ var searchData=
   ['collate_85',['collate',['http://en.cppreference.com/w/cpp/locale/collate.html',1,'std']]],
   ['collate_5fbyname_86',['collate_byname',['http://en.cppreference.com/w/cpp/locale/collate_byname.html',1,'std']]],
   ['collectbynode_87',['CollectByNode',['../structxrpl_1_1test_1_1csf_1_1CollectByNode.html',1,'xrpl::test::csf']]],
-  ['collection_88',['collection',['../classJson_1_1Collection.html',1,'Json::Collection'],['../structJson_1_1Writer_1_1Impl_1_1Collection.html',1,'Json::Writer::Impl::Collection']]],
+  ['collection_88',['Collection',['../structJson_1_1Writer_1_1Impl_1_1Collection.html',1,'Json::Writer::Impl']]],
   ['collectionanddelimiter_89',['CollectionAndDelimiter',['../classxrpl_1_1CollectionAndDelimiter.html',1,'xrpl']]],
   ['collectionanddelimiter_3c_20char_5bn_5d_3e_90',['CollectionAndDelimiter&lt; char[N]&gt;',['../classxrpl_1_1CollectionAndDelimiter_3_01char_0fN_0e_4.html',1,'xrpl']]],
   ['collectionanddelimiter_3c_20collection_5bn_5d_3e_91',['CollectionAndDelimiter&lt; Collection[N]&gt;',['../classxrpl_1_1CollectionAndDelimiter_3_01Collection_0fN_0e_4.html',1,'xrpl']]],

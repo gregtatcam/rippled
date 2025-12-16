@@ -343,7 +343,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        BEAST_EXPECT(trie.<a class="code hl_function" href="classxrpl_1_1LedgerTrie.html#a6bac32f4c14fc7e436cbd5328d09f5d2">branchSupport</a>(ledg_258) == 4);</div>
 <div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="comment">// Move three of the s258 ledgers to s259, which splits the trie</span></div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        <span class="comment">// due to the 256 ancestory limit</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        <span class="comment">// due to the 256 ancestry limit</span></div>
 <div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        BEAST_EXPECT(trie.<a class="code hl_function" href="classxrpl_1_1LedgerTrie.html#aec8c50f77c7325ddf211c7e46b395bfa">remove</a>(ledg_258, 3));</div>
 <div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        trie.<a class="code hl_function" href="classxrpl_1_1LedgerTrie.html#a97fa116c8b7a28b105b39968db686d62">insert</a>(ledg_259, 3);</div>
 <div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        trie.<a class="code hl_function" href="classxrpl_1_1LedgerTrie.html#a7effe96ab4c38b885c12b5b2314439e7">getPreferred</a>(1);</div>
@@ -364,7 +364,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        <span class="comment">// then verify the remove call works</span></div>
 <div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        <span class="comment">// past bug: remove had assumed the first child of a node in the trie</span></div>
 <div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        <span class="comment">//      which matches is the *only* child in the trie which matches.</span></div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <span class="comment">//      This is **NOT** true with the limited 256 ledger ancestory</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <span class="comment">//      This is **NOT** true with the limited 256 ledger ancestry</span></div>
 <div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        <span class="comment">//      quirk of RCLValidation and prevents deleting the old support</span></div>
 <div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>        <span class="comment">//      for ledger 257</span></div>
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>

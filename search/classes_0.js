@@ -129,7 +129,7 @@ var searchData=
   ['applyview_126',['ApplyView',['../classxrpl_1_1ApplyView.html',1,'xrpl']]],
   ['applyviewbase_127',['ApplyViewBase',['../classxrpl_1_1detail_1_1ApplyViewBase.html',1,'xrpl::detail']]],
   ['applyviewimpl_128',['ApplyViewImpl',['../classxrpl_1_1ApplyViewImpl.html',1,'xrpl']]],
-  ['array_129',['array',['../classJson_1_1Array.html',1,'Json::Array'],['http://en.cppreference.com/w/cpp/container/array.html',1,'std::array&lt; T &gt;']]],
+  ['array_129',['array',['http://en.cppreference.com/w/cpp/container/array.html',1,'std']]],
   ['array_3c_20bool_2c_20num_5fsigners_20_3e_130',['array&lt; bool, num_signers &gt;',['http://en.cppreference.com/w/cpp/container/array.html',1,'std']]],
   ['array_3c_20boost_3a_3acontainer_3a_3aflat_5fset_3c_20xrpl_3a_3aissue_20_3e_2c_202_20_3e_131',['array&lt; boost::container::flat_set&lt; xrpl::Issue &gt;, 2 &gt;',['http://en.cppreference.com/w/cpp/container/array.html',1,'std']]],
   ['array_3c_20char_20const_20_2a_2c_205_20_3e_132',['array&lt; char const *, 5 &gt;',['http://en.cppreference.com/w/cpp/container/array.html',1,'std']]],

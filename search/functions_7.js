@@ -573,7 +573,7 @@ var searchData=
   ['gettxfee_570',['getTxFee',['../namespacexrpl_1_1RPC.html#a72081b090a97cf2a42523bef1d69e0d3',1,'xrpl::RPC']]],
   ['gettxformat_571',['getTxFormat',['../namespacexrpl.html#a7118aa5ffbd5c880bcc58a4a3dca7e9c',1,'xrpl']]],
   ['gettxhistory_572',['gettxhistory',['../classxrpl_1_1RelationalDatabase.html#aba5b17bda9b8ad23d4a1374d6c2de41b',1,'xrpl::RelationalDatabase::getTxHistory()'],['../classxrpl_1_1SQLiteDatabaseImp.html#a1ba05b2a9ed7ae8f2e077d7a297d0aab',1,'xrpl::SQLiteDatabaseImp::getTxHistory()'],['../namespacexrpl_1_1detail.html#a55fbf6f112a1783b1ed947bc23bed41f',1,'xrpl::detail::getTxHistory()']]],
-  ['gettxid_573',['gettxid',['../classxrpl_1_1TxMeta.html#a9bc86e40782490069fd1e1e15981d693',1,'xrpl::TxMeta::getTxID()'],['../classxrpl_1_1CanonicalTXSet_1_1Key.html#ae7360f629c60d9f328f638d74653c14b',1,'xrpl::CanonicalTXSet::Key::getTXID()']]],
+  ['gettxid_573',['gettxid',['../classxrpl_1_1CanonicalTXSet_1_1Key.html#ae7360f629c60d9f328f638d74653c14b',1,'xrpl::CanonicalTXSet::Key::getTXID()'],['../classxrpl_1_1TxMeta.html#a9bc86e40782490069fd1e1e15981d693',1,'xrpl::TxMeta::getTxID()']]],
   ['gettxjsonfromparams_574',['getTxJsonFromParams',['../namespacexrpl.html#aa9c763632cd4fc71818f494f79f6c799',1,'xrpl']]],
   ['gettxn_575',['gettxn',['../classxrpl_1_1test_1_1jtx_1_1batch_1_1inner.html#a5c45d2b6805f7d2537fe85e3f242e36e',1,'xrpl::test::jtx::batch::inner::getTxn()'],['../classxrpl_1_1AcceptedLedgerTx.html#aeb2ba0cf7c0f0ef087f74e82001aec8f',1,'xrpl::AcceptedLedgerTx::getTxn()']]],
   ['gettxncount_576',['getTxnCount',['../classxrpl_1_1TxQ_1_1TxQAccount.html#a607aa62e76617ccc76649c0045034344',1,'xrpl::TxQ::TxQAccount']]],
