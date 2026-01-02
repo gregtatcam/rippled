@@ -1,14 +1,14 @@
 <map id="xrpl::test::Loan_test::LoanState" name="xrpl::test::Loan_test::LoanState">
 <area shape="rect" id="Node000001" title=" " alt="" coords="783,159,933,199"/>
-<area shape="rect" id="Node000002" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="404,58,507,83"/>
+<area shape="rect" id="Node000002" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="404,58,507,83"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="521,71,634,85,697,99,760,118,798,136,831,156,828,161,795,140,758,122,696,104,633,91,520,77"/>
-<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/chrono/time_point.html" title=" " alt="" coords="369,108,541,148"/>
+<area shape="rect" id="Node000003" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/chrono/time_point.html" title=" " alt="" coords="369,108,541,148"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="555,135,759,159,783,162,782,168,758,164,555,140"/>
-<area shape="rect" id="Node000004" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="408,173,503,198"/>
+<area shape="rect" id="Node000004" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="408,173,503,198"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="516,182,782,177,782,183,517,187"/>
 <area shape="rect" id="Node000005" href="$classxrpl_1_1Number.html" title=" " alt="" coords="402,238,509,263"/>
 <area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="523,259,575,263,635,264,697,259,758,245,800,224,835,197,838,201,803,228,760,251,698,264,635,269,575,268,522,264"/>
-<area shape="rect" id="Node000006" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="71,202,166,227"/>
+<area shape="rect" id="Node000006" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="71,202,166,227"/>
 <area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="180,218,402,242,402,248,179,224"/>
 <area shape="rect" id="Node000007" href="$classxrpl_1_1unit_1_1ValueUnit.html" title=" " alt="" coords="380,425,531,465"/>
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="520,418,634,363,698,327,757,286,805,241,840,197,844,201,809,244,760,290,700,332,637,368,522,422"/>

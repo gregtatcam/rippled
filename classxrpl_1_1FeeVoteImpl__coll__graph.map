@@ -14,7 +14,7 @@
 <area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="237,137,335,137,335,143,237,143"/>
 <area shape="rect" id="Node000008" title=" " alt="" coords="11,184,225,224"/>
 <area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="220,178,342,150,344,155,221,183"/>
-<area shape="rect" id="Node000009" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="71,249,165,274"/>
+<area shape="rect" id="Node000009" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="71,249,165,274"/>
 <area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="178,249,230,234,268,216,301,190,312,176,325,162,347,150,350,155,328,166,316,179,305,194,270,220,232,238,180,254"/>
 <area shape="rect" id="Node000010" href="$classbeast_1_1Journal.html" title="A generic endpoint for log messages." alt="" coords="635,177,746,202"/>
 <area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="759,172,829,157,862,150,863,155,830,163,760,178"/>

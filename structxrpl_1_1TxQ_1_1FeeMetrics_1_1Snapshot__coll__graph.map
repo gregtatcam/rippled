@@ -1,6 +1,6 @@
 <map id="xrpl::TxQ::FeeMetrics::Snapshot" name="xrpl::TxQ::FeeMetrics::Snapshot">
 <area shape="rect" id="Node000001" title="Snapshot of the externally relevant FeeMetrics fields at any given time." alt="" coords="660,168,820,208"/>
-<area shape="rect" id="Node000002" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/size_t.html" title=" " alt="" coords="359,147,447,173"/>
+<area shape="rect" id="Node000002" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/size_t.html" title=" " alt="" coords="359,147,447,173"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,162,660,179,659,184,461,167"/>
 <area shape="rect" id="Node000003" href="$classxrpl_1_1unit_1_1ValueUnit.html" title=" " alt="" coords="328,197,479,237"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="492,209,636,197,659,195,660,200,636,203,493,214"/>

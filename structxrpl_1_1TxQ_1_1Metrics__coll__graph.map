@@ -1,8 +1,8 @@
 <map id="xrpl::TxQ::Metrics" name="xrpl::TxQ::Metrics">
 <area shape="rect" id="Node000001" title="Structure returned by TxQ::getMetrics, expressed in reference fee level units." alt="" coords="657,147,795,172"/>
-<area shape="rect" id="Node000002" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/size_t.html" title=" " alt="" coords="337,89,425,115"/>
+<area shape="rect" id="Node000002" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/size_t.html" title=" " alt="" coords="337,89,425,115"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="439,107,634,137,670,144,669,149,633,142,438,112"/>
-<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/utility/optional.html" title=" " alt="" coords="311,139,450,179"/>
+<area shape="rect" id="Node000003" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/utility/optional.html" title=" " alt="" coords="311,139,450,179"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="464,157,657,157,657,162,464,162"/>
 <area shape="rect" id="Node000004" href="$classxrpl_1_1unit_1_1ValueUnit.html" title=" " alt="" coords="305,229,456,269"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="470,248,550,241,592,233,632,221,676,197,709,170,713,174,679,201,634,226,593,238,551,246,470,253"/>

@@ -1,6 +1,6 @@
 <map id="xrpl::Ledger" name="xrpl::Ledger">
 <area shape="rect" id="Node000001" title="Holds a ledger." alt="" coords="424,95,523,121"/>
-<area shape="rect" id="Node000002" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="192,5,357,45"/>
+<area shape="rect" id="Node000002" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="192,5,357,45"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="358,48,377,55,452,93,449,98,375,60,356,53"/>
 <area shape="rect" id="Node000003" href="$classxrpl_1_1DigestAwareReadView.html" title="ReadView that associates keys with digests." alt="" coords="173,70,376,95"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="388,94,424,99,424,104,387,100"/>

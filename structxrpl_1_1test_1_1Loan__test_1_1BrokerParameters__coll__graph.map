@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="691,661,841,701"/>
 <area shape="rect" id="Node000002" href="$classxrpl_1_1Number.html" title=" " alt="" coords="369,129,475,154"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="451,161,497,203,555,261,615,330,669,407,704,477,732,549,763,661,758,662,727,551,699,479,664,409,611,334,551,265,493,207,447,165"/>
-<area shape="rect" id="Node000003" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="60,17,155,42"/>
+<area shape="rect" id="Node000003" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="60,17,155,42"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="169,33,244,47,324,72,371,99,407,126,404,131,368,103,322,77,243,52,168,38"/>
 <area shape="rect" id="Node000004" href="$classxrpl_1_1unit_1_1ValueUnit.html" title=" " alt="" coords="347,321,497,361"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="455,369,746,659,743,663,451,373"/>
@@ -35,10 +35,10 @@
 <area shape="poly" id="edge16_Node000012_Node000017" title=" " alt="" coords="191,826,208,819,269,791,293,775,321,750,332,731,336,722,345,711,362,699,365,704,348,715,341,724,337,733,325,754,296,779,272,795,210,824,193,831"/>
 <area shape="rect" id="Node000018" title=" " alt="" coords="15,898,199,953"/>
 <area shape="poly" id="edge17_Node000012_Node000018" title=" " alt="" coords="194,890,208,883,272,856,296,840,320,813,328,800,331,788,331,763,332,738,336,725,345,712,358,699,362,703,349,715,341,727,337,739,336,763,336,788,333,802,325,816,300,844,274,860,210,888,196,895"/>
-<area shape="rect" id="Node000019" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/string/basic_string.html" title=" " alt="" coords="379,726,465,751"/>
+<area shape="rect" id="Node000019" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/string/basic_string.html" title=" " alt="" coords="379,726,465,751"/>
 <area shape="poly" id="edge19_Node000001_Node000019" title=" " alt="" coords="478,728,666,699,690,694,691,700,667,704,479,734"/>
-<area shape="rect" id="Node000020" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/string/basic_string.html" title=" " alt="" coords="38,977,177,1017"/>
+<area shape="rect" id="Node000020" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/string/basic_string.html" title=" " alt="" coords="38,977,177,1017"/>
 <area shape="poly" id="edge20_Node000019_Node000020" title=" " alt="" coords="189,972,208,963,273,929,297,909,320,877,328,862,331,847,329,819,329,791,334,776,345,761,360,749,377,742,379,747,363,754,349,764,339,778,335,791,335,819,336,847,333,863,325,880,301,913,276,933,211,968,191,977"/>
-<area shape="rect" id="Node000021" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="371,775,473,801"/>
+<area shape="rect" id="Node000021" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="371,775,473,801"/>
 <area shape="poly" id="edge21_Node000001_Node000021" title=" " alt="" coords="487,781,573,769,620,758,666,743,705,723,739,699,742,704,708,727,668,748,622,763,574,774,487,787"/>
 </map>

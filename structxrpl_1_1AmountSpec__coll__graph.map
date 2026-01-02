@@ -10,7 +10,7 @@
 <area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="237,148,357,159,356,165,236,154"/>
 <area shape="rect" id="Node000006" title=" " alt="" coords="11,184,225,224"/>
 <area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="239,187,356,173,357,178,239,192"/>
-<area shape="rect" id="Node000007" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="71,249,165,274"/>
+<area shape="rect" id="Node000007" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="71,249,165,274"/>
 <area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="178,247,249,229,326,205,392,178,394,183,328,211,251,234,179,252"/>
 <area shape="rect" id="Node000008" href="$classxrpl_1_1IOUAmount.html" title="Floating point representation of amounts with high dynamic range." alt="" coords="357,283,487,309"/>
 <area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="180,266,357,286,356,291,179,271"/>
@@ -19,6 +19,6 @@
 <area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="214,309,356,298,356,304,215,314"/>
 <area shape="rect" id="Node000010" title=" " alt="" coords="6,363,230,389"/>
 <area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="191,358,230,348,378,306,380,311,231,353,192,363"/>
-<area shape="rect" id="Node000011" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/utility/optional.html" title=" " alt="" coords="351,335,493,375"/>
+<area shape="rect" id="Node000011" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/utility/optional.html" title=" " alt="" coords="351,335,493,375"/>
 <area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="507,343,578,328,642,305,643,310,579,333,508,348"/>
 </map>

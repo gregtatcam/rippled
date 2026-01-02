@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000000" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="199,69,350,109"/>
 <area shape="rect" id="Node000001" href="$classxrpl_1_1Ledger.html" title="Holds a ledger." alt="" coords="479,106,578,131"/>
 <area shape="poly" id="edge604_Node000000_Node000001" title=" " alt="" coords="364,97,479,110,479,116,363,102"/>
-<area shape="rect" id="Node000002" href="/__w/rippled/rippled/.build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="192,5,357,45"/>
+<area shape="rect" id="Node000002" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/memory/enable_shared_from_this.html" title=" " alt="" coords="192,5,357,45"/>
 <area shape="poly" id="edge605_Node000002_Node000001" title=" " alt="" coords="355,47,377,55,498,103,496,108,375,60,354,52"/>
 <area shape="rect" id="Node000011" href="$classxrpl_1_1RawView.html" title="Interface for ledger entry changes." alt="" coords="8,159,123,185"/>
 <area shape="rect" id="Node000003" href="$classxrpl_1_1TxsRawView.html" title="Interface for changing ledger entries with transactions." alt="" coords="205,134,344,159"/>
