@@ -332,69 +332,96 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>}</div>
 </div>
 <div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span> </div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><a class="code hl_class" href="classxrpl_1_1Expected.html">Expected&lt;STXChainBridge, Json::Value&gt;</a></div>
-<div class="foldopen" id="foldopen00222" data-start="{" data-end="}">
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="namespacexrpl_1_1LedgerEntryHelpers.html#a80592133bd9c1b490018876095ff9380">  222</a></span><a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a80592133bd9c1b490018876095ff9380">parseBridgeFields</a>(<a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> <span class="keyword">const</span>&amp; params)</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>{</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="keywordflow">if</span> (<span class="keyword">auto</span> <span class="keyword">const</span> value = <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a57eefd8bad5ad66613a419bdbe0d9fa9">hasRequired</a>(</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>            params,</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>            {jss::LockingChainDoor,</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>             jss::LockingChainIssue,</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>             jss::IssuingChainDoor,</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>             jss::IssuingChainIssue});</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        !value)</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    {</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1Unexpected.html">Unexpected</a>(value.error());</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    }</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span><span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional&lt;Issue&gt;</a></div>
+<div class="foldopen" id="foldopen00223" data-start="{" data-end="}">
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno"><a class="line" href="namespacexrpl_1_1LedgerEntryHelpers.html#afe00f81224c5fb22cf6a13a87c069f95">  223</a></span><a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a8ab73dbbcd973030aeb33b2d89b5a50f">parse</a>(<a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> <span class="keyword">const</span>&amp; param)</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>{</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    {</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespacexrpl.html#a9567c2805037dfdb104c59142ca6461d">issueFromJson</a>(param);</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    }</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/runtime_error.html">std::runtime_error</a> <span class="keyword">const</span>&amp;)</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    {</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        <span class="keywordflow">return</span> <a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::nullopt</a>;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    }</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>}</div>
+</div>
 <div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    <span class="keyword">auto</span> <span class="keyword">const</span> lockingChainDoor = <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a0c7d64ebf628bec058c94a46db0ea78d">requiredAccountID</a>(</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        params, jss::LockingChainDoor, <span class="stringliteral">&quot;malformedLockingChainDoor&quot;</span>);</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordflow">if</span> (!lockingChainDoor)</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    {</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1Unexpected.html">Unexpected</a>(lockingChainDoor.error());</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    }</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="keyword">auto</span> <span class="keyword">const</span> issuingChainDoor = <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a0c7d64ebf628bec058c94a46db0ea78d">requiredAccountID</a>(</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        params, jss::IssuingChainDoor, <span class="stringliteral">&quot;malformedIssuingChainDoor&quot;</span>);</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <span class="keywordflow">if</span> (!issuingChainDoor)</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    {</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1Unexpected.html">Unexpected</a>(issuingChainDoor.error());</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    }</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <a class="code hl_class" href="classxrpl_1_1Issue.html">Issue</a> lockingChainIssue;</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="keywordflow">try</span></div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    {</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        lockingChainIssue = <a class="code hl_function" href="namespacexrpl.html#a9567c2805037dfdb104c59142ca6461d">issueFromJson</a>(params[jss::LockingChainIssue]);</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    }</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/runtime_error.html">std::runtime_error</a> <span class="keyword">const</span>&amp; ex)</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    {</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#ae66e135b19d81aa5e38099ef764326a9">invalidFieldError</a>(</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>            <span class="stringliteral">&quot;malformedIssue&quot;</span>, jss::LockingChainIssue, <span class="stringliteral">&quot;Issue&quot;</span>);</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    }</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <a class="code hl_class" href="classxrpl_1_1Issue.html">Issue</a> issuingChainIssue;</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="keywordflow">try</span></div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    {</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        issuingChainIssue = <a class="code hl_function" href="namespacexrpl.html#a9567c2805037dfdb104c59142ca6461d">issueFromJson</a>(params[jss::IssuingChainIssue]);</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    }</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/runtime_error.html">std::runtime_error</a> <span class="keyword">const</span>&amp; ex)</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    {</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#ae66e135b19d81aa5e38099ef764326a9">invalidFieldError</a>(</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>            <span class="stringliteral">&quot;malformedIssue&quot;</span>, jss::IssuingChainIssue, <span class="stringliteral">&quot;Issue&quot;</span>);</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    }</div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1STXChainBridge.html">STXChainBridge</a>(</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        *lockingChainDoor,</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        lockingChainIssue,</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        *issuingChainDoor,</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        issuingChainIssue);</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>}</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><a class="code hl_class" href="classxrpl_1_1Expected.html">Expected&lt;Issue, Json::Value&gt;</a></div>
+<div class="foldopen" id="foldopen00236" data-start="{" data-end="}">
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="namespacexrpl_1_1LedgerEntryHelpers.html#a76ecf3d7ff51ac025f088d54bf312898">  236</a></span><a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a76ecf3d7ff51ac025f088d54bf312898">requiredIssue</a>(</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> <span class="keyword">const</span>&amp; params,</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <a class="code hl_class" href="classJson_1_1StaticString.html">Json::StaticString</a> <span class="keyword">const</span> fieldName,</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; err)</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>{</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <span class="keywordflow">return</span> required&lt;Issue&gt;(params, fieldName, err, <span class="stringliteral">&quot;Issue&quot;</span>);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>}</div>
 </div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>}  <span class="comment">// namespace LedgerEntryHelpers</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><a class="code hl_class" href="classxrpl_1_1Expected.html">Expected&lt;STXChainBridge, Json::Value&gt;</a></div>
+<div class="foldopen" id="foldopen00245" data-start="{" data-end="}">
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno"><a class="line" href="namespacexrpl_1_1LedgerEntryHelpers.html#a80592133bd9c1b490018876095ff9380">  245</a></span><a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a80592133bd9c1b490018876095ff9380">parseBridgeFields</a>(<a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> <span class="keyword">const</span>&amp; params)</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>{</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    <span class="keywordflow">if</span> (<span class="keyword">auto</span> <span class="keyword">const</span> value = <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a57eefd8bad5ad66613a419bdbe0d9fa9">hasRequired</a>(</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            params,</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            {jss::LockingChainDoor,</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>             jss::LockingChainIssue,</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>             jss::IssuingChainDoor,</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>             jss::IssuingChainIssue});</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        !value)</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    {</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1Unexpected.html">Unexpected</a>(value.error());</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    }</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    <span class="keyword">auto</span> <span class="keyword">const</span> lockingChainDoor = <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a0c7d64ebf628bec058c94a46db0ea78d">requiredAccountID</a>(</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        params, jss::LockingChainDoor, <span class="stringliteral">&quot;malformedLockingChainDoor&quot;</span>);</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="keywordflow">if</span> (!lockingChainDoor)</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    {</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1Unexpected.html">Unexpected</a>(lockingChainDoor.error());</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    }</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keyword">auto</span> <span class="keyword">const</span> issuingChainDoor = <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#a0c7d64ebf628bec058c94a46db0ea78d">requiredAccountID</a>(</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        params, jss::IssuingChainDoor, <span class="stringliteral">&quot;malformedIssuingChainDoor&quot;</span>);</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <span class="keywordflow">if</span> (!issuingChainDoor)</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    {</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1Unexpected.html">Unexpected</a>(issuingChainDoor.error());</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    }</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    <a class="code hl_class" href="classxrpl_1_1Issue.html">Issue</a> lockingChainIssue;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    {</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        lockingChainIssue = <a class="code hl_function" href="namespacexrpl.html#a9567c2805037dfdb104c59142ca6461d">issueFromJson</a>(params[jss::LockingChainIssue]);</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    }</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/runtime_error.html">std::runtime_error</a> <span class="keyword">const</span>&amp; ex)</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    {</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#ae66e135b19d81aa5e38099ef764326a9">invalidFieldError</a>(</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            <span class="stringliteral">&quot;malformedIssue&quot;</span>, jss::LockingChainIssue, <span class="stringliteral">&quot;Issue&quot;</span>);</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    }</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <a class="code hl_class" href="classxrpl_1_1Issue.html">Issue</a> issuingChainIssue;</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <span class="keywordflow">try</span></div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    {</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        issuingChainIssue = <a class="code hl_function" href="namespacexrpl.html#a9567c2805037dfdb104c59142ca6461d">issueFromJson</a>(params[jss::IssuingChainIssue]);</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    }</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <span class="keywordflow">catch</span> (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/error/runtime_error.html">std::runtime_error</a> <span class="keyword">const</span>&amp; ex)</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    {</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="namespacexrpl_1_1LedgerEntryHelpers.html#ae66e135b19d81aa5e38099ef764326a9">invalidFieldError</a>(</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>            <span class="stringliteral">&quot;malformedIssue&quot;</span>, jss::IssuingChainIssue, <span class="stringliteral">&quot;Issue&quot;</span>);</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    }</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span> </div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    <span class="keywordflow">return</span> <a class="code hl_class" href="classxrpl_1_1STXChainBridge.html">STXChainBridge</a>(</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>        *lockingChainDoor,</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        lockingChainIssue,</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>        *issuingChainDoor,</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>        issuingChainIssue);</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>}</div>
 </div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>}  <span class="comment">// namespace xrpl</span></div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>}  <span class="comment">// namespace LedgerEntryHelpers</span></div>
+</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>}  <span class="comment">// namespace xrpl</span></div>
 <div class="ttc" id="abasic_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div></div>
 <div class="ttc" id="aclassJson_1_1StaticString_html"><div class="ttname"><a href="classJson_1_1StaticString.html">Json::StaticString</a></div><div class="ttdoc">Lightweight wrapper to tag static string.</div><div class="ttdef"><b>Definition</b> <a href="json__value_8h_source.html#l00044">json_value.h:45</a></div></div>
 <div class="ttc" id="aclassJson_1_1Value_html"><div class="ttname"><a href="classJson_1_1Value.html">Json::Value</a></div><div class="ttdoc">Represents a JSON value.</div><div class="ttdef"><b>Definition</b> <a href="json__value_8h_source.html#l00130">json_value.h:131</a></div></div>
@@ -426,7 +453,8 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a4d0a6ba74ceb839d831957c6624d037e"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a4d0a6ba74ceb839d831957c6624d037e">xrpl::LedgerEntryHelpers::required</a></div><div class="ttdeci">Expected&lt; T, Json::Value &gt; required(Json::Value const &amp;params, Json::StaticString const fieldName, std::string const &amp;err, std::string const &amp;expectedType)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00078">LedgerEntryHelpers.h:78</a></div></div>
 <div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a57eefd8bad5ad66613a419bdbe0d9fa9"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a57eefd8bad5ad66613a419bdbe0d9fa9">xrpl::LedgerEntryHelpers::hasRequired</a></div><div class="ttdeci">Expected&lt; bool, Json::Value &gt; hasRequired(Json::Value const &amp;params, std::initializer_list&lt; Json::StaticString &gt; fields, std::optional&lt; std::string &gt; err=std::nullopt)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00057">LedgerEntryHelpers.h:57</a></div></div>
 <div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a6d01622ae11ab0ed43c64d03491b1d39"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a6d01622ae11ab0ed43c64d03491b1d39">xrpl::LedgerEntryHelpers::requiredHexBlob</a></div><div class="ttdeci">Expected&lt; Blob, Json::Value &gt; requiredHexBlob(Json::Value const &amp;params, Json::StaticString const fieldName, std::size_t maxLength, std::string const &amp;err)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00134">LedgerEntryHelpers.h:134</a></div></div>
-<div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a80592133bd9c1b490018876095ff9380"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a80592133bd9c1b490018876095ff9380">xrpl::LedgerEntryHelpers::parseBridgeFields</a></div><div class="ttdeci">Expected&lt; STXChainBridge, Json::Value &gt; parseBridgeFields(Json::Value const &amp;params)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00222">LedgerEntryHelpers.h:222</a></div></div>
+<div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a76ecf3d7ff51ac025f088d54bf312898"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a76ecf3d7ff51ac025f088d54bf312898">xrpl::LedgerEntryHelpers::requiredIssue</a></div><div class="ttdeci">Expected&lt; Issue, Json::Value &gt; requiredIssue(Json::Value const &amp;params, Json::StaticString const fieldName, std::string const &amp;err)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00236">LedgerEntryHelpers.h:236</a></div></div>
+<div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a80592133bd9c1b490018876095ff9380"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a80592133bd9c1b490018876095ff9380">xrpl::LedgerEntryHelpers::parseBridgeFields</a></div><div class="ttdeci">Expected&lt; STXChainBridge, Json::Value &gt; parseBridgeFields(Json::Value const &amp;params)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00245">LedgerEntryHelpers.h:245</a></div></div>
 <div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a88cb8efa0edfee91df8051d1d52d5b58"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a88cb8efa0edfee91df8051d1d52d5b58">xrpl::LedgerEntryHelpers::malformedError</a></div><div class="ttdeci">Unexpected&lt; Json::Value &gt; malformedError(std::string const &amp;err, std::string const &amp;message)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00047">LedgerEntryHelpers.h:47</a></div></div>
 <div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_a8ab73dbbcd973030aeb33b2d89b5a50f"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#a8ab73dbbcd973030aeb33b2d89b5a50f">xrpl::LedgerEntryHelpers::parse</a></div><div class="ttdeci">std::optional&lt; T &gt; parse(Json::Value const &amp;param)</div></div>
 <div class="ttc" id="anamespacexrpl_1_1LedgerEntryHelpers_html_ad3e2f1e3cd09fef79f81a2179fc48eeb"><div class="ttname"><a href="namespacexrpl_1_1LedgerEntryHelpers.html#ad3e2f1e3cd09fef79f81a2179fc48eeb">xrpl::LedgerEntryHelpers::requiredUInt256</a></div><div class="ttdeci">Expected&lt; uint256, Json::Value &gt; requiredUInt256(Json::Value const &amp;params, Json::StaticString const fieldName, std::string const &amp;err)</div><div class="ttdef"><b>Definition</b> <a href="LedgerEntryHelpers_8h_source.html#l00191">LedgerEntryHelpers.h:191</a></div></div>

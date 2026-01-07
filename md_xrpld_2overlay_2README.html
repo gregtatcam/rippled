@@ -296,7 +296,7 @@ Ripple Clustering</h1>
 <h2><a class="anchor" id="autotoc_md328"></a>
 Configuration</h2>
 <p>A server's public key can be determined from the output of the <code>server_info</code> command. The key is in the <code>pubkey_node</code> value, and is a text string beginning with the letter <code>n</code>. The key is maintained across runs in a database.</p>
-<p>Cluster members are configured in the <code>rippled.cfg</code> file under <code>[cluster_nodes]</code>. Each member should be configured on a line beginning with the node public key, followed optionally by a space and a friendly name.</p>
+<p>Cluster members are configured in the <code>xrpld.cfg</code> file under <code>[cluster_nodes]</code>. Each member should be configured on a line beginning with the node public key, followed optionally by a space and a friendly name.</p>
 <p>Because cluster members can introduce other cluster members, it is not necessary to configure every cluster member on every other cluster member. If a hub and spoke system is used, it is sufficient to configure every cluster member on the hub(s) and only configure the hubs on the spokes. That is, each spoke does not need to be configured on every other spoke.</p>
 <p>New spokes can be added as follows:</p>
 <ul>

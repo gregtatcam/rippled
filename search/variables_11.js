@@ -120,7 +120,7 @@ var searchData=
   ['right_117',['right',['../structxrpl_1_1test_1_1csf_1_1WrongPrevLedger.html#a280580d1c4b407cd0851b4c077b73d98',1,'xrpl::test::csf::WrongPrevLedger::right'],['../classbeast_1_1field__t.html#a492409566c57e088b0e5c8dec09e87d6',1,'beast::field_t::right']]],
   ['rightmargin_5f_118',['rightmargin_',['../classJson_1_1StyledWriter.html#a9c8fc62cb4f3b4a6dbed470fea2aa567',1,'Json::StyledWriter::rightMargin_'],['../classJson_1_1StyledStreamWriter.html#a67fdaa6758885f082b6a7ede52b0ab91',1,'Json::StyledStreamWriter::rightMargin_']]],
   ['rmax_119',['rmax',['../structxrpl_1_1RPC_1_1Tuning_1_1LimitRange.html#a4d7c10543620a62d860207d1879335f4',1,'xrpl::RPC::Tuning::LimitRange']]],
-  ['rmdatadir_5f_120',['rmDataDir_',['../classxrpl_1_1detail_1_1RippledCfgGuard.html#a1039667dac642de54dafb0b4ab2c11ef',1,'xrpl::detail::RippledCfgGuard']]],
+  ['rmdatadir_5f_120',['rmDataDir_',['../classxrpl_1_1detail_1_1FileCfgGuard.html#a1e6a67561a13e896eb016ee88825dd0a',1,'xrpl::detail::FileCfgGuard']]],
   ['rmin_121',['rmin',['../structxrpl_1_1RPC_1_1Tuning_1_1LimitRange.html#a3c6c6a0cd08d9fa46fa5c74b98102df5',1,'xrpl::RPC::Tuning::LimitRange']]],
   ['rmsubdir_5f_122',['rmSubDir_',['../classxrpl_1_1detail_1_1DirGuard.html#a32525618bb1e567e9a13d90a2d9d4151',1,'xrpl::detail::DirGuard']]],
   ['rng_123',['rng',['../classxrpl_1_1test_1_1csf_1_1Sim.html#a4eec1fd42a7847bae84dea9da967b492',1,'xrpl::test::csf::Sim']]],
