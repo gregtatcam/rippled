@@ -134,7 +134,7 @@ AMMTestBase::testAMM(
 
         auto const [asset1, asset2] =
             arg.pool ? *arg.pool : std::make_pair(XRP(10000), USD(10000));
-        auto tofund = [&](STAmount const& a) -> STAmount {
+        auto toFund = [&](STAmount const& a) -> STAmount {
             if (a.native())
             {
                 auto const defXRP = XRP(30000);
@@ -147,8 +147,8 @@ AMMTestBase::testAMM(
                 return defAmt;
             return a + STAmount{a.asset(), 1000};
         };
-        auto const toFund1 = tofund(asset1);
-        auto const toFund2 = tofund(asset2);
+        auto const toFund1 = toFund(asset1);
+        auto const toFund2 = toFund(asset2);
         BEAST_EXPECT(asset1 <= toFund1 && asset2 <= toFund2);
 
         // asset1/asset2 could be dummy MPT. In this case real MPT

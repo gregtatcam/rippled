@@ -85,7 +85,7 @@ public:
      */
     TAmounts<TIn, TOut>
     limitOut(
-        TAmounts<TIn, TOut> const& offrAmt,
+        TAmounts<TIn, TOut> const& offerAmount,
         TOut const& limit,
         bool roundUp) const;
 
@@ -94,8 +94,10 @@ public:
      * current quality.
      */
     TAmounts<TIn, TOut>
-    limitIn(TAmounts<TIn, TOut> const& offrAmt, TIn const& limit, bool roundUp)
-        const;
+    limitIn(
+        TAmounts<TIn, TOut> const& offerAmount,
+        TIn const& limit,
+        bool roundUp) const;
 
     QualityFunction
     getQualityFunc() const;
