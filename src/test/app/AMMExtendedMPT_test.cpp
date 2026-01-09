@@ -2988,29 +2988,29 @@ private:
                  .flags = MPTDEXFlags});
 
             env(pay(alice, bob, BTC(10'000)),
-                delivermin(BTC(10'000)),
+                deliver_min(BTC(10'000)),
                 ter(temBAD_AMOUNT));
             env(pay(alice, bob, BTC(10'000)),
-                delivermin(BTC(-5'000)),
+                deliver_min(BTC(-5'000)),
                 txflags(tfPartialPayment),
                 ter(temBAD_AMOUNT));
             env(pay(alice, bob, BTC(10'000)),
-                delivermin(XRP(5)),
+                deliver_min(XRP(5)),
                 txflags(tfPartialPayment),
                 ter(temBAD_AMOUNT));
             env(pay(alice, bob, BTC(10'000)),
-                delivermin(BTC(5'000)),
+                deliver_min(BTC(5'000)),
                 txflags(tfPartialPayment),
                 ter(tecPATH_DRY));
             env(pay(alice, bob, BTC(10'000)),
-                delivermin(BTC(15'000)),
+                deliver_min(BTC(15'000)),
                 txflags(tfPartialPayment),
                 ter(temBAD_AMOUNT));
             env(pay(gw, carol, BTC(50'000)));
             AMM ammCarol(env, carol, XRP(10), BTC(15'000));
             env(pay(alice, bob, BTC(10'000)),
                 paths(XRP),
-                delivermin(BTC(7'000)),
+                deliver_min(BTC(7'000)),
                 txflags(tfPartialPayment),
                 sendmax(XRP(5)),
                 ter(tecPATH_PARTIAL));
@@ -3037,7 +3037,7 @@ private:
             AMM ammBob(env, bob, XRP(1'000), BTC(1'100'000));
             env(pay(alice, alice, BTC(10'000'000)),
                 paths(XRP),
-                delivermin(BTC(100'000)),
+                deliver_min(BTC(100'000)),
                 txflags(tfPartialPayment),
                 sendmax(XRP(100)));
             env.require(balance(alice, BTC(100'000)));
@@ -3070,7 +3070,7 @@ private:
                 AMM ammBob(env, bob, USD(1'000), BTC(1'100));
                 env(pay(alice, alice, BTC(10'000)),
                     paths(USD),
-                    delivermin(BTC(100)),
+                    deliver_min(BTC(100)),
                     txflags(tfPartialPayment),
                     sendmax(USD(100)));
                 env.require(balance(alice, BTC(100)));
@@ -3092,13 +3092,13 @@ private:
             AMM ammBob(env, bob, XRP(5'500), BTC(1'200'000));
             env(pay(alice, carol, BTC(10'000'000)),
                 paths(XRP),
-                delivermin(BTC(200'000)),
+                deliver_min(BTC(200'000)),
                 txflags(tfPartialPayment),
                 sendmax(XRP(1'000)),
                 ter(tecPATH_PARTIAL));
             env(pay(alice, carol, BTC(10'000'000)),
                 paths(XRP),
-                delivermin(BTC(200'000)),
+                deliver_min(BTC(200'000)),
                 txflags(tfPartialPayment),
                 sendmax(XRP(1'100)));
             BEAST_EXPECT(ammBob.expectBalances(
@@ -3135,13 +3135,13 @@ private:
                 AMM ammBob(env, bob, USD(5'500), BTC(1'200));
                 env(pay(alice, carol, BTC(10'000)),
                     paths(USD),
-                    delivermin(BTC(200)),
+                    deliver_min(BTC(200)),
                     txflags(tfPartialPayment),
                     sendmax(USD(1'000)),
                     ter(tecPATH_PARTIAL));
                 env(pay(alice, carol, BTC(10'000)),
                     paths(USD),
-                    delivermin(BTC(200)),
+                    deliver_min(BTC(200)),
                     txflags(tfPartialPayment),
                     sendmax(USD(1'100)));
                 BEAST_EXPECT(ammBob.expectBalances(
@@ -3170,7 +3170,7 @@ private:
 
             env(pay(alice, carol, BTC(10'000'000'000)),
                 paths(XRP),
-                delivermin(BTC(200'000'000)),
+                deliver_min(BTC(200'000'000)),
                 txflags(tfPartialPayment),
                 sendmax(XRPAmount(200'000'001)));
             env.require(balance(bob, BTC(0)));

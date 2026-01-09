@@ -4,66 +4,6 @@
 #include <xrpl/protocol/jss.h>
 
 namespace xrpl {
-namespace test {
-namespace jtx {
-
-/** Set Expiration on a JTx. */
-class expiration
-{
-private:
-    std::uint32_t const expiry_;
-
-public:
-    explicit expiration(NetClock::time_point const& expiry)
-        : expiry_{expiry.time_since_epoch().count()}
-    {
-    }
-
-    void
-    operator()(Env&, JTx& jt) const
-    {
-        jt[sfExpiration.jsonName] = expiry_;
-    }
-};
-
-/** Set SourceTag on a JTx. */
-class source_tag
-{
-private:
-    std::uint32_t const tag_;
-
-public:
-    explicit source_tag(std::uint32_t tag) : tag_{tag}
-    {
-    }
-
-    void
-    operator()(Env&, JTx& jt) const
-    {
-        jt[sfSourceTag.jsonName] = tag_;
-    }
-};
-
-/** Set DestinationTag on a JTx. */
-class dest_tag
-{
-private:
-    std::uint32_t const tag_;
-
-public:
-    explicit dest_tag(std::uint32_t tag) : tag_{tag}
-    {
-    }
-
-    void
-    operator()(Env&, JTx& jt) const
-    {
-        jt[sfDestinationTag.jsonName] = tag_;
-    }
-};
-
-}  // namespace jtx
-}  // namespace test
 
 class Check_test : public beast::unit_test::suite
 {
