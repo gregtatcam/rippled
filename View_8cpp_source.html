@@ -3494,7 +3494,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l03244" name="l03244"></a><span class="lineno"> 3244</span>    <span class="keyword">auto</span> <span class="keyword">const</span> maybeDomainID = sleIssuance-&gt;at(~sfDomainID);</div>
 <div class="line"><a id="l03245" name="l03245"></a><span class="lineno"> 3245</span>    <span class="keywordtype">bool</span> <a class="code hl_enumvalue" href="namespacexrpl.html#a46feb2a3d6afe415003984673a6a8648ac4bfb2a0bab0e91bc7dcfbe3bbec246e">expired</a> = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l03246" name="l03246"></a><span class="lineno"> 3246</span>    <span class="keywordtype">bool</span> <span class="keyword">const</span> authorizedByDomain = [&amp;]() -&gt; <span class="keywordtype">bool</span> {</div>
-<div class="line"><a id="l03247" name="l03247"></a><span class="lineno"> 3247</span>        <span class="comment">// NOTE: defensive here, shuld be checked in preclaim</span></div>
+<div class="line"><a id="l03247" name="l03247"></a><span class="lineno"> 3247</span>        <span class="comment">// NOTE: defensive here, should be checked in preclaim</span></div>
 <div class="line"><a id="l03248" name="l03248"></a><span class="lineno"> 3248</span>        <span class="keywordflow">if</span> (!maybeDomainID.has_value())</div>
 <div class="line"><a id="l03249" name="l03249"></a><span class="lineno"> 3249</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;  <span class="comment">// LCOV_EXCL_LINE</span></div>
 <div class="line"><a id="l03250" name="l03250"></a><span class="lineno"> 3250</span> </div>

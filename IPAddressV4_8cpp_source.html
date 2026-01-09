@@ -112,7 +112,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen00025" data-start="{" data-end="}">
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="namespacebeast_1_1IP.html#a54d5d1d55a9fb07941c3c89ea33463df">   25</a></span><a class="code hl_function" href="namespacebeast_1_1IP.html#a54d5d1d55a9fb07941c3c89ea33463df">get_class</a>(<a class="code hl_typedef" href="namespacebeast_1_1IP.html#ad2074ed8068d52be937bf6895918bcb5">AddressV4</a> <span class="keyword">const</span>&amp; addr)</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>{</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">static</span> <span class="keywordtype">char</span> <span class="keyword">const</span>* table = <span class="stringliteral">&quot;AAAABBCD&quot;</span>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keyword">static</span> <span class="keywordtype">char</span> <span class="keyword">const</span>* table = <span class="stringliteral">&quot;AAAABBCD&quot;</span>;  <span class="comment">// cspell:disable-line</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">return</span> table[(addr.to_uint() &amp; 0xE0000000) &gt;&gt; 29];</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>}</div>
 </div>

@@ -527,7 +527,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>    <span class="comment">// tells us whether there is any kind of event or cq_ is shutting down.</span></div>
 <div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>    <span class="comment">// When cq_.Next(...) returns false, all work has been completed and the</span></div>
 <div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>    <span class="comment">// loop can exit. When the server is shutdown, each CallData object that is</span></div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>    <span class="comment">// listening for a request is forceably cancelled, and is returned by</span></div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>    <span class="comment">// listening for a request is forcibly cancelled, and is returned by</span></div>
 <div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>    <span class="comment">// cq_-&gt;Next() with ok set to false. Then, each CallData object processing</span></div>
 <div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>    <span class="comment">// a request must complete (by sending data to the client), each of which</span></div>
 <div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>    <span class="comment">// will be returned from cq_-&gt;Next() with ok set to true. After all</span></div>

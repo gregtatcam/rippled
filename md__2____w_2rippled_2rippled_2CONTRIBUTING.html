@@ -384,16 +384,16 @@ Betas, and the first release candidate</h4>
 <div class="fragment"><div class="line">git fetch --multiple upstreams user1 user2 user3 [...]</div>
 <div class="line">git checkout -B release-next --no-track upstream/develop</div>
 <div class="line"> </div>
-<div class="line"># Only do an ff-only merge if prbranch1 is either already</div>
+<div class="line"># Only do an ff-only merge if pr-branch1 is either already</div>
 <div class="line"># squashed, or needs to be merged with separate commits,</div>
 <div class="line"># and has no merge commits.</div>
-<div class="line"># Use -S on the ff-only merge if prbranch1 isn&#39;t signed.</div>
-<div class="line">git merge [-S] --ff-only user1/prbranch1</div>
+<div class="line"># Use -S on the ff-only merge if pr-branch1 isn&#39;t signed.</div>
+<div class="line">git merge [-S] --ff-only user1/pr-branch1</div>
 <div class="line"> </div>
-<div class="line">git merge --squash user2/prbranch2</div>
+<div class="line">git merge --squash user2/pr-branch2</div>
 <div class="line">git commit -S # Use the commit message provided on the PR</div>
 <div class="line"> </div>
-<div class="line">git merge --squash user3/prbranch3</div>
+<div class="line">git merge --squash user3/pr-branch3</div>
 <div class="line">git commit -S # Use the commit message provided on the PR</div>
 <div class="line"> </div>
 <div class="line">[...]</div>
@@ -596,7 +596,7 @@ Final releases</h4>
 </ol>
 <h4><a class="anchor" id="autotoc_md85"></a>
 Special cases: point releases, hotfixes, etc.</h4>
-<p>On occassion, a bug or issue is discovered in a version that already had a final release. Most of the time, development will have started on the next version, and will usually have changes in <code>develop</code> and often in <code>release</code>.</p>
+<p>On occasion, a bug or issue is discovered in a version that already had a final release. Most of the time, development will have started on the next version, and will usually have changes in <code>develop</code> and often in <code>release</code>.</p>
 <p>Because git history is kept as linear as possible, any fix and new version will need to be applied against <code>master</code>.</p>
 <p>The process for building a hotfix release is very similar to [the process for building release candidates after the first](#release-candidates-after-the-first) and for building a final release, except the changes will be done against <code>master</code> instead of <code>release</code>.</p>
 <p>If there is only a single issue for the hotfix, the work can be done in any branch. When it's ready to merge, jump to step 3 using your branch instead of <code>master-next</code>.</p>

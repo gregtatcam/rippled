@@ -141,7 +141,7 @@ Modes</h2>
 </ul>
 <p>The other two modes are set internally during the consensus round when the node believes it is no longer working on the dominant ledger chain based on peer validations. It checks this on every call to <code>timerEntry</code>.</p>
 <ul>
-<li><em>Wrong Ledger</em> indicates the node is not working on the correct prior ledger and does not have it available. It requests that ledger from the network, but continues to work towards consensus this round while waiting. If it had been <em>proposing</em>, it will send a special "bowout" proposal to its peers to indicate its change in mode for the rest of this round. For the duration of the round, it defers to peer positions for determining the consensus outcome as if it were just <em>observing</em>.</li>
+<li><em>Wrong Ledger</em> indicates the node is not working on the correct prior ledger and does not have it available. It requests that ledger from the network, but continues to work towards consensus this round while waiting. If it had been <em>proposing</em>, it will send a special "bow-out" proposal to its peers to indicate its change in mode for the rest of this round. For the duration of the round, it defers to peer positions for determining the consensus outcome as if it were just <em>observing</em>.</li>
 <li><em>Switch Ledger</em> indicates that the node has acquired the correct prior ledger from the network. Although it now has the correct prior ledger, the fact that it had the wrong one at some point during this round means it is likely behind and should defer to peer positions for determining the consensus outcome.</li>
 </ul>
 <div class="image">
@@ -312,7 +312,7 @@ PeerProposal</h2>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md155"></a>
 Generic Consensus Interface</h2>
 <p>The generic <code>Consensus</code> relies on <code>Adaptor</code> template class to implement a set of helper functions that plug the consensus algorithm into a specific application. The <code>Adaptor</code> class also defines the types above needed by the algorithm. Below are excerpts of the generic consensus implementation and of helper types that will interact with the concrete implementing class.</p>
-<div class="fragment"><div class="line"><span class="comment">// Represents a transction under dispute this round</span></div>
+<div class="fragment"><div class="line"><span class="comment">// Represents a transaction under dispute this round</span></div>
 <div class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> Tx_t, <span class="keyword">class</span> NodeID_t&gt; <span class="keyword">class </span>DisputedTx;</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Represents how the node participates in Consensus this round</span></div>

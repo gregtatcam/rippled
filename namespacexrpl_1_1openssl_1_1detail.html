@@ -92,7 +92,7 @@ Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:af0e31599c498c0fb0e9f3cebd74c3d3a" id="r_af0e31599c498c0fb0e9f3cebd74c3d3a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1openssl_1_1detail.html#af0e31599c498c0fb0e9f3cebd74c3d3a">defaultRSAKeyBits</a> = 2048</td></tr>
-<tr class="memdesc:af0e31599c498c0fb0e9f3cebd74c3d3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The default strength of self-signed RSA certifices.  <br /></td></tr>
+<tr class="memdesc:af0e31599c498c0fb0e9f3cebd74c3d3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The default strength of self-signed RSA certificates.  <br /></td></tr>
 <tr class="separator:af0e31599c498c0fb0e9f3cebd74c3d3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8190570b8f07b8aa27b9f0f6e39feee" id="r_ae8190570b8f07b8aa27b9f0f6e39feee"><td class="memItemLeft" align="right" valign="top">static constexpr char const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1openssl_1_1detail.html#ae8190570b8f07b8aa27b9f0f6e39feee">defaultDH</a> []</td></tr>
 <tr class="memdesc:ae8190570b8f07b8aa27b9f0f6e39feee"><td class="mdescLeft">&#160;</td><td class="mdescRight">The default DH parameters.  <br /></td></tr>
@@ -213,7 +213,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>The default strength of self-signed RSA certifices. </p>
+<p>The default strength of self-signed RSA certificates. </p>
 <p>Per NIST Special Publication 800-57 Part 3, 2048-bit RSA is still considered acceptably secure. Generally, we would want to go above and beyond such recommendations (e.g. by using 3072 or 4096 bits) but there is a computational cost associated with that may not be worth paying, considering that:</p>
 <ul>
 <li>We regenerate a new ephemeral certificate and a securely generated random private key every time the server is started; and</li>

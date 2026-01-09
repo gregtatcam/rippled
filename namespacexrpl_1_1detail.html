@@ -389,10 +389,10 @@ Functions</h2></td></tr>
 <tr class="memdesc:a6309f4e818b32fe5f521d3d9f86d79fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">getNewestLedgerInfo Returns info of newest saved ledger.  <br /></td></tr>
 <tr class="separator:a6309f4e818b32fe5f521d3d9f86d79fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a682930778556e0a2d9c3a50be02fe562" id="r_a682930778556e0a2d9c3a50be02fe562"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structxrpl_1_1LedgerHeader.html">LedgerHeader</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a682930778556e0a2d9c3a50be02fe562">getLimitedOldestLedgerInfo</a> (soci::session &amp;session, <a class="el" href="namespacexrpl.html#a93f5d90cfd55a948d64156c16029ad9b">LedgerIndex</a> ledgerFirstIndex, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:a682930778556e0a2d9c3a50be02fe562"><td class="mdescLeft">&#160;</td><td class="mdescRight">getLimitedOldestLedgerInfo Returns info of oldest ledger from ledgers with sequences greather or equal to given.  <br /></td></tr>
+<tr class="memdesc:a682930778556e0a2d9c3a50be02fe562"><td class="mdescLeft">&#160;</td><td class="mdescRight">getLimitedOldestLedgerInfo Returns info of oldest ledger from ledgers with sequences greater or equal to given.  <br /></td></tr>
 <tr class="separator:a682930778556e0a2d9c3a50be02fe562"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd06e0eec3243042a0c1418d73f0e28d" id="r_acd06e0eec3243042a0c1418d73f0e28d"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structxrpl_1_1LedgerHeader.html">LedgerHeader</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#acd06e0eec3243042a0c1418d73f0e28d">getLimitedNewestLedgerInfo</a> (soci::session &amp;session, <a class="el" href="namespacexrpl.html#a93f5d90cfd55a948d64156c16029ad9b">LedgerIndex</a> ledgerFirstIndex, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:acd06e0eec3243042a0c1418d73f0e28d"><td class="mdescLeft">&#160;</td><td class="mdescRight">getLimitedNewestLedgerInfo Returns info of newest ledger from ledgers with sequences greather or equal to given.  <br /></td></tr>
+<tr class="memdesc:acd06e0eec3243042a0c1418d73f0e28d"><td class="mdescLeft">&#160;</td><td class="mdescRight">getLimitedNewestLedgerInfo Returns info of newest ledger from ledgers with sequences greater or equal to given.  <br /></td></tr>
 <tr class="separator:acd06e0eec3243042a0c1418d73f0e28d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a154f188de83bf0288c263e5c7bc3381c" id="r_a154f188de83bf0288c263e5c7bc3381c"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structxrpl_1_1LedgerHeader.html">LedgerHeader</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a154f188de83bf0288c263e5c7bc3381c">getLedgerInfoByHash</a> (soci::session &amp;session, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> const  &amp;ledgerHash, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="memdesc:a154f188de83bf0288c263e5c7bc3381c"><td class="mdescLeft">&#160;</td><td class="mdescRight">getLedgerInfoByHash Returns info of ledger with given hash.  <br /></td></tr>
@@ -404,7 +404,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:afe456f4863105acdfd027476aaaf1a7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">getHashesByIndex Returns hash of the ledger and hash of parent ledger for the ledger of given sequence.  <br /></td></tr>
 <tr class="separator:afe456f4863105acdfd027476aaaf1a7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ab3857dc88455358307e1fedd8ebc8d" id="r_a4ab3857dc88455358307e1fedd8ebc8d"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/map.html">std::map</a>&lt; <a class="el" href="namespacexrpl.html#a93f5d90cfd55a948d64156c16029ad9b">LedgerIndex</a>, <a class="el" href="structxrpl_1_1LedgerHashPair.html">LedgerHashPair</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a4ab3857dc88455358307e1fedd8ebc8d">getHashesByIndex</a> (soci::session &amp;session, <a class="el" href="namespacexrpl.html#a93f5d90cfd55a948d64156c16029ad9b">LedgerIndex</a> minSeq, <a class="el" href="namespacexrpl.html#a93f5d90cfd55a948d64156c16029ad9b">LedgerIndex</a> maxSeq, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="memdesc:a4ab3857dc88455358307e1fedd8ebc8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">getHashesByIndex Returns hash of the ledger and hash of parent ledger for all ledgers with seqyences from given minimum limit to fiven maximum limit.  <br /></td></tr>
+<tr class="memdesc:a4ab3857dc88455358307e1fedd8ebc8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">getHashesByIndex Returns hash of the ledger and hash of parent ledger for all ledgers with sequences from given minimum limit to given maximum limit.  <br /></td></tr>
 <tr class="separator:a4ab3857dc88455358307e1fedd8ebc8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55fbf6f112a1783b1ed947bc23bed41f" id="r_a55fbf6f112a1783b1ed947bc23bed41f"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="classxrpl_1_1Transaction.html">Transaction</a> &gt; &gt;, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a55fbf6f112a1783b1ed947bc23bed41f">getTxHistory</a> (soci::session &amp;session, <a class="el" href="classxrpl_1_1Application.html">Application</a> &amp;app, <a class="el" href="namespacexrpl.html#a93f5d90cfd55a948d64156c16029ad9b">LedgerIndex</a> startIndex, int quantity)</td></tr>
 <tr class="memdesc:a55fbf6f112a1783b1ed947bc23bed41f"><td class="mdescLeft">&#160;</td><td class="mdescRight">getTxHistory Returns given number of most recent transactions starting from given number of entry.  <br /></td></tr>
@@ -2592,7 +2592,7 @@ template&lt;class T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Struct <a class="el" href="structxrpl_1_1detail_1_1DatabasePairValid.html">DatabasePairValid</a> which contain unique pointers to ledger and transaction databases and flag if opening was successfull. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Struct <a class="el" href="structxrpl_1_1detail_1_1DatabasePairValid.html">DatabasePairValid</a> which contain unique pointers to ledger and transaction databases and flag if opening was successful. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00051">51</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
@@ -2905,7 +2905,7 @@ template&lt;class T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>True is saving was successfull. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True is saving was successful. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00172">172</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
@@ -3085,7 +3085,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>getLimitedOldestLedgerInfo Returns info of oldest ledger from ledgers with sequences greather or equal to given. </p>
+<p>getLimitedOldestLedgerInfo Returns info of oldest ledger from ledgers with sequences greater or equal to given. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">session</td><td><a class="el" href="classxrpl_1_1Session.html" title="Persistent state information for a connection session.">Session</a> with database. </td></tr>
@@ -3132,7 +3132,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>getLimitedNewestLedgerInfo Returns info of newest ledger from ledgers with sequences greather or equal to given. </p>
+<p>getLimitedNewestLedgerInfo Returns info of newest ledger from ledgers with sequences greater or equal to given. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">session</td><td><a class="el" href="classxrpl_1_1Session.html" title="Persistent state information for a connection session.">Session</a> with database. </td></tr>
@@ -3319,7 +3319,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>getHashesByIndex Returns hash of the ledger and hash of parent ledger for all ledgers with seqyences from given minimum limit to fiven maximum limit. </p>
+<p>getHashesByIndex Returns hash of the ledger and hash of parent ledger for all ledgers with sequences from given minimum limit to given maximum limit. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">session</td><td><a class="el" href="classxrpl_1_1Session.html" title="Persistent state information for a connection session.">Session</a> with database. </td></tr>
@@ -4100,7 +4100,7 @@ template&lt;class T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Transaction.html">Transaction</a> and its metadata if found, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6aa181a603769c1f98ad927e7367c7aa51">TxSearched::all</a> if range given and all ledgers from range are present in the database, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6a03d59e663c1af9ac33a9949d1193505a">TxSearched::some</a> if range given and not all ledgers are present, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6aad921d60486366258809553a3db49a4a">TxSearched::unknown</a> if range not given or deserializing error occured. In the last case error code modified in ec link parameter, in other cases default error code remained. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Transaction.html">Transaction</a> and its metadata if found, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6aa181a603769c1f98ad927e7367c7aa51">TxSearched::all</a> if range given and all ledgers from range are present in the database, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6a03d59e663c1af9ac33a9949d1193505a">TxSearched::some</a> if range given and not all ledgers are present, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6aad921d60486366258809553a3db49a4a">TxSearched::unknown</a> if range not given or deserializing error occurred. In the last case error code modified in ec link parameter, in other cases default error code remained. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01185">1185</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 

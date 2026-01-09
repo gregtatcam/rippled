@@ -383,7 +383,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="keyword">protected</span>:</div>
 <div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uintptr_t</a> <span class="keyword">const</span> id_;</div>
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    <span class="comment">// session is owned by the DatabaseCon parent that holds the checkpointer.</span></div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    <span class="comment">// It is possible (tho rare) for the DatabaseCon class to be destoryed</span></div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    <span class="comment">// It is possible (though rare) for the DatabaseCon class to be destroyed</span></div>
 <div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <span class="comment">// before the checkpointer.</span></div>
 <div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/memory/weak_ptr.html">std::weak_ptr&lt;soci::session&gt;</a> session_;</div>
 <div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/thread/mutex.html">std::mutex</a> mutex_;</div>

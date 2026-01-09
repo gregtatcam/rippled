@@ -273,7 +273,7 @@ Overview</h2>
 <h2><a class="anchor" id="autotoc_md281"></a>
 Operations</h2>
 <p>The ledger cleaner can operate on a single ledger or a range of ledgers. It always validates the ledger chain itself, ensuring that the SQLite database contains a consistent chain of ledgers from the last validated ledger as far back as the database goes.</p>
-<p>If requested, it can additionally repair the SQLite entries for transactions in each checked ledger. This was primarily intended to repair incorrect entries created by a bug (since fixed) that could cause transasctions from a ledger other than the fully-validated ledger to appear in the SQLite databases in addition to the transactions from the correct ledger.</p>
+<p>If requested, it can additionally repair the SQLite entries for transactions in each checked ledger. This was primarily intended to repair incorrect entries created by a bug (since fixed) that could cause transactions from a ledger other than the fully-validated ledger to appear in the SQLite databases in addition to the transactions from the correct ledger.</p>
 <p>If requested, it can additionally check the ledger for missing entries in the account state and transaction trees.</p>
 <p>To prevent the ledger cleaner from saturating the available I/O bandwidth and excessively polluting caches with ancient information, the ledger cleaner paces itself and does not attempt to get its work done quickly.</p>
 <h2><a class="anchor" id="autotoc_md282"></a>

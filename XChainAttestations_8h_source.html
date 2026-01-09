@@ -118,12 +118,12 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="comment">// Account on the sending chain that triggered the event (sent the</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="comment">// transaction)</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structxrpl_1_1Attestations_1_1AttestationBase.html#a3d76ae15184c9541ee26da8736841cd8">   35</a></span>    <a class="code hl_class" href="classxrpl_1_1base__uint.html">AccountID</a> <a class="code hl_variable" href="structxrpl_1_1Attestations_1_1AttestationBase.html#a3d76ae15184c9541ee26da8736841cd8">sendingAccount</a>;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// Amount transfered on the sending chain</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="comment">// Amount transferred on the sending chain</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="structxrpl_1_1Attestations_1_1AttestationBase.html#a59756d62244ce625e18fe2833b0d61da">   37</a></span>    <a class="code hl_class" href="classxrpl_1_1STAmount.html">STAmount</a> <a class="code hl_variable" href="structxrpl_1_1Attestations_1_1AttestationBase.html#a59756d62244ce625e18fe2833b0d61da">sendingAmount</a>;</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="comment">// Account on the destination chain that collects a share of the attestation</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    <span class="comment">// reward</span></div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="structxrpl_1_1Attestations_1_1AttestationBase.html#afbc4c271387d612a237b6a7231486021">   40</a></span>    <a class="code hl_class" href="classxrpl_1_1base__uint.html">AccountID</a> <a class="code hl_variable" href="structxrpl_1_1Attestations_1_1AttestationBase.html#afbc4c271387d612a237b6a7231486021">rewardAccount</a>;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// Amount was transfered on the locking chain</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// Amount was transferred on the locking chain</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="structxrpl_1_1Attestations_1_1AttestationBase.html#a4200b7f483a9f1592e37a6097ccbe91a">   42</a></span>    <span class="keywordtype">bool</span> <a class="code hl_variable" href="structxrpl_1_1Attestations_1_1AttestationBase.html#a4200b7f483a9f1592e37a6097ccbe91a">wasLockingChainSend</a>;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    <span class="keyword">explicit</span> <a class="code hl_struct" href="structxrpl_1_1Attestations_1_1AttestationBase.html">AttestationBase</a>(</div>
@@ -465,7 +465,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>};</div>
 </div>
 <div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span> </div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span><span class="comment">// Attestations from witness servers for a particular claimid and bridge.</span></div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span><span class="comment">// Attestations from witness servers for a particular claim ID and bridge.</span></div>
 <div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span><span class="comment">// Only one attestation per signature is allowed.</span></div>
 <div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> TAttestation&gt;</div>
 <div class="foldopen" id="foldopen00360" data-start="{" data-end="};">

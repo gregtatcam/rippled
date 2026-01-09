@@ -644,12 +644,12 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>            <span class="keyword">auto</span> escrow = [](<a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1Account.html">Account</a> <span class="keyword">const</span>&amp; account,</div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>                             <a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1Account.html">Account</a> <span class="keyword">const</span>&amp; to,</div>
 <div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>                             <a class="code hl_class" href="classxrpl_1_1STAmount.html">STAmount</a> <span class="keyword">const</span>&amp; <a class="code hl_variable" href="namespacexrpl_1_1test_1_1jtx.html#aa2d8284d8eff3443e0f8ada927a97858">amount</a>) {</div>
-<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>                <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> escro;</div>
-<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>                escro[jss::TransactionType] = jss::EscrowCreate;</div>
-<div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>                escro[jss::Account] = account.human();</div>
-<div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>                escro[jss::Destination] = to.human();</div>
-<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>                escro[jss::Amount] = <a class="code hl_variable" href="namespacexrpl_1_1test_1_1jtx.html#aa2d8284d8eff3443e0f8ada927a97858">amount</a>.getJson(<a class="code hl_enumvalue" href="structxrpl_1_1JsonOptions.html#a248f4c1cb1b2fe05b58678f32307570ba1a97822ca421424f4fc466f09db227a6">JsonOptions::none</a>);</div>
-<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>                <span class="keywordflow">return</span> escro;</div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>                <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> escrow;</div>
+<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>                escrow[jss::TransactionType] = jss::EscrowCreate;</div>
+<div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>                escrow[jss::Account] = account.human();</div>
+<div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>                escrow[jss::Destination] = to.human();</div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>                escrow[jss::Amount] = <a class="code hl_variable" href="namespacexrpl_1_1test_1_1jtx.html#aa2d8284d8eff3443e0f8ada927a97858">amount</a>.getJson(<a class="code hl_enumvalue" href="structxrpl_1_1JsonOptions.html#a248f4c1cb1b2fe05b58678f32307570ba1a97822ca421424f4fc466f09db227a6">JsonOptions::none</a>);</div>
+<div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>                <span class="keywordflow">return</span> escrow;</div>
 <div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>            };</div>
 <div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span> </div>
 <div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>            <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/time_point.html">NetClock::time_point</a> <span class="keyword">const</span> nextTime{env.<a class="code hl_function" href="classxrpl_1_1test_1_1jtx_1_1Env.html#afc1be82a2d1572220adef1b06e2fda54">now</a>() + 2s};</div>
@@ -744,7 +744,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span>            env.<a class="code hl_function" href="classxrpl_1_1test_1_1jtx_1_1Env.html#a0e3c16e11ba7ddebd9d9eb1112f59dce">close</a>();</div>
 <div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>        }</div>
 <div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>        {</div>
-<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>            <span class="comment">// Deposit preauthorization with a Ticket.</span></div>
+<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>            <span class="comment">// Deposit pre-authorization with a Ticket.</span></div>
 <div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>            <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> <span class="keyword">const</span> tktSeq{env.<a class="code hl_function" href="classxrpl_1_1test_1_1jtx_1_1Env.html#a7e2bf847bf817405a5d8db448d8b4f6f">seq</a>(alice) + 1};</div>
 <div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>            env(<a class="code hl_function" href="namespacexrpl_1_1test_1_1jtx_1_1ticket.html#a0b1ad4f987824c55b472d3546e06cebf">ticket::create</a>(alice, 1), <a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1sig.html">sig</a>(alie));</div>
 <div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>            env.<a class="code hl_function" href="classxrpl_1_1test_1_1jtx_1_1Env.html#a0e3c16e11ba7ddebd9d9eb1112f59dce">close</a>();</div>
@@ -883,19 +883,19 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00788" name="l00788"></a><span class="lineno">  788</span>            BEAST_EXPECT(result[jss::result][jss::transactions].isArray());</div>
 <div class="line"><a id="l00789" name="l00789"></a><span class="lineno">  789</span> </div>
 <div class="line"><a id="l00790" name="l00790"></a><span class="lineno">  790</span>            <span class="comment">// The first two transactions listed in sanity haven&#39;t happened yet.</span></div>
-<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>            <span class="keyword">constexpr</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> beckyDeletedOffest = 2;</div>
+<div class="line"><a id="l00791" name="l00791"></a><span class="lineno">  791</span>            <span class="keyword">constexpr</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> beckyDeletedOffset = 2;</div>
 <div class="line"><a id="l00792" name="l00792"></a><span class="lineno">  792</span>            BEAST_EXPECT(</div>
 <div class="line"><a id="l00793" name="l00793"></a><span class="lineno">  793</span>                <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/iterator/size.html">std::size</a>(sanity) ==</div>
 <div class="line"><a id="l00794" name="l00794"></a><span class="lineno">  794</span>                result[jss::result][jss::transactions].size() +</div>
-<div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span>                    beckyDeletedOffest);</div>
+<div class="line"><a id="l00795" name="l00795"></a><span class="lineno">  795</span>                    beckyDeletedOffset);</div>
 <div class="line"><a id="l00796" name="l00796"></a><span class="lineno">  796</span> </div>
 <div class="line"><a id="l00797" name="l00797"></a><span class="lineno">  797</span>            <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> <span class="keyword">const</span>&amp; txs{result[jss::result][jss::transactions]};</div>
 <div class="line"><a id="l00798" name="l00798"></a><span class="lineno">  798</span> </div>
-<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>            <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index = beckyDeletedOffest;</div>
+<div class="line"><a id="l00799" name="l00799"></a><span class="lineno">  799</span>            <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index = beckyDeletedOffset;</div>
 <div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>                 index &lt; <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/iterator/size.html">std::size</a>(sanity);</div>
 <div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>                 ++index)</div>
 <div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>            {</div>
-<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>                <a class="code hl_function" href="classxrpl_1_1test_1_1AccountTx__test.html#aad00015279ad82d3781683016086f6f9">checkSanity</a>(txs[index - beckyDeletedOffest], sanity[index]);</div>
+<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>                <a class="code hl_function" href="classxrpl_1_1test_1_1AccountTx__test.html#aad00015279ad82d3781683016086f6f9">checkSanity</a>(txs[index - beckyDeletedOffset], sanity[index]);</div>
 <div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>            }</div>
 <div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>        }</div>
 <div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span> </div>

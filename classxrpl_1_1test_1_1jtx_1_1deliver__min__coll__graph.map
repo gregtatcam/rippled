@@ -1,5 +1,5 @@
-<map id="xrpl::test::jtx::delivermin" name="xrpl::test::jtx::delivermin">
-<area shape="rect" id="Node000001" title="Sets the DeliverMin on a JTx." alt="" coords="1317,269,1500,294"/>
+<map id="xrpl::test::jtx::deliver_min" name="xrpl::test::jtx::deliver_min">
+<area shape="rect" id="Node000001" title="Sets the DeliverMin on a JTx." alt="" coords="1317,269,1508,294"/>
 <area shape="rect" id="Node000002" href="$classxrpl_1_1STAmount.html" title=" " alt="" coords="1087,269,1208,294"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1222,279,1317,279,1317,284,1222,284"/>
 <area shape="rect" id="Node000003" href="$classxrpl_1_1STBase.html" title="A type which can be exported to a well known binary format." alt="" coords="799,115,902,141"/>

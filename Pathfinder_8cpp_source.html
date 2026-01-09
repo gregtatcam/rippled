@@ -123,7 +123,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">The engine permits the search depth to be selected and the paths table</span></div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">includes the depth at which each path type is found.  A search depth of zero</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">causes no searching to be done.  Extra paths can also be injected, and this</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">should be used to preserve previously-found paths across invokations for the</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">should be used to preserve previously-found paths across invocations for the</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">same path request (particularly if the search depth may change).</span></div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"></span> </div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">*/</span></div>
@@ -1407,7 +1407,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l01292" name="l01292"></a><span class="lineno"> 1292</span><span class="comment">// 1 = include trivial paths to make common cases work</span></div>
 <div class="line"><a id="l01293" name="l01293"></a><span class="lineno"> 1293</span><span class="comment">// 4 = normal fast search level</span></div>
 <div class="line"><a id="l01294" name="l01294"></a><span class="lineno"> 1294</span><span class="comment">// 7 = normal slow search level</span></div>
-<div class="line"><a id="l01295" name="l01295"></a><span class="lineno"> 1295</span><span class="comment">// 10 = most agressive</span></div>
+<div class="line"><a id="l01295" name="l01295"></a><span class="lineno"> 1295</span><span class="comment">// 10 = most aggressive</span></div>
 <div class="line"><a id="l01296" name="l01296"></a><span class="lineno"> 1296</span> </div>
 <div class="line"><a id="l01297" name="l01297"></a><span class="lineno"> 1297</span><span class="keywordtype">void</span></div>
 <div class="foldopen" id="foldopen01298" data-start="{" data-end="}">
@@ -1417,66 +1417,68 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l01301" name="l01301"></a><span class="lineno"> 1301</span> </div>
 <div class="line"><a id="l01302" name="l01302"></a><span class="lineno"> 1302</span>    mPathTable.clear();</div>
 <div class="line"><a id="l01303" name="l01303"></a><span class="lineno"> 1303</span>    fillPaths(<a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea92f028026c7a92eee30a52789ebf792f">pt_XRP_to_XRP</a>, {});</div>
-<div class="line"><a id="l01304" name="l01304"></a><span class="lineno"> 1304</span> </div>
-<div class="line"><a id="l01305" name="l01305"></a><span class="lineno"> 1305</span>    fillPaths(</div>
-<div class="line"><a id="l01306" name="l01306"></a><span class="lineno"> 1306</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea56df14763321810bc5991d635239b29e">pt_XRP_to_nonXRP</a>,</div>
-<div class="line"><a id="l01307" name="l01307"></a><span class="lineno"> 1307</span>        {{1, <span class="stringliteral">&quot;sfd&quot;</span>},    <span class="comment">// source -&gt; book -&gt; gateway</span></div>
-<div class="line"><a id="l01308" name="l01308"></a><span class="lineno"> 1308</span>         {3, <span class="stringliteral">&quot;sfad&quot;</span>},   <span class="comment">// source -&gt; book -&gt; account -&gt; destination</span></div>
-<div class="line"><a id="l01309" name="l01309"></a><span class="lineno"> 1309</span>         {5, <span class="stringliteral">&quot;sfaad&quot;</span>},  <span class="comment">// source -&gt; book -&gt; account -&gt; account -&gt; destination</span></div>
-<div class="line"><a id="l01310" name="l01310"></a><span class="lineno"> 1310</span>         {6, <span class="stringliteral">&quot;sbfd&quot;</span>},   <span class="comment">// source -&gt; book -&gt; book -&gt; destination</span></div>
-<div class="line"><a id="l01311" name="l01311"></a><span class="lineno"> 1311</span>         {8, <span class="stringliteral">&quot;sbafd&quot;</span>},  <span class="comment">// source -&gt; book -&gt; account -&gt; book -&gt; destination</span></div>
-<div class="line"><a id="l01312" name="l01312"></a><span class="lineno"> 1312</span>         {9, <span class="stringliteral">&quot;sbfad&quot;</span>},  <span class="comment">// source -&gt; book -&gt; book -&gt; account -&gt; destination</span></div>
-<div class="line"><a id="l01313" name="l01313"></a><span class="lineno"> 1313</span>         {10, <span class="stringliteral">&quot;sbafad&quot;</span>}});</div>
-<div class="line"><a id="l01314" name="l01314"></a><span class="lineno"> 1314</span> </div>
-<div class="line"><a id="l01315" name="l01315"></a><span class="lineno"> 1315</span>    fillPaths(</div>
-<div class="line"><a id="l01316" name="l01316"></a><span class="lineno"> 1316</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea5b9b262fc8baa493ac203523e1101822">pt_nonXRP_to_XRP</a>,</div>
-<div class="line"><a id="l01317" name="l01317"></a><span class="lineno"> 1317</span>        {{1, <span class="stringliteral">&quot;sxd&quot;</span>},   <span class="comment">// gateway buys XRP</span></div>
-<div class="line"><a id="l01318" name="l01318"></a><span class="lineno"> 1318</span>         {2, <span class="stringliteral">&quot;saxd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book(XRP) -&gt; dest</span></div>
-<div class="line"><a id="l01319" name="l01319"></a><span class="lineno"> 1319</span>         {6, <span class="stringliteral">&quot;saaxd&quot;</span>},</div>
-<div class="line"><a id="l01320" name="l01320"></a><span class="lineno"> 1320</span>         {7, <span class="stringliteral">&quot;sbxd&quot;</span>},</div>
-<div class="line"><a id="l01321" name="l01321"></a><span class="lineno"> 1321</span>         {8, <span class="stringliteral">&quot;sabxd&quot;</span>},</div>
-<div class="line"><a id="l01322" name="l01322"></a><span class="lineno"> 1322</span>         {9, <span class="stringliteral">&quot;sabaxd&quot;</span>}});</div>
-<div class="line"><a id="l01323" name="l01323"></a><span class="lineno"> 1323</span> </div>
-<div class="line"><a id="l01324" name="l01324"></a><span class="lineno"> 1324</span>    <span class="comment">// non-XRP to non-XRP (same currency)</span></div>
-<div class="line"><a id="l01325" name="l01325"></a><span class="lineno"> 1325</span>    fillPaths(</div>
-<div class="line"><a id="l01326" name="l01326"></a><span class="lineno"> 1326</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea5cd39ed91076611d8b7204a478847190">pt_nonXRP_to_same</a>,</div>
-<div class="line"><a id="l01327" name="l01327"></a><span class="lineno"> 1327</span>        {</div>
-<div class="line"><a id="l01328" name="l01328"></a><span class="lineno"> 1328</span>            {1, <span class="stringliteral">&quot;sad&quot;</span>},   <span class="comment">// source -&gt; gateway -&gt; destination</span></div>
-<div class="line"><a id="l01329" name="l01329"></a><span class="lineno"> 1329</span>            {1, <span class="stringliteral">&quot;sfd&quot;</span>},   <span class="comment">// source -&gt; book -&gt; destination</span></div>
-<div class="line"><a id="l01330" name="l01330"></a><span class="lineno"> 1330</span>            {4, <span class="stringliteral">&quot;safd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book -&gt; destination</span></div>
-<div class="line"><a id="l01331" name="l01331"></a><span class="lineno"> 1331</span>            {4, <span class="stringliteral">&quot;sfad&quot;</span>},</div>
-<div class="line"><a id="l01332" name="l01332"></a><span class="lineno"> 1332</span>            {5, <span class="stringliteral">&quot;saad&quot;</span>},</div>
-<div class="line"><a id="l01333" name="l01333"></a><span class="lineno"> 1333</span>            {5, <span class="stringliteral">&quot;sbfd&quot;</span>},</div>
-<div class="line"><a id="l01334" name="l01334"></a><span class="lineno"> 1334</span>            {6, <span class="stringliteral">&quot;sxfad&quot;</span>},</div>
-<div class="line"><a id="l01335" name="l01335"></a><span class="lineno"> 1335</span>            {6, <span class="stringliteral">&quot;safad&quot;</span>},</div>
-<div class="line"><a id="l01336" name="l01336"></a><span class="lineno"> 1336</span>            {6, <span class="stringliteral">&quot;saxfd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book to XRP -&gt; book -&gt;</span></div>
-<div class="line"><a id="l01337" name="l01337"></a><span class="lineno"> 1337</span>                           <span class="comment">// destination</span></div>
-<div class="line"><a id="l01338" name="l01338"></a><span class="lineno"> 1338</span>            {6, <span class="stringliteral">&quot;saxfad&quot;</span>},</div>
-<div class="line"><a id="l01339" name="l01339"></a><span class="lineno"> 1339</span>            {6, <span class="stringliteral">&quot;sabfd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book -&gt; book -&gt; destination</span></div>
-<div class="line"><a id="l01340" name="l01340"></a><span class="lineno"> 1340</span>            {7, <span class="stringliteral">&quot;saaad&quot;</span>},</div>
-<div class="line"><a id="l01341" name="l01341"></a><span class="lineno"> 1341</span>        });</div>
-<div class="line"><a id="l01342" name="l01342"></a><span class="lineno"> 1342</span> </div>
-<div class="line"><a id="l01343" name="l01343"></a><span class="lineno"> 1343</span>    <span class="comment">// non-XRP to non-XRP (different currency)</span></div>
-<div class="line"><a id="l01344" name="l01344"></a><span class="lineno"> 1344</span>    fillPaths(</div>
-<div class="line"><a id="l01345" name="l01345"></a><span class="lineno"> 1345</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea28084c4e864daf270d4b14ba72123ce8">pt_nonXRP_to_nonXRP</a>,</div>
-<div class="line"><a id="l01346" name="l01346"></a><span class="lineno"> 1346</span>        {</div>
-<div class="line"><a id="l01347" name="l01347"></a><span class="lineno"> 1347</span>            {1, <span class="stringliteral">&quot;sfad&quot;</span>},</div>
-<div class="line"><a id="l01348" name="l01348"></a><span class="lineno"> 1348</span>            {1, <span class="stringliteral">&quot;safd&quot;</span>},</div>
-<div class="line"><a id="l01349" name="l01349"></a><span class="lineno"> 1349</span>            {3, <span class="stringliteral">&quot;safad&quot;</span>},</div>
-<div class="line"><a id="l01350" name="l01350"></a><span class="lineno"> 1350</span>            {4, <span class="stringliteral">&quot;sxfd&quot;</span>},</div>
-<div class="line"><a id="l01351" name="l01351"></a><span class="lineno"> 1351</span>            {5, <span class="stringliteral">&quot;saxfd&quot;</span>},</div>
-<div class="line"><a id="l01352" name="l01352"></a><span class="lineno"> 1352</span>            {5, <span class="stringliteral">&quot;sxfad&quot;</span>},</div>
-<div class="line"><a id="l01353" name="l01353"></a><span class="lineno"> 1353</span>            {5, <span class="stringliteral">&quot;sbfd&quot;</span>},</div>
-<div class="line"><a id="l01354" name="l01354"></a><span class="lineno"> 1354</span>            {6, <span class="stringliteral">&quot;saxfad&quot;</span>},</div>
-<div class="line"><a id="l01355" name="l01355"></a><span class="lineno"> 1355</span>            {6, <span class="stringliteral">&quot;sabfd&quot;</span>},</div>
-<div class="line"><a id="l01356" name="l01356"></a><span class="lineno"> 1356</span>            {7, <span class="stringliteral">&quot;saafd&quot;</span>},</div>
-<div class="line"><a id="l01357" name="l01357"></a><span class="lineno"> 1357</span>            {8, <span class="stringliteral">&quot;saafad&quot;</span>},</div>
-<div class="line"><a id="l01358" name="l01358"></a><span class="lineno"> 1358</span>            {9, <span class="stringliteral">&quot;safaad&quot;</span>},</div>
-<div class="line"><a id="l01359" name="l01359"></a><span class="lineno"> 1359</span>        });</div>
-<div class="line"><a id="l01360" name="l01360"></a><span class="lineno"> 1360</span>}</div>
+<div class="line"><a id="l01304" name="l01304"></a><span class="lineno"> 1304</span>    <span class="comment">/* cspell: disable */</span></div>
+<div class="line"><a id="l01305" name="l01305"></a><span class="lineno"> 1305</span> </div>
+<div class="line"><a id="l01306" name="l01306"></a><span class="lineno"> 1306</span>    fillPaths(</div>
+<div class="line"><a id="l01307" name="l01307"></a><span class="lineno"> 1307</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea56df14763321810bc5991d635239b29e">pt_XRP_to_nonXRP</a>,</div>
+<div class="line"><a id="l01308" name="l01308"></a><span class="lineno"> 1308</span>        {{1, <span class="stringliteral">&quot;sfd&quot;</span>},    <span class="comment">// source -&gt; book -&gt; gateway</span></div>
+<div class="line"><a id="l01309" name="l01309"></a><span class="lineno"> 1309</span>         {3, <span class="stringliteral">&quot;sfad&quot;</span>},   <span class="comment">// source -&gt; book -&gt; account -&gt; destination</span></div>
+<div class="line"><a id="l01310" name="l01310"></a><span class="lineno"> 1310</span>         {5, <span class="stringliteral">&quot;sfaad&quot;</span>},  <span class="comment">// source -&gt; book -&gt; account -&gt; account -&gt; destination</span></div>
+<div class="line"><a id="l01311" name="l01311"></a><span class="lineno"> 1311</span>         {6, <span class="stringliteral">&quot;sbfd&quot;</span>},   <span class="comment">// source -&gt; book -&gt; book -&gt; destination</span></div>
+<div class="line"><a id="l01312" name="l01312"></a><span class="lineno"> 1312</span>         {8, <span class="stringliteral">&quot;sbafd&quot;</span>},  <span class="comment">// source -&gt; book -&gt; account -&gt; book -&gt; destination</span></div>
+<div class="line"><a id="l01313" name="l01313"></a><span class="lineno"> 1313</span>         {9, <span class="stringliteral">&quot;sbfad&quot;</span>},  <span class="comment">// source -&gt; book -&gt; book -&gt; account -&gt; destination</span></div>
+<div class="line"><a id="l01314" name="l01314"></a><span class="lineno"> 1314</span>         {10, <span class="stringliteral">&quot;sbafad&quot;</span>}});</div>
+<div class="line"><a id="l01315" name="l01315"></a><span class="lineno"> 1315</span> </div>
+<div class="line"><a id="l01316" name="l01316"></a><span class="lineno"> 1316</span>    fillPaths(</div>
+<div class="line"><a id="l01317" name="l01317"></a><span class="lineno"> 1317</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea5b9b262fc8baa493ac203523e1101822">pt_nonXRP_to_XRP</a>,</div>
+<div class="line"><a id="l01318" name="l01318"></a><span class="lineno"> 1318</span>        {{1, <span class="stringliteral">&quot;sxd&quot;</span>},   <span class="comment">// gateway buys XRP</span></div>
+<div class="line"><a id="l01319" name="l01319"></a><span class="lineno"> 1319</span>         {2, <span class="stringliteral">&quot;saxd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book(XRP) -&gt; dest</span></div>
+<div class="line"><a id="l01320" name="l01320"></a><span class="lineno"> 1320</span>         {6, <span class="stringliteral">&quot;saaxd&quot;</span>},</div>
+<div class="line"><a id="l01321" name="l01321"></a><span class="lineno"> 1321</span>         {7, <span class="stringliteral">&quot;sbxd&quot;</span>},</div>
+<div class="line"><a id="l01322" name="l01322"></a><span class="lineno"> 1322</span>         {8, <span class="stringliteral">&quot;sabxd&quot;</span>},</div>
+<div class="line"><a id="l01323" name="l01323"></a><span class="lineno"> 1323</span>         {9, <span class="stringliteral">&quot;sabaxd&quot;</span>}});</div>
+<div class="line"><a id="l01324" name="l01324"></a><span class="lineno"> 1324</span> </div>
+<div class="line"><a id="l01325" name="l01325"></a><span class="lineno"> 1325</span>    <span class="comment">// non-XRP to non-XRP (same currency)</span></div>
+<div class="line"><a id="l01326" name="l01326"></a><span class="lineno"> 1326</span>    fillPaths(</div>
+<div class="line"><a id="l01327" name="l01327"></a><span class="lineno"> 1327</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea5cd39ed91076611d8b7204a478847190">pt_nonXRP_to_same</a>,</div>
+<div class="line"><a id="l01328" name="l01328"></a><span class="lineno"> 1328</span>        {</div>
+<div class="line"><a id="l01329" name="l01329"></a><span class="lineno"> 1329</span>            {1, <span class="stringliteral">&quot;sad&quot;</span>},   <span class="comment">// source -&gt; gateway -&gt; destination</span></div>
+<div class="line"><a id="l01330" name="l01330"></a><span class="lineno"> 1330</span>            {1, <span class="stringliteral">&quot;sfd&quot;</span>},   <span class="comment">// source -&gt; book -&gt; destination</span></div>
+<div class="line"><a id="l01331" name="l01331"></a><span class="lineno"> 1331</span>            {4, <span class="stringliteral">&quot;safd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book -&gt; destination</span></div>
+<div class="line"><a id="l01332" name="l01332"></a><span class="lineno"> 1332</span>            {4, <span class="stringliteral">&quot;sfad&quot;</span>},</div>
+<div class="line"><a id="l01333" name="l01333"></a><span class="lineno"> 1333</span>            {5, <span class="stringliteral">&quot;saad&quot;</span>},</div>
+<div class="line"><a id="l01334" name="l01334"></a><span class="lineno"> 1334</span>            {5, <span class="stringliteral">&quot;sbfd&quot;</span>},</div>
+<div class="line"><a id="l01335" name="l01335"></a><span class="lineno"> 1335</span>            {6, <span class="stringliteral">&quot;sxfad&quot;</span>},</div>
+<div class="line"><a id="l01336" name="l01336"></a><span class="lineno"> 1336</span>            {6, <span class="stringliteral">&quot;safad&quot;</span>},</div>
+<div class="line"><a id="l01337" name="l01337"></a><span class="lineno"> 1337</span>            {6, <span class="stringliteral">&quot;saxfd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book to XRP -&gt; book -&gt;</span></div>
+<div class="line"><a id="l01338" name="l01338"></a><span class="lineno"> 1338</span>                           <span class="comment">// destination</span></div>
+<div class="line"><a id="l01339" name="l01339"></a><span class="lineno"> 1339</span>            {6, <span class="stringliteral">&quot;saxfad&quot;</span>},</div>
+<div class="line"><a id="l01340" name="l01340"></a><span class="lineno"> 1340</span>            {6, <span class="stringliteral">&quot;sabfd&quot;</span>},  <span class="comment">// source -&gt; gateway -&gt; book -&gt; book -&gt; destination</span></div>
+<div class="line"><a id="l01341" name="l01341"></a><span class="lineno"> 1341</span>            {7, <span class="stringliteral">&quot;saaad&quot;</span>},</div>
+<div class="line"><a id="l01342" name="l01342"></a><span class="lineno"> 1342</span>        });</div>
+<div class="line"><a id="l01343" name="l01343"></a><span class="lineno"> 1343</span> </div>
+<div class="line"><a id="l01344" name="l01344"></a><span class="lineno"> 1344</span>    <span class="comment">// non-XRP to non-XRP (different currency)</span></div>
+<div class="line"><a id="l01345" name="l01345"></a><span class="lineno"> 1345</span>    fillPaths(</div>
+<div class="line"><a id="l01346" name="l01346"></a><span class="lineno"> 1346</span>        <a class="code hl_enumvalue" href="classxrpl_1_1Pathfinder.html#a981c298e423415a93a898e6529ea2a5ea28084c4e864daf270d4b14ba72123ce8">pt_nonXRP_to_nonXRP</a>,</div>
+<div class="line"><a id="l01347" name="l01347"></a><span class="lineno"> 1347</span>        {</div>
+<div class="line"><a id="l01348" name="l01348"></a><span class="lineno"> 1348</span>            {1, <span class="stringliteral">&quot;sfad&quot;</span>},</div>
+<div class="line"><a id="l01349" name="l01349"></a><span class="lineno"> 1349</span>            {1, <span class="stringliteral">&quot;safd&quot;</span>},</div>
+<div class="line"><a id="l01350" name="l01350"></a><span class="lineno"> 1350</span>            {3, <span class="stringliteral">&quot;safad&quot;</span>},</div>
+<div class="line"><a id="l01351" name="l01351"></a><span class="lineno"> 1351</span>            {4, <span class="stringliteral">&quot;sxfd&quot;</span>},</div>
+<div class="line"><a id="l01352" name="l01352"></a><span class="lineno"> 1352</span>            {5, <span class="stringliteral">&quot;saxfd&quot;</span>},</div>
+<div class="line"><a id="l01353" name="l01353"></a><span class="lineno"> 1353</span>            {5, <span class="stringliteral">&quot;sxfad&quot;</span>},</div>
+<div class="line"><a id="l01354" name="l01354"></a><span class="lineno"> 1354</span>            {5, <span class="stringliteral">&quot;sbfd&quot;</span>},</div>
+<div class="line"><a id="l01355" name="l01355"></a><span class="lineno"> 1355</span>            {6, <span class="stringliteral">&quot;saxfad&quot;</span>},</div>
+<div class="line"><a id="l01356" name="l01356"></a><span class="lineno"> 1356</span>            {6, <span class="stringliteral">&quot;sabfd&quot;</span>},</div>
+<div class="line"><a id="l01357" name="l01357"></a><span class="lineno"> 1357</span>            {7, <span class="stringliteral">&quot;saafd&quot;</span>},</div>
+<div class="line"><a id="l01358" name="l01358"></a><span class="lineno"> 1358</span>            {8, <span class="stringliteral">&quot;saafad&quot;</span>},</div>
+<div class="line"><a id="l01359" name="l01359"></a><span class="lineno"> 1359</span>            {9, <span class="stringliteral">&quot;safaad&quot;</span>},</div>
+<div class="line"><a id="l01360" name="l01360"></a><span class="lineno"> 1360</span>        });</div>
+<div class="line"><a id="l01361" name="l01361"></a><span class="lineno"> 1361</span>    <span class="comment">/* cspell: enable */</span></div>
+<div class="line"><a id="l01362" name="l01362"></a><span class="lineno"> 1362</span>}</div>
 </div>
-<div class="line"><a id="l01361" name="l01361"></a><span class="lineno"> 1361</span> </div>
-<div class="line"><a id="l01362" name="l01362"></a><span class="lineno"> 1362</span>}  <span class="comment">// namespace xrpl</span></div>
+<div class="line"><a id="l01363" name="l01363"></a><span class="lineno"> 1363</span> </div>
+<div class="line"><a id="l01364" name="l01364"></a><span class="lineno"> 1364</span>}  <span class="comment">// namespace xrpl</span></div>
 <div class="ttc" id="aappend_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string/append.html">std::string::append</a></div><div class="ttdeci">T append(T... args)</div></div>
 <div class="ttc" id="aback_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/container/vector/back.html">std::vector::back</a></div><div class="ttdeci">T back(T... args)</div></div>
 <div class="ttc" id="abasic_string_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a></div></div>

@@ -141,7 +141,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        <span class="comment">// Initialize timers</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        HeartbeatTimer heart(sim.scheduler, <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/duration.html">seconds</a>(10s));</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="comment">// Run for 10 minues, submitting 100 tx/second</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        <span class="comment">// Run for 10 minutes, submitting 100 tx/second</span></div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/duration.html">std::chrono::nanoseconds</a> <span class="keyword">const</span> simDuration = 10min;</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/chrono/duration.html">std::chrono::nanoseconds</a> <span class="keyword">const</span> quiet = 10s;</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <a class="code hl_struct" href="structxrpl_1_1Rate.html">Rate</a> <span class="keyword">const</span> <a class="code hl_function" href="namespacexrpl_1_1test_1_1jtx.html#a568042fe4ef4385c8f0e4b3d9b393894">rate</a>{100, 1000ms};</div>

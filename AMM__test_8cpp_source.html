@@ -916,10 +916,10 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>        <span class="comment">// Tiny deposit</span></div>
 <div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span>        <a class="code hl_function" href="classxrpl_1_1test_1_1jtx_1_1AMMTestBase.html#aca928797c99dd1f9aab960bfc3168565">testAMM</a>(</div>
 <div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span>            [&amp;](<a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1AMM.html">AMM</a>&amp; ammAlice, <a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1Env.html">Env</a>&amp; env) {</div>
-<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>                <span class="keyword">auto</span> <span class="keyword">const</span> enabledv1_3 =</div>
+<div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>                <span class="keyword">auto</span> <span class="keyword">const</span> enabledV1_3 =</div>
 <div class="line"><a id="l00835" name="l00835"></a><span class="lineno">  835</span>                    env.<a class="code hl_function" href="classxrpl_1_1test_1_1jtx_1_1Env.html#af7f5213163cfb1264ae49e0b4eff1a1e">current</a>()-&gt;rules().enabled(fixAMMv1_3);</div>
 <div class="line"><a id="l00836" name="l00836"></a><span class="lineno">  836</span>                <span class="keyword">auto</span> <span class="keyword">const</span> err =</div>
-<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>                    !enabledv1_3 ? <a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1ter.html">ter</a>(<a class="code hl_enumvalue" href="namespacexrpl.html#ac8c50610643a4f902b9bb9e42d0b00e6aa9a4c76c9c7d2e1fc83581b9ce4d5152">temBAD_AMOUNT</a>) : <a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1ter.html">ter</a>(<a class="code hl_enumvalue" href="namespacexrpl.html#af4adbbe94a1cecf1bd3ad2c76ff1ea3da157dace29a657c58cdeb4f7fa19be976">tesSUCCESS</a>);</div>
+<div class="line"><a id="l00837" name="l00837"></a><span class="lineno">  837</span>                    !enabledV1_3 ? <a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1ter.html">ter</a>(<a class="code hl_enumvalue" href="namespacexrpl.html#ac8c50610643a4f902b9bb9e42d0b00e6aa9a4c76c9c7d2e1fc83581b9ce4d5152">temBAD_AMOUNT</a>) : <a class="code hl_class" href="classxrpl_1_1test_1_1jtx_1_1ter.html">ter</a>(<a class="code hl_enumvalue" href="namespacexrpl.html#af4adbbe94a1cecf1bd3ad2c76ff1ea3da157dace29a657c58cdeb4f7fa19be976">tesSUCCESS</a>);</div>
 <div class="line"><a id="l00838" name="l00838"></a><span class="lineno">  838</span>                <span class="comment">// Pre-amendment XRP deposit side is rounded to 0</span></div>
 <div class="line"><a id="l00839" name="l00839"></a><span class="lineno">  839</span>                <span class="comment">// and deposit fails.</span></div>
 <div class="line"><a id="l00840" name="l00840"></a><span class="lineno">  840</span>                <span class="comment">// Post-amendment XRP deposit side is rounded to 1</span></div>
@@ -2915,7 +2915,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l02818" name="l02818"></a><span class="lineno"> 2818</span>            BEAST_EXPECT(amm.expectAuctionSlot(100, 0, <a class="code hl_class" href="classxrpl_1_1IOUAmount.html">IOUAmount</a>{0}));</div>
 <div class="line"><a id="l02819" name="l02819"></a><span class="lineno"> 2819</span> </div>
 <div class="line"><a id="l02820" name="l02820"></a><span class="lineno"> 2820</span>            <span class="comment">// gw burns all but one of its LPTokens through a bid transaction</span></div>
-<div class="line"><a id="l02821" name="l02821"></a><span class="lineno"> 2821</span>            <span class="comment">// this transaction suceeds because the bid price is less than</span></div>
+<div class="line"><a id="l02821" name="l02821"></a><span class="lineno"> 2821</span>            <span class="comment">// this transaction succeeds because the bid price is less than</span></div>
 <div class="line"><a id="l02822" name="l02822"></a><span class="lineno"> 2822</span>            <span class="comment">// the total outstanding LPToken balance</span></div>
 <div class="line"><a id="l02823" name="l02823"></a><span class="lineno"> 2823</span>            env(amm.bid({</div>
 <div class="line"><a id="l02824" name="l02824"></a><span class="lineno"> 2824</span>                    .account = gw,</div>
@@ -2969,7 +2969,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l02872" name="l02872"></a><span class="lineno"> 2872</span>                    ter(<a class="code hl_enumvalue" href="namespacexrpl.html#ac8c50610643a4f902b9bb9e42d0b00e6aa9a4c76c9c7d2e1fc83581b9ce4d5152">temBAD_AMOUNT</a>));</div>
 <div class="line"><a id="l02873" name="l02873"></a><span class="lineno"> 2873</span>            }</div>
 <div class="line"><a id="l02874" name="l02874"></a><span class="lineno"> 2874</span> </div>
-<div class="line"><a id="l02875" name="l02875"></a><span class="lineno"> 2875</span>            <span class="comment">// Invlaid Min/Max combination</span></div>
+<div class="line"><a id="l02875" name="l02875"></a><span class="lineno"> 2875</span>            <span class="comment">// Invalid Min/Max combination</span></div>
 <div class="line"><a id="l02876" name="l02876"></a><span class="lineno"> 2876</span>            env(ammAlice.<a class="code hl_function" href="classxrpl_1_1test_1_1jtx_1_1AMM.html#a96cc19842dc7bf04d1a30a12ed2dec98">bid</a>({</div>
 <div class="line"><a id="l02877" name="l02877"></a><span class="lineno"> 2877</span>                    .account = carol,</div>
 <div class="line"><a id="l02878" name="l02878"></a><span class="lineno"> 2878</span>                    .bidMin = 200,</div>
@@ -3646,13 +3646,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l03547" name="l03547"></a><span class="lineno"> 3547</span>            {</div>
 <div class="line"><a id="l03548" name="l03548"></a><span class="lineno"> 3548</span>                <span class="keyword">auto</span> jtx = env.jt(tx, seq(1), fee(baseFee));</div>
 <div class="line"><a id="l03549" name="l03549"></a><span class="lineno"> 3549</span>                env.app().config().features.erase(featureAMM);</div>
-<div class="line"><a id="l03550" name="l03550"></a><span class="lineno"> 3550</span>                PreflightContext pfctx(</div>
+<div class="line"><a id="l03550" name="l03550"></a><span class="lineno"> 3550</span>                PreflightContext pfCtx(</div>
 <div class="line"><a id="l03551" name="l03551"></a><span class="lineno"> 3551</span>                    env.app(),</div>
 <div class="line"><a id="l03552" name="l03552"></a><span class="lineno"> 3552</span>                    *jtx.stx,</div>
 <div class="line"><a id="l03553" name="l03553"></a><span class="lineno"> 3553</span>                    env.current()-&gt;rules(),</div>
 <div class="line"><a id="l03554" name="l03554"></a><span class="lineno"> 3554</span>                    tapNONE,</div>
 <div class="line"><a id="l03555" name="l03555"></a><span class="lineno"> 3555</span>                    env.journal);</div>
-<div class="line"><a id="l03556" name="l03556"></a><span class="lineno"> 3556</span>                <span class="keyword">auto</span> pf = Transactor::invokePreflight&lt;AMMBid&gt;(pfctx);</div>
+<div class="line"><a id="l03556" name="l03556"></a><span class="lineno"> 3556</span>                <span class="keyword">auto</span> pf = Transactor::invokePreflight&lt;AMMBid&gt;(pfCtx);</div>
 <div class="line"><a id="l03557" name="l03557"></a><span class="lineno"> 3557</span>                BEAST_EXPECT(pf == temDISABLED);</div>
 <div class="line"><a id="l03558" name="l03558"></a><span class="lineno"> 3558</span>                env.app().config().features.insert(featureAMM);</div>
 <div class="line"><a id="l03559" name="l03559"></a><span class="lineno"> 3559</span>            }</div>
@@ -3661,13 +3661,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l03562" name="l03562"></a><span class="lineno"> 3562</span>                <span class="keyword">auto</span> jtx = env.jt(tx, seq(1), fee(baseFee));</div>
 <div class="line"><a id="l03563" name="l03563"></a><span class="lineno"> 3563</span>                jtx.jv[<span class="stringliteral">&quot;TxnSignature&quot;</span>] = <span class="stringliteral">&quot;deadbeef&quot;</span>;</div>
 <div class="line"><a id="l03564" name="l03564"></a><span class="lineno"> 3564</span>                jtx.stx = env.ust(jtx);</div>
-<div class="line"><a id="l03565" name="l03565"></a><span class="lineno"> 3565</span>                PreflightContext pfctx(</div>
+<div class="line"><a id="l03565" name="l03565"></a><span class="lineno"> 3565</span>                PreflightContext pfCtx(</div>
 <div class="line"><a id="l03566" name="l03566"></a><span class="lineno"> 3566</span>                    env.app(),</div>
 <div class="line"><a id="l03567" name="l03567"></a><span class="lineno"> 3567</span>                    *jtx.stx,</div>
 <div class="line"><a id="l03568" name="l03568"></a><span class="lineno"> 3568</span>                    env.current()-&gt;rules(),</div>
 <div class="line"><a id="l03569" name="l03569"></a><span class="lineno"> 3569</span>                    tapNONE,</div>
 <div class="line"><a id="l03570" name="l03570"></a><span class="lineno"> 3570</span>                    env.journal);</div>
-<div class="line"><a id="l03571" name="l03571"></a><span class="lineno"> 3571</span>                <span class="keyword">auto</span> pf = Transactor::invokePreflight&lt;AMMBid&gt;(pfctx);</div>
+<div class="line"><a id="l03571" name="l03571"></a><span class="lineno"> 3571</span>                <span class="keyword">auto</span> pf = Transactor::invokePreflight&lt;AMMBid&gt;(pfCtx);</div>
 <div class="line"><a id="l03572" name="l03572"></a><span class="lineno"> 3572</span>                BEAST_EXPECT(pf != tesSUCCESS);</div>
 <div class="line"><a id="l03573" name="l03573"></a><span class="lineno"> 3573</span>            }</div>
 <div class="line"><a id="l03574" name="l03574"></a><span class="lineno"> 3574</span> </div>
@@ -3676,13 +3676,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l03577" name="l03577"></a><span class="lineno"> 3577</span>                jtx.jv[<span class="stringliteral">&quot;Asset2&quot;</span>][<span class="stringliteral">&quot;currency&quot;</span>] = <span class="stringliteral">&quot;XRP&quot;</span>;</div>
 <div class="line"><a id="l03578" name="l03578"></a><span class="lineno"> 3578</span>                jtx.jv[<span class="stringliteral">&quot;Asset2&quot;</span>].removeMember(<span class="stringliteral">&quot;issuer&quot;</span>);</div>
 <div class="line"><a id="l03579" name="l03579"></a><span class="lineno"> 3579</span>                jtx.stx = env.ust(jtx);</div>
-<div class="line"><a id="l03580" name="l03580"></a><span class="lineno"> 3580</span>                PreflightContext pfctx(</div>
+<div class="line"><a id="l03580" name="l03580"></a><span class="lineno"> 3580</span>                PreflightContext pfCtx(</div>
 <div class="line"><a id="l03581" name="l03581"></a><span class="lineno"> 3581</span>                    env.app(),</div>
 <div class="line"><a id="l03582" name="l03582"></a><span class="lineno"> 3582</span>                    *jtx.stx,</div>
 <div class="line"><a id="l03583" name="l03583"></a><span class="lineno"> 3583</span>                    env.current()-&gt;rules(),</div>
 <div class="line"><a id="l03584" name="l03584"></a><span class="lineno"> 3584</span>                    tapNONE,</div>
 <div class="line"><a id="l03585" name="l03585"></a><span class="lineno"> 3585</span>                    env.journal);</div>
-<div class="line"><a id="l03586" name="l03586"></a><span class="lineno"> 3586</span>                <span class="keyword">auto</span> pf = Transactor::invokePreflight&lt;AMMBid&gt;(pfctx);</div>
+<div class="line"><a id="l03586" name="l03586"></a><span class="lineno"> 3586</span>                <span class="keyword">auto</span> pf = Transactor::invokePreflight&lt;AMMBid&gt;(pfCtx);</div>
 <div class="line"><a id="l03587" name="l03587"></a><span class="lineno"> 3587</span>                BEAST_EXPECT(pf == temBAD_AMM_TOKENS);</div>
 <div class="line"><a id="l03588" name="l03588"></a><span class="lineno"> 3588</span>            }</div>
 <div class="line"><a id="l03589" name="l03589"></a><span class="lineno"> 3589</span>        }</div>

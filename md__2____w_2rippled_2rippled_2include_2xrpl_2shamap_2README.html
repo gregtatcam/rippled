@@ -154,7 +154,7 @@ Late-arriving Nodes</h1>
 <p>The <code>fetchNodeNT()</code> method goes through three phases:</p>
 <ol type="1">
 <li><p class="startli">By calling <code>cacheLookup()</code> we attempt to locate the missing node in the TreeNodeCache. The TreeNodeCache is a cache of immutable SHAMapTreeNodes that are shared across all <code>SHAMap</code>s.</p>
-<p class="startli">Any SHAMapLeafNode that is immutable has a sequence number of zero (sharable). When a mutable <code>SHAMap</code> is created then its SHAMapTreeNodes are given non-zero sequence numbers (unsharable). But all nodes in the TreeNodeCache are immutable, so if one is found here, its sequence number will be 0.</p>
+<p class="startli">Any SHAMapLeafNode that is immutable has a sequence number of zero (sharable). When a mutable <code>SHAMap</code> is created then its SHAMapTreeNodes are given non-zero sequence numbers (unshareable). But all nodes in the TreeNodeCache are immutable, so if one is found here, its sequence number will be 0.</p>
 </li>
 <li>If the node is not in the TreeNodeCache, we attempt to locate the node in the historic data stored by the data base. The call to to <code>fetchNodeFromDB(hash)</code> does that work for us.</li>
 <li>Finally if a filter exists, we check if it can supply the node. This is typically the LedgerMaster which tracks the current ledger and ledgers in the process of closing.</li>

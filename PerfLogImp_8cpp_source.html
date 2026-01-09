@@ -189,7 +189,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        rpcobj[jss::total] = totalRpcJson;</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    }</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> jqobj(<a class="code hl_enumvalue" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6">Json::objectValue</a>);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> jobQueueObj(<a class="code hl_enumvalue" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6">Json::objectValue</a>);</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="comment">// totalJq represents all jobs. All enqueued, started, finished, etc.</span></div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <a class="code hl_struct" href="structxrpl_1_1perf_1_1PerfLogImp_1_1Counters_1_1Jq.html">Jq</a> totalJq;</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> <span class="keyword">const</span>&amp; proc : jq_)</div>
@@ -218,7 +218,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        j[jss::running_duration_us] =</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>            <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/to_string.html">std::to_string</a>(value.<a class="code hl_variable" href="structxrpl_1_1perf_1_1PerfLogImp_1_1Counters_1_1Jq.html#ab77b11ce93781258ad1ce5a8c20973d6">runningDuration</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/chrono/duration/count.html">count</a>());</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        totalJq.<a class="code hl_variable" href="structxrpl_1_1perf_1_1PerfLogImp_1_1Counters_1_1Jq.html#ab77b11ce93781258ad1ce5a8c20973d6">runningDuration</a> += value.<a class="code hl_variable" href="structxrpl_1_1perf_1_1PerfLogImp_1_1Counters_1_1Jq.html#ab77b11ce93781258ad1ce5a8c20973d6">runningDuration</a>;</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        jqobj[<a class="code hl_function" href="classxrpl_1_1JobTypes.html#acc5afe60aafd19ed0b1b3be3438f8846">JobTypes::name</a>(proc.first)] = j;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        jobQueueObj[<a class="code hl_function" href="classxrpl_1_1JobTypes.html#acc5afe60aafd19ed0b1b3be3438f8846">JobTypes::name</a>(proc.first)] = j;</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    }</div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordflow">if</span> (totalJq.<a class="code hl_variable" href="structxrpl_1_1perf_1_1PerfLogImp_1_1Counters_1_1Jq.html#aaf948550c97dea538ab0f65d863ada23">queued</a>)</div>
@@ -231,14 +231,14 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>            <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/to_string.html">std::to_string</a>(totalJq.<a class="code hl_variable" href="structxrpl_1_1perf_1_1PerfLogImp_1_1Counters_1_1Jq.html#a7f2d82bce040d83527b9c55c3bb63d00">queuedDuration</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/chrono/duration/count.html">count</a>());</div>
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        totalJqJson[jss::running_duration_us] =</div>
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>            <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/string/basic_string/to_string.html">std::to_string</a>(totalJq.<a class="code hl_variable" href="structxrpl_1_1perf_1_1PerfLogImp_1_1Counters_1_1Jq.html#ab77b11ce93781258ad1ce5a8c20973d6">runningDuration</a>.<a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/chrono/duration/count.html">count</a>());</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        jqobj[jss::total] = totalJqJson;</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        jobQueueObj[jss::total] = totalJqJson;</div>
 <div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    }</div>
 <div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span> </div>
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    <a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> counters(<a class="code hl_enumvalue" href="namespaceJson.html#a7d654b75c16a57007925868e38212b4eae8386dcfc36d1ae897745f7b4f77a1f6">Json::objectValue</a>);</div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    <span class="comment">// Be kind to reporting tools and let them expect rpc and jq objects</span></div>
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="comment">// even if empty.</span></div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    counters[jss::rpc] = rpcobj;</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    counters[jss::job_queue] = jqobj;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    counters[jss::job_queue] = jobQueueObj;</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="keywordflow">return</span> counters;</div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>}</div>
 </div>

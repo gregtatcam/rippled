@@ -152,7 +152,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keyword">using namespace </span>std::chrono_literals;</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <a class="code hl_variable" href="classbeast_1_1unit__test_1_1suite.html#aaa1237d9b85c69d35fe86645cee094b5">testcase</a>(<span class="stringliteral">&quot;check consensus&quot;</span>);</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="comment">// Use default parameterss</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="comment">// Use default parameters</span></div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <a class="code hl_struct" href="structxrpl_1_1ConsensusParms.html">ConsensusParms</a> <span class="keyword">const</span> p{};</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="comment">// Disputes still in doubt</span></div>
@@ -162,7 +162,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            <a class="code hl_enumvalue" href="namespacexrpl.html#a7b535130885568516b37cbb912cc6f2fabafd7322c6e97d25b6299b5d6fe8920b">ConsensusState::No</a> ==</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            <a class="code hl_function" href="namespacexrpl.html#a69c485ee87423733f2c903044e682724">checkConsensus</a>(10, 2, 2, 0, 3s, 2s, <span class="keyword">false</span>, p, <span class="keyword">true</span>, <a class="code hl_variable" href="classxrpl_1_1test_1_1Consensus__test.html#ad1309b3ff01b2094c0abb3a05acae152">journal_</a>));</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span> </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="comment">// If not enough peers have propsed, ensure</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="comment">// If not enough peers have proposed, ensure</span></div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="comment">// more time for proposals</span></div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        BEAST_EXPECT(</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>            <a class="code hl_enumvalue" href="namespacexrpl.html#a7b535130885568516b37cbb912cc6f2fabafd7322c6e97d25b6299b5d6fe8920b">ConsensusState::No</a> ==</div>
@@ -206,7 +206,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>            <a class="code hl_enumvalue" href="namespacexrpl.html#a7b535130885568516b37cbb912cc6f2fabafd7322c6e97d25b6299b5d6fe8920b">ConsensusState::No</a> ==</div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            <a class="code hl_function" href="namespacexrpl.html#a69c485ee87423733f2c903044e682724">checkConsensus</a>(10, 2, 2, 0, 3s, 2s, <span class="keyword">true</span>, p, <span class="keyword">true</span>, <a class="code hl_variable" href="classxrpl_1_1test_1_1Consensus__test.html#ad1309b3ff01b2094c0abb3a05acae152">journal_</a>));</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span> </div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="comment">// If not enough peers have propsed, ensure</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="comment">// If not enough peers have proposed, ensure</span></div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <span class="comment">// more time for proposals</span></div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        BEAST_EXPECT(</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>            <a class="code hl_enumvalue" href="namespacexrpl.html#a7b535130885568516b37cbb912cc6f2fabafd7322c6e97d25b6299b5d6fe8920b">ConsensusState::No</a> ==</div>
@@ -760,7 +760,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>        <span class="comment">// Run to the ledger *prior* to decreasing the resolution</span></div>
 <div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>        sim.run(<a class="code hl_variable" href="namespacexrpl.html#a1cdae6d4d06308b8ed66325565b181ee">increaseLedgerTimeResolutionEvery</a> - 2);</div>
 <div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span> </div>
-<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>        <span class="comment">// In order to create the discrepency, we want a case where if</span></div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>        <span class="comment">// In order to create the discrepancy, we want a case where if</span></div>
 <div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>        <span class="comment">//   X = effCloseTime(closeTime, resolution, parentCloseTime)</span></div>
 <div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>        <span class="comment">//   X != effCloseTime(X, resolution, parentCloseTime)</span></div>
 <div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>        <span class="comment">//</span></div>
@@ -1021,7 +1021,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00906" name="l00906"></a><span class="lineno">  906</span>        <span class="comment">//   for B.</span></div>
 <div class="line"><a id="l00907" name="l00907"></a><span class="lineno">  907</span>        <span class="comment">// - The network reconnects and the validations for generation 3 ledgers</span></div>
 <div class="line"><a id="l00908" name="l00908"></a><span class="lineno">  908</span>        <span class="comment">//   are observed (D and the 8 C&#39;s)</span></div>
-<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>        <span class="comment">// - In the old approach, 2 votes for D outweights 1 vote for each C&#39;</span></div>
+<div class="line"><a id="l00909" name="l00909"></a><span class="lineno">  909</span>        <span class="comment">// - In the old approach, 2 votes for D outweighs 1 vote for each C&#39;</span></div>
 <div class="line"><a id="l00910" name="l00910"></a><span class="lineno">  910</span>        <span class="comment">//   so the network would avalanche towards D and fully validate it</span></div>
 <div class="line"><a id="l00911" name="l00911"></a><span class="lineno">  911</span>        <span class="comment">//   EVEN though C was fully validated by one node</span></div>
 <div class="line"><a id="l00912" name="l00912"></a><span class="lineno">  912</span>        <span class="comment">// - In the new approach, 2 votes for D are not enough to outweight the</span></div>
@@ -1154,7 +1154,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l01029" name="l01029"></a><span class="lineno"> 1029</span>        <span class="comment">// The &quot;ahead&quot; validators run normal speed and run ahead validating the</span></div>
 <div class="line"><a id="l01030" name="l01030"></a><span class="lineno"> 1030</span>        <span class="comment">// upper chain of ledgers.</span></div>
 <div class="line"><a id="l01031" name="l01031"></a><span class="lineno"> 1031</span>        <span class="comment">//</span></div>
-<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span>        <span class="comment">// Due to the uncommited support definition of the preferred branch</span></div>
+<div class="line"><a id="l01032" name="l01032"></a><span class="lineno"> 1032</span>        <span class="comment">// Due to the uncommitted support definition of the preferred branch</span></div>
 <div class="line"><a id="l01033" name="l01033"></a><span class="lineno"> 1033</span>        <span class="comment">// protocol, even if the &quot;behind&quot; validators are a majority, the &quot;ahead&quot;</span></div>
 <div class="line"><a id="l01034" name="l01034"></a><span class="lineno"> 1034</span>        <span class="comment">// validators cannot jump to the proper branch until the &quot;behind&quot;</span></div>
 <div class="line"><a id="l01035" name="l01035"></a><span class="lineno"> 1035</span>        <span class="comment">// validators catch up to the same sequence number. For this test to</span></div>

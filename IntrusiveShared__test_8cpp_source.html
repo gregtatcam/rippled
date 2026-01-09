@@ -466,7 +466,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>            {</div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>                <span class="comment">// strong goes out of scope while weak is still in scope</span></div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>                <span class="comment">// This checks that partialDelete has run to completion</span></div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>                <span class="comment">// before the desturctor is called. A sleep is inserted</span></div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>                <span class="comment">// before the destructor is called. A sleep is inserted</span></div>
 <div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>                <span class="comment">// inside the partial delete to make sure the destructor is</span></div>
 <div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>                <span class="comment">// given an opportunity to run durring partial delete.</span></div>
 <div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>                BEAST_EXPECT(cur == partiallyDeleted);</div>

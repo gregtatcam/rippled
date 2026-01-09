@@ -133,11 +133,11 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    }</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">auto</span> warn = [&amp;](<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; mesg) {</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keyword">auto</span> warn = [&amp;](<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span>&amp; msg) {</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        <span class="comment">// Buffer based on asio recommended size</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordtype">char</span> buf[256];</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        ::ERR_error_string_n(ec.value(), buf, <span class="keyword">sizeof</span>(buf));</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        JLOG(j.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>()) &lt;&lt; mesg &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; buf;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>        JLOG(j.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>()) &lt;&lt; msg &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; buf;</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        ::ERR_clear_error();</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    };</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>

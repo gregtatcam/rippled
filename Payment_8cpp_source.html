@@ -412,7 +412,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>                &lt;&lt; <span class="stringliteral">&quot;Delay transaction: Destination account does not exist. &quot;</span></div>
 <div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>                &lt;&lt; <span class="stringliteral">&quot;Insufficent payment to create account.&quot;</span>;</div>
 <div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>            <span class="comment">// TODO: dedupe</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>            <span class="comment">// TODO: de-dupe</span></div>
 <div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>            <span class="comment">// Another transaction could create the account and then this</span></div>
 <div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>            <span class="comment">// transaction would succeed.</span></div>
 <div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>            <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacexrpl.html#ad78c115958eec639754bf9227f58556ba4ab0c111f0a84389d97fabb56164d8ae">tecNO_DST_INSUF_XRP</a>;</div>
@@ -656,7 +656,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span> </div>
 <div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>            <span class="comment">// If the actual amount delivered is different from the original</span></div>
 <div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>            <span class="comment">// amount due to partial payment or transfer fee, we need to update</span></div>
-<div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>            <span class="comment">// DelieveredAmount using the actual delivered amount</span></div>
+<div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>            <span class="comment">// DeliveredAmount using the actual delivered amount</span></div>
 <div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="classxrpl_1_1Transactor.html#a9d90f09b3f9c786a878f206bd10e2890">view</a>().rules().enabled(fixMPTDeliveredAmount) &amp;&amp;</div>
 <div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>                amountDeliver != dstAmount)</div>
 <div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span>                <a class="code hl_variable" href="classxrpl_1_1Transactor.html#ac8b61136d9ebc92db493cd79f0f0f0b5">ctx_</a>.<a class="code hl_function" href="classxrpl_1_1ApplyContext.html#a66fdbfcb3decdbd51fcede9f178962b3">deliver</a>(amountDeliver);</div>

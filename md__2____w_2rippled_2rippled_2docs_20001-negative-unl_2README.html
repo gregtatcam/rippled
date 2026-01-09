@@ -156,7 +156,7 @@ Negative UNL Protocol Overview</h2>
 <h2><a class="anchor" id="autotoc_md95"></a>
 Validator Reliability Measurement</h2>
 <p>A node only measures the reliability of validators on its own UNL, and only proposes based on local observations. There are many metrics that a node can measure about its validators, but we have chosen ledger validation messages. This is because every validator shall send one and only one signed validation message per ledger. This keeps the measurement simple and removes timing/clock-sync issues. A node will measure the percentage of agreeing validation messages (<em>PAV</em>) received from each validator on the node's UNL. Note that the node will only count the validation messages that agree with its own validations.</p>
-<p>We define the <b>PAV</b> as the **P**ercentage of **A**greed **V**alidation messages received for the last N ledgers, where N = 256 by default.</p>
+<p>We define the <b>PAV</b> as the Percentage of Agreed Validation messages received for the last N ledgers, where N = 256 by default.</p>
 <p>When the PAV drops below the **_low-water mark_**, the validator is considered unreliable, and is a candidate to be disabled by being added to the negative UNL. A validator must have a PAV higher than the **_high-water mark_** to be re-enabled. The validator is re-enabled by removing it from the negative UNL. In the implementation, we plan to set the low-water mark as 50% and the high-water mark as 80%.</p>
 <h2><a class="anchor" id="autotoc_md96"></a>
 Format Changes</h2>

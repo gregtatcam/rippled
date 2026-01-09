@@ -332,103 +332,102 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>                         <span class="keyword">auto</span> <span class="keyword">const</span>&amp; valueField) {</div>
 <div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> <span class="keyword">const</span> field = val-&gt;at(~valueField))</div>
 <div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>            {</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>                <span class="keyword">using </span>xrptype = <a class="code hl_typedef" href="classxrpl_1_1XRPAmount.html#a7713bf4abf093a76712228c526824d5e">XRPAmount::value_type</a>;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>                <span class="keyword">using </span>XRPType = <a class="code hl_typedef" href="classxrpl_1_1XRPAmount.html#a7713bf4abf093a76712228c526824d5e">XRPAmount::value_type</a>;</div>
 <div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>                <span class="keyword">auto</span> <span class="keyword">const</span> vote = *field;</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>                <span class="keywordflow">if</span> (vote &lt;= <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits&lt;xrptype&gt;::max</a>() &amp;&amp;</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>                    <a class="code hl_function" href="namespacexrpl.html#ad3a09b516c7b386a7d14a2d32bf7721c">isLegalAmountSigned</a>(<a class="code hl_class" href="classxrpl_1_1XRPAmount.html">XRPAmount</a>{unsafe_cast&lt;xrptype&gt;(vote)}))</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>                    value.addVote(</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>                        <a class="code hl_class" href="classxrpl_1_1XRPAmount.html">XRPAmount</a>{unsafe_cast&lt;XRPAmount::value_type&gt;(vote)});</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>                <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>                    <span class="comment">// Invalid amounts will be treated as if they&#39;re</span></div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>                    <span class="comment">// not provided. Don&#39;t throw because this value is</span></div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>                    <span class="comment">// provided by an external entity.</span></div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>                    value.noVote();</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            }</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            {</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>                value.noVote();</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            }</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        };</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> <span class="keyword">const</span>&amp; val : <a class="code hl_function" href="namespacexrpl.html#a0ad5d92e6f6f18567bbdf6cae19f1fcd">set</a>)</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        {</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>            <span class="keywordflow">if</span> (!val-&gt;isTrusted())</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>                <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>            doVote(val, baseFeeVote, sfBaseFee);</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>            doVote(val, baseReserveVote, sfReserveBase);</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>            doVote(val, incReserveVote, sfReserveIncrement);</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        }</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>    }</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="comment">// choose our positions</span></div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <span class="comment">// TODO: Use structured binding once LLVM 16 is the minimum supported</span></div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    <span class="comment">// version. See also: https://github.com/llvm/llvm-project/issues/48582</span></div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    <span class="comment">// https://github.com/llvm/llvm-project/commit/127bf44385424891eb04cff8e52d3f157fc2cb7c</span></div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keyword">auto</span> <span class="keyword">const</span> baseFee = baseFeeVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a760b85572026a5057f7f132b46a34275">getVotes</a>();</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keyword">auto</span> <span class="keyword">const</span> baseReserve = baseReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a760b85572026a5057f7f132b46a34275">getVotes</a>();</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <span class="keyword">auto</span> <span class="keyword">const</span> incReserve = incReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a760b85572026a5057f7f132b46a34275">getVotes</a>();</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <span class="keyword">auto</span> <span class="keyword">const</span> seq = lastClosedLedger-&gt;header().seq + 1;</div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="comment">// add transactions to our position</span></div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    <span class="keywordflow">if</span> (baseFee.second || baseReserve.second || incReserve.second)</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    {</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        JLOG(<a class="code hl_variable" href="classxrpl_1_1FeeVoteImpl.html#afbc46da3a753d49d535447629ec5a1f7">journal_</a>.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>())</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>            &lt;&lt; <span class="stringliteral">&quot;We are voting for a fee change: &quot;</span> &lt;&lt; baseFee.first &lt;&lt; <span class="stringliteral">&quot;/&quot;</span></div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>            &lt;&lt; baseReserve.first &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; incReserve.first;</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span> </div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <a class="code hl_class" href="classxrpl_1_1STTx.html">STTx</a> feeTx(ttFEE, [=, &amp;rules](<span class="keyword">auto</span>&amp; obj) {</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>            obj[sfAccount] = <a class="code hl_typedef" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a>();</div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            obj[sfLedgerSequence] = seq;</div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>            <span class="keywordflow">if</span> (rules.enabled(featureXRPFees))</div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>            {</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>                obj[sfBaseFeeDrops] = baseFee.first;</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>                obj[sfReserveBaseDrops] = baseReserve.first;</div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>                obj[sfReserveIncrementDrops] = incReserve.first;</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>            }</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>            <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>            {</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>                <span class="comment">// Without the featureXRPFees amendment, these fields are</span></div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>                <span class="comment">// required.</span></div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>                obj[sfBaseFee] =</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>                    baseFee.first.dropsAs&lt;<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a>&gt;(baseFeeVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a81f6667e932283f30cc4f0554b1c057c">current</a>());</div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>                obj[sfReserveBase] = baseReserve.first.dropsAs&lt;<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&gt;(</div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>                    baseReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a81f6667e932283f30cc4f0554b1c057c">current</a>());</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>                obj[sfReserveIncrement] =</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>                    incReserve.first.dropsAs&lt;<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&gt;(</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>                        incReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a81f6667e932283f30cc4f0554b1c057c">current</a>());</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>                obj[sfReferenceFeeUnits] = <a class="code hl_variable" href="classxrpl_1_1Config.html#a8c52e96f35724d2ae7c01abccbac1fb7">Config::FEE_UNITS_DEPRECATED</a>;</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>            }</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>        });</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        <a class="code hl_class" href="classxrpl_1_1base__uint.html">uint256</a> txID = feeTx.getTransactionID();</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span> </div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>        JLOG(<a class="code hl_variable" href="classxrpl_1_1FeeVoteImpl.html#afbc46da3a753d49d535447629ec5a1f7">journal_</a>.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>()) &lt;&lt; <span class="stringliteral">&quot;Vote: &quot;</span> &lt;&lt; txID;</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span> </div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        <a class="code hl_class" href="classxrpl_1_1Serializer.html">Serializer</a> s;</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>        feeTx.add(s);</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span> </div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>        <span class="keywordflow">if</span> (!initialPosition-&gt;addGiveItem(</div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>                <a class="code hl_enumvalue" href="namespacexrpl.html#a13201019bfaccabd85a221c9207a5255a9b447756a7d7ddf4e828beeb38d079f6">SHAMapNodeType::tnTRANSACTION_NM</a>,</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>                <a class="code hl_function" href="namespacexrpl.html#a2a6f7d9ca24cef02a5f48130be9f8ed2">make_shamapitem</a>(txID, s.<a class="code hl_function" href="classxrpl_1_1Serializer.html#a9fdb78b3d7b575806292496989bd138a">slice</a>())))</div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>        {</div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>            JLOG(<a class="code hl_variable" href="classxrpl_1_1FeeVoteImpl.html#afbc46da3a753d49d535447629ec5a1f7">journal_</a>.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>()) &lt;&lt; <span class="stringliteral">&quot;Ledger already had fee change&quot;</span>;</div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>        }</div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    }</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>}</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>                <span class="keywordflow">if</span> (vote &lt;= <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits&lt;XRPType&gt;::max</a>() &amp;&amp;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>                    <a class="code hl_function" href="namespacexrpl.html#ad3a09b516c7b386a7d14a2d32bf7721c">isLegalAmountSigned</a>(<a class="code hl_class" href="classxrpl_1_1XRPAmount.html">XRPAmount</a>{unsafe_cast&lt;XRPType&gt;(vote)}))</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>                    value.addVote(<a class="code hl_class" href="classxrpl_1_1XRPAmount.html">XRPAmount</a>{unsafe_cast&lt;XRPType&gt;(vote)});</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>                <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>                    <span class="comment">// Invalid amounts will be treated as if they&#39;re</span></div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>                    <span class="comment">// not provided. Don&#39;t throw because this value is</span></div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>                    <span class="comment">// provided by an external entity.</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>                    value.noVote();</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            }</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            {</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>                value.noVote();</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            }</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        };</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> <span class="keyword">const</span>&amp; val : <a class="code hl_function" href="namespacexrpl.html#a0ad5d92e6f6f18567bbdf6cae19f1fcd">set</a>)</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        {</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>            <span class="keywordflow">if</span> (!val-&gt;isTrusted())</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>                <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>            doVote(val, baseFeeVote, sfBaseFee);</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>            doVote(val, baseReserveVote, sfReserveBase);</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>            doVote(val, incReserveVote, sfReserveIncrement);</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        }</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    }</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="comment">// choose our positions</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="comment">// TODO: Use structured binding once LLVM 16 is the minimum supported</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <span class="comment">// version. See also: https://github.com/llvm/llvm-project/issues/48582</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    <span class="comment">// https://github.com/llvm/llvm-project/commit/127bf44385424891eb04cff8e52d3f157fc2cb7c</span></div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    <span class="keyword">auto</span> <span class="keyword">const</span> baseFee = baseFeeVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a760b85572026a5057f7f132b46a34275">getVotes</a>();</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="keyword">auto</span> <span class="keyword">const</span> baseReserve = baseReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a760b85572026a5057f7f132b46a34275">getVotes</a>();</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="keyword">auto</span> <span class="keyword">const</span> incReserve = incReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a760b85572026a5057f7f132b46a34275">getVotes</a>();</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    <span class="keyword">auto</span> <span class="keyword">const</span> seq = lastClosedLedger-&gt;header().seq + 1;</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    <span class="comment">// add transactions to our position</span></div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="keywordflow">if</span> (baseFee.second || baseReserve.second || incReserve.second)</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    {</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        JLOG(<a class="code hl_variable" href="classxrpl_1_1FeeVoteImpl.html#afbc46da3a753d49d535447629ec5a1f7">journal_</a>.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>())</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>            &lt;&lt; <span class="stringliteral">&quot;We are voting for a fee change: &quot;</span> &lt;&lt; baseFee.first &lt;&lt; <span class="stringliteral">&quot;/&quot;</span></div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>            &lt;&lt; baseReserve.first &lt;&lt; <span class="stringliteral">&quot;/&quot;</span> &lt;&lt; incReserve.first;</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        <a class="code hl_class" href="classxrpl_1_1STTx.html">STTx</a> feeTx(ttFEE, [=, &amp;rules](<span class="keyword">auto</span>&amp; obj) {</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>            obj[sfAccount] = <a class="code hl_typedef" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a>();</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>            obj[sfLedgerSequence] = seq;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            <span class="keywordflow">if</span> (rules.enabled(featureXRPFees))</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>            {</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>                obj[sfBaseFeeDrops] = baseFee.first;</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>                obj[sfReserveBaseDrops] = baseReserve.first;</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>                obj[sfReserveIncrementDrops] = incReserve.first;</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>            }</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>            <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>            {</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>                <span class="comment">// Without the featureXRPFees amendment, these fields are</span></div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>                <span class="comment">// required.</span></div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>                obj[sfBaseFee] =</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>                    baseFee.first.dropsAs&lt;<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a>&gt;(baseFeeVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a81f6667e932283f30cc4f0554b1c057c">current</a>());</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>                obj[sfReserveBase] = baseReserve.first.dropsAs&lt;<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&gt;(</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>                    baseReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a81f6667e932283f30cc4f0554b1c057c">current</a>());</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>                obj[sfReserveIncrement] =</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>                    incReserve.first.dropsAs&lt;<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&gt;(</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>                        incReserveVote.<a class="code hl_function" href="classxrpl_1_1detail_1_1VotableValue.html#a81f6667e932283f30cc4f0554b1c057c">current</a>());</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>                obj[sfReferenceFeeUnits] = <a class="code hl_variable" href="classxrpl_1_1Config.html#a8c52e96f35724d2ae7c01abccbac1fb7">Config::FEE_UNITS_DEPRECATED</a>;</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>            }</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>        });</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>        <a class="code hl_class" href="classxrpl_1_1base__uint.html">uint256</a> txID = feeTx.getTransactionID();</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>        JLOG(<a class="code hl_variable" href="classxrpl_1_1FeeVoteImpl.html#afbc46da3a753d49d535447629ec5a1f7">journal_</a>.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>()) &lt;&lt; <span class="stringliteral">&quot;Vote: &quot;</span> &lt;&lt; txID;</div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span> </div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>        <a class="code hl_class" href="classxrpl_1_1Serializer.html">Serializer</a> s;</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        feeTx.add(s);</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>        <span class="keywordflow">if</span> (!initialPosition-&gt;addGiveItem(</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>                <a class="code hl_enumvalue" href="namespacexrpl.html#a13201019bfaccabd85a221c9207a5255a9b447756a7d7ddf4e828beeb38d079f6">SHAMapNodeType::tnTRANSACTION_NM</a>,</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>                <a class="code hl_function" href="namespacexrpl.html#a2a6f7d9ca24cef02a5f48130be9f8ed2">make_shamapitem</a>(txID, s.<a class="code hl_function" href="classxrpl_1_1Serializer.html#a9fdb78b3d7b575806292496989bd138a">slice</a>())))</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>        {</div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>            JLOG(<a class="code hl_variable" href="classxrpl_1_1FeeVoteImpl.html#afbc46da3a753d49d535447629ec5a1f7">journal_</a>.<a class="code hl_function" href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">warn</a>()) &lt;&lt; <span class="stringliteral">&quot;Ledger already had fee change&quot;</span>;</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>        }</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    }</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>}</div>
 </div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span> </div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span><span class="comment">//------------------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/memory/unique_ptr.html">std::unique_ptr&lt;FeeVote&gt;</a></div>
-<div class="foldopen" id="foldopen00321" data-start="{" data-end="}">
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno"><a class="line" href="namespacexrpl.html#a05afb701b61417e8b69ce97213b7080c">  321</a></span><a class="code hl_function" href="namespacexrpl.html#a05afb701b61417e8b69ce97213b7080c">make_FeeVote</a>(<a class="code hl_struct" href="structxrpl_1_1FeeSetup.html">FeeSetup</a> <span class="keyword">const</span>&amp; setup, <a class="code hl_class" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>{</div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>    <span class="keywordflow">return</span> <a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::make_unique&lt;FeeVoteImpl&gt;</a>(setup, journal);</div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>}</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span> </div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span><span class="comment">//------------------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/memory/unique_ptr.html">std::unique_ptr&lt;FeeVote&gt;</a></div>
+<div class="foldopen" id="foldopen00320" data-start="{" data-end="}">
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno"><a class="line" href="namespacexrpl.html#a05afb701b61417e8b69ce97213b7080c">  320</a></span><a class="code hl_function" href="namespacexrpl.html#a05afb701b61417e8b69ce97213b7080c">make_FeeVote</a>(<a class="code hl_struct" href="structxrpl_1_1FeeSetup.html">FeeSetup</a> <span class="keyword">const</span>&amp; setup, <a class="code hl_class" href="classbeast_1_1Journal.html">beast::Journal</a> journal)</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>{</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>    <span class="keywordflow">return</span> <a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::make_unique&lt;FeeVoteImpl&gt;</a>(setup, journal);</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>}</div>
 </div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span> </div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>}  <span class="comment">// namespace xrpl</span></div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span> </div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>}  <span class="comment">// namespace xrpl</span></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html"><div class="ttname"><a href="classbeast_1_1Journal.html">beast::Journal</a></div><div class="ttdoc">A generic endpoint for log messages.</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00040">Journal.h:41</a></div></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html_a87d6bd59020d94110027dcab3d9e3357"><div class="ttname"><a href="classbeast_1_1Journal.html#a87d6bd59020d94110027dcab3d9e3357">beast::Journal::info</a></div><div class="ttdeci">Stream info() const</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00315">Journal.h:315</a></div></div>
 <div class="ttc" id="aclassbeast_1_1Journal_html_ad8fefe3e8ad583e1ed1bf02094ac3d8f"><div class="ttname"><a href="classbeast_1_1Journal.html#ad8fefe3e8ad583e1ed1bf02094ac3d8f">beast::Journal::warn</a></div><div class="ttdeci">Stream warn() const</div><div class="ttdef"><b>Definition</b> <a href="Journal_8h_source.html#l00321">Journal.h:321</a></div></div>
@@ -466,7 +465,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="amin_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/algorithm/min.html">std::min</a></div><div class="ttdeci">T min(T... args)</div></div>
 <div class="ttc" id="anamespacestd_html"><div class="ttname"><a href="namespacestd.html">std</a></div><div class="ttdoc">STL namespace.</div></div>
 <div class="ttc" id="anamespacexrpl_html"><div class="ttname"><a href="namespacexrpl.html">xrpl</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition</b> <a href="algorithm_8h_source.html#l00006">algorithm.h:6</a></div></div>
-<div class="ttc" id="anamespacexrpl_html_a05afb701b61417e8b69ce97213b7080c"><div class="ttname"><a href="namespacexrpl.html#a05afb701b61417e8b69ce97213b7080c">xrpl::make_FeeVote</a></div><div class="ttdeci">std::unique_ptr&lt; FeeVote &gt; make_FeeVote(FeeSetup const &amp;setup, beast::Journal journal)</div><div class="ttdoc">Create an instance of the FeeVote logic.</div><div class="ttdef"><b>Definition</b> <a href="FeeVoteImpl_8cpp_source.html#l00321">FeeVoteImpl.cpp:321</a></div></div>
+<div class="ttc" id="anamespacexrpl_html_a05afb701b61417e8b69ce97213b7080c"><div class="ttname"><a href="namespacexrpl.html#a05afb701b61417e8b69ce97213b7080c">xrpl::make_FeeVote</a></div><div class="ttdeci">std::unique_ptr&lt; FeeVote &gt; make_FeeVote(FeeSetup const &amp;setup, beast::Journal journal)</div><div class="ttdoc">Create an instance of the FeeVote logic.</div><div class="ttdef"><b>Definition</b> <a href="FeeVoteImpl_8cpp_source.html#l00320">FeeVoteImpl.cpp:320</a></div></div>
 <div class="ttc" id="anamespacexrpl_html_a0ad5d92e6f6f18567bbdf6cae19f1fcd"><div class="ttname"><a href="namespacexrpl.html#a0ad5d92e6f6f18567bbdf6cae19f1fcd">xrpl::set</a></div><div class="ttdeci">bool set(T &amp;target, std::string const &amp;name, Section const &amp;section)</div><div class="ttdoc">Set a value from a configuration Section If the named value is not found or doesn't parse as a T,...</div><div class="ttdef"><b>Definition</b> <a href="BasicConfig_8h_source.html#l00296">BasicConfig.h:296</a></div></div>
 <div class="ttc" id="anamespacexrpl_html_a13201019bfaccabd85a221c9207a5255a9b447756a7d7ddf4e828beeb38d079f6"><div class="ttname"><a href="namespacexrpl.html#a13201019bfaccabd85a221c9207a5255a9b447756a7d7ddf4e828beeb38d079f6">xrpl::SHAMapNodeType::tnTRANSACTION_NM</a></div><div class="ttdeci">@ tnTRANSACTION_NM</div></div>
 <div class="ttc" id="anamespacexrpl_html_a2191648df8f704130887303dd5a90f9e"><div class="ttname"><a href="namespacexrpl.html#a2191648df8f704130887303dd5a90f9e">xrpl::isFlagLedger</a></div><div class="ttdeci">bool isFlagLedger(LedgerIndex seq)</div><div class="ttdoc">Returns true if the given ledgerIndex is a flag ledgerIndex.</div><div class="ttdef"><b>Definition</b> <a href="Ledger_8cpp_source.html#l00945">Ledger.cpp:945</a></div></div>

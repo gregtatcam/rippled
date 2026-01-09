@@ -135,8 +135,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4b67602e3c461aea0d7f9513943b715b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89fbc930203660bdffcb607042dba272" id="r_a89fbc930203660bdffcb607042dba272"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper.html">std::reference_wrapper</a>&lt; <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> const &gt; &gt; const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a89fbc930203660bdffcb607042dba272">getTxFeature</a> (<a class="el" href="namespacexrpl.html#a2302c0748b98cd689ea7eea653eda396">TxType</a> txType) const</td></tr>
 <tr class="separator:a89fbc930203660bdffcb607042dba272"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a045ce305584f7a6717f6b5b68981eec7" id="r_a045ce305584f7a6717f6b5b68981eec7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a045ce305584f7a6717f6b5b68981eec7">isDelegatable</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> const &amp;permissionValue, <a class="el" href="classxrpl_1_1Rules.html">Rules</a> const &amp;rules) const</td></tr>
-<tr class="separator:a045ce305584f7a6717f6b5b68981eec7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67274524cb49e3a05d539a96b806eca9" id="r_a67274524cb49e3a05d539a96b806eca9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a67274524cb49e3a05d539a96b806eca9">isDelegable</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> const &amp;permissionValue, <a class="el" href="classxrpl_1_1Rules.html">Rules</a> const &amp;rules) const</td></tr>
+<tr class="separator:a67274524cb49e3a05d539a96b806eca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63fec7a1efe4f95bdd41203ed514db1f" id="r_a63fec7a1efe4f95bdd41203ed514db1f"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a63fec7a1efe4f95bdd41203ed514db1f">txToPermissionType</a> (<a class="el" href="namespacexrpl.html#a2302c0748b98cd689ea7eea653eda396">TxType</a> const &amp;type) const</td></tr>
 <tr class="separator:a63fec7a1efe4f95bdd41203ed514db1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4845479abc6a4ad3e8b8fceed4ff8ee7" id="r_a4845479abc6a4ad3e8b8fceed4ff8ee7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a2302c0748b98cd689ea7eea653eda396">TxType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a4845479abc6a4ad3e8b8fceed4ff8ee7">permissionToTxType</a> (uint32_t const &amp;value) const</td></tr>
@@ -156,8 +156,8 @@ Private Member Functions</h2></td></tr>
 Private Attributes</h2></td></tr>
 <tr class="memitem:ab5d5a3683f80d2c32195a3453fe9e722" id="r_ab5d5a3683f80d2c32195a3453fe9e722"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a>, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#ab5d5a3683f80d2c32195a3453fe9e722">txFeatureMap_</a></td></tr>
 <tr class="separator:ab5d5a3683f80d2c32195a3453fe9e722"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87efe11e4e7eb13ad84536b745987a54" id="r_a87efe11e4e7eb13ad84536b745987a54"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a>, <a class="el" href="namespacexrpl.html#af02fc40fb59be7e5f8ee0c33efc7148d">Delegation</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a87efe11e4e7eb13ad84536b745987a54">delegatableTx_</a></td></tr>
-<tr class="separator:a87efe11e4e7eb13ad84536b745987a54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29ecb01a083e77d477aea3050b4af3d7" id="r_a29ecb01a083e77d477aea3050b4af3d7"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a>, <a class="el" href="namespacexrpl.html#af02fc40fb59be7e5f8ee0c33efc7148d">Delegation</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a29ecb01a083e77d477aea3050b4af3d7">delegableTx_</a></td></tr>
+<tr class="separator:a29ecb01a083e77d477aea3050b4af3d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea658ea950d2d70895a348f9a4c059d6" id="r_aea658ea950d2d70895a348f9a4c059d6"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>, <a class="el" href="namespacexrpl.html#a748d5f3500038734c2e091fbcafe1ce6">GranularPermissionType</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#aea658ea950d2d70895a348f9a4c059d6">granularPermissionMap_</a></td></tr>
 <tr class="separator:aea658ea950d2d70895a348f9a4c059d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93e6ff24af7f74af2daf182cb64738d5" id="r_a93e6ff24af7f74af2daf182cb64738d5"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt; <a class="el" href="namespacexrpl.html#a748d5f3500038734c2e091fbcafe1ce6">GranularPermissionType</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Permission.html#a93e6ff24af7f74af2daf182cb64738d5">granularNameMap_</a></td></tr>
@@ -376,14 +376,14 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a045ce305584f7a6717f6b5b68981eec7" name="a045ce305584f7a6717f6b5b68981eec7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a045ce305584f7a6717f6b5b68981eec7">&#9670;&#160;</a></span>isDelegatable()</h2>
+<a id="a67274524cb49e3a05d539a96b806eca9" name="a67274524cb49e3a05d539a96b806eca9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67274524cb49e3a05d539a96b806eca9">&#9670;&#160;</a></span>isDelegable()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool xrpl::Permission::isDelegatable </td>
+          <td class="memname">bool xrpl::Permission::isDelegable </td>
           <td>(</td>
           <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> const &amp;&#160;</td>
           <td class="paramname"><em>permissionValue</em>, </td>
@@ -471,8 +471,8 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a87efe11e4e7eb13ad84536b745987a54" name="a87efe11e4e7eb13ad84536b745987a54"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a87efe11e4e7eb13ad84536b745987a54">&#9670;&#160;</a></span>delegatableTx_</h2>
+<a id="a29ecb01a083e77d477aea3050b4af3d7" name="a29ecb01a083e77d477aea3050b4af3d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29ecb01a083e77d477aea3050b4af3d7">&#9670;&#160;</a></span>delegableTx_</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -481,7 +481,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a>, <a class="el" href="namespacexrpl.html#af02fc40fb59be7e5f8ee0c33efc7148d">Delegation</a>&gt; xrpl::Permission::delegatableTx_</td>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/unordered_map.html">std::unordered_map</a>&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint16_t</a>, <a class="el" href="namespacexrpl.html#af02fc40fb59be7e5f8ee0c33efc7148d">Delegation</a>&gt; xrpl::Permission::delegableTx_</td>
         </tr>
       </table>
   </td>

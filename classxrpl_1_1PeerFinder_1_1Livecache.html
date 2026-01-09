@@ -87,7 +87,7 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
-<p>The <a class="el" href="classxrpl_1_1PeerFinder_1_1Livecache.html" title="The Livecache holds the short-lived relayed Endpoint messages.">Livecache</a> holds the short-lived relayed <a class="el" href="structxrpl_1_1PeerFinder_1_1Endpoint.html" title="Describes a connectible peer address along with some metadata.">Endpoint</a> messages.  
+<p>The <a class="el" href="classxrpl_1_1PeerFinder_1_1Livecache.html" title="The Livecache holds the short-lived relayed Endpoint messages.">Livecache</a> holds the short-lived relayed <a class="el" href="structxrpl_1_1PeerFinder_1_1Endpoint.html" title="Describes a connectable peer address along with some metadata.">Endpoint</a> messages.  
  <a href="classxrpl_1_1PeerFinder_1_1Livecache.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="Livecache_8h_source.html">Livecache.h</a>&gt;</code></p>
@@ -201,9 +201,9 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class Allocator = std::allocator&lt;char&gt;&gt;<br />
-class xrpl::PeerFinder::Livecache&lt; Allocator &gt;</div><p>The <a class="el" href="classxrpl_1_1PeerFinder_1_1Livecache.html" title="The Livecache holds the short-lived relayed Endpoint messages.">Livecache</a> holds the short-lived relayed <a class="el" href="structxrpl_1_1PeerFinder_1_1Endpoint.html" title="Describes a connectible peer address along with some metadata.">Endpoint</a> messages. </p>
-<p>Since peers only advertise themselves when they have open slots, we want these messags to expire rather quickly after the peer becomes full.</p>
-<p>Addresses added to the cache are not connection-tested to see if they are connectible (with one small exception regarding neighbors). Therefore, these addresses are not suitable for persisting across launches or for bootstrapping, because they do not have verifiable and locally observed uptime and connectibility information. </p>
+class xrpl::PeerFinder::Livecache&lt; Allocator &gt;</div><p>The <a class="el" href="classxrpl_1_1PeerFinder_1_1Livecache.html" title="The Livecache holds the short-lived relayed Endpoint messages.">Livecache</a> holds the short-lived relayed <a class="el" href="structxrpl_1_1PeerFinder_1_1Endpoint.html" title="Describes a connectable peer address along with some metadata.">Endpoint</a> messages. </p>
+<p>Since peers only advertise themselves when they have open slots, we want these messages to expire rather quickly after the peer becomes full.</p>
+<p>Addresses added to the cache are not connection-tested to see if they are connectable (with one small exception regarding neighbors). Therefore, these addresses are not suitable for persisting across launches or for bootstrapping, because they do not have verifiable and locally observed uptime and connectability information. </p>
 
 <p class="definition">Definition at line <a class="el" href="Livecache_8h_source.html#l00178">178</a> of file <a class="el" href="Livecache_8h_source.html">Livecache.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>

@@ -223,13 +223,13 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    {</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        <span class="keyword">auto</span> p = <span class="keyword">reinterpret_cast&lt;</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a> const*<span class="keyword">&gt;</span>(x);</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        <span class="comment">// The SHAMapItem constuctor isn&#39;t trivial (because the destructor</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        <span class="comment">// The SHAMapItem constructor isn&#39;t trivial (because the destructor</span></div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        <span class="comment">// for CountedObject isn&#39;t) so we can&#39;t avoid calling it here, but</span></div>
 <div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        <span class="comment">// plan for a future where we might not need to.</span></div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        <span class="keywordflow">if</span> <span class="keyword">constexpr</span> (!<a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::is_trivially_destructible_v&lt;SHAMapItem&gt;</a>)</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>            <a class="code hl_functionRef" href="http://en.cppreference.com/w/cpp/memory/destroy_at.html">std::destroy_at</a>(x);</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        <span class="comment">// If the slabber doens&#39;t claim this pointer, it was allocated</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        <span class="comment">// If the slabber doesn&#39;t claim this pointer, it was allocated</span></div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        <span class="comment">// manually, so we free it manually.</span></div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="keywordflow">if</span> (!<a class="code hl_function" href="namespacexrpl_1_1detail.html#ab16f52fb9807eaac88d112015e2f712c">detail::slabber</a>.deallocate(<span class="keyword">const_cast&lt;</span><a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a>*<span class="keyword">&gt;</span>(p)))</div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>            <span class="keyword">delete</span>[] p;</div>

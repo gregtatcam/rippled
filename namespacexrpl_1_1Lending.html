@@ -355,7 +355,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Maximum number of combined payments that a <a class="el" href="classxrpl_1_1LoanPay.html">LoanPay</a> transaction will process. </p>
-<p>This limit is enforced during the loan payment process, and thus is not estimated. If the limit is hit, no further payments or overpayments will be processed, no matter how much of the transation Amount is left, but the transaction will succeed with the payments that have been processed up to that point.</p>
+<p>This limit is enforced during the loan payment process, and thus is not estimated. If the limit is hit, no further payments or overpayments will be processed, no matter how much of the transaction Amount is left, but the transaction will succeed with the payments that have been processed up to that point.</p>
 <p>This limit is independent of loanPaymentsPerFeeIncrement, so a transaction could potentially be charged for many more payments than actually get processed. Users should take care not to submit a transaction paying more than loanMaximumPaymentsPerTransaction * Loan.PeriodicPayment. Because overpayments are charged as a payment, if submitting loanMaximumPaymentsPerTransaction * Loan.PeriodicPayment, users should not set the tfLoanOverpayment flag.</p>
 <p>Even though they're independent, loanMaximumPaymentsPerTransaction should be a multiple of loanPaymentsPerFeeIncrement.</p>
 <p>This number was chosen arbitrarily, but should not be changed once released without an amendment </p>

@@ -159,12 +159,12 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    }</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keyword">auto</span> checkExtra = [](<a class="code hl_class" href="classJson_1_1Value.html">Json::Value</a> <span class="keyword">const</span>&amp; v) {</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keyword">static</span> <span class="keyword">auto</span> <span class="keyword">const</span> jbridge =</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keyword">static</span> <span class="keyword">auto</span> <span class="keyword">const</span> bridgeJson =</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>            <a class="code hl_class" href="classxrpl_1_1STXChainBridge.html">xrpl::STXChainBridge</a>().<a class="code hl_function" href="classxrpl_1_1STXChainBridge.html#ace4d862b379f41fa0312cca0274884c2">getJson</a>(<a class="code hl_enumvalue" href="structxrpl_1_1JsonOptions.html#a248f4c1cb1b2fe05b58678f32307570ba1a97822ca421424f4fc466f09db227a6">xrpl::JsonOptions::none</a>);</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = v.<a class="code hl_function" href="classJson_1_1Value.html#a015459a3950c198d63a2d3be8f5ae296">begin</a>(); it != v.<a class="code hl_function" href="classJson_1_1Value.html#a3e443cd0ef24f7e028b175e47ee045e0">end</a>(); ++it)</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        {</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> <span class="keyword">const</span> name = it.memberName();</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            <span class="keywordflow">if</span> (!jbridge.isMember(name))</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            <span class="keywordflow">if</span> (!bridgeJson.isMember(name))</div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            {</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                Throw&lt;std::runtime_error&gt;(</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>                    <span class="stringliteral">&quot;STXChainBridge extra field detected: &quot;</span> + name);</div>

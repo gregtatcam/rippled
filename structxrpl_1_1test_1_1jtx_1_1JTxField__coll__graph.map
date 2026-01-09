@@ -1,5 +1,5 @@
 <map id="xrpl::test::jtx::JTxField&lt; SField, StoredValue, OutputValue &gt;" name="xrpl::test::jtx::JTxField&lt; SField, StoredValue, OutputValue &gt;">
-<area shape="rect" id="Node000001" title="Generic helper class for helper clases that set a field on a JTx." alt="" coords="720,5,887,60"/>
+<area shape="rect" id="Node000001" title="Generic helper class for helper classes that set a field on a JTx." alt="" coords="720,5,887,60"/>
 <area shape="rect" id="Node000002" href="$classxrpl_1_1SField.html" title="Identifies fields." alt="" coords="445,123,540,148"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="515,111,537,93,563,78,602,63,642,52,719,37,720,42,643,57,603,68,565,83,540,98,519,115"/>
 <area shape="rect" id="Node000006" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/container/unordered_map.html" title=" " alt="" coords="727,91,879,145"/>

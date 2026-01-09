@@ -930,11 +930,11 @@ template&lt;class F &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">lock</td><td>Existing lock of mutex_ </td></tr>
-    <tr><td class="paramname">f</td><td>Invokable with signature (LedgerTrie&lt;Ledger&gt; &amp;)</td></tr>
+    <tr><td class="paramname">f</td><td>Invocable with signature (LedgerTrie&lt;Ledger&gt; &amp;)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section warning"><dt>Warning</dt><dd>The invokable <code>f</code> is expected to be a simple transformation of its arguments and will be called with mutex_ under lock. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The invocable <code>f</code> is expected to be a simple transformation of its arguments and will be called with mutex_ under lock. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="Validations_8h_source.html#l00466">466</a> of file <a class="el" href="Validations_8h_source.html">Validations.h</a>.</p>
 
@@ -989,12 +989,12 @@ template&lt;class Pre , class F &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">lock</td><td>Existing lock of mutex_ </td></tr>
-    <tr><td class="paramname">pre</td><td>Invokable with signature (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>) called prior to looping. </td></tr>
-    <tr><td class="paramname">f</td><td>Invokable with signature (NodeID const &amp;, <a class="el" href="classxrpl_1_1Validations.html" title="Maintains current and recent ledger validations.">Validations</a> const &amp;) for each current validation.</td></tr>
+    <tr><td class="paramname">pre</td><td>Invocable with signature (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>) called prior to looping. </td></tr>
+    <tr><td class="paramname">f</td><td>Invocable with signature (NodeID const &amp;, <a class="el" href="classxrpl_1_1Validations.html" title="Maintains current and recent ledger validations.">Validations</a> const &amp;) for each current validation.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>The invokable <code>pre</code> is called <em>prior</em> to checking for staleness and reflects an upper-bound on the number of calls to <code>f. @warning The invokable</code>f` is expected to be a simple transformation of its arguments and will be called with mutex_ under lock. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The invocable <code>pre</code> is called <em>prior</em> to checking for staleness and reflects an upper-bound on the number of calls to <code>f. @warning The invocable</code>f` is expected to be a simple transformation of its arguments and will be called with mutex_ under lock. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="Validations_8h_source.html#l00492">492</a> of file <a class="el" href="Validations_8h_source.html">Validations.h</a>.</p>
 
@@ -1055,13 +1055,13 @@ template&lt;class Pre , class F &gt; </div>
   <table class="params">
     <tr><td class="paramname">lock</td><td>Existing lock on mutex_ </td></tr>
     <tr><td class="paramname">ledgerID</td><td>The identifier of the ledger </td></tr>
-    <tr><td class="paramname">pre</td><td>Invokable with signature(std::size_t) </td></tr>
-    <tr><td class="paramname">f</td><td>Invokable with signature (NodeID const &amp;, Validation const &amp;)</td></tr>
+    <tr><td class="paramname">pre</td><td>Invocable with signature(std::size_t) </td></tr>
+    <tr><td class="paramname">f</td><td>Invocable with signature (NodeID const &amp;, Validation const &amp;)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>The invokable <code>pre</code> is called prior to iterating validations. The argument is the number of times <code>f</code> will be called. </dd></dl>
-<dl class="section warning"><dt>Warning</dt><dd>The invokable f is expected to be a simple transformation of its arguments and will be called with mutex_ under lock. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The invocable <code>pre</code> is called prior to iterating validations. The argument is the number of times <code>f</code> will be called. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>The invocable f is expected to be a simple transformation of its arguments and will be called with mutex_ under lock. </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="Validations_8h_source.html#l00530">530</a> of file <a class="el" href="Validations_8h_source.html">Validations.h</a>.</p>
 

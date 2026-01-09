@@ -376,7 +376,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>    <span class="keywordflow">return</span> {std::move(r.value()), changed};</div>
 <div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>};</div>
 <div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span> </div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="comment">// Check if there is a quorurm of attestations for the given amount and</span></div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="comment">// Check if there is a quorum of attestations for the given amount and</span></div>
 <div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span><span class="comment">// chain. If so return the reward accounts, if not return the tec code (most</span></div>
 <div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span><span class="comment">// likely tecXCHAIN_CLAIM_NO_QUORUM)</span></div>
 <div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>Expected&lt;std::vector&lt;AccountID&gt;, <a class="code hl_typedef" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&gt;</div>
@@ -464,7 +464,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>            <span class="keyword">auto</span> <span class="keyword">const</span> availableBalance = [&amp;]() -&gt; STAmount {</div>
 <div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>                STAmount <span class="keyword">const</span> curBal = (*sleSrc)[sfBalance];</div>
 <div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span>                <span class="comment">// Checking that account == src and postFeeBalance == curBal is</span></div>
-<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>                <span class="comment">// not strictly nessisary, but helps protect against future</span></div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>                <span class="comment">// not strictly necessary, but helps protect against future</span></div>
 <div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>                <span class="comment">// changes</span></div>
 <div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span>                <span class="keywordflow">if</span> (!submittingAccountInfo ||</div>
 <div class="line"><a id="l00440" name="l00440"></a><span class="lineno">  440</span>                    submittingAccountInfo-&gt;account != src ||</div>
@@ -616,7 +616,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span>        <span class="comment">// If distributing the reward pool fails, the mainFunds transfer should</span></div>
 <div class="line"><a id="l00623" name="l00623"></a><span class="lineno">  623</span>        <span class="comment">// be rolled back</span></div>
 <div class="line"><a id="l00624" name="l00624"></a><span class="lineno">  624</span>        <span class="comment">//</span></div>
-<div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span>        <span class="comment">// If the claimid is removed, the rewards should be distributed</span></div>
+<div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span>        <span class="comment">// If the claim ID is removed, the rewards should be distributed</span></div>
 <div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span>        <span class="comment">// even if the mainFunds fails.</span></div>
 <div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>        <span class="comment">//</span></div>
 <div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>        <span class="comment">// If OnTransferFail::removeClaim, the claim should be removed even if</span></div>
@@ -1175,7 +1175,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l01190" name="l01190"></a><span class="lineno"> 1190</span> </div>
 <div class="line"><a id="l01191" name="l01191"></a><span class="lineno"> 1191</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> TAttestation&gt;</div>
 <div class="line"><a id="l01192" name="l01192"></a><span class="lineno"> 1192</span><a class="code hl_typedef" href="namespacexrpl.html#aec5bc721e24f63bb2c1a542f6f456b33">NotTEC</a></div>
-<div class="line"><a id="l01193" name="l01193"></a><span class="lineno"> 1193</span>attestationpreflight(PreflightContext <span class="keyword">const</span>&amp; ctx)</div>
+<div class="line"><a id="l01193" name="l01193"></a><span class="lineno"> 1193</span>attestationPreflight(PreflightContext <span class="keyword">const</span>&amp; ctx)</div>
 <div class="line"><a id="l01194" name="l01194"></a><span class="lineno"> 1194</span>{</div>
 <div class="line"><a id="l01195" name="l01195"></a><span class="lineno"> 1195</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="namespacexrpl.html#a7629062ffff8edd500f4b66d3440ac47">publicKeyType</a>(ctx.tx[sfPublicKey]))</div>
 <div class="line"><a id="l01196" name="l01196"></a><span class="lineno"> 1196</span>        <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacexrpl.html#ac8c50610643a4f902b9bb9e42d0b00e6a6596ee0ec0bc3a3e73dfade1dca4fd5b">temMALFORMED</a>;</div>
@@ -2096,7 +2096,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen02077" data-start="{" data-end="}">
 <div class="line"><a id="l02077" name="l02077"></a><span class="lineno"><a class="line" href="classxrpl_1_1XChainAddClaimAttestation.html#aac7e2ae50fc56ea3f3978a9414ff27ee"> 2077</a></span><a class="code hl_function" href="classxrpl_1_1XChainAddClaimAttestation.html#aac7e2ae50fc56ea3f3978a9414ff27ee">XChainAddClaimAttestation::preflight</a>(<a class="code hl_struct" href="structxrpl_1_1PreflightContext.html">PreflightContext</a> <span class="keyword">const</span>&amp; ctx)</div>
 <div class="line"><a id="l02078" name="l02078"></a><span class="lineno"> 2078</span>{</div>
-<div class="line"><a id="l02079" name="l02079"></a><span class="lineno"> 2079</span>    <span class="keywordflow">return</span> attestationpreflight&lt;Attestations::AttestationClaim&gt;(ctx);</div>
+<div class="line"><a id="l02079" name="l02079"></a><span class="lineno"> 2079</span>    <span class="keywordflow">return</span> attestationPreflight&lt;Attestations::AttestationClaim&gt;(ctx);</div>
 <div class="line"><a id="l02080" name="l02080"></a><span class="lineno"> 2080</span>}</div>
 </div>
 <div class="line"><a id="l02081" name="l02081"></a><span class="lineno"> 2081</span> </div>
@@ -2122,7 +2122,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="foldopen" id="foldopen02097" data-start="{" data-end="}">
 <div class="line"><a id="l02097" name="l02097"></a><span class="lineno"><a class="line" href="classxrpl_1_1XChainAddAccountCreateAttestation.html#ac031fa77171ab9709c58b75205992109"> 2097</a></span><a class="code hl_function" href="classxrpl_1_1XChainAddAccountCreateAttestation.html#ac031fa77171ab9709c58b75205992109">XChainAddAccountCreateAttestation::preflight</a>(<a class="code hl_struct" href="structxrpl_1_1PreflightContext.html">PreflightContext</a> <span class="keyword">const</span>&amp; ctx)</div>
 <div class="line"><a id="l02098" name="l02098"></a><span class="lineno"> 2098</span>{</div>
-<div class="line"><a id="l02099" name="l02099"></a><span class="lineno"> 2099</span>    <span class="keywordflow">return</span> attestationpreflight&lt;Attestations::AttestationCreateAccount&gt;(ctx);</div>
+<div class="line"><a id="l02099" name="l02099"></a><span class="lineno"> 2099</span>    <span class="keywordflow">return</span> attestationPreflight&lt;Attestations::AttestationCreateAccount&gt;(ctx);</div>
 <div class="line"><a id="l02100" name="l02100"></a><span class="lineno"> 2100</span>}</div>
 </div>
 <div class="line"><a id="l02101" name="l02101"></a><span class="lineno"> 2101</span> </div>

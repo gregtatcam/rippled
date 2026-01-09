@@ -6,7 +6,7 @@ var searchData=
   ['defaultmaxpeers_3',['defaultMaxPeers',['../namespacexrpl_1_1PeerFinder_1_1Tuning.html#addf8bda62b973c4f4c2e73de15da7793a93978bfc67cb666da9046161988357b7',1,'xrpl::PeerFinder::Tuning']]],
   ['defaultno_4',['DefaultNo',['../namespacexrpl.html#a3d02416a71398d8466f19a6515c944fea3fcbd083035206240ef4d4488ac18498',1,'xrpl']]],
   ['defaultyes_5',['DefaultYes',['../namespacexrpl.html#a3d02416a71398d8466f19a6515c944fea7edd41da231424c2a5df0cffd15af6bf',1,'xrpl']]],
-  ['delegatable_6',['delegatable',['../namespacexrpl.html#af02fc40fb59be7e5f8ee0c33efc7148daf708354f10e0c20bc6e8af971f0b0bd7',1,'xrpl']]],
+  ['delegable_6',['delegable',['../namespacexrpl.html#af02fc40fb59be7e5f8ee0c33efc7148dae1a6b2acbf70d302b99c789e9f6f65c4',1,'xrpl']]],
   ['delegate_7',['DELEGATE',['../namespacexrpl.html#aa040fac78e4975614b31771a1bc5f7ada728f601ddf976d05ffa0d99cc27e8366',1,'xrpl']]],
   ['delete_8',['Delete',['../classxrpl_1_1test_1_1LoanBroker__test.html#a4a1c657bf0942fde0eb150bf2c826905a25c2f81a72fe38bfd5d629f0bca7f714',1,'xrpl::test::LoanBroker_test']]],
   ['deposit_5fpreauth_9',['DEPOSIT_PREAUTH',['../namespacexrpl.html#aa040fac78e4975614b31771a1bc5f7ada3327bcb6bb4b74aec018c7cf6efa8b3a',1,'xrpl']]],
