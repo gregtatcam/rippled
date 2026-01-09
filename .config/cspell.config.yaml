@@ -34,6 +34,7 @@ suggestWords:
 words:
   - abempty
   - AMMID
+  - AMMMP
   - amt
   - amts
   - asnode
@@ -124,6 +125,8 @@ words:
   - lsmf
   - ltype
   - MEMORYSTATUSEX
+  - MPTAMM
+  - MPTDEX
   - Merkle
   - Metafuncton
   - misprediction
@@ -132,6 +135,7 @@ words:
   - mptid
   - mptissuance
   - mptissuanceid
+  - mptissue
   - mptoken
   - mptokenid
   - mptokenissuance

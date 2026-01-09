@@ -1,5 +1,5 @@
-#ifndef XRPL_APP_MISC_MPTUTILS_H_INLCUDED
-#define XRPL_APP_MISC_MPTUTILS_H_INLCUDED
+#ifndef XRPL_APP_MISC_MPTUTILS_H_INCLUDED
+#define XRPL_APP_MISC_MPTUTILS_H_INCLUDED
 
 #include <xrpl/basics/contract.h>
 #include <xrpl/protocol/Protocol.h>
@@ -41,4 +41,4 @@ maxMPTAmount(SLE const& sleIssuance)
 
 }  // namespace xrpl
 
-#endif  // XRPL_APP_MISC_MPTUTILS_H_INLCUDED
+#endif  // XRPL_APP_MISC_MPTUTILS_H_INCLUDED
