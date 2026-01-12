@@ -70,6 +70,7 @@ words:
   - cryptoconditional
   - cryptoconditions
   - csprng
+  - ctest
   - ctid
   - currenttxhash
   - daria
@@ -105,6 +106,7 @@ words:
   - iou
   - ious
   - isrdc
+  - itype
   - jemalloc
   - jlog
   - keylet
@@ -196,10 +198,12 @@ words:
   - roundings
   - sahyadri
   - Satoshi
+  - scons
   - secp
   - sendq
   - seqit
   - sf
+  - SFIELD
   - shamap
   - shamapitem
   - sidechain
