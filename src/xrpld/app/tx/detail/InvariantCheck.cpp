@@ -3113,23 +3113,18 @@ ValidVault::finalize(
             return it->second * sign;
         };
 
-        return std::visit(
-            [&]<typename TIss>(TIss const& issue) {
-                if constexpr (std::is_same_v<TIss, Issue>)
-                {
-                    if (isXRP(issue))
-                        return get(deltas_.find(keylet::account(id).key));
-                    return get(
-                        deltas_.find(keylet::line(id, issue).key),
-                        id > issue.getIssuer() ? -1 : 1);
-                }
-                else if constexpr (std::is_same_v<TIss, MPTIssue>)
-                {
-                    return get(deltas_.find(
-                        keylet::mptoken(issue.getMptID(), id).key));
-                }
+        return vaultAsset.visit(
+            [&](Issue const& issue) {
+                if (isXRP(issue))
+                    return get(deltas_.find(keylet::account(id).key));
+                return get(
+                    deltas_.find(keylet::line(id, issue).key),
+                    id > issue.getIssuer() ? -1 : 1);
             },
-            vaultAsset.value());
+            [&](MPTIssue const& issue) {
+                return get(
+                    deltas_.find(keylet::mptoken(issue.getMptID(), id).key));
+            });
     };
     auto const deltaAssetsTxAccount = [&]() -> std::optional<Number> {
         auto ret = deltaAssets(tx[sfAccount]);

@@ -2926,16 +2926,15 @@ accountSendMulti(
         receivers.size() > 1,
         "xrpl::accountSendMulti",
         "multiple recipients provided");
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-                return accountSendMultiIOU(
-                    view, senderID, issue, receivers, j, waiveFee);
-            else
-                return accountSendMultiMPT(
-                    view, senderID, issue, receivers, j, waiveFee);
+    return asset.visit(
+        [&](Issue const& issue) {
+            return accountSendMultiIOU(
+                view, senderID, issue, receivers, j, waiveFee);
         },
-        asset.value());
+        [&](MPTIssue const& issue) {
+            return accountSendMultiMPT(
+                view, senderID, issue, receivers, j, waiveFee);
+        });
 }
 
 static bool
