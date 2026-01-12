@@ -448,7 +448,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>            h.<a class="code hl_function" href="classxrpl_1_1Section.html#a7d47caf8e3a791259e02a9f2447aca8d">set</a>(<span class="stringliteral">&quot;hold_time&quot;</span>, <span class="stringliteral">&quot;alice&quot;</span>);</div>
 <div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>            h.set(<span class="stringliteral">&quot;relay_time&quot;</span>, <span class="stringliteral">&quot;bob&quot;</span>);</div>
 <div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>            <span class="keyword">auto</span> <span class="keyword">const</span> setup = <a class="code hl_function" href="namespacexrpl.html#adb828bc581e4c2eed73d0b44c67473e4">setup_HashRouter</a>(cfg);</div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>            <span class="comment">// The set function ignores values that don&#39;t covert, so the</span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>            <span class="comment">// The set function ignores values that don&#39;t convert, so the</span></div>
 <div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>            <span class="comment">// defaults are left unchanged</span></div>
 <div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>            BEAST_EXPECT(setup.holdTime == 300s);</div>
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>            BEAST_EXPECT(setup.relayTime == 30s);</div>

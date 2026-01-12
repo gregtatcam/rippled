@@ -340,6 +340,8 @@ Protected Attributes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
+<tr class="memitem:af5054682a428ecc3132f6d814bf4f746" id="r_af5054682a428ecc3132f6d814bf4f746"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Expected.html">Expected</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> &gt;, <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1VaultClawback.html#af5054682a428ecc3132f6d814bf4f746">assetsToClawback</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="namespacexrpl.html#a7dd44ba0950a623d378c3da99084fb28">SLE</a> &gt; const &amp;vault, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="namespacexrpl.html#a7dd44ba0950a623d378c3da99084fb28">SLE</a> const &gt; const &amp;sleShareIssuance, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;holder, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;<a class="el" href="namespacexrpl.html#ae85a654befbab3ced6edd17c24de008a">clawbackAmount</a>)</td></tr>
+<tr class="separator:af5054682a428ecc3132f6d814bf4f746"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adba3cd5fdf6ef41d5ad2a5a5a8f9be04" id="r_adba3cd5fdf6ef41d5ad2a5a5a8f9be04"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>, <a class="el" href="classxrpl_1_1XRPAmount.html">XRPAmount</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Transactor.html#adba3cd5fdf6ef41d5ad2a5a5a8f9be04">reset</a> (<a class="el" href="classxrpl_1_1XRPAmount.html">XRPAmount</a> fee)</td></tr>
 <tr class="memdesc:adba3cd5fdf6ef41d5ad2a5a5a8f9be04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the context, discarding any changes made and adjust the fee.  <br /></td></tr>
 <tr class="separator:adba3cd5fdf6ef41d5ad2a5a5a8f9be04"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -450,7 +452,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="VaultClawback_8cpp_source.html#l00017">17</a> of file <a class="el" href="VaultClawback_8cpp_source.html">VaultClawback.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="VaultClawback_8cpp_source.html#l00016">16</a> of file <a class="el" href="VaultClawback_8cpp_source.html">VaultClawback.cpp</a>.</p>
 
 </div>
 </div>
@@ -507,7 +509,57 @@ Static Private Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classxrpl_1_1Transactor.html#a812d1e3e83c7edfdc358a1737ccd54b3">xrpl::Transactor</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="VaultClawback_8cpp_source.html#l00121">121</a> of file <a class="el" href="VaultClawback_8cpp_source.html">VaultClawback.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="VaultClawback_8cpp_source.html#l00324">324</a> of file <a class="el" href="VaultClawback_8cpp_source.html">VaultClawback.cpp</a>.</p>
+
+</div>
+</div>
+<a id="af5054682a428ecc3132f6d814bf4f746" name="af5054682a428ecc3132f6d814bf4f746"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5054682a428ecc3132f6d814bf4f746">&#9670;&#160;</a></span>assetsToClawback()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1Expected.html">Expected</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> &gt;, <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a> &gt; xrpl::VaultClawback::assetsToClawback </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="namespacexrpl.html#a7dd44ba0950a623d378c3da99084fb28">SLE</a> &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>vault</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="namespacexrpl.html#a7dd44ba0950a623d378c3da99084fb28">SLE</a> const &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>sleShareIssuance</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>holder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;&#160;</td>
+          <td class="paramname"><em>clawbackAmount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="VaultClawback_8cpp_source.html#l00220">220</a> of file <a class="el" href="VaultClawback_8cpp_source.html">VaultClawback.cpp</a>.</p>
 
 </div>
 </div>
@@ -536,7 +588,7 @@ Static Private Member Functions</h2></td></tr>
 
 <p>Process the transaction. </p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01129">1129</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01135">1135</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -634,7 +686,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00426">426</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00432">432</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -662,7 +714,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00497">497</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00503">503</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -700,7 +752,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00326">326</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00332">332</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -728,7 +780,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00722">722</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00728">728</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -790,7 +842,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00653">653</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00659">659</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -818,7 +870,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00732">732</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00738">738</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -856,7 +908,7 @@ Static Private Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00277">277</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00283">283</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -982,7 +1034,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00261">261</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00267">267</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1032,7 +1084,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00546">546</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00552">552</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1059,7 +1111,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00616">616</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00622">622</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1088,7 +1140,7 @@ template&lt;&gt; </div>
 
 <p>Reimplemented in <a class="el" href="classxrpl_1_1Change.html#ac7f1aff3ef755020f30e8af2b30c9255">xrpl::Change</a>, and <a class="el" href="classxrpl_1_1SetSignerList.html#a960aee48ab666ee59f278d3116acc1b1">xrpl::SetSignerList</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00608">608</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00614">614</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1155,7 +1207,7 @@ template&lt;&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00316">316</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00322">322</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1193,7 +1245,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00296">296</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00302">302</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1249,7 +1301,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00249">249</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00255">255</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1277,7 +1329,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00255">255</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00261">261</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1315,7 +1367,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00239">239</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00245">245</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1528,7 +1580,7 @@ template&lt;class T , class Unit &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pair containing the transaction result and the actual fee charged. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01067">1067</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01073">1073</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1556,7 +1608,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00527">527</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00533">533</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1583,7 +1635,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00391">391</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00397">397</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1639,7 +1691,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00778">778</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00784">784</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1695,7 +1747,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00810">810</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00816">816</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -1723,7 +1775,7 @@ template&lt;class T , class Unit &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01122">1122</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l01128">1128</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
