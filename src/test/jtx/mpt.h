@@ -93,6 +93,7 @@ struct MPTCreate
     std::optional<std::uint32_t> mutableFlags = std::nullopt;
     bool authHolder = false;
     std::optional<uint256> domainID = std::nullopt;
+    std::optional<std::uint8_t> tickSize = std::nullopt;
     std::optional<TER> err = std::nullopt;
 };
 
@@ -157,6 +158,7 @@ struct MPTSet
     std::optional<std::string> metadata = std::nullopt;
     std::optional<Account> delegate = std::nullopt;
     std::optional<uint256> domainID = std::nullopt;
+    std::optional<std::uint8_t> tickSize = std::nullopt;
     std::optional<TER> err = std::nullopt;
 };
 

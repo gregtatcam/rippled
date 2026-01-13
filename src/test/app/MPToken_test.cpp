@@ -142,6 +142,26 @@ class MPToken_test : public beast::unit_test::suite
                  .metadata = "test",
                  .err = temMALFORMED});
         }
+
+        // TickSize
+        {
+            // Amendment disabled, TickSize field can't be included
+            Env env{*this, features - featureMPTokensV2};
+            MPTTester mptAlice(env, alice);
+
+            mptAlice.create({.tickSize = 10, .err = temDISABLED});
+        }
+        {
+            // Amendment enabled, invalid TickSize value
+            Env env{*this, features};
+            MPTTester mptAlice(env, alice);
+            mptAlice.create(
+                {.tickSize = Quality::minTickSize - 1,
+                 .err = temBAD_TICK_SIZE});
+            mptAlice.create(
+                {.tickSize = Quality::maxTickSize + 1,
+                 .err = temBAD_TICK_SIZE});
+        }
     }
 
     void
@@ -214,6 +234,27 @@ class MPToken_test : public beast::unit_test::suite
                 BEAST_EXPECT(
                     result[sfMaximumAmount.getJsonName()] ==
                     "9223372036854775807");
+            }
+        }
+
+        // TickSize
+        for (auto const& tickSize : std::vector<std::optional<std::uint8_t>>{
+                 std::nullopt,
+                 Quality::minTickSize,
+                 Quality::minTickSize + 1,
+                 Quality::maxTickSize})
+        {
+            Env env{*this, features};
+            MPTTester mptAlice(env, alice);
+            mptAlice.create({.tickSize = tickSize});
+            auto const le = env.le(keylet::mptIssuance(mptAlice.issuanceID()));
+            if (BEAST_EXPECT(le))
+            {
+                // no TickSize and max are treated as default
+                if (tickSize && *tickSize != Quality::maxTickSize)
+                    BEAST_EXPECT((*le)[sfTickSize] == *tickSize);
+                else
+                    BEAST_EXPECT(!le->isFieldPresent(sfTickSize));
             }
         }
     }
@@ -645,6 +686,26 @@ class MPToken_test : public beast::unit_test::suite
                  .err = temMALFORMED});
         }
 
+        // TickSize
+        {
+            Env env{*this, features - featureMPTokensV2};
+            MPTTester mptAlice(env, alice);
+            mptAlice.create({.ownerCount = 1});
+            mptAlice.set(
+                {.tickSize = Quality::minTickSize, .err = temDISABLED});
+        }
+        {
+            Env env{*this, features};
+            MPTTester mptAlice(env, alice);
+            mptAlice.create({.ownerCount = 1});
+            mptAlice.set(
+                {.tickSize = Quality::minTickSize - 1,
+                 .err = temBAD_TICK_SIZE});
+            mptAlice.set(
+                {.tickSize = Quality::maxTickSize + 1,
+                 .err = temBAD_TICK_SIZE});
+        }
+
         // Validate fields in MPTokenIssuanceSet (preclaim)
         // test when a mptokenissuance has disabled locking
         {
@@ -897,6 +958,37 @@ class MPToken_test : public beast::unit_test::suite
             // reset domain to "domain not set"
             mptAlice.set({.domainID = beast::zero});
             BEAST_EXPECT(mptAlice.checkDomainID(std::nullopt));
+        }
+
+        // TickSize
+        auto checkTickSize = [&](Env& env,
+                                 MPTTester& mpt,
+                                 std::optional<std::uint8_t> tickSize) {
+            auto le = env.le(keylet::mptIssuance(mpt.issuanceID()));
+            if (BEAST_EXPECT(le))
+            {
+                // no TickSize and max are treated as default
+                if (tickSize && *tickSize != Quality::maxTickSize)
+                    BEAST_EXPECT((*le)[sfTickSize] == *tickSize);
+                else
+                    BEAST_EXPECT(!le->isFieldPresent(sfTickSize));
+            }
+        };
+        for (auto const& tickSize : std::vector<std::optional<std::uint8_t>>{
+                 std::nullopt,
+                 Quality::minTickSize,
+                 Quality::minTickSize + 1,
+                 Quality::maxTickSize - 1})
+        {
+            Env env{*this, features};
+            MPTTester mptAlice(env, alice);
+            mptAlice.create({.tickSize = tickSize});
+            checkTickSize(env, mptAlice, tickSize);
+
+            auto const setTickSize =
+                tickSize ? (*tickSize + 1) : Quality::minTickSize;
+            mptAlice.set({.tickSize = setTickSize});
+            checkTickSize(env, mptAlice, setTickSize);
         }
     }
 

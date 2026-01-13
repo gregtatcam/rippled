@@ -20,6 +20,7 @@ struct MPTCreateArgs
     std::optional<Slice> const& metadata{};
     std::optional<uint256> domainId{};
     std::optional<std::uint32_t> mutableFlags{};
+    std::optional<std::uint8_t> tickSize{};
 };
 
 class MPTokenIssuanceCreate : public Transactor

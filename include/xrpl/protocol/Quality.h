@@ -94,8 +94,8 @@ public:
     // have lower unsigned integer representations.
     using value_type = std::uint64_t;
 
-    static int const minTickSize = 3;
-    static int const maxTickSize = 16;
+    static int constexpr minTickSize = 3;
+    static int constexpr maxTickSize = 16;
 
 private:
     // This has the same representation as STAmount, see the comment on the

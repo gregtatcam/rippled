@@ -4720,6 +4720,158 @@ public:
     }
 
     void
+    testTickSize(FeatureBitset features)
+    {
+        testcase("Tick Size");
+
+        using namespace jtx;
+
+        auto const gw = Account{"gateway"};
+        auto const alice = Account{"alice"};
+
+        // Both tokens are MPT
+        {
+            Env env{*this, features};
+            env.fund(XRP(10'000), gw, alice);
+            env.close();
+
+            auto XTS = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice},
+                 .pay = 1'000'000});
+            auto XXX = MPTTester(
+                {.env = env, .issuer = gw, .holders = {alice}, .pay = 100});
+
+            {
+                // Gateway sets its tick size to 5
+                XTS.set({.tickSize = 5});
+            }
+
+            env(offer(alice, XTS(100'000), XXX(300'000)));
+            env(offer(alice, XTS(300'000), XXX(100'000)));
+            env(offer(alice, XTS(100'000), XXX(300'000)),
+                json(jss::Flags, tfSell));
+            env(offer(alice, XTS(300'000), XXX(100'000)),
+                json(jss::Flags, tfSell));
+
+            std::map<std::uint32_t, std::pair<STAmount, STAmount>> offers;
+            forEachItem(
+                *env.current(),
+                alice,
+                [&](std::shared_ptr<SLE const> const& sle) {
+                    if (sle->getType() == ltOFFER)
+                        offers.emplace(
+                            (*sle)[sfSequence],
+                            std::make_pair(
+                                (*sle)[sfTakerPays], (*sle)[sfTakerGets]));
+                });
+
+            // first offer
+            auto it = offers.begin();
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(100'000) &&
+                it->second.second == XXX(299'994));
+
+            // second offer
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(300'000) &&
+                it->second.second == XXX(100'000));
+
+            // third offer
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(100'002) &&
+                it->second.second == XXX(300'000));
+
+            // fourth offer
+            // exact TakerPays is XTS(1/.033333)
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(300'000) &&
+                it->second.second == XXX(100'000));
+
+            BEAST_EXPECT(++it == offers.end());
+        }
+
+        // One token is MPT and another one is iOU
+        {
+            Env env{*this, features};
+            env.fund(XRP(10'000), gw, alice);
+            env.close();
+
+            auto XTS = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice},
+                 .pay = 1'000'000});
+            auto XXX = gw["XXX"];
+
+            {
+                // Gateway sets its tick size to 5
+                XTS.set({.tickSize = 5});
+            }
+
+            env(trust(alice, XXX(1'000)));
+            env(pay(gw, alice, XXX(100)));
+
+            env(offer(alice, XTS(100'000), XXX(30)));
+            env(offer(alice, XTS(300'000), XXX(10)));
+            env(offer(alice, XTS(100'000), XXX(30)), json(jss::Flags, tfSell));
+            env(offer(alice, XTS(300'000), XXX(10)), json(jss::Flags, tfSell));
+
+            std::map<std::uint32_t, std::pair<STAmount, STAmount>> offers;
+            forEachItem(
+                *env.current(),
+                alice,
+                [&](std::shared_ptr<SLE const> const& sle) {
+                    if (sle->getType() == ltOFFER)
+                        offers.emplace(
+                            (*sle)[sfSequence],
+                            std::make_pair(
+                                (*sle)[sfTakerPays], (*sle)[sfTakerGets]));
+                });
+
+            // first offer
+            auto it = offers.begin();
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(100'000) &&
+                it->second.second < XXX(30) &&
+                it->second.second > XXX(29.9994));
+
+            // second offer
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(300'000) &&
+                it->second.second == XXX(10));
+
+            // third offer
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(100'002) &&
+                it->second.second == XXX(30));
+
+            // fourth offer
+            // exact TakerPays is XTS(1/.033333)
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(300'000) &&
+                it->second.second == XXX(10));
+
+            BEAST_EXPECT(++it == offers.end());
+        }
+    }
+
+    void
     testAll(FeatureBitset features)
     {
         testCanceledOffer(features);

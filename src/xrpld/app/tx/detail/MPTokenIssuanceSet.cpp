@@ -3,16 +3,26 @@
 
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/LedgerFormats.h>
+#include <xrpl/protocol/Quality.h>
 #include <xrpl/protocol/TxFlags.h>
+
+#include <boost/process/v1/args.hpp>
 
 namespace xrpl {
 
 bool
 MPTokenIssuanceSet::checkExtraFeatures(PreflightContext const& ctx)
 {
-    return !ctx.tx.isFieldPresent(sfDomainID) ||
-        (ctx.rules.enabled(featurePermissionedDomains) &&
-         ctx.rules.enabled(featureSingleAssetVault));
+    if (ctx.tx.isFieldPresent(sfDomainID) &&
+        !(ctx.rules.enabled(featurePermissionedDomains) &&
+          ctx.rules.enabled(featureSingleAssetVault)))
+        return false;
+
+    if (ctx.tx.isFieldPresent(sfTickSize) &&
+        !ctx.rules.enabled(featureMPTokensV2))
+        return false;
+
+    return true;
 }
 
 std::uint32_t
@@ -74,7 +84,8 @@ MPTokenIssuanceSet::preflight(PreflightContext const& ctx)
         ctx.rules.enabled(featureDynamicMPT))
     {
         // Is this transaction actually changing anything ?
-        if (txFlags == 0 && !ctx.tx.isFieldPresent(sfDomainID) && !isMutate)
+        if (txFlags == 0 && !ctx.tx.isFieldPresent(sfDomainID) && !isMutate &&
+            !ctx.tx.isFieldPresent(sfTickSize))
             return temMALFORMED;
     }
 
@@ -116,6 +127,13 @@ MPTokenIssuanceSet::preflight(PreflightContext const& ctx)
                 (*mutableFlags & tmfMPTClearCanTransfer))
                 return temMALFORMED;
         }
+    }
+
+    if (auto const tickSize = ctx.tx[~sfTickSize])
+    {
+        if (*tickSize < Quality::minTickSize ||
+            *tickSize > Quality::maxTickSize)
+            return temBAD_TICK_SIZE;
     }
 
     return tesSUCCESS;
@@ -330,6 +348,14 @@ MPTokenIssuanceSet::doApply()
             if (sle->isFieldPresent(sfDomainID))
                 sle->makeFieldAbsent(sfDomainID);
         }
+    }
+
+    if (auto const tickSize = ctx_.tx[~sfTickSize])
+    {
+        if (*tickSize != 0 && tickSize != Quality::maxTickSize)
+            sle->setFieldU8(sfTickSize, *tickSize);
+        else if (sle->isFieldPresent(sfTickSize))
+            sle->makeFieldAbsent(sfTickSize);
     }
 
     view().update(sle);

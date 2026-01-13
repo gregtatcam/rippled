@@ -647,22 +647,31 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
     if (result == tesSUCCESS)
     {
         // If a tick size applies, round the offer to the tick size
-        auto const& uPaysIssuerID = saTakerPays.getIssuer();
-        auto const& uGetsIssuerID = saTakerGets.getIssuer();
 
         std::uint8_t uTickSize = Quality::maxTickSize;
-        if (!isXRP(uPaysIssuerID))
-        {
-            auto const sle = sb.read(keylet::account(uPaysIssuerID));
-            if (sle && sle->isFieldPresent(sfTickSize))
-                uTickSize = std::min(uTickSize, (*sle)[sfTickSize]);
-        }
-        if (!isXRP(uGetsIssuerID))
-        {
-            auto const sle = sb.read(keylet::account(uGetsIssuerID));
-            if (sle && sle->isFieldPresent(sfTickSize))
-                uTickSize = std::min(uTickSize, (*sle)[sfTickSize]);
-        }
+
+        auto setTickSize = [&](Asset const& asset) {
+            asset.visit(
+                [&](Issue const& issue) {
+                    if (!issue.native())
+                    {
+                        auto const sle =
+                            sb.read(keylet::account(issue.getIssuer()));
+                        if (sle && sle->isFieldPresent(sfTickSize))
+                            uTickSize = std::min(uTickSize, (*sle)[sfTickSize]);
+                    }
+                },
+                [&](MPTIssue const& issue) {
+                    auto const sle =
+                        sb.read(keylet::mptIssuance(issue.getMptID()));
+                    if (sle && sle->isFieldPresent(sfTickSize))
+                        uTickSize = std::min(uTickSize, (*sle)[sfTickSize]);
+                });
+        };
+
+        setTickSize(saTakerPays.asset());
+        setTickSize(saTakerGets.asset());
+
         if (uTickSize < Quality::maxTickSize)
         {
             auto const rate =

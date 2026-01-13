@@ -135,6 +135,8 @@ MPTTester::createjv(MPTCreate const& arg)
         jv[sfDomainID] = to_string(*arg.domainID);
     if (arg.mutableFlags)
         jv[sfMutableFlags] = *arg.mutableFlags;
+    if (arg.tickSize)
+        jv[sfTickSize] = *arg.tickSize;
     jv[sfTransactionType] = jss::MPTokenIssuanceCreate;
 
     return jv;
@@ -153,7 +155,8 @@ MPTTester::create(MPTCreate const& arg)
          .transferFee = arg.transferFee,
          .metadata = arg.metadata,
          .mutableFlags = arg.mutableFlags,
-         .domainID = arg.domainID});
+         .domainID = arg.domainID,
+         .tickSize = arg.tickSize});
     if (submit(arg, jv) != tesSUCCESS)
     {
         // Verify issuance doesn't exist
@@ -351,6 +354,8 @@ MPTTester::setjv(MPTSet const& arg)
         jv[sfTransferFee] = *arg.transferFee;
     if (arg.metadata)
         jv[sfMPTokenMetadata] = strHex(*arg.metadata);
+    if (arg.tickSize)
+        jv[sfTickSize] = *arg.tickSize;
     jv[sfTransactionType] = jss::MPTokenIssuanceSet;
 
     return jv;
@@ -369,7 +374,8 @@ MPTTester::set(MPTSet const& arg)
          .transferFee = arg.transferFee,
          .metadata = arg.metadata,
          .delegate = arg.delegate,
-         .domainID = arg.domainID});
+         .domainID = arg.domainID,
+         .tickSize = arg.tickSize});
     if (submit(arg, jv) == tesSUCCESS &&
         (arg.flags.value_or(0) || arg.mutableFlags))
     {

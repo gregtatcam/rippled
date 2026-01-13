@@ -693,6 +693,7 @@ TRANSACTION(ttMPTOKEN_ISSUANCE_CREATE, 54, MPTokenIssuanceCreate,
     {sfMPTokenMetadata, soeOPTIONAL},
     {sfDomainID, soeOPTIONAL},
     {sfMutableFlags, soeOPTIONAL},
+    {sfTickSize, soeOPTIONAL},
 }))
 
 /** This transaction type destroys a MPTokensIssuance instance */
@@ -722,6 +723,7 @@ TRANSACTION(ttMPTOKEN_ISSUANCE_SET, 56, MPTokenIssuanceSet,
     {sfMPTokenMetadata, soeOPTIONAL},
     {sfTransferFee, soeOPTIONAL},
     {sfMutableFlags, soeOPTIONAL},
+    {sfTickSize, soeOPTIONAL},
 }))
 
 /** This transaction type authorizes a MPToken instance */

@@ -2,6 +2,7 @@
 
 #include <xrpl/ledger/View.h>
 #include <xrpl/protocol/Feature.h>
+#include <xrpl/protocol/Quality.h>
 #include <xrpl/protocol/TxFlags.h>
 
 namespace xrpl {
@@ -16,6 +17,10 @@ MPTokenIssuanceCreate::checkExtraFeatures(PreflightContext const& ctx)
 
     if (ctx.tx.isFieldPresent(sfMutableFlags) &&
         !ctx.rules.enabled(featureDynamicMPT))
+        return false;
+
+    if (ctx.tx.isFieldPresent(sfTickSize) &&
+        !ctx.rules.enabled(featureMPTokensV2))
         return false;
 
     return true;
@@ -74,6 +79,14 @@ MPTokenIssuanceCreate::preflight(PreflightContext const& ctx)
         if (maxAmt > maxMPTokenAmount)
             return temMALFORMED;
     }
+
+    if (auto const tickSize = ctx.tx[~sfTickSize])
+    {
+        if (*tickSize < Quality::minTickSize ||
+            *tickSize > Quality::maxTickSize)
+            return temBAD_TICK_SIZE;
+    }
+
     return tesSUCCESS;
 }
 
@@ -130,6 +143,10 @@ MPTokenIssuanceCreate::create(
         if (args.mutableFlags)
             (*mptIssuance)[sfMutableFlags] = *args.mutableFlags;
 
+        if (args.tickSize &&
+            (*args.tickSize != 0 && *args.tickSize != Quality::maxTickSize))
+            (*mptIssuance)[sfTickSize] = *args.tickSize;
+
         view.insert(mptIssuance);
     }
 
@@ -157,6 +174,7 @@ MPTokenIssuanceCreate::doApply()
             .metadata = tx[~sfMPTokenMetadata],
             .domainId = tx[~sfDomainID],
             .mutableFlags = tx[~sfMutableFlags],
+            .tickSize = tx[~sfTickSize],
         });
     return result ? tesSUCCESS : result.error();
 }
