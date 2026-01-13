@@ -1,9 +1,12 @@
 <map id="xrpl::LoanProperties" name="xrpl::LoanProperties">
-<area shape="rect" id="Node000001" title=" " alt="" coords="100,255,252,280"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="188,347,340,372"/>
 <area shape="rect" id="Node000002" href="$classxrpl_1_1Number.html" title=" " alt="" coords="5,123,112,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="54,162,51,196,54,214,62,229,79,245,101,255,98,260,76,249,58,232,49,215,46,197,49,162"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="51,162,43,189,38,221,39,253,52,283,79,310,113,330,151,343,188,351,187,356,149,348,111,335,76,314,47,285,34,254,32,221,38,188,46,160"/>
+<area shape="rect" id="Node000004" href="$structxrpl_1_1LoanState.html" title="This structure captures the parts of a loan state." alt="" coords="204,257,324,282"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="90,153,247,254,245,259,87,158"/>
 <area shape="rect" id="Node000003" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="11,5,106,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="61,44,61,123,56,123,56,44"/>
-<area shape="rect" id="Node000004" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="246,123,341,148"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="294,162,286,198,278,216,266,232,248,247,227,257,225,252,245,243,262,229,273,213,281,196,289,161"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="267,296,267,346,261,346,261,296"/>
+<area shape="rect" id="Node000005" href="/__w/rippled/rippled/build/docs/cppreference-doxygen-web.tag.xml$cpp/types/integer.html" title=" " alt="" coords="349,257,443,282"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="376,294,337,325,292,349,290,344,335,320,373,290"/>
 </map>

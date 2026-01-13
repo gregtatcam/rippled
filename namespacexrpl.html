@@ -1979,6 +1979,11 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a97a9ff10fdce86ac84f6be6e23007dd4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls the treatment of unauthorized MPT balances.  <a href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">More...</a><br /></td></tr>
 <tr class="separator:a97a9ff10fdce86ac84f6be6e23007dd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d257b0930e93adcb3db3d2ccedf6653" id="r_a1d257b0930e93adcb3db3d2ccedf6653"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a> { <a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a>
+, <a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a8e620913fc9112933944e6a2f9a498c7">shFULL_BALANCE</a>
+ }</td></tr>
+<tr class="memdesc:a1d257b0930e93adcb3db3d2ccedf6653"><td class="mdescLeft">&#160;</td><td class="mdescRight">Controls whether to include the account's full spendable balance.  <a href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">More...</a><br /></td></tr>
+<tr class="separator:a1d257b0930e93adcb3db3d2ccedf6653"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9fc0181844e951d8a012ead9fab7fbe9" id="r_a9fc0181844e951d8a012ead9fab7fbe9"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a9fc0181844e951d8a012ead9fab7fbe9">AuthType</a> { <a class="el" href="namespacexrpl.html#a9fc0181844e951d8a012ead9fab7fbe9a7559328fba92acce7308a39180e16441">StrongAuth</a>
 , <a class="el" href="namespacexrpl.html#a9fc0181844e951d8a012ead9fab7fbe9a41aee20744fc47f976626aa2ade7adcb">WeakAuth</a>
 , <a class="el" href="namespacexrpl.html#a9fc0181844e951d8a012ead9fab7fbe9a0cc0a0507cf3d31e5089f420a4cf8b4b">Legacy</a>
@@ -3236,22 +3241,14 @@ Functions</h2></td></tr>
 <tr class="separator:ab16cf7dd87686f126073ce9ecf068ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeaaf934dc11029bf998996fe591144c2" id="r_aeaaf934dc11029bf998996fe591144c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aeaaf934dc11029bf998996fe591144c2">isLPTokenFrozen</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1Issue.html">Issue</a> const &amp;asset, <a class="el" href="classxrpl_1_1Issue.html">Issue</a> const &amp;asset2)</td></tr>
 <tr class="separator:aeaaf934dc11029bf998996fe591144c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e690a19f75d02e9bcd802518d58ab2d" id="r_a6e690a19f75d02e9bcd802518d58ab2d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a6e690a19f75d02e9bcd802518d58ab2d">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;currency, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;issuer, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:a6e690a19f75d02e9bcd802518d58ab2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9da8defe8625617eaae966ad002d99e0" id="r_a9da8defe8625617eaae966ad002d99e0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a9da8defe8625617eaae966ad002d99e0">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1Issue.html">Issue</a> const &amp;issue, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:a9da8defe8625617eaae966ad002d99e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65cd6f74efbb79554307f4dd8270ca13" id="r_a65cd6f74efbb79554307f4dd8270ca13"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a65cd6f74efbb79554307f4dd8270ca13">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a> const &amp;mptIssue, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a> zeroIfUnauthorized, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:a65cd6f74efbb79554307f4dd8270ca13"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15f08e259d6ea90b3942c04b4f71286f" id="r_a15f08e259d6ea90b3942c04b4f71286f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a15f08e259d6ea90b3942c04b4f71286f">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a> zeroIfUnauthorized, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:a15f08e259d6ea90b3942c04b4f71286f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9a41eb70ebd38d9c76e892b3ccdb768" id="r_ab9a41eb70ebd38d9c76e892b3ccdb768"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#ab9a41eb70ebd38d9c76e892b3ccdb768">accountSpendable</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;currency, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;issuer, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:ab9a41eb70ebd38d9c76e892b3ccdb768"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14475140876468c5e090555b3a8820f2" id="r_a14475140876468c5e090555b3a8820f2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a14475140876468c5e090555b3a8820f2">accountSpendable</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1Issue.html">Issue</a> const &amp;issue, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:a14475140876468c5e090555b3a8820f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af05dd221bfc016900e835a847f0779c1" id="r_af05dd221bfc016900e835a847f0779c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#af05dd221bfc016900e835a847f0779c1">accountSpendable</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a> const &amp;mptIssue, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a> zeroIfUnauthorized, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:af05dd221bfc016900e835a847f0779c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac471f8f439227e2822a5434251b1334" id="r_aac471f8f439227e2822a5434251b1334"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aac471f8f439227e2822a5434251b1334">accountSpendable</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a> zeroIfUnauthorized, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
-<tr class="separator:aac471f8f439227e2822a5434251b1334"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f5cf1d4503b195f0d8640b978e13edf" id="r_a4f5cf1d4503b195f0d8640b978e13edf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a4f5cf1d4503b195f0d8640b978e13edf">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;currency, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;issuer, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j, <a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a> includeFullBalance=<a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a>)</td></tr>
+<tr class="separator:a4f5cf1d4503b195f0d8640b978e13edf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0957c9a091526007095300d321c308a2" id="r_a0957c9a091526007095300d321c308a2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a0957c9a091526007095300d321c308a2">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1Issue.html">Issue</a> const &amp;issue, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j, <a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a> includeFullBalance=<a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a>)</td></tr>
+<tr class="separator:a0957c9a091526007095300d321c308a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71052e6cf4c62b4b1a827dca661431b9" id="r_a71052e6cf4c62b4b1a827dca661431b9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a71052e6cf4c62b4b1a827dca661431b9">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a> const &amp;mptIssue, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a> zeroIfUnauthorized, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j, <a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a> includeFullBalance=<a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a>)</td></tr>
+<tr class="separator:a71052e6cf4c62b4b1a827dca661431b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2af89b09281573029d656c58127b4e8b" id="r_a2af89b09281573029d656c58127b4e8b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a2af89b09281573029d656c58127b4e8b">accountHolds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> zeroIfFrozen, <a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a> zeroIfUnauthorized, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j, <a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a> includeFullBalance=<a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a>)</td></tr>
+<tr class="separator:a2af89b09281573029d656c58127b4e8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f3f9e12a407c36aa82ea566e0a3136f" id="r_a7f3f9e12a407c36aa82ea566e0a3136f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a7f3f9e12a407c36aa82ea566e0a3136f">accountFunds</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;id, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;saDefault, <a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a> freezeHandling, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="separator:a7f3f9e12a407c36aa82ea566e0a3136f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12188327ecf418e3f5d3be8723ac938d" id="r_a12188327ecf418e3f5d3be8723ac938d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1XRPAmount.html">XRPAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a12188327ecf418e3f5d3be8723ac938d">xrpLiquid</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;id, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int32_t</a> ownerCountAdj, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
@@ -3318,12 +3315,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ade61fecf8e39df200e82e370235d3ceb" id="r_ade61fecf8e39df200e82e370235d3ceb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#ade61fecf8e39df200e82e370235d3ceb">checkDestinationAndTag</a> (<a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a> toSle, bool hasDestinationTag)</td></tr>
 <tr class="memdesc:ade61fecf8e39df200e82e370235d3ceb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validates that the destination SLE and tag are valid.  <br /></td></tr>
 <tr class="separator:ade61fecf8e39df200e82e370235d3ceb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaee7ad724aba8bdc7cec08a21fa2fefa" id="r_aaee7ad724aba8bdc7cec08a21fa2fefa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aaee7ad724aba8bdc7cec08a21fa2fefa">canWithdraw</a> (<a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;from, <a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;to, <a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a> toSle, bool hasDestinationTag)</td></tr>
-<tr class="memdesc:aaee7ad724aba8bdc7cec08a21fa2fefa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that can withdraw funds from an object to itself or a destination.  <br /></td></tr>
-<tr class="separator:aaee7ad724aba8bdc7cec08a21fa2fefa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6dbcab25efda8f67664fafc4c46584f2" id="r_a6dbcab25efda8f67664fafc4c46584f2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a6dbcab25efda8f67664fafc4c46584f2">canWithdraw</a> (<a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;from, <a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;to, bool hasDestinationTag)</td></tr>
-<tr class="memdesc:a6dbcab25efda8f67664fafc4c46584f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that can withdraw funds from an object to itself or a destination.  <br /></td></tr>
-<tr class="separator:a6dbcab25efda8f67664fafc4c46584f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc19f6ae62db94674b9461f536df4235" id="r_adc19f6ae62db94674b9461f536df4235"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#adc19f6ae62db94674b9461f536df4235">canWithdraw</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;from, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;to, <a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a> toSle, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;amount, bool hasDestinationTag)</td></tr>
+<tr class="memdesc:adc19f6ae62db94674b9461f536df4235"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that can withdraw funds from an object to itself or a destination.  <br /></td></tr>
+<tr class="separator:adc19f6ae62db94674b9461f536df4235"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac94ad410f64838089ccb8b26b58b315" id="r_aac94ad410f64838089ccb8b26b58b315"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aac94ad410f64838089ccb8b26b58b315">canWithdraw</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;from, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;to, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;amount, bool hasDestinationTag)</td></tr>
+<tr class="memdesc:aac94ad410f64838089ccb8b26b58b315"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that can withdraw funds from an object to itself or a destination.  <br /></td></tr>
+<tr class="separator:aac94ad410f64838089ccb8b26b58b315"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4453fa2cbb4d013b268b34e8834d372a" id="r_a4453fa2cbb4d013b268b34e8834d372a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a4453fa2cbb4d013b268b34e8834d372a">canWithdraw</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="classxrpl_1_1STTx.html">STTx</a> const &amp;tx)</td></tr>
 <tr class="memdesc:a4453fa2cbb4d013b268b34e8834d372a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks that can withdraw funds from an object to itself or a destination.  <br /></td></tr>
 <tr class="separator:a4453fa2cbb4d013b268b34e8834d372a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4115,6 +4112,8 @@ requires requires(T const&amp; t) { { t.getJson(<a class="el" href="structxrpl_1
 <tr class="separator:afac0ea91dd1d8f292bb0410f19b2eaed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b3b1a475c4c8984ed0b6a1d8c820229" id="r_a8b3b1a475c4c8984ed0b6a1d8c820229"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a8b3b1a475c4c8984ed0b6a1d8c820229">canAddHolding</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a> const &amp;mptIssue)</td></tr>
 <tr class="separator:a8b3b1a475c4c8984ed0b6a1d8c820229"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a970fd4bb24069f33fb20b1110cbcf3fe" id="r_a970fd4bb24069f33fb20b1110cbcf3fe"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a970fd4bb24069f33fb20b1110cbcf3fe">withdrawToDestExceedsLimit</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;from, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;to, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;amount)</td></tr>
+<tr class="separator:a970fd4bb24069f33fb20b1110cbcf3fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68e4262184ef46b9de650c3edbfcd736" id="r_a68e4262184ef46b9de650c3edbfcd736"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a68e4262184ef46b9de650c3edbfcd736">rippleCreditIOU</a> (<a class="el" href="classxrpl_1_1ApplyView.html">ApplyView</a> &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;uSenderID, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;uReceiverID, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;saAmount, bool bCheckIssuer, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="separator:a68e4262184ef46b9de650c3edbfcd736"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6de182dca2b8ee28d8f0a6eeb0cab139" id="r_a6de182dca2b8ee28d8f0a6eeb0cab139"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a6de182dca2b8ee28d8f0a6eeb0cab139">rippleSendIOU</a> (<a class="el" href="classxrpl_1_1ApplyView.html">ApplyView</a> &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;uSenderID, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;uReceiverID, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;saAmount, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> &amp;saActual, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j, <a class="el" href="namespacexrpl.html#a53be00cb856ef39ec60e33cf9694b5eb">WaiveTransferFee</a> waiveFee)</td></tr>
@@ -4684,22 +4683,20 @@ requires ( <a class="elRef" href="http://en.cppreference.com/w/cpp/types/is_same
 <tr class="separator:a1c3de39e4d0e22afe0621f0f0bf9628c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7808b36d8f2224062a27cd2a84250604" id="r_a7808b36d8f2224062a27cd2a84250604"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a7808b36d8f2224062a27cd2a84250604">checkLoanGuards</a> (<a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;vaultAsset, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;principalRequested, bool expectInterest, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentTotal, <a class="el" href="structxrpl_1_1LoanProperties.html">LoanProperties</a> const &amp;properties, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="separator:a7808b36d8f2224062a27cd2a84250604"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedfa11d7b25389edf35bd0fa791af73a" id="r_aedfa11d7b25389edf35bd0fa791af73a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aedfa11d7b25389edf35bd0fa791af73a">computeFullPaymentInterest</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;rawPrincipalOutstanding, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicRate, <a class="el" href="classxrpl_1_1NetClock.html#a6fdfbe103d809c714f11b914b391f8df">NetClock::time_point</a> parentCloseTime, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentInterval, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> prevPaymentDate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> startDate, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> closeInterestRate)</td></tr>
-<tr class="separator:aedfa11d7b25389edf35bd0fa791af73a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a450446fe48ffdb581e50c813f7d7e7c2" id="r_a450446fe48ffdb581e50c813f7d7e7c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a450446fe48ffdb581e50c813f7d7e7c2">computeFullPaymentInterest</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicPayment, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentRemaining, <a class="el" href="classxrpl_1_1NetClock.html#a6fdfbe103d809c714f11b914b391f8df">NetClock::time_point</a> parentCloseTime, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentInterval, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> prevPaymentDate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> startDate, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> closeInterestRate)</td></tr>
-<tr class="separator:a450446fe48ffdb581e50c813f7d7e7c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0f232a4432aeb8d072e026c5686b17e" id="r_af0f232a4432aeb8d072e026c5686b17e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#af0f232a4432aeb8d072e026c5686b17e">computeRawLoanState</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicPayment, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> const paymentRemaining, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> const managementFeeRate)</td></tr>
-<tr class="separator:af0f232a4432aeb8d072e026c5686b17e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac463b12a42de263568cae355d5094106" id="r_ac463b12a42de263568cae355d5094106"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#ac463b12a42de263568cae355d5094106">computeRawLoanState</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicPayment, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> interestRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentInterval, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> const paymentRemaining, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> const managementFeeRate)</td></tr>
-<tr class="separator:ac463b12a42de263568cae355d5094106"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af74cf647690ab5cdb695b5edf8c75a91" id="r_af74cf647690ab5cdb695b5edf8c75a91"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#af74cf647690ab5cdb695b5edf8c75a91">computeFullPaymentInterest</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;theoreticalPrincipalOutstanding, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicRate, <a class="el" href="classxrpl_1_1NetClock.html#a6fdfbe103d809c714f11b914b391f8df">NetClock::time_point</a> parentCloseTime, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentInterval, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> prevPaymentDate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> startDate, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> closeInterestRate)</td></tr>
+<tr class="separator:af74cf647690ab5cdb695b5edf8c75a91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5405a03459935d24ab27d4a0b9c5afc6" id="r_a5405a03459935d24ab27d4a0b9c5afc6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a5405a03459935d24ab27d4a0b9c5afc6">computeTheoreticalLoanState</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicPayment, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> const paymentRemaining, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> const managementFeeRate)</td></tr>
+<tr class="separator:a5405a03459935d24ab27d4a0b9c5afc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb5f98fcbd289260f4848cbf266400a4" id="r_aeb5f98fcbd289260f4848cbf266400a4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aeb5f98fcbd289260f4848cbf266400a4">constructLoanState</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;totalValueOutstanding, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;principalOutstanding, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;managementFeeOutstanding)</td></tr>
 <tr class="separator:aeb5f98fcbd289260f4848cbf266400a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8b129bcfda287e4cf8286e544af7242" id="r_ac8b129bcfda287e4cf8286e544af7242"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#ac8b129bcfda287e4cf8286e544af7242">constructRoundedLoanState</a> (<a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a> loan)</td></tr>
 <tr class="separator:ac8b129bcfda287e4cf8286e544af7242"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a214a68fa4b462cf05138d87a9806bd06" id="r_a214a68fa4b462cf05138d87a9806bd06"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a214a68fa4b462cf05138d87a9806bd06">computeManagementFee</a> (<a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;value, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> managementFeeRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int32_t</a> scale)</td></tr>
 <tr class="separator:a214a68fa4b462cf05138d87a9806bd06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8a294a6260939b7dda4c0ffd8891632" id="r_ae8a294a6260939b7dda4c0ffd8891632"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanProperties.html">LoanProperties</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#ae8a294a6260939b7dda4c0ffd8891632">computeLoanProperties</a> (<a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="classxrpl_1_1Number.html">Number</a> principalOutstanding, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> interestRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentInterval, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentsRemaining, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> managementFeeRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int32_t</a> minimumScale)</td></tr>
-<tr class="separator:ae8a294a6260939b7dda4c0ffd8891632"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb1403000c2c2a5c8fa065d22f7cbcaf" id="r_aeb1403000c2c2a5c8fa065d22f7cbcaf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanProperties.html">LoanProperties</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aeb1403000c2c2a5c8fa065d22f7cbcaf">computeLoanProperties</a> (<a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;principalOutstanding, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> interestRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentInterval, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentsRemaining, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> managementFeeRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int32_t</a> minimumScale)</td></tr>
+<tr class="separator:aeb1403000c2c2a5c8fa065d22f7cbcaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cbb7d30e86d8a2a0d4b0ca2ddc717be" id="r_a4cbb7d30e86d8a2a0d4b0ca2ddc717be"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1LoanProperties.html">LoanProperties</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a4cbb7d30e86d8a2a0d4b0ca2ddc717be">computeLoanProperties</a> (<a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;principalOutstanding, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;periodicRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> paymentsRemaining, <a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> managementFeeRate, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int32_t</a> minimumScale)</td></tr>
+<tr class="separator:a4cbb7d30e86d8a2a0d4b0ca2ddc717be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf7b8008f440919861328f902c97dbdf" id="r_aaf7b8008f440919861328f902c97dbdf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Expected.html">Expected</a>&lt; <a class="el" href="structxrpl_1_1LoanPaymentParts.html">LoanPaymentParts</a>, <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aaf7b8008f440919861328f902c97dbdf">loanMakePayment</a> (<a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, <a class="el" href="classxrpl_1_1ApplyView.html">ApplyView</a> &amp;view, <a class="el" href="classxrpl_1_1STLedgerEntry.html#a3824052630a8c7032ccb819dbbf45eed">SLE::ref</a> loan, <a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a> brokerSle, <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;amount, <a class="el" href="namespacexrpl.html#a18040b3096f725088b176428273a6e6c">LoanPaymentType</a> const paymentType, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="separator:aaf7b8008f440919861328f902c97dbdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca11af9918c066c7edb4e6dfaab88f13" id="r_aca11af9918c066c7edb4e6dfaab88f13"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1XRPAmount.html">XRPAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aca11af9918c066c7edb4e6dfaab88f13">scaleFeeLoad</a> (<a class="el" href="classxrpl_1_1XRPAmount.html">XRPAmount</a> fee, <a class="el" href="classxrpl_1_1LoadFeeTrack.html">LoadFeeTrack</a> const &amp;feeTrack, <a class="el" href="structxrpl_1_1Fees.html">Fees</a> const &amp;fees, bool bUnlimited)</td></tr>
@@ -4755,8 +4752,8 @@ requires ( <a class="elRef" href="http://en.cppreference.com/w/cpp/types/is_same
 <tr class="memitem:a46c08bc932d6f6f79ccbf36a21cf2d97" id="r_a46c08bc932d6f6f79ccbf36a21cf2d97"><td class="memTemplParams" colspan="2">template&lt;class NumberProxy &gt; </td></tr>
 <tr class="memitem:a46c08bc932d6f6f79ccbf36a21cf2d97"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a46c08bc932d6f6f79ccbf36a21cf2d97">adjustImpreciseNumber</a> (NumberProxy value, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;adjustment, <a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;asset, int vaultScale)</td></tr>
 <tr class="separator:a46c08bc932d6f6f79ccbf36a21cf2d97"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9975411534136d6be1c3c17d32842e4" id="r_ab9975411534136d6be1c3c17d32842e4"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#ab9975411534136d6be1c3c17d32842e4">getVaultScale</a> (<a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a> vaultSle)</td></tr>
-<tr class="separator:ab9975411534136d6be1c3c17d32842e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45a752d036373d0d2e26aacd2ca9bdad" id="r_a45a752d036373d0d2e26aacd2ca9bdad"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a45a752d036373d0d2e26aacd2ca9bdad">getAssetsTotalScale</a> (<a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a> vaultSle)</td></tr>
+<tr class="separator:a45a752d036373d0d2e26aacd2ca9bdad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c9ffb8ef62bb789d97c96910638e0dd" id="r_a4c9ffb8ef62bb789d97c96910638e0dd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a4c9ffb8ef62bb789d97c96910638e0dd">operator==</a> (<a class="el" href="structxrpl_1_1Manifest.html">Manifest</a> const &amp;lhs, <a class="el" href="structxrpl_1_1Manifest.html">Manifest</a> const &amp;rhs)</td></tr>
 <tr class="separator:a4c9ffb8ef62bb789d97c96910638e0dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a99399245345ef705e93c1e8353c44ebb" id="r_a99399245345ef705e93c1e8353c44ebb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a99399245345ef705e93c1e8353c44ebb">operator!=</a> (<a class="el" href="structxrpl_1_1Manifest.html">Manifest</a> const &amp;lhs, <a class="el" href="structxrpl_1_1Manifest.html">Manifest</a> const &amp;rhs)</td></tr>
@@ -5763,6 +5760,16 @@ requires (T::ConsequencesFactory == <a class="el" href="classxrpl_1_1Transactor.
 <tr class="memitem:a9e5f84a8d316b66b015766390900c6be" id="r_a9e5f84a8d316b66b015766390900c6be"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a9e5f84a8d316b66b015766390900c6be">rand_bool</a> ()</td></tr>
 <tr class="separator:a9e5f84a8d316b66b015766390900c6be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader"></div></td></tr>
+<tr class="memitem:a6827ba10f9a74582eb39009494f651a7" id="r_a6827ba10f9a74582eb39009494f651a7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a6827ba10f9a74582eb39009494f651a7">creditLimit</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;issuer, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;currency)</td></tr>
+<tr class="memdesc:a6827ba10f9a74582eb39009494f651a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the maximum amount of IOUs that an account can hold.  <br /></td></tr>
+<tr class="separator:a6827ba10f9a74582eb39009494f651a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d80263dd562d13fe89a37179552979b" id="r_a7d80263dd562d13fe89a37179552979b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1IOUAmount.html">IOUAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a7d80263dd562d13fe89a37179552979b">creditLimit2</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;v, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;acc, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;iss, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;cur)</td></tr>
+<tr class="separator:a7d80263dd562d13fe89a37179552979b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
+<tr class="memitem:aa02ddd7fd103324c4ac6c80efc16f1bd" id="r_aa02ddd7fd103324c4ac6c80efc16f1bd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#aa02ddd7fd103324c4ac6c80efc16f1bd">creditBalance</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;account, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;issuer, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;currency)</td></tr>
+<tr class="memdesc:aa02ddd7fd103324c4ac6c80efc16f1bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the amount of IOUs issued by issuer that are held by an account.  <br /></td></tr>
+<tr class="separator:aa02ddd7fd103324c4ac6c80efc16f1bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
 <tr class="memitem:a6b55eb15c0572e3b6fa55e1e1d246d51" id="r_a6b55eb15c0572e3b6fa55e1e1d246d51"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a6b55eb15c0572e3b6fa55e1e1d246d51">cdirFirst</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;view, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> const &amp;<a class="el" href="namespacexrpl.html#a5a08adf1bad37c44d2ada7ae983dd12f">root</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; <a class="el" href="namespacexrpl.html#a7dd44ba0950a623d378c3da99084fb28">SLE</a> const &gt; &amp;page, unsigned int &amp;index, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> &amp;entry)</td></tr>
 <tr class="memdesc:a6b55eb15c0572e3b6fa55e1e1d246d51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the first entry in the directory, advancing the index.  <br /></td></tr>
 <tr class="separator:a6b55eb15c0572e3b6fa55e1e1d246d51"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -5849,16 +5856,6 @@ requires (T::ConsequencesFactory == <a class="el" href="classxrpl_1_1Transactor.
 <tr class="memitem:a7fbe04c636377211ad075106c8aa05e8" id="r_a7fbe04c636377211ad075106c8aa05e8"><td class="memTemplParams" colspan="2">template&lt;class T , class  = std::enable_if_t&lt;        std::is_same&lt;T, char&gt;::value || std::is_same&lt;T, unsigned char&gt;::value&gt;&gt; </td></tr>
 <tr class="memitem:a7fbe04c636377211ad075106c8aa05e8"><td class="memTemplItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structxrpl_1_1Manifest.html">Manifest</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a7fbe04c636377211ad075106c8aa05e8">deserializeManifest</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/container/vector.html">std::vector</a>&lt; T &gt; const &amp;v, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> journal=<a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>(<a class="el" href="classbeast_1_1Journal.html#a930d70ff72f71414fcd5b560610cefb6">beast::Journal::getNullSink</a>()))</td></tr>
 <tr class="separator:a7fbe04c636377211ad075106c8aa05e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
-<tr class="memitem:a1b74896ada9ca8bd55fcdd18753d09f5" id="r_a1b74896ada9ca8bd55fcdd18753d09f5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a1b74896ada9ca8bd55fcdd18753d09f5">creditLimit</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const  &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const  &amp;account, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const  &amp;issuer, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const  &amp;currency)</td></tr>
-<tr class="memdesc:a1b74896ada9ca8bd55fcdd18753d09f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the maximum amount of IOUs that an account can hold.  <br /></td></tr>
-<tr class="separator:a1b74896ada9ca8bd55fcdd18753d09f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d80263dd562d13fe89a37179552979b" id="r_a7d80263dd562d13fe89a37179552979b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1IOUAmount.html">IOUAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a7d80263dd562d13fe89a37179552979b">creditLimit2</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;v, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;acc, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;iss, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;cur)</td></tr>
-<tr class="separator:a7d80263dd562d13fe89a37179552979b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
-<tr class="memitem:a49370032ac9c5e920f3249ead6b1c89b" id="r_a49370032ac9c5e920f3249ead6b1c89b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a49370032ac9c5e920f3249ead6b1c89b">creditBalance</a> (<a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const  &amp;view, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const  &amp;account, <a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const  &amp;issuer, <a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const  &amp;currency)</td></tr>
-<tr class="memdesc:a49370032ac9c5e920f3249ead6b1c89b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the amount of IOUs issued by issuer that are held by an account.  <br /></td></tr>
-<tr class="separator:a49370032ac9c5e920f3249ead6b1c89b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader"></div></td></tr>
 <tr class="memitem:a4b9cd90d78d04b423badb0d09d7861d6" id="r_a4b9cd90d78d04b423badb0d09d7861d6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1PreflightResult.html">PreflightResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl.html#a4b9cd90d78d04b423badb0d09d7861d6">preflight</a> (<a class="el" href="classxrpl_1_1Application.html">Application</a> &amp;app, <a class="el" href="classxrpl_1_1Rules.html">Rules</a> const &amp;rules, <a class="el" href="classxrpl_1_1STTx.html">STTx</a> const &amp;tx, <a class="el" href="namespacexrpl.html#abd040209899a4fb5e9c298f9156a074e">ApplyFlags</a> flags, <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> j)</td></tr>
 <tr class="memdesc:a4b9cd90d78d04b423badb0d09d7861d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gate a transaction based on static information.  <br /></td></tr>
@@ -6969,7 +6966,7 @@ template&lt;class Value , class Hash  = hardened_hash&lt;strong_hash&gt;, class 
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00499">499</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00473">473</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -6985,7 +6982,7 @@ template&lt;class Value , class Hash  = hardened_hash&lt;strong_hash&gt;, class 
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00936">936</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00918">918</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -7004,7 +7001,7 @@ template&lt;class Value , class Hash  = hardened_hash&lt;strong_hash&gt;, class 
 <p>Deleter function prototype. </p>
 <p>Returns the status of the entry deletion (if should not be skipped) and if the entry should be skipped. The status is always tesSUCCESS if the entry should be skipped. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01121">1121</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01103">1103</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -9020,6 +9017,28 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a id="a1d257b0930e93adcb3db3d2ccedf6653" name="a1d257b0930e93adcb3db3d2ccedf6653"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d257b0930e93adcb3db3d2ccedf6653">&#9670;&#160;</a></span>SpendableHandling</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">xrpl::SpendableHandling</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Controls whether to include the account's full spendable balance. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d" name="a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d"></a>shSIMPLE_BALANCE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a1d257b0930e93adcb3db3d2ccedf6653a8e620913fc9112933944e6a2f9a498c7" name="a1d257b0930e93adcb3db3d2ccedf6653a8e620913fc9112933944e6a2f9a498c7"></a>shFULL_BALANCE&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00065">65</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+
+</div>
+</div>
 <a id="a9fc0181844e951d8a012ead9fab7fbe9" name="a9fc0181844e951d8a012ead9fab7fbe9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9fc0181844e951d8a012ead9fab7fbe9">&#9670;&#160;</a></span>AuthType</h2>
 
@@ -9045,7 +9064,7 @@ template&lt;class T &gt; </div>
 <tr><td class="fieldname"><a id="a9fc0181844e951d8a012ead9fab7fbe9a0cc0a0507cf3d31e5089f420a4cf8b4b" name="a9fc0181844e951d8a012ead9fab7fbe9a0cc0a0507cf3d31e5089f420a4cf8b4b"></a>Legacy&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00985">985</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00967">967</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -9073,7 +9092,7 @@ template&lt;class T &gt; </div>
 <tr><td class="fieldname"><a id="a7b6ccf13c6f6d8d07e087d8e5edd82aeaa6105c0a611b41b08f1209506350279e" name="a7b6ccf13c6f6d8d07e087d8e5edd82aeaa6105c0a611b41b08f1209506350279e"></a>yes&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01169">1169</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01151">1151</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -10430,7 +10449,7 @@ ledger.
 <tr><td class="fieldname"><a id="a18040b3096f725088b176428273a6e6ca0b5398b7cf60888ad8de87df87e7c1e9" name="a18040b3096f725088b176428273a6e6ca0b5398b7cf60888ad8de87df87e7c1e9"></a>overpayment&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00430">430</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00478">478</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
 
 </div>
 </div>
@@ -14902,6 +14921,155 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a id="a6827ba10f9a74582eb39009494f651a7" name="a6827ba10f9a74582eb39009494f651a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6827ba10f9a74582eb39009494f651a7">&#9670;&#160;</a></span>creditLimit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::creditLimit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>account</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>issuer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;&#160;</td>
+          <td class="paramname"><em>currency</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate the maximum amount of IOUs that an account can hold. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ledger</td><td>the ledger to check against. </td></tr>
+    <tr><td class="paramname">account</td><td>the account of interest. </td></tr>
+    <tr><td class="paramname">issuer</td><td>the issuer of the IOU. </td></tr>
+    <tr><td class="paramname">currency</td><td>the IOU to check. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The maximum amount that can be held. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="Credit_8cpp_source.html#l00009">9</a> of file <a class="el" href="Credit_8cpp_source.html">Credit.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a7d80263dd562d13fe89a37179552979b" name="a7d80263dd562d13fe89a37179552979b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d80263dd562d13fe89a37179552979b">&#9670;&#160;</a></span>creditLimit2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1IOUAmount.html">IOUAmount</a> xrpl::creditLimit2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
+          <td class="paramname"><em>v</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>acc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>iss</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;&#160;</td>
+          <td class="paramname"><em>cur</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Credit_8cpp_source.html#l00036">36</a> of file <a class="el" href="Credit_8cpp_source.html">Credit.cpp</a>.</p>
+
+</div>
+</div>
+<a id="aa02ddd7fd103324c4ac6c80efc16f1bd" name="aa02ddd7fd103324c4ac6c80efc16f1bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa02ddd7fd103324c4ac6c80efc16f1bd">&#9670;&#160;</a></span>creditBalance()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::creditBalance </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>account</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>issuer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;&#160;</td>
+          <td class="paramname"><em>currency</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the amount of IOUs issued by issuer that are held by an account. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ledger</td><td>the ledger to check against. </td></tr>
+    <tr><td class="paramname">account</td><td>the account of interest. </td></tr>
+    <tr><td class="paramname">issuer</td><td>the issuer of the IOU. </td></tr>
+    <tr><td class="paramname">currency</td><td>the IOU to check. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="Credit_8cpp_source.html#l00046">46</a> of file <a class="el" href="Credit_8cpp_source.html">Credit.cpp</a>.</p>
+
+</div>
+</div>
 <a id="a3d480d47bcf3b12e8569c7d95e88e072" name="a3d480d47bcf3b12e8569c7d95e88e072"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3d480d47bcf3b12e8569c7d95e88e072">&#9670;&#160;</a></span>makeRulesGivenLedger() <span class="overload">[1/2]</span></h2>
 
@@ -15002,7 +15170,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>true</code> if <code>exp</code> is in the past; <code>false</code> otherwise. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00154">154</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00155">155</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15032,7 +15200,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00163">163</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00164">164</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15062,7 +15230,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00173">173</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00174">174</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15092,7 +15260,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00181">181</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00182">182</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15134,7 +15302,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00288">288</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00289">289</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15176,7 +15344,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00194">194</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00195">195</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15212,7 +15380,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00089">89</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00092">92</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15248,7 +15416,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00214">214</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00215">215</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15284,7 +15452,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00104">104</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00107">107</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15326,7 +15494,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00228">228</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00229">229</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15368,7 +15536,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00124">124</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00127">127</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15410,7 +15578,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00251">251</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00252">252</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15455,7 +15623,7 @@ template&lt;class T &gt; </div>
 <p>isFrozen check is recursive for MPT shares in a vault, descending to assets in the vault, up to maxAssetCheckDepth recursion depth. </p>
 <p>This is purely defensive, as we currently do not allow such vaults to be created. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00146">146</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00149">149</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15491,7 +15659,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00160">160</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00163">163</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15527,7 +15695,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00166">166</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00169">169</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15563,7 +15731,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00175">175</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00178">178</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15605,7 +15773,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00263">263</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00264">264</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15641,7 +15809,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00190">190</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00193">193</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15683,7 +15851,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00204">204</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00207">207</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15725,7 +15893,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00331">331</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00332">332</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -15767,7 +15935,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00228">228</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00231">231</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15809,7 +15977,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00238">238</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00241">241</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15854,7 +16022,7 @@ template&lt;class T &gt; </div>
 <p>isFrozen check is recursive for MPT shares in a vault, descending to assets in the vault, up to maxAssetCheckDepth recursion depth. </p>
 <p>This is purely defensive, as we currently do not allow such vaults to be created. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00255">255</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00258">258</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15890,7 +16058,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00269">269</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00272">272</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15926,7 +16094,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00279">279</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00282">282</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -15962,7 +16130,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00289">289</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00292">292</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -16004,12 +16172,12 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00357">357</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00358">358</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a6e690a19f75d02e9bcd802518d58ab2d" name="a6e690a19f75d02e9bcd802518d58ab2d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e690a19f75d02e9bcd802518d58ab2d">&#9670;&#160;</a></span>accountHolds() <span class="overload">[1/4]</span></h2>
+<a id="a4f5cf1d4503b195f0d8640b978e13edf" name="a4f5cf1d4503b195f0d8640b978e13edf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f5cf1d4503b195f0d8640b978e13edf">&#9670;&#160;</a></span>accountHolds() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -16048,7 +16216,13 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
+          <td class="paramname"><em>j</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a>&#160;</td>
+          <td class="paramname"><em>includeFullBalance</em> = <code><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -16058,12 +16232,12 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00461">461</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00462">462</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a9da8defe8625617eaae966ad002d99e0" name="a9da8defe8625617eaae966ad002d99e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9da8defe8625617eaae966ad002d99e0">&#9670;&#160;</a></span>accountHolds() <span class="overload">[2/4]</span></h2>
+<a id="a0957c9a091526007095300d321c308a2" name="a0957c9a091526007095300d321c308a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0957c9a091526007095300d321c308a2">&#9670;&#160;</a></span>accountHolds() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -16096,7 +16270,13 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
+          <td class="paramname"><em>j</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a>&#160;</td>
+          <td class="paramname"><em>includeFullBalance</em> = <code><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -16106,12 +16286,12 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00483">483</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00493">493</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a65cd6f74efbb79554307f4dd8270ca13" name="a65cd6f74efbb79554307f4dd8270ca13"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a65cd6f74efbb79554307f4dd8270ca13">&#9670;&#160;</a></span>accountHolds() <span class="overload">[3/4]</span></h2>
+<a id="a71052e6cf4c62b4b1a827dca661431b9" name="a71052e6cf4c62b4b1a827dca661431b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71052e6cf4c62b4b1a827dca661431b9">&#9670;&#160;</a></span>accountHolds() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -16150,7 +16330,13 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
+          <td class="paramname"><em>j</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a>&#160;</td>
+          <td class="paramname"><em>includeFullBalance</em> = <code><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -16160,12 +16346,12 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00495">495</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00512">512</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a15f08e259d6ea90b3942c04b4f71286f" name="a15f08e259d6ea90b3942c04b4f71286f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15f08e259d6ea90b3942c04b4f71286f">&#9670;&#160;</a></span>accountHolds() <span class="overload">[4/4]</span></h2>
+<a id="a2af89b09281573029d656c58127b4e8b" name="a2af89b09281573029d656c58127b4e8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2af89b09281573029d656c58127b4e8b">&#9670;&#160;</a></span>accountHolds() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -16204,7 +16390,13 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
+          <td class="paramname"><em>j</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653">SpendableHandling</a>&#160;</td>
+          <td class="paramname"><em>includeFullBalance</em> = <code><a class="el" href="namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653a0bc363a889266c42f0dbc1f0a412a27d">shSIMPLE_BALANCE</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -16214,217 +16406,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00544">544</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ab9a41eb70ebd38d9c76e892b3ccdb768" name="ab9a41eb70ebd38d9c76e892b3ccdb768"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9a41eb70ebd38d9c76e892b3ccdb768">&#9670;&#160;</a></span>accountSpendable() <span class="overload">[1/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::accountSpendable </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>account</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;&#160;</td>
-          <td class="paramname"><em>currency</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>issuer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a>&#160;</td>
-          <td class="paramname"><em>zeroIfFrozen</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00567">567</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a14475140876468c5e090555b3a8820f2" name="a14475140876468c5e090555b3a8820f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14475140876468c5e090555b3a8820f2">&#9670;&#160;</a></span>accountSpendable() <span class="overload">[2/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::accountSpendable </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>account</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1Issue.html">Issue</a> const &amp;&#160;</td>
-          <td class="paramname"><em>issue</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a>&#160;</td>
-          <td class="paramname"><em>zeroIfFrozen</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00592">592</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
-
-</div>
-</div>
-<a id="af05dd221bfc016900e835a847f0779c1" name="af05dd221bfc016900e835a847f0779c1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af05dd221bfc016900e835a847f0779c1">&#9670;&#160;</a></span>accountSpendable() <span class="overload">[3/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::accountSpendable </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>account</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a> const &amp;&#160;</td>
-          <td class="paramname"><em>mptIssue</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a>&#160;</td>
-          <td class="paramname"><em>zeroIfFrozen</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a>&#160;</td>
-          <td class="paramname"><em>zeroIfUnauthorized</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00604">604</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
-
-</div>
-</div>
-<a id="aac471f8f439227e2822a5434251b1334" name="aac471f8f439227e2822a5434251b1334"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aac471f8f439227e2822a5434251b1334">&#9670;&#160;</a></span>accountSpendable() <span class="overload">[4/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::accountSpendable </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>account</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;&#160;</td>
-          <td class="paramname"><em>asset</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a1751722455e1d7c781d2cc897403a534">FreezeHandling</a>&#160;</td>
-          <td class="paramname"><em>zeroIfFrozen</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a97a9ff10fdce86ac84f6be6e23007dd4">AuthHandling</a>&#160;</td>
-          <td class="paramname"><em>zeroIfUnauthorized</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td>
-          <td class="paramname"><em>j</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00634">634</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00581">581</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16472,7 +16454,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00657">657</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00613">613</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16514,7 +16496,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00721">721</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00677">677</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16552,7 +16534,7 @@ template&lt;class T &gt; </div>
 
 <p>Iterate all items in the given directory. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00759">759</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00715">715</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16617,7 +16599,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>false</code> if the iteration failed </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00786">786</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00742">742</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16655,7 +16637,7 @@ template&lt;class T &gt; </div>
 
 <p>Iterate all items in an account's owner directory. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00439">439</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00413">413</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -16720,7 +16702,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>false</code> if the iteration failed </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00454">454</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00428">428</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -16758,7 +16740,7 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00864">864</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00820">820</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16796,7 +16778,7 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00875">875</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00831">831</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16835,7 +16817,7 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00888">888</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00844">844</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16873,7 +16855,7 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01009">1009</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00965">965</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16893,7 +16875,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01023">1023</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00979">979</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16913,7 +16895,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01040">1040</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00996">996</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16952,7 +16934,7 @@ template&lt;class T &gt; </div>
 <p>Return the hash of a ledger by sequence. </p>
 <p>The hash is retrieved by looking up the "skip list" in the passed ledger. As the skip list is limited in size, if the requested ledger sequence number is out of the range of ledgers represented in the skip list, then <a class="elRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::nullopt</a> is returned. </p><dl class="section return"><dt>Returns</dt><dd>The hash of the ledger with the given sequence number or <a class="elRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::nullopt</a>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01063">1063</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01019">1019</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -16976,7 +16958,7 @@ template&lt;class T &gt; </div>
 <p>The index that we return should meet two requirements: 1) It must be the index of a ledger that has the hash of the ledger we are looking for. This means that its sequence must be equal to greater than the sequence that we want but not more than 256 greater since each ledger contains the hashes of the 256 previous ledgers.</p>
 <p>2) Its hash must be easy for us to find. This means it must be 0 mod 256 because every such ledger is permanently enshrined in a LedgerHashes page which we can easily retrieve via the skip list. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00528">528</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00502">502</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -17021,7 +17003,7 @@ template&lt;class T &gt; </div>
 <p>Return false if the test ledger is provably incompatible with the valid ledger, that is, they could not possibly both be valid. </p>
 <p>Use the first form if you have both ledgers, use the second form if you have not acquired the valid ledger yet </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00901">901</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00857">857</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17069,7 +17051,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00964">964</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00920">920</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17113,7 +17095,7 @@ template&lt;class T &gt; </div>
 
 <p>Adjust the owner count up or down. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01134">1134</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01090">1090</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17174,7 +17156,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the directory isn't empty; false otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00126">126</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00127">127</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17222,7 +17204,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00104">104</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00105">105</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17283,7 +17265,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the directory isn't empty; false otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00137">137</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00138">138</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17331,7 +17313,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00115">115</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00116">116</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17351,7 +17333,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01152">1152</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01108">1108</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17393,7 +17375,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01160">1160</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01116">1116</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17423,7 +17405,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01175">1175</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01131">1131</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17462,7 +17444,7 @@ template&lt;class T &gt; </div>
 <p>Create pseudo-account, storing pseudoOwnerKey into ownerField. </p>
 <p>The list of valid ownerField is maintained in <a class="el" href="View_8cpp_source.html">View.cpp</a> and the caller to this function must perform necessary amendment check(s) before using a field. The amendment check is <b>not</b> performed in createPseudoAccount. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01246">1246</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01201">1201</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17492,7 +17474,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01226">1226</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01181">1181</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17511,7 +17493,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01199">1199</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01155">1155</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17547,7 +17529,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00682">682</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00656">656</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -17577,7 +17559,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01322">1322</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01277">1277</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17613,12 +17595,12 @@ template&lt;class T &gt; </div>
 <li>If the SLE requires a destination tag, checks that there is a tag. </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01332">1332</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01287">1287</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
-<a id="aaee7ad724aba8bdc7cec08a21fa2fefa" name="aaee7ad724aba8bdc7cec08a21fa2fefa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaee7ad724aba8bdc7cec08a21fa2fefa">&#9670;&#160;</a></span>canWithdraw() <span class="overload">[1/3]</span></h2>
+<a id="adc19f6ae62db94674b9461f536df4235" name="adc19f6ae62db94674b9461f536df4235"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc19f6ae62db94674b9461f536df4235">&#9670;&#160;</a></span>canWithdraw() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -17626,14 +17608,14 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="memname"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a> xrpl::canWithdraw </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>from</em>, </td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>from</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -17650,6 +17632,12 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;&#160;</td>
+          <td class="paramname"><em>amount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>hasDestinationTag</em>&#160;</td>
         </tr>
@@ -17667,15 +17655,16 @@ template&lt;class T &gt; </div>
 <li>Checks that the receiver account exists.</li>
 <li>If the receiver requires a destination tag, check that one exists, even if withdrawing to self.</li>
 <li>If withdrawing to self, succeed.</li>
-<li>If not, checks if the receiver requires deposit authorization, and if the sender has it. </li>
+<li>If not, checks if the receiver requires deposit authorization, and if the sender has it.</li>
+<li>Checks that the receiver will not exceed the limit (IOU trustline limit or MPT MaximumAmount). </li>
 </ul>
 
 <p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01346">1346</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a6dbcab25efda8f67664fafc4c46584f2" name="a6dbcab25efda8f67664fafc4c46584f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6dbcab25efda8f67664fafc4c46584f2">&#9670;&#160;</a></span>canWithdraw() <span class="overload">[2/3]</span></h2>
+<a id="aac94ad410f64838089ccb8b26b58b315" name="aac94ad410f64838089ccb8b26b58b315"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac94ad410f64838089ccb8b26b58b315">&#9670;&#160;</a></span>canWithdraw() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -17683,14 +17672,14 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="memname"><a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a> xrpl::canWithdraw </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>from</em>, </td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>from</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -17701,6 +17690,12 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;&#160;</td>
+          <td class="paramname"><em>amount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>hasDestinationTag</em>&#160;</td>
         </tr>
@@ -17718,10 +17713,11 @@ template&lt;class T &gt; </div>
 <li>Checks that the receiver account exists.</li>
 <li>If the receiver requires a destination tag, check that one exists, even if withdrawing to self.</li>
 <li>If withdrawing to self, succeed.</li>
-<li>If not, checks if the receiver requires deposit authorization, and if the sender has it. </li>
+<li>If not, checks if the receiver requires deposit authorization, and if the sender has it.</li>
+<li>Checks that the receiver will not exceed the limit (IOU trustline limit or MPT MaximumAmount). </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01369">1369</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01370">1370</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17757,10 +17753,11 @@ template&lt;class T &gt; </div>
 <li>Checks that the receiver account exists.</li>
 <li>If the receiver requires a destination tag, check that one exists, even if withdrawing to self.</li>
 <li>If withdrawing to self, succeed.</li>
-<li>If not, checks if the receiver requires deposit authorization, and if the sender has it. </li>
+<li>If not, checks if the receiver requires deposit authorization, and if the sender has it.</li>
+<li>Checks that the receiver will not exceed the limit (IOU trustline limit or MPT MaximumAmount). </li>
 </ul>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01381">1381</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01383">1383</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17826,7 +17823,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01390">1390</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01393">1393</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17876,7 +17873,7 @@ template&lt;class T &gt; </div>
 
 <p>Any transactors that call <a class="el" href="namespacexrpl.html#a14d658afcbfa6fa217f326b66ade1391" title="Any transactors that call addEmptyHolding() in doApply must call canAddHolding() in preflight with th...">addEmptyHolding()</a> in doApply must call <a class="el" href="namespacexrpl.html#a2942208949bfa8872b3b20a2ba306113">canAddHolding()</a> in preflight with the same View and <a class="el" href="classxrpl_1_1Asset.html">Asset</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01439">1439</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01442">1442</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17924,7 +17921,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01493">1493</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01496">1496</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -17972,7 +17969,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00786">786</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00768">768</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -18032,7 +18029,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01515">1515</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01518">1518</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18143,7 +18140,7 @@ template&lt;class T &gt; </div>
 <p>Create a trust line. </p>
 <p>This can set an initial balance. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01635">1635</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01638">1638</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18185,7 +18182,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01762">1762</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01765">1765</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18227,7 +18224,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01831">1831</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01834">1834</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18269,7 +18266,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00853">853</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l00835">835</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -18317,7 +18314,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01863">1863</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01866">1866</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18356,7 +18353,7 @@ template&lt;class T &gt; </div>
 <p>Delete an offer. </p>
 <p>Requirements: The passed <code>sle</code> be obtained from a prior call to view.peek() </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01903">1903</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01906">1906</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18413,7 +18410,7 @@ template&lt;class T &gt; </div>
 <p>Calls static rippleCreditIOU if saAmount represents <a class="el" href="classxrpl_1_1Issue.html" title="A currency issued by an account.">Issue</a>. </p>
 <p>Calls static rippleCreditMPT if saAmount represents <a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03513">3513</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03516">3516</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18455,7 +18452,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03651">3651</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03654">3654</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18509,7 +18506,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03748">3748</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03751">3751</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18566,7 +18563,7 @@ template&lt;class T &gt; </div>
 <p>Calls static accountSendIOU if saAmount represents <a class="el" href="classxrpl_1_1Issue.html" title="A currency issued by an account.">Issue</a>. </p>
 <p>Calls static accountSendMPT if saAmount represents <a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02777">2777</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02780">2780</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18623,7 +18620,7 @@ template&lt;class T &gt; </div>
 <p>Like accountSend, except one account is sending multiple payments (with the same asset!) simultaneously. </p>
 <p>Calls static accountSendMultiIOU if saAmount represents <a class="el" href="classxrpl_1_1Issue.html" title="A currency issued by an account.">Issue</a>. Calls static accountSendMultiMPT if saAmount represents <a class="el" href="classxrpl_1_1MPTIssue.html">MPTIssue</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02798">2798</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02801">2801</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18671,7 +18668,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02876">2876</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02879">2879</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18719,7 +18716,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02976">2976</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02979">2979</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18767,7 +18764,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03051">3051</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03054">3054</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18815,7 +18812,7 @@ template&lt;class T &gt; </div>
 <p>If WeakAuth then return tecNO_AUTH if lsfRequireAuth is set, and the RippleState exists, and is not authorized. Return tecNO_LINE if lsfRequireAuth is set and the RippleState doesn't exist. Consequently, if WeakAuth and lsfRequireAuth is <em>not</em> set, this function will return tesSUCCESS even if RippleState does <em>not</em> exist.</p>
 <p>The default "Legacy" auth type is equivalent to WeakAuth. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03096">3096</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03099">3099</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18870,7 +18867,7 @@ template&lt;class T &gt; </div>
 <p>If WeakAuth then return tecNO_AUTH if lsfMPTRequireAuth is set and MPToken doesn't exist or is not authorized (explicitly or via credentials, if DomainID is set in MPTokenIssuance). Consequently, if WeakAuth and lsfMPTRequireAuth is <em>not</em> set, this function will return true even if MPToken does <em>not</em> exist.</p>
 <p>The default "Legacy" auth type is equivalent to StrongAuth. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03128">3128</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03131">3131</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -18912,7 +18909,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01042">1042</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01024">1024</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -18967,7 +18964,7 @@ template&lt;class T &gt; </div>
 <p>The caller does NOT need to look for existing MPToken to match mptIssue/account - this function checks lsfMPTAuthorized of an existing MPToken iff DomainID is not set.</p>
 <p>Do not use for accounts which hold implied permission e.g. object owners or if MPTokenIssuance does not require authorization. In both cases use MPTokenAuthorize::authorize if MPToken does not yet exist. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03224">3224</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03227">3227</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19012,7 +19009,7 @@ template&lt;class T &gt; </div>
 <p>Check if the destination account is allowed to receive MPT. </p>
 <p>Return tecNO_AUTH if it doesn't and tesSUCCESS otherwise. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03325">3325</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03328">3328</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19054,7 +19051,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03345">3345</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03348">3348</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19096,7 +19093,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01104">1104</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8h_source.html#l01086">1086</a> of file <a class="el" href="View_8h_source.html">View.h</a>.</p>
 
 </div>
 </div>
@@ -19190,7 +19187,7 @@ template&lt;class T &gt; </div>
 <p>Delete trustline to AMM. </p>
 <p>The passed <code>sle</code> must be obtained from a prior call to view.peek(). Fail if neither side of the trustline is AMM or if ammAccountID is seated and is not one of the trustline's side. </p>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03463">3463</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03466">3466</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19226,7 +19223,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03540">3540</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03543">3543</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19262,7 +19259,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03568">3568</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03571">3571</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19304,7 +19301,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03597">3597</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03600">3600</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19340,7 +19337,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03626">3626</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03629">3629</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -19380,7 +19377,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if <em>now</em> refers to a time strictly after <em>mark</em>, else false. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03922">3922</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03925">3925</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28490,7 +28487,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00368">368</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00369">369</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28558,7 +28555,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00422">422</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00423">423</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28608,7 +28605,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00683">683</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00639">639</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28638,7 +28635,7 @@ template&lt;class Handler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01294">1294</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01249">1249</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28668,7 +28665,57 @@ template&lt;class Handler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01309">1309</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01264">1264</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a970fd4bb24069f33fb20b1110cbcf3fe" name="a970fd4bb24069f33fb20b1110cbcf3fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a970fd4bb24069f33fb20b1110cbcf3fe">&#9670;&#160;</a></span>withdrawToDestExceedsLimit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespacexrpl.html#a89ce254d202a943d2f5bad19d88787a5">TER</a> xrpl::withdrawToDestExceedsLimit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>from</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
+          <td class="paramname"><em>to</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> const &amp;&#160;</td>
+          <td class="paramname"><em>amount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01317">1317</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28730,7 +28777,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01964">1964</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l01967">1967</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28798,7 +28845,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02118">2118</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02121">2121</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28866,7 +28913,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02173">2173</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02176">2176</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28928,7 +28975,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02251">2251</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02254">2254</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -28990,7 +29037,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02375">2375</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02378">2378</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -29046,7 +29093,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02513">2513</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02516">2516</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -29114,7 +29161,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02575">2575</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02578">2578</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -29182,7 +29229,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02641">2641</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02644">2644</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -29244,7 +29291,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02737">2737</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02740">2740</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -29306,7 +29353,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02762">2762</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02765">2765</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -29374,7 +29421,7 @@ template&lt;class Handler &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02823">2823</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l02826">2826</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -29422,7 +29469,7 @@ template&lt;class Handler &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03381">3381</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l03384">3384</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -37833,7 +37880,7 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01276">1276</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01228">1228</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -37863,7 +37910,7 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01288">1288</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01240">1240</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -37893,7 +37940,7 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01301">1301</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01253">1253</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -37947,12 +37994,12 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01314">1314</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01266">1266</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
-<a id="aedfa11d7b25389edf35bd0fa791af73a" name="aedfa11d7b25389edf35bd0fa791af73a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aedfa11d7b25389edf35bd0fa791af73a">&#9670;&#160;</a></span>computeFullPaymentInterest() <span class="overload">[1/2]</span></h2>
+<a id="af74cf647690ab5cdb695b5edf8c75a91" name="af74cf647690ab5cdb695b5edf8c75a91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af74cf647690ab5cdb695b5edf8c75a91">&#9670;&#160;</a></span>computeFullPaymentInterest()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -37961,7 +38008,7 @@ template&lt;typename A &gt; </div>
           <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::computeFullPaymentInterest </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
-          <td class="paramname"><em>rawPrincipalOutstanding</em>, </td>
+          <td class="paramname"><em>theoreticalPrincipalOutstanding</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -38007,84 +38054,18 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01401">1401</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01353">1353</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a450446fe48ffdb581e50c813f7d7e7c2" name="a450446fe48ffdb581e50c813f7d7e7c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a450446fe48ffdb581e50c813f7d7e7c2">&#9670;&#160;</a></span>computeFullPaymentInterest() <span class="overload">[2/2]</span></h2>
+<a id="a5405a03459935d24ab27d4a0b9c5afc6" name="a5405a03459935d24ab27d4a0b9c5afc6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5405a03459935d24ab27d4a0b9c5afc6">&#9670;&#160;</a></span>computeTheoreticalLoanState()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::computeFullPaymentInterest </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
-          <td class="paramname"><em>periodicPayment</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
-          <td class="paramname"><em>periodicRate</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
-          <td class="paramname"><em>paymentRemaining</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1NetClock.html#a6fdfbe103d809c714f11b914b391f8df">NetClock::time_point</a>&#160;</td>
-          <td class="paramname"><em>parentCloseTime</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
-          <td class="paramname"><em>paymentInterval</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
-          <td class="paramname"><em>prevPaymentDate</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
-          <td class="paramname"><em>startDate</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a>&#160;</td>
-          <td class="paramname"><em>closeInterestRate</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01437">1437</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
-
-</div>
-</div>
-<a id="af0f232a4432aeb8d072e026c5686b17e" name="af0f232a4432aeb8d072e026c5686b17e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af0f232a4432aeb8d072e026c5686b17e">&#9670;&#160;</a></span>computeRawLoanState() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a> xrpl::computeRawLoanState </td>
+          <td class="memname"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a> xrpl::computeTheoreticalLoanState </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
           <td class="paramname"><em>periodicPayment</em>, </td>
@@ -38115,55 +38096,7 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01481">1481</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
-
-</div>
-</div>
-<a id="ac463b12a42de263568cae355d5094106" name="ac463b12a42de263568cae355d5094106"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac463b12a42de263568cae355d5094106">&#9670;&#160;</a></span>computeRawLoanState() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structxrpl_1_1LoanState.html">LoanState</a> xrpl::computeRawLoanState </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
-          <td class="paramname"><em>periodicPayment</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a>&#160;</td>
-          <td class="paramname"><em>interestRate</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
-          <td class="paramname"><em>paymentInterval</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a> const&#160;</td>
-          <td class="paramname"><em>paymentRemaining</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a> const&#160;</td>
-          <td class="paramname"><em>managementFeeRate</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01523">1523</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01411">1411</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -38199,7 +38132,7 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01557">1557</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01474">1474</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -38219,7 +38152,7 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01573">1573</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01490">1490</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -38261,12 +38194,12 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01588">1588</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01505">1505</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
-<a id="ae8a294a6260939b7dda4c0ffd8891632" name="ae8a294a6260939b7dda4c0ffd8891632"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae8a294a6260939b7dda4c0ffd8891632">&#9670;&#160;</a></span>computeLoanProperties()</h2>
+<a id="aeb1403000c2c2a5c8fa065d22f7cbcaf" name="aeb1403000c2c2a5c8fa065d22f7cbcaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb1403000c2c2a5c8fa065d22f7cbcaf">&#9670;&#160;</a></span>computeLoanProperties() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -38280,7 +38213,7 @@ template&lt;typename A &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
           <td class="paramname"><em>principalOutstanding</em>, </td>
         </tr>
         <tr>
@@ -38321,7 +38254,61 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01605">1605</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01527">1527</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4cbb7d30e86d8a2a0d4b0ca2ddc717be" name="a4cbb7d30e86d8a2a0d4b0ca2ddc717be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cbb7d30e86d8a2a0d4b0ca2ddc717be">&#9670;&#160;</a></span>computeLoanProperties() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structxrpl_1_1LoanProperties.html">LoanProperties</a> xrpl::computeLoanProperties </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Asset.html">Asset</a> const &amp;&#160;</td>
+          <td class="paramname"><em>asset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
+          <td class="paramname"><em>principalOutstanding</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
+          <td class="paramname"><em>periodicRate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td>
+          <td class="paramname"><em>paymentsRemaining</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacexrpl.html#a64347051276d9ee7646d93623f5039b4">TenthBips32</a>&#160;</td>
+          <td class="paramname"><em>managementFeeRate</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int32_t</a>&#160;</td>
+          <td class="paramname"><em>minimumScale</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01558">1558</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -38381,7 +38368,7 @@ template&lt;typename A &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01700">1700</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01652">1652</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -39274,18 +39261,18 @@ template&lt;class NumberProxy &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00169">169</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00162">162</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
 
 </div>
 </div>
-<a id="ab9975411534136d6be1c3c17d32842e4" name="ab9975411534136d6be1c3c17d32842e4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9975411534136d6be1c3c17d32842e4">&#9670;&#160;</a></span>getVaultScale()</h2>
+<a id="a45a752d036373d0d2e26aacd2ca9bdad" name="a45a752d036373d0d2e26aacd2ca9bdad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45a752d036373d0d2e26aacd2ca9bdad">&#9670;&#160;</a></span>getAssetsTotalScale()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int xrpl::getVaultScale </td>
+          <td class="memname">int xrpl::getAssetsTotalScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classxrpl_1_1STLedgerEntry.html#abfe1dfb5d52d41d0f04b38097d14f16f">SLE::const_ref</a>&#160;</td>
           <td class="paramname"><em>vaultSle</em></td><td>)</td>
@@ -39294,7 +39281,7 @@ template&lt;class NumberProxy &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00182">182</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00175">175</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
 
 </div>
 </div>
@@ -39815,155 +39802,6 @@ template&lt;class Hasher &gt; </div>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="AccountCurrencies_8cpp_source.html#l00042">42</a> of file <a class="el" href="AccountCurrencies_8cpp_source.html">AccountCurrencies.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a1b74896ada9ca8bd55fcdd18753d09f5" name="a1b74896ada9ca8bd55fcdd18753d09f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b74896ada9ca8bd55fcdd18753d09f5">&#9670;&#160;</a></span>creditLimit()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::creditLimit </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>account</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>issuer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;&#160;</td>
-          <td class="paramname"><em>currency</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Calculate the maximum amount of IOUs that an account can hold. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">ledger</td><td>the ledger to check against. </td></tr>
-    <tr><td class="paramname">account</td><td>the account of interest. </td></tr>
-    <tr><td class="paramname">issuer</td><td>the issuer of the IOU. </td></tr>
-    <tr><td class="paramname">currency</td><td>the IOU to check. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The maximum amount that can be held. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="Credit_8cpp_source.html#l00009">9</a> of file <a class="el" href="Credit_8cpp_source.html">Credit.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a7d80263dd562d13fe89a37179552979b" name="a7d80263dd562d13fe89a37179552979b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d80263dd562d13fe89a37179552979b">&#9670;&#160;</a></span>creditLimit2()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1IOUAmount.html">IOUAmount</a> xrpl::creditLimit2 </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>v</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>acc</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>iss</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;&#160;</td>
-          <td class="paramname"><em>cur</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Credit_8cpp_source.html#l00036">36</a> of file <a class="el" href="Credit_8cpp_source.html">Credit.cpp</a>.</p>
-
-</div>
-</div>
-<a id="a49370032ac9c5e920f3249ead6b1c89b" name="a49370032ac9c5e920f3249ead6b1c89b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a49370032ac9c5e920f3249ead6b1c89b">&#9670;&#160;</a></span>creditBalance()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> xrpl::creditBalance </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1ReadView.html">ReadView</a> const &amp;&#160;</td>
-          <td class="paramname"><em>view</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>account</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a645fcf7e35dc370816f6dd8e2fd7f146">AccountID</a> const &amp;&#160;</td>
-          <td class="paramname"><em>issuer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespacexrpl.html#a0b15ac90e02d620c67750cc6a0eb8200">Currency</a> const &amp;&#160;</td>
-          <td class="paramname"><em>currency</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Returns the amount of IOUs issued by issuer that are held by an account. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">ledger</td><td>the ledger to check against. </td></tr>
-    <tr><td class="paramname">account</td><td>the account of interest. </td></tr>
-    <tr><td class="paramname">issuer</td><td>the issuer of the IOU. </td></tr>
-    <tr><td class="paramname">currency</td><td>the IOU to check. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="Credit_8cpp_source.html#l00046">46</a> of file <a class="el" href="Credit_8cpp_source.html">Credit.cpp</a>.</p>
 
 </div>
 </div>
@@ -45672,7 +45510,7 @@ template&lt;&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LoanSet_8cpp_source.html#l00189">189</a> of file <a class="el" href="LoanSet_8cpp_source.html">LoanSet.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LoanSet_8cpp_source.html#l00191">191</a> of file <a class="el" href="LoanSet_8cpp_source.html">LoanSet.cpp</a>.</p>
 
 </div>
 </div>

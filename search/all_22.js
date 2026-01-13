@@ -356,7 +356,7 @@ var searchData=
   ['_7ewios_353',['~wios',['http://en.cppreference.com/w/cpp/io/basic_ios/~basic_ios.html',1,'std::wios']]],
   ['_7ewiostream_354',['~wiostream',['http://en.cppreference.com/w/cpp/io/basic_iostream/~basic_iostream.html',1,'std::wiostream']]],
   ['_7ewistream_355',['~wistream',['http://en.cppreference.com/w/cpp/io/basic_istream/~basic_istream.html',1,'std::wistream']]],
-  ['_7ework_356',['~work',['../classxrpl_1_1detail_1_1Work.html#afa173b7f03b9f3059196a39fa54c9ad8',1,'xrpl::detail::Work::~Work()'],['../classxrpl_1_1io__list_1_1work.html#a97e2e8af0e4e4c077defe25f018bd5d3',1,'xrpl::io_list::work::~work()']]],
+  ['_7ework_356',['~work',['../classxrpl_1_1io__list_1_1work.html#a97e2e8af0e4e4c077defe25f018bd5d3',1,'xrpl::io_list::work::~work()'],['../classxrpl_1_1detail_1_1Work.html#afa173b7f03b9f3059196a39fa54c9ad8',1,'xrpl::detail::Work::~Work()']]],
   ['_7eworkbase_357',['~WorkBase',['../classxrpl_1_1detail_1_1WorkBase.html#aa1a40435fd305c229e24b14be3fb17c9',1,'xrpl::detail::WorkBase']]],
   ['_7eworker_358',['~Worker',['../classxrpl_1_1Workers_1_1Worker.html#a118a9bd209934c6a752bfdc38e30e2fc',1,'xrpl::Workers::Worker']]],
   ['_7eworkers_359',['~Workers',['../classxrpl_1_1Workers.html#a6dc76a5f0c26c6e61d9fcc1e53dd3dc7',1,'xrpl::Workers']]],

@@ -12,9 +12,10 @@ var searchData=
   ['smstate_9',['SmState',['../structxrpl_1_1test_1_1XChainSim__test.html#a57f80895f505dae8e3549f56a061bb96',1,'xrpl::test::XChainSim_test']]],
   ['soestyle_10',['SOEStyle',['../namespacexrpl.html#a39cef704bc54911c99acb6be435d552f',1,'xrpl']]],
   ['soetxmptissue_11',['SOETxMPTIssue',['../namespacexrpl.html#ae73aaebe9faba1b33e2172bc6d79c42b',1,'xrpl']]],
-  ['startuptype_12',['StartUpType',['../classxrpl_1_1Config.html#ac137fe70fc805bad953335f4f1cc1f4a',1,'xrpl::Config']]],
-  ['state_13',['state',['../classxrpl_1_1PeerFinder_1_1Slot.html#a9f7f74456679552f34bba92f853b8132',1,'xrpl::PeerFinder::Slot::State'],['../classxrpl_1_1LedgerCleanerImp.html#a28cf927f76d8996023f38d227c8cf66c',1,'xrpl::LedgerCleanerImp::State'],['../classxrpl_1_1test_1_1reduce__relay__test.html#a6bd67f01a8911875f6d9a9470904b28b',1,'xrpl::test::reduce_relay_test::State']]],
-  ['status_14',['Status',['../namespacexrpl_1_1NodeStore.html#a4883b8bc797bf7591fde489676a6e96b',1,'xrpl::NodeStore']]],
-  ['stranddirection_15',['StrandDirection',['../namespacexrpl.html#a79a793a19f9bf2aad6e7b82772743ae8',1,'xrpl']]],
-  ['subtypes_16',['SubTypes',['../classxrpl_1_1NetworkOPsImp.html#a0348b84b46884fa0aa4ea896369baa0d',1,'xrpl::NetworkOPsImp']]]
+  ['spendablehandling_12',['SpendableHandling',['../namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653',1,'xrpl']]],
+  ['startuptype_13',['StartUpType',['../classxrpl_1_1Config.html#ac137fe70fc805bad953335f4f1cc1f4a',1,'xrpl::Config']]],
+  ['state_14',['state',['../classxrpl_1_1PeerFinder_1_1Slot.html#a9f7f74456679552f34bba92f853b8132',1,'xrpl::PeerFinder::Slot::State'],['../classxrpl_1_1LedgerCleanerImp.html#a28cf927f76d8996023f38d227c8cf66c',1,'xrpl::LedgerCleanerImp::State'],['../classxrpl_1_1test_1_1reduce__relay__test.html#a6bd67f01a8911875f6d9a9470904b28b',1,'xrpl::test::reduce_relay_test::State']]],
+  ['status_15',['Status',['../namespacexrpl_1_1NodeStore.html#a4883b8bc797bf7591fde489676a6e96b',1,'xrpl::NodeStore']]],
+  ['stranddirection_16',['StrandDirection',['../namespacexrpl.html#a79a793a19f9bf2aad6e7b82772743ae8',1,'xrpl']]],
+  ['subtypes_17',['SubTypes',['../classxrpl_1_1NetworkOPsImp.html#a0348b84b46884fa0aa4ea896369baa0d',1,'xrpl::NetworkOPsImp']]]
 ];
