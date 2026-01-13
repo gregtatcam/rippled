@@ -62,6 +62,9 @@ enum FreezeHandling { fhIGNORE_FREEZE, fhZERO_IF_FROZEN };
 /** Controls the treatment of unauthorized MPT balances */
 enum AuthHandling { ahIGNORE_AUTH, ahZERO_IF_UNAUTHORIZED };
 
+/** Controls whether to include the account's full spendable balance */
+enum SpendableHandling { shSIMPLE_BALANCE, shFULL_BALANCE };
+
 [[nodiscard]] bool
 isGlobalFrozen(ReadView const& view, AccountID const& issuer);
 
@@ -303,7 +306,17 @@ isLPTokenFrozen(
     Asset const& asset,
     Asset const& asset2);
 
-// Returns the amount an account can spend without going into debt.
+// Returns the amount an account can spend.
+//
+// If shSIMPLE_BALANCE is specified, this is the amount the account can spend
+// without going into debt.
+//
+// If shFULL_BALANCE is specified, this is the amount the account can spend
+// total. Specifically:
+// * The account can go into debt if using a trust line, and the other side has
+// a non-zero limit.
+// * If the account is the asset issuer the limit is defined by the asset /
+//   issuance.
 //
 // <-- saAmount: amount of currency held by account. May be negative.
 [[nodiscard]] STAmount
@@ -313,7 +326,8 @@ accountHolds(
     Currency const& currency,
     AccountID const& issuer,
     FreezeHandling zeroIfFrozen,
-    beast::Journal j);
+    beast::Journal j,
+    SpendableHandling includeFullBalance = shSIMPLE_BALANCE);
 
 [[nodiscard]] inline STAmount
 accountHolds(
@@ -321,11 +335,8 @@ accountHolds(
     AccountID const& account,
     Issue const& issue,
     FreezeHandling zeroIfFrozen,
-    beast::Journal j)
-{
-    return accountHolds(
-        view, account, issue.currency, issue.account, zeroIfFrozen, j);
-}
+    beast::Journal j,
+    SpendableHandling includeFullBalance = shSIMPLE_BALANCE);
 
 [[nodiscard]] STAmount
 accountHolds(
@@ -334,7 +345,8 @@ accountHolds(
     MPTIssue const& mptIssue,
     FreezeHandling zeroIfFrozen,
     AuthHandling zeroIfUnauthorized,
-    beast::Journal j);
+    beast::Journal j,
+    SpendableHandling includeFullBalance = shSIMPLE_BALANCE);
 
 [[nodiscard]] STAmount
 accountHolds(
@@ -343,50 +355,8 @@ accountHolds(
     Asset const& asset,
     FreezeHandling zeroIfFrozen,
     AuthHandling zeroIfUnauthorized,
-    beast::Journal j);
-
-// Returns the amount an account can spend total.
-//
-// These functions use accountHolds, but unlike accountHolds:
-// * The account can go into debt.
-// * If the account is the asset issuer the only limit is defined by the asset /
-//   issuance.
-//
-// <-- saAmount: amount of currency held by account. May be negative.
-[[nodiscard]] STAmount
-accountSpendable(
-    ReadView const& view,
-    AccountID const& account,
-    Currency const& currency,
-    AccountID const& issuer,
-    FreezeHandling zeroIfFrozen,
-    beast::Journal j);
-
-[[nodiscard]] STAmount
-accountSpendable(
-    ReadView const& view,
-    AccountID const& account,
-    Issue const& issue,
-    FreezeHandling zeroIfFrozen,
-    beast::Journal j);
-
-[[nodiscard]] STAmount
-accountSpendable(
-    ReadView const& view,
-    AccountID const& account,
-    MPTIssue const& mptIssue,
-    FreezeHandling zeroIfFrozen,
-    AuthHandling zeroIfUnauthorized,
-    beast::Journal j);
-
-[[nodiscard]] STAmount
-accountSpendable(
-    ReadView const& view,
-    AccountID const& account,
-    Asset const& asset,
-    FreezeHandling zeroIfFrozen,
-    AuthHandling zeroIfUnauthorized,
-    beast::Journal j);
+    beast::Journal j,
+    SpendableHandling includeFullBalance = shSIMPLE_BALANCE);
 
 // Returns the amount an account can spend of the currency type saDefault, or
 // returns saDefault if this account is the issuer of the currency in
@@ -694,7 +664,7 @@ createPseudoAccount(
     uint256 const& pseudoOwnerKey,
     SField const& ownerField);
 
-// Returns true iff sleAcct is a pseudo-account or specific
+// Returns true if and only if sleAcct is a pseudo-account or specific
 // pseudo-accounts in pseudoFieldFilter.
 //
 // Returns false if sleAcct is
@@ -749,13 +719,16 @@ checkDestinationAndTag(SLE::const_ref toSle, bool hasDestinationTag);
  *    - If withdrawing to self, succeed.
  *    - If not, checks if the receiver requires deposit authorization, and if
  *      the sender has it.
+ *    - Checks that the receiver will not exceed the limit (IOU trustline limit
+ *      or MPT MaximumAmount).
  */
 [[nodiscard]] TER
 canWithdraw(
-    AccountID const& from,
     ReadView const& view,
+    AccountID const& from,
     AccountID const& to,
     SLE::const_ref toSle,
+    STAmount const& amount,
     bool hasDestinationTag);
 
 /** Checks that can withdraw funds from an object to itself or a destination.
@@ -769,12 +742,15 @@ canWithdraw(
  *    - If withdrawing to self, succeed.
  *    - If not, checks if the receiver requires deposit authorization, and if
  *      the sender has it.
+ *    - Checks that the receiver will not exceed the limit (IOU trustline limit
+ *      or MPT MaximumAmount).
  */
 [[nodiscard]] TER
 canWithdraw(
-    AccountID const& from,
     ReadView const& view,
+    AccountID const& from,
     AccountID const& to,
+    STAmount const& amount,
     bool hasDestinationTag);
 
 /** Checks that can withdraw funds from an object to itself or a destination.
@@ -788,6 +764,8 @@ canWithdraw(
  *    - If withdrawing to self, succeed.
  *    - If not, checks if the receiver requires deposit authorization, and if
  *      the sender has it.
+ *    - Checks that the receiver will not exceed the limit (IOU trustline limit
+ *      or MPT MaximumAmount).
  */
 [[nodiscard]] TER
 canWithdraw(ReadView const& view, STTx const& tx);
