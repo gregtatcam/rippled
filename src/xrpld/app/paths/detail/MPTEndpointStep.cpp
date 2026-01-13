@@ -1,17 +1,14 @@
 #include <xrpld/app/misc/MPTUtils.h>
-#include <xrpld/app/paths/Credit.h>
 #include <xrpld/app/paths/detail/Steps.h>
 #include <xrpld/app/tx/detail/MPTokenAuthorize.h>
 
 #include <xrpl/basics/Log.h>
 #include <xrpl/ledger/PaymentSandbox.h>
-#include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/MPTAmount.h>
 #include <xrpl/protocol/Quality.h>
 
 #include <boost/container/flat_set.hpp>
 
-#include <numeric>
 #include <sstream>
 
 namespace xrpl {

@@ -2746,7 +2746,7 @@ protected:
                             periodicRate,
                             state.paymentRemaining - 1,
                             broker.params.managementFeeRate);
-                    detail::LoanStateDeltas const deltas =
+                    xrpl::detail::LoanStateDeltas const deltas =
                         currentTrueState - nextTrueState;
 
                     testcase
@@ -6214,7 +6214,7 @@ protected:
         // Accrued + prepayment-penalty interest based on current periodic
         // schedule
         auto const fullPaymentInterest = computeFullPaymentInterest(
-            detail::loanPrincipalFromPeriodicPayment(
+            xrpl::detail::loanPrincipalFromPeriodicPayment(
                 after.periodicPayment, periodicRate2, after.paymentRemaining),
             periodicRate2,
             env.current()->parentCloseTime(),
@@ -6251,7 +6251,7 @@ protected:
         // window by clamping prevPaymentDate to 'now' for the full-pay path.
         auto const prevClamped = std::min(after.previousPaymentDate, nowSecs);
         auto const fullPaymentInterestClamped = computeFullPaymentInterest(
-            detail::loanPrincipalFromPeriodicPayment(
+            xrpl::detail::loanPrincipalFromPeriodicPayment(
                 after.periodicPayment, periodicRate2, after.paymentRemaining),
             periodicRate2,
             env.current()->parentCloseTime(),

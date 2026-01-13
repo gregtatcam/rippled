@@ -165,7 +165,7 @@ VaultWithdraw::doApply()
         return tecPATH_DRY;
     }
 
-    if (accountSpendable(
+    if (accountHolds(
             view(),
             account_,
             share,

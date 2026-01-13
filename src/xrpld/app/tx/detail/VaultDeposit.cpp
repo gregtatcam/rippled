@@ -258,7 +258,7 @@ VaultDeposit::doApply()
         return ter;
 
     // Sanity check
-    if (accountSpendable(
+    if (accountHolds(
             view(),
             account_,
             assetsDeposited.asset(),
