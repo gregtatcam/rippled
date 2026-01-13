@@ -157,7 +157,8 @@ Patched recipes</h3>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line"># Define which recipes to export.</div>
-<div class="line">recipes=(ed25519 grpc secp256k1 snappy soci)</div>
+<div class="line">recipes=(&#39;ed25519&#39; &#39;grpc&#39; &#39;openssl&#39; &#39;secp256k1&#39; &#39;snappy&#39; &#39;soci&#39;)</div>
+<div class="line">folders=(&#39;all&#39;     &#39;all&#39;  &#39;3.x.x&#39;   &#39;all&#39;       &#39;all&#39;    &#39;all&#39;)</div>
 <div class="line"> </div>
 <div class="line"># Selectively check out the recipes from our CCI fork.</div>
 <div class="line">cd external</div>
@@ -166,20 +167,24 @@ Patched recipes</h3>
 <div class="line">git init</div>
 <div class="line">git remote add origin git@github.com:XRPLF/conan-center-index.git</div>
 <div class="line">git sparse-checkout init</div>
-<div class="line">for recipe in ${recipes[@]}; do</div>
-<div class="line">  echo &quot;Checking out ${recipe}...&quot;</div>
-<div class="line">  git sparse-checkout add recipes/${recipe}/all</div>
+<div class="line">for ((index = 1; index &lt;= ${#recipes[@]}; index++)); do</div>
+<div class="line">  recipe=${recipes[index]}</div>
+<div class="line">  folder=${folders[index]}</div>
+<div class="line">  echo &quot;Checking out recipe &#39;${recipe}&#39; from folder &#39;${folder}&#39;...&quot;</div>
+<div class="line">  git sparse-checkout add recipes/${recipe}/${folder}</div>
 <div class="line">done</div>
 <div class="line">git fetch origin master</div>
 <div class="line">git checkout master</div>
 <div class="line">cd ../..</div>
 <div class="line"> </div>
 <div class="line"># Export the recipes into the local cache.</div>
-<div class="line">for recipe in ${recipes[@]}; do</div>
+<div class="line">for ((index = 1; index &lt;= ${#recipes[@]}; index++)); do</div>
+<div class="line">  recipe=${recipes[index]}</div>
+<div class="line">  folder=${folders[index]}</div>
 <div class="line">  version=$(extract_version ${recipe})</div>
-<div class="line">  echo &quot;Exporting ${recipe}/${version}...&quot;</div>
+<div class="line">  echo &quot;Exporting &#39;${recipe}/${version}&#39; from &#39;${recipe}/${folder}&#39;...&quot;</div>
 <div class="line">  conan export --version $(extract_version ${recipe}) \</div>
-<div class="line">    external/conan-center-index/recipes/${recipe}/all</div>
+<div class="line">    external/conan-center-index/recipes/${recipe}/${folder}</div>
 <div class="line">done</div>
 </div><!-- fragment --><p>In the case we switch to a newer version of a dependency that still requires a patch, it will be necessary for you to pull in the changes and re-export the updated dependencies with the newer version. However, if we switch to a newer version that no longer requires a patch, no action is required on your part, as the new recipe will be automatically pulled from the official Conan Center.</p>
 <blockquote class="doxtable">
