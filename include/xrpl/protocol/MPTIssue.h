@@ -53,6 +53,12 @@ public:
     {
         return false;
     }
+
+    bool
+    integral() const
+    {
+        return true;
+    }
 };
 
 constexpr bool
