@@ -68,7 +68,7 @@ var searchData=
   ['expiry_5f_65',['expiry_',['../classxrpl_1_1test_1_1jtx_1_1expiration.html#afbfbaaebdffa8b798e0fcdacd79cb159',1,'xrpl::test::jtx::expiration']]],
   ['expmsg_66',['expMsg',['../structxrpl_1_1RPC_1_1TxnTestData.html#ac307fbd465a842c81cd4cbb02fe75fc4',1,'xrpl::RPC::TxnTestData']]],
   ['exponent_67',['exponent',['../structxrpl_1_1NumberParts.html#ab62d61f6268163296fea5463de99aa22',1,'xrpl::NumberParts']]],
-  ['exponent_5f_68',['exponent_',['../classxrpl_1_1IOUAmount.html#a93ad50e7b8634db49d373a7101c66878',1,'xrpl::IOUAmount::exponent_'],['../classxrpl_1_1Number.html#ac901dca6c4ae9b77298650a82ad606f3',1,'xrpl::Number::exponent_']]],
+  ['exponent_5f_68',['exponent_',['../classxrpl_1_1IOUAmount.html#a321f27490cc1112692cf67ba5a3869ec',1,'xrpl::IOUAmount::exponent_'],['../classxrpl_1_1Number.html#ac901dca6c4ae9b77298650a82ad606f3',1,'xrpl::Number::exponent_']]],
   ['extent_5fv_69',['extent_v',['http://en.cppreference.com/w/cpp/types/extent.html',1,'std::extent_v'],['http://en.cppreference.com/w/cpp/experimental/type_trait_variable_templates.html',1,'std::experimental::extent_v']]],
   ['extra_70',['extra',['../classxrpl_1_1SlabAllocatorSet_1_1SlabConfig.html#a5fa5ae272eb9e91c18faf57c20313ffd',1,'xrpl::SlabAllocatorSet::SlabConfig']]],
   ['extra_5f_71',['extra_',['../classJson_1_1Reader_1_1ErrorInfo.html#af92c24acf642b040d6e40aac4952d44d',1,'Json::Reader::ErrorInfo']]]

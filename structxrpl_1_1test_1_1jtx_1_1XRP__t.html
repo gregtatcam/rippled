@@ -88,6 +88,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6c50c7d73a535c5b1b7cfa78cc40af46" id="r_a6c50c7d73a535c5b1b7cfa78cc40af46"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1test_1_1jtx_1_1XRP__t.html#a6c50c7d73a535c5b1b7cfa78cc40af46">operator Issue</a> () const</td></tr>
 <tr class="memdesc:a6c50c7d73a535c5b1b7cfa78cc40af46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implicit conversion to <a class="el" href="classxrpl_1_1Issue.html" title="A currency issued by an account.">Issue</a>.  <br /></td></tr>
 <tr class="separator:a6c50c7d73a535c5b1b7cfa78cc40af46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed3f373fc100dc0ccb2ae7abb4f6262d" id="r_aed3f373fc100dc0ccb2ae7abb4f6262d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1test_1_1jtx_1_1XRP__t.html#aed3f373fc100dc0ccb2ae7abb4f6262d">integral</a> () const</td></tr>
+<tr class="separator:aed3f373fc100dc0ccb2ae7abb4f6262d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04f4ca18369c1f4c738b8de54726c99a" id="r_a04f4ca18369c1f4c738b8de54726c99a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structxrpl_1_1test_1_1jtx_1_1None.html">None</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1test_1_1jtx_1_1XRP__t.html#a04f4ca18369c1f4c738b8de54726c99a">operator()</a> (<a class="el" href="structxrpl_1_1test_1_1jtx_1_1none__t.html">none_t</a>) const</td></tr>
 <tr class="memdesc:a04f4ca18369c1f4c738b8de54726c99a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns None-of-XRP.  <br /></td></tr>
 <tr class="separator:a04f4ca18369c1f4c738b8de54726c99a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -133,6 +135,25 @@ Friends</h2></td></tr>
 
 </div>
 </div>
+<a id="aed3f373fc100dc0ccb2ae7abb4f6262d" name="aed3f373fc100dc0ccb2ae7abb4f6262d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed3f373fc100dc0ccb2ae7abb4f6262d">&#9670;&#160;</a></span>integral()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool xrpl::test::jtx::XRP_t::integral </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00265">265</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+
+</div>
+</div>
 <a id="a839fe49a926c2d2d076cd08d12c0bfb5" name="a839fe49a926c2d2d076cd08d12c0bfb5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a839fe49a926c2d2d076cd08d12c0bfb5">&#9670;&#160;</a></span>operator()() <span class="overload">[1/4]</span></h2>
 
@@ -159,7 +180,7 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00272">272</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00278">278</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
@@ -182,12 +203,12 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
 <p>Returns an amount of XRP as <a class="el" href="structxrpl_1_1test_1_1jtx_1_1PrettyAmount.html" title="Represents an XRP or IOU quantity This customizes the string conversion and supports XRP conversions ...">PrettyAmount</a>, which is trivially convertible to <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">v</td><td>The <a class="el" href="classxrpl_1_1Number.html">Number</a> of XRP (not drops). May be fractional. </td></tr>
+    <tr><td class="paramname">v</td><td>The <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> of XRP (not drops). May be fractional. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00285">285</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00291">291</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
@@ -207,7 +228,7 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00295">295</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00301">301</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
@@ -229,7 +250,7 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
 
 <p>Returns None-of-XRP. </p>
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00314">314</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00320">320</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>
@@ -258,7 +279,7 @@ template&lt;class T , class  = std::enable_if_t&lt;std::is_integral_v&lt;T&gt;&g
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00320">320</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="src_2test_2jtx_2amount_8h_source.html#l00326">326</a> of file <a class="el" href="src_2test_2jtx_2amount_8h_source.html">src/test/jtx/amount.h</a>.</p>
 
 </div>
 </div>

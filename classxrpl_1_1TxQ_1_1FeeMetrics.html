@@ -151,14 +151,14 @@ Private Attributes</h2></td></tr>
 <tr class="memdesc:a93b6ff339c53517f740a34f051650e74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum value of txnsExpected.  <br /></td></tr>
 <tr class="separator:a93b6ff339c53517f740a34f051650e74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a308df44141cb65437cfde0a9fb287cb9" id="r_a308df44141cb65437cfde0a9fb287cb9"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1TxQ_1_1FeeMetrics.html#a308df44141cb65437cfde0a9fb287cb9">targetTxnCount_</a></td></tr>
-<tr class="memdesc:a308df44141cb65437cfde0a9fb287cb9"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classxrpl_1_1Number.html">Number</a> of transactions per ledger that fee escalation "works
+<tr class="memdesc:a308df44141cb65437cfde0a9fb287cb9"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> of transactions per ledger that fee escalation "works
 towards".  <br /></td></tr>
 <tr class="separator:a308df44141cb65437cfde0a9fb287cb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43d451a51f1fe8f310ff448249975708" id="r_a43d451a51f1fe8f310ff448249975708"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> &gt; const&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1TxQ_1_1FeeMetrics.html#a43d451a51f1fe8f310ff448249975708">maximumTxnCount_</a></td></tr>
 <tr class="memdesc:a43d451a51f1fe8f310ff448249975708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum value of txnsExpected.  <br /></td></tr>
 <tr class="separator:a43d451a51f1fe8f310ff448249975708"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26c84bcb96dc490f181ed33fb0ee2a50" id="r_a26c84bcb96dc490f181ed33fb0ee2a50"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1TxQ_1_1FeeMetrics.html#a26c84bcb96dc490f181ed33fb0ee2a50">txnsExpected_</a></td></tr>
-<tr class="memdesc:a26c84bcb96dc490f181ed33fb0ee2a50"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classxrpl_1_1Number.html">Number</a> of transactions expected per ledger.  <br /></td></tr>
+<tr class="memdesc:a26c84bcb96dc490f181ed33fb0ee2a50"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> of transactions expected per ledger.  <br /></td></tr>
 <tr class="separator:a26c84bcb96dc490f181ed33fb0ee2a50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9eb474f6f7c7d8279b0a980a11fbb267" id="r_a9eb474f6f7c7d8279b0a980a11fbb267"><td class="memItemLeft" align="right" valign="top">boost::circular_buffer&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1TxQ_1_1FeeMetrics.html#a9eb474f6f7c7d8279b0a980a11fbb267">recentTxnCounts_</a></td></tr>
 <tr class="memdesc:a9eb474f6f7c7d8279b0a980a11fbb267"><td class="mdescLeft">&#160;</td><td class="mdescRight">Recent history of transaction counts that exceed the targetTxnCount_.  <br /></td></tr>
@@ -382,7 +382,7 @@ towards".  <br /></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">view</td><td>Current open / working ledger. (May be a sandbox.) </td></tr>
-    <tr><td class="paramname">extraCount</td><td><a class="el" href="classxrpl_1_1Number.html">Number</a> of additional transactions to count as in the ledger. (If <code>view</code> is a sandbox, should be the number of transactions in the parent ledger.) </td></tr>
+    <tr><td class="paramname">extraCount</td><td><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> of additional transactions to count as in the ledger. (If <code>view</code> is a sandbox, should be the number of transactions in the parent ledger.) </td></tr>
     <tr><td class="paramname">seriesSize</td><td>Total number of transactions in the series to be processed.</td></tr>
   </table>
   </dd>
@@ -440,7 +440,7 @@ towards".  <br /></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="classxrpl_1_1Number.html">Number</a> of transactions per ledger that fee escalation "works
+<p><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> of transactions per ledger that fee escalation "works
 towards". </p>
 
 <p class="definition">Definition at line <a class="el" href="TxQ_8h_source.html#l00365">365</a> of file <a class="el" href="TxQ_8h_source.html">TxQ.h</a>.</p>
@@ -493,7 +493,7 @@ towards". </p>
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="classxrpl_1_1Number.html">Number</a> of transactions expected per ledger. </p>
+<p><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> of transactions expected per ledger. </p>
 <p>One more than this value will be accepted before escalation kicks in. </p>
 
 <p class="definition">Definition at line <a class="el" href="TxQ_8h_source.html#l00371">371</a> of file <a class="el" href="TxQ_8h_source.html">TxQ.h</a>.</p>

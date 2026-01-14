@@ -81,6 +81,7 @@ $(function() {
 <a href="#pub-static-attribs">Static Public Attributes</a> &#124;
 <a href="#pri-types">Private Types</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="#friends">Friends</a> &#124;
@@ -89,21 +90,31 @@ $(function() {
 </div><!--header-->
 <div class="contents">
 
+<p><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> is a floating point type that can represent a wide range of values.  
+ <a href="classxrpl_1_1Number.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="Number_8h_source.html">Number.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for xrpl::Number:</div>
 <div class="dyncontent">
 <div class="center"><img src="classxrpl_1_1Number__coll__graph.png" border="0" usemap="#axrpl_1_1Number_coll__map" alt="Collaboration graph"/></div>
 <map name="axrpl_1_1Number_coll__map" id="axrpl_1_1Number_coll__map">
-<area shape="rect" title=" " alt="" coords="5,123,112,148"/>
-<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/types/integer.html" title=" " alt="" coords="11,5,106,31"/>
-<area shape="poly" title=" " alt="" coords="61,44,61,123,56,123,56,44"/>
+<area shape="rect" title="Number is a floating point type that can represent a wide range of values." alt="" coords="488,71,595,97"/>
+<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/types/integer.html" title=" " alt="" coords="5,41,108,66"/>
+<area shape="poly" title=" " alt="" coords="121,40,132,39,165,39,250,36,316,32,382,33,465,47,494,56,519,69,517,74,492,61,463,52,381,38,316,37,250,42,165,44,132,44,122,45"/>
+<area shape="rect" href="structxrpl_1_1MantissaRange.html" title="MantissaRange defines a range for the mantissa of a normalized Number." alt="" coords="198,71,353,97"/>
+<area shape="poly" title=" " alt="" coords="122,66,132,68,198,76,198,81,132,73,121,71"/>
+<area shape="poly" title=" " alt="" coords="366,81,488,81,488,87,366,87"/>
+<area shape="rect" target="_parent" href="http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper.html" title=" " alt="" coords="189,121,361,175"/>
+<area shape="poly" title=" " alt="" coords="374,123,463,101,492,94,493,99,465,107,375,128"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number_1_1Guard.html">Guard</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1Number_1_1normalized.html">normalized</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structxrpl_1_1Number_1_1unchecked.html">unchecked</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,11 +136,19 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab433fcec28ecf57dea22710141fc22a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8051d5e9b1ef04ce5acba074819fed4d" id="r_a8051d5e9b1ef04ce5acba074819fed4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a8051d5e9b1ef04ce5acba074819fed4d">Number</a> (<a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a> <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>)</td></tr>
 <tr class="separator:a8051d5e9b1ef04ce5acba074819fed4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a596bb914b61c7b343c269c755624fe06" id="r_a596bb914b61c7b343c269c755624fe06"><td class="memItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a596bb914b61c7b343c269c755624fe06">Number</a> (<a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a> <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="structxrpl_1_1Number_1_1unchecked.html">unchecked</a>) noexcept</td></tr>
-<tr class="separator:a596bb914b61c7b343c269c755624fe06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0609cf6c7fccc8110af6a49a024df589" id="r_a0609cf6c7fccc8110af6a49a024df589"><td class="memItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a0609cf6c7fccc8110af6a49a024df589">Number</a> (bool negative, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="structxrpl_1_1Number_1_1unchecked.html">unchecked</a>) noexcept</td></tr>
+<tr class="separator:a0609cf6c7fccc8110af6a49a024df589"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b76facdee6f73564373a8732d33c526" id="r_a3b76facdee6f73564373a8732d33c526"><td class="memItemLeft" align="right" valign="top">constexpr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a3b76facdee6f73564373a8732d33c526">Number</a> (<a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="structxrpl_1_1Number_1_1unchecked.html">unchecked</a>) noexcept</td></tr>
+<tr class="separator:a3b76facdee6f73564373a8732d33c526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a038dcb6cd9a6f0c4c9dc991258d7bdbd" id="r_a038dcb6cd9a6f0c4c9dc991258d7bdbd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a038dcb6cd9a6f0c4c9dc991258d7bdbd">Number</a> (bool negative, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="structxrpl_1_1Number_1_1normalized.html">normalized</a>)</td></tr>
+<tr class="separator:a038dcb6cd9a6f0c4c9dc991258d7bdbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31b4e505357c0994561f1b00b9fce89c" id="r_a31b4e505357c0994561f1b00b9fce89c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a31b4e505357c0994561f1b00b9fce89c">Number</a> (<a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="structxrpl_1_1Number_1_1normalized.html">normalized</a>)</td></tr>
+<tr class="separator:a31b4e505357c0994561f1b00b9fce89c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a223cbe5eabe0bea1d9156f05c971e5c3" id="r_a223cbe5eabe0bea1d9156f05c971e5c3"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a> () const noexcept</td></tr>
+<tr class="memdesc:a223cbe5eabe0bea1d9156f05c971e5c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the mantissa of the external view of the <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a>.  <br /></td></tr>
 <tr class="separator:a223cbe5eabe0bea1d9156f05c971e5c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa4058fefe18f86063240cfd2ba985358" id="r_aa4058fefe18f86063240cfd2ba985358"><td class="memItemLeft" align="right" valign="top">constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a> () const noexcept</td></tr>
+<tr class="memdesc:aa4058fefe18f86063240cfd2ba985358"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the exponent of the external view of the <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a>.  <br /></td></tr>
 <tr class="separator:aa4058fefe18f86063240cfd2ba985358"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e74431e27ce46a0fef1bbe2bfd4c167" id="r_a7e74431e27ce46a0fef1bbe2bfd4c167"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a7e74431e27ce46a0fef1bbe2bfd4c167">operator+</a> () const noexcept</td></tr>
 <tr class="separator:a7e74431e27ce46a0fef1bbe2bfd4c167"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,61 +171,112 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2c584da7e74e5b5bb6770ad27d0ac546" id="r_a2c584da7e74e5b5bb6770ad27d0ac546"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a2c584da7e74e5b5bb6770ad27d0ac546">operator/=</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;x)</td></tr>
 <tr class="separator:a2c584da7e74e5b5bb6770ad27d0ac546"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26f0b9ae0cd8c2dfcc37371fa46336f1" id="r_a26f0b9ae0cd8c2dfcc37371fa46336f1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a26f0b9ae0cd8c2dfcc37371fa46336f1">operator rep</a> () const</td></tr>
-<tr class="memdesc:a26f0b9ae0cd8c2dfcc37371fa46336f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conversions to <a class="el" href="classxrpl_1_1Number.html">Number</a> are implicit and conversions away from <a class="el" href="classxrpl_1_1Number.html">Number</a> are explicit.  <br /></td></tr>
+<tr class="memdesc:a26f0b9ae0cd8c2dfcc37371fa46336f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Conversions to <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> are implicit and conversions away from <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> are explicit.  <br /></td></tr>
 <tr class="separator:a26f0b9ae0cd8c2dfcc37371fa46336f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abac88bc4caeeaddc6829b42af4363e75" id="r_abac88bc4caeeaddc6829b42af4363e75"><td class="memItemLeft" align="right" valign="top">constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#abac88bc4caeeaddc6829b42af4363e75">signum</a> () const noexcept</td></tr>
 <tr class="memdesc:abac88bc4caeeaddc6829b42af4363e75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the sign of the amount.  <br /></td></tr>
 <tr class="separator:abac88bc4caeeaddc6829b42af4363e75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d6e8e71ee3641f8d21041d3ade5aed0" id="r_a3d6e8e71ee3641f8d21041d3ade5aed0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a3d6e8e71ee3641f8d21041d3ade5aed0">truncate</a> () const noexcept</td></tr>
 <tr class="separator:a3d6e8e71ee3641f8d21041d3ade5aed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48a40dabffeda7599db182132de1dc6c" id="r_a48a40dabffeda7599db182132de1dc6c"><td class="memTemplParams" colspan="2">template&lt;Integral64 T&gt; </td></tr>
+<tr class="memitem:a48a40dabffeda7599db182132de1dc6c"><td class="memTemplItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; T, int &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a48a40dabffeda7599db182132de1dc6c">normalizeToRange</a> (T <a class="el" href="classxrpl_1_1Number.html#a1be401c2cd91d8311dbc55bf6038a492">minMantissa</a>, T <a class="el" href="classxrpl_1_1Number.html#a992a7b726b84f3e57bdba64acc107ba9">maxMantissa</a>) const</td></tr>
+<tr class="separator:a48a40dabffeda7599db182132de1dc6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:abc8b240ae3d9ac7b46e44aa6a300ac2b" id="r_abc8b240ae3d9ac7b46e44aa6a300ac2b"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#abc8b240ae3d9ac7b46e44aa6a300ac2b">min</a> () noexcept</td></tr>
-<tr class="separator:abc8b240ae3d9ac7b46e44aa6a300ac2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74939e6aee5581ea03e9d10c55885563" id="r_a74939e6aee5581ea03e9d10c55885563"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a74939e6aee5581ea03e9d10c55885563">max</a> () noexcept</td></tr>
-<tr class="separator:a74939e6aee5581ea03e9d10c55885563"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28d8c973c6cc798720ffd9856238a128" id="r_a28d8c973c6cc798720ffd9856238a128"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a28d8c973c6cc798720ffd9856238a128">lowest</a> () noexcept</td></tr>
-<tr class="separator:a28d8c973c6cc798720ffd9856238a128"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac64ccc5f642ddbfcdd59d5e22b9185a7" id="r_ac64ccc5f642ddbfcdd59d5e22b9185a7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ac64ccc5f642ddbfcdd59d5e22b9185a7">min</a> () noexcept</td></tr>
+<tr class="separator:ac64ccc5f642ddbfcdd59d5e22b9185a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6b53fc8d0ce290926d72e247b95f4d30" id="r_a6b53fc8d0ce290926d72e247b95f4d30"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a6b53fc8d0ce290926d72e247b95f4d30">max</a> () noexcept</td></tr>
+<tr class="separator:a6b53fc8d0ce290926d72e247b95f4d30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae30cef79b02481287824413ac35f4595" id="r_ae30cef79b02481287824413ac35f4595"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ae30cef79b02481287824413ac35f4595">lowest</a> () noexcept</td></tr>
+<tr class="separator:ae30cef79b02481287824413ac35f4595"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c71d26d6de400ed12cf3923157aca31" id="r_a0c71d26d6de400ed12cf3923157aca31"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html#a40e08f75077897215c66d102b5b75f95">rounding_mode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a0c71d26d6de400ed12cf3923157aca31">getround</a> ()</td></tr>
 <tr class="separator:a0c71d26d6de400ed12cf3923157aca31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a274b459d7478df80795caed8a56d4f00" id="r_a274b459d7478df80795caed8a56d4f00"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html#a40e08f75077897215c66d102b5b75f95">rounding_mode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a274b459d7478df80795caed8a56d4f00">setround</a> (<a class="el" href="classxrpl_1_1Number.html#a40e08f75077897215c66d102b5b75f95">rounding_mode</a> mode)</td></tr>
 <tr class="separator:a274b459d7478df80795caed8a56d4f00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac138187ff4d421f4158228642551756c" id="r_ac138187ff4d421f4158228642551756c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2">MantissaRange::mantissa_scale</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ac138187ff4d421f4158228642551756c">getMantissaScale</a> ()</td></tr>
+<tr class="memdesc:ac138187ff4d421f4158228642551756c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns which mantissa scale is currently in use for normalization.  <br /></td></tr>
+<tr class="separator:ac138187ff4d421f4158228642551756c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89a1e2cc1d2d69c86bbb03340284a6b7" id="r_a89a1e2cc1d2d69c86bbb03340284a6b7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a89a1e2cc1d2d69c86bbb03340284a6b7">setMantissaScale</a> (<a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2">MantissaRange::mantissa_scale</a> scale)</td></tr>
+<tr class="memdesc:a89a1e2cc1d2d69c86bbb03340284a6b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changes which mantissa scale is used for normalization.  <br /></td></tr>
+<tr class="separator:a89a1e2cc1d2d69c86bbb03340284a6b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1be401c2cd91d8311dbc55bf6038a492" id="r_a1be401c2cd91d8311dbc55bf6038a492"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a1be401c2cd91d8311dbc55bf6038a492">minMantissa</a> ()</td></tr>
+<tr class="separator:a1be401c2cd91d8311dbc55bf6038a492"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a992a7b726b84f3e57bdba64acc107ba9" id="r_a992a7b726b84f3e57bdba64acc107ba9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a992a7b726b84f3e57bdba64acc107ba9">maxMantissa</a> ()</td></tr>
+<tr class="separator:a992a7b726b84f3e57bdba64acc107ba9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9df36fbc7e4a5663ce40454d30999ce" id="r_ae9df36fbc7e4a5663ce40454d30999ce"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ae9df36fbc7e4a5663ce40454d30999ce">mantissaLog</a> ()</td></tr>
+<tr class="separator:ae9df36fbc7e4a5663ce40454d30999ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0981e6287c63318941d3b12d5c51c419" id="r_a0981e6287c63318941d3b12d5c51c419"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a0981e6287c63318941d3b12d5c51c419">oneSmall</a> ()</td></tr>
+<tr class="memdesc:a0981e6287c63318941d3b12d5c51c419"><td class="mdescLeft">&#160;</td><td class="mdescRight">oneSmall is needed because the ranges are private  <br /></td></tr>
+<tr class="separator:a0981e6287c63318941d3b12d5c51c419"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae07fcd3fb3a2d61a8c4491e43c3d99b2" id="r_ae07fcd3fb3a2d61a8c4491e43c3d99b2"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ae07fcd3fb3a2d61a8c4491e43c3d99b2">oneLarge</a> ()</td></tr>
+<tr class="memdesc:ae07fcd3fb3a2d61a8c4491e43c3d99b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">oneLarge is needed because the ranges are private  <br /></td></tr>
+<tr class="separator:ae07fcd3fb3a2d61a8c4491e43c3d99b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7b3dcf0314ef5327550516bdb1fa7d2" id="r_ad7b3dcf0314ef5327550516bdb1fa7d2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ad7b3dcf0314ef5327550516bdb1fa7d2">one</a> ()</td></tr>
+<tr class="separator:ad7b3dcf0314ef5327550516bdb1fa7d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:ad1e185a2512b37c8467c5e5b1c4bc595" id="r_ad1e185a2512b37c8467c5e5b1c4bc595"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int64_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ad1e185a2512b37c8467c5e5b1c4bc595">minMantissa</a> = 1'000'000'000'000'000LL</td></tr>
-<tr class="separator:ad1e185a2512b37c8467c5e5b1c4bc595"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a846338f1abc6844b1497c17f6043b19b" id="r_a846338f1abc6844b1497c17f6043b19b"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int64_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a846338f1abc6844b1497c17f6043b19b">maxMantissa</a> = <a class="el" href="classxrpl_1_1Number.html#ad1e185a2512b37c8467c5e5b1c4bc595">minMantissa</a> * 10 - 1</td></tr>
-<tr class="separator:a846338f1abc6844b1497c17f6043b19b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7cf828e636abd921b2ff2bca7a7bc8b8" id="r_a7cf828e636abd921b2ff2bca7a7bc8b8"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a7cf828e636abd921b2ff2bca7a7bc8b8">minExponent</a> = -32768</td></tr>
 <tr class="separator:a7cf828e636abd921b2ff2bca7a7bc8b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa41a4f7784291ffd76634c7fc567f6fb" id="r_aa41a4f7784291ffd76634c7fc567f6fb"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#aa41a4f7784291ffd76634c7fc567f6fb">maxExponent</a> = 32768</td></tr>
 <tr class="separator:aa41a4f7784291ffd76634c7fc567f6fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b91f73f5bb83bdca17bcd2378b612f8" id="r_a5b91f73f5bb83bdca17bcd2378b612f8"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a5b91f73f5bb83bdca17bcd2378b612f8">maxRep</a> = <a class="elRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits</a>&lt;<a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a>&gt;<a class="el" href="classxrpl_1_1Number.html#a6b53fc8d0ce290926d72e247b95f4d30">::max</a>()</td></tr>
+<tr class="separator:a5b91f73f5bb83bdca17bcd2378b612f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
 Private Types</h2></td></tr>
 <tr class="memitem:a3e899a2315bdca222c4f12e8a244c281" id="r_a3e899a2315bdca222c4f12e8a244c281"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a> = <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int64_t</a></td></tr>
 <tr class="separator:a3e899a2315bdca222c4f12e8a244c281"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67e66cfedbb2ff6c670917e4872da14f" id="r_a67e66cfedbb2ff6c670917e4872da14f"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> = <a class="el" href="structxrpl_1_1MantissaRange.html#a40179916ebaf305e2ebe5d22aa6740d7">MantissaRange::rep</a></td></tr>
+<tr class="separator:a67e66cfedbb2ff6c670917e4872da14f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:ad471bfbafa5464af9c8b498e125d9873" id="r_ad471bfbafa5464af9c8b498e125d9873"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ad471bfbafa5464af9c8b498e125d9873">normalize</a> ()</td></tr>
 <tr class="separator:ad471bfbafa5464af9c8b498e125d9873"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31b3a8364202c5d032fe1b99f6d9fdbb" id="r_a31b3a8364202c5d032fe1b99f6d9fdbb"><td class="memItemLeft" align="right" valign="top">constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a31b3a8364202c5d032fe1b99f6d9fdbb">isnormal</a> () const noexcept</td></tr>
-<tr class="separator:a31b3a8364202c5d032fe1b99f6d9fdbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa164f49489cb861950f4477b1f19a211" id="r_aa164f49489cb861950f4477b1f19a211"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#aa164f49489cb861950f4477b1f19a211">isnormal</a> () const noexcept</td></tr>
+<tr class="separator:aa164f49489cb861950f4477b1f19a211"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80f5761398748f4d740631511d344701" id="r_a80f5761398748f4d740631511d344701"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a80f5761398748f4d740631511d344701">shiftExponent</a> (int exponentDelta) const</td></tr>
+<tr class="separator:a80f5761398748f4d740631511d344701"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:a3328c67dc592a6c82505643458bbe430" id="r_a3328c67dc592a6c82505643458bbe430"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a3328c67dc592a6c82505643458bbe430"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a3328c67dc592a6c82505643458bbe430">normalize</a> (bool &amp;negative, T &amp;<a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int &amp;<a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a1be401c2cd91d8311dbc55bf6038a492">minMantissa</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a992a7b726b84f3e57bdba64acc107ba9">maxMantissa</a>)</td></tr>
+<tr class="memdesc:a3328c67dc592a6c82505643458bbe430"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normalize <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> components to an arbitrary range.  <br /></td></tr>
+<tr class="separator:a3328c67dc592a6c82505643458bbe430"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a966f5eca09ff61f50f0c377dea86c798" id="r_a966f5eca09ff61f50f0c377dea86c798"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a966f5eca09ff61f50f0c377dea86c798">externalToInternal</a> (<a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a> <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>)</td></tr>
+<tr class="separator:a966f5eca09ff61f50f0c377dea86c798"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85a1f584e04ab4bd89d1f1e73a03dfd2" id="r_a85a1f584e04ab4bd89d1f1e73a03dfd2"><td class="memItemLeft" align="right" valign="top">template&lt;&gt; </td></tr>
+<tr class="memitem:a85a1f584e04ab4bd89d1f1e73a03dfd2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a85a1f584e04ab4bd89d1f1e73a03dfd2">normalize</a> (bool &amp;negative, uint128_t &amp;<a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int &amp;<a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a1be401c2cd91d8311dbc55bf6038a492">minMantissa</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a992a7b726b84f3e57bdba64acc107ba9">maxMantissa</a>)</td></tr>
+<tr class="separator:a85a1f584e04ab4bd89d1f1e73a03dfd2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a176c4c2727bbfcdfb6c9900142495dd3" id="r_a176c4c2727bbfcdfb6c9900142495dd3"><td class="memItemLeft" align="right" valign="top">template&lt;&gt; </td></tr>
+<tr class="memitem:a176c4c2727bbfcdfb6c9900142495dd3"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a176c4c2727bbfcdfb6c9900142495dd3">normalize</a> (bool &amp;negative, unsigned long long &amp;<a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int &amp;<a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a1be401c2cd91d8311dbc55bf6038a492">minMantissa</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a992a7b726b84f3e57bdba64acc107ba9">maxMantissa</a>)</td></tr>
+<tr class="separator:a176c4c2727bbfcdfb6c9900142495dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e734ab9162f8836ece323bab0ea8166" id="r_a7e734ab9162f8836ece323bab0ea8166"><td class="memItemLeft" align="right" valign="top">template&lt;&gt; </td></tr>
+<tr class="memitem:a7e734ab9162f8836ece323bab0ea8166"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a7e734ab9162f8836ece323bab0ea8166">normalize</a> (bool &amp;negative, unsigned long &amp;<a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3">mantissa</a>, int &amp;<a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358">exponent</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a1be401c2cd91d8311dbc55bf6038a492">minMantissa</a>, <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a992a7b726b84f3e57bdba64acc107ba9">maxMantissa</a>)</td></tr>
+<tr class="separator:a7e734ab9162f8836ece323bab0ea8166"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:ab08d095f0f25462be0d2be62051edfa5" id="r_ab08d095f0f25462be0d2be62051edfa5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ab08d095f0f25462be0d2be62051edfa5">mantissa_</a> {0}</td></tr>
-<tr class="separator:ab08d095f0f25462be0d2be62051edfa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac901dca6c4ae9b77298650a82ad606f3" id="r_ac901dca6c4ae9b77298650a82ad606f3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ac901dca6c4ae9b77298650a82ad606f3">exponent_</a> {<a class="elRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits</a>&lt;int&gt;<a class="el" href="classxrpl_1_1Number.html#a28d8c973c6cc798720ffd9856238a128">::lowest</a>()}</td></tr>
+<tr class="memitem:ae6da4d1edef20960bc7d37aa0a731fe0" id="r_ae6da4d1edef20960bc7d37aa0a731fe0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ae6da4d1edef20960bc7d37aa0a731fe0">negative_</a> {false}</td></tr>
+<tr class="separator:ae6da4d1edef20960bc7d37aa0a731fe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10e51120e8e4f1f3a08d5211069658f6" id="r_a10e51120e8e4f1f3a08d5211069658f6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a10e51120e8e4f1f3a08d5211069658f6">mantissa_</a> {0}</td></tr>
+<tr class="separator:a10e51120e8e4f1f3a08d5211069658f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac901dca6c4ae9b77298650a82ad606f3" id="r_ac901dca6c4ae9b77298650a82ad606f3"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ac901dca6c4ae9b77298650a82ad606f3">exponent_</a> {<a class="elRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits</a>&lt;int&gt;<a class="el" href="classxrpl_1_1Number.html#ae30cef79b02481287824413ac35f4595">::lowest</a>()}</td></tr>
 <tr class="separator:ac901dca6c4ae9b77298650a82ad606f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-attribs" name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
 <tr class="memitem:a73b1712a4714d18b02c0b9158a3ac201" id="r_a73b1712a4714d18b02c0b9158a3ac201"><td class="memItemLeft" align="right" valign="top">static thread_local <a class="el" href="classxrpl_1_1Number.html#a40e08f75077897215c66d102b5b75f95">rounding_mode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a73b1712a4714d18b02c0b9158a3ac201">mode_</a> = <a class="el" href="classxrpl_1_1Number.html#a40e08f75077897215c66d102b5b75f95aa1683b7e2939668142366896b111931a">Number::to_nearest</a></td></tr>
 <tr class="separator:a73b1712a4714d18b02c0b9158a3ac201"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a484ed599d53a6c6f57cd6b6163dca4d6" id="r_a484ed599d53a6c6f57cd6b6163dca4d6"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structxrpl_1_1MantissaRange.html">MantissaRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a484ed599d53a6c6f57cd6b6163dca4d6">smallRange</a> {<a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2a159d6fc6b77bffdac828a75a473aea42">MantissaRange::small</a>}</td></tr>
+<tr class="separator:a484ed599d53a6c6f57cd6b6163dca4d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace04e61c20eedabf3ead4454049d9126" id="r_ace04e61c20eedabf3ead4454049d9126"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structxrpl_1_1MantissaRange.html">MantissaRange</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ace04e61c20eedabf3ead4454049d9126">largeRange</a> {<a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2a0b64e613fbbea29706141a2e1a08ffa5">MantissaRange::large</a>}</td></tr>
+<tr class="separator:ace04e61c20eedabf3ead4454049d9126"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2381c12707d6e7e9a7704b4733ae3af" id="r_ab2381c12707d6e7e9a7704b4733ae3af"><td class="memItemLeft" align="right" valign="top">static thread_local <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper.html">std::reference_wrapper</a>&lt; <a class="el" href="structxrpl_1_1MantissaRange.html">MantissaRange</a> const  &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ab2381c12707d6e7e9a7704b4733ae3af">range_</a></td></tr>
+<tr class="separator:ab2381c12707d6e7e9a7704b4733ae3af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
@@ -224,10 +294,51 @@ Friends</h2></td></tr>
 <tr class="separator:a95f708454f6da9e5f04f380273b0eb78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab09940caeba7ca6f6c57f4dc5220f4f1" id="r_ab09940caeba7ca6f6c57f4dc5220f4f1"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ab09940caeba7ca6f6c57f4dc5220f4f1">operator&lt;&lt;</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html">std::ostream</a> &amp;os, <a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;x)</td></tr>
 <tr class="separator:ab09940caeba7ca6f6c57f4dc5220f4f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f93a0fd9a95f114e3ab7d12ea0a1f7d" id="r_a3f93a0fd9a95f114e3ab7d12ea0a1f7d"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a3f93a0fd9a95f114e3ab7d12ea0a1f7d">to_string</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;amount)</td></tr>
+<tr class="separator:a3f93a0fd9a95f114e3ab7d12ea0a1f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af59083b29186c11c2808135c5ff075b8" id="r_af59083b29186c11c2808135c5ff075b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#af59083b29186c11c2808135c5ff075b8">root</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> f, unsigned d)</td></tr>
+<tr class="separator:af59083b29186c11c2808135c5ff075b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab83e07ef7e17606d7bcaeabe05ec1236" id="r_ab83e07ef7e17606d7bcaeabe05ec1236"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#ab83e07ef7e17606d7bcaeabe05ec1236">root2</a> (<a class="el" href="classxrpl_1_1Number.html">Number</a> f)</td></tr>
+<tr class="separator:ab83e07ef7e17606d7bcaeabe05ec1236"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f3e98cecc5435852a47d61a2d80d02f" id="r_a4f3e98cecc5435852a47d61a2d80d02f"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a4f3e98cecc5435852a47d61a2d80d02f"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1Number.html#a4f3e98cecc5435852a47d61a2d80d02f">doNormalize</a> (bool &amp;negative, T &amp;<a class="el" href="classxrpl_1_1Number.html#a10e51120e8e4f1f3a08d5211069658f6">mantissa_</a>, int &amp;<a class="el" href="classxrpl_1_1Number.html#ac901dca6c4ae9b77298650a82ad606f3">exponent_</a>, <a class="el" href="structxrpl_1_1MantissaRange.html#a40179916ebaf305e2ebe5d22aa6740d7">MantissaRange::rep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a1be401c2cd91d8311dbc55bf6038a492">minMantissa</a>, <a class="el" href="structxrpl_1_1MantissaRange.html#a40179916ebaf305e2ebe5d22aa6740d7">MantissaRange::rep</a> const &amp;<a class="el" href="classxrpl_1_1Number.html#a992a7b726b84f3e57bdba64acc107ba9">maxMantissa</a>)</td></tr>
+<tr class="separator:a4f3e98cecc5435852a47d61a2d80d02f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00025">25</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<div class="textblock"><p><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> is a floating point type that can represent a wide range of values. </p>
+<p>It can represent all values that can be represented by an <a class="el" href="classxrpl_1_1STAmount.html">STAmount</a> - regardless of asset type - <a class="el" href="classxrpl_1_1XRPAmount.html">XRPAmount</a>, <a class="el" href="classxrpl_1_1MPTAmount.html">MPTAmount</a>, and <a class="el" href="classxrpl_1_1IOUAmount.html" title="Floating point representation of amounts with high dynamic range.">IOUAmount</a>, with at least as much precision as those types require.</p>
+<p>-&mdash; Internal Representation -&mdash;</p>
+<p>Internally, <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> is represented with three values:</p><ol type="1">
+<li>a bool sign flag,</li>
+<li>a <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint64_t</a> mantissa,</li>
+<li>an int exponent.</li>
+</ol>
+<p>The internal mantissa is an unsigned integer in the range defined by the current <a class="el" href="structxrpl_1_1MantissaRange.html" title="MantissaRange defines a range for the mantissa of a normalized Number.">MantissaRange</a>. The exponent is an integer in the range [minExponent, maxExponent].</p>
+<p>See the description of <a class="el" href="structxrpl_1_1MantissaRange.html" title="MantissaRange defines a range for the mantissa of a normalized Number.">MantissaRange</a> for more details on the ranges.</p>
+<p>A non-zero mantissa is (almost) always normalized, meaning it and the exponent are grown or shrunk until the mantissa is in the range [<a class="el" href="structxrpl_1_1MantissaRange.html#a6e5cafa1836416d4069e77a8fb54363c">MantissaRange.min</a>, <a class="el" href="structxrpl_1_1MantissaRange.html#a5605e543c0da8e19ea6f1447b393cc7d">MantissaRange.max</a>].</p>
+<p>Note:</p><ol type="1">
+<li>Normalization can be disabled by using the "unchecked" ctor tag. This should only be used at specific conversion points, some constexpr values, and in unit tests.</li>
+<li>The max of the "large" range, 10^19-1, is the largest 10^X-1 value that fits in an unsigned 64-bit number. (10^19-1 &lt; 2^64-1 and 10^20-1 &gt; 2^64-1). This avoids under- and overflows.</li>
+</ol>
+<p>-&mdash; External Interface -&mdash;</p>
+<p>The external interface of <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> consists of a <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int64_t</a> mantissa, which is restricted to 63-bits, and an int exponent, which must be in the range [minExponent, maxExponent]. The range of the mantissa depends on which <a class="el" href="structxrpl_1_1MantissaRange.html" title="MantissaRange defines a range for the mantissa of a normalized Number.">MantissaRange</a> is currently active. For the "short" range, the mantissa will be between 10^15 and 10^16-1. For the "large" range, the mantissa will be between -(2^63-1) and 2^63-1. As noted above, the "large" range is needed to represent the full range of valid XRP and MPT integer values accurately.</p>
+<p>Note:</p><ol type="1">
+<li>2^63-1 is between 10^18 and 10^19-1, which are the limits of the "large" mantissa range.</li>
+<li>The functions <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3" title="Returns the mantissa of the external view of the Number.">mantissa()</a> and <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358" title="Returns the exponent of the external view of the Number.">exponent()</a> return the external view of the <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> value, specifically using a signed 63-bit mantissa. This may require altering the internal representation to fit into that range before the value is returned. The interface guarantees consistency of the two values.</li>
+<li><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> cannot represent -2^63 (<a class="elRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits/min.html">std::numeric_limits&lt;std::int64_t&gt;::min()</a>) as an exact integer, but it doesn't need to, because all asset values on-ledger are non-negative. This is due to implementation details of several operations which use unsigned arithmetic internally. This is sufficient to represent all valid XRP values (where the absolute value can not exceed INITIAL_XRP: 10^17), and MPT values (where the absolute value can not exceed maxMPTokenAmount: 2^63-1).</li>
+</ol>
+<p>-&mdash; Mantissa Range Switching -&mdash;</p>
+<p>The mantissa range may be changed at runtime via <a class="el" href="classxrpl_1_1Number.html#a89a1e2cc1d2d69c86bbb03340284a6b7" title="Changes which mantissa scale is used for normalization.">setMantissaScale()</a>. The default mantissa range is "large". The range is updated whenever transaction processing begins, based on whether SingleAssetVault or LendingProtocol are enabled. If either is enabled, the mantissa range is set to "large". If not, it is set to "small", preserving backward compatibility and correct "amendment-gating".</p>
+<p>It is extremely unlikely that any more calls to <a class="el" href="classxrpl_1_1Number.html#a89a1e2cc1d2d69c86bbb03340284a6b7" title="Changes which mantissa scale is used for normalization.">setMantissaScale()</a> will be needed outside of unit tests.</p>
+<p>-&mdash; Usage With Different Ranges -&mdash;</p>
+<p>Outside of unit tests, and existing checks, code that uses <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> should not know or care which mantissa range is active.</p>
+<p>The results of computations using Numbers with a small mantissa may differ from computations using Numbers with a large mantissa, specifically as it effects the results after rounding. That is why the large mantissa range is amendment gated in transaction processing.</p>
+<p>It is extremely unlikely that any more calls to <a class="el" href="classxrpl_1_1Number.html#ac138187ff4d421f4158228642551756c" title="Returns which mantissa scale is currently in use for normalization.">getMantissaScale()</a> will be needed outside of unit tests.</p>
+<p>Code that uses <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> should not assume or check anything about the <a class="el" href="classxrpl_1_1Number.html#a223cbe5eabe0bea1d9156f05c971e5c3" title="Returns the mantissa of the external view of the Number.">mantissa()</a> or <a class="el" href="classxrpl_1_1Number.html#aa4058fefe18f86063240cfd2ba985358" title="Returns the exponent of the external view of the Number.">exponent()</a> except that they fit into the "large" range specified in the "External Interface" section.</p>
+<p>--&mdash; Unit Tests --&mdash;</p>
+<p>Within unit tests, it may be useful to explicitly switch between the two ranges, or to check which range is active when checking the results of computations. If the test is doing the math directly, the set/getMantissaScale() functions may be most appropriate. However, if the test has anything to do with transaction processing, it should enable or disable the amendments that control the mantissa range choice (SingleAssetVault and LendingProtocol), and/or check if either of those amendments are enabled to determine which result to expect. </p>
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00210">210</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a3e899a2315bdca222c4f12e8a244c281" name="a3e899a2315bdca222c4f12e8a244c281"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3e899a2315bdca222c4f12e8a244c281">&#9670;&#160;</a></span>rep</h2>
@@ -249,7 +360,31 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00027">27</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00212">212</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a67e66cfedbb2ff6c670917e4872da14f" name="a67e66cfedbb2ff6c670917e4872da14f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67e66cfedbb2ff6c670917e4872da14f">&#9670;&#160;</a></span>internalrep</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">using <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">xrpl::Number::internalrep</a> =  <a class="el" href="structxrpl_1_1MantissaRange.html#a40179916ebaf305e2ebe5d22aa6740d7">MantissaRange::rep</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00213">213</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -272,13 +407,13 @@ Friends</h2></td></tr>
 <tr><td class="fieldname"><a id="a40e08f75077897215c66d102b5b75f95aaf71effcd4dcf7bc7c89bb51e27e8b17" name="a40e08f75077897215c66d102b5b75f95aaf71effcd4dcf7bc7c89bb51e27e8b17"></a>upward&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00173">173</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00396">396</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="adbf347c98a775ae3c4bde68d36d6e36c" name="adbf347c98a775ae3c4bde68d36d6e36c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adbf347c98a775ae3c4bde68d36d6e36c">&#9670;&#160;</a></span>Number() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#adbf347c98a775ae3c4bde68d36d6e36c">&#9670;&#160;</a></span>Number() <span class="overload">[1/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -303,7 +438,7 @@ Friends</h2></td></tr>
 </div>
 </div>
 <a id="ab433fcec28ecf57dea22710141fc22a4" name="ab433fcec28ecf57dea22710141fc22a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab433fcec28ecf57dea22710141fc22a4">&#9670;&#160;</a></span>Number() <span class="overload">[2/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab433fcec28ecf57dea22710141fc22a4">&#9670;&#160;</a></span>Number() <span class="overload">[2/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -318,12 +453,12 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00204">204</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00560">560</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
 <a id="a8051d5e9b1ef04ce5acba074819fed4d" name="a8051d5e9b1ef04ce5acba074819fed4d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8051d5e9b1ef04ce5acba074819fed4d">&#9670;&#160;</a></span>Number() <span class="overload">[3/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8051d5e9b1ef04ce5acba074819fed4d">&#9670;&#160;</a></span>Number() <span class="overload">[3/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -356,12 +491,12 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00198">198</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00555">555</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
-<a id="a596bb914b61c7b343c269c755624fe06" name="a596bb914b61c7b343c269c755624fe06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a596bb914b61c7b343c269c755624fe06">&#9670;&#160;</a></span>Number() <span class="overload">[4/4]</span></h2>
+<a id="a0609cf6c7fccc8110af6a49a024df589" name="a0609cf6c7fccc8110af6a49a024df589"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0609cf6c7fccc8110af6a49a024df589">&#9670;&#160;</a></span>Number() <span class="overload">[4/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -372,7 +507,13 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">constexpr xrpl::Number::Number </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a>&#160;</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>negative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td>
           <td class="paramname"><em>mantissa</em>, </td>
         </tr>
         <tr>
@@ -400,7 +541,145 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00193">193</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00521">521</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a3b76facdee6f73564373a8732d33c526" name="a3b76facdee6f73564373a8732d33c526"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b76facdee6f73564373a8732d33c526">&#9670;&#160;</a></span>Number() <span class="overload">[5/7]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr xrpl::Number::Number </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td>
+          <td class="paramname"><em>mantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structxrpl_1_1Number_1_1unchecked.html">unchecked</a>&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00530">530</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a038dcb6cd9a6f0c4c9dc991258d7bdbd" name="a038dcb6cd9a6f0c4c9dc991258d7bdbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a038dcb6cd9a6f0c4c9dc991258d7bdbd">&#9670;&#160;</a></span>Number() <span class="overload">[6/7]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">xrpl::Number::Number </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>negative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td>
+          <td class="paramname"><em>mantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structxrpl_1_1Number_1_1normalized.html">normalized</a>&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00540">540</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a31b4e505357c0994561f1b00b9fce89c" name="a31b4e505357c0994561f1b00b9fce89c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a31b4e505357c0994561f1b00b9fce89c">&#9670;&#160;</a></span>Number() <span class="overload">[7/7]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">xrpl::Number::Number </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a>&#160;</td>
+          <td class="paramname"><em>mantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structxrpl_1_1Number_1_1normalized.html">normalized</a>&#160;</td>
+          <td class="paramname">&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">explicit</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00550">550</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -428,7 +707,10 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00209">209</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p>Returns the mantissa of the external view of the <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a>. </p>
+<p>Please see the "---- External Interface ----" section of the class documentation for an explanation of why the internal value may be modified. </p>
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00570">570</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -455,7 +737,10 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00215">215</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p>Returns the exponent of the external view of the <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a>. </p>
+<p>Please see the "---- External Interface ----" section of the class documentation for an explanation of why the internal value may be modified. </p>
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00591">591</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -482,7 +767,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00221">221</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00606">606</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -509,7 +794,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00227">227</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00612">612</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -528,7 +813,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00235">235</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00622">622</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -548,7 +833,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00242">242</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00629">629</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -567,7 +852,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00250">250</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00637">637</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -587,7 +872,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00257">257</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00644">644</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -607,7 +892,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00267">267</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00537">537</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
@@ -627,7 +912,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00265">265</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00652">652</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -647,7 +932,7 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00388">388</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00667">667</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
@@ -667,12 +952,12 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00445">445</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00730">730</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
-<a id="abc8b240ae3d9ac7b46e44aa6a300ac2b" name="abc8b240ae3d9ac7b46e44aa6a300ac2b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc8b240ae3d9ac7b46e44aa6a300ac2b">&#9670;&#160;</a></span>min()</h2>
+<a id="ac64ccc5f642ddbfcdd59d5e22b9185a7" name="ac64ccc5f642ddbfcdd59d5e22b9185a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac64ccc5f642ddbfcdd59d5e22b9185a7">&#9670;&#160;</a></span>min()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -681,7 +966,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::min </td>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::min </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -689,17 +974,17 @@ Friends</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00303">303</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00690">690</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
-<a id="a74939e6aee5581ea03e9d10c55885563" name="a74939e6aee5581ea03e9d10c55885563"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a74939e6aee5581ea03e9d10c55885563">&#9670;&#160;</a></span>max()</h2>
+<a id="a6b53fc8d0ce290926d72e247b95f4d30" name="a6b53fc8d0ce290926d72e247b95f4d30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6b53fc8d0ce290926d72e247b95f4d30">&#9670;&#160;</a></span>max()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -708,7 +993,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::max </td>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::max </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -716,17 +1001,17 @@ Friends</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00309">309</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00696">696</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
-<a id="a28d8c973c6cc798720ffd9856238a128" name="a28d8c973c6cc798720ffd9856238a128"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28d8c973c6cc798720ffd9856238a128">&#9670;&#160;</a></span>lowest()</h2>
+<a id="ae30cef79b02481287824413ac35f4595" name="ae30cef79b02481287824413ac35f4595"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae30cef79b02481287824413ac35f4595">&#9670;&#160;</a></span>lowest()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -735,7 +1020,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::lowest </td>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::lowest </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -743,12 +1028,12 @@ Friends</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00315">315</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00703">703</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -775,10 +1060,10 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Conversions to <a class="el" href="classxrpl_1_1Number.html">Number</a> are implicit and conversions away from <a class="el" href="classxrpl_1_1Number.html">Number</a> are explicit. </p>
-<p>This design encourages and facilitates the use of <a class="el" href="classxrpl_1_1Number.html">Number</a> as the preferred type for floating point arithmetic as it makes "mixed mode" more convenient, e.g. <a class="el" href="classxrpl_1_1MPTAmount.html">MPTAmount</a> + <a class="el" href="classxrpl_1_1Number.html">Number</a>. </p>
+<p>Conversions to <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> are implicit and conversions away from <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> are explicit. </p>
+<p>This design encourages and facilitates the use of <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> as the preferred type for floating point arithmetic as it makes "mixed mode" more convenient, e.g. <a class="el" href="classxrpl_1_1MPTAmount.html">MPTAmount</a> + <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00477">477</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00827">827</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
@@ -807,7 +1092,7 @@ Friends</h2></td></tr>
 
 <p>Return the sign of the amount. </p>
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00140">140</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00354">354</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -834,7 +1119,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00506">506</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00856">856</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
@@ -861,7 +1146,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00028">28</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00034">34</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
@@ -889,12 +1174,271 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00034">34</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00040">40</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ac138187ff4d421f4158228642551756c" name="ac138187ff4d421f4158228642551756c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac138187ff4d421f4158228642551756c">&#9670;&#160;</a></span>getMantissaScale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2">MantissaRange::mantissa_scale</a> xrpl::Number::getMantissaScale </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns which mantissa scale is currently in use for normalization. </p>
+<p>If you think you need to call this outside of unit tests, no you don't. </p>
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00046">46</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a89a1e2cc1d2d69c86bbb03340284a6b7" name="a89a1e2cc1d2d69c86bbb03340284a6b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a89a1e2cc1d2d69c86bbb03340284a6b7">&#9670;&#160;</a></span>setMantissaScale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void xrpl::Number::setMantissaScale </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2">MantissaRange::mantissa_scale</a>&#160;</td>
+          <td class="paramname"><em>scale</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Changes which mantissa scale is used for normalization. </p>
+<p>If you think you need to call this outside of unit tests, no you don't. </p>
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00052">52</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1be401c2cd91d8311dbc55bf6038a492" name="a1be401c2cd91d8311dbc55bf6038a492"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1be401c2cd91d8311dbc55bf6038a492">&#9670;&#160;</a></span>minMantissa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> xrpl::Number::minMantissa </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00417">417</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a992a7b726b84f3e57bdba64acc107ba9" name="a992a7b726b84f3e57bdba64acc107ba9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a992a7b726b84f3e57bdba64acc107ba9">&#9670;&#160;</a></span>maxMantissa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> xrpl::Number::maxMantissa </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00423">423</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="ae9df36fbc7e4a5663ce40454d30999ce" name="ae9df36fbc7e4a5663ce40454d30999ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9df36fbc7e4a5663ce40454d30999ce">&#9670;&#160;</a></span>mantissaLog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int xrpl::Number::mantissaLog </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00429">429</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a0981e6287c63318941d3b12d5c51c419" name="a0981e6287c63318941d3b12d5c51c419"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0981e6287c63318941d3b12d5c51c419">&#9670;&#160;</a></span>oneSmall()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::oneSmall </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>oneSmall is needed because the ranges are private </p>
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00345">345</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae07fcd3fb3a2d61a8c4491e43c3d99b2" name="ae07fcd3fb3a2d61a8c4491e43c3d99b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae07fcd3fb3a2d61a8c4491e43c3d99b2">&#9670;&#160;</a></span>oneLarge()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::oneLarge </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>oneLarge is needed because the ranges are private </p>
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00357">357</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ad7b3dcf0314ef5327550516bdb1fa7d2" name="ad7b3dcf0314ef5327550516bdb1fa7d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7b3dcf0314ef5327550516bdb1fa7d2">&#9670;&#160;</a></span>one()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::one </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00369">369</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a48a40dabffeda7599db182132de1dc6c" name="a48a40dabffeda7599db182132de1dc6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48a40dabffeda7599db182132de1dc6c">&#9670;&#160;</a></span>normalizeToRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;Integral64 T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/pair.html">std::pair</a>&lt; T, int &gt; xrpl::Number::normalizeToRange </td>
+          <td>(</td>
+          <td class="paramtype">T&#160;</td>
+          <td class="paramname"><em>minMantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T&#160;</td>
+          <td class="paramname"><em>maxMantissa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00722">722</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
 <a id="ad471bfbafa5464af9c8b498e125d9873" name="ad471bfbafa5464af9c8b498e125d9873"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad471bfbafa5464af9c8b498e125d9873">&#9670;&#160;</a></span>normalize()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad471bfbafa5464af9c8b498e125d9873">&#9670;&#160;</a></span>normalize() <span class="overload">[1/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -916,12 +1460,71 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00226">226</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00508">508</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
-<a id="a31b3a8364202c5d032fe1b99f6d9fdbb" name="a31b3a8364202c5d032fe1b99f6d9fdbb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a31b3a8364202c5d032fe1b99f6d9fdbb">&#9670;&#160;</a></span>isnormal()</h2>
+<a id="a3328c67dc592a6c82505643458bbe430" name="a3328c67dc592a6c82505643458bbe430"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3328c67dc592a6c82505643458bbe430">&#9670;&#160;</a></span>normalize() <span class="overload">[2/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void xrpl::Number::normalize </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>negative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T &amp;&#160;</td>
+          <td class="paramname"><em>mantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>minMantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>maxMantissa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Normalize <a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> components to an arbitrary range. </p>
+<p>min/maxMantissa are parameters because this function is used by both <a class="el" href="classxrpl_1_1Number.html#ad471bfbafa5464af9c8b498e125d9873">normalize()</a>, which reads from range_, and by normalizeToRange, which is public and can accept an arbitrary range from the caller. </p>
+
+</div>
+</div>
+<a id="aa164f49489cb861950f4477b1f19a211" name="aa164f49489cb861950f4477b1f19a211"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa164f49489cb861950f4477b1f19a211">&#9670;&#160;</a></span>isnormal()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -930,7 +1533,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr bool xrpl::Number::isnormal </td>
+          <td class="memname">bool xrpl::Number::isnormal </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -938,12 +1541,242 @@ Friends</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">constexpr</span><span class="mlabel">private</span><span class="mlabel">noexcept</span></span>  </td>
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00321">321</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00710">710</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a80f5761398748f4d740631511d344701" name="a80f5761398748f4d740631511d344701"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80f5761398748f4d740631511d344701">&#9670;&#160;</a></span>shiftExponent()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> xrpl::Number::shiftExponent </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>exponentDelta</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00518">518</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a966f5eca09ff61f50f0c377dea86c798" name="a966f5eca09ff61f50f0c377dea86c798"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a966f5eca09ff61f50f0c377dea86c798">&#9670;&#160;</a></span>externalToInternal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">Number::internalrep</a> xrpl::Number::externalToInternal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a>&#160;</td>
+          <td class="paramname"><em>mantissa</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00326">326</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a85a1f584e04ab4bd89d1f1e73a03dfd2" name="a85a1f584e04ab4bd89d1f1e73a03dfd2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85a1f584e04ab4bd89d1f1e73a03dfd2">&#9670;&#160;</a></span>normalize() <span class="overload">[3/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void xrpl::Number::normalize </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>negative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint128_t &amp;&#160;</td>
+          <td class="paramname"><em>mantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>minMantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>maxMantissa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00472">472</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a176c4c2727bbfcdfb6c9900142495dd3" name="a176c4c2727bbfcdfb6c9900142495dd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a176c4c2727bbfcdfb6c9900142495dd3">&#9670;&#160;</a></span>normalize() <span class="overload">[4/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void xrpl::Number::normalize </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>negative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long long &amp;&#160;</td>
+          <td class="paramname"><em>mantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>minMantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>maxMantissa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00484">484</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a7e734ab9162f8836ece323bab0ea8166" name="a7e734ab9162f8836ece323bab0ea8166"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e734ab9162f8836ece323bab0ea8166">&#9670;&#160;</a></span>normalize() <span class="overload">[5/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void xrpl::Number::normalize </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>negative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned long &amp;&#160;</td>
+          <td class="paramname"><em>mantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>minMantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>maxMantissa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00496">496</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
 
 </div>
 </div>
@@ -982,7 +1815,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00097">97</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00310">310</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1020,7 +1853,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00103">103</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00317">317</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1058,7 +1891,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00108">108</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00322">322</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1096,7 +1929,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00149">149</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00363">363</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1134,7 +1967,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00154">154</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00368">368</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1172,7 +2005,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00161">161</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00375">375</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1210,13 +2043,12 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00166">166</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00380">380</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a id="ab08d095f0f25462be0d2be62051edfa5" name="ab08d095f0f25462be0d2be62051edfa5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab08d095f0f25462be0d2be62051edfa5">&#9670;&#160;</a></span>mantissa_</h2>
+<a id="a3f93a0fd9a95f114e3ab7d12ea0a1f7d" name="a3f93a0fd9a95f114e3ab7d12ea0a1f7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f93a0fd9a95f114e3ab7d12ea0a1f7d">&#9670;&#160;</a></span>to_string</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1225,7 +2057,160 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a> xrpl::Number::mantissa_ {0}</td>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> to_string </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a> const &amp;&#160;</td>
+          <td class="paramname"><em>amount</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00874">874</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="af59083b29186c11c2808135c5ff075b8" name="af59083b29186c11c2808135c5ff075b8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af59083b29186c11c2808135c5ff075b8">&#9670;&#160;</a></span>root</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> root </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td>
+          <td class="paramname"><em>f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>d</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00997">997</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ab83e07ef7e17606d7bcaeabe05ec1236" name="ab83e07ef7e17606d7bcaeabe05ec1236"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab83e07ef7e17606d7bcaeabe05ec1236">&#9670;&#160;</a></span>root2</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html">Number</a> root2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classxrpl_1_1Number.html">Number</a>&#160;</td>
+          <td class="paramname"><em>f</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l01073">1073</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4f3e98cecc5435852a47d61a2d80d02f" name="a4f3e98cecc5435852a47d61a2d80d02f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f3e98cecc5435852a47d61a2d80d02f">&#9670;&#160;</a></span>doNormalize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void doNormalize </td>
+          <td>(</td>
+          <td class="paramtype">bool &amp;&#160;</td>
+          <td class="paramname"><em>negative</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T &amp;&#160;</td>
+          <td class="paramname"><em>mantissa_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;&#160;</td>
+          <td class="paramname"><em>exponent_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structxrpl_1_1MantissaRange.html#a40179916ebaf305e2ebe5d22aa6740d7">MantissaRange::rep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>minMantissa</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structxrpl_1_1MantissaRange.html#a40179916ebaf305e2ebe5d22aa6740d7">MantissaRange::rep</a> const &amp;&#160;</td>
+          <td class="paramname"><em>maxMantissa</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8cpp_source.html#l00381">381</a> of file <a class="el" href="Number_8cpp_source.html">Number.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ae6da4d1edef20960bc7d37aa0a731fe0" name="ae6da4d1edef20960bc7d37aa0a731fe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6da4d1edef20960bc7d37aa0a731fe0">&#9670;&#160;</a></span>negative_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool xrpl::Number::negative_ {false}</td>
         </tr>
       </table>
   </td>
@@ -1235,7 +2220,31 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00028">28</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00215">215</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a10e51120e8e4f1f3a08d5211069658f6" name="a10e51120e8e4f1f3a08d5211069658f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10e51120e8e4f1f3a08d5211069658f6">&#9670;&#160;</a></span>mantissa_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> xrpl::Number::mantissa_ {0}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00216">216</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1249,7 +2258,7 @@ Friends</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int xrpl::Number::exponent_ {<a class="elRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits</a>&lt;int&gt;<a class="el" href="classxrpl_1_1Number.html#a28d8c973c6cc798720ffd9856238a128">::lowest</a>()}</td>
+          <td class="memname">int xrpl::Number::exponent_ {<a class="elRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits</a>&lt;int&gt;<a class="el" href="classxrpl_1_1Number.html#ae30cef79b02481287824413ac35f4595">::lowest</a>()}</td>
         </tr>
       </table>
   </td>
@@ -1259,55 +2268,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00029">29</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
-
-</div>
-</div>
-<a id="ad1e185a2512b37c8467c5e5b1c4bc595" name="ad1e185a2512b37c8467c5e5b1c4bc595"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1e185a2512b37c8467c5e5b1c4bc595">&#9670;&#160;</a></span>minMantissa</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int64_t</a> xrpl::Number::minMantissa = 1'000'000'000'000'000LL</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00033">33</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
-
-</div>
-</div>
-<a id="a846338f1abc6844b1497c17f6043b19b" name="a846338f1abc6844b1497c17f6043b19b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a846338f1abc6844b1497c17f6043b19b">&#9670;&#160;</a></span>maxMantissa</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">constexpr <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::int64_t</a> xrpl::Number::maxMantissa = <a class="el" href="classxrpl_1_1Number.html#ad1e185a2512b37c8467c5e5b1c4bc595">minMantissa</a> * 10 - 1</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00035">35</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00217">217</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1331,7 +2292,7 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00039">39</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00221">221</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1355,7 +2316,31 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00040">40</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00222">222</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a5b91f73f5bb83bdca17bcd2378b612f8" name="a5b91f73f5bb83bdca17bcd2378b612f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b91f73f5bb83bdca17bcd2378b612f8">&#9670;&#160;</a></span>maxRep</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="classxrpl_1_1Number.html#a67e66cfedbb2ff6c670917e4872da14f">internalrep</a> xrpl::Number::maxRep = <a class="elRef" href="http://en.cppreference.com/w/cpp/types/numeric_limits.html">std::numeric_limits</a>&lt;<a class="el" href="classxrpl_1_1Number.html#a3e899a2315bdca222c4f12e8a244c281">rep</a>&gt;<a class="el" href="classxrpl_1_1Number.html#a6b53fc8d0ce290926d72e247b95f4d30">::max</a>()</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00224">224</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>
@@ -1379,7 +2364,82 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00181">181</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00452">452</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="a484ed599d53a6c6f57cd6b6163dca4d6" name="a484ed599d53a6c6f57cd6b6163dca4d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a484ed599d53a6c6f57cd6b6163dca4d6">&#9670;&#160;</a></span>smallRange</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="structxrpl_1_1MantissaRange.html">MantissaRange</a> xrpl::Number::smallRange {<a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2a159d6fc6b77bffdac828a75a473aea42">MantissaRange::small</a>}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00455">455</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="ace04e61c20eedabf3ead4454049d9126" name="ace04e61c20eedabf3ead4454049d9126"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace04e61c20eedabf3ead4454049d9126">&#9670;&#160;</a></span>largeRange</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="structxrpl_1_1MantissaRange.html">MantissaRange</a> xrpl::Number::largeRange {<a class="el" href="structxrpl_1_1MantissaRange.html#a20f7a2bea468b1da813e45c7881e29f2a0b64e613fbbea29706141a2e1a08ffa5">MantissaRange::large</a>}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00462">462</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
+
+</div>
+</div>
+<a id="ab2381c12707d6e7e9a7704b4733ae3af" name="ab2381c12707d6e7e9a7704b4733ae3af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2381c12707d6e7e9a7704b4733ae3af">&#9670;&#160;</a></span>range_</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">thread_local <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/functional/reference_wrapper.html">std::reference_wrapper</a>&lt; <a class="el" href="structxrpl_1_1MantissaRange.html">MantissaRange</a> const  &gt; xrpl::Number::range_</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">=</div>
+<div class="line">    <a class="code hl_variable" href="classxrpl_1_1Number.html#ace04e61c20eedabf3ead4454049d9126">largeRange</a></div>
+<div class="ttc" id="aclassxrpl_1_1Number_html_ace04e61c20eedabf3ead4454049d9126"><div class="ttname"><a href="classxrpl_1_1Number.html#ace04e61c20eedabf3ead4454049d9126">xrpl::Number::largeRange</a></div><div class="ttdeci">static constexpr MantissaRange largeRange</div><div class="ttdef"><b>Definition</b> <a href="Number_8h_source.html#l00462">Number.h:462</a></div></div>
+</div><!-- fragment -->
+<p class="definition">Definition at line <a class="el" href="Number_8h_source.html#l00473">473</a> of file <a class="el" href="Number_8h_source.html">Number.h</a>.</p>
 
 </div>
 </div>

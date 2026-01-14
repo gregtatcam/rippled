@@ -6,60 +6,62 @@
 <area shape="rect" id="Node000003" href="$classxrpl_1_1STAmount.html" title=" " alt="" coords="280,83,401,109"/>
 <area shape="poly" id="edge643_Node000004_Node000003" title=" " alt="" coords="190,89,280,92,280,97,190,94"/>
 <area shape="rect" id="Node000006" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,133,176,173"/>
-<area shape="rect" id="Node000005" href="$classxrpl_1_1STArray.html" title=" " alt="" coords="288,143,393,169"/>
-<area shape="poly" id="edge644_Node000006_Node000005" title=" " alt="" coords="190,152,288,153,288,158,190,157"/>
+<area shape="rect" id="Node000005" href="$classxrpl_1_1STArray.html" title=" " alt="" coords="288,141,393,166"/>
+<area shape="poly" id="edge644_Node000006_Node000005" title=" " alt="" coords="190,151,288,151,288,156,190,156"/>
 <area shape="rect" id="Node000008" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="11,197,190,237"/>
-<area shape="rect" id="Node000007" href="$classxrpl_1_1STBitString.html" title=" " alt="" coords="271,199,410,239"/>
-<area shape="poly" id="edge645_Node000008_Node000007" title=" " alt="" coords="203,215,271,216,271,221,203,221"/>
+<area shape="rect" id="Node000007" href="$classxrpl_1_1STBitString.html" title=" " alt="" coords="271,191,410,231"/>
+<area shape="poly" id="edge645_Node000008_Node000007" title=" " alt="" coords="203,212,271,210,271,215,203,217"/>
 <area shape="rect" id="Node000010" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,261,176,301"/>
-<area shape="rect" id="Node000009" href="$classxrpl_1_1STBlob.html" title=" " alt="" coords="291,266,391,291"/>
-<area shape="poly" id="edge646_Node000010_Node000009" title=" " alt="" coords="190,278,291,277,291,282,190,283"/>
-<area shape="rect" id="Node000013" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="5,325,196,365"/>
-<area shape="rect" id="Node000012" href="$classxrpl_1_1STInteger.html" title=" " alt="" coords="244,315,437,341"/>
-<area shape="poly" id="edge647_Node000013_Node000012" title=" " alt="" coords="209,335,244,332,244,338,210,340"/>
-<area shape="rect" id="Node000015" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,440,176,480"/>
-<area shape="rect" id="Node000014" href="$classxrpl_1_1STIssue.html" title=" " alt="" coords="288,414,393,439"/>
-<area shape="poly" id="edge648_Node000015_Node000014" title=" " alt="" coords="189,445,287,431,288,437,190,450"/>
-<area shape="rect" id="Node000020" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="265,464,416,504"/>
-<area shape="rect" id="Node000019" href="$classxrpl_1_1STLedgerEntry.html" title=" " alt="" coords="485,506,635,531"/>
-<area shape="poly" id="edge649_Node000020_Node000019" title=" " alt="" coords="430,495,485,504,485,510,429,501"/>
-<area shape="rect" id="Node000017" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,521,176,561"/>
-<area shape="rect" id="Node000016" href="$classxrpl_1_1STNumber.html" title="A serializable number." alt="" coords="279,529,402,554"/>
-<area shape="poly" id="edge650_Node000017_Node000016" title=" " alt="" coords="190,539,279,539,279,544,190,544"/>
-<area shape="rect" id="Node000025" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,636,176,676"/>
-<area shape="rect" id="Node000018" href="$classxrpl_1_1STObject.html" title=" " alt="" coords="284,643,397,669"/>
-<area shape="poly" id="edge651_Node000025_Node000018" title=" " alt="" coords="190,653,284,653,284,659,190,659"/>
-<area shape="poly" id="edge652_Node000018_Node000019" title=" " alt="" coords="410,640,436,628,471,605,502,578,546,530,550,533,506,582,474,609,439,633,412,644"/>
-<area shape="rect" id="Node000021" href="$classxrpl_1_1STTx.html" title=" " alt="" coords="517,617,603,642"/>
-<area shape="poly" id="edge653_Node000018_Node000021" title=" " alt="" coords="411,645,516,632,517,637,412,650"/>
-<area shape="rect" id="Node000023" href="$classxrpl_1_1STValidation.html" title=" " alt="" coords="492,670,628,695"/>
-<area shape="poly" id="edge654_Node000018_Node000023" title=" " alt="" coords="412,662,492,672,492,677,411,667"/>
-<area shape="rect" id="Node000027" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,736,176,776"/>
-<area shape="rect" id="Node000026" href="$classxrpl_1_1STPathSet.html" title=" " alt="" coords="281,758,401,783"/>
-<area shape="poly" id="edge655_Node000027_Node000026" title=" " alt="" coords="190,759,281,764,280,770,190,764"/>
-<area shape="rect" id="Node000022" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="265,579,416,619"/>
-<area shape="poly" id="edge656_Node000022_Node000021" title=" " alt="" coords="430,608,517,621,516,626,430,614"/>
-<area shape="rect" id="Node000024" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="265,693,416,733"/>
-<area shape="poly" id="edge657_Node000024_Node000023" title=" " alt="" coords="430,698,492,689,492,695,430,704"/>
-<area shape="rect" id="Node000029" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,800,176,840"/>
-<area shape="rect" id="Node000028" href="$classxrpl_1_1STVector256.html" title=" " alt="" coords="273,807,409,833"/>
-<area shape="poly" id="edge658_Node000029_Node000028" title=" " alt="" coords="190,817,272,817,272,823,190,823"/>
-<area shape="rect" id="Node000031" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="23,864,178,904"/>
-<area shape="rect" id="Node000030" href="$classxrpl_1_1STXChainBridge.html" title=" " alt="" coords="261,863,420,889"/>
-<area shape="poly" id="edge659_Node000031_Node000030" title=" " alt="" coords="192,878,261,876,261,881,192,884"/>
-<area shape="rect" id="Node000002" href="$classxrpl_1_1STBase.html" title="A type which can be exported to a well known binary format." alt="" coords="49,390,152,415"/>
-<area shape="poly" id="edge660_Node000002_Node000001" title=" " alt="" coords="164,394,181,386,194,376,219,338,228,301,226,264,220,227,213,188,211,150,219,110,242,69,259,53,280,42,282,47,262,58,246,72,224,112,216,150,218,188,225,226,232,263,233,302,223,340,198,379,183,391,166,399"/>
-<area shape="poly" id="edge661_Node000002_Node000003" title=" " alt="" coords="164,393,181,386,194,376,215,346,223,316,223,286,219,256,214,225,214,193,222,161,242,129,259,115,278,105,281,110,262,119,246,132,227,163,219,194,220,224,224,255,228,286,228,317,219,348,198,379,183,391,167,398"/>
-<area shape="poly" id="edge662_Node000002_Node000005" title=" " alt="" coords="164,393,180,386,194,375,211,353,218,330,220,306,218,283,216,259,217,234,225,209,242,185,263,169,287,160,289,165,265,174,246,189,230,212,223,235,221,259,223,282,225,306,224,331,216,355,198,379,183,390,166,398"/>
-<area shape="poly" id="edge663_Node000002_Node000007" title=" " alt="" coords="164,392,194,375,207,361,214,346,218,316,222,284,229,268,242,251,270,233,272,237,246,255,234,270,227,285,223,316,219,348,211,364,198,379,167,397"/>
-<area shape="poly" id="edge664_Node000002_Node000009" title=" " alt="" coords="164,390,194,375,210,358,217,339,225,319,242,301,265,288,289,281,291,286,267,293,246,305,230,322,222,341,215,360,198,379,166,395"/>
-<area shape="poly" id="edge666_Node000002_Node000012" title=" " alt="" coords="165,385,195,375,219,362,243,350,279,338,280,343,245,354,221,367,197,380,166,390"/>
-<area shape="poly" id="edge667_Node000002_Node000014" title=" " alt="" coords="166,406,288,419,288,424,166,412"/>
-<area shape="poly" id="edge668_Node000002_Node000016" title=" " alt="" coords="166,410,198,426,216,448,223,471,229,493,246,514,280,531,278,536,242,518,224,496,217,473,211,451,194,430,164,415"/>
-<area shape="poly" id="edge669_Node000002_Node000018" title=" " alt="" coords="166,407,183,415,198,426,216,452,224,478,225,504,223,530,220,555,221,580,228,604,246,629,264,641,285,649,283,654,261,646,242,633,224,607,216,581,215,555,217,529,220,504,219,479,212,454,194,430,180,419,164,412"/>
-<area shape="poly" id="edge670_Node000002_Node000026" title=" " alt="" coords="166,407,183,414,198,426,213,447,224,467,233,507,230,547,223,587,215,627,212,666,221,705,231,724,246,743,262,756,282,764,280,769,259,761,242,747,227,727,216,706,207,666,209,626,217,586,225,547,228,508,219,469,209,449,194,430,181,419,164,411"/>
-<area shape="poly" id="edge671_Node000002_Node000028" title=" " alt="" coords="167,407,183,414,198,426,215,450,227,473,234,497,237,520,233,566,223,612,212,657,209,703,211,725,218,748,229,770,246,793,258,803,274,811,271,815,256,808,242,796,225,773,213,750,206,726,203,703,207,657,217,611,228,565,231,520,229,498,222,475,211,453,194,430,181,419,164,411"/>
-<area shape="poly" id="edge672_Node000002_Node000030" title=" " alt="" coords="167,406,184,414,198,426,218,453,231,480,238,506,241,533,236,585,224,636,212,688,206,739,209,765,215,791,228,817,246,843,269,861,266,865,242,847,223,820,210,793,203,766,201,739,206,687,219,635,231,584,236,533,233,507,226,482,213,456,194,430,181,419,164,411"/>
-<area shape="rect" id="Node000011" href="$classxrpl_1_1STCurrency.html" title=" " alt="" coords="277,365,405,390"/>
-<area shape="poly" id="edge665_Node000002_Node000011" title=" " alt="" coords="166,393,276,381,277,387,166,398"/>
+<area shape="rect" id="Node000009" href="$classxrpl_1_1STBlob.html" title=" " alt="" coords="291,255,391,281"/>
+<area shape="poly" id="edge646_Node000010_Node000009" title=" " alt="" coords="190,274,290,268,291,273,190,279"/>
+<area shape="rect" id="Node000013" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="5,447,196,487"/>
+<area shape="rect" id="Node000012" href="$classxrpl_1_1STInteger.html" title=" " alt="" coords="244,469,437,494"/>
+<area shape="poly" id="edge647_Node000013_Node000012" title=" " alt="" coords="210,471,244,473,244,478,209,476"/>
+<area shape="rect" id="Node000015" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,511,176,551"/>
+<area shape="rect" id="Node000014" href="$classxrpl_1_1STIssue.html" title=" " alt="" coords="288,518,393,543"/>
+<area shape="poly" id="edge648_Node000015_Node000014" title=" " alt="" coords="190,528,288,528,288,533,190,533"/>
+<area shape="rect" id="Node000018" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="265,667,416,707"/>
+<area shape="rect" id="Node000017" href="$classxrpl_1_1STLedgerEntry.html" title=" " alt="" coords="485,710,635,735"/>
+<area shape="poly" id="edge649_Node000018_Node000017" title=" " alt="" coords="430,699,486,708,485,713,429,704"/>
+<area shape="rect" id="Node000028" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="265,305,416,345"/>
+<area shape="rect" id="Node000027" href="$classxrpl_1_1STNumber.html" title="A serializable number." alt="" coords="499,342,621,367"/>
+<area shape="poly" id="edge650_Node000028_Node000027" title=" " alt="" coords="430,335,499,344,498,349,430,340"/>
+<area shape="rect" id="Node000023" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,781,176,821"/>
+<area shape="rect" id="Node000016" href="$classxrpl_1_1STObject.html" title=" " alt="" coords="284,795,397,821"/>
+<area shape="poly" id="edge651_Node000023_Node000016" title=" " alt="" coords="190,801,284,804,284,809,190,806"/>
+<area shape="poly" id="edge652_Node000016_Node000017" title=" " alt="" coords="410,789,436,780,490,757,535,733,538,738,493,761,438,785,412,794"/>
+<area shape="rect" id="Node000019" href="$classxrpl_1_1STTx.html" title=" " alt="" coords="517,778,603,803"/>
+<area shape="poly" id="edge653_Node000016_Node000019" title=" " alt="" coords="411,800,516,791,517,797,411,805"/>
+<area shape="rect" id="Node000021" href="$classxrpl_1_1STValidation.html" title=" " alt="" coords="492,855,628,881"/>
+<area shape="poly" id="edge654_Node000016_Node000021" title=" " alt="" coords="404,822,438,831,516,853,514,858,437,836,403,827"/>
+<area shape="rect" id="Node000025" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,575,176,615"/>
+<area shape="rect" id="Node000024" href="$classxrpl_1_1STPathSet.html" title=" " alt="" coords="281,567,401,593"/>
+<area shape="poly" id="edge655_Node000025_Node000024" title=" " alt="" coords="190,587,280,581,281,586,190,592"/>
+<area shape="rect" id="Node000020" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="265,731,416,771"/>
+<area shape="poly" id="edge656_Node000020_Node000019" title=" " alt="" coords="431,764,517,780,516,785,430,770"/>
+<area shape="rect" id="Node000022" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="265,895,416,935"/>
+<area shape="poly" id="edge657_Node000022_Node000021" title=" " alt="" coords="430,893,499,878,500,883,431,898"/>
+<area shape="rect" id="Node000030" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="25,639,176,679"/>
+<area shape="rect" id="Node000029" href="$classxrpl_1_1STVector256.html" title=" " alt="" coords="273,617,409,642"/>
+<area shape="poly" id="edge658_Node000030_Node000029" title=" " alt="" coords="190,645,272,635,273,640,190,650"/>
+<area shape="rect" id="Node000032" href="$classxrpl_1_1CountedObject.html" title=" " alt="" coords="23,845,178,885"/>
+<area shape="rect" id="Node000031" href="$classxrpl_1_1STXChainBridge.html" title=" " alt="" coords="261,845,420,870"/>
+<area shape="poly" id="edge659_Node000032_Node000031" title=" " alt="" coords="192,860,261,857,261,863,192,865"/>
+<area shape="rect" id="Node000002" href="$classxrpl_1_1STBase.html" title="A type which can be exported to a well known binary format." alt="" coords="49,397,152,422"/>
+<area shape="poly" id="edge660_Node000002_Node000001" title=" " alt="" coords="128,386,163,354,194,312,207,278,213,246,210,187,209,159,212,130,222,100,242,69,260,53,281,42,283,47,263,58,246,72,226,103,217,131,214,159,216,187,218,246,212,279,198,315,167,357,132,390"/>
+<area shape="poly" id="edge661_Node000002_Node000003" title=" " alt="" coords="128,386,163,353,194,312,205,286,210,262,211,216,215,172,225,149,242,126,259,113,278,104,281,109,262,117,246,130,229,152,221,173,217,216,216,262,210,287,198,315,167,357,132,389"/>
+<area shape="poly" id="edge662_Node000002_Node000005" title=" " alt="" coords="127,385,162,353,194,312,203,293,209,275,212,242,219,209,228,193,242,177,263,163,287,155,289,160,266,168,246,181,232,196,224,211,218,242,214,276,208,295,198,315,166,356,131,389"/>
+<area shape="poly" id="edge663_Node000002_Node000007" title=" " alt="" coords="124,385,194,312,207,292,215,274,225,258,242,241,270,225,272,230,246,245,229,261,220,277,212,294,198,315,128,389"/>
+<area shape="poly" id="edge664_Node000002_Node000009" title=" " alt="" coords="122,385,174,337,207,312,243,291,289,274,291,279,245,296,210,317,177,341,125,389"/>
+<area shape="poly" id="edge666_Node000002_Node000012" title=" " alt="" coords="166,422,197,432,245,455,282,466,281,471,243,460,195,437,164,427"/>
+<area shape="poly" id="edge667_Node000002_Node000014" title=" " alt="" coords="166,417,198,433,215,451,222,470,230,488,246,505,266,515,289,522,287,527,264,520,242,509,225,491,217,472,210,454,194,437,164,422"/>
+<area shape="poly" id="edge668_Node000002_Node000016" title=" " alt="" coords="167,413,183,421,198,433,215,455,226,478,235,522,232,566,223,609,213,652,210,695,219,738,230,759,246,781,263,794,285,802,283,807,261,799,242,785,225,762,214,740,205,696,208,652,217,608,227,565,230,522,221,479,210,458,194,437,181,425,164,418"/>
+<area shape="poly" id="edge669_Node000002_Node000024" title=" " alt="" coords="167,415,198,433,211,448,218,464,223,495,227,526,233,540,246,554,262,565,282,572,280,577,260,570,242,558,229,543,222,527,217,496,213,465,206,451,194,437,164,420"/>
+<area shape="poly" id="edge672_Node000002_Node000029" title=" " alt="" coords="166,414,183,422,198,433,214,454,222,477,222,520,223,563,230,583,246,603,274,620,271,624,242,607,226,586,218,564,217,520,217,477,209,457,194,437,180,426,164,419"/>
+<area shape="poly" id="edge673_Node000002_Node000031" title=" " alt="" coords="167,413,184,421,198,433,217,459,229,484,236,510,239,535,234,585,222,635,210,684,206,733,208,758,215,782,228,807,246,831,263,844,260,849,242,835,223,810,210,784,203,759,201,734,205,683,217,634,229,584,234,535,231,511,224,486,212,461,194,436,181,425,164,418"/>
+<area shape="rect" id="Node000011" href="$classxrpl_1_1STCurrency.html" title=" " alt="" coords="277,419,405,445"/>
+<area shape="poly" id="edge665_Node000002_Node000011" title=" " alt="" coords="166,413,277,423,276,429,166,418"/>
+<area shape="rect" id="Node000026" href="$classxrpl_1_1STTakesAsset.html" title="Intermediate class for any STBase&#45;derived class to store an Asset." alt="" coords="269,370,412,395"/>
+<area shape="poly" id="edge670_Node000002_Node000026" title=" " alt="" coords="165,400,269,388,270,393,166,405"/>
+<area shape="poly" id="edge671_Node000026_Node000027" title=" " alt="" coords="425,369,498,360,499,365,426,375"/>
 </map>
