@@ -538,6 +538,9 @@ accountHolds(
     SpendableHandling includeFullBalance)
 {
     bool const returnSpendable = (includeFullBalance == shFULL_BALANCE);
+    STAmount amount{mptIssue};
+    auto const& issuer = mptIssue.getIssuer();
+    bool const mptokensV2 = view.rules().enabled(featureMPTokensV2);
 
     if (returnSpendable && account == mptIssue.getIssuer())
     {
@@ -548,15 +551,13 @@ accountHolds(
 
         if (!issuance)
         {
-            return STAmount{mptIssue};
+            return amount;
         }
-        return STAmount{
-            mptIssue,
-            issuance->at(~sfMaximumAmount).value_or(maxMPTokenAmount) -
-                issuance->at(sfOutstandingAmount)};
+        auto const available = availableMPTAmount(*issuance);
+        if (!mptokensV2)
+            return STAmount{mptIssue, available};
+        return view.balanceHookMPT(issuer, mptIssue, available);
     }
-
-    STAmount amount;
 
     auto const sleMpt =
         view.read(keylet::mptoken(mptIssue.getMptID(), account));
@@ -608,26 +609,21 @@ accountHolds(
     beast::Journal j,
     SpendableHandling includeFullBalance)
 {
-    return std::visit(
-        [&]<ValidIssueType TIss>(TIss const& value) {
-            if constexpr (std::is_same_v<TIss, Issue>)
-            {
-                return accountHolds(
-                    view, account, value, zeroIfFrozen, j, includeFullBalance);
-            }
-            else if constexpr (std::is_same_v<TIss, MPTIssue>)
-            {
-                return accountHolds(
-                    view,
-                    account,
-                    value,
-                    zeroIfFrozen,
-                    zeroIfUnauthorized,
-                    j,
-                    includeFullBalance);
-            }
+    return asset.visit(
+        [&](Issue const& issue) {
+            return accountHolds(
+                view, account, issue, zeroIfFrozen, j, includeFullBalance);
         },
-        asset.value());
+        [&](MPTIssue const& issue) {
+            return accountHolds(
+                view,
+                account,
+                issue,
+                zeroIfFrozen,
+                zeroIfUnauthorized,
+                j,
+                includeFullBalance);
+        });
 }
 
 STAmount
@@ -663,31 +659,18 @@ accountFunds(
     beast::Journal j)
 {
     return saDefault.asset().visit(
-        [&](Issue const& issue) {
+        [&](Issue const&) {
             return accountFunds(view, id, saDefault, freezeHandling, j);
         },
-        [&](MPTIssue const& mptIssue) {
-            auto const mptokensV2 = view.rules().enabled(featureMPTokensV2);
-            STAmount amount{mptIssue};
-            auto const& issuer = mptIssue.getIssuer();
-
-            if (id == issuer)
-            {
-                if (!mptokensV2)
-                    return saDefault;
-
-                auto const sle = view.read(keylet::mptIssuance(mptIssue));
-
-                if (!sle)
-                    return amount;
-
-                auto const available = availableMPTAmount(*sle);
-
-                return view.balanceHookMPT(issuer, mptIssue, available);
-            }
-
+        [&](MPTIssue const&) {
             return accountHolds(
-                view, id, mptIssue, freezeHandling, authHandling, j);
+                view,
+                id,
+                saDefault.asset(),
+                freezeHandling,
+                authHandling,
+                j,
+                shFULL_BALANCE);
         });
 }
 

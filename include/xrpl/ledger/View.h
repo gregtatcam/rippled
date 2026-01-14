@@ -329,7 +329,7 @@ accountHolds(
     beast::Journal j,
     SpendableHandling includeFullBalance = shSIMPLE_BALANCE);
 
-[[nodiscard]] inline STAmount
+[[nodiscard]] STAmount
 accountHolds(
     ReadView const& view,
     AccountID const& account,
