@@ -378,7 +378,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
         // is typically passed to creditHookIOU, since it comes from a trust
         // line.
         Issue tlIssue = noIssue();
-        tlIssue.currency = USD.currency;
+        tlIssue.currency(USD.currency);
 
         sb.creditHookIOU(gw.id(), alice.id(), {USD, 400}, {tlIssue, 600});
         sb.creditHookIOU(gw.id(), alice.id(), {USD, 100}, {tlIssue, 600});

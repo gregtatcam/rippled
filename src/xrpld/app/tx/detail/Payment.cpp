@@ -42,7 +42,7 @@ getMaxSourceAmount(
             if (issue.native())
                 return dstAmount;
             return STAmount(
-                Issue{issue.currency, account},
+                Issue{issue.currency(), account},
                 dstAmount.mantissa(),
                 dstAmount.exponent(),
                 dstAmount < beast::zero);

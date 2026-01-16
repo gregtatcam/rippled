@@ -359,7 +359,7 @@ NoZeroEscrow::visitEntry(
                     if (amount <= beast::zero)
                         return true;
 
-                    if (badCurrency() == issue.currency)
+                    if (badCurrency() == issue.currency())
                         return true;
 
                     return false;
@@ -794,7 +794,7 @@ TransfersNotFrozen::finalize(
 
     for (auto const& [issue, changes] : balanceChanges_)
     {
-        auto const issuerSle = findIssuer(issue.account, view);
+        auto const issuerSle = findIssuer(issue.account(), view);
         // It should be impossible for the issuer to not be found, but check
         // just in case so rippled doesn't crash in release.
         if (!issuerSle)
@@ -901,7 +901,7 @@ TransfersNotFrozen::recordBalanceChanges(
         after->at(sfBalance).holds<Issue>(),
         "xrpl::TransfersNotFrozen::recordBalanceChanges : after is Issue");
     auto const balanceChangeSign = balanceChange.signum();
-    auto const currency = after->at(sfBalance).get<Issue>().currency;
+    auto const currency = after->at(sfBalance).get<Issue>().currency();
 
     // Change from low account's perspective, which is trust line default
     recordBalance(
@@ -1418,7 +1418,7 @@ ValidClawback::finalize(
                     return accountHolds(
                         view,
                         holder,
-                        issue.currency,
+                        issue.currency(),
                         issuer,
                         fhIGNORE_FREEZE,
                         j);

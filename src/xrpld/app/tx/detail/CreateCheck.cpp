@@ -112,7 +112,7 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                     {
                         // Check if the issuer froze the line
                         auto const sleTrust = ctx.view.read(
-                            keylet::line(srcId, issuerId, issue.currency));
+                            keylet::line(srcId, issuerId, issue.currency()));
                         if (sleTrust &&
                             sleTrust->isFlag(
                                 (issuerId > srcId) ? lsfHighFreeze
@@ -127,7 +127,7 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                     {
                         // Check if dst froze the line.
                         auto const sleTrust = ctx.view.read(
-                            keylet::line(issuerId, dstId, issue.currency));
+                            keylet::line(issuerId, dstId, issue.currency()));
                         if (sleTrust &&
                             sleTrust->isFlag(
                                 (dstId > issuerId) ? lsfHighFreeze

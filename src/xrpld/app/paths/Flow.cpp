@@ -56,7 +56,7 @@ flow(
             [&](Issue const& issue) -> Asset {
                 if (isXRP(issue))
                     return xrpIssue();
-                return Issue(issue.currency, src);
+                return Issue(issue.currency(), src);
             },
             [&](MPTIssue const&) { return deliver.asset(); });
     }();

@@ -87,7 +87,8 @@ public:
 
         BEAST_EXPECT(!cmp.native());
 
-        BEAST_EXPECT(cmp.get<Issue>().currency == res.get<Issue>().currency);
+        BEAST_EXPECT(
+            cmp.get<Issue>().currency() == res.get<Issue>().currency());
 
         if (res != cmp)
         {

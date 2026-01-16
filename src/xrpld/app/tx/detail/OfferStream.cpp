@@ -227,7 +227,7 @@ TOfferStreamBase<TIn, TOut>::step()
             bool const deepFrozen = isDeepFrozen(
                 view_,
                 offer_.owner(),
-                offer_.assetIn().template get<Issue>().currency,
+                offer_.assetIn().template get<Issue>().currency(),
                 offer_.assetIn().getIssuer());
             if (deepFrozen)
             {

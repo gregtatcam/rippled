@@ -71,8 +71,8 @@ IPE(Issue const& iss)
     return STPathElement(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         xrpAccount(),
-        PathAsset{iss.currency},
-        iss.account);
+        PathAsset{iss.currency()},
+        iss.account());
 }
 STPathElement
 IPE(MPTIssue const& iss)
@@ -310,7 +310,7 @@ expectHolding(
     if (auto const sle = env.le(keylet::line(account, value.get<Issue>())))
     {
         Issue const issue = value.get<Issue>();
-        bool const accountLow = account < issue.account;
+        bool const accountLow = account < issue.account();
 
         bool expectDefaultTrustLine = true;
         if (defaultLimits)
@@ -318,15 +318,15 @@ expectHolding(
             STAmount low{issue};
             STAmount high{issue};
 
-            low.get<Issue>().account = accountLow ? account : issue.account;
-            high.get<Issue>().account = accountLow ? issue.account : account;
+            low.get<Issue>().account(accountLow ? account : issue.account());
+            high.get<Issue>().account(accountLow ? issue.account() : account);
 
             expectDefaultTrustLine = sle->getFieldAmount(sfLowLimit) == low &&
                 sle->getFieldAmount(sfHighLimit) == high;
         }
 
         auto amount = sle->getFieldAmount(sfBalance);
-        amount.get<Issue>().account = value.getIssuer();
+        amount.get<Issue>().account(value.getIssuer());
         if (!accountLow)
             amount.negate();
         return amount == value && expectDefaultTrustLine;
@@ -619,8 +619,8 @@ ipe(Asset const& asset)
             return STPathElement(
                 STPathElement::typeCurrency | STPathElement::typeIssuer,
                 xrpAccount(),
-                issue.currency,
-                issue.account);
+                issue.currency(),
+                issue.account());
         },
         [](MPTIssue const& issue) {
             return STPathElement(

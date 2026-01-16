@@ -20,14 +20,14 @@ creditLimit(
     {
         result = sleRippleState->getFieldAmount(
             account < issuer ? sfLowLimit : sfHighLimit);
-        result.get<Issue>().account = account;
+        result.get<Issue>().account(account);
     }
 
     XRPL_ASSERT(
         result.getIssuer() == account,
         "xrpl::creditLimit : result issuer match");
     XRPL_ASSERT(
-        result.get<Issue>().currency == currency,
+        result.get<Issue>().currency() == currency,
         "xrpl::creditLimit : result currency match");
     return result;
 }
@@ -58,14 +58,14 @@ creditBalance(
         result = sleRippleState->getFieldAmount(sfBalance);
         if (account < issuer)
             result.negate();
-        result.get<Issue>().account = account;
+        result.get<Issue>().account(account);
     }
 
     XRPL_ASSERT(
         result.getIssuer() == account,
         "xrpl::creditBalance : result issuer match");
     XRPL_ASSERT(
-        result.get<Issue>().currency == currency,
+        result.get<Issue>().currency() == currency,
         "xrpl::creditBalance : result currency match");
     return result;
 }

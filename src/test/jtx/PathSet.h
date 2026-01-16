@@ -119,8 +119,8 @@ Path::push_back(Issue const& iss)
     path.emplace_back(
         STPathElement::typeCurrency | STPathElement::typeIssuer,
         beast::zero,
-        iss.currency,
-        iss.account);
+        iss.currency(),
+        iss.account());
     return *this;
 }
 

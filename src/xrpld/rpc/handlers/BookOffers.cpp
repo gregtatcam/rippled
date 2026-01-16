@@ -53,8 +53,9 @@ parseTakerAssetJSON(
     if (taker.isMember(jss::currency))
     {
         Issue issue = xrpIssue();
+        Currency currency;
 
-        if (!to_currency(issue.currency, taker[jss::currency].asString()))
+        if (!to_currency(currency, taker[jss::currency].asString()))
         {
             JLOG(j.info()) << boost::format("Bad %s currency.") % name.c_str();
             return RPC::make_error(
@@ -63,6 +64,7 @@ parseTakerAssetJSON(
                  name.c_str())
                     .str());
         }
+        issue.currency(currency);
         asset = issue;
     }
     else if (taker.isMember(jss::mpt_issuance_id))
@@ -104,27 +106,29 @@ parseTakerIssuerJSON(
                     (boost::format("%s.issuer") % name.c_str()).str(),
                     "string");
 
-            if (!to_issuer(issue.account, taker[jss::issuer].asString()))
+            AccountID account;
+            if (!to_issuer(account, taker[jss::issuer].asString()))
                 return RPC::make_error(
                     issuerError,
                     (boost::format("Invalid field '%s.issuer', bad issuer.") %
                      name.c_str())
                         .str());
 
-            if (issue.account == noAccount())
+            if (account == noAccount())
                 return RPC::make_error(
                     issuerError,
                     (boost::format(
                          "Invalid field '%s.issuer', bad issuer account one.") %
                      name.c_str())
                         .str());
+            issue.account(account);
         }
         else
         {
-            issue.account = xrpAccount();
+            issue.account(xrpAccount());
         }
 
-        if (isXRP(issue.currency) && !isXRP(issue.account))
+        if (isXRP(issue.currency()) && !isXRP(issue.account()))
             return RPC::make_error(
                 issuerError,
                 (boost::format("Unneeded field '%s.issuer' for XRP currency "
@@ -132,7 +136,7 @@ parseTakerIssuerJSON(
                  name.c_str())
                     .str());
 
-        if (!isXRP(issue.currency) && isXRP(issue.account))
+        if (!isXRP(issue.currency()) && isXRP(issue.account()))
             return RPC::make_error(
                 issuerError,
                 (boost::format(

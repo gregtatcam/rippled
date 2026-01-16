@@ -423,10 +423,11 @@ parseSubUnsubJson(
 
     if (jv.isMember(jss::currency))
     {
-        Issue issue = xrpIssue();
+        Currency currency = xrpCurrency();
+        AccountID account = xrpAccount();
         // Parse mandatory currency.
         if (!jv.isMember(jss::currency) ||
-            !to_currency(issue.currency, jv[jss::currency].asString()))
+            !to_currency(currency, jv[jss::currency].asString()))
         {
             JLOG(j.info()) << boost::format("Bad %s currency.") % name.c_str();
             return assetError;
@@ -435,15 +436,14 @@ parseSubUnsubJson(
         // Parse optional issuer.
         if (((jv.isMember(jss::issuer)) &&
              (!jv[jss::issuer].isString() ||
-              !to_issuer(issue.account, jv[jss::issuer].asString())))
+              !to_issuer(account, jv[jss::issuer].asString())))
             // Don't allow illegal issuers.
-            || (!issue.currency != !issue.account) ||
-            noAccount() == issue.account)
+            || (!currency != !account) || noAccount() == account)
         {
             JLOG(j.info()) << boost::format("Bad %s issuer.") % name.c_str();
             return issuerError;
         }
-        asset = issue;
+        asset = Issue{currency, account};
     }
     else if (jv.isMember(jss::mpt_issuance_id))
     {

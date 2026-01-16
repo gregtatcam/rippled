@@ -34,7 +34,7 @@ doBalance(
         else if (env.test.expect(sle))
         {
             auto amount = sle->getFieldAmount(sfBalance);
-            amount.get<Issue>().account = value.getIssuer();
+            amount.get<Issue>().account(value.getIssuer());
             if (account > value.getIssuer())
                 amount.negate();
             env.test.expect(amount == value);

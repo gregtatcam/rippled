@@ -176,16 +176,16 @@ Env::balance(Account const& account, Asset const& asset) const
 {
     return asset.visit(
         [&](Issue const& issue) -> PrettyAmount {
-            if (isXRP(issue.currency))
+            if (isXRP(issue.currency()))
                 return balance(account);
             auto const sle = le(keylet::line(account.id(), issue));
             if (!sle)
                 return {STAmount(issue, 0), account.name()};
             auto amount = sle->getFieldAmount(sfBalance);
-            amount.get<Issue>().account = issue.account;
-            if (account.id() > issue.account)
+            amount.get<Issue>().account(issue.account());
+            if (account.id() > issue.account())
                 amount.negate();
-            return {amount, lookup(issue.account).name()};
+            return {amount, lookup(issue.account()).name()};
         },
         [&](MPTIssue const& mptIssue) -> PrettyAmount {
             MPTID const& id = mptIssue.getMptID();
@@ -224,7 +224,7 @@ Env::limit(Account const& account, Issue const& issue) const
     auto const sle = le(keylet::line(account.id(), issue));
     if (!sle)
         return {STAmount(issue, 0), account.name()};
-    auto const aHigh = account.id() > issue.account;
+    auto const aHigh = account.id() > issue.account();
     if (sle && sle->isFieldPresent(aHigh ? sfLowLimit : sfHighLimit))
         return {(*sle)[aHigh ? sfLowLimit : sfHighLimit], account.name()};
     return {STAmount(issue, 0), account.name()};

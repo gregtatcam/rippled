@@ -78,7 +78,7 @@ escrowCreatePreflightHelper<Issue>(PreflightContext const& ctx)
     if (amount.native() || amount <= beast::zero)
         return temBAD_AMOUNT;
 
-    if (badCurrency() == amount.get<Issue>().currency)
+    if (badCurrency() == amount.get<Issue>().currency())
         return temBAD_CURRENCY;
 
     return tesSUCCESS;
@@ -189,7 +189,7 @@ escrowCreatePreclaimHelper<Issue>(
 
     // If the account does not have a trustline to the issuer, return tecNO_LINE
     auto const sleRippleState =
-        ctx.view.read(keylet::line(account, issuer, issue.currency));
+        ctx.view.read(keylet::line(account, issuer, issue.currency()));
     if (!sleRippleState)
         return tecNO_LINE;
 
@@ -221,7 +221,7 @@ escrowCreatePreclaimHelper<Issue>(
         return tecFROZEN;
 
     STAmount const spendableAmount = accountHolds(
-        ctx.view, account, issue.currency, issuer, fhIGNORE_FREEZE, ctx.j);
+        ctx.view, account, issue.currency(), issuer, fhIGNORE_FREEZE, ctx.j);
 
     // If the balance is less than or equal to 0, return tecINSUFFICIENT_FUNDS
     if (spendableAmount <= beast::zero)
@@ -647,7 +647,7 @@ escrowFinishPreclaimHelper<Issue>(
         return ter;
 
     // If the issuer has deep frozen the destination, return tecFROZEN
-    if (isDeepFrozen(ctx.view, dest, issue.currency, amount.getIssuer()))
+    if (isDeepFrozen(ctx.view, dest, issue.currency(), amount.getIssuer()))
         return tecFROZEN;
 
     return tesSUCCESS;
@@ -775,9 +775,9 @@ escrowUnlockApplyHelper<Issue>(
             return tecNO_LINE_INSUF_RESERVE;
         }
 
-        Currency const& currency = issue.currency;
+        Currency const& currency = issue.currency();
         STAmount initialBalance(issue);
-        initialBalance.get<Issue>().account = noAccount();
+        initialBalance.get<Issue>().account(noAccount());
 
         // clang-format off
         if (TER const ter = trustCreate(

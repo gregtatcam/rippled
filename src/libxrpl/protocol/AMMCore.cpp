@@ -30,7 +30,7 @@ ammLPTCurrency(Asset const& asset1, Asset const& asset2)
         [](auto&& issue1, auto&& issue2) {
             auto fromIss = []<ValidIssueType T>(T const& issue) {
                 if constexpr (std::is_same_v<T, Issue>)
-                    return issue.currency;
+                    return issue.currency();
                 if constexpr (std::is_same_v<T, MPTIssue>)
                     return issue.getMptID();
             };
@@ -66,7 +66,7 @@ invalidAMMAsset(
             return std::nullopt;
         },
         [](Issue const& issue) -> std::optional<NotTEC> {
-            if (badCurrency() == issue.currency)
+            if (badCurrency() == issue.currency())
                 return temBAD_CURRENCY;
             if (isXRP(issue) && issue.getIssuer().isNonZero())
                 return temBAD_ISSUER;

@@ -199,7 +199,9 @@ constexpr Asset::token_type
 Asset::token() const
 {
     return visit(
-        [&](Issue const& issue) -> Asset::token_type { return issue.currency; },
+        [&](Issue const& issue) -> Asset::token_type {
+            return issue.currency();
+        },
         [&](MPTIssue const& issue) -> Asset::token_type {
             return issue.getMptID();
         });
@@ -256,7 +258,7 @@ constexpr bool
 operator==(Currency const& lhs, Asset const& rhs)
 {
     return rhs.visit(
-        [&](Issue const& issue) { return issue.currency == lhs; },
+        [&](Issue const& issue) { return issue.currency() == lhs; },
         [](MPTIssue const& issue) { return false; });
 }
 
@@ -265,7 +267,7 @@ operator==(BadAsset const&, Asset const& rhs)
 {
     return rhs.visit(
         [](Issue const& issue) -> bool {
-            return badCurrency() == issue.currency;
+            return badCurrency() == issue.currency();
         },
         [](MPTIssue const& issue) -> bool {
             return issue.getIssuer() == xrpAccount();
@@ -280,7 +282,7 @@ equalTokens(Asset const& lhs, Asset const& rhs)
             TLhs const& issLhs, TRhs const& issRhs) {
             if constexpr (
                 std::is_same_v<TLhs, Issue> && std::is_same_v<TRhs, Issue>)
-                return issLhs.currency == issRhs.currency;
+                return issLhs.currency() == issRhs.currency();
             else if constexpr (
                 std::is_same_v<TLhs, MPTIssue> &&
                 std::is_same_v<TRhs, MPTIssue>)
@@ -323,7 +325,7 @@ validAsset(Asset const& asset)
 {
     return asset.visit(
         [](Issue const& issue) {
-            return isConsistent(issue) && issue.currency != badCurrency();
+            return isConsistent(issue) && issue.currency() != badCurrency();
         },
         [](MPTIssue const& issue) {
             return issue.getIssuer() != xrpAccount();

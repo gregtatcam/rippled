@@ -12,20 +12,45 @@ namespace xrpl {
 */
 class Issue
 {
-public:
-    Currency currency{};
-    AccountID account{};
+private:
+    Currency currency_;
+    AccountID account_;
 
+public:
     Issue() = default;
 
-    Issue(Currency const& c, AccountID const& a) : currency(c), account(a)
+    Issue(Currency const& c, AccountID const& a) : currency_(c), account_(a)
     {
+    }
+
+    AccountID const&
+    account() const
+    {
+        return account_;
+    }
+
+    void
+    account(AccountID const& account)
+    {
+        account_ = account;
+    }
+
+    Currency const&
+    currency() const
+    {
+        return currency_;
+    }
+
+    void
+    currency(Currency const& currency)
+    {
+        currency_ = currency;
     }
 
     AccountID const&
     getIssuer() const
     {
-        return account;
+        return account_;
     }
 
     std::string
@@ -64,7 +89,7 @@ void
 hash_append(Hasher& h, Issue const& r)
 {
     using beast::hash_append;
-    hash_append(h, r.currency, r.account);
+    hash_append(h, r.currency(), r.account());
 }
 
 /** Equality comparison. */
@@ -72,8 +97,8 @@ hash_append(Hasher& h, Issue const& r)
 [[nodiscard]] inline constexpr bool
 operator==(Issue const& lhs, Issue const& rhs)
 {
-    return (lhs.currency == rhs.currency) &&
-        (isXRP(lhs.currency) || lhs.account == rhs.account);
+    return (lhs.currency() == rhs.currency()) &&
+        (isXRP(lhs.currency()) || lhs.account() == rhs.account());
 }
 /** @} */
 
@@ -82,13 +107,13 @@ operator==(Issue const& lhs, Issue const& rhs)
 [[nodiscard]] constexpr std::weak_ordering
 operator<=>(Issue const& lhs, Issue const& rhs)
 {
-    if (auto const c{lhs.currency <=> rhs.currency}; c != 0)
+    if (auto const c{lhs.currency() <=> rhs.currency()}; c != 0)
         return c;
 
-    if (isXRP(lhs.currency))
+    if (isXRP(lhs.currency()))
         return std::weak_ordering::equivalent;
 
-    return (lhs.account <=> rhs.account);
+    return (lhs.account() <=> rhs.account());
 }
 /** @} */
 

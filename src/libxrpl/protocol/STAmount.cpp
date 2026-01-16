@@ -97,7 +97,7 @@ areComparable(STAmount const& v1, STAmount const& v2)
             TIss1 const& issue1, TIss2 const& issue2) {
             if constexpr (is_issue_v<TIss1> && is_issue_v<TIss2>)
                 return v1.native() == v2.native() &&
-                    issue1.currency == issue2.currency;
+                    issue1.currency() == issue2.currency();
             else if constexpr (is_mptissue_v<TIss1> && is_mptissue_v<TIss2>)
                 return issue1 == issue2;
             else
@@ -145,14 +145,14 @@ STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
     }
 
     Issue issue;
-    issue.currency = sit.get160();
+    issue.currency(static_cast<Currency>(sit.get160()));
 
-    if (isXRP(issue.currency))
+    if (isXRP(issue.currency()))
         Throw<std::runtime_error>("invalid native currency");
 
-    issue.account = sit.get160();
+    issue.account(static_cast<AccountID>(sit.get160()));
 
-    if (isXRP(issue.account))
+    if (isXRP(issue.account()))
         Throw<std::runtime_error>("invalid native account");
 
     // 10 bits for the offset, sign and "not native" flag
@@ -843,8 +843,8 @@ STAmount::add(Serializer& s) const
                         mValue |
                         (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
                          << (64 - 10)));
-                s.addBitString(issue.currency);
-                s.addBitString(issue.account);
+                s.addBitString(issue.currency());
+                s.addBitString(issue.account());
             }
         });
 }
@@ -1120,12 +1120,13 @@ amountFromJson(SField const& name, Json::Value const& v)
         }
         else
         {
-            Issue issue;
-            if (!to_currency(issue.currency, currencyOrMPTID.asString()))
+            Currency currency;
+            AccountID account;
+            if (!to_currency(currency, currencyOrMPTID.asString()))
                 Throw<std::runtime_error>("invalid currency");
-            if (!issuer.isString() ||
-                !to_issuer(issue.account, issuer.asString()))
+            if (!issuer.isString() || !to_issuer(account, issuer.asString()))
                 Throw<std::runtime_error>("invalid issuer");
+            Issue issue{currency, account};
             if (issue.native())
                 Throw<std::runtime_error>("invalid issuer");
             asset = issue;

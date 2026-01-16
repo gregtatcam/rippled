@@ -252,7 +252,7 @@ CreateOffer::checkAcceptAsset(
             if ((*issuerAccount)[sfFlags] & lsfRequireAuth)
             {
                 auto const trustLine =
-                    view.read(keylet::line(id, issuer, issue.currency));
+                    view.read(keylet::line(id, issuer, issue.currency()));
 
                 if (!trustLine)
                 {
@@ -283,13 +283,13 @@ CreateOffer::checkAcceptAsset(
             // An account can not create a trustline to itself, so no line
             // can exist to be frozen. Additionally, an issuer can always
             // accept its own issuance.
-            if (issue.account == id)
+            if (issue.account() == id)
             {
                 return tesSUCCESS;
             }
 
             auto const trustLine =
-                view.read(keylet::line(id, issue.account, issue.currency));
+                view.read(keylet::line(id, issue.account(), issue.currency()));
 
             if (!trustLine)
             {
@@ -531,7 +531,7 @@ CreateOffer::format_amount(STAmount const& amount)
     std::string txt = amount.getText();
     txt += "/";
     amount.asset().visit(
-        [&](Issue const& issue) { txt += to_string(issue.currency); },
+        [&](Issue const& issue) { txt += to_string(issue.currency()); },
         [&](MPTIssue const& issue) { txt += to_string(issue); });
     return txt;
 }
@@ -879,16 +879,16 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
                           std::optional<uint256> const& maybeDomain) {
         saTakerPays.asset().visit(
             [&](Issue const& issue) {
-                sle->setFieldH160(sfTakerPaysCurrency, issue.currency);
-                sle->setFieldH160(sfTakerPaysIssuer, issue.account);
+                sle->setFieldH160(sfTakerPaysCurrency, issue.currency());
+                sle->setFieldH160(sfTakerPaysIssuer, issue.account());
             },
             [&](MPTIssue const& issue) {
                 sle->setFieldH192(sfTakerPaysMPT, issue.getMptID());
             });
         saTakerGets.asset().visit(
             [&](Issue const& issue) {
-                sle->setFieldH160(sfTakerGetsCurrency, issue.currency);
-                sle->setFieldH160(sfTakerGetsIssuer, issue.account);
+                sle->setFieldH160(sfTakerGetsCurrency, issue.currency());
+                sle->setFieldH160(sfTakerGetsIssuer, issue.account());
             },
             [&](MPTIssue const& issue) {
                 sle->setFieldH192(sfTakerGetsMPT, issue.getMptID());

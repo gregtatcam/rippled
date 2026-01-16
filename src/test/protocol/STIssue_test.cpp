@@ -21,7 +21,7 @@ public:
         try
         {
             issue = xrpIssue();
-            issue.account = alice;
+            issue.account(alice);
             STIssue stissue(sfAsset, Asset{issue});
             fail("Inconsistent XRP Issue doesn't fail");
         }
@@ -33,7 +33,7 @@ public:
         try
         {
             issue = USD;
-            issue.account = xrpAccount();
+            issue.account(xrpAccount());
             STIssue stissue(sfAsset, Asset{issue});
             fail("Inconsistent IOU Issue doesn't fail");
         }

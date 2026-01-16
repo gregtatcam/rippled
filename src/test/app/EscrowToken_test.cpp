@@ -50,7 +50,7 @@ struct EscrowToken_test : public beast::unit_test::suite
         auto jrr = env.rpc("json", "gateway_balances", to_string(params));
         auto const result = jrr[jss::result];
         auto const obligations =
-            result[jss::obligations][to_string(issue.currency)];
+            result[jss::obligations][to_string(issue.currency())];
         if (obligations.isNull())
             return {STAmount(issue, 0), account.name()};
         STAmount const amount = amountFromString(issue, obligations.asString());
@@ -67,7 +67,7 @@ struct EscrowToken_test : public beast::unit_test::suite
         params[jss::account] = account.human();
         auto jrr = env.rpc("json", "gateway_balances", to_string(params));
         auto const result = jrr[jss::result];
-        auto const locked = result[jss::locked][to_string(issue.currency)];
+        auto const locked = result[jss::locked][to_string(issue.currency())];
         if (locked.isNull())
             return {STAmount(issue, 0), account.name()};
         STAmount const amount = amountFromString(issue, locked.asString());

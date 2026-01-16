@@ -29,7 +29,7 @@ accountSourceAssets(
                  // Peer extends credit.
                  && ((-saBalance) < rspEntry.getLimitPeer())))  // Credit left.
             {
-                assets.insert(saBalance.get<Issue>().currency);
+                assets.insert(saBalance.get<Issue>().currency());
             }
         }
     }
@@ -68,7 +68,7 @@ accountDestAssets(
             auto& saBalance = rspEntry.getBalance();
 
             if (saBalance < rspEntry.getLimit())  // Can take more
-                assets.insert(saBalance.get<Issue>().currency);
+                assets.insert(saBalance.get<Issue>().currency());
         }
     }
 

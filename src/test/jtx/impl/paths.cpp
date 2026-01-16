@@ -93,8 +93,8 @@ path::append_one(BookSpec const& book)
     auto& jv = create();
     book.asset.visit(
         [&](Issue const& issue) {
-            jv["currency"] = to_string(issue.currency);
-            jv["issuer"] = toBase58(issue.account);
+            jv["currency"] = to_string(issue.currency());
+            jv["issuer"] = toBase58(issue.account());
         },
         [&](MPTIssue const& issue) {
             jv["mpt_issuance_id"] = to_string(issue.getMptID());

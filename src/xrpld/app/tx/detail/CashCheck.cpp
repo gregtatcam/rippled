@@ -174,7 +174,7 @@ CashCheck::preclaim(PreclaimContext const& ctx)
         {
             return value.asset().visit(
                 [&](Issue const& issue) -> TER {
-                    Currency const currency{issue.currency};
+                    Currency const currency{issue.currency()};
                     auto const sleTrustLine =
                         ctx.view.read(keylet::line(dstId, issuerId, currency));
 
@@ -429,9 +429,9 @@ CashCheck::doApply()
                         if (sleDst == nullptr)
                             return tecNO_LINE_INSUF_RESERVE;
 
-                        Currency const& currency = issue.currency;
+                        Currency const& currency = issue.currency();
                         STAmount initialBalance(flowDeliver.asset());
-                        initialBalance.get<Issue>().account = noAccount();
+                        initialBalance.get<Issue>().account(noAccount());
 
                         if (TER const ter = trustCreate(
                                 psb,                // payment sandbox

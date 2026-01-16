@@ -95,7 +95,7 @@ isIndividualFrozen(
     AccountID const& account,
     Issue const& issue)
 {
-    return isIndividualFrozen(view, account, issue.currency, issue.account);
+    return isIndividualFrozen(view, account, issue.currency(), issue.account());
 }
 
 [[nodiscard]] bool
@@ -131,7 +131,7 @@ isFrozen(
     Issue const& issue,
     int = 0 /*ignored*/)
 {
-    return isFrozen(view, account, issue.currency, issue.account);
+    return isFrozen(view, account, issue.currency(), issue.account());
 }
 
 [[nodiscard]] bool
@@ -198,7 +198,7 @@ isAnyFrozen(
 {
     for (auto const& account : accounts)
     {
-        if (isFrozen(view, account, issue.currency, issue.account))
+        if (isFrozen(view, account, issue.currency(), issue.account()))
             return true;
     }
     return false;
@@ -232,7 +232,7 @@ isDeepFrozen(
     Issue const& issue,
     int = 0 /*ignored*/)
 {
-    return isDeepFrozen(view, account, issue.currency, issue.account);
+    return isDeepFrozen(view, account, issue.currency(), issue.account());
 }
 
 [[nodiscard]] inline bool

@@ -36,7 +36,7 @@ DeferredCredits::creditIOU(
         amount.holds<Issue>(),
         "xrpl::detail::DeferredCredits::creditIOU : amount is for Issue");
 
-    auto const k = makeKeyIOU(sender, receiver, amount.get<Issue>().currency);
+    auto const k = makeKeyIOU(sender, receiver, amount.get<Issue>().currency());
     auto i = creditsIOU_.find(k);
     if (i == creditsIOU_.end())
     {
@@ -284,7 +284,7 @@ PaymentSandbox::balanceHookIOU(
     magnitudes, (B+C)-C may not equal B.
     */
 
-    auto const& currency = amount.get<Issue>().currency;
+    auto const& currency = amount.get<Issue>().currency();
 
     auto delta = amount.zeroed();
     auto lastBal = amount;
@@ -305,7 +305,7 @@ PaymentSandbox::balanceHookIOU(
     // to compute usable balance just slightly above what the ledger
     // calculates (but always less than the actual balance).
     auto adjustedAmt = std::min({amount, lastBal - delta, minBal});
-    adjustedAmt.get<Issue>().account = amount.getIssuer();
+    adjustedAmt.get<Issue>().account(amount.getIssuer());
 
     if (isXRP(issuer) && adjustedAmt < beast::zero)
         // A calculated negative XRP balance is not an error case. Consider a
@@ -564,7 +564,7 @@ PaymentSandbox::balanceChanges(ReadView const& view) const
         }
         // The following are now set, put them in the map
         auto delta = newBalance - oldBalance;
-        auto const cur = newBalance.get<Issue>().currency;
+        auto const cur = newBalance.get<Issue>().currency();
         result[std::make_tuple(lowID, highID, cur)] = delta;
         auto r = result.emplace(std::make_tuple(lowID, lowID, cur), delta);
         if (r.second)

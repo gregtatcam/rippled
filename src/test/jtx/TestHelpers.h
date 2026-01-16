@@ -343,7 +343,14 @@ getAccountLines(Env& env, AccountID const& acctId, IOU... ious)
     {
         for (auto const& iou : {ious...})
         {
-            if (line[jss::currency].asString() == to_string(iou.currency))
+            Currency const currency = [&]() {
+                if constexpr (std::
+                                  is_same_v<Issue, std::decay_t<decltype(iou)>>)
+                    return iou.currency();
+                else
+                    return iou.currency;
+            }();
+            if (line[jss::currency].asString() == to_string(currency))
             {
                 Json::Value v;
                 v[jss::currency] = line[jss::currency];

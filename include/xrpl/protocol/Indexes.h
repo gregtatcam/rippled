@@ -102,7 +102,7 @@ line(
 inline Keylet
 line(AccountID const& id, Issue const& issue) noexcept
 {
-    return line(id, issue.account, issue.currency);
+    return line(id, issue.account(), issue.currency());
 }
 /** @} */
 

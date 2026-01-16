@@ -882,7 +882,7 @@ tokenOfferCreatePreclaim(
         if (isFrozen(
                 view,
                 nftIssuer,
-                amount.get<Issue>().currency,
+                amount.get<Issue>().currency(),
                 amount.getIssuer()))
             return tecFROZEN;
     }
@@ -898,7 +898,7 @@ tokenOfferCreatePreclaim(
     }
 
     if (isFrozen(
-            view, acctID, amount.get<Issue>().currency, amount.getIssuer()))
+            view, acctID, amount.get<Issue>().currency(), amount.getIssuer()))
         return tecFROZEN;
 
     // If this is an offer to buy the token, the account must have the
@@ -1039,17 +1039,17 @@ checkTrustlineAuthorized(
 {
     // Only valid for custom currencies
     XRPL_ASSERT(
-        !isXRP(issue.currency),
+        !isXRP(issue.currency()),
         "xrpl::nft::checkTrustlineAuthorized : valid to check.");
 
     if (view.rules().enabled(fixEnforceNFTokenTrustlineV2))
     {
-        auto const issuerAccount = view.read(keylet::account(issue.account));
+        auto const issuerAccount = view.read(keylet::account(issue.account()));
         if (!issuerAccount)
         {
             JLOG(j.debug()) << "xrpl::nft::checkTrustlineAuthorized: can't "
                                "receive IOUs from non-existent issuer: "
-                            << to_string(issue.account);
+                            << to_string(issue.account());
 
             return tecNO_ISSUER;
         }
@@ -1057,7 +1057,7 @@ checkTrustlineAuthorized(
         // An account can not create a trustline to itself, so no line can
         // exist to be authorized. Additionally, an issuer can always accept
         // its own issuance.
-        if (issue.account == id)
+        if (issue.account() == id)
         {
             return tesSUCCESS;
         }
@@ -1065,7 +1065,7 @@ checkTrustlineAuthorized(
         if (issuerAccount->isFlag(lsfRequireAuth))
         {
             auto const trustLine =
-                view.read(keylet::line(id, issue.account, issue.currency));
+                view.read(keylet::line(id, issue.account(), issue.currency()));
 
             if (!trustLine)
             {
@@ -1076,7 +1076,7 @@ checkTrustlineAuthorized(
             // lexicographical "greater than" comparison employing strict
             // weak ordering. Determine which entry we need to access.
             if (!trustLine->isFlag(
-                    id > issue.account ? lsfLowAuth : lsfHighAuth))
+                    id > issue.account() ? lsfLowAuth : lsfHighAuth))
             {
                 return tecNO_AUTH;
             }
@@ -1095,17 +1095,17 @@ checkTrustlineDeepFrozen(
 {
     // Only valid for custom currencies
     XRPL_ASSERT(
-        !isXRP(issue.currency),
+        !isXRP(issue.currency()),
         "xrpl::nft::checkTrustlineDeepFrozen : valid to check.");
 
     if (view.rules().enabled(featureDeepFreeze))
     {
-        auto const issuerAccount = view.read(keylet::account(issue.account));
+        auto const issuerAccount = view.read(keylet::account(issue.account()));
         if (!issuerAccount)
         {
             JLOG(j.debug()) << "xrpl::nft::checkTrustlineDeepFrozen: can't "
                                "receive IOUs from non-existent issuer: "
-                            << to_string(issue.account);
+                            << to_string(issue.account());
 
             return tecNO_ISSUER;
         }
@@ -1113,13 +1113,13 @@ checkTrustlineDeepFrozen(
         // An account can not create a trustline to itself, so no line can
         // exist to be frozen. Additionally, an issuer can always accept its
         // own issuance.
-        if (issue.account == id)
+        if (issue.account() == id)
         {
             return tesSUCCESS;
         }
 
         auto const trustLine =
-            view.read(keylet::line(id, issue.account, issue.currency));
+            view.read(keylet::line(id, issue.account(), issue.currency()));
 
         if (!trustLine)
         {

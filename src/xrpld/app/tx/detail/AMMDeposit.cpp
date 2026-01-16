@@ -224,7 +224,7 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
             auto const lpIssue = (*ammSle)[sfLPTokenBalance].get<Issue>();
             // Adjust the reserve if LP doesn't have LPToken trustline
             auto const sle = ctx.view.read(
-                keylet::line(accountID, lpIssue.account, lpIssue.currency));
+                keylet::line(accountID, lpIssue.account(), lpIssue.currency()));
             if (xrpLiquid(ctx.view, accountID, !sle, ctx.j) >= deposit)
                 return TER(tesSUCCESS);
             if (sle)
@@ -532,7 +532,7 @@ AMMDeposit::deposit(
             auto const& lpIssue = lpTokensDeposit.get<Issue>();
             // Adjust the reserve if LP doesn't have LPToken trustline
             auto const sle = view.read(
-                keylet::line(account_, lpIssue.account, lpIssue.currency));
+                keylet::line(account_, lpIssue.account(), lpIssue.currency()));
             if (xrpLiquid(view, account_, !sle, j_) >= depositAmount)
                 return tesSUCCESS;
         }

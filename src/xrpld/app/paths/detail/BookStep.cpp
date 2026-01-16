@@ -1381,7 +1381,7 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
             auto const err = book_.in.visit(
                 [&](Issue const& issue) -> std::optional<TER> {
                     auto sle =
-                        view.read(keylet::line(*prev, cur, issue.currency));
+                        view.read(keylet::line(*prev, cur, issue.currency()));
                     if (!sle)
                         return terNO_LINE;
                     if ((*sle)[sfFlags] &

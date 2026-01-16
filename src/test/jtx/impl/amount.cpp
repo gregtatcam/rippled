@@ -60,7 +60,8 @@ operator<<(std::ostream& os, PrettyAmount const& amount)
             else
             {
                 os << amount.value().getText() << "/"
-                   << to_string(issue.currency) << "(" << amount.name() << ")";
+                   << to_string(issue.currency()) << "(" << amount.name()
+                   << ")";
             }
         },
         [&](MPTIssue const& issue) {

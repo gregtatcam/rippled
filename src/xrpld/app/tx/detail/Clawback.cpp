@@ -101,7 +101,7 @@ preclaimHelper<Issue>(
         return tecNO_PERMISSION;
 
     auto const sleRippleState = ctx.view.read(
-        keylet::line(holder, issuer, clawAmount.get<Issue>().currency));
+        keylet::line(holder, issuer, clawAmount.get<Issue>().currency()));
     if (!sleRippleState)
         return tecNO_LINE;
 
@@ -127,7 +127,7 @@ preclaimHelper<Issue>(
     if (accountHolds(
             ctx.view,
             holder,
-            clawAmount.get<Issue>().currency,
+            clawAmount.get<Issue>().currency(),
             issuer,
             fhIGNORE_FREEZE,
             ctx.j) <= beast::zero)
@@ -214,7 +214,7 @@ applyHelper<Issue>(ApplyContext& ctx)
     AccountID const holder = clawAmount.getIssuer();  // cannot be reference
 
     // Replace the `issuer` field with issuer's account
-    clawAmount.get<Issue>().account = issuer;
+    clawAmount.get<Issue>().account(issuer);
     if (holder == issuer)
         return tecINTERNAL;  // LCOV_EXCL_LINE
 
@@ -222,7 +222,7 @@ applyHelper<Issue>(ApplyContext& ctx)
     STAmount const spendableAmount = accountHolds(
         ctx.view(),
         holder,
-        clawAmount.get<Issue>().currency,
+        clawAmount.get<Issue>().currency(),
         clawAmount.getIssuer(),
         fhIGNORE_FREEZE,
         ctx.journal);

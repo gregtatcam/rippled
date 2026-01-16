@@ -102,8 +102,10 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
                 if (sle->isFieldPresent(sfTakerPaysCurrency))
                 {
                     Issue issue;
-                    issue.currency = sle->getFieldH160(sfTakerPaysCurrency);
-                    issue.account = sle->getFieldH160(sfTakerPaysIssuer);
+                    issue.currency(static_cast<Currency>(
+                        sle->getFieldH160(sfTakerPaysCurrency)));
+                    issue.account(static_cast<AccountID>(
+                        sle->getFieldH160(sfTakerPaysIssuer)));
                     book.in = issue;
                 }
                 else
@@ -113,8 +115,10 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
                 if (sle->isFieldPresent(sfTakerGetsCurrency))
                 {
                     Issue issue;
-                    issue.currency = sle->getFieldH160(sfTakerGetsCurrency);
-                    issue.account = sle->getFieldH160(sfTakerGetsIssuer);
+                    issue.currency(static_cast<Currency>(
+                        sle->getFieldH160(sfTakerGetsCurrency)));
+                    issue.account(static_cast<AccountID>(
+                        sle->getFieldH160(sfTakerGetsIssuer)));
                     book.out = issue;
                 }
                 else

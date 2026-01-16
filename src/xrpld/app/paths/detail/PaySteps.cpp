@@ -103,7 +103,7 @@ toStep(
                     ctx,
                     e1->getAccountID(),
                     e2->getAccountID(),
-                    issue.currency);
+                    issue.currency());
             });
     }
 
@@ -257,7 +257,7 @@ toStrand(
                 if (isXRP(asset))
                     return xrpIssue();
                 // First step ripples from the source to the issuer.
-                return Issue{issue.currency, src};
+                return Issue{issue.currency(), src};
             });
     }();
 
@@ -401,9 +401,9 @@ toStrand(
         curAsset.visit(
             [&](Issue const&) {
                 if (cur->isAccount())
-                    curAsset.get<Issue>().account = cur->getAccountID();
+                    curAsset.get<Issue>().account(cur->getAccountID());
                 else if (cur->hasIssuer())
-                    curAsset.get<Issue>().account = cur->getIssuerID();
+                    curAsset.get<Issue>().account(cur->getIssuerID());
             },
             [](MPTIssue const&) {});
 
@@ -411,7 +411,7 @@ toStrand(
         {
             curAsset = Issue{cur->getCurrency(), curAsset.getIssuer()};
             if (isXRP(curAsset))
-                curAsset.get<Issue>().account = xrpAccount();
+                curAsset.get<Issue>().account(xrpAccount());
         }
         else if (cur->hasMPT())
             curAsset = cur->getPathAsset().get<MPTID>();
@@ -426,7 +426,8 @@ toStrand(
                     return {temBAD_PATH, nullptr};
                 },
                 [&](Issue const& issue) -> ImpliedStepRet {
-                    return make_DirectStepI(ctx(), src_, dst_, issue.currency);
+                    return make_DirectStepI(
+                        ctx(), src_, dst_, issue.currency());
                 });
         };
 
@@ -548,7 +549,7 @@ toStrand(
                 [&](Issue const& issue) -> Asset {
                     if (isXRP(asset))
                         return xrpIssue();
-                    return Issue{issue.currency, src};
+                    return Issue{issue.currency(), src};
                 });
         }();
 
@@ -566,7 +567,7 @@ toStrand(
             }
             else if (curAsset.holds<Issue>())
             {
-                curAsset.get<Issue>().account = accts.second;
+                curAsset.get<Issue>().account(accts.second);
             }
 
             curAcc = accts.second;
@@ -575,7 +576,8 @@ toStrand(
             return false;
         if (curAsset.holds<Issue>() != deliver.holds<Issue>() ||
             (curAsset.holds<Issue>() &&
-             curAsset.get<Issue>().currency != deliver.get<Issue>().currency) ||
+             curAsset.get<Issue>().currency() !=
+                 deliver.get<Issue>().currency()) ||
             (curAsset.holds<MPTIssue>() &&
              curAsset.get<MPTIssue>() != deliver.get<MPTIssue>()))
             return false;

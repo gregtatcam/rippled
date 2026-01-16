@@ -1425,11 +1425,11 @@ class STParsedJSON_test : public beast::unit_test::suite
                 BEAST_EXPECT(obj.object->isFieldPresent(sfAsset));
                 auto const& issueField = (*obj.object)[sfAsset];
                 auto const issue = issueField.value().get<Issue>();
-                BEAST_EXPECT(issue.currency.size() == 20);
-                BEAST_EXPECT(to_string(issue.currency) == "USD");
-                BEAST_EXPECT(issue.account.size() == 20);
+                BEAST_EXPECT(issue.currency().size() == 20);
+                BEAST_EXPECT(to_string(issue.currency()) == "USD");
+                BEAST_EXPECT(issue.account().size() == 20);
                 BEAST_EXPECT(
-                    issue.account ==
+                    issue.account() ==
                     parseBase58<AccountID>(
                         "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"));
             }
@@ -1448,8 +1448,8 @@ class STParsedJSON_test : public beast::unit_test::suite
                 BEAST_EXPECT(obj.object->isFieldPresent(sfAsset));
                 auto const& issueField = (*obj.object)[sfAsset];
                 auto const issue = issueField.value().get<Issue>();
-                BEAST_EXPECT(issue.currency.size() == 20);
-                BEAST_EXPECT(issue.account.size() == 20);
+                BEAST_EXPECT(issue.currency().size() == 20);
+                BEAST_EXPECT(issue.account().size() == 20);
             }
         }
 
@@ -1568,9 +1568,9 @@ class STParsedJSON_test : public beast::unit_test::suite
                 BEAST_EXPECT(obj.object->isFieldPresent(sfXChainBridge));
                 auto const& bridgeField = (*obj.object)[sfXChainBridge];
                 BEAST_EXPECT(
-                    bridgeField->lockingChainIssue().currency.size() == 20);
+                    bridgeField->lockingChainIssue().currency().size() == 20);
                 BEAST_EXPECT(
-                    bridgeField->issuingChainIssue().currency.size() == 20);
+                    bridgeField->issuingChainIssue().currency().size() == 20);
             }
         }
 
@@ -1597,9 +1597,9 @@ class STParsedJSON_test : public beast::unit_test::suite
                 BEAST_EXPECT(obj.object->isFieldPresent(sfXChainBridge));
                 auto const& bridgeField = (*obj.object)[sfXChainBridge];
                 BEAST_EXPECT(
-                    bridgeField->lockingChainIssue().currency.size() == 20);
+                    bridgeField->lockingChainIssue().currency().size() == 20);
                 BEAST_EXPECT(
-                    bridgeField->issuingChainIssue().currency.size() == 20);
+                    bridgeField->issuingChainIssue().currency().size() == 20);
             }
         }
 

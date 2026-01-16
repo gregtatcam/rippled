@@ -57,8 +57,8 @@ STIssue::STIssue(SerialIter& sit, SField const& name) : STBase{name}
         else
         {
             Issue issue;
-            issue.currency = currencyOrAccount;
-            issue.account = account;
+            issue.currency(static_cast<Currency>(currencyOrAccount));
+            issue.account(account);
             if (!isConsistent(issue))
                 Throw<std::runtime_error>(
                     "invalid issue: currency and account native mismatch");
@@ -92,9 +92,9 @@ STIssue::add(Serializer& s) const
 {
     asset_.visit(
         [&](Issue const& issue) {
-            s.addBitString(issue.currency);
-            if (!isXRP(issue.currency))
-                s.addBitString(issue.account);
+            s.addBitString(issue.currency());
+            if (!isXRP(issue.currency()))
+                s.addBitString(issue.account());
         },
         [&](MPTIssue const& issue) {
             s.addBitString(issue.getIssuer());

@@ -18,18 +18,18 @@ Issue::getText() const
     std::string ret;
 
     ret.reserve(64);
-    ret = to_string(currency);
+    ret = to_string(currency_);
 
-    if (!isXRP(currency))
+    if (!isXRP(currency_))
     {
         ret += "/";
 
-        if (isXRP(account))
+        if (isXRP(account_))
             ret += "0";
-        else if (account == noAccount())
+        else if (account() == noAccount())
             ret += "1";
         else
-            ret += to_string(account);
+            ret += to_string(account_);
     }
 
     return ret;
@@ -38,9 +38,9 @@ Issue::getText() const
 void
 Issue::setJson(Json::Value& jv) const
 {
-    jv[jss::currency] = to_string(currency);
-    if (!isXRP(currency))
-        jv[jss::issuer] = toBase58(account);
+    jv[jss::currency] = to_string(currency_);
+    if (!isXRP(currency_))
+        jv[jss::issuer] = toBase58(account_);
 }
 
 bool
@@ -58,16 +58,16 @@ Issue::integral() const
 bool
 isConsistent(Issue const& ac)
 {
-    return isXRP(ac.currency) == isXRP(ac.account);
+    return isXRP(ac.currency()) == isXRP(ac.account());
 }
 
 std::string
 to_string(Issue const& ac)
 {
-    if (isXRP(ac.account))
-        return to_string(ac.currency);
+    if (isXRP(ac.account()))
+        return to_string(ac.currency());
 
-    return to_string(ac.account) + "/" + to_string(ac.currency);
+    return to_string(ac.account()) + "/" + to_string(ac.currency());
 }
 
 Json::Value

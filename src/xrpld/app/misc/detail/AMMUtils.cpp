@@ -133,7 +133,7 @@ ammLPHolds(
             // Put balance in account terms.
             amount.negate();
         }
-        amount.get<Issue>().account = ammAccount;
+        amount.get<Issue>().account(ammAccount);
 
         JLOG(j.trace()) << "ammLPHolds:"
                         << " lpAccount=" << to_string(lpAccount)
@@ -213,15 +213,15 @@ ammAccountHolds(
                     return (*sle)[sfBalance];
             }
             else if (auto const sle = view.read(keylet::line(
-                         ammAccountID, issue.account, issue.currency));
+                         ammAccountID, issue.account(), issue.currency()));
                      sle &&
                      !isFrozen(
-                         view, ammAccountID, issue.currency, issue.account))
+                         view, ammAccountID, issue.currency(), issue.account()))
             {
                 STAmount amount = (*sle)[sfBalance];
-                if (ammAccountID > issue.account)
+                if (ammAccountID > issue.account())
                     amount.negate();
-                amount.get<Issue>().account = issue.account;
+                amount.get<Issue>().account(issue.account());
                 return amount;
             }
             return STAmount{asset};
@@ -461,7 +461,7 @@ isOnlyLiquidityProvider(
     // it's either an error or there are more than one LP. Ten pages should
     // be sufficient to include four objects.
     std::uint8_t limit = 10;
-    auto const root = keylet::ownerDir(ammIssue.account);
+    auto const root = keylet::ownerDir(ammIssue.account());
     auto currentIndex = root;
 
     // Iterate over AMM owner directory objects.

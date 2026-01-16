@@ -437,7 +437,7 @@ getTrustLineBalance(
         {
             amount += sle->getFieldAmount(oppositeField);
         }
-        amount.get<Issue>().account = issuer;
+        amount.get<Issue>().account(issuer);
     }
     else
     {
@@ -520,8 +520,8 @@ accountHolds(
     return accountHolds(
         view,
         account,
-        issue.currency,
-        issue.account,
+        issue.currency(),
+        issue.account(),
         zeroIfFrozen,
         j,
         includeFullBalance);
@@ -643,7 +643,7 @@ accountFunds(
     return accountHolds(
         view,
         id,
-        saDefault.get<Issue>().currency,
+        saDefault.get<Issue>().currency(),
         saDefault.getIssuer(),
         freezeHandling,
         j);
@@ -1382,7 +1382,7 @@ withdrawToDestExceedsLimit(
         [&]<ValidIssueType TIss>(TIss const& issue) -> TER {
             if constexpr (std::is_same_v<TIss, Issue>)
             {
-                auto const& currency = issue.currency;
+                auto const& currency = issue.currency();
                 auto const owed = creditBalance(view, to, issuer, currency);
                 if (owed <= beast::zero)
                 {
@@ -1505,7 +1505,7 @@ addEmptyHolding(
         return tesSUCCESS;
 
     auto const& issuerId = issue.getIssuer();
-    auto const& currency = issue.currency;
+    auto const& currency = issue.currency();
     if (isGlobalFrozen(view, issuerId))
         return tecFROZEN;  // LCOV_EXCL_LINE
 
@@ -1767,7 +1767,7 @@ trustCreate(
     sleRippleState->setFieldAmount(
         bSetHigh ? sfLowLimit : sfHighLimit,
         STAmount(Issue{
-            saBalance.get<Issue>().currency,
+            saBalance.get<Issue>().currency(),
             bSetDst ? uSrcAccountID : uDstAccountID}));
 
     if (uQualityIn)
@@ -1839,7 +1839,7 @@ removeEmptyHolding(
     // `asset` is an IOU.
     // If the account is the issuer, then no line should exist. Check anyway. If
     // a line does exist, it will get deleted. If not, return success.
-    bool const accountIsIssuer = accountID == issue.account;
+    bool const accountIsIssuer = accountID == issue.account();
     auto const line = view.peek(keylet::line(accountID, issue));
     if (!line)
         return accountIsIssuer ? (TER)tesSUCCESS : (TER)tecOBJECT_NOT_FOUND;
@@ -2028,7 +2028,7 @@ rippleCreditIOU(
     beast::Journal j)
 {
     AccountID const& issuer = saAmount.getIssuer();
-    Currency const& currency = saAmount.get<Issue>().currency;
+    Currency const& currency = saAmount.get<Issue>().currency();
 
     // Make sure issuer is involved.
     XRPL_ASSERT(
@@ -2138,7 +2138,7 @@ rippleCreditIOU(
     STAmount const saReceiverLimit(Issue{currency, uReceiverID});
     STAmount saBalance{saAmount};
 
-    saBalance.get<Issue>().account = noAccount();
+    saBalance.get<Issue>().account(noAccount());
 
     JLOG(j.debug()) << "rippleCreditIOU: "
                        "create line: "
@@ -3000,7 +3000,7 @@ issueIOU(
     beast::Journal j)
 {
     XRPL_ASSERT(
-        !isXRP(account) && !isXRP(issue.account),
+        !isXRP(account) && !isXRP(issue.account()),
         "xrpl::issueIOU : neither account nor issuer is XRP");
 
     // Consistency check
@@ -3009,14 +3009,14 @@ issueIOU(
 
     // Can't send to self!
     XRPL_ASSERT(
-        issue.account != account, "xrpl::issueIOU : not issuer account");
+        issue.account() != account, "xrpl::issueIOU : not issuer account");
 
     JLOG(j.trace()) << "issueIOU: " << to_string(account) << ": "
                     << amount.getFullText();
 
-    bool bSenderHigh = issue.account > account;
+    bool bSenderHigh = issue.account() > account;
 
-    auto const index = keylet::line(issue.account, account, issue.currency);
+    auto const index = keylet::line(issue.account(), account, issue.currency());
 
     if (auto state = view.peek(index))
     {
@@ -3033,12 +3033,12 @@ issueIOU(
             view,
             state,
             bSenderHigh,
-            issue.account,
+            issue.account(),
             start_balance,
             final_balance,
             j);
 
-        view.creditHookIOU(issue.account, account, amount, start_balance);
+        view.creditHookIOU(issue.account(), account, amount, start_balance);
 
         if (bSenderHigh)
             final_balance.negate();
@@ -3051,8 +3051,8 @@ issueIOU(
             return trustDelete(
                 view,
                 state,
-                bSenderHigh ? account : issue.account,
-                bSenderHigh ? issue.account : account,
+                bSenderHigh ? account : issue.account(),
+                bSenderHigh ? issue.account() : account,
                 j);
 
         view.update(state);
@@ -3063,10 +3063,10 @@ issueIOU(
     // NIKB TODO: The limit uses the receiver's account as the issuer and
     // this is unnecessarily inefficient as copying which could be avoided
     // is now required. Consider available options.
-    STAmount const limit(Issue{issue.currency, account});
+    STAmount const limit(Issue{issue.currency(), account});
     STAmount final_balance = amount;
 
-    final_balance.get<Issue>().account = noAccount();
+    final_balance.get<Issue>().account(noAccount());
 
     auto const receiverAccount = view.peek(keylet::account(account));
     if (!receiverAccount)
@@ -3077,7 +3077,7 @@ issueIOU(
     return trustCreate(
         view,
         bSenderHigh,
-        issue.account,
+        issue.account(),
         account,
         index.key,
         receiverAccount,
@@ -3101,7 +3101,7 @@ redeemIOU(
     beast::Journal j)
 {
     XRPL_ASSERT(
-        !isXRP(account) && !isXRP(issue.account),
+        !isXRP(account) && !isXRP(issue.account()),
         "xrpl::redeemIOU : neither account nor issuer is XRP");
 
     // Consistency check
@@ -3110,15 +3110,15 @@ redeemIOU(
 
     // Can't send to self!
     XRPL_ASSERT(
-        issue.account != account, "xrpl::redeemIOU : not issuer account");
+        issue.account() != account, "xrpl::redeemIOU : not issuer account");
 
     JLOG(j.trace()) << "redeemIOU: " << to_string(account) << ": "
                     << amount.getFullText();
 
-    bool bSenderHigh = account > issue.account;
+    bool bSenderHigh = account > issue.account();
 
     if (auto state =
-            view.peek(keylet::line(account, issue.account, issue.currency)))
+            view.peek(keylet::line(account, issue.account(), issue.currency())))
     {
         STAmount final_balance = state->getFieldAmount(sfBalance);
 
@@ -3132,7 +3132,7 @@ redeemIOU(
         auto const must_delete = updateTrustLine(
             view, state, bSenderHigh, account, start_balance, final_balance, j);
 
-        view.creditHookIOU(account, issue.account, amount, start_balance);
+        view.creditHookIOU(account, issue.account(), amount, start_balance);
 
         if (bSenderHigh)
             final_balance.negate();
@@ -3147,8 +3147,8 @@ redeemIOU(
             return trustDelete(
                 view,
                 state,
-                bSenderHigh ? issue.account : account,
-                bSenderHigh ? account : issue.account,
+                bSenderHigh ? issue.account() : account,
+                bSenderHigh ? account : issue.account(),
                 j);
         }
 
@@ -3220,23 +3220,23 @@ requireAuth(
     AccountID const& account,
     AuthType authType)
 {
-    if (isXRP(issue) || issue.account == account)
+    if (isXRP(issue) || issue.account() == account)
         return tesSUCCESS;
 
     auto const trustLine =
-        view.read(keylet::line(account, issue.account, issue.currency));
+        view.read(keylet::line(account, issue.account(), issue.currency()));
     // If account has no line, and this is a strong check, fail
     if (!trustLine && authType == AuthType::StrongAuth)
         return tecNO_LINE;
 
     // If this is a weak or legacy check, or if the account has a line, fail if
     // auth is required and not set on the line
-    if (auto const issuerAccount = view.read(keylet::account(issue.account));
+    if (auto const issuerAccount = view.read(keylet::account(issue.account()));
         issuerAccount && (*issuerAccount)[sfFlags] & lsfRequireAuth)
     {
         if (trustLine)
             return ((*trustLine)[sfFlags] &
-                    ((account > issue.account) ? lsfLowAuth : lsfHighAuth))
+                    ((account > issue.account()) ? lsfLowAuth : lsfHighAuth))
                 ? tesSUCCESS
                 : TER{tecNO_AUTH};
         return TER{tecNO_LINE};

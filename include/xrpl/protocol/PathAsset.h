@@ -61,7 +61,7 @@ constexpr bool is_mptid_v = std::is_same_v<PA, MPTID>;
 inline PathAsset::PathAsset(Asset const& asset)
 {
     asset.visit(
-        [&](Issue const& issue) { easset_ = issue.currency; },
+        [&](Issue const& issue) { easset_ = issue.currency(); },
         [&](MPTIssue const& issue) { easset_ = issue.getMptID(); });
 }
 

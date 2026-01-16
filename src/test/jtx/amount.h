@@ -611,7 +611,7 @@ struct AnyAmount
     {
         if (!is_any)
             return;
-        value.get<Issue>().account = id;
+        value.get<Issue>().account(id);
     }
 };
 

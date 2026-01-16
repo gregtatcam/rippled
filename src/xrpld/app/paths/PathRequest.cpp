@@ -602,7 +602,7 @@ PathRequest::findPaths(
             return asset.visit(
                 [&](Issue const& issue) {
                     return STAmount(
-                        Issue{issue.currency, sourceAccount}, 1u, 0, true);
+                        Issue{issue.currency(), sourceAccount}, 1u, 0, true);
                 },
                 [](MPTIssue const& issue) {
                     return STAmount(issue, 1u, 0, true);
@@ -667,7 +667,7 @@ PathRequest::findPaths(
         {
             Json::Value jvEntry(Json::objectValue);
             if (rc.actualAmountIn.holds<Issue>())
-                rc.actualAmountIn.get<Issue>().account = sourceAccount;
+                rc.actualAmountIn.get<Issue>().account(sourceAccount);
             jvEntry[jss::source_amount] =
                 rc.actualAmountIn.getJson(JsonOptions::none);
             jvEntry[jss::paths_computed] = ps.getJson(JsonOptions::none);

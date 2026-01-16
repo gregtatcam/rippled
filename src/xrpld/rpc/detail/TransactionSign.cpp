@@ -252,7 +252,7 @@ checkPayment(
             sendMax = amount;
             sendMax.asset().visit(
                 [&](Issue const&) {
-                    sendMax.get<Issue>().account = srcAddressID;
+                    sendMax.get<Issue>().account(srcAddressID);
                 },
                 [](MPTIssue const&) {});
         }

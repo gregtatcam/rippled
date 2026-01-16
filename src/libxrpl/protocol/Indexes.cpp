@@ -112,24 +112,24 @@ getBookBase(Book const& book)
                 std::is_same_v<TIn, Issue> && std::is_same_v<TOut, Issue>)
                 return getIndexHash(
                     LedgerNameSpace::BOOK_DIR,
-                    in.currency,
-                    out.currency,
-                    in.account,
-                    out.account);
+                    in.currency(),
+                    out.currency(),
+                    in.account(),
+                    out.account());
             else if constexpr (
                 std::is_same_v<TIn, Issue> && std::is_same_v<TOut, MPTIssue>)
                 return getIndexHash(
                     LedgerNameSpace::BOOK_DIR,
-                    in.currency,
+                    in.currency(),
                     out.getMptID(),
-                    in.account);
+                    in.account());
             else if constexpr (
                 std::is_same_v<TIn, MPTIssue> && std::is_same_v<TOut, Issue>)
                 return getIndexHash(
                     LedgerNameSpace::BOOK_DIR,
                     in.getMptID(),
-                    out.currency,
-                    out.account);
+                    out.currency(),
+                    out.account());
             else
                 return getIndexHash(
                     LedgerNameSpace::BOOK_DIR, in.getMptID(), out.getMptID());
@@ -459,24 +459,24 @@ amm(Asset const& asset1, Asset const& asset2) noexcept
                 std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, Issue>)
                 return amm(indexHash(
                     LedgerNameSpace::AMM,
-                    issue1.account,
-                    issue1.currency,
-                    issue2.account,
-                    issue2.currency));
+                    issue1.account(),
+                    issue1.currency(),
+                    issue2.account(),
+                    issue2.currency()));
             else if constexpr (
                 std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, MPTIssue>)
                 return amm(indexHash(
                     LedgerNameSpace::AMM,
-                    issue1.account,
-                    issue1.currency,
+                    issue1.account(),
+                    issue1.currency(),
                     issue2.getMptID()));
             else if constexpr (
                 std::is_same_v<TIss1, MPTIssue> && std::is_same_v<TIss2, Issue>)
                 return amm(indexHash(
                     LedgerNameSpace::AMM,
                     issue1.getMptID(),
-                    issue2.account,
-                    issue2.currency));
+                    issue2.account(),
+                    issue2.currency()));
             else if constexpr (
                 std::is_same_v<TIss1, MPTIssue> &&
                 std::is_same_v<TIss2, MPTIssue>)
@@ -513,7 +513,7 @@ bridge(STXChainBridge const& bridge, STXChainBridge::ChainType chainType)
     return {
         ltBRIDGE,
         indexHash(
-            LedgerNameSpace::BRIDGE, bridge.door(chainType), issue.currency)};
+            LedgerNameSpace::BRIDGE, bridge.door(chainType), issue.currency())};
 }
 
 Keylet

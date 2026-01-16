@@ -47,10 +47,10 @@ class OfferBaseUtil_test : public beast::unit_test::suite
     {
         Json::Value jvbp;
         jvbp[jss::ledger_index] = "current";
-        jvbp[jss::taker_pays][jss::currency] = to_string(taker_pays.currency);
-        jvbp[jss::taker_pays][jss::issuer] = to_string(taker_pays.account);
-        jvbp[jss::taker_gets][jss::currency] = to_string(taker_gets.currency);
-        jvbp[jss::taker_gets][jss::issuer] = to_string(taker_gets.account);
+        jvbp[jss::taker_pays][jss::currency] = to_string(taker_pays.currency());
+        jvbp[jss::taker_pays][jss::issuer] = to_string(taker_pays.account());
+        jvbp[jss::taker_gets][jss::currency] = to_string(taker_gets.currency());
+        jvbp[jss::taker_gets][jss::issuer] = to_string(taker_gets.account());
         return env.rpc("json", "book_offers", to_string(jvbp))[jss::result];
     }
 
@@ -2230,15 +2230,15 @@ public:
         BEAST_EXPECT(sleTrust);
         if (sleTrust)
         {
-            bool const accountLow = account.id() < issue.account;
+            bool const accountLow = account.id() < issue.account();
 
             STAmount low{issue};
             STAmount high{issue};
 
-            low.get<Issue>().account =
-                (accountLow ? account.id() : issue.account);
-            high.get<Issue>().account =
-                (accountLow ? issue.account : account.id());
+            low.get<Issue>().account(
+                accountLow ? account.id() : issue.account());
+            high.get<Issue>().account(
+                accountLow ? issue.account() : account.id());
 
             BEAST_EXPECT(sleTrust->getFieldAmount(sfLowLimit) == low);
             BEAST_EXPECT(sleTrust->getFieldAmount(sfHighLimit) == high);

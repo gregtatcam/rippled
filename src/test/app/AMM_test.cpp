@@ -7345,7 +7345,7 @@ private:
             auto const error = features[featureSingleAssetVault]
                 ? ter{tecPSEUDO_ACCOUNT}
                 : ter{tecAMM_ACCOUNT};
-            Issue usd(USD.issue().currency, amm.ammAccount());
+            Issue usd(USD.issue().currency(), amm.ammAccount());
             auto amount = amountFromString(usd, "10");
             env(claw(gw, amount), error);
         }

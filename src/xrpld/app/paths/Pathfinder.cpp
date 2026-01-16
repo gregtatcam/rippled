@@ -770,7 +770,7 @@ Pathfinder::getPathsOut(
                     for (auto const& rspEntry : *lines)
                     {
                         if (pathAsset.get<Currency>() !=
-                            rspEntry.getLimit().get<Issue>().currency)
+                            rspEntry.getLimit().get<Issue>().currency())
                         {
                         }
                         else if (
@@ -1094,7 +1094,7 @@ Pathfinder::addLink(
                                 return uEndPathAsset.get<Currency>() ==
                                     asset.getLimit()
                                         .template get<Issue>()
-                                        .currency;
+                                        .currency();
                             if constexpr (isMPT)
                                 return uEndPathAsset.get<MPTID>() ==
                                     asset.getMptID();
