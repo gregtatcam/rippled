@@ -4,6 +4,7 @@
 
 #include <xrpl/basics/Log.h>
 #include <xrpl/ledger/PaymentSandbox.h>
+#include <xrpl/ledger/View.h>
 #include <xrpl/protocol/MPTAmount.h>
 #include <xrpl/protocol/Quality.h>
 

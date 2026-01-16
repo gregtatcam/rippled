@@ -13,6 +13,8 @@
 #include <xrpl/protocol/STAmount.h>
 #include <xrpl/protocol/TxFlags.h>
 
+#include <nudb/detail/stream.hpp>
+
 namespace xrpl {
 namespace test {
 namespace jtx {
@@ -125,7 +127,6 @@ class AMM
     AccountID const ammAccount_;
     Issue const lptIssue_;
     IOUAmount const initialLPTokens_;
-    static inline bool ammOutPoolOnlyModifier_ = false;
 
 public:
     AMM(Env& env,
@@ -355,24 +356,7 @@ public:
     operator<<(std::ostream& s, AMM const& amm)
     {
         if (auto const res = amm.ammRpcInfo())
-        {
-            if (ammOutPoolOnlyModifier_)
-            {
-                auto const& ammRes = res[jss::amm];
-                auto outAmt = [&](Json::Value const& jv) {
-                    STAmount amt;
-                    amountFromJsonNoThrow(amt, jv);
-                    std::cout << amt.getText();
-                };
-                outAmt(ammRes[jss::amount]);
-                s << " ";
-                outAmt(ammRes[jss::amount2]);
-                s << std::endl;
-                ammOutPoolOnlyModifier_ = false;
-            }
-            else
-                s << res.toStyledString();
-        }
+            s << res.toStyledString();
         return s;
     }
 
@@ -424,14 +408,66 @@ public:
         return i == 0 ? asset1_.asset() : asset2_.asset();
     }
 
-    /* Modify amm output operator behavior - print only the pool balances
-     */
-    static std::string
-    poolOnly()
+    struct Pool
     {
-        ammOutPoolOnlyModifier_ = true;
-        return "";
-    }
+        AMM const& amm;
+        std::vector<Json::StaticString> names;
+        Pool(AMM const& a, std::vector<Json::StaticString> const& n = {})
+            : amm(a), names(n)
+        {
+        }
+        friend std::ostream&
+        operator<<(std::ostream& s, Pool const& p)
+        {
+            auto const& jr = p.amm.ammRpcInfo();
+            auto out = [&](Json::Value const& jv) {
+                if (jv.isMember(jss::value))
+                    std::cout << jv[jss::value].asString();
+                else
+                    std::cout << jv.asString();
+                std::cout << " ";
+            };
+            if (p.names.empty())
+            {
+                out(jr[jss::amm][jss::amount]);
+                out(jr[jss::amm][jss::amount2]);
+                out(jr[jss::amm][jss::lp_token]);
+            }
+            else
+            {
+                for (auto const& n : p.names)
+                    out(jr[jss::amm][n]);
+            }
+            std::cout << std::endl;
+            return s;
+        }
+    };
+    struct Offers
+    {
+        Json::Value const& jv;
+        Offers(Json::Value const& j) : jv(j)
+        {
+        }
+        friend std::ostream&
+        operator<<(std::ostream& s, Offers const& offers)
+        {
+            auto out = [&](Json::Value const& jv) {
+                if (jv.isMember(jss::value))
+                    s << jv[jss::value].asString();
+                else
+                    s << jv;
+            };
+            for (auto const& o : offers.jv[jss::offers])
+            {
+                s << "taker_pays: ";
+                out(o[jss::taker_pays]);
+                s << " taker_gets: ";
+                out(o[jss::taker_gets]);
+                s << std::endl;
+            }
+            return s;
+        }
+    };
 
 private:
     AccountID

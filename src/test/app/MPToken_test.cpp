@@ -6175,7 +6175,7 @@ class MPToken_test : public beast::unit_test::suite
             amm.withdraw(WithdrawArg{.account = alice, .asset1Out = EUR(100)});
 
             BEAST_EXPECT(amm.expectBalances(
-                EUR(901), USD(1'000), IOUAmount{948'683298050514, -12}));
+                EUR(901), USD(1'000), IOUAmount{948'6832980505138, -13}));
             BEAST_EXPECT(env.balance(alice, EUR) == EUR(99));
         }
     }

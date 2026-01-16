@@ -2761,7 +2761,7 @@ protected:
 
                     BEAST_EXPECTS(
                         paymentComponents.specialCase ==
-                                detail::PaymentSpecialCase::final ||
+                                xrpl::detail::PaymentSpecialCase::final ||
                             paymentComponents.trackedValueDelta <=
                                 roundedPeriodicPayment,
                         "Delta: " +
@@ -2823,7 +2823,7 @@ protected:
                             paymentComponents.trackedManagementFeeDelta);
                     BEAST_EXPECT(
                         paymentComponents.specialCase ==
-                            detail::PaymentSpecialCase::final ||
+                            xrpl::detail::PaymentSpecialCase::final ||
                         paymentComponents.trackedValueDelta <=
                             roundedPeriodicPayment);
 

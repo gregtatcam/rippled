@@ -632,10 +632,10 @@ private:
                 // Tiny deposit
                 ammAlice.deposit(
                     carol,
-                    IOUAmount{1, -4},
+                    IOUAmount{1, -10},
                     std::nullopt,
                     std::nullopt,
-                    ter(temBAD_AMOUNT));
+                    ter(tecAMM_INVALID_TOKENS));
 
                 // Deposit non-empty AMM
                 ammAlice.deposit(
@@ -1614,11 +1614,18 @@ private:
                 auto carolUSD = env.balance(carol, USD);
 
                 ammAlice.deposit(carol, 100, USD(205));
+                auto deltaUSD = [&]() {
+                    if constexpr (std::is_same_v<
+                                      MPT,
+                                      std::decay_t<decltype(USD)>>)
+                        return USD(202);
+                    return USD(201);
+                }();
                 BEAST_EXPECT(ammAlice.expectBalances(
-                    BTC(10'000), USD(10'201), IOUAmount{10'100, 0}));
+                    BTC(10'000), USD(10'000) + deltaUSD, IOUAmount{10'100, 0}));
 
                 env.require(balance(carol, carolBTC));
-                env.require(balance(carol, carolUSD - USD(201)));
+                env.require(balance(carol, carolUSD - deltaUSD));
             };
             testHelper2TokensMix(test);
         }
@@ -4180,7 +4187,7 @@ private:
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRPAmount(12'000'000001),
                 BTC(12'001),
-                IOUAmount{11'999'678'91, -2}));
+                IOUAmount{11'999'678'91000001, -8}));
         }
 
         // Pool's fee 1%. Bid bidMin.
@@ -4234,17 +4241,17 @@ private:
             // carol, bob, and ed pay ~0.99USD in fees.
             BEAST_EXPECT(
                 env.balance(carol, USD) ==
-                STAmount(USD, UINT64_C(29'499'00572620544), -11));
+                STAmount(USD, UINT64_C(29'499'00572620545), -11));
             BEAST_EXPECT(
                 env.balance(bob, USD) ==
-                STAmount(USD, UINT64_C(18'999'00572616194), -11));
+                STAmount(USD, UINT64_C(18'999'00572616195), -11));
             BEAST_EXPECT(
                 env.balance(ed, USD) ==
-                STAmount(USD, UINT64_C(18'999'0057261184), -10));
+                STAmount(USD, UINT64_C(18'999'00572611841), -11));
             // USD pool is slightly higher because of the fees.
             BEAST_EXPECT(ammAlice.expectBalances(
                 BTC(13'000'000'003),
-                STAmount(USD, UINT64_C(13'002'98282151422), -11),
+                STAmount(USD, UINT64_C(13'002'98282151419), -11),
                 ammTokens));
 
             ammTokens = ammAlice.getLPTokensBalance();
@@ -4264,14 +4271,14 @@ private:
             // USD pool gains more in dan's fees.
             BEAST_EXPECT(ammAlice.expectBalances(
                 BTC(13'000'000'003),
-                STAmount{USD, UINT64_C(13'012'92609877024), -11},
+                STAmount{USD, UINT64_C(13'012'92609877021), -11},
                 ammTokens));
             // Discounted fee payment
             ammAlice.deposit(carol, USD(100));
             ammTokens = ammAlice.getLPTokensBalance();
             BEAST_EXPECT(ammAlice.expectBalances(
                 MPT(ammAlice[0])(13'000'000'003),
-                STAmount{USD, UINT64_C(13'112'92609877024), -11},
+                STAmount{USD, UINT64_C(13'112'92609877019), -11},
                 ammTokens));
             env(pay(carol, bob, USD(100)),
                 path(~USD),
@@ -4281,7 +4288,7 @@ private:
             // 99900668MPT swapped in for 100USD
             BEAST_EXPECT(ammAlice.expectBalances(
                 BTC(13'100'000'671),
-                STAmount{USD, UINT64_C(13'012'92609877024), -11},
+                STAmount{USD, UINT64_C(13'012'92609877019), -11},
                 ammTokens));
 
             // Payment with the trading fee
@@ -4295,7 +4302,7 @@ private:
 
             BEAST_EXPECT(ammAlice.expectBalances(
                 BTC(13'000'000'671),
-                STAmount{USD, UINT64_C(13'114'03663044937), -11},
+                STAmount{USD, UINT64_C(13'114'03663044931), -11},
                 ammTokens));
 
             // Auction slot expired, no discounted fee
@@ -4305,7 +4312,7 @@ private:
 
             BEAST_EXPECT(
                 env.balance(carol, USD) ==
-                STAmount(USD, UINT64_C(29'399'00572620544), -11));
+                STAmount(USD, UINT64_C(29'399'00572620547), -11));
             ammTokens = ammAlice.getLPTokensBalance();
             for (int i = 0; i < 10; ++i)
             {
@@ -4317,10 +4324,10 @@ private:
 
             BEAST_EXPECT(
                 env.balance(carol, USD) ==
-                STAmount(USD, UINT64_C(29'389'06197177129), -11));
+                STAmount(USD, UINT64_C(29'389'06197177122), -11));
             BEAST_EXPECT(ammAlice.expectBalances(
                 BTC(13'000'000'671),
-                STAmount{USD, UINT64_C(13'123'98038488352), -11},
+                STAmount{USD, UINT64_C(13'123'98038488356), -11},
                 ammTokens));
 
             env(pay(carol, bob, USD(100)),
@@ -4332,7 +4339,7 @@ private:
             // 99.815876MPT is swapped in for 100USD
             BEAST_EXPECT(ammAlice.expectBalances(
                 BTC(13'100'824'793),
-                STAmount{USD, UINT64_C(13'023'98038488352), -11},
+                STAmount{USD, UINT64_C(13'023'98038488356), -11},
                 ammTokens));
         }
 
@@ -4429,7 +4436,7 @@ private:
 
             BEAST_EXPECT(amm.expectBalances(
                 BTC(1'000'010'011),
-                STAmount{USD, UINT64_C(1'010'100908980811), -12},
+                STAmount{USD, UINT64_C(1'010'10090898081), -11},
                 IOUAmount{1'004'487'562112089, -9}));
         }
 
@@ -5272,16 +5279,16 @@ private:
             env.close();
             BEAST_EXPECT(ammETH_XRP.expectBalances(
                 XRPAmount(10'030'082'730),
-                ETH(9'970'00749812546800),
+                ETH(9'970'00749812546872),
                 ammETH_XRP.tokens()));
 
             BEAST_EXPECT(ammBTC_ETH.expectBalances(
-                BTC(9'970'09727766217162),
-                ETH(10'029'99250187453200),
+                BTC(9'970'09727766213961),
+                ETH(10'029'99250187453128),
                 ammBTC_ETH.tokens()));
 
             Amounts const expectedAmounts =
-                Amounts{XRPAmount(30'201'749), BTC(29'90272233782838)};
+                Amounts{XRPAmount(30'201'749), BTC(29'90272233786039)};
 
             BEAST_EXPECT(expectOffers(env, alice, 1, {{expectedAmounts}}));
 
@@ -5334,14 +5341,14 @@ private:
             env.close();
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRPAmount(10'050'238'637),
-                BTC(9'950'01249687578000),
+                BTC(9'950'01249687578120),
                 ammAlice.tokens()));
             BEAST_EXPECT(expectOffers(
                 env,
                 alice,
                 2,
-                {{Amounts{XRPAmount(50'487'378), ETH(49'98750312422000)},
-                  Amounts{ETH(49'98750312422000), BTC(49'98750312422000)}}}));
+                {{Amounts{XRPAmount(50'487'378), ETH(49'98750312421880)},
+                  Amounts{ETH(49'98750312421880), BTC(49'98750312421880)}}}));
             // Initial (30,000 + 100)e14
             env.require(balance(carol, BTC(30'100'00000000000000)));
             // Initial 1,000 - 50238637(AMM pool) - 50512622(offer) - 10(tx
@@ -5375,9 +5382,9 @@ private:
 
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRP(10'100),
-                MPT(ammAlice[1])(10'000'000000000010),
+                MPT(ammAlice[1])(10'000'000000000001),
                 ammAlice.tokens()));
-            env.require(balance(carol, MPT(ammAlice[1])(30'199'999999999990)));
+            env.require(balance(carol, MPT(ammAlice[1])(30'199'999999999999)));
 
             // Initial 30,000 - 10000(AMM pool LP) - 100(AMMoffer) -
             // - 100(offer) - 10(tx fee) - 10(tx fee of MPTTester init as
@@ -5498,7 +5505,7 @@ private:
             env.close();
 
             BEAST_EXPECT(amm.expectBalances(
-                XRPAmount(909'090'909), BTC(550'000000055000), amm.tokens()));
+                XRPAmount(909'090'909), BTC(550'000000055001), amm.tokens()));
             // Offer ~91XRP/49.99e12BTC
             BEAST_EXPECT(expectOffers(
                 env,
@@ -5506,7 +5513,7 @@ private:
                 1,
                 {{Amounts{XRPAmount{9'090'909}, BTC(4'999999950000)}}}));
             // Carol pays 0.1% fee on 50'000000055000BTC = 50'000000055BTC
-            env.require(balance(carol, BTC(29'949'949'999'944'945)));
+            env.require(balance(carol, BTC(29'949'949'999'944'943)));
         }
 
         {
@@ -5524,7 +5531,7 @@ private:
             env.close();
 
             BEAST_EXPECT(amm.expectBalances(
-                XRP(990), BTC(505'05050505050510), amm.tokens()));
+                XRP(990), BTC(505'05050505050506), amm.tokens()));
             BEAST_EXPECT(expectOffers(env, carol, 0));
         }
 
@@ -5563,20 +5570,20 @@ private:
             env.close();
 
             BEAST_EXPECT(ammAlice.expectBalances(
-                BTC(1'060'6848287928320),
-                ETH(1'037'0658372213395),
+                BTC(1'060'6848287928033),
+                ETH(1'037'0658372213574),
                 ammAlice.tokens()));
             // Consumed offer ~72.93e13ETH/72.93e13BTC
             BEAST_EXPECT(expectOffers(
                 env,
                 carol,
                 1,
-                {Amounts{ETH(27'0658372213395), BTC(27'0658372213396)}}));
+                {Amounts{ETH(27'0658372213574), BTC(27'0658372213575)}}));
             BEAST_EXPECT(expectOffers(env, bob, 0));
             BEAST_EXPECT(expectOffers(env, ed, 0));
 
-            env.require(balance(carol, BTC(19'116'439'640'089'598)));
-            env.require(balance(carol, ETH(20'729'341'627'786'605)));
+            env.require(balance(carol, BTC(19'116'439'640'089'955)));
+            env.require(balance(carol, ETH(20'729'341'627'786'426)));
             env.require(balance(bob, BTC(20'100'000'000'000'000)));
             env.require(balance(ed, ETH(19'875'000'000'000'000)));
         }
@@ -5772,21 +5779,21 @@ private:
 
             BEAST_EXPECT(xrp_eth.expectBalances(
                 XRPAmount(10'026'208'900),
-                ETH(10'073'6577924446070),
+                ETH(10'073'6577924447994),
                 xrp_eth.tokens()));
             BEAST_EXPECT(eth_eur.expectBalances(
-                ETH(10'926'3422075553930),
-                EUR(10'973'5423207872003),
+                ETH(10'926'3422075552006),
+                EUR(10'973'5423207873690),
                 eth_eur.tokens()));
             BEAST_EXPECT(eur_usd.expectBalances(
-                EUR(10'126'4576792127997),
-                USD(9'973'9315171205700),
+                EUR(10'126'4576792126310),
+                USD(9'973'9315171207179),
                 eur_usd.tokens()));
             // XRP-USD path
             // This path provides ~73.9e12USD/74.1XRP
             BEAST_EXPECT(xrp_usd.expectBalances(
                 XRPAmount(10'224'106'246),
-                USD(10'126'0684828794300),
+                USD(10'126'0684828792821),
                 xrp_usd.tokens()));
 
             // XRP-EUR-BTC-USD
@@ -5862,23 +5869,23 @@ private:
 
             BEAST_EXPECT(xrp_eur.expectBalances(
                 XRPAmount(10'118'738'472),
-                EUR(9'981'544436337920),
+                EUR(9'981'544436337981),
                 xrp_eur.tokens()));
             BEAST_EXPECT(eur_btc.expectBalances(
-                EUR(10'101'160967851887),
-                BTC(10'097'914269680590),
+                EUR(10'101'160967851758),
+                BTC(10'097'914269680647),
                 eur_btc.tokens()));
             BEAST_EXPECT(btc_usd.expectBalances(
-                BTC(10'202'085730319410),
+                BTC(10'202'085730319353),
                 USD(9'900'000'000'000'000),
                 btc_usd.tokens()));
             BEAST_EXPECT(xrp_eth.expectBalances(
                 XRPAmount(10'082'446'397),
-                ETH(10'017'410727779954),
+                ETH(10'017'410727780081),
                 xrp_eth.tokens()));
             BEAST_EXPECT(eth_eur.expectBalances(
-                ETH(10'982'589272220046),
-                EUR(10'917'294595810193),
+                ETH(10'982'589272219919),
+                EUR(10'917'294595810261),
                 eth_eur.tokens()));
             env.require(balance(carol, USD(50'100'000'000'000'000)));
         }
@@ -5917,9 +5924,9 @@ private:
                 txflags(tfPartialPayment | tfNoRippleDirect));
 
             BEAST_EXPECT(ammAlice.expectBalances(
-                XRP(10'030), BTC(9'970'089730807827), ammAlice.tokens()));
+                XRP(10'030), BTC(9'970'089730807592), ammAlice.tokens()));
 
-            env.require(balance(carol, BTC(30'029'910269192173)));
+            env.require(balance(carol, BTC(30'029'910269192408)));
             BEAST_EXPECT(expectOffers(
                 env, alice, 1, {{{ETH(140'000'000'000'000), XRP(100)}}}));
         }
@@ -5987,13 +5994,13 @@ private:
 
             BEAST_EXPECT(ammAlice.expectBalances(
                 XRPAmount{10'049'825'372},
-                BTC(10'049'925870493030),
+                BTC(10'049'925870493027),
                 ammAlice.tokens()));
             BEAST_EXPECT(expectOffers(
                 env,
                 bob,
                 1,
-                {{{XRPAmount{50'074'628}, BTC(50'075129506970)}}}));
+                {{{XRPAmount{50'074'628}, BTC(50'075129506973)}}}));
 
             env.require(balance(carol, BTC(30'100'000'000'000'000)));
         }
@@ -6563,7 +6570,9 @@ private:
             env.require(balance(ed, USD(2'010)));
             env.require(balance(bob, BTC(29'989'999999)));
             BEAST_EXPECT(ammAlice.expectBalances(
-                BTC(1'005'000001), USD(1'000), ammAlice.tokens()));
+                BTC(1'005'000001),
+                STAmount{USD, UINT64_C(999'9999999999999), -13},
+                ammAlice.tokens()));
             BEAST_EXPECT(expectOffers(env, carol, 0));
         }
 
@@ -6745,7 +6754,7 @@ private:
 
             BEAST_EXPECT(ammAlice.expectBalances(
                 BTC(10'000'000000),
-                STAmount{USD, UINT64_C(10000'0000000003), -10},
+                STAmount{USD, UINT64_C(10000'0000000001), -10},
                 IOUAmount{10'000'000}));
 
             env.require(balance(bob, bobUSD));
@@ -7517,7 +7526,7 @@ private:
 
         BEAST_EXPECT(
             lpToken == "1.414213562374011" &&
-            lpTokenBalance == "1.414213562374");
+            lpTokenBalance == "1.4142135623741");
 
         auto res =
             isOnlyLiquidityProvider(*env.current(), amm.lptIssue(), alice);

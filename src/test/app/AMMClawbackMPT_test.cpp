@@ -315,9 +315,7 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             env(amm::ammClawback(gw2, alice, BTC, USD, BTC(250'000000)));
             env.close();
             BEAST_EXPECT(amm.expectBalances(
-                BTC(250'000000),
-                STAmount{USD, UINT64_C(499'9999999999999), -13},
-                IOUAmount{353'553'3905932737, -10}));
+                BTC(250'000000), USD(500), IOUAmount{353'553'3905932737, -10}));
             env.require(balance(alice, aliceUSD + USD(500)));
             env.require(balance(alice, aliceBTC));
             aliceUSD = env.balance(alice, USD);
@@ -1417,7 +1415,9 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             BTC.set({.holder = alice, .flags = tfMPTUnlock});
             env(amm::ammClawback(gw, alice, MPT(BTC), USD, BTC(3'000)));
             BEAST_EXPECT(ammAlice.expectBalances(
-                USD(4'000), BTC(4'000), IOUAmount(3'999'999999999999, -12)));
+                STAmount{USD, UINT64_C(4000'000000000001), -12},
+                BTC(4'001),
+                IOUAmount(4'000)));
             env.require(balance(alice, aliceBTC));
             env.require(balance(alice, aliceUSD + USD(3'000)));
             aliceUSD = env.balance(alice, USD);
@@ -1427,10 +1427,10 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             env.close();
             env(amm::ammClawback(gw, alice, USD, MPT(BTC), USD(1'000)));
             BEAST_EXPECT(ammAlice.expectBalances(
-                STAmount(USD, UINT64_C(3'000'000000000001), -12),
+                STAmount(USD, UINT64_C(3'000'000000000002), -12),
                 BTC(3'001),
-                IOUAmount(3'000)));
-            env.require(balance(alice, aliceBTC + BTC(999)));
+                IOUAmount(3000'000000000001, -12)));
+            env.require(balance(alice, aliceBTC + BTC(1'000)));
             env.require(balance(alice, aliceUSD));
         }
     }
@@ -1645,9 +1645,19 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             auto const lpTokenBalance =
                 amm.ammRpcInfo()[jss::amm][jss::lp_token][jss::value]
                     .asString();
-            BEAST_EXPECT(
-                lpToken == "1.414213562374011" &&
-                lpTokenBalance == "1.414213562374");
+            if (features[featureSingleAssetVault] ||
+                features[featureLendingProtocol])
+            {
+                BEAST_EXPECT(
+                    lpToken == "1.414213562374011" &&
+                    lpTokenBalance == "1.4142135623741");
+            }
+            else
+            {
+                BEAST_EXPECT(
+                    lpToken == "1.414213562374011" &&
+                    lpTokenBalance == "1.414213562374");
+            }
 
             auto res =
                 isOnlyLiquidityProvider(*env.current(), amm.lptIssue(), alice);
@@ -1658,10 +1668,28 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
                 env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt));
                 BEAST_EXPECT(!amm.ammExists());
             }
-            else
+            else if (
+                features[fixAMMv1_3] &&
+                (features[featureSingleAssetVault] ||
+                 features[featureLendingProtocol]))
+            {
+                env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt));
+                // Without the Rounding feature and with new Number a dust pool
+                // amount remains
+                BEAST_EXPECT(amm.ammExists());
+            }
+            else if (
+                !features[featureSingleAssetVault] &&
+                !features[featureLendingProtocol])
             {
                 env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt),
                     ter(tecINTERNAL));
+                BEAST_EXPECT(amm.ammExists());
+            }
+            else
+            {
+                env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt),
+                    ter(tecAMM_BALANCE));
                 BEAST_EXPECT(amm.ammExists());
             }
         }
@@ -1700,9 +1728,19 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             auto const lpTokenBalance =
                 amm.ammRpcInfo()[jss::amm][jss::lp_token][jss::value]
                     .asString();
-            BEAST_EXPECT(
-                lpToken == "1.414213562374011" &&
-                lpTokenBalance == "1.414213562374");
+            if (!features[featureSingleAssetVault] &&
+                !features[featureLendingProtocol])
+            {
+                BEAST_EXPECT(
+                    lpToken == "1.414213562374011" &&
+                    lpTokenBalance == "1.414213562374");
+            }
+            else
+            {
+                BEAST_EXPECT(
+                    lpToken == "1.414213562374011" &&
+                    lpTokenBalance == "1.4142135623741");
+            }
 
             auto res =
                 isOnlyLiquidityProvider(*env.current(), amm.lptIssue(), alice);
@@ -1713,10 +1751,28 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
                 env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt));
                 BEAST_EXPECT(!amm.ammExists());
             }
-            else
+            else if (
+                features[fixAMMv1_3] &&
+                (features[featureSingleAssetVault] ||
+                 features[featureLendingProtocol]))
+            {
+                // Without the Rounding feature and with new Number a dust pool
+                // amount remains
+                env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt));
+                BEAST_EXPECT(amm.ammExists());
+            }
+            else if (
+                !features[featureSingleAssetVault] &&
+                !features[featureLendingProtocol])
             {
                 env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt),
                     ter(tecINTERNAL));
+                BEAST_EXPECT(amm.ammExists());
+            }
+            else if (features[featureMPTokensV2])
+            {
+                env(amm::ammClawback(gw, alice, USD, EUR, std::nullopt),
+                    ter(tecAMM_BALANCE));
                 BEAST_EXPECT(amm.ammExists());
             }
         }
@@ -1915,6 +1971,9 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
         testSingleDepositAndClawback(all);
         testLastHolderLPTokenBalance(all);
         testLastHolderLPTokenBalance(all - fixAMMv1_3 - fixAMMClawbackRounding);
+        testLastHolderLPTokenBalance(
+            all - fixAMMv1_3 - fixAMMClawbackRounding -
+            featureSingleAssetVault - featureLendingProtocol);
         testLastHolderLPTokenBalance(all - fixAMMClawbackRounding);
         testClawAssetCheck(all);
     }
