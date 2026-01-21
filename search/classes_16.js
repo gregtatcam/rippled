@@ -61,7 +61,7 @@ var searchData=
   ['wregex_58',['wregex',['http://en.cppreference.com/w/cpp/regex/basic_regex.html',1,'std']]],
   ['writer_59',['writer',['../classJson_1_1Writer.html',1,'Json::Writer'],['../classxrpl_1_1json__body_1_1writer.html',1,'xrpl::json_body::writer'],['../classxrpl_1_1Writer.html',1,'xrpl::Writer']]],
   ['writerbase_60',['WriterBase',['../classJson_1_1WriterBase.html',1,'Json']]],
-  ['writerfixture_61',['WriterFixture',['../structWriterFixture.html',1,'']]],
+  ['writerfixture_61',['WriterFixture',['../classWriterFixture.html',1,'']]],
   ['wrongprevledger_62',['WrongPrevLedger',['../structxrpl_1_1test_1_1csf_1_1WrongPrevLedger.html',1,'xrpl::test::csf']]],
   ['wsclient_63',['WSClient',['../classxrpl_1_1test_1_1WSClient.html',1,'xrpl::test']]],
   ['wsclient_5ftest_64',['WSClient_test',['../classxrpl_1_1test_1_1WSClient__test.html',1,'xrpl::test']]],

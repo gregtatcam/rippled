@@ -317,7 +317,7 @@ var searchData=
   ['donftselloffers_314',['doNFTSellOffers',['../namespacexrpl.html#a1a28cc54665dafeea58c6c1cd25d78cb',1,'xrpl']]],
   ['donoripplecheck_315',['doNoRippleCheck',['../namespacexrpl.html#ae541c0b9f6bcbcb399ba122669e0e656',1,'xrpl']]],
   ['donormalize_316',['doNormalize',['../namespacexrpl.html#aca07a6ba64f50b5424f5a35e7d2aa106',1,'xrpl']]],
-  ['door_317',['door',['../classxrpl_1_1Door.html#a38f628bdbc911b7e359f42d7a796825c',1,'xrpl::Door::Door()'],['../classxrpl_1_1STXChainBridge.html#a53e62dfc1919548b690050a9088a1864',1,'xrpl::STXChainBridge::door()']]],
+  ['door_317',['door',['../classxrpl_1_1STXChainBridge.html#a53e62dfc1919548b690050a9088a1864',1,'xrpl::STXChainBridge::door()'],['../classxrpl_1_1Door.html#a38f628bdbc911b7e359f42d7a796825c',1,'xrpl::Door::Door()']]],
   ['dooverpayment_318',['doOverpayment',['../namespacexrpl_1_1detail.html#a45834c9016f224c507fe46b5fb6834b9',1,'xrpl::detail']]],
   ['doownerinfo_319',['doOwnerInfo',['../namespacexrpl.html#a0b36e020ee173b613be72848e31f921c',1,'xrpl']]],
   ['dopathfind_320',['doPathFind',['../namespacexrpl.html#a6fcb25485a8252a1cd9279de57489687',1,'xrpl']]],

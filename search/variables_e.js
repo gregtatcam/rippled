@@ -36,7 +36,7 @@ var searchData=
   ['out_5f_33',['out_',['../classxrpl_1_1test_1_1csf_1_1HeartbeatTimer.html#adf20a87bce6ff9b40f303d8aa26baca8',1,'xrpl::test::csf::HeartbeatTimer']]],
   ['outbound_5f_34',['outbound_',['../classxrpl_1_1Resource_1_1Logic.html#a87c4917653f93a1f51be1d3440bb73bf',1,'xrpl::Resource::Logic']]],
   ['outpeers_35',['outPeers',['../structxrpl_1_1PeerFinder_1_1Config.html#a13c63f743293e2d53e487ae9e6f511c1',1,'xrpl::PeerFinder::Config']]],
-  ['output_36',['output',['../structWriterFixture.html#adcb0d412374c9f22e916a14ef981357c',1,'WriterFixture']]],
+  ['output_36',['output',['../classWriterFixture.html#adcb0d412374c9f22e916a14ef981357c',1,'WriterFixture']]],
   ['output_5f_37',['output_',['../classJson_1_1Writer_1_1Impl.html#abc90527a7c42048cf9e8bb4427acdcd1',1,'Json::Writer::Impl::output_'],['../classxrpl_1_1test_1_1TestOutputSuite.html#a8e786ab7bdaf12e4ca5402c7cdcd896d',1,'xrpl::test::TestOutputSuite::output_']]],
   ['overfee_38',['overFee',['../structxrpl_1_1test_1_1Loan__test_1_1LoanParameters.html#ad30970052c25bda6b0e9e605b79eee68',1,'xrpl::test::Loan_test::LoanParameters']]],
   ['overlap_39',['overlap',['../structxrpl_1_1test_1_1csf_1_1TrustGraph_1_1ForkInfo.html#a8dda0fcd4213b724e157497937200097',1,'xrpl::test::csf::TrustGraph::ForkInfo']]],
