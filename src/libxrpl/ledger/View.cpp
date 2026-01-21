@@ -444,9 +444,8 @@ getTrustLineBalance(
         amount.clear(Issue{currency, issuer});
     }
 
-    JLOG(j.trace()) << "getTrustLineBalance:"
-                    << " account=" << to_string(account)
-                    << " amount=" << amount.getFullText();
+    JLOG(j.trace()) << "getTrustLineBalance:" << " account="
+                    << to_string(account) << " amount=" << amount.getFullText();
 
     return view.balanceHookIOU(account, issuer, amount);
 }
@@ -767,8 +766,7 @@ xrpLiquid(
     STAmount const amount =
         (balance < reserve) ? STAmount{0} : balance - reserve;
 
-    JLOG(j.trace()) << "accountHolds:"
-                    << " account=" << to_string(id)
+    JLOG(j.trace()) << "accountHolds:" << " account=" << to_string(id)
                     << " amount=" << amount.getFullText()
                     << " fullBalance=" << fullBalance.getFullText()
                     << " balance=" << balance.getFullText()
@@ -1161,7 +1159,7 @@ adjustOwnerCount(
 std::function<void(SLE::ref)>
 describeOwnerDir(AccountID const& account)
 {
-    return [&account](std::shared_ptr<SLE> const& sle) {
+    return [account](std::shared_ptr<SLE> const& sle) {
         (*sle)[sfOwner] = account;
     };
 }
