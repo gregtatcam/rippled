@@ -4720,6 +4720,165 @@ public:
     }
 
     void
+    testTickSize(FeatureBitset features)
+    {
+        testcase("Tick Size");
+
+        using namespace jtx;
+
+        auto const gw = Account{"gateway"};
+        auto const alice = Account{"alice"};
+
+        auto getIOU = [&](Env& env) -> PrettyAsset {
+            static int i = 0;
+            std::string name = "IO" + std::to_string(i++);
+            auto const iou = gw[name];
+            env(trust(alice, iou(1'000)));
+            env(pay(gw, alice, iou(100)));
+            env.close();
+            return iou;
+        };
+        auto getMPT = [&](Env& env) -> PrettyAsset {
+            MPT const mpt = MPTTester(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice},
+                 .pay = 10'000'000});
+            return mpt;
+        };
+        auto getXRP = [&](Env& env) -> PrettyAsset { return XRP; };
+
+        using ToAsset = std::function<PrettyAsset(Env&)>;
+        struct TestInfo
+        {
+            ToAsset toAsset1;
+            ToAsset toAsset2;
+            int val1;
+            int val2;
+        };
+        // XRP/MPT, MPT/XRP, MPT/MPT offers are not adjusted for TickSize
+        // IOU/IOU, XPR/IOU, IOU/XRP offers have TickSize logic unchanged
+        // IOU/MPT, MPT/IOU have TickSize logic applied to adjust IOU only
+        std::vector<TestInfo> tests = {
+            {getIOU, getIOU, 10, 30},
+            {getIOU, getXRP, 10, 30'000'000},
+            {getXRP, getIOU, 10'000'000, 30},
+            {getMPT, getXRP, 100'000, 30'000'000},
+            {getXRP, getMPT, 10'000'000, 300'000},
+            {getIOU, getMPT, 10, 300'000},
+            {getMPT, getIOU, 100'000, 30},
+            {getMPT, getMPT, 100'000, 300'000}};
+        for (TestInfo const& t : tests)
+        {
+            Env env{*this, features};
+            env.fund(XRP(10'000), gw, alice);
+            env.close();
+
+            auto const XTS = t.toAsset1(env);
+            auto const XXX = t.toAsset2(env);
+
+            auto tokenType = [](PrettyAsset const& asset) -> std::string {
+                return asset.raw().visit(
+                    [&](Issue const& issue) {
+                        return issue.native() ? "XRPIssue" : "Issue";
+                    },
+                    [&](MPTIssue const&) { return "MPTIssue"; });
+            };
+
+            testcase << "offer: " << tokenType(XTS) << "/" << tokenType(XXX);
+
+            {
+                // Gateway sets its tick size to 5
+                auto txn = noop(gw);
+                txn[sfTickSize.fieldName] = 5;
+                env(txn);
+                BEAST_EXPECT((*env.le(gw))[sfTickSize] == 5);
+            }
+
+            env(offer(alice, XTS(t.val1), XXX(t.val2)));
+            env(offer(alice, XTS(t.val2), XXX(t.val1)));
+            env(offer(alice, XTS(t.val1), XXX(t.val2)),
+                json(jss::Flags, tfSell));
+            env(offer(alice, XTS(t.val2), XXX(t.val1)),
+                json(jss::Flags, tfSell));
+
+            std::map<std::uint32_t, std::pair<STAmount, STAmount>> offers;
+            forEachItem(
+                *env.current(),
+                alice,
+                [&](std::shared_ptr<SLE const> const& sle) {
+                    if (sle->getType() == ltOFFER)
+                        offers.emplace(
+                            (*sle)[sfSequence],
+                            std::make_pair(
+                                (*sle)[sfTakerPays], (*sle)[sfTakerGets]));
+                });
+
+            // first offer
+            auto it = offers.begin();
+            BEAST_EXPECT(it != offers.end());
+            if (XXX.native() && !XTS.holds<MPTIssue>())
+            {
+                BEAST_EXPECT(
+                    it->second.first == XTS(t.val1) &&
+                    it->second.second == XRPAmount(29'999'400));
+            }
+            else if (!XXX.integral())
+            {
+                BEAST_EXPECT(
+                    it->second.first == XTS(t.val1) &&
+                    it->second.second < XXX(t.val2) &&
+                    it->second.second > STAmount(XXX, 29'9994, -4));
+            }
+            else
+            {
+                BEAST_EXPECT(
+                    it->second.first == XTS(t.val1) &&
+                    it->second.second == XXX(t.val2));
+            }
+
+            // second offer
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(t.val2) &&
+                it->second.second == XXX(t.val1));
+
+            // third offer
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            if (XTS.native() && !XXX.holds<MPTIssue>())
+            {
+                BEAST_EXPECT(
+                    it->second.first == XRPAmount(10'000'200) &&
+                    it->second.second == XXX(t.val2));
+            }
+            else if (!XTS.integral())
+            {
+                BEAST_EXPECT(
+                    it->second.first == STAmount(XTS, 10'0002, -4) &&
+                    it->second.second == XXX(t.val2));
+            }
+            else
+            {
+                BEAST_EXPECT(
+                    it->second.first == XTS(t.val1) &&
+                    it->second.second == XXX(t.val2));
+            }
+
+            // fourth offer
+            // exact TakerPays is XTS(1/.033333)
+            ++it;
+            BEAST_EXPECT(it != offers.end());
+            BEAST_EXPECT(
+                it->second.first == XTS(t.val2) &&
+                it->second.second == XXX(t.val1));
+
+            BEAST_EXPECT(++it == offers.end());
+        }
+    }
+
+    void
     testAll(FeatureBitset features)
     {
         testCanceledOffer(features);
@@ -4774,6 +4933,7 @@ public:
         testRmSmallIncreasedQOffersXRP(features);
         testRmSmallIncreasedQOffersMPT(features);
         testFillOrKill(features);
+        testTickSize(features);
     }
 
     void
