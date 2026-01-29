@@ -254,8 +254,7 @@ VaultDeposit::doApply()
             vaultAccount,
             assetsDeposited,
             j_,
-            WaiveTransferFee::Yes,
-            AllowMPTOverflow::No);
+            WaiveTransferFee::Yes);
         !isTesSuccess(ter))
         return ter;
 
@@ -281,8 +280,7 @@ VaultDeposit::doApply()
             account_,
             sharesCreated,
             j_,
-            WaiveTransferFee::Yes,
-            AllowMPTOverflow::No);
+            WaiveTransferFee::Yes);
         !isTesSuccess(ter))
         return ter;
 

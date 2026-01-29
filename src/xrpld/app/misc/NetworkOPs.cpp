@@ -4555,17 +4555,13 @@ NetworkOPsImp::getBookPage(
                     {
                         // Did not find balance in table.
 
-                        auto const includeBalance = book.out.holds<MPTIssue>()
-                            ? shFULL_BALANCE
-                            : shSIMPLE_BALANCE;
                         saOwnerFunds = accountHolds(
                             view,
                             uOfferOwnerID,
                             book.out,
                             fhZERO_IF_FROZEN,
                             ahZERO_IF_UNAUTHORIZED,
-                            viewJ,
-                            includeBalance);
+                            viewJ);
 
                         if (saOwnerFunds < beast::zero)
                         {

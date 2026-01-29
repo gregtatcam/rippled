@@ -300,8 +300,7 @@ applyCreate(
                 accountId,
                 amount,
                 ctx_.journal,
-                WaiveTransferFee::Yes,
-                AllowMPTOverflow::No);
+                WaiveTransferFee::Yes);
         };
         // Authorize MPT
         return amount.asset().visit(

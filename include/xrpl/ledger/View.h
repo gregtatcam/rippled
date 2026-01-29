@@ -949,7 +949,7 @@ accountSend(
     STAmount const& saAmount,
     beast::Journal j,
     WaiveTransferFee waiveFee = WaiveTransferFee::No,
-    AllowMPTOverflow allowOverflow = AllowMPTOverflow::Yes);
+    AllowMPTOverflow allowOverflow = AllowMPTOverflow::No);
 
 using MultiplePaymentDestinations = std::vector<std::pair<AccountID, Number>>;
 /** Like accountSend, except one account is sending multiple payments (with the

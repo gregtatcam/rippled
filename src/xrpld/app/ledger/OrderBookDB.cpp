@@ -108,6 +108,9 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
                 }
                 else
                 {
+                    XRPL_ASSERT(
+                        sle->isFieldPresent(sfTakerPaysMPT),
+                        "OrderBookDB::update, must be TakerPaysMPT");
                     book.in = sle->getFieldH192(sfTakerPaysMPT);
                 }
                 if (sle->isFieldPresent(sfTakerGetsCurrency))
@@ -119,6 +122,9 @@ OrderBookDB::update(std::shared_ptr<ReadView const> const& ledger)
                 }
                 else
                 {
+                    XRPL_ASSERT(
+                        sle->isFieldPresent(sfTakerGetsMPT),
+                        "OrderBookDB::update, must be TakerGetsMPT");
                     book.out = sle->getFieldH192(sfTakerGetsMPT);
                 }
                 book.domain = (*sle)[~sfDomainID];

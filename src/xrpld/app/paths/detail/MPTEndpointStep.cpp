@@ -94,6 +94,9 @@ public:
               (ctx.isFirst || (ctx.prevStep && !ctx.prevStep->bookStepBook())))
         , j_(ctx.j)
     {
+        XRPL_ASSERT(
+            src_ == mptIssue_.getIssuer() || dst_ == mptIssue_.getIssuer(),
+            "MPTEndpointStep::MPTEndpointStep src or dst must be an issuer");
     }
 
     AccountID const&
