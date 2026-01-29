@@ -4743,7 +4743,7 @@ public:
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice},
-                 .pay = 10'000'000});
+                 .pay = 1'000'000'000});
             return mpt;
         };
         auto getXRP = [&](Env& env) -> PrettyAsset { return XRP; };
@@ -4757,17 +4757,17 @@ public:
             int val2;
         };
         // XRP/MPT, MPT/XRP, MPT/MPT offers are not adjusted for TickSize
-        // IOU/IOU, XPR/IOU, IOU/XRP offers have TickSize logic unchanged
+        // IOU/IOU, XRP/IOU, IOU/XRP offers have TickSize logic unchanged
         // IOU/MPT, MPT/IOU have TickSize logic applied to adjust IOU only
         std::vector<TestInfo> tests = {
             {getIOU, getIOU, 10, 30},
             {getIOU, getXRP, 10, 30'000'000},
             {getXRP, getIOU, 10'000'000, 30},
-            {getMPT, getXRP, 100'000, 30'000'000},
-            {getXRP, getMPT, 10'000'000, 300'000},
-            {getIOU, getMPT, 10, 300'000},
-            {getMPT, getIOU, 100'000, 30},
-            {getMPT, getMPT, 100'000, 300'000}};
+            {getMPT, getXRP, 10'000'000, 30'000'000},
+            {getXRP, getMPT, 10'000'000, 30'000'000},
+            {getIOU, getMPT, 10, 30'000'000},
+            {getMPT, getIOU, 10'000'000, 30},
+            {getMPT, getMPT, 10'000'000, 30'000'000}};
         for (TestInfo const& t : tests)
         {
             Env env{*this, features};
