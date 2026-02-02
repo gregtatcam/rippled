@@ -651,13 +651,15 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
         auto const& uGetsIssuerID = saTakerGets.getIssuer();
 
         std::uint8_t uTickSize = Quality::maxTickSize;
-        if (!isXRP(uPaysIssuerID))
+        // Not XRP or MPT
+        if (!saTakerPays.integral())
         {
             auto const sle = sb.read(keylet::account(uPaysIssuerID));
             if (sle && sle->isFieldPresent(sfTickSize))
                 uTickSize = std::min(uTickSize, (*sle)[sfTickSize]);
         }
-        if (!isXRP(uGetsIssuerID))
+        // Not XRP or MPT
+        if (!saTakerGets.integral())
         {
             auto const sle = sb.read(keylet::account(uGetsIssuerID));
             if (sle && sle->isFieldPresent(sfTickSize))
@@ -674,9 +676,11 @@ CreateOffer::applyGuts(Sandbox& sb, Sandbox& sbCancel)
             if (bSell)
             {
                 // this is a sell, round taker pays
-                saTakerPays = multiply(saTakerGets, rate, saTakerPays.asset());
+                if (!saTakerPays.holds<MPTIssue>())
+                    saTakerPays =
+                        multiply(saTakerGets, rate, saTakerPays.asset());
             }
-            else
+            else if (!saTakerGets.holds<MPTIssue>())
             {
                 // this is a buy, round taker gets
                 saTakerGets = divide(saTakerPays, rate, saTakerGets.asset());
