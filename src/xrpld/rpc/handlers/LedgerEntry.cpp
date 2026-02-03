@@ -116,12 +116,12 @@ parseAMM(
         return Unexpected(value.error());
     }
 
-    auto const asset = LedgerEntryHelpers::requiredIssue(
+    auto const asset = LedgerEntryHelpers::requiredAsset(
         params, jss::asset, "malformedRequest");
     if (!asset)
         return Unexpected(asset.error());
 
-    auto const asset2 = LedgerEntryHelpers::requiredIssue(
+    auto const asset2 = LedgerEntryHelpers::requiredAsset(
         params, jss::asset2, "malformedRequest");
     if (!asset2)
         return Unexpected(asset2.error());
