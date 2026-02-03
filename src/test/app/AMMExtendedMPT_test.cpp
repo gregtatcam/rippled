@@ -3360,25 +3360,24 @@ private:
         BTC.set({.holder = bob, .flags = tfMPTLock});
 
         {
-            // different from IOU.
-            // with MPT locked,
-            // can not buy more assets
-            env(offer(bob, BTC(5), XRP(25)), ter(tecLOCKED));
+            // different from IOU. The offer is created but not crossed.
+            env(offer(bob, BTC(5), XRP(25)));
             env.close();
+            BEAST_EXPECT(expectOffers(env, bob, 1, {{{BTC(5), XRP(25)}}}));
             BEAST_EXPECT(
                 ammAlice.expectBalances(XRP(500), BTC(105), ammAlice.tokens()));
         }
 
         {
             // can not sell assets
-            env(offer(bob, XRP(1), BTC(5)), ter(tecLOCKED));
+            env(offer(bob, XRP(1), BTC(5)), ter(tecUNFUNDED_OFFER));
 
             // different from IOU
             // can not receive Payment when locked
-            env(pay(alice, bob, BTC(1)), ter(tecLOCKED));
+            env(pay(alice, bob, BTC(1)), ter(tecPATH_DRY));
 
             // can not make Payment when locked
-            env(pay(bob, alice, BTC(1)), ter(tecLOCKED));
+            env(pay(bob, alice, BTC(1)), ter(tecPATH_DRY));
 
             env.require(balance(bob, BTC(10)));
         }
@@ -3474,8 +3473,8 @@ private:
             env(pay(G1, A2, BTC(1)));
             env(pay(A2, G1, BTC(1)));
             // locked
-            env(pay(A2, A1, BTC(1)), ter(tecLOCKED));
-            env(pay(A1, A2, BTC(1)), ter(tecLOCKED));
+            env(pay(A2, A1, BTC(1)), ter(tecPATH_DRY));
+            env(pay(A1, A2, BTC(1)), ter(tecPATH_DRY));
         }
 
         {

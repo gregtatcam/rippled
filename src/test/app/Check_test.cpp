@@ -364,10 +364,16 @@ class Check_test : public beast::unit_test::suite
             env(check::create(alice, bob, USF(50)), ter(tecFROZEN));
             env.close();
 
+            env(check::create(gwF, bob, USF(50)), ter(tecFROZEN));
+            env.close();
+
             env(fclear(gwF, asfGlobalFreeze));
             env.close();
 
             env(check::create(alice, bob, USF(50)));
+            env.close();
+
+            env(check::create(gwF, bob, USF(50)));
             env.close();
         }
         {
@@ -1272,6 +1278,14 @@ class Check_test : public beast::unit_test::suite
         env(check::create(alice, bob, USD(4)));
         env.close();
 
+        uint256 const chkIdFroz4ToIssuer{getCheckIndex(alice, env.seq(alice))};
+        env(check::create(alice, gw, USD(4)));
+        env.close();
+
+        uint256 const chkIdFroz4Issuer{getCheckIndex(gw, env.seq(gw))};
+        env(check::create(gw, alice, USD(4)));
+        env.close();
+
         uint256 const chkIdNoDest1{getCheckIndex(alice, env.seq(alice))};
         env(check::create(alice, bob, USD(1)));
         env.close();
@@ -1399,6 +1413,21 @@ class Check_test : public beast::unit_test::suite
                 ter(tecPATH_PARTIAL));
             env.close();
 
+            env(check::cash(gw, chkIdFroz4ToIssuer, USD(1)),
+                ter(tecPATH_PARTIAL));
+            env.close();
+            env(check::cash(
+                    gw, chkIdFroz4ToIssuer, check::DeliverMin(USD(0.5))),
+                ter(tecPATH_PARTIAL));
+            env.close();
+
+            env(check::cash(alice, chkIdFroz4Issuer, USD(1)), ter(tecFROZEN));
+            env.close();
+            env(check::cash(
+                    alice, chkIdFroz4Issuer, check::DeliverMin(USD(0.5))),
+                ter(tecFROZEN));
+            env.close();
+
             env(fclear(gw, asfGlobalFreeze));
             env.close();
 
@@ -1407,6 +1436,9 @@ class Check_test : public beast::unit_test::suite
             env.close();
             env.require(balance(alice, USD(19)));
             env.require(balance(bob, USD(1)));
+
+            env(check::cash(gw, chkIdFroz4ToIssuer, USD(1)));
+            env.close();
 
             // Freeze individual trustlines.
             env(trust(gw, alice["USD"](0), tfSetFreeze));
@@ -1422,7 +1454,7 @@ class Check_test : public beast::unit_test::suite
             env.close();
             env(check::cash(bob, chkIdFroz2, USD(2)));
             env.close();
-            env.require(balance(alice, USD(17)));
+            env.require(balance(alice, USD(16)));
             env.require(balance(bob, USD(3)));
 
             // Freeze bob's trustline.  bob can't cash the check.
@@ -1439,7 +1471,7 @@ class Check_test : public beast::unit_test::suite
             env.close();
             env(check::cash(bob, chkIdFroz3, check::DeliverMin(USD(1))));
             verifyDeliveredAmount(env, USD(3));
-            env.require(balance(alice, USD(14)));
+            env.require(balance(alice, USD(13)));
             env.require(balance(bob, USD(6)));
 
             // Set bob's freeze bit in the other direction.  Check
@@ -1457,7 +1489,7 @@ class Check_test : public beast::unit_test::suite
             env.close();
             env(check::cash(bob, chkIdFroz4, USD(4)));
             env.close();
-            env.require(balance(alice, USD(10)));
+            env.require(balance(alice, USD(9)));
             env.require(balance(bob, USD(10)));
         }
         {
@@ -1474,7 +1506,7 @@ class Check_test : public beast::unit_test::suite
             // bob can cash a check with a destination tag.
             env(check::cash(bob, chkIdHasDest2, USD(2)));
             env.close();
-            env.require(balance(alice, USD(8)));
+            env.require(balance(alice, USD(7)));
             env.require(balance(bob, USD(12)));
 
             // Clear the RequireDest flag on bob's account so he can
@@ -1483,7 +1515,7 @@ class Check_test : public beast::unit_test::suite
             env.close();
             env(check::cash(bob, chkIdNoDest1, USD(1)));
             env.close();
-            env.require(balance(alice, USD(7)));
+            env.require(balance(alice, USD(6)));
             env.require(balance(bob, USD(13)));
         }
     }

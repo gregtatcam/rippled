@@ -327,19 +327,19 @@ struct PayStrandMPT_test : public beast::unit_test::suite
 
             // Account can't issue payments
             USDM.set({.holder = alice, .flags = tfMPTLock});
-            test(env, USD, std::nullopt, STPath(), tecLOCKED);
+            test(env, USD, std::nullopt, STPath(), terLOCKED);
             USDM.set({.holder = alice, .flags = tfMPTUnlock});
             test(env, USD, std::nullopt, STPath(), tesSUCCESS);
 
             // Account can not issue funds
             USDM.set({.flags = tfMPTLock});
-            test(env, USD, std::nullopt, STPath(), tecLOCKED);
+            test(env, USD, std::nullopt, STPath(), terLOCKED);
             USDM.set({.flags = tfMPTUnlock});
             test(env, USD, std::nullopt, STPath(), tesSUCCESS);
 
             // Account can not receive funds
             USDM.set({.holder = bob, .flags = tfMPTLock});
-            test(env, USD, std::nullopt, STPath(), tecLOCKED);
+            test(env, USD, std::nullopt, STPath(), terLOCKED);
             USDM.set({.holder = bob, .flags = tfMPTUnlock});
             test(env, USD, std::nullopt, STPath(), tesSUCCESS);
         }

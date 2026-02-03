@@ -766,6 +766,25 @@ AMM::bid(BidArg const& arg)
 }
 
 void
+AMM::clawback(ClawbackArg const& arg)
+{
+    Account bad("bad", noAccount());
+    Account const& issuer = arg.issuer ? *arg.issuer : bad;
+    Account const& holder = arg.holder ? *arg.holder : bad;
+    auto const& [asset, asset2] = [&]() {
+        if (arg.assets)
+            return *arg.assets;
+        return std::make_pair(asset1_.asset(), asset2_.asset());
+    }();
+    auto jv = amm::ammClawback(issuer, holder, asset, asset2, arg.amount);
+    if (arg.flags)
+        jv[jss::Flags] = *arg.flags;
+    if (fee_ != 0)
+        jv[jss::Fee] = std::to_string(fee_);
+    submit(jv, std::nullopt, arg.err);
+}
+
+void
 AMM::submit(
     Json::Value const& jv,
     std::optional<jtx::seq> const& seq,

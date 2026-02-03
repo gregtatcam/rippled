@@ -52,6 +52,7 @@ protected:
     // quality or there is no CLOB offer.
     std::optional<AMMLiquidity<TIn, TOut>> ammLiquidity_;
     beast::Journal const j_;
+    Asset const strandDeliver_;
 
     struct Cache
     {
@@ -73,6 +74,7 @@ public:
         , prevStep_(ctx.prevStep)
         , ownerPaysTransferFee_(ctx.ownerPaysTransferFee)
         , j_(ctx.j)
+        , strandDeliver_(ctx.strandDeliver)
     {
         if (auto const ammSle = ctx.view.read(keylet::amm(in, out));
             ammSle && ammSle->getFieldAmount(sfLPTokenBalance) != beast::zero)
@@ -235,6 +237,11 @@ private:
     // whichever is a better quality.
     std::optional<QualityFunction>
     tipOfferQualityF(ReadView const& view) const;
+
+    // Check that takerPays/takerGets can be transferred/traded.
+    // Applies to MPT assets.
+    bool
+    checkMPTDEX(ReadView const& view, AccountID const& owner) const;
 };
 
 //------------------------------------------------------------------------------
@@ -722,9 +729,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
             return true;
 
         Asset const& assetIn = offer.assetIn();
-        Asset const& assetOut = offer.assetOut();
         bool const isAssetInMPT = assetIn.holds<MPTIssue>();
-        bool const isAssetOutMPT = assetOut.holds<MPTIssue>();
         auto const& owner = offer.owner();
 
         if (isAssetInMPT)
@@ -742,15 +747,10 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         // or afView. Amendment guard this change just in case.
         auto& applyView = sb.rules().enabled(featureMPTokensV2) ? sb : afView;
         // Make sure offer owner has authorization to own Assets from issuer
-        // if IOU. An account can always own XRP or their own Assets.
-        // If MPT then MPTDEX should be allowed.
+        // and MPT assets can be traded/transferred.
+        // An account can always own XRP or their own Assets.
         if (requireAuth(applyView, assetIn, owner) != tesSUCCESS ||
-            (isAssetInMPT &&
-             checkMPTDEXAllowed(applyView, assetIn, owner, std::nullopt) !=
-                 tesSUCCESS) ||
-            (isAssetOutMPT &&
-             checkMPTDEXAllowed(applyView, assetOut, owner, std::nullopt) !=
-                 tesSUCCESS))
+            !checkMPTDEX(sb, owner))
         {
             // Offer owner not authorized to hold IOU/MPT from issuer.
             // Remove this offer even if no crossing occurs.
@@ -1362,7 +1362,7 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
 
     auto issuerExists = [](ReadView const& view, Asset const& iss) -> bool {
         return isXRP(iss.getIssuer()) ||
-            view.read(keylet::account(iss.getIssuer()));
+            view.exists(keylet::account(iss.getIssuer()));
     };
 
     if (!issuerExists(ctx.view, book_.in) || !issuerExists(ctx.view, book_.out))
@@ -1390,16 +1390,11 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
                     return std::nullopt;
                 },
                 [&](MPTIssue const& issue) -> std::optional<TER> {
-                    auto const issuanceID =
-                        keylet::mptIssuance(issue.getMptID());
-                    if (!view.exists(issuanceID))
-                        return tecOBJECT_NOT_FOUND;
-
-                    if (auto const ter = checkMPTDEXAllowed(
-                            view,
-                            book_.in,
-                            issue.getIssuer(),
-                            issue.getIssuer());
+                    // Check if can trade on DEX.
+                    if (auto const ter = canTrade(view, book_.in);
+                        ter != tesSUCCESS)
+                        return ter;
+                    if (auto const ter = canTrade(view, book_.out);
                         ter != tesSUCCESS)
                         return ter;
                     return std::nullopt;
@@ -1429,6 +1424,55 @@ BookStep<TIn, TOut, TDerived>::rate(
             return transferRate(view, issue.getMptID());
         });
 };
+
+template <class TIn, class TOut, class TDerived>
+bool
+BookStep<TIn, TOut, TDerived>::checkMPTDEX(
+    ReadView const& view,
+    AccountID const& owner) const
+{
+    if (canTrade(view, book_.in) != tesSUCCESS ||
+        canTrade(view, book_.out) != tesSUCCESS)
+        return false;
+
+    if (book_.in.holds<MPTIssue>())
+    {
+        auto ret = [&]() {
+            auto const& asset = book_.in;
+            // Strand's source is an issuer
+            if (!prevStep_)
+                return true;
+            // Offer's owner is an issuer
+            if (asset.getIssuer() == owner)
+                return true;
+            // Previous step is BookStep. BookStep only sends if CanTransfer is
+            // set and not locked or the offer is owned by an issuer
+            if (prevStep_->bookStepBook())
+                return true;
+            // Previous step is MPTEndpointStep and offer's owner is not an
+            // issuer
+            return canTransfer(view, asset, owner, owner) == tesSUCCESS;
+        }();
+        if (!ret)
+            return false;
+    }
+
+    if (book_.out.holds<MPTIssue>())
+    {
+        auto const& asset = book_.out;
+        // Last step if the strand's destination is an issuer
+        if (strandDeliver_ == asset && strandDst_ == asset.getIssuer())
+            return true;
+        // Offer's owner is an issuer
+        if (asset.getIssuer() == owner)
+            return true;
+
+        // Next step is BookStep and offer's owner is not an issuer
+        return canTransfer(view, asset, owner, owner) == tesSUCCESS;
+    }
+
+    return true;
+}
 
 //------------------------------------------------------------------------------
 

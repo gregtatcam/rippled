@@ -300,8 +300,11 @@ private:
             env.close();
             env(trust(gw, alice["USD"](30'000)));
             env.close();
-            AMM ammAlice(env, alice, XRP(10'000), USD(10'000), ter(tecFROZEN));
-            BEAST_EXPECT(!ammAlice.ammExists());
+            for (auto const& account : {alice, gw})
+            {
+                AMM amm(env, account, XRP(10'000), USD(10'000), ter(tecFROZEN));
+                BEAST_EXPECT(!amm.ammExists());
+            }
         }
 
         // Individually frozen
@@ -897,26 +900,29 @@ private:
                         std::nullopt,
                         std::nullopt,
                         ter(tecFROZEN));
-                ammAlice.deposit(
-                    carol,
-                    USD(100),
-                    std::nullopt,
-                    std::nullopt,
-                    std::nullopt,
-                    ter(tecFROZEN));
-                ammAlice.deposit(
-                    carol,
-                    1'000'000,
-                    std::nullopt,
-                    std::nullopt,
-                    ter(tecFROZEN));
-                ammAlice.deposit(
-                    carol,
-                    XRP(100),
-                    USD(100),
-                    std::nullopt,
-                    std::nullopt,
-                    ter(tecFROZEN));
+                for (auto const& account : {carol, gw})
+                {
+                    ammAlice.deposit(
+                        account,
+                        USD(100),
+                        std::nullopt,
+                        std::nullopt,
+                        std::nullopt,
+                        ter(tecFROZEN));
+                    ammAlice.deposit(
+                        account,
+                        1'000'000,
+                        std::nullopt,
+                        std::nullopt,
+                        ter(tecFROZEN));
+                    ammAlice.deposit(
+                        account,
+                        XRP(100),
+                        USD(100),
+                        std::nullopt,
+                        std::nullopt,
+                        ter(tecFROZEN));
+                }
             },
             std::nullopt,
             0,
@@ -2066,14 +2072,25 @@ private:
 
         // Globally frozen asset
         testAMM([&](AMM& ammAlice, Env& env) {
+            ammAlice.deposit(
+                {.account = gw,
+                 .asset1In = USD(1'000),
+                 .asset2In = XRP(1'000)});
             env(fset(gw, asfGlobalFreeze));
             env.close();
             // Can withdraw non-frozen token
-            ammAlice.withdraw(alice, XRP(100));
-            ammAlice.withdraw(
-                alice, USD(100), std::nullopt, std::nullopt, ter(tecFROZEN));
-            ammAlice.withdraw(
-                alice, 1'000, std::nullopt, std::nullopt, ter(tecFROZEN));
+            for (auto const& account : {alice, gw})
+            {
+                ammAlice.withdraw(account, XRP(100));
+                ammAlice.withdraw(
+                    account,
+                    USD(100),
+                    std::nullopt,
+                    std::nullopt,
+                    ter(tecFROZEN));
+                ammAlice.withdraw(
+                    account, 1'000, std::nullopt, std::nullopt, ter(tecFROZEN));
+            }
         });
 
         // Individually frozen (AMM) account

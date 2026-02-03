@@ -1101,6 +1101,12 @@ enforceMPTokenAuthorization(
     XRPAmount const& priorBalance,
     beast::Journal j);
 
+/** Check if Asset can be traded on DEX. return tecNO_PERMISSION
+ * if it doesn't and tesSUCCESS otherwise.
+ */
+[[nodiscard]] TER
+canTrade(ReadView const& view, Asset const& asset);
+
 /** Check if the destination account is allowed
  *  to receive MPT. Return tecNO_AUTH if it doesn't
  *  and tesSUCCESS otherwise.

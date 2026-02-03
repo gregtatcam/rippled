@@ -306,7 +306,7 @@ private:
             },
             {{AMMMPT(20'000), AMMMPT(10'000)}});
 
-        // MPTRequireAuth flag is set and AMM creator is not authorzied
+        // MPTRequireAuth flag is set and AMM creator is not authorized
         {
             Env env{*this};
             env.fund(XRP(30'000), gw, alice);
@@ -326,7 +326,7 @@ private:
             BEAST_EXPECT(!ammAlice.ammExists());
         }
 
-        // MPTLocked flag is set and AMM creator is not the issuer of MPT
+        // MPTLocked flag is set
         {
             Env env{*this};
             fund(env, gw, {alice}, {USD(20'000)}, Fund::All);
@@ -4717,12 +4717,12 @@ private:
                 path(~static_cast<MPT>(BTC)),
                 txflags(tfPartialPayment | tfNoRippleDirect),
                 sendmax(XRP(10)),
-                ter(tecLOCKED));
+                ter(tecPATH_DRY));
             env(pay(alice, carol, XRP(1)),
                 path(~XRP),
                 txflags(tfPartialPayment | tfNoRippleDirect),
                 sendmax(BTC(10)),
-                ter(tecLOCKED));
+                ter(tecPATH_DRY));
         }
 
         // Individually locked MPT destination account.
@@ -4743,7 +4743,7 @@ private:
                 path(~static_cast<MPT>(BTC)),
                 txflags(tfPartialPayment | tfNoRippleDirect),
                 sendmax(XRP(10)),
-                ter(tecLOCKED));
+                ter(tecPATH_DRY));
         }
 
         // Individually locked MPT source account
@@ -4764,7 +4764,7 @@ private:
                 path(~XRP),
                 txflags(tfPartialPayment | tfNoRippleDirect),
                 sendmax(BTC(10)),
-                ter(tecLOCKED));
+                ter(tecPATH_DRY));
         }
 
         // lock on both sides
@@ -4794,13 +4794,13 @@ private:
                 path(~MPT(ETH)),
                 txflags(tfPartialPayment | tfNoRippleDirect),
                 sendmax(BTC(10)),
-                ter(tecLOCKED));
+                ter(tecPATH_DRY));
 
             env(pay(alice, carol, BTC(1)),
                 path(~MPT(BTC)),
                 txflags(tfPartialPayment | tfNoRippleDirect),
                 sendmax(ETH(10)),
-                ter(tecLOCKED));
+                ter(tecPATH_DRY));
         }
 
         // Individually locked AMM MPT
@@ -7509,7 +7509,7 @@ private:
              .issuer = gw,
              .holders = {alice, bob},
              .pay = 40'000'000000,
-             .flags = tfMPTCanClawback | tfMPTCanLock | tfMPTCanTransfer});
+             .flags = tfMPTCanClawback | tfMPTCanLock | MPTDEXFlags});
 
         AMM amm(env, alice, BTC(2), USD(1));
         amm.deposit(alice, IOUAmount{1'876123487565916, -15});

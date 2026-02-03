@@ -3442,6 +3442,22 @@ enforceMPTokenAuthorization(
 }
 
 TER
+canTrade(ReadView const& view, Asset const& asset)
+{
+    return asset.visit(
+        [&](Issue const&) -> TER { return tesSUCCESS; },
+        [&](MPTIssue const& mptIssue) -> TER {
+            auto const sleIssuance =
+                view.read(keylet::mptIssuance(mptIssue.getMptID()));
+            if (!sleIssuance)
+                return tecOBJECT_NOT_FOUND;
+            if (!sleIssuance->isFlag(lsfMPTCanTrade))
+                return tecNO_PERMISSION;
+            return tesSUCCESS;
+        });
+}
+
+TER
 canTransfer(
     ReadView const& view,
     MPTIssue const& mptIssue,

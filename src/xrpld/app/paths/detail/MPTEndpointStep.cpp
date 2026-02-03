@@ -347,22 +347,8 @@ MPTEndpointPaymentStep::check(
     // Cross-token MPT payment via DEX
     else
     {
-        if (ctx.isFirst && src_ != mptIssue_.getIssuer())
-        {
-            if (auto const ter =
-                    checkMPTDEXAllowed(ctx.view, mptIssue_, src_, std::nullopt);
-                ter != tesSUCCESS)
-                return ter;
-        }
-        else if (
-            ctx.prevStep && ctx.prevStep->bookStepBook() &&
-            dst_ != mptIssue_.getIssuer())
-        {
-            if (auto const ter =
-                    checkMPTDEXAllowed(ctx.view, mptIssue_, dst_, std::nullopt);
-                ter != tesSUCCESS)
-                return ter;
-        }
+        if (auto const ter = canTrade(ctx.view, mptIssue_); ter != tesSUCCESS)
+            return ter;
     }
 
     // Can't check for creditBalance/Limit unless it's the first step.
@@ -387,15 +373,6 @@ MPTEndpointOfferCrossingStep::check(
     StrandContext const& ctx,
     std::shared_ptr<const SLE> const&) const
 {
-    auto const& holder = ctx.isFirst ? src_ : dst_;
-    auto const& issuer = mptIssue_.getIssuer();
-    if (holder != issuer)
-    {
-        if (auto const ter =
-                checkMPTDEXAllowed(ctx.view, mptIssue_, holder, issuer);
-            ter != tesSUCCESS)
-            return ter;
-    }
     return tesSUCCESS;
 }
 
@@ -877,6 +854,14 @@ MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
             << "MPTEndpointStep: can't receive MPT from non-existent issuer: "
             << src_;
         return terNO_ACCOUNT;
+    }
+
+    // pure issue/redeem can't be frozen (issuer/holder)
+    if (!(ctx.isLast && ctx.isFirst))
+    {
+        auto const& account = ctx.isFirst ? src_ : dst_;
+        if (isFrozen(ctx.view, account, mptIssue_))
+            return terLOCKED;
     }
 
     if (ctx.seenBookOuts.count(mptIssue_))
