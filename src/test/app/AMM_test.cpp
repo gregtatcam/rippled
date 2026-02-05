@@ -318,6 +318,8 @@ private:
             env.close();
             AMM ammAlice(env, alice, XRP(10'000), USD(10'000), ter(tecFROZEN));
             BEAST_EXPECT(!ammAlice.ammExists());
+            // issuer can create
+            AMM amm(env, gw, XRP(10'000), USD(10'000));
         }
 
         // Insufficient reserve, XRP/IOU

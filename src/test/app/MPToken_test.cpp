@@ -3660,20 +3660,25 @@ class MPToken_test : public beast::unit_test::suite
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice);
-            MPT const BTC = MPT(gw, 0);
+            env.close();
+            MPT const BTC = MPTTester(
+                {.env = env, .issuer = gw, .holders = {alice}, .pay = 100});
             MPT const ETH = MPT(gw, 1);
 
-            env(offer(alice, ETH(10), BTC(10)), ter(tecUNFUNDED_OFFER));
+            env(offer(alice, ETH(10), BTC(10)), ter(tecOBJECT_NOT_FOUND));
+            env(offer(alice, BTC(10), ETH(10)), ter(tecUNFUNDED_OFFER));
         }
 
         // MPToken object doesn't exist and the account is not the issuer of MPT
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice);
-            MPTTester BTC({.env = env, .issuer = gw});
+            MPTTester BTC(
+                {.env = env, .issuer = gw, .holders = {alice}, .pay = 100});
             MPTTester ETH({.env = env, .issuer = gw});
 
-            env(offer(alice, ETH(10), BTC(10)), ter(tecUNFUNDED_OFFER));
+            env(offer(alice, ETH(10), BTC(10)));
+            env(offer(alice, BTC(10), ETH(10)), ter(tecUNFUNDED_OFFER));
         }
 
         // MPTLock flag is set and the account is not the issuer of MPT
@@ -3758,32 +3763,66 @@ class MPToken_test : public beast::unit_test::suite
         // MPTCanTransfer is not set and the account is not the issuer of MPT
         {
             Env env(*this);
-            env.fund(XRP(1'000), gw, alice);
+            env.fund(XRP(1'000), gw, alice, carol);
             MPTTester BTC(
                 {.env = env,
                  .issuer = gw,
-                 .holders = {alice},
+                 .holders = {alice, carol},
                  .pay = 100,
                  .flags = tfMPTCanTrade,
                  .mutableFlags = tmfMPTCanMutateCanTransfer});
             MPTTester ETH(
                 {.env = env,
                  .issuer = gw,
-                 .holders = {alice},
+                 .holders = {alice, carol},
                  .pay = 100,
                  .flags = tfMPTCanTrade | tfMPTCanTransfer,
                  .mutableFlags = tmfMPTCanMutateCanTransfer});
 
             // Can create
-            env(offer(alice, ETH(10), BTC(10)), ter(tesSUCCESS));
+            env(offer(alice, ETH(10), BTC(10)), txflags(tfPassive));
             BTC.set({.mutableFlags = tmfMPTSetCanTransfer});
             ETH.set({.mutableFlags = tmfMPTClearCanTransfer});
-            env(offer(alice, ETH(10), BTC(10)), ter(tesSUCCESS));
+            env(offer(alice, ETH(10), BTC(10)), txflags(tfPassive));
             BEAST_EXPECT(getAccountOffers(env, alice)[jss::offers].size() == 2);
 
             // issuer can create
+            env(offer(gw, ETH(10), BTC(10)), txflags(tfPassive));
+            env.close();
 
-            env(offer(gw, ETH(10), BTC(10)));
+            // can cross issuer's offer, other offers are removed
+            env(offer(carol, BTC(10), ETH(10)));
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(expectOffers(env, gw, 0));
+            BEAST_EXPECT(expectOffers(env, carol, 0));
+            // can't cross holder's offer, holder's offer is removed
+            env(offer(alice, ETH(10), BTC(10)), txflags(tfPassive));
+            env(offer(carol, BTC(10), ETH(10)));
+            BEAST_EXPECT(expectOffers(env, alice, 0));
+            BEAST_EXPECT(expectOffers(env, carol, 1));
+        }
+
+        // MPTCanTrade is disabled
+        {
+            Env env(*this);
+            env.fund(XRP(1'000), gw, alice, carol);
+            MPTTester BTC(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, carol},
+                 .pay = 100,
+                 .flags = tfMPTCanTransfer,
+                 .mutableFlags = tmfMPTCanMutateCanTrade});
+            MPTTester ETH(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, carol},
+                 .pay = 100,
+                 .flags = tfMPTCanTrade,
+                 .mutableFlags = tmfMPTCanMutateCanTrade});
+
+            // Can't create
+            env(offer(gw, ETH(10), BTC(10)), ter(tecNO_PERMISSION));
             env.close();
         }
 
@@ -4068,11 +4107,18 @@ class MPToken_test : public beast::unit_test::suite
                 sendmax(ETH(10)),
                 ter(tecOBJECT_NOT_FOUND));
             env.close();
+            env(pay(alice, carol, ETH(10)),
+                sendmax(MPT(gw)(10)),
+                ter(tecOBJECT_NOT_FOUND));
+            env.close();
 
             // MPToken object doesn't exist
 
+            // holder and issuer fail
             env(pay(ed, carol, BTC(10)), sendmax(ETH(10)), ter(tecNO_AUTH));
             env(pay(carol, ed, BTC(10)), sendmax(ETH(10)), ter(tecNO_AUTH));
+            env(pay(ed, gw, BTC(10)), sendmax(ETH(10)), ter(tecNO_AUTH));
+            env(pay(gw, ed, BTC(10)), sendmax(ETH(10)), ter(tecNO_AUTH));
             env.close();
 
             // MPTRequireAuth is set
@@ -4113,7 +4159,7 @@ class MPToken_test : public beast::unit_test::suite
 
             // MPTCanTransfer is not set
 
-            // Fail regardless if source/destinaiton is the issuer or
+            // Fail regardless if source/destination is the issuer or
             // not since the offer is owned by a holder.
             BTC.set({.mutableFlags = tmfMPTClearCanTransfer});
             env(pay(ed, carol, BTC(10)),
@@ -4157,6 +4203,7 @@ class MPToken_test : public beast::unit_test::suite
             env.close();
             env(offer(gw, BTC(100), ETH(100)), txflags(tfPassive));
             env.close();
+            BEAST_EXPECT(expectOffers(env, bob, 2));
             env(pay(ed, carol, BTC(10)),
                 path(~BTC),
                 sendmax(ETH(10)),
@@ -4209,13 +4256,13 @@ class MPToken_test : public beast::unit_test::suite
                  .mutableFlags = tmfMPTCanMutateCanTransfer});
             // takerGets can transfer if:
             //  - CanTransfer is set
-            //  - Offer's owner is an issuer
+            //  - The offer's owner is the issuer
             //  - BookStep is the last step, which means strand's destination is
-            //    an issuer
+            //    the issuer
             // takerPays can transfer if
             //  - BookStep is the first step, which means strand's source is
-            //    an issuer
-            //  - Offer's owner is an issuer
+            //    the issuer
+            //  - The offer's owner is the issuer
             //  - Previous step is BookStep, which transfers per above
             //  - CanTransfer is set
             env(offer(bob, CAD(100), USD(100)), txflags(tfPassive));
@@ -4303,59 +4350,120 @@ class MPToken_test : public beast::unit_test::suite
             BEAST_EXPECT(expectOffers(env, gw, 0));
         }
 
-        // Holders are locked
+        // MPTCanTrade is not set
         {
-            Env env(*this);
+            Env env{*this, features};
             env.fund(XRP(1'000), gw, alice, carol, bob);
+            env.close();
             MPTTester BTC(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol, bob},
-                 .pay = 100,
-                 .flags = tfMPTCanLock | MPTDEXFlags});
+                 .pay = 1'000,
+                 .flags = tfMPTCanTransfer,
+                 .mutableFlags = tmfMPTCanMutateCanTrade});
             MPTTester ETH(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol, bob},
-                 .pay = 100,
-                 .flags = tfMPTCanLock | MPTDEXFlags});
+                 .pay = 1'000,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade,
+                 .mutableFlags = tmfMPTCanMutateCanTrade});
+            MPTTester USD(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, carol, bob},
+                 .pay = 1'000,
+                 .flags = tfMPTCanTransfer | tfMPTCanTrade,
+                 .mutableFlags = tmfMPTCanMutateCanTrade});
 
-            env(offer(bob, ETH(10), BTC(10)), txflags(tfPassive));
-            env(offer(bob, BTC(10), ETH(10)), txflags(tfPassive));
+            env(pay(alice, carol, ETH(1)),
+                path(~ETH),
+                sendmax(BTC(1)),
+                ter(tecNO_PERMISSION));
+            env(pay(alice, carol, BTC(1)),
+                path(~BTC),
+                sendmax(ETH(1)),
+                ter(tecNO_PERMISSION));
+            env.close();
 
-            auto test = [&](auto const& flag, auto const& err) {
-                BTC.set({.holder = carol, .flags = flag});
-                BTC.set({.holder = alice, .flags = flag});
-                ETH.set({.holder = carol, .flags = flag});
-                ETH.set({.holder = alice, .flags = flag});
+            BTC.set({.mutableFlags = tmfMPTSetCanTrade});
+            env(offer(bob, XRP(1), BTC(1)));
+            env(offer(bob, BTC(1), ETH(1)));
+            env(offer(bob, ETH(1), USD(1)));
+            env.close();
+            BTC.set({.mutableFlags = tmfMPTClearCanTrade});
+            env(pay(gw, carol, USD(1)),
+                path(~BTC, ~ETH, ~USD),
+                sendmax(XRP(1)),
+                ter(tecPATH_PARTIAL));
+            env.close();
+            BEAST_EXPECT(expectOffers(env, bob, 3));
+        }
 
-                env(pay(alice, carol, ETH(1)),
-                    path(~(MPT)ETH),
-                    txflags(tfNoRippleDirect),
-                    sendmax(BTC(1)),
-                    err);
+        // Holders are locked
+        {
+            auto test =
+                [&](auto const& flag, auto const& err, bool globalLock) {
+                    Env env(*this);
+                    env.fund(XRP(1'000), gw, alice, carol, bob);
+                    MPTTester BTC(
+                        {.env = env,
+                         .issuer = gw,
+                         .holders = {alice, carol, bob},
+                         .pay = 100,
+                         .flags = tfMPTCanLock | MPTDEXFlags});
+                    MPTTester ETH(
+                        {.env = env,
+                         .issuer = gw,
+                         .holders = {alice, carol, bob},
+                         .pay = 100,
+                         .flags = tfMPTCanLock | MPTDEXFlags});
 
-                env(pay(alice, carol, BTC(1)),
-                    path(~(MPT)BTC),
-                    txflags(tfNoRippleDirect),
-                    sendmax(ETH(1)),
-                    err);
+                    env(offer(bob, ETH(10), BTC(10)), txflags(tfPassive));
+                    env(offer(bob, BTC(10), ETH(10)), txflags(tfPassive));
 
-                env(pay(gw, carol, ETH(1)),
-                    path(~(MPT)ETH),
-                    txflags(tfNoRippleDirect),
-                    sendmax(BTC(1)),
-                    err);
+                    if (globalLock)
+                    {
+                        BTC.set({.flags = flag});
+                        ETH.set({.flags = flag});
+                    }
+                    else
+                    {
+                        BTC.set({.holder = carol, .flags = flag});
+                        BTC.set({.holder = alice, .flags = flag});
+                        ETH.set({.holder = carol, .flags = flag});
+                        ETH.set({.holder = alice, .flags = flag});
+                    }
 
-                env(pay(alice, gw, BTC(1)),
-                    path(~(MPT)BTC),
-                    txflags(tfNoRippleDirect),
-                    sendmax(ETH(1)),
-                    err);
-            };
+                    env(pay(alice, carol, ETH(1)),
+                        path(~ETH),
+                        txflags(tfNoRippleDirect),
+                        sendmax(BTC(1)),
+                        err);
 
-            test(tfMPTLock, ter(tecPATH_DRY));
-            test(tfMPTUnlock, ter(tesSUCCESS));
+                    env(pay(alice, carol, BTC(1)),
+                        path(~BTC),
+                        txflags(tfNoRippleDirect),
+                        sendmax(ETH(1)),
+                        err);
+
+                    env(pay(gw, carol, ETH(1)),
+                        path(~ETH),
+                        txflags(tfNoRippleDirect),
+                        sendmax(BTC(1)),
+                        err);
+
+                    env(pay(alice, gw, BTC(1)),
+                        path(~BTC),
+                        txflags(tfNoRippleDirect),
+                        sendmax(ETH(1)),
+                        err);
+                };
+
+            test(tfMPTLock, ter(tecPATH_DRY), true);
+            test(tfMPTLock, ter(tecPATH_DRY), false);
+            test(tfMPTUnlock, ter(tesSUCCESS), false);
         }
         {
             Env env(*this);
@@ -5947,6 +6055,10 @@ class MPToken_test : public beast::unit_test::suite
             env(check::create(alice, carol, MPT(gw)(50)),
                 ter(tecOBJECT_NOT_FOUND));
             env.close();
+            auto BTC = MPTTester({.env = env, .issuer = gw});
+            uint256 const chkId{getCheckIndex(gw, env.seq(gw))};
+            env(check::cash(carol, chkId, MPT(gw)(1)), ter(tecNO_ENTRY));
+            env.close();
         }
 
         // MPToken doesn't exist - can create check since MPToken will be
@@ -5996,10 +6108,9 @@ class MPToken_test : public beast::unit_test::suite
 
             mpt.set({.flags = tfMPTLock});
 
-            // Cash Check fails, holder and issuer
-            env(check::cash(carol, chkIdAlice, mpt(1)), ter(tecPATH_PARTIAL));
-            // tec is different if the source is the issuer (this is consistent
-            // with IOU)
+            // Cash Check fails, holder and issuer env(check::cash(carol,
+            // chkIdAlice, mpt(1)), ter(tecPATH_PARTIAL)); // tec is different
+            // if the source is the issuer (this is consistent with IOU)
             env(check::cash(carol, chkIdGw, mpt(2)), ter(tecFROZEN));
             env.close();
 
@@ -6008,6 +6119,32 @@ class MPToken_test : public beast::unit_test::suite
             // Cash Check succeeds, holder and issuer.
             env(check::cash(carol, chkIdAlice, mpt(1)));
             env(check::cash(carol, chkIdGw, mpt(2)));
+
+            // Individual lock
+            mpt.set({.holder = alice, .flags = tfMPTLock});
+            env(check::create(alice, carol, mpt(10)), ter(tecFROZEN));
+            env.close();
+            env(check::create(carol, alice, mpt(10)), ter(tecFROZEN));
+            env.close();
+
+            mpt.set({.holder = alice, .flags = tfMPTUnlock});
+            uint256 const chkId1{getCheckIndex(alice, env.seq(alice))};
+            env(check::create(alice, carol, mpt(10)));
+            env.close();
+            uint256 const chkId2{getCheckIndex(gw, env.seq(gw))};
+            env(check::create(gw, alice, mpt(10)));
+            env.close();
+            uint256 const chkId3{getCheckIndex(alice, env.seq(alice))};
+            env(check::create(alice, gw, mpt(10)));
+            env.close();
+            uint256 const chkId4{getCheckIndex(gw, env.seq(gw))};
+            env(check::create(gw, alice, mpt(10)));
+            env.close();
+            mpt.set({.holder = alice, .flags = tfMPTLock});
+            env(check::cash(carol, chkId1, mpt(1)), ter(tecPATH_PARTIAL));
+            env(check::cash(alice, chkId2, mpt(1)), ter(tecFROZEN));
+            env(check::cash(gw, chkId3, mpt(1)), ter(tecPATH_PARTIAL));
+            env(check::cash(alice, chkId4, mpt(1)), ter(tecFROZEN));
         }
 
         // MPTRequireAuth flag is set and the account is not authorized.
@@ -6094,6 +6231,35 @@ class MPToken_test : public beast::unit_test::suite
             env(pay(gw, alice, mpt(10)));
             env.close();
             env(check::cash(carol, checkId, mpt(10)));
+            env.close();
+        }
+
+        // MPTCanTrade disabled
+        {
+            Env env{*this, features};
+            env.fund(XRP(1'000), gw, alice, carol);
+            env.close();
+
+            MPTTester mpt(
+                {.env = env,
+                 .issuer = gw,
+                 .holders = {alice, carol},
+                 .flags = tfMPTCanTransfer,
+                 .mutableFlags = tmfMPTCanMutateCanTrade});
+
+            uint256 checkId{keylet::check(gw, env.seq(gw)).key};
+
+            // can't create
+            env(check::create(gw, alice, mpt(100)), ter(tecNO_PERMISSION));
+            env.close();
+            mpt.set({.account = gw, .mutableFlags = tmfMPTSetCanTrade});
+
+            // can't cash
+            checkId = keylet::check(gw, env.seq(gw)).key;
+            env(check::create(gw, carol, mpt(100)));
+            env.close();
+            mpt.set({.account = gw, .mutableFlags = tmfMPTClearCanTrade});
+            env(check::cash(carol, checkId, mpt(10)), ter(tecNO_PERMISSION));
             env.close();
         }
 
@@ -6553,7 +6719,8 @@ class MPToken_test : public beast::unit_test::suite
                  .issuer = gw,
                  .flags = tfMPTCanLock | MPTDEXFlags,
                  .mutableFlags = tmfMPTCanMutateRequireAuth |
-                     tmfMPTCanMutateCanTransfer | tmfMPTCanMutateCanClawback});
+                     tmfMPTCanMutateCanTransfer | tmfMPTCanMutateCanClawback |
+                     tmfMPTCanMutateCanTrade});
             auto EUR = MPTTester(
                 {.env = env,
                  .issuer = gw,
@@ -6635,6 +6802,15 @@ class MPToken_test : public beast::unit_test::suite
             // alice can create
             createDeleteAMM(alice);
 
+            // MPTCanTrade is not set
+
+            USD.set({.mutableFlags = tmfMPTSetCanTransfer});
+            USD.set({.mutableFlags = tmfMPTClearCanTrade});
+            // alice and issuer can't create
+            createFail(alice, tecNO_PERMISSION);
+            createFail(gw, tecNO_PERMISSION);
+            USD.set({.mutableFlags = tmfMPTSetCanTrade});
+
             //
             // AMMDeposit
             //
@@ -6706,7 +6882,7 @@ class MPToken_test : public beast::unit_test::suite
             USD.authorize({.account = gw, .holder = carol});
             amm.deposit({.account = carol, .tokens = 1'000});
 
-            // MPTCanTransfer is set
+            // MPTCanTransfer is not set
 
             USD.set({.mutableFlags = tmfMPTClearRequireAuth});
             USD.set({.mutableFlags = tmfMPTClearCanTransfer});
@@ -6726,6 +6902,18 @@ class MPToken_test : public beast::unit_test::suite
             // carol can deposit
             USD.set({.mutableFlags = tmfMPTSetCanTransfer});
             amm.deposit({.account = carol, .tokens = 1'000});
+
+            // MPTCanTrade is not set
+
+            USD.set({.mutableFlags = tmfMPTSetCanTransfer});
+            USD.set({.mutableFlags = tmfMPTClearCanTrade});
+            amm.deposit(
+                {.account = gw, .tokens = 1'000, .err = ter(tecNO_PERMISSION)});
+            amm.deposit(
+                {.account = carol,
+                 .tokens = 1'000,
+                 .err = ter(tecNO_PERMISSION)});
+            USD.set({.mutableFlags = tmfMPTSetCanTrade});
 
             //
             // AMMWithdraw
@@ -6812,6 +7000,16 @@ class MPToken_test : public beast::unit_test::suite
             USD.set({.mutableFlags = tmfMPTSetCanTransfer});
             amm.withdraw(
                 {.account = carol, .asset1Out = USD(1), .asset2Out = EUR(1)});
+
+            USD.set({.mutableFlags = tmfMPTSetCanTransfer});
+            USD.set({.mutableFlags = tmfMPTClearCanTrade});
+            amm.withdraw(
+                {.account = gw, .tokens = 1'000, .err = ter(tecNO_PERMISSION)});
+            amm.withdraw(
+                {.account = carol,
+                 .tokens = 1'000,
+                 .err = ter(tecNO_PERMISSION)});
+            USD.set({.mutableFlags = tmfMPTSetCanTrade});
 
             // MPToken created on withdraw
 

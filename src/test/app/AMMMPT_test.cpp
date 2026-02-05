@@ -136,7 +136,7 @@ private:
                 env, alice, BTC(20'000), BTC(10'000), ter(temBAD_AMM_TOKENS));
         }
 
-        // MPTCanTransfer is not set and AMM creator is not the issuer of MPT
+        // MPTCanTrade is not set and AMM creator is not the issuer of MPT
         {
             Env env{*this};
             env.fund(XRP(30'000), alice, gw);
