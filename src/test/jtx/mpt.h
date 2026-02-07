@@ -281,7 +281,7 @@ public:
     friend BookSpec
     operator~(MPTTester const& mpt)
     {
-        return ~(MPT)mpt;
+        return ~static_cast<MPT>(mpt);
     }
 
 private:
