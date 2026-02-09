@@ -107,8 +107,8 @@ struct BidArg
 
 struct ClawbackArg
 {
-    std::optional<Account> issuer = std::nullopt;
-    std::optional<Account> holder = std::nullopt;
+    Account issuer;
+    Account holder;
     std::optional<std::pair<Asset, Asset>> assets = std::nullopt;
     std::optional<STAmount> amount = std::nullopt;
     std::optional<std::uint32_t> flags = std::nullopt;

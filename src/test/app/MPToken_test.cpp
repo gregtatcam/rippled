@@ -9,15 +9,15 @@
 #include <test/jtx/trust.h>
 #include <test/jtx/xchain_bridge.h>
 
+#include <xrpld/app/misc/AMMHelpers.h>
+#include <xrpld/app/paths/detail/StepChecks.h>
+
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/beast/utility/Zero.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/jss.h>
-
-#include "xrpld/app/misc/AMMHelpers.h"
-#include "xrpld/app/paths/detail/StepChecks.h"
 
 namespace xrpl {
 namespace test {
