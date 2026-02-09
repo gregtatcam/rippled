@@ -274,10 +274,10 @@ Functions</h2></td></tr>
 <tr class="separator:a01e8a79935362d23faa6f8e10aa4121a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab16f52fb9807eaac88d112015e2f712c" id="r_ab16f52fb9807eaac88d112015e2f712c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1SlabAllocatorSet.html">SlabAllocatorSet</a>&lt; <a class="el" href="classxrpl_1_1SHAMapItem.html">SHAMapItem</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#ab16f52fb9807eaac88d112015e2f712c">slabber</a> ({ { 128, <a class="el" href="namespacexrpl.html#a87dbe1831075eeaf14847f09dc2b0988">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(60)) }, { 192, <a class="el" href="namespacexrpl.html#a87dbe1831075eeaf14847f09dc2b0988">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(46)) }, { 272, <a class="el" href="namespacexrpl.html#a87dbe1831075eeaf14847f09dc2b0988">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(60)) }, { 384, <a class="el" href="namespacexrpl.html#a87dbe1831075eeaf14847f09dc2b0988">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(56)) }, { 564, <a class="el" href="namespacexrpl.html#a87dbe1831075eeaf14847f09dc2b0988">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(40)) }, { 772, <a class="el" href="namespacexrpl.html#a87dbe1831075eeaf14847f09dc2b0988">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(46)) }, { 1052, <a class="el" href="namespacexrpl.html#a87dbe1831075eeaf14847f09dc2b0988">megabytes</a>(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a>(60)) }, })</td></tr>
 <tr class="separator:ab16f52fb9807eaac88d112015e2f712c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac75aadb29b03de461d13f8bd75eda11d" id="r_ac75aadb29b03de461d13f8bd75eda11d"><td class="memTemplParams" colspan="2">template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp;        std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </td></tr>
+<tr class="memitem:ac75aadb29b03de461d13f8bd75eda11d" id="r_ac75aadb29b03de461d13f8bd75eda11d"><td class="memTemplParams" colspan="2">template&lt;class V , class N , class  = std::enable_if_t&lt;std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp; std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </td></tr>
 <tr class="memitem:ac75aadb29b03de461d13f8bd75eda11d"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#ac75aadb29b03de461d13f8bd75eda11d">internalDirNext</a> (V &amp;view, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> const &amp;<a class="el" href="namespacexrpl.html#a5a08adf1bad37c44d2ada7ae983dd12f">root</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; N &gt; &amp;page, unsigned int &amp;index, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> &amp;entry)</td></tr>
 <tr class="separator:ac75aadb29b03de461d13f8bd75eda11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88d31bef9c5d4d58370a6306c685f192" id="r_a88d31bef9c5d4d58370a6306c685f192"><td class="memTemplParams" colspan="2">template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp;        std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </td></tr>
+<tr class="memitem:a88d31bef9c5d4d58370a6306c685f192" id="r_a88d31bef9c5d4d58370a6306c685f192"><td class="memTemplParams" colspan="2">template&lt;class V , class N , class  = std::enable_if_t&lt;std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp; std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </td></tr>
 <tr class="memitem:a88d31bef9c5d4d58370a6306c685f192"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a88d31bef9c5d4d58370a6306c685f192">internalDirFirst</a> (V &amp;view, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> const &amp;<a class="el" href="namespacexrpl.html#a5a08adf1bad37c44d2ada7ae983dd12f">root</a>, <a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; N &gt; &amp;page, unsigned int &amp;index, <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> &amp;entry)</td></tr>
 <tr class="separator:a88d31bef9c5d4d58370a6306c685f192"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a44f06028b1bda4ff4d7b4bf9ff51b179" id="r_a44f06028b1bda4ff4d7b4bf9ff51b179"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classxrpl_1_1STAmount.html">STAmount</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a44f06028b1bda4ff4d7b4bf9ff51b179">as_amount</a> (<a class="el" href="structxrpl_1_1Rate.html">Rate</a> const &amp;rate)</td></tr>
@@ -461,10 +461,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a6a87d3086b646172c991616723620379"><td class="memTemplItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="structxrpl_1_1detail_1_1MessageHeader.html">MessageHeader</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a6a87d3086b646172c991616723620379">parseMessageHeader</a> (boost::system::error_code &amp;ec, BufferSequence const &amp;bufs, <a class="elRef" href="http://en.cppreference.com/w/cpp/types/size_t.html">std::size_t</a> size)</td></tr>
 <tr class="memdesc:a6a87d3086b646172c991616723620379"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parse a message header.  <br /></td></tr>
 <tr class="separator:a6a87d3086b646172c991616723620379"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa2aed40dc81bf145c4e5dac1a6ae876a" id="r_aa2aed40dc81bf145c4e5dac1a6ae876a"><td class="memTemplParams" colspan="2">template&lt;class T , class Buffers , class  = std::enable_if_t&lt;        std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </td></tr>
+<tr class="memitem:aa2aed40dc81bf145c4e5dac1a6ae876a" id="r_aa2aed40dc81bf145c4e5dac1a6ae876a"><td class="memTemplParams" colspan="2">template&lt;class T , class Buffers , class  = std::enable_if_t&lt;std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </td></tr>
 <tr class="memitem:aa2aed40dc81bf145c4e5dac1a6ae876a"><td class="memTemplItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#aa2aed40dc81bf145c4e5dac1a6ae876a">parseMessageContent</a> (<a class="el" href="structxrpl_1_1detail_1_1MessageHeader.html">MessageHeader</a> const &amp;header, Buffers const &amp;buffers)</td></tr>
 <tr class="separator:aa2aed40dc81bf145c4e5dac1a6ae876a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1386c6e77672756195632f4cca2c1e80" id="r_a1386c6e77672756195632f4cca2c1e80"><td class="memTemplParams" colspan="2">template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&lt;        std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </td></tr>
+<tr class="memitem:a1386c6e77672756195632f4cca2c1e80" id="r_a1386c6e77672756195632f4cca2c1e80"><td class="memTemplParams" colspan="2">template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&lt;std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </td></tr>
 <tr class="memitem:a1386c6e77672756195632f4cca2c1e80"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacexrpl_1_1detail.html#a1386c6e77672756195632f4cca2c1e80">invoke</a> (<a class="el" href="structxrpl_1_1detail_1_1MessageHeader.html">MessageHeader</a> const &amp;header, Buffers const &amp;buffers, Handler &amp;handler)</td></tr>
 <tr class="separator:a1386c6e77672756195632f4cca2c1e80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -505,7 +505,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hardened__hash_8h_source.html#l00016">16</a> of file <a class="el" href="hardened__hash_8h_source.html">hardened_hash.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hardened__hash_8h_source.html#l00015">15</a> of file <a class="el" href="hardened__hash_8h_source.html">hardened_hash.h</a>.</p>
 
 </div>
 </div>
@@ -523,7 +523,7 @@ template&lt;class Engine , class <a class="el" href="namespacexrpl.html#ad3f1943
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="include_2xrpl_2basics_2random_8h_source.html#l00032">32</a> of file <a class="el" href="include_2xrpl_2basics_2random_8h_source.html">include/xrpl/basics/random.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="include_2xrpl_2basics_2random_8h_source.html#l00030">30</a> of file <a class="el" href="include_2xrpl_2basics_2random_8h_source.html">include/xrpl/basics/random.h</a>.</p>
 
 </div>
 </div>
@@ -595,7 +595,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hardened__hash__test_8cpp_source.html#l00073">73</a> of file <a class="el" href="hardened__hash__test_8cpp_source.html">hardened_hash_test.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hardened__hash__test_8cpp_source.html#l00072">72</a> of file <a class="el" href="hardened__hash__test_8cpp_source.html">hardened_hash_test.cpp</a>.</p>
 
 </div>
 </div>
@@ -611,7 +611,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="multi__runner_8h_source.html#l00027">27</a> of file <a class="el" href="multi__runner_8h_source.html">multi_runner.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="multi__runner_8h_source.html#l00026">26</a> of file <a class="el" href="multi__runner_8h_source.html">multi_runner.h</a>.</p>
 
 </div>
 </div>
@@ -627,7 +627,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Work_8h_source.html#l00011">11</a> of file <a class="el" href="Work_8h_source.html">Work.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Work_8h_source.html#l00010">10</a> of file <a class="el" href="Work_8h_source.html">Work.h</a>.</p>
 
 </div>
 </div>
@@ -657,7 +657,7 @@ template&lt;class T &gt; </div>
 <tr><td class="fieldname"><a id="a230ef83732e01df4f26a546cfadcbab0aea9f91b2cda019730f2891bd12a7a4d6" name="a230ef83732e01df4f26a546cfadcbab0aea9f91b2cda019730f2891bd12a7a4d6"></a>extra&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00232">232</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8h_source.html#l00218">218</a> of file <a class="el" href="LendingHelpers_8h_source.html">LendingHelpers.h</a>.</p>
 
 </div>
 </div>
@@ -686,7 +686,7 @@ template&lt;class T &gt; </div>
 <tr><td class="fieldname"><a id="ab296ec0b00759ef2a55fc80e5fb35827a905a88ab91dd81b2eac7aee14c283b7c" name="ab296ec0b00759ef2a55fc80e5fb35827a905a88ab91dd81b2eac7aee14c283b7c"></a>AccountTransactions&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="Node_8h_source.html#l00012">12</a> of file <a class="el" href="Node_8h_source.html">Node.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8h_source.html#l00011">11</a> of file <a class="el" href="Node_8h_source.html">Node.h</a>.</p>
 
 </div>
 </div>
@@ -716,7 +716,7 @@ template&lt;bool  = true&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="hardened__hash_8h_source.html#l00020">20</a> of file <a class="el" href="hardened__hash_8h_source.html">hardened_hash.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hardened__hash_8h_source.html#l00019">19</a> of file <a class="el" href="hardened__hash_8h_source.html">hardened_hash.h</a>.</p>
 
 </div>
 </div>
@@ -737,7 +737,7 @@ template&lt;class  = void&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LocalValue_8h_source.html#l00056">56</a> of file <a class="el" href="LocalValue_8h_source.html">LocalValue.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LocalValue_8h_source.html#l00055">55</a> of file <a class="el" href="LocalValue_8h_source.html">LocalValue.h</a>.</p>
 
 </div>
 </div>
@@ -768,7 +768,7 @@ template&lt;class  = void&gt; </div>
 <p>Spinlocks caught in tight loops can result in the processor's pipeline filling up with comparison operations, resulting in a misprediction at the time the lock is finally acquired, necessitating pipeline flushing which is ridiculously expensive and results in very high latency.</p>
 <p>This function instructs the processor to "pause" for some architecture specific amount of time, to prevent this. </p>
 
-<p class="definition">Definition at line <a class="el" href="spinlock_8h_source.html#l00030">30</a> of file <a class="el" href="spinlock_8h_source.html">spinlock.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="spinlock_8h_source.html#l00029">29</a> of file <a class="el" href="spinlock_8h_source.html">spinlock.h</a>.</p>
 
 </div>
 </div>
@@ -790,7 +790,7 @@ template&lt;class T , class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00145">145</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00144">144</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
 
 </div>
 </div>
@@ -820,7 +820,7 @@ template&lt;class T , class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00153">153</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00152">152</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
 
 </div>
 </div>
@@ -850,7 +850,7 @@ template&lt;class T , class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00159">159</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="STVar_8h_source.html#l00158">158</a> of file <a class="el" href="STVar_8h_source.html">STVar.h</a>.</p>
 
 </div>
 </div>
@@ -873,7 +873,7 @@ template&lt;class T , class... Args&gt; </div>
 <p>Amendments that this server supports.</p>
 <p>Whether they are enabled depends on the <a class="el" href="classxrpl_1_1Rules.html" title="Rules controlling protocol behavior.">Rules</a> defined in the validated ledger </p>
 
-<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00341">341</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00314">314</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
 
 </div>
 </div>
@@ -895,7 +895,7 @@ template&lt;class T , class... Args&gt; </div>
 <p>Amendments that this server won't vote for by default. </p>
 <p>This function is only used in unit tests. </p>
 
-<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00348">348</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00321">321</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
 
 </div>
 </div>
@@ -917,7 +917,7 @@ template&lt;class T , class... Args&gt; </div>
 <p>Amendments that this server will vote for by default. </p>
 <p>This function is only used in unit tests. </p>
 
-<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00355">355</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Feature_8cpp_source.html#l00328">328</a> of file <a class="el" href="Feature_8cpp_source.html">Feature.cpp</a>.</p>
 
 </div>
 </div>
@@ -961,7 +961,7 @@ template&lt;class T , class... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HashPrefix_8h_source.html#l00013">13</a> of file <a class="el" href="HashPrefix_8h_source.html">HashPrefix.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HashPrefix_8h_source.html#l00012">12</a> of file <a class="el" href="HashPrefix_8h_source.html">HashPrefix.h</a>.</p>
 
 </div>
 </div>
@@ -989,7 +989,7 @@ template&lt;class T , class... Args&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp;        std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </div>
+template&lt;class V , class N , class  = std::enable_if_t&lt;std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp; std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">bool xrpl::detail::internalDirNext </td>
@@ -1029,7 +1029,7 @@ template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_sam
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00034">34</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00032">32</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -1039,7 +1039,7 @@ template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_sam
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp;        std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </div>
+template&lt;class V , class N , class  = std::enable_if_t&lt;std::is_same_v&lt;std::remove_cv_t&lt;N&gt;, SLE&gt; &amp;&amp; std::is_base_of_v&lt;ReadView, V&gt;&gt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">bool xrpl::detail::internalDirFirst </td>
@@ -1079,7 +1079,7 @@ template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_sam
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00082">82</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="View_8cpp_source.html#l00071">71</a> of file <a class="el" href="View_8cpp_source.html">View.cpp</a>.</p>
 
 </div>
 </div>
@@ -1225,7 +1225,7 @@ template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_sam
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Config__test_8cpp_source.html#l00193">193</a> of file <a class="el" href="Config__test_8cpp_source.html">Config_test.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Config__test_8cpp_source.html#l00189">189</a> of file <a class="el" href="Config__test_8cpp_source.html">Config_test.cpp</a>.</p>
 
 </div>
 </div>
@@ -1303,7 +1303,7 @@ template&lt;class V , class N , class  = std::enable_if_t&lt;        std::is_sam
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="owners_8cpp_source.html#l00019">19</a> of file <a class="el" href="owners_8cpp_source.html">owners.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="owners_8cpp_source.html#l00018">18</a> of file <a class="el" href="owners_8cpp_source.html">owners.cpp</a>.</p>
 
 </div>
 </div>
@@ -1341,7 +1341,7 @@ template&lt;class Cond , class... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="require_8h_source.html#l00015">15</a> of file <a class="el" href="require_8h_source.html">require.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="require_8h_source.html#l00014">14</a> of file <a class="el" href="require_8h_source.html">require.h</a>.</p>
 
 </div>
 </div>
@@ -1373,7 +1373,7 @@ template&lt;class Rep , class Period &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="import__test_8cpp_source.html#l00075">75</a> of file <a class="el" href="import__test_8cpp_source.html">import_test.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="import__test_8cpp_source.html#l00072">72</a> of file <a class="el" href="import__test_8cpp_source.html">import_test.cpp</a>.</p>
 
 </div>
 </div>
@@ -1395,7 +1395,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="import__test_8cpp_source.html#l00164">164</a> of file <a class="el" href="import__test_8cpp_source.html">import_test.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="import__test_8cpp_source.html#l00161">161</a> of file <a class="el" href="import__test_8cpp_source.html">import_test.cpp</a>.</p>
 
 </div>
 </div>
@@ -1435,7 +1435,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMHelpers_8h_source.html#l00021">21</a> of file <a class="el" href="AMMHelpers_8h_source.html">AMMHelpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMHelpers_8h_source.html#l00020">20</a> of file <a class="el" href="AMMHelpers_8h_source.html">AMMHelpers.h</a>.</p>
 
 </div>
 </div>
@@ -1455,7 +1455,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMHelpers_8h_source.html#l00635">635</a> of file <a class="el" href="AMMHelpers_8h_source.html">AMMHelpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMHelpers_8h_source.html#l00572">572</a> of file <a class="el" href="AMMHelpers_8h_source.html">AMMHelpers.h</a>.</p>
 
 </div>
 </div>
@@ -1475,7 +1475,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="AMMHelpers_8h_source.html#l00643">643</a> of file <a class="el" href="AMMHelpers_8h_source.html">AMMHelpers.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="AMMHelpers_8h_source.html#l00580">580</a> of file <a class="el" href="AMMHelpers_8h_source.html">AMMHelpers.h</a>.</p>
 
 </div>
 </div>
@@ -1505,7 +1505,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00088">88</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00084">84</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1535,7 +1535,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00099">99</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00095">95</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1571,7 +1571,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00122">122</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00115">115</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1607,7 +1607,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00144">144</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00133">133</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1649,7 +1649,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00165">165</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00153">153</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1691,7 +1691,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00183">183</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00170">170</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1745,7 +1745,7 @@ template&lt;class Period , class Rep &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00216">216</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00203">203</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1813,7 +1813,7 @@ template&lt;class NumberProxy , class UInt32Proxy , class UInt32OptionalProxy &g
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00259">259</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00245">245</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1885,7 +1885,7 @@ template&lt;class NumberProxy , class UInt32Proxy , class UInt32OptionalProxy &g
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00384">384</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00361">361</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -1971,7 +1971,7 @@ template&lt;class NumberProxy &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00576">576</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00525">525</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -2055,7 +2055,7 @@ template&lt;class NumberProxy &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00703">703</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00640">640</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -2175,7 +2175,7 @@ template&lt;class NumberProxy &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00805">805</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00731">731</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -2247,7 +2247,7 @@ template&lt;class NumberProxy &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00943">943</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l00859">859</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -2301,7 +2301,7 @@ template&lt;class NumberProxy &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01167">1167</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="LendingHelpers_8cpp_source.html#l01057">1057</a> of file <a class="el" href="LendingHelpers_8cpp_source.html">LendingHelpers.cpp</a>.</p>
 
 </div>
 </div>
@@ -2329,7 +2329,7 @@ template&lt;class NumberProxy &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TxQ_8cpp_source.html#l00179">179</a> of file <a class="el" href="TxQ_8cpp_source.html">TxQ.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TxQ_8cpp_source.html#l00160">160</a> of file <a class="el" href="TxQ_8cpp_source.html">TxQ.cpp</a>.</p>
 
 </div>
 </div>
@@ -2367,7 +2367,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="TrustLine_8cpp_source.html#l00045">45</a> of file <a class="el" href="TrustLine_8cpp_source.html">TrustLine.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="TrustLine_8cpp_source.html#l00041">41</a> of file <a class="el" href="TrustLine_8cpp_source.html">TrustLine.cpp</a>.</p>
 
 </div>
 </div>
@@ -2458,7 +2458,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Struct <a class="el" href="structxrpl_1_1detail_1_1DatabasePairValid.html">DatabasePairValid</a> which contain unique pointers to ledger and transaction databases and flag if opening was successful. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00051">51</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00049">49</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2498,7 +2498,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> sequence or none if no ledgers exist. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00108">108</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00100">100</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2538,7 +2538,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> sequence or none if no ledgers exist. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00118">118</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00110">110</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2584,7 +2584,7 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00128">128</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00120">120</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2630,7 +2630,7 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00135">135</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00126">126</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2670,7 +2670,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Number.html" title="Number is a floating point type that can represent a wide range of values.">Number</a> of rows. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00145">145</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00132">132</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2710,7 +2710,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Struct CountMinMax which contain minimum sequence, maximum sequence and number of rows. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00157">157</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00144">144</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2771,7 +2771,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True is saving was successful. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00172">172</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00158">158</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2826,7 +2826,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or no value if the ledger was not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00391">391</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00353">353</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2873,7 +2873,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00461">461</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00417">417</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2913,7 +2913,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00472">472</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00425">425</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -2960,7 +2960,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00480">480</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00433">433</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3007,7 +3007,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> info or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00492">492</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00441">441</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3054,7 +3054,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Ledger.html" title="Holds a ledger.">Ledger</a> or none if ledger not found. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00504">504</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00449">449</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3094,7 +3094,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Hash of the ledger. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00515">515</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00457">457</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3141,7 +3141,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Struct <a class="el" href="structxrpl_1_1LedgerHashPair.html">LedgerHashPair</a> which contain hashes of the ledger and its parent ledger. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00545">545</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00486">486</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3195,7 +3195,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Map which points sequence number of found ledger to the struct <a class="el" href="structxrpl_1_1LedgerHashPair.html">LedgerHashPair</a> which contains ledger hash and its parent hash. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00576">576</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00514">514</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3249,7 +3249,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of shared pointers to transactions sorted in descending order by ledger sequence. Also number of transactions if count == true. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00621">621</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00550">550</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3332,7 +3332,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>SQL query string. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00688">688</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00608">608</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3408,7 +3408,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted by account sequence in the specified order along with the number of transactions processed or skipped. If this number is &gt;= 0, then it represents the number of transactions processed, if it is &lt; 0, then -number represents the number of transactions skipped. We need to skip some number of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00784">784</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00696">696</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3469,7 +3469,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted in ascending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00864">864</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00764">764</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3530,7 +3530,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of pairs of found transactions and their metadata sorted in descending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00875">875</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00775">775</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3599,7 +3599,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples each containing (the found transactions, their metadata, and their account sequences) sorted by account sequence in the specified order along with the number of transactions processed or skipped. If this number is &gt;= 0, then it represents the number of transactions processed, if it is &lt; 0, then -number represents the number of transactions skipped. We need to skip some number of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00906">906</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00806">806</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3653,7 +3653,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in ascending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00964">964</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00857">857</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3707,7 +3707,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in descending order by account sequence. Also number of transactions processed or skipped. If this number is &gt;= 0, then it means number of transactions processed, if it is &lt; 0, then -number means number of transactions skipped. We need to skip some quantity of transactions if option offset is &gt; 0 in the options structure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00974">974</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00867">867</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3783,7 +3783,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in the specified order by account sequence, a marker for the next search if the search was not finished and the number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01003">1003</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l00896">896</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3844,7 +3844,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in ascending order by account sequence and marker for next search if search not finished. Also number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01157">1157</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01039">1039</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3905,7 +3905,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Vector of tuples of found transactions, their metadata and account sequences sorted in descending order by account sequence and marker for next search if search not finished. Also number of transactions processed during this call. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01171">1171</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01050">1050</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -3966,7 +3966,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classxrpl_1_1Transaction.html">Transaction</a> and its metadata if found, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6aa181a603769c1f98ad927e7367c7aa51">TxSearched::all</a> if range given and all ledgers from range are present in the database, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6a03d59e663c1af9ac33a9949d1193505a">TxSearched::some</a> if range given and not all ledgers are present, <a class="el" href="namespacexrpl.html#ab2fee6d98c0fcdead09c04e35ab453a6aad921d60486366258809553a3db49a4a">TxSearched::unknown</a> if range not given or deserializing error occurred. In the last case error code modified in ec link parameter, in other cases default error code remained. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01185">1185</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01061">1061</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -4013,7 +4013,7 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if space is available. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01266">1266</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8cpp_source.html#l01136">1136</a> of file <a class="el" href="Node_8cpp_source.html">Node.cpp</a>.</p>
 
 </div>
 </div>
@@ -4047,7 +4047,7 @@ template&lt;class T &gt; </div>
 <p>Normally called from preflight1.</p>
 <p>Normally called from preflight1 with ctx.tx. </p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00085">85</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00082">82</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -4086,7 +4086,7 @@ template&lt;class T &gt; </div>
 <p>Checks the special signing key state needed for simulation. </p>
 <p>Normally called from preflight2 with ctx.tx. </p>
 
-<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00097">97</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Transactor_8cpp_source.html#l00093">93</a> of file <a class="el" href="Transactor_8cpp_source.html">Transactor.cpp</a>.</p>
 
 </div>
 </div>
@@ -4152,7 +4152,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="SociDB_8cpp_source.html#l00044">44</a> of file <a class="el" href="SociDB_8cpp_source.html">SociDB.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="SociDB_8cpp_source.html#l00039">39</a> of file <a class="el" href="SociDB_8cpp_source.html">SociDB.cpp</a>.</p>
 
 </div>
 </div>
@@ -4174,7 +4174,7 @@ template&lt;typename BufferSequence &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00125">125</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00124">124</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -4196,7 +4196,7 @@ template&lt;typename BufferSequence &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00133">133</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00131">131</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -4247,7 +4247,7 @@ template&lt;class BufferSequence &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00150">150</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00147">147</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -4257,7 +4257,7 @@ template&lt;class BufferSequence &gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T , class Buffers , class  = std::enable_if_t&lt;        std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </div>
+template&lt;class T , class Buffers , class  = std::enable_if_t&lt;std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html">std::shared_ptr</a>&lt; T &gt; xrpl::detail::parseMessageContent </td>
@@ -4279,7 +4279,7 @@ template&lt;class T , class Buffers , class  = std::enable_if_t&lt;        std::
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00247">247</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00235">235</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -4289,7 +4289,7 @@ template&lt;class T , class Buffers , class  = std::enable_if_t&lt;        std::
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&lt;        std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </div>
+template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&lt;std::is_base_of&lt;::google::protobuf::Message, T&gt;::value&gt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">bool xrpl::detail::invoke </td>
@@ -4317,7 +4317,7 @@ template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00282">282</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ProtocolMessage_8h_source.html#l00265">265</a> of file <a class="el" href="ProtocolMessage_8h_source.html">ProtocolMessage.h</a>.</p>
 
 </div>
 </div>
@@ -4378,7 +4378,7 @@ template&lt;class T , class Buffers , class Handler , class  = std::enable_if_t&
 <div class="line"> </div>
 <div class="line">    )</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="Feature_8h_source.html#l00095">95</a> of file <a class="el" href="Feature_8h_source.html">Feature.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Feature_8h_source.html#l00094">94</a> of file <a class="el" href="Feature_8h_source.html">Feature.h</a>.</p>
 
 </div>
 </div>
@@ -4404,7 +4404,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="MultiApiJson_8h_source.html#l00019">19</a> of file <a class="el" href="MultiApiJson_8h_source.html">MultiApiJson.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="MultiApiJson_8h_source.html#l00018">18</a> of file <a class="el" href="MultiApiJson_8h_source.html">MultiApiJson.h</a>.</p>
 
 </div>
 </div>
@@ -4553,7 +4553,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="Node_8h_source.html#l00013">13</a> of file <a class="el" href="Node_8h_source.html">Node.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="Node_8h_source.html#l00012">12</a> of file <a class="el" href="Node_8h_source.html">Node.h</a>.</p>
 
 </div>
 </div>

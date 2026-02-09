@@ -1,33 +1,35 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$classBasicApp.html" title=" " alt="" coords="275,55,357,80"/>
-<area shape="rect" id="Node000001" href="$classxrpl_1_1ApplicationImp.html" title=" " alt="" coords="489,79,643,104"/>
-<area shape="poly" id="edge7_Node000000_Node000001" title=" " alt="" coords="371,70,489,81,489,87,371,75"/>
-<area shape="rect" id="Node000010" href="$classxrpl_1_1test_1_1Overlay.html" title="Simulate server&#39;s OverlayImpl." alt="" coords="247,367,385,392"/>
-<area shape="rect" id="Node000009" href="$classxrpl_1_1test_1_1OverlaySim.html" title=" " alt="" coords="484,367,648,392"/>
-<area shape="poly" id="edge8_Node000010_Node000009" title=" " alt="" coords="399,377,484,377,484,382,399,382"/>
-<area shape="rect" id="Node000003" href="$classbeast_1_1PropertyStream_1_1Source.html" title="Subclasses can be called to write to a stream and have children." alt="" coords="5,146,173,186"/>
-<area shape="rect" id="Node000002" href="$classxrpl_1_1Application.html" title=" " alt="" coords="252,104,380,129"/>
-<area shape="poly" id="edge9_Node000003_Node000002" title=" " alt="" coords="186,142,256,127,258,132,187,147"/>
-<area shape="rect" id="Node000004" href="$classxrpl_1_1LedgerCleaner.html" title="Check the ledger/transaction databases to make sure they have continuity." alt="" coords="241,203,391,228"/>
-<area shape="poly" id="edge11_Node000003_Node000004" title=" " alt="" coords="187,185,258,200,256,205,186,190"/>
-<area shape="rect" id="Node000006" href="$classxrpl_1_1Overlay.html" title="Manages the set of connected peers." alt="" coords="263,252,369,277"/>
-<area shape="poly" id="edge13_Node000003_Node000006" title=" " alt="" coords="134,191,176,216,222,238,263,251,262,256,220,243,173,221,131,196"/>
-<area shape="rect" id="Node000012" href="$classxrpl_1_1PeerFinder_1_1Manager.html" title="Maintains a set of IP addresses used for getting into the network." alt="" coords="221,5,411,31"/>
-<area shape="poly" id="edge15_Node000003_Node000012" title=" " alt="" coords="113,134,159,85,188,61,220,40,247,28,249,33,223,44,192,65,163,89,117,137"/>
-<area shape="rect" id="Node000014" href="$classxrpl_1_1Resource_1_1Manager.html" title="Tracks load and resource consumption." alt="" coords="226,153,406,179"/>
-<area shape="poly" id="edge17_Node000003_Node000014" title=" " alt="" coords="187,163,226,163,226,169,187,169"/>
-<area shape="poly" id="edge10_Node000002_Node000001" title=" " alt="" coords="394,106,489,96,489,102,394,111"/>
-<area shape="rect" id="Node000005" href="$classxrpl_1_1LedgerCleanerImp.html" title=" " alt="" coords="479,203,653,228"/>
-<area shape="poly" id="edge12_Node000004_Node000005" title=" " alt="" coords="404,213,478,213,478,218,404,218"/>
-<area shape="rect" id="Node000007" href="$classxrpl_1_1OverlayImpl.html" title=" " alt="" coords="499,252,633,277"/>
-<area shape="poly" id="edge14_Node000006_Node000007" title=" " alt="" coords="384,262,499,262,499,267,384,267"/>
-<area shape="rect" id="Node000013" href="$classxrpl_1_1PeerFinder_1_1ManagerImp.html" title=" " alt="" coords="459,5,673,31"/>
-<area shape="poly" id="edge16_Node000012_Node000013" title=" " alt="" coords="425,15,459,15,459,21,425,21"/>
-<area shape="rect" id="Node000015" href="$classxrpl_1_1Resource_1_1ManagerImp.html" title=" " alt="" coords="463,153,669,179"/>
-<area shape="poly" id="edge18_Node000014_Node000015" title=" " alt="" coords="420,163,463,163,463,169,420,169"/>
-<area shape="rect" id="Node000008" href="$classxrpl_1_1reduce__relay_1_1SquelchHandler.html" title="Abstract class." alt="" coords="247,302,385,342"/>
-<area shape="poly" id="edge20_Node000008_Node000009" title=" " alt="" coords="399,338,511,364,509,369,398,343"/>
-<area shape="poly" id="edge19_Node000008_Node000007" title=" " alt="" coords="398,301,509,275,511,280,399,306"/>
-<area shape="rect" id="Node000011" href="$structxrpl_1_1test_1_1reduce__relay__test_1_1Handler.html" title=" " alt="" coords="489,302,643,342"/>
-<area shape="poly" id="edge21_Node000008_Node000011" title=" " alt="" coords="399,319,489,319,489,325,399,325"/>
+<area shape="rect" id="Node000000" href="$classBasicApp.html" title=" " alt="" coords="275,5,357,31"/>
+<area shape="rect" id="Node000001" href="$classxrpl_1_1ApplicationImp.html" title=" " alt="" coords="489,31,643,56"/>
+<area shape="poly" id="edge7_Node000000_Node000001" title=" " alt="" coords="371,21,489,33,489,38,371,26"/>
+<area shape="rect" id="Node000011" href="$classxrpl_1_1test_1_1Overlay.html" title="Simulate server&#39;s OverlayImpl." alt="" coords="247,367,385,392"/>
+<area shape="rect" id="Node000010" href="$classxrpl_1_1test_1_1OverlaySim.html" title=" " alt="" coords="484,367,648,392"/>
+<area shape="poly" id="edge8_Node000011_Node000010" title=" " alt="" coords="399,377,484,377,484,382,399,382"/>
+<area shape="rect" id="Node000003" href="$classxrpl_1_1ServiceRegistry.html" title="Service registry for dependency injection." alt="" coords="11,55,168,80"/>
+<area shape="rect" id="Node000002" href="$classxrpl_1_1Application.html" title=" " alt="" coords="252,55,380,80"/>
+<area shape="poly" id="edge9_Node000003_Node000002" title=" " alt="" coords="182,65,252,65,252,70,182,70"/>
+<area shape="poly" id="edge10_Node000002_Node000001" title=" " alt="" coords="394,57,489,48,489,53,394,63"/>
+<area shape="rect" id="Node000004" href="$classbeast_1_1PropertyStream_1_1Source.html" title="Subclasses can be called to write to a stream and have children." alt="" coords="5,146,173,186"/>
+<area shape="poly" id="edge11_Node000004_Node000002" title=" " alt="" coords="131,136,173,111,220,89,254,78,256,83,222,94,176,116,134,141"/>
+<area shape="rect" id="Node000005" href="$classxrpl_1_1LedgerCleaner.html" title="Check the ledger/transaction databases to make sure they have continuity." alt="" coords="241,104,391,129"/>
+<area shape="poly" id="edge12_Node000004_Node000005" title=" " alt="" coords="186,142,256,127,258,132,187,147"/>
+<area shape="rect" id="Node000007" href="$classxrpl_1_1Overlay.html" title="Manages the set of connected peers." alt="" coords="263,252,369,277"/>
+<area shape="poly" id="edge14_Node000004_Node000007" title=" " alt="" coords="134,191,176,216,222,238,263,251,262,256,220,243,173,221,131,196"/>
+<area shape="rect" id="Node000013" href="$classxrpl_1_1PeerFinder_1_1Manager.html" title="Maintains a set of IP addresses used for getting into the network." alt="" coords="221,153,411,179"/>
+<area shape="poly" id="edge16_Node000004_Node000013" title=" " alt="" coords="187,163,221,163,221,169,187,169"/>
+<area shape="rect" id="Node000015" href="$classxrpl_1_1Resource_1_1Manager.html" title="Tracks load and resource consumption." alt="" coords="226,203,406,228"/>
+<area shape="poly" id="edge18_Node000004_Node000015" title=" " alt="" coords="187,185,258,200,256,205,186,190"/>
+<area shape="rect" id="Node000006" href="$classxrpl_1_1LedgerCleanerImp.html" title=" " alt="" coords="479,104,653,129"/>
+<area shape="poly" id="edge13_Node000005_Node000006" title=" " alt="" coords="404,114,478,114,478,119,404,119"/>
+<area shape="rect" id="Node000008" href="$classxrpl_1_1OverlayImpl.html" title=" " alt="" coords="499,252,633,277"/>
+<area shape="poly" id="edge15_Node000007_Node000008" title=" " alt="" coords="384,262,499,262,499,267,384,267"/>
+<area shape="rect" id="Node000014" href="$classxrpl_1_1PeerFinder_1_1ManagerImp.html" title=" " alt="" coords="459,153,673,179"/>
+<area shape="poly" id="edge17_Node000013_Node000014" title=" " alt="" coords="425,163,459,163,459,169,425,169"/>
+<area shape="rect" id="Node000016" href="$classxrpl_1_1Resource_1_1ManagerImp.html" title=" " alt="" coords="463,203,669,228"/>
+<area shape="poly" id="edge19_Node000015_Node000016" title=" " alt="" coords="420,213,463,213,463,218,420,218"/>
+<area shape="rect" id="Node000009" href="$classxrpl_1_1reduce__relay_1_1SquelchHandler.html" title="Abstract class." alt="" coords="247,302,385,342"/>
+<area shape="poly" id="edge21_Node000009_Node000010" title=" " alt="" coords="399,338,511,364,509,369,398,343"/>
+<area shape="poly" id="edge20_Node000009_Node000008" title=" " alt="" coords="398,301,509,275,511,280,399,306"/>
+<area shape="rect" id="Node000012" href="$structxrpl_1_1test_1_1reduce__relay__test_1_1Handler.html" title=" " alt="" coords="489,302,643,342"/>
+<area shape="poly" id="edge22_Node000009_Node000012" title=" " alt="" coords="399,319,489,319,489,325,399,325"/>
 </map>

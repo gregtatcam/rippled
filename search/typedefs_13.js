@@ -26,7 +26,7 @@ var searchData=
   ['token_5fiter_23',['token_iter',['../classxrpl_1_1test_1_1AMMCalc__test.html#a5aa9de6e89608f98eedeac746dcf28f2',1,'xrpl::test::AMMCalc_test']]],
   ['tp_24',['tp',['../classxrpl_1_1test_1_1csf_1_1CollectorRef.html#a4fea875d9095af34563e5b3debf1507c',1,'xrpl::test::csf::CollectorRef']]],
   ['traits_5ftype_25',['traits_type',['../classbeast_1_1basic__logstream.html#aa650f62ec82b492b352e1cb72f5f1f74',1,'beast::basic_logstream']]],
-  ['trates_26',['trates',['../classxrpl_1_1test_1_1AMMCalc__test.html#a3699bf8c2b346a5c1c13f26449837b3e',1,'xrpl::test::AMMCalc_test']]],
+  ['transfer_5frates_26',['transfer_rates',['../classxrpl_1_1test_1_1AMMCalc__test.html#a5e91e4241ec3009cb3d416ab6673efb6',1,'xrpl::test::AMMCalc_test']]],
   ['treenodecache_27',['TreeNodeCache',['../namespacexrpl.html#abd161ba39f2c7297793fc378ead1bfbe',1,'xrpl']]],
   ['trustset_28',['TrustSet',['../namespacexrpl.html#a5fef8ac0489a3d61a1e3f1629a6a9d09',1,'xrpl']]],
   ['tsignedattestation_29',['tsignedattestation',['../structxrpl_1_1XChainClaimAttestation.html#a36280cbf194aface26a5541e7b7d307f',1,'xrpl::XChainClaimAttestation::TSignedAttestation'],['../structxrpl_1_1XChainCreateAccountAttestation.html#a5d283022619497d60865f04c7ed2a1d4',1,'xrpl::XChainCreateAccountAttestation::TSignedAttestation']]],
@@ -41,8 +41,8 @@ var searchData=
   ['txnmetaledgertype_38',['txnMetaLedgerType',['../classxrpl_1_1RelationalDatabase.html#ae948715d1ae963c3ba18de02d28b11e1',1,'xrpl::RelationalDatabase']]],
   ['txnsdata_39',['TxnsData',['../namespacexrpl.html#adb08e1d760cedb4083ee208b65413756',1,'xrpl']]],
   ['txnsdatabinary_40',['TxnsDataBinary',['../namespacexrpl.html#a3285463eb62f9c039c5a2854cf72f2fb',1,'xrpl']]],
-  ['txs_5fmap_41',['txs_map',['../classxrpl_1_1OpenView.html#a661a98b93d21d421657b62d4e93eced5',1,'xrpl::OpenView']]],
+  ['txs_5fmap_41',['txs_map',['../classxrpl_1_1OpenView.html#abdfa26d1a2de1442edd2229d856f3519',1,'xrpl::OpenView']]],
   ['txset_5ft_42',['txset_t',['../structxrpl_1_1test_1_1csf_1_1Peer.html#a00a913d1a2d1a89b1d9e164b859f4615',1,'xrpl::test::csf::Peer::TxSet_t'],['../classxrpl_1_1RCLConsensus_1_1Adaptor.html#ad82d19306db4897606649d95ec6458a4',1,'xrpl::RCLConsensus::Adaptor::TxSet_t'],['../classxrpl_1_1Consensus.html#a07e496d8bdf75d3122d500e4a8843db6',1,'xrpl::Consensus::TxSet_t'],['../structxrpl_1_1ConsensusResult.html#a9f925ebc3a58c334fbca5ce2bc4e6049',1,'xrpl::ConsensusResult::TxSet_t']]],
   ['txsettype_43',['TxSetType',['../namespacexrpl_1_1test_1_1csf.html#a6f9ad0790ad2048033e0d7e91a5dacd8',1,'xrpl::test::csf']]],
-  ['type_44',['type',['../structxrpl_1_1TypedField.html#abb1cb136cda68aac132830a24b3b7fd1',1,'xrpl::TypedField::type'],['../structbeast_1_1maybe__const.html#a62817e087ae7434ffcef5c569f1e1198',1,'beast::maybe_const::type'],['../structbeast_1_1detail_1_1CopyConst_3_01T_01const_00_01U_01_4.html#af6bad09fff8798aecdf67663f14eab21',1,'beast::detail::CopyConst&lt; T const, U &gt;::type'],['../structbeast_1_1detail_1_1CopyConst.html#a5b227ffac65f273363ca0787265f6a9e',1,'beast::detail::CopyConst::type']]]
+  ['type_44',['type',['../structxrpl_1_1TypedField.html#abb1cb136cda68aac132830a24b3b7fd1',1,'xrpl::TypedField::type'],['../structbeast_1_1maybe__const.html#a7150c7c729b658a567532dded71a2ff6',1,'beast::maybe_const::type'],['../structbeast_1_1detail_1_1CopyConst_3_01T_01const_00_01U_01_4.html#af6bad09fff8798aecdf67663f14eab21',1,'beast::detail::CopyConst&lt; T const, U &gt;::type'],['../structbeast_1_1detail_1_1CopyConst.html#a5b227ffac65f273363ca0787265f6a9e',1,'beast::detail::CopyConst::type']]]
 ];

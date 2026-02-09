@@ -120,36 +120,35 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#undef TRANSACTION</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#define UNWRAP(...) __VA_ARGS__</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#define TRANSACTION(                                            \</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">    tag, value, name, delegable, amendment, privileges, fields) \</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">    add(jss::name, tag, UNWRAP fields, commonFields);</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &lt;xrpl/protocol/detail/transactions.macro&gt;</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#undef TRANSACTION</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#pragma pop_macro(&quot;TRANSACTION&quot;)</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#undef UNWRAP</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#pragma pop_macro(&quot;UNWRAP&quot;)</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>}</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#define TRANSACTION(tag, value, name, delegable, amendment, privileges, fields) \</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">    add(jss::name, tag, UNWRAP fields, commonFields);</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#include &lt;xrpl/protocol/detail/transactions.macro&gt;</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#undef TRANSACTION</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#pragma pop_macro(&quot;TRANSACTION&quot;)</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#undef UNWRAP</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#pragma pop_macro(&quot;UNWRAP&quot;)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>}</div>
 </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><a class="code hl_class" href="classxrpl_1_1TxFormats.html">TxFormats</a> <span class="keyword">const</span>&amp;</div>
-<div class="foldopen" id="foldopen00052" data-start="{" data-end="}">
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="classxrpl_1_1TxFormats.html#aed4f62d2c53f781fa74a783ab9c2f8c3">   52</a></span><a class="code hl_function" href="classxrpl_1_1TxFormats.html#aed4f62d2c53f781fa74a783ab9c2f8c3">TxFormats::getInstance</a>()</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>{</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">static</span> <a class="code hl_class" href="classxrpl_1_1TxFormats.html">TxFormats</a> <span class="keyword">const</span> instance;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keywordflow">return</span> instance;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>}</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><a class="code hl_class" href="classxrpl_1_1TxFormats.html">TxFormats</a> <span class="keyword">const</span>&amp;</div>
+<div class="foldopen" id="foldopen00051" data-start="{" data-end="}">
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="classxrpl_1_1TxFormats.html#aed4f62d2c53f781fa74a783ab9c2f8c3">   51</a></span><a class="code hl_function" href="classxrpl_1_1TxFormats.html#aed4f62d2c53f781fa74a783ab9c2f8c3">TxFormats::getInstance</a>()</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">static</span> <a class="code hl_class" href="classxrpl_1_1TxFormats.html">TxFormats</a> <span class="keyword">const</span> instance;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordflow">return</span> instance;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
 </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}  <span class="comment">// namespace xrpl</span></div>
-<div class="ttc" id="aclassxrpl_1_1TxFormats_html"><div class="ttname"><a href="classxrpl_1_1TxFormats.html">xrpl::TxFormats</a></div><div class="ttdoc">Manages the list of known transaction formats.</div><div class="ttdef"><b>Definition</b> <a href="TxFormats_8h_source.html#l00066">TxFormats.h:67</a></div></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>}  <span class="comment">// namespace xrpl</span></div>
+<div class="ttc" id="aclassxrpl_1_1TxFormats_html"><div class="ttname"><a href="classxrpl_1_1TxFormats.html">xrpl::TxFormats</a></div><div class="ttdoc">Manages the list of known transaction formats.</div><div class="ttdef"><b>Definition</b> <a href="TxFormats_8h_source.html#l00065">TxFormats.h:66</a></div></div>
 <div class="ttc" id="aclassxrpl_1_1TxFormats_html_a2994ed25d5bec51c9c3c2d47bebc5890"><div class="ttname"><a href="classxrpl_1_1TxFormats.html#a2994ed25d5bec51c9c3c2d47bebc5890">xrpl::TxFormats::TxFormats</a></div><div class="ttdeci">TxFormats()</div><div class="ttdoc">Create the object.</div><div class="ttdef"><b>Definition</b> <a href="TxFormats_8cpp_source.html#l00010">TxFormats.cpp:10</a></div></div>
-<div class="ttc" id="aclassxrpl_1_1TxFormats_html_aed4f62d2c53f781fa74a783ab9c2f8c3"><div class="ttname"><a href="classxrpl_1_1TxFormats.html#aed4f62d2c53f781fa74a783ab9c2f8c3">xrpl::TxFormats::getInstance</a></div><div class="ttdeci">static TxFormats const &amp; getInstance()</div><div class="ttdef"><b>Definition</b> <a href="TxFormats_8cpp_source.html#l00052">TxFormats.cpp:52</a></div></div>
+<div class="ttc" id="aclassxrpl_1_1TxFormats_html_aed4f62d2c53f781fa74a783ab9c2f8c3"><div class="ttname"><a href="classxrpl_1_1TxFormats.html#aed4f62d2c53f781fa74a783ab9c2f8c3">xrpl::TxFormats::getInstance</a></div><div class="ttdeci">static TxFormats const &amp; getInstance()</div><div class="ttdef"><b>Definition</b> <a href="TxFormats_8cpp_source.html#l00051">TxFormats.cpp:51</a></div></div>
 <div class="ttc" id="ainitializer_list_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/header/initializer_list.html">initializer_list</a></div></div>
-<div class="ttc" id="anamespacexrpl_html"><div class="ttname"><a href="namespacexrpl.html">xrpl</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition</b> <a href="algorithm_8h_source.html#l00006">algorithm.h:6</a></div></div>
-<div class="ttc" id="anamespacexrpl_html_a39cef704bc54911c99acb6be435d552fa37a33f0d8fb6f8d2f0a095dfe3397bc7"><div class="ttname"><a href="namespacexrpl.html#a39cef704bc54911c99acb6be435d552fa37a33f0d8fb6f8d2f0a095dfe3397bc7">xrpl::soeOPTIONAL</a></div><div class="ttdeci">@ soeOPTIONAL</div><div class="ttdef"><b>Definition</b> <a href="SOTemplate_8h_source.html#l00017">SOTemplate.h:17</a></div></div>
-<div class="ttc" id="anamespacexrpl_html_a39cef704bc54911c99acb6be435d552fa9fd82d86101744eb983d3d11bd54d73f"><div class="ttname"><a href="namespacexrpl.html#a39cef704bc54911c99acb6be435d552fa9fd82d86101744eb983d3d11bd54d73f">xrpl::soeREQUIRED</a></div><div class="ttdeci">@ soeREQUIRED</div><div class="ttdef"><b>Definition</b> <a href="SOTemplate_8h_source.html#l00016">SOTemplate.h:16</a></div></div>
+<div class="ttc" id="anamespacexrpl_html"><div class="ttname"><a href="namespacexrpl.html">xrpl</a></div><div class="ttdoc">Use hash_* containers for keys that do not need a cryptographically secure hashing algorithm.</div><div class="ttdef"><b>Definition</b> <a href="algorithm_8h_source.html#l00005">algorithm.h:5</a></div></div>
+<div class="ttc" id="anamespacexrpl_html_a39cef704bc54911c99acb6be435d552fa37a33f0d8fb6f8d2f0a095dfe3397bc7"><div class="ttname"><a href="namespacexrpl.html#a39cef704bc54911c99acb6be435d552fa37a33f0d8fb6f8d2f0a095dfe3397bc7">xrpl::soeOPTIONAL</a></div><div class="ttdeci">@ soeOPTIONAL</div><div class="ttdef"><b>Definition</b> <a href="SOTemplate_8h_source.html#l00016">SOTemplate.h:16</a></div></div>
+<div class="ttc" id="anamespacexrpl_html_a39cef704bc54911c99acb6be435d552fa9fd82d86101744eb983d3d11bd54d73f"><div class="ttname"><a href="namespacexrpl.html#a39cef704bc54911c99acb6be435d552fa9fd82d86101744eb983d3d11bd54d73f">xrpl::soeREQUIRED</a></div><div class="ttdeci">@ soeREQUIRED</div><div class="ttdef"><b>Definition</b> <a href="SOTemplate_8h_source.html#l00015">SOTemplate.h:15</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

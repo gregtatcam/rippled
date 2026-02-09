@@ -104,11 +104,11 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:acc63398efc9c6353fc9f67477a7603c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a986c672adc2d72635bff84efef1231c0" id="r_a986c672adc2d72635bff84efef1231c0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1HTTPClientSSLContext.html#a986c672adc2d72635bff84efef1231c0">sslVerify</a> () const</td></tr>
 <tr class="separator:a986c672adc2d72635bff84efef1231c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a5c92b724c39709d5536ce986b35192" id="r_a0a5c92b724c39709d5536ce986b35192"><td class="memTemplParams" colspan="2">template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::                value ||            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::                value&gt;&gt; </td></tr>
+<tr class="memitem:a0a5c92b724c39709d5536ce986b35192" id="r_a0a5c92b724c39709d5536ce986b35192"><td class="memTemplParams" colspan="2">template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::value ||            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::value&gt;&gt; </td></tr>
 <tr class="memitem:a0a5c92b724c39709d5536ce986b35192"><td class="memTemplItemLeft" align="right" valign="top">boost::system::error_code&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1HTTPClientSSLContext.html#a0a5c92b724c39709d5536ce986b35192">preConnectVerify</a> (T &amp;strm, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;host)</td></tr>
 <tr class="memdesc:a0a5c92b724c39709d5536ce986b35192"><td class="mdescLeft">&#160;</td><td class="mdescRight">invoked before connect/async_connect on an ssl stream to setup name verification.  <br /></td></tr>
 <tr class="separator:a0a5c92b724c39709d5536ce986b35192"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ad2f840a1c4e23a45ce594ae59f31a7" id="r_a1ad2f840a1c4e23a45ce594ae59f31a7"><td class="memTemplParams" colspan="2">template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::                value ||            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::                value&gt;&gt; </td></tr>
+<tr class="memitem:a1ad2f840a1c4e23a45ce594ae59f31a7" id="r_a1ad2f840a1c4e23a45ce594ae59f31a7"><td class="memTemplParams" colspan="2">template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::value ||            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::value&gt;&gt; </td></tr>
 <tr class="memitem:a1ad2f840a1c4e23a45ce594ae59f31a7"><td class="memTemplItemLeft" align="right" valign="top">boost::system::error_code&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classxrpl_1_1HTTPClientSSLContext.html#a1ad2f840a1c4e23a45ce594ae59f31a7">postConnectVerify</a> (T &amp;strm, <a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;host)</td></tr>
 <tr class="memdesc:a1ad2f840a1c4e23a45ce594ae59f31a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">invoked after connect/async_connect but before sending data on an ssl stream - to setup name verification.  <br /></td></tr>
 <tr class="separator:a1ad2f840a1c4e23a45ce594ae59f31a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -130,7 +130,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00016">16</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00015">15</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a960ed5675654cd67ea7cb25ca7be5dcd" name="a960ed5675654cd67ea7cb25ca7be5dcd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a960ed5675654cd67ea7cb25ca7be5dcd">&#9670;&#160;</a></span>HTTPClientSSLContext()</h2>
@@ -184,7 +184,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00019">19</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00018">18</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -204,7 +204,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00056">56</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00051">51</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -223,7 +223,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00062">62</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00057">57</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -233,7 +233,7 @@ Private Attributes</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::                value ||            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::                value&gt;&gt; </div>
+template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::value ||            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::value&gt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">boost::system::error_code xrpl::HTTPClientSSLContext::preConnectVerify </td>
@@ -266,7 +266,7 @@ template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt; 
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>error_code indicating failures, if any </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00091">91</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00080">80</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -276,7 +276,7 @@ template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt; 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::                value ||            std::is_same&lt;                T,                boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::                value&gt;&gt; </div>
+template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&gt;&gt;::value ||            std::is_same&lt;T, boost::asio::ssl::stream&lt;boost::asio::ip::tcp::socket&amp;&gt;&gt;::value&gt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">boost::system::error_code xrpl::HTTPClientSSLContext::postConnectVerify </td>
@@ -307,7 +307,7 @@ template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt; 
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00126">126</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00107">107</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -368,7 +368,7 @@ template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt; 
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00159">159</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00134">134</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -393,7 +393,7 @@ template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt; 
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00174">174</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00144">144</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -417,7 +417,7 @@ template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt; 
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00175">175</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00145">145</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>
@@ -441,7 +441,7 @@ template&lt;class T , class  = std::enable_if_t&lt;            std::is_same&lt; 
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00176">176</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="HTTPClientSSLContext_8h_source.html#l00146">146</a> of file <a class="el" href="HTTPClientSSLContext_8h_source.html">HTTPClientSSLContext.h</a>.</p>
 
 </div>
 </div>

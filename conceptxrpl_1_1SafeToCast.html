@@ -82,16 +82,15 @@ $(function() {
 <div class="fragment"><div class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> Src, <span class="keyword">class</span> Dest&gt;</div>
 <div class="line"><span class="keyword">concept </span><a class="code hl_concept" href="conceptxrpl_1_1SafeToCast.html">xrpl::SafeToCast</a> =  (<a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::is_integral_v&lt;Src&gt;</a> &amp;&amp; <a class="code hl_variableRef" href="http://en.cppreference.com/w/cpp/types/is_same.html">std::is_integral_v&lt;Dest&gt;</a>) &amp;&amp;</div>
 <div class="line">    (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/is_signed.html">std::is_signed&lt;Src&gt;::value</a> || <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/is_unsigned.html">std::is_unsigned&lt;Dest&gt;::value</a>) &amp;&amp;</div>
-<div class="line">    (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/is_signed.html">std::is_signed&lt;Src&gt;::value</a> != <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/is_signed.html">std::is_signed&lt;Dest&gt;::value</a></div>
-<div class="line">         ? <span class="keyword">sizeof</span>(Dest) &gt; <span class="keyword">sizeof</span>(Src)</div>
-<div class="line">         : sizeof(Dest) &gt;= sizeof(Src))</div>
-<div class="ttc" id="aconceptxrpl_1_1SafeToCast_html"><div class="ttname"><a href="conceptxrpl_1_1SafeToCast.html">xrpl::SafeToCast</a></div><div class="ttdef"><b>Definition</b> <a href="safe__cast_8h_source.html#l00013">safe_cast.h:13</a></div></div>
+<div class="line">    (<a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/is_signed.html">std::is_signed&lt;Src&gt;::value</a> != <a class="code hl_classRef" href="http://en.cppreference.com/w/cpp/types/is_signed.html">std::is_signed&lt;Dest&gt;::value</a> ? <span class="keyword">sizeof</span>(Dest) &gt; <span class="keyword">sizeof</span>(Src)</div>
+<div class="line">                                                               : sizeof(Dest) &gt;= sizeof(Src))</div>
+<div class="ttc" id="aconceptxrpl_1_1SafeToCast_html"><div class="ttname"><a href="conceptxrpl_1_1SafeToCast.html">xrpl::SafeToCast</a></div><div class="ttdef"><b>Definition</b> <a href="safe__cast_8h_source.html#l00012">safe_cast.h:12</a></div></div>
 <div class="ttc" id="ais_same_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/is_same.html">std::is_same_v</a></div><div class="ttdeci">T is_same_v</div></div>
 <div class="ttc" id="ais_signed_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/is_signed.html">std::is_signed</a></div></div>
 <div class="ttc" id="ais_unsigned_html"><div class="ttname"><a href="http://en.cppreference.com/w/cpp/types/is_unsigned.html">std::is_unsigned</a></div></div>
 </div><!-- fragment --><a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="safe__cast_8h_source.html#l00013">13</a> of file <a class="el" href="safe__cast_8h_source.html">safe_cast.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="safe__cast_8h_source.html#l00012">12</a> of file <a class="el" href="safe__cast_8h_source.html">safe_cast.h</a>.</p>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

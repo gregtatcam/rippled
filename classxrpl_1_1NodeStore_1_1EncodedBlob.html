@@ -122,9 +122,9 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:a4d463c9c540467d0501405d62630caaf" id="r_a4d463c9c540467d0501405d62630caaf"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a>, 32 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1NodeStore_1_1EncodedBlob.html#a4d463c9c540467d0501405d62630caaf">key_</a></td></tr>
 <tr class="memdesc:a4d463c9c540467d0501405d62630caaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">The 32-byte key of the serialized object.  <br /></td></tr>
 <tr class="separator:a4d463c9c540467d0501405d62630caaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5bc5465267be5e154db25dfe53c5d0a8" id="r_a5bc5465267be5e154db25dfe53c5d0a8"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a>, boost::alignment::align_up(9+1024, alignof(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>))&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1NodeStore_1_1EncodedBlob.html#a5bc5465267be5e154db25dfe53c5d0a8">payload_</a></td></tr>
-<tr class="memdesc:a5bc5465267be5e154db25dfe53c5d0a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pre-allocated buffer for the serialized object.  <br /></td></tr>
-<tr class="separator:a5bc5465267be5e154db25dfe53c5d0a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87b573b9ce2c885d1a3f10b04e347aab" id="r_a87b573b9ce2c885d1a3f10b04e347aab"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a>, boost::alignment::align_up(9+1024, alignof(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>))&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1NodeStore_1_1EncodedBlob.html#a87b573b9ce2c885d1a3f10b04e347aab">payload_</a></td></tr>
+<tr class="memdesc:a87b573b9ce2c885d1a3f10b04e347aab"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pre-allocated buffer for the serialized object.  <br /></td></tr>
+<tr class="separator:a87b573b9ce2c885d1a3f10b04e347aab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79f5dff73857eccbe451e53b8c4139ed" id="r_a79f5dff73857eccbe451e53b8c4139ed"><td class="memItemLeft" align="right" valign="top"><a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1NodeStore_1_1EncodedBlob.html#a79f5dff73857eccbe451e53b8c4139ed">size_</a></td></tr>
 <tr class="memdesc:a79f5dff73857eccbe451e53b8c4139ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">The size of the serialized data.  <br /></td></tr>
 <tr class="separator:a79f5dff73857eccbe451e53b8c4139ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -143,7 +143,7 @@ Private Attributes</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>This class is typically instantiated on the stack, so the size of the object does not matter as much as it normally would since the allocation is, effectively, free.</dd></dl>
 <p>We leverage that fact to preallocate enough memory to handle most payloads as part of this object, eliminating the need for dynamic allocation. As of this writing ~94% of objects require fewer than 1024 payload bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00036">36</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00035">35</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a76c19144c9b6c7cc9b7e087f04d62ec4" name="a76c19144c9b6c7cc9b7e087f04d62ec4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a76c19144c9b6c7cc9b7e087f04d62ec4">&#9670;&#160;</a></span>EncodedBlob()</h2>
@@ -169,7 +169,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00063">63</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00059">59</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
@@ -188,7 +188,7 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00085">85</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00076">76</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
@@ -216,7 +216,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00098">98</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00089">89</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
@@ -243,7 +243,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00104">104</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00095">95</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
@@ -270,7 +270,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00110">110</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00101">101</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
@@ -297,12 +297,12 @@ Private Attributes</h2></td></tr>
 
 <p>The 32-byte key of the serialized object. </p>
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00039">39</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00038">38</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
-<a id="a5bc5465267be5e154db25dfe53c5d0a8" name="a5bc5465267be5e154db25dfe53c5d0a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5bc5465267be5e154db25dfe53c5d0a8">&#9670;&#160;</a></span>payload_</h2>
+<a id="a87b573b9ce2c885d1a3f10b04e347aab" name="a87b573b9ce2c885d1a3f10b04e347aab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87b573b9ce2c885d1a3f10b04e347aab">&#9670;&#160;</a></span>payload_</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -311,7 +311,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt; <a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a>, boost::alignment::align_up(9 + 1024, alignof(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>))&gt; xrpl::NodeStore::EncodedBlob::payload_</td>
+          <td class="memname"><a class="elRef" href="http://en.cppreference.com/w/cpp/container/array.html">std::array</a>&lt;<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint8_t</a>, boost::alignment::align_up(9 + 1024, alignof(<a class="elRef" href="http://en.cppreference.com/w/cpp/types/integer.html">std::uint32_t</a>))&gt; xrpl::NodeStore::EncodedBlob::payload_</td>
         </tr>
       </table>
   </td>
@@ -324,7 +324,7 @@ Private Attributes</h2></td></tr>
 <p>A pre-allocated buffer for the serialized object. </p>
 <p>The buffer is large enough for the 9 byte prefix and at least 1024 more bytes. The precise size is calculated automatically at compile time so as to avoid wasting space on padding bytes. </p>
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00050">50</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00046">46</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
@@ -350,7 +350,7 @@ Private Attributes</h2></td></tr>
 
 <p>The size of the serialized data. </p>
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00053">53</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00049">49</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
@@ -377,7 +377,7 @@ Private Attributes</h2></td></tr>
 <p>A pointer to the serialized data. </p>
 <p>This may point to the pre-allocated buffer (if it is sufficiently large) or to a dynamically allocated buffer. </p>
 
-<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00060">60</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="EncodedBlob_8h_source.html#l00056">56</a> of file <a class="el" href="EncodedBlob_8h_source.html">EncodedBlob.h</a>.</p>
 
 </div>
 </div>
