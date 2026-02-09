@@ -69,7 +69,7 @@ class CheckMPT_test : public beast::unit_test::suite
 
         MPT const USD = MPTTester({.env = env, .issuer = gw});
 
-        // Note that no trust line has been set up for alice, but alice can
+        // Note that no MPToken has been set up for alice, but alice can
         // still write a check for USD.  You don't have to have the funds
         // necessary to cover a check in order to write a check.
         auto writeTwoChecks = [&env, &USD, this](
@@ -354,11 +354,11 @@ class CheckMPT_test : public beast::unit_test::suite
             // Note that IOU returns tecPATH_DRY in this case.
             // IOU's internal error is terNO_LINE, which is
             // considered ter re-triable and changed to tecPATH_DRY.
-            env(pay(alice, bob, USD(1)), ter(tecLOCKED));
+            env(pay(alice, bob, USD(1)), ter(tecPATH_DRY));
             env.close();
             env(check::create(bob, alice, USD(50)), ter(tecFROZEN));
             env.close();
-            env(pay(bob, alice, USD(1)), ter(tecLOCKED));
+            env(pay(bob, alice, USD(1)), ter(tecPATH_DRY));
             env.close();
             env(check::create(gw1, alice, USD(50)), ter(tecFROZEN));
             env.close();
@@ -404,7 +404,7 @@ class CheckMPT_test : public beast::unit_test::suite
     void
     testCashMPT(FeatureBitset features)
     {
-        // Explore many of the valid ways to cash a check for an IOU.
+        // Explore many of the valid ways to cash a check for an MPT.
         testcase("Cash MPT");
 
         using namespace test::jtx;
@@ -413,7 +413,7 @@ class CheckMPT_test : public beast::unit_test::suite
         Account const alice{"alice"};
         Account const bob{"bob"};
         {
-            // Simple IOU check cashed with Amount (with failures).
+            // Simple MPT check cashed with Amount (with failures).
             Env env{*this, features};
 
             env.fund(XRP(1'000), gw, alice, bob);
@@ -673,10 +673,6 @@ class CheckMPT_test : public beast::unit_test::suite
             USDM.authorize({.holder = bob});
             env.close();
 
-            // Two possible outcomes here depending on whether cashing a
-            // check can build a trust line:
-            //  o If it can build a trust line, then the check is allowed to
-            //    exceed the trust limit and bob gets the full transfer.
             env(check::cash(bob, chkId, check::DeliverMin(USD(4))));
             STAmount const bobGot = USD(7);
             verifyDeliveredAmount(env, bobGot);

@@ -23,15 +23,7 @@ checkMPTTxAllowed(
     ReadView const& v,
     TxType tx,
     Asset const& asset,
-    AccountID const& accountID,
-    std::optional<AccountID> const& destAccount = std::nullopt);
-
-TER
-checkMPTDEXAllowed(
-    ReadView const& view,
-    Asset const& issuanceID,
-    AccountID const& srcAccount,
-    std::optional<AccountID> const& destAccount);
+    AccountID const& accountID);
 
 inline std::int64_t
 maxMPTAmount(SLE const& sleIssuance)

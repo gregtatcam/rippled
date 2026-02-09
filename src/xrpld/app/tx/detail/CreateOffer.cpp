@@ -157,15 +157,6 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
         return tecFROZEN;
     }
 
-    if (auto const ter =
-            checkMPTDEXAllowed(ctx.view, saTakerPays.asset(), id, std::nullopt);
-        ter != tesSUCCESS)
-        return ter;
-    if (auto const ter =
-            checkMPTDEXAllowed(ctx.view, saTakerGets.asset(), id, std::nullopt);
-        ter != tesSUCCESS)
-        return ter;
-
     // Allow unfunded MPT for issuer (OutstandingAmount >= MaximumAmount)
     if ((!saTakerGets.holds<MPTIssue>() || saTakerGets.getIssuer() != id) &&
         accountFunds(
@@ -214,6 +205,13 @@ CreateOffer::preclaim(PreclaimContext const& ctx)
                 ctx.view, id, ctx.tx[sfDomainID]))
             return tecNO_PERMISSION;
     }
+
+    if (auto const ter = canTrade(ctx.view, saTakerPays.asset());
+        ter != tesSUCCESS)
+        return ter;
+    if (auto const ter = canTrade(ctx.view, saTakerGets.asset());
+        ter != tesSUCCESS)
+        return ter;
 
     return tesSUCCESS;
 }

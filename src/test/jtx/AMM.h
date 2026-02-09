@@ -105,6 +105,16 @@ struct BidArg
     std::optional<std::pair<Asset, Asset>> assets = std::nullopt;
 };
 
+struct ClawbackArg
+{
+    Account issuer;
+    Account holder;
+    std::optional<std::pair<Asset, Asset>> assets = std::nullopt;
+    std::optional<STAmount> amount = std::nullopt;
+    std::optional<std::uint32_t> flags = std::nullopt;
+    std::optional<ter> err = std::nullopt;
+};
+
 /** Convenience class to test AMM functionality.
  */
 class AMM
@@ -329,6 +339,9 @@ public:
 
     Json::Value
     bid(BidArg const& arg);
+
+    void
+    clawback(ClawbackArg const& arg);
 
     AccountID const&
     ammAccount() const

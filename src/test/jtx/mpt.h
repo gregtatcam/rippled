@@ -116,6 +116,7 @@ struct MPTInitDef
     std::uint16_t transferFee = 0;
     std::optional<std::uint64_t> pay = std::nullopt;
     std::uint32_t flags = MPTDEXFlags;
+    std::optional<std::uint32_t> mutableFlags = std::nullopt;
     bool authHolder = false;
     bool fund = false;
     bool close = true;
@@ -280,7 +281,7 @@ public:
     friend BookSpec
     operator~(MPTTester const& mpt)
     {
-        return ~MPT();
+        return ~static_cast<MPT>(mpt);
     }
 
 private:

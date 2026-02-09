@@ -11,18 +11,16 @@ checkMPTAllowed(
     ReadView const& view,
     TxType txType,
     Asset const& asset,
-    AccountID const& accountID,
-    std::optional<AccountID> const& destAccount)
+    AccountID const& accountID)
 {
     if (!asset.holds<MPTIssue>())
         return tesSUCCESS;
 
     auto const& issuanceID = asset.get<MPTIssue>().getMptID();
-    auto const isDEX = txType == ttPAYMENT && destAccount;
     auto const validTx = txType == ttAMM_CREATE || txType == ttAMM_DEPOSIT ||
         txType == ttAMM_WITHDRAW || txType == ttOFFER_CREATE ||
         txType == ttCHECK_CREATE || txType == ttCHECK_CASH ||
-        txType == ttPAYMENT || isDEX;
+        txType == ttPAYMENT;
     XRPL_ASSERT(validTx, "xrpl::checkMPTAllowed : all MPT tx or DEX");
     if (!validTx)
         return tefINTERNAL;
@@ -41,13 +39,12 @@ checkMPTAllowed(
     if (flags & lsfMPTLocked)
         return tecLOCKED;
     // Offer crossing and Payment
-    if ((flags & lsfMPTCanTrade) == 0 && isDEX)
+    if ((flags & lsfMPTCanTrade) == 0)
         return tecNO_PERMISSION;
 
     if (accountID != issuer)
     {
-        if ((flags & lsfMPTCanTransfer) == 0 &&
-            (!destAccount || destAccount != issuer))
+        if ((flags & lsfMPTCanTransfer) == 0)
             return tecNO_PERMISSION;
 
         auto const mptSle =
@@ -57,8 +54,7 @@ checkMPTAllowed(
         if (!mptSle)
             return tesSUCCESS;
 
-        if ((mptSle->getFlags() & lsfMPTLocked) &&
-            (!destAccount || destAccount != issuer))
+        if (mptSle->getFlags() & lsfMPTLocked)
             return tecLOCKED;
     }
 
@@ -70,23 +66,11 @@ checkMPTTxAllowed(
     ReadView const& view,
     TxType txType,
     Asset const& asset,
-    AccountID const& accountID,
-    std::optional<AccountID> const& destAccount)
+    AccountID const& accountID)
 {
     // use isDEXAllowed for payment/offer crossing
     XRPL_ASSERT(txType != ttPAYMENT, "xrpl::checkMPTTxAllowed : not payment");
-    return checkMPTAllowed(view, txType, asset, accountID, destAccount);
-}
-
-TER
-checkMPTDEXAllowed(
-    ReadView const& view,
-    Asset const& asset,
-    AccountID const& accountID,
-    std::optional<AccountID> const& dest)
-{
-    // use ttPAYMENT for any DEX transaction
-    return checkMPTAllowed(view, ttPAYMENT, asset, accountID, dest);
+    return checkMPTAllowed(view, txType, asset, accountID);
 }
 
 }  // namespace xrpl
