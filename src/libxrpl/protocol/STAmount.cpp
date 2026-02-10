@@ -107,6 +107,8 @@ areComparable(STAmount const& v1, STAmount const& v2)
         v2.asset().value());
 }
 
+static_assert(INITIAL_XRP.drops() == STAmount::cMaxNativeN);
+
 STAmount::STAmount(SerialIter& sit, SField const& name) : STBase(name)
 {
     std::uint64_t value = sit.get64();
