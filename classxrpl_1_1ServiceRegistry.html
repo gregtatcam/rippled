@@ -115,6 +115,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a04e806aa36376adf9e923f4d148f7266"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abba4d947c2fa94de553f59346ba86c2a" id="r_abba4d947c2fa94de553f59346ba86c2a"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacexrpl.html#a09923a111781399c32385ba65761e9e8">CachedSLEs</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#abba4d947c2fa94de553f59346ba86c2a">cachedSLEs</a> ()=0</td></tr>
 <tr class="separator:abba4d947c2fa94de553f59346ba86c2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44f83f92a0b9b4be6f5a8406f9e43678" id="r_a44f83f92a0b9b4be6f5a8406f9e43678"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classxrpl_1_1NetworkIDService.html">NetworkIDService</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a44f83f92a0b9b4be6f5a8406f9e43678">getNetworkIDService</a> ()=0</td></tr>
+<tr class="separator:a44f83f92a0b9b4be6f5a8406f9e43678"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1947c531d5b08e75bd6e36d48d41f0b5" id="r_a1947c531d5b08e75bd6e36d48d41f0b5"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classxrpl_1_1AmendmentTable.html">AmendmentTable</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a1947c531d5b08e75bd6e36d48d41f0b5">getAmendmentTable</a> ()=0</td></tr>
 <tr class="separator:a1947c531d5b08e75bd6e36d48d41f0b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8343c9406f895fb63fae6386fb878b43" id="r_a8343c9406f895fb63fae6386fb878b43"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classxrpl_1_1HashRouter.html">HashRouter</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a8343c9406f895fb63fae6386fb878b43">getHashRouter</a> ()=0</td></tr>
@@ -179,13 +181,28 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a63723c2dce8a2f57a416f17d1289b291"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0745ac739dc7eb4dd7cec24e0f2dae63" id="r_a0745ac739dc7eb4dd7cec24e0f2dae63"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classxrpl_1_1perf_1_1PerfLog.html">perf::PerfLog</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a0745ac739dc7eb4dd7cec24e0f2dae63">getPerfLog</a> ()=0</td></tr>
 <tr class="separator:a0745ac739dc7eb4dd7cec24e0f2dae63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a882ec5ca5fcf52bc446a64eacba8a88f" id="r_a882ec5ca5fcf52bc446a64eacba8a88f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a882ec5ca5fcf52bc446a64eacba8a88f">isStopping</a> () const =0</td></tr>
+<tr class="separator:a882ec5ca5fcf52bc446a64eacba8a88f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6bc0d5fd9a242edb333ab74d19bddc0" id="r_ad6bc0d5fd9a242edb333ab74d19bddc0"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#ad6bc0d5fd9a242edb333ab74d19bddc0">journal</a> (<a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;name)=0</td></tr>
+<tr class="separator:ad6bc0d5fd9a242edb333ab74d19bddc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a891047d588b6917f6acb2adc6f84cb09" id="r_a891047d588b6917f6acb2adc6f84cb09"><td class="memItemLeft" align="right" valign="top">virtual boost::asio::io_context &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a891047d588b6917f6acb2adc6f84cb09">getIOContext</a> ()=0</td></tr>
+<tr class="separator:a891047d588b6917f6acb2adc6f84cb09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a158b199072841deec342b10bf980248f" id="r_a158b199072841deec342b10bf980248f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classxrpl_1_1Logs.html">Logs</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a158b199072841deec342b10bf980248f">logs</a> ()=0</td></tr>
+<tr class="separator:a158b199072841deec342b10bf980248f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6af191093f38eebb3228c286f2a33805" id="r_a6af191093f38eebb3228c286f2a33805"><td class="memItemLeft" align="right" valign="top">virtual <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> &gt; const &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a6af191093f38eebb3228c286f2a33805">trapTxID</a> () const =0</td></tr>
+<tr class="separator:a6af191093f38eebb3228c286f2a33805"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95a17d5f8c19da17acc45118ee0a6a19" id="r_a95a17d5f8c19da17acc45118ee0a6a19"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classxrpl_1_1DatabaseCon.html">DatabaseCon</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#a95a17d5f8c19da17acc45118ee0a6a19">getWalletDB</a> ()=0</td></tr>
+<tr class="memdesc:a95a17d5f8c19da17acc45118ee0a6a19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the "wallet database".  <br /></td></tr>
+<tr class="separator:a95a17d5f8c19da17acc45118ee0a6a19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9324b9349626ba5ebe37b8784f61535" id="r_af9324b9349626ba5ebe37b8784f61535"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classxrpl_1_1Application.html">Application</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classxrpl_1_1ServiceRegistry.html#af9324b9349626ba5ebe37b8784f61535">app</a> ()=0</td></tr>
+<tr class="separator:af9324b9349626ba5ebe37b8784f61535"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Service registry for dependency injection. </p>
 <p>This abstract interface provides access to various services and components used throughout the application. It separates the service locator pattern from the <a class="el" href="classxrpl_1_1Application.html">Application</a> lifecycle management.</p>
 <p>Components that need access to services can hold a reference to <a class="el" href="classxrpl_1_1ServiceRegistry.html" title="Service registry for dependency injection.">ServiceRegistry</a> rather than <a class="el" href="classxrpl_1_1Application.html">Application</a> when they only need service access and not lifecycle management. </p>
 
-<p class="definition">Definition at line <a class="el" href="ServiceRegistry_8h_source.html#l00071">71</a> of file <a class="el" href="ServiceRegistry_8h_source.html">ServiceRegistry.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="ServiceRegistry_8h_source.html#l00078">78</a> of file <a class="el" href="ServiceRegistry_8h_source.html">ServiceRegistry.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a017f0907dd1ad5d7aad3df75a3d0bf17" name="a017f0907dd1ad5d7aad3df75a3d0bf17"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a017f0907dd1ad5d7aad3df75a3d0bf17">&#9670;&#160;</a></span>ServiceRegistry()</h2>
@@ -397,6 +414,33 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#a8d5ae620d9c4cfe5f53dd0719f097005">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="a44f83f92a0b9b4be6f5a8406f9e43678" name="a44f83f92a0b9b4be6f5a8406f9e43678"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44f83f92a0b9b4be6f5a8406f9e43678">&#9670;&#160;</a></span>getNetworkIDService()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classxrpl_1_1NetworkIDService.html">NetworkIDService</a> &amp; xrpl::ServiceRegistry::getNetworkIDService </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#a8f657416542a3c84a50cce0956aad27d">xrpl::ApplicationImp</a>.</p>
 
 </div>
 </div>
@@ -1261,6 +1305,198 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#af726049e8b8953c50525dbe24b5d5e05">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="a882ec5ca5fcf52bc446a64eacba8a88f" name="a882ec5ca5fcf52bc446a64eacba8a88f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a882ec5ca5fcf52bc446a64eacba8a88f">&#9670;&#160;</a></span>isStopping()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool xrpl::ServiceRegistry::isStopping </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#aaa9695423a00b0bd1869f06bb7121d0d">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="ad6bc0d5fd9a242edb333ab74d19bddc0" name="ad6bc0d5fd9a242edb333ab74d19bddc0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad6bc0d5fd9a242edb333ab74d19bddc0">&#9670;&#160;</a></span>journal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classbeast_1_1Journal.html">beast::Journal</a> xrpl::ServiceRegistry::journal </td>
+          <td>(</td>
+          <td class="paramtype"><a class="elRef" href="http://en.cppreference.com/w/cpp/string/basic_string.html">std::string</a> const &amp;&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#aae73026007e43e1aac26ba19f2bcce3d">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="a891047d588b6917f6acb2adc6f84cb09" name="a891047d588b6917f6acb2adc6f84cb09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a891047d588b6917f6acb2adc6f84cb09">&#9670;&#160;</a></span>getIOContext()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual boost::asio::io_context &amp; xrpl::ServiceRegistry::getIOContext </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#a2c17dad7488babe9e1b082473dcc8683">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="a158b199072841deec342b10bf980248f" name="a158b199072841deec342b10bf980248f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a158b199072841deec342b10bf980248f">&#9670;&#160;</a></span>logs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classxrpl_1_1Logs.html">Logs</a> &amp; xrpl::ServiceRegistry::logs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#a7ee69c49b56bf687fbae951013d67b67">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="a6af191093f38eebb3228c286f2a33805" name="a6af191093f38eebb3228c286f2a33805"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6af191093f38eebb3228c286f2a33805">&#9670;&#160;</a></span>trapTxID()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="elRef" href="http://en.cppreference.com/w/cpp/utility/optional.html">std::optional</a>&lt; <a class="el" href="namespacexrpl.html#a76c892803711595bd0d3cf6fbedf028a">uint256</a> &gt; const  &amp; xrpl::ServiceRegistry::trapTxID </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#a90ea9bfed89b0f932f0ec3971a647b52">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="a95a17d5f8c19da17acc45118ee0a6a19" name="a95a17d5f8c19da17acc45118ee0a6a19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95a17d5f8c19da17acc45118ee0a6a19">&#9670;&#160;</a></span>getWalletDB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classxrpl_1_1DatabaseCon.html">DatabaseCon</a> &amp; xrpl::ServiceRegistry::getWalletDB </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Retrieve the "wallet database". </p>
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#aa3c1c854c0a1edcc3cf9840b3afc2d0f">xrpl::ApplicationImp</a>.</p>
+
+</div>
+</div>
+<a id="af9324b9349626ba5ebe37b8784f61535" name="af9324b9349626ba5ebe37b8784f61535"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9324b9349626ba5ebe37b8784f61535">&#9670;&#160;</a></span>app()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classxrpl_1_1Application.html">Application</a> &amp; xrpl::ServiceRegistry::app </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implemented in <a class="el" href="classxrpl_1_1ApplicationImp.html#a7cd1f732c74983eb1b49b151cf51b74f">xrpl::ApplicationImp</a>.</p>
 
 </div>
 </div>

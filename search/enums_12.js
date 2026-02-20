@@ -13,7 +13,7 @@ var searchData=
   ['soestyle_10',['SOEStyle',['../namespacexrpl.html#a39cef704bc54911c99acb6be435d552f',1,'xrpl']]],
   ['soetxmptissue_11',['SOETxMPTIssue',['../namespacexrpl.html#ae73aaebe9faba1b33e2172bc6d79c42b',1,'xrpl']]],
   ['spendablehandling_12',['SpendableHandling',['../namespacexrpl.html#a1d257b0930e93adcb3db3d2ccedf6653',1,'xrpl']]],
-  ['startuptype_13',['StartUpType',['../classxrpl_1_1Config.html#ac137fe70fc805bad953335f4f1cc1f4a',1,'xrpl::Config']]],
+  ['startuptype_13',['StartUpType',['../namespacexrpl.html#aeff8897a4a88b852a68c624eb0377eda',1,'xrpl']]],
   ['state_14',['state',['../classxrpl_1_1PeerFinder_1_1Slot.html#a9f7f74456679552f34bba92f853b8132',1,'xrpl::PeerFinder::Slot::State'],['../classxrpl_1_1LedgerCleanerImp.html#a28cf927f76d8996023f38d227c8cf66c',1,'xrpl::LedgerCleanerImp::State'],['../classxrpl_1_1test_1_1reduce__relay__test.html#a6bd67f01a8911875f6d9a9470904b28b',1,'xrpl::test::reduce_relay_test::State']]],
   ['status_15',['Status',['../namespacexrpl_1_1NodeStore.html#a4883b8bc797bf7591fde489676a6e96b',1,'xrpl::NodeStore']]],
   ['stranddirection_16',['StrandDirection',['../namespacexrpl.html#a79a793a19f9bf2aad6e7b82772743ae8',1,'xrpl']]],

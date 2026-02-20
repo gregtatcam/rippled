@@ -39,7 +39,7 @@ var searchData=
   ['username_36',['username',['../structxrpl_1_1parsedURL.html#ac01c2e1abee119184d0b971c9ce58e3c',1,'xrpl::parsedURL']]],
   ['uses_5fallocator_5fv_37',['uses_allocator_v',['http://en.cppreference.com/w/cpp/memory/uses_allocator.html',1,'std::uses_allocator_v'],['http://en.cppreference.com/w/cpp/experimental/type_trait_variable_templates.html',1,'std::experimental::uses_allocator_v']]],
   ['usessl_5f_38',['useSSL_',['../classxrpl_1_1test_1_1TrustedPublisherServer.html#a62f318a26d1bdc81a446acb2f966ab00',1,'xrpl::test::TrustedPublisherServer']]],
-  ['usetxtables_5f_39',['useTxTables_',['../classxrpl_1_1SQLiteDatabaseImp.html#a5a52674eaa37717eaf7ada525aa5c316',1,'xrpl::SQLiteDatabaseImp']]],
+  ['usetxtables_5f_39',['useTxTables_',['../classxrpl_1_1SQLiteDatabase.html#afc3507c75a975fc7389681bcf486dc3f',1,'xrpl::SQLiteDatabase']]],
   ['ut_5fxchain_5fdefault_5fnum_5fsigners_40',['UT_XCHAIN_DEFAULT_NUM_SIGNERS',['../namespacexrpl_1_1test_1_1jtx.html#a10b44c68a5f8954b9d1a8b10228360ee',1,'xrpl::test::jtx']]],
   ['ut_5fxchain_5fdefault_5fquorum_41',['UT_XCHAIN_DEFAULT_QUORUM',['../namespacexrpl_1_1test_1_1jtx.html#aa6d8312e86baf2faa275e446fa82d729',1,'xrpl::test::jtx']]]
 ];
