@@ -195,8 +195,7 @@ Env::balance(Account const& account, Asset const& asset) const
                     return {STAmount(mptIssue, 0), account.name()};
 
                 // Make it negative
-                STAmount const amount{
-                    mptIssue, sle->getFieldU64(sfOutstandingAmount), 0, true};
+                STAmount const amount{mptIssue, sle->getFieldU64(sfOutstandingAmount), 0, true};
                 return {amount, lookup(issuer).name()};
             }
             else

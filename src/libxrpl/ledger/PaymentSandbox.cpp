@@ -8,10 +8,7 @@ namespace xrpl {
 namespace detail {
 
 auto
-DeferredCredits::makeKeyIOU(
-    AccountID const& a1,
-    AccountID const& a2,
-    Currency const& c) -> KeyIOU
+DeferredCredits::makeKeyIOU(AccountID const& a1, AccountID const& a2, Currency const& c) -> KeyIOU
 {
     if (a1 < a2)
         return std::make_tuple(a1, a2, c);
@@ -27,14 +24,10 @@ DeferredCredits::creditIOU(
     STAmount const& preCreditSenderBalance)
 {
     XRPL_ASSERT(
-        sender != receiver,
-        "xrpl::detail::DeferredCredits::creditIOU : sender is not receiver");
+        sender != receiver, "xrpl::detail::DeferredCredits::creditIOU : sender is not receiver");
+    XRPL_ASSERT(!amount.negative(), "xrpl::detail::DeferredCredits::creditIOU : positive amount");
     XRPL_ASSERT(
-        !amount.negative(),
-        "xrpl::detail::DeferredCredits::creditIOU : positive amount");
-    XRPL_ASSERT(
-        amount.holds<Issue>(),
-        "xrpl::detail::DeferredCredits::creditIOU : amount is for Issue");
+        amount.holds<Issue>(), "xrpl::detail::DeferredCredits::creditIOU : amount is for Issue");
 
     auto const k = makeKeyIOU(sender, receiver, amount.get<Issue>().currency);
     auto i = creditsIOU_.find(k);
@@ -79,12 +72,9 @@ DeferredCredits::creditMPT(
     XRPL_ASSERT(
         amount.holds<MPTIssue>(),
         "xrpl::detail::DeferredCredits::creditMPT : amount is for MPTIssue");
+    XRPL_ASSERT(!amount.negative(), "xrpl::detail::DeferredCredits::creditMPT : positive amount");
     XRPL_ASSERT(
-        !amount.negative(),
-        "xrpl::detail::DeferredCredits::creditMPT : positive amount");
-    XRPL_ASSERT(
-        sender != receiver,
-        "xrpl::detail::DeferredCredits::creditMPT : sender is not receiver");
+        sender != receiver, "xrpl::detail::DeferredCredits::creditMPT : sender is not receiver");
 
     auto const mptAmtVal = amount.mpt().value();
     auto const& issuer = amount.getIssuer();
@@ -195,21 +185,18 @@ DeferredCredits::adjustmentsIOU(
 
     if (main < other)
     {
-        result.emplace(
-            v.highAcctCredits, v.lowAcctCredits, v.lowAcctOrigBalance);
+        result.emplace(v.highAcctCredits, v.lowAcctCredits, v.lowAcctOrigBalance);
     }
     else
     {
-        result.emplace(
-            v.lowAcctCredits, v.highAcctCredits, -v.lowAcctOrigBalance);
+        result.emplace(v.lowAcctCredits, v.highAcctCredits, -v.lowAcctOrigBalance);
     }
 
     return result;
 }
 
 auto
-DeferredCredits::adjustmentsMPT(xrpl::MPTID const& mptID) const
-    -> std::optional<AdjustmentMPT>
+DeferredCredits::adjustmentsMPT(xrpl::MPTID const& mptID) const -> std::optional<AdjustmentMPT>
 {
     auto i = creditsMPT_.find(mptID);
     if (i == creditsMPT_.end())
@@ -315,10 +302,8 @@ PaymentSandbox::balanceHookIOU(
 }
 
 STAmount
-PaymentSandbox::balanceHookMPT(
-    AccountID const& account,
-    MPTIssue const& issue,
-    std::int64_t amount) const
+PaymentSandbox::balanceHookMPT(AccountID const& account, MPTIssue const& issue, std::int64_t amount)
+    const
 {
     auto const& issuer = issue.getIssuer();
     bool const accountIsHolder = account != issuer;
@@ -332,8 +317,7 @@ PaymentSandbox::balanceHookMPT(
         {
             if (accountIsHolder)
             {
-                if (auto const i = adj->holders.find(account);
-                    i != adj->holders.end())
+                if (auto const i = adj->holders.find(account); i != adj->holders.end())
                 {
                     delta += i->second.debit;
                     lastBal = i->second.origBalance;
@@ -357,9 +341,7 @@ PaymentSandbox::balanceHookMPT(
 }
 
 STAmount
-PaymentSandbox::balanceHookSelfIssueMPT(
-    xrpl::MPTIssue const& issue,
-    std::int64_t amount) const
+PaymentSandbox::balanceHookSelfIssueMPT(xrpl::MPTIssue const& issue, std::int64_t amount) const
 {
     std::int64_t selfDebited = 0;
     std::int64_t lastBal = amount;
@@ -410,11 +392,9 @@ PaymentSandbox::creditHookMPT(
     std::uint64_t preCreditBalanceHolder,
     std::int64_t preCreditBalanceIssuer)
 {
-    XRPL_ASSERT(
-        amount.holds<MPTIssue>(), "creditHookMPT: amount is for MPTIssue");
+    XRPL_ASSERT(amount.holds<MPTIssue>(), "creditHookMPT: amount is for MPTIssue");
 
-    tab_.creditMPT(
-        from, to, amount, preCreditBalanceHolder, preCreditBalanceIssuer);
+    tab_.creditMPT(from, to, amount, preCreditBalanceHolder, preCreditBalanceIssuer);
 }
 
 void
@@ -423,9 +403,7 @@ PaymentSandbox::issuerSelfDebitHookMPT(
     std::uint64_t amount,
     std::int64_t origBalance)
 {
-    XRPL_ASSERT(
-        amount > 0,
-        "PaymentSandbox::issuerSelfDebitHookMPT: amount must be > 0");
+    XRPL_ASSERT(amount > 0, "PaymentSandbox::issuerSelfDebitHookMPT: amount must be > 0");
 
     tab_.issuerSelfDebitMPT(issue, amount, origBalance);
 }

@@ -67,8 +67,7 @@ Payment::getFlagsMask(PreflightContext const& ctx)
     bool const isDstMPT = dstAmount.holds<MPTIssue>();
     bool const MPTokensV2 = ctx.rules.enabled(featureMPTokensV2);
 
-    std::uint32_t paymentMask =
-        (isDstMPT && !MPTokensV2) ? tfMPTPaymentMaskV1 : tfPaymentMask;
+    std::uint32_t paymentMask = (isDstMPT && !MPTokensV2) ? tfMPTPaymentMaskV1 : tfPaymentMask;
 
     return paymentMask;
 }
@@ -378,8 +377,7 @@ Payment::doApply()
     AccountID const dstAccountID(ctx_.tx.getAccountID(sfDestination));
     STAmount const dstAmount(ctx_.tx.getFieldAmount(sfAmount));
     bool const isDstMPT = dstAmount.holds<MPTIssue>();
-    STAmount const maxSourceAmount =
-        getMaxSourceAmount(account_, dstAmount, sendMax);
+    STAmount const maxSourceAmount = getMaxSourceAmount(account_, dstAmount, sendMax);
 
     JLOG(j_.trace()) << "maxSourceAmount=" << maxSourceAmount.getFullText()
                      << " dstAmount=" << dstAmount.getFullText();
@@ -408,8 +406,7 @@ Payment::doApply()
     bool const MPTokensV2 = view().rules().enabled(featureMPTokensV2);
 
     // Direct MPT payment is handled by payment engine if MPTokensV2 is enabled
-    bool const ripple = (hasPaths || sendMax || !dstAmount.native()) &&
-        (!isDstMPT || MPTokensV2);
+    bool const ripple = (hasPaths || sendMax || !dstAmount.native()) && (!isDstMPT || MPTokensV2);
 
     if (ripple)
     {

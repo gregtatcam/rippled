@@ -65,9 +65,7 @@ assetFromJson(Json::Value const& v)
 std::ostream&
 operator<<(std::ostream& os, Asset const& x)
 {
-    std::visit(
-        [&]<ValidIssueType TIss>(TIss const& issue) { os << issue; },
-        x.value());
+    std::visit([&]<ValidIssueType TIss>(TIss const& issue) { os << issue; }, x.value());
     return os;
 }
 

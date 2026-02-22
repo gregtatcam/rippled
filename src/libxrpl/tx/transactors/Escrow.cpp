@@ -182,8 +182,7 @@ escrowCreatePreclaimHelper<Issue>(
         return tecNO_PERMISSION;
 
     // If the account does not have a trustline to the issuer, return tecNO_LINE
-    auto const sleRippleState =
-        ctx.view.read(keylet::line(account, issuer, issue.currency));
+    auto const sleRippleState = ctx.view.read(keylet::line(account, issuer, issue.currency));
     if (!sleRippleState)
         return tecNO_LINE;
 
@@ -198,8 +197,7 @@ escrowCreatePreclaimHelper<Issue>(
         return tecNO_PERMISSION;  // LCOV_EXCL_LINE
 
     // If the issuer has requireAuth set, check if the account is authorized
-    if (auto const ter = requireAuth(ctx.view, issue, account);
-        ter != tesSUCCESS)
+    if (auto const ter = requireAuth(ctx.view, issue, account); ter != tesSUCCESS)
         return ter;
 
     // If the issuer has requireAuth set, check if the destination is authorized
@@ -214,8 +212,8 @@ escrowCreatePreclaimHelper<Issue>(
     if (isFrozen(ctx.view, dest, issue))
         return tecFROZEN;
 
-    STAmount const spendableAmount = accountHolds(
-        ctx.view, account, issue.currency, issuer, fhIGNORE_FREEZE, ctx.j);
+    STAmount const spendableAmount =
+        accountHolds(ctx.view, account, issue.currency, issuer, fhIGNORE_FREEZE, ctx.j);
 
     // If the balance is less than or equal to 0, return tecINSUFFICIENT_FUNDS
     if (spendableAmount <= beast::zero)
@@ -793,8 +791,7 @@ escrowUnlockApplyHelper<Issue>(
     if ((!senderIssuer && !receiverIssuer) && lockedRate != parityRate)
     {
         // compute transfer fee, if any
-        auto const xferFee =
-            amount.value() - divideRound(amount, lockedRate, issue, true);
+        auto const xferFee = amount.value() - divideRound(amount, lockedRate, issue, true);
         // compute balance to transfer
         finalAmt = amount.value() - xferFee;
     }
@@ -1102,8 +1099,7 @@ escrowCancelPreclaimHelper<Issue>(
         return tecINTERNAL;  // LCOV_EXCL_LINE
 
     // If the issuer has requireAuth set, check if the account is authorized
-    if (auto const ter = requireAuth(ctx.view, amount.get<Issue>(), account);
-        ter != tesSUCCESS)
+    if (auto const ter = requireAuth(ctx.view, amount.get<Issue>(), account); ter != tesSUCCESS)
         return ter;
 
     return tesSUCCESS;
@@ -1130,8 +1126,7 @@ escrowCancelPreclaimHelper<MPTIssue>(
 
     // If the issuer has requireAuth set, check if the account is
     // authorized
-    if (auto const ter =
-            requireAuth(ctx.view, mptIssue, account, AuthType::WeakAuth);
+    if (auto const ter = requireAuth(ctx.view, mptIssue, account, AuthType::WeakAuth);
         ter != tesSUCCESS)
         return ter;
 

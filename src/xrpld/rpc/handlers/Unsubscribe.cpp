@@ -154,13 +154,11 @@ doUnsubscribe(RPC::JsonContext& context)
 
             Book book;
 
-            if (auto const err = RPC::parseSubUnsubJson(
-                    book.in, jv, jss::taker_pays, context.j);
+            if (auto const err = RPC::parseSubUnsubJson(book.in, jv, jss::taker_pays, context.j);
                 err != rpcSUCCESS)
                 return rpcError(err);
 
-            if (auto const err = RPC::parseSubUnsubJson(
-                    book.out, jv, jss::taker_gets, context.j);
+            if (auto const err = RPC::parseSubUnsubJson(book.out, jv, jss::taker_gets, context.j);
                 err != rpcSUCCESS)
                 return rpcError(err);
 

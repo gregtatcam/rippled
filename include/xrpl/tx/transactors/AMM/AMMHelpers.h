@@ -36,10 +36,7 @@ enum class IsDeposit : bool { No = false, Yes = true };
  * @return LP Tokens as IOU
  */
 STAmount
-ammLPTokens(
-    STAmount const& asset1,
-    STAmount const& asset2,
-    Asset const& lptIssue);
+ammLPTokens(STAmount const& asset1, STAmount const& asset2, Asset const& lptIssue);
 
 /** Calculate LP Tokens given asset's deposit amount.
  * @param asset1Balance current AMM asset1 balance
@@ -198,10 +195,9 @@ getAMMOfferStartWithTakerGets(
     auto getAmounts = [&pool, &tfee](Number const& nTakerGetsProposed) {
         // Round downward to minimize the offer and to maximize the quality.
         // This has the most impact when takerGets is XRP.
-        auto const takerGets = toAmount<TOut>(
-            getAsset(pool.out), nTakerGetsProposed, Number::downward);
-        return TAmounts<TIn, TOut>{
-            swapAssetOut(pool, takerGets, tfee), takerGets};
+        auto const takerGets =
+            toAmount<TOut>(getAsset(pool.out), nTakerGetsProposed, Number::downward);
+        return TAmounts<TIn, TOut>{swapAssetOut(pool, takerGets, tfee), takerGets};
     };
 
     // Try to reduce the offer size to improve the quality.
@@ -266,10 +262,9 @@ getAMMOfferStartWithTakerPays(
     auto getAmounts = [&pool, &tfee](Number const& nTakerPaysProposed) {
         // Round downward to minimize the offer and to maximize the quality.
         // This has the most impact when takerPays is XRP.
-        auto const takerPays = toAmount<TIn>(
-            getAsset(pool.in), nTakerPaysProposed, Number::downward);
-        return TAmounts<TIn, TOut>{
-            takerPays, swapAssetIn(pool, takerPays, tfee)};
+        auto const takerPays =
+            toAmount<TIn>(getAsset(pool.in), nTakerPaysProposed, Number::downward);
+        return TAmounts<TIn, TOut>{takerPays, swapAssetIn(pool, takerPays, tfee)};
     };
 
     // Try to reduce the offer size to improve the quality.
@@ -337,8 +332,7 @@ changeSpotPriceQuality(
                                 << " " << to_string(pool.out) << " " << quality << " " << tfee;
                 return std::nullopt;
             }
-            auto const takerPays =
-                toAmount<TIn>(getAsset(pool.in), nTakerPays, Number::upward);
+            auto const takerPays = toAmount<TIn>(getAsset(pool.in), nTakerPays, Number::upward);
             // should not fail
             if (auto const amounts =
                     TAmounts<TIn, TOut>{takerPays, swapAssetIn(pool, takerPays, tfee)};
@@ -470,8 +464,7 @@ swapAssetIn(TAmounts<TIn, TOut> const& pool, TIn const& assetIn, std::uint16_t t
     {
         return toAmount<TOut>(
             getAsset(pool.out),
-            pool.out -
-                (pool.in * pool.out) / (pool.in + assetIn * feeMult(tfee)),
+            pool.out - (pool.in * pool.out) / (pool.in + assetIn * feeMult(tfee)),
             Number::downward);
     }
 }
@@ -539,8 +532,7 @@ swapAssetOut(TAmounts<TIn, TOut> const& pool, TOut const& assetOut, std::uint16_
     {
         return toAmount<TIn>(
             getAsset(pool.in),
-            ((pool.in * pool.out) / (pool.out - assetOut) - pool.in) /
-                feeMult(tfee),
+            ((pool.in * pool.out) / (pool.out - assetOut) - pool.in) / feeMult(tfee),
             Number::upward);
     }
 }

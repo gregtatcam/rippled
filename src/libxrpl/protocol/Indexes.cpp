@@ -106,33 +106,18 @@ getBookBase(Book const& book)
     };
 
     auto const index = std::visit(
-        [&]<ValidIssueType TIn, ValidIssueType TOut>(
-            TIn const& in, TOut const& out) {
-            if constexpr (
-                std::is_same_v<TIn, Issue> && std::is_same_v<TOut, Issue>)
+        [&]<ValidIssueType TIn, ValidIssueType TOut>(TIn const& in, TOut const& out) {
+            if constexpr (std::is_same_v<TIn, Issue> && std::is_same_v<TOut, Issue>)
                 return getIndexHash(
-                    LedgerNameSpace::BOOK_DIR,
-                    in.currency,
-                    out.currency,
-                    in.account,
-                    out.account);
-            else if constexpr (
-                std::is_same_v<TIn, Issue> && std::is_same_v<TOut, MPTIssue>)
+                    LedgerNameSpace::BOOK_DIR, in.currency, out.currency, in.account, out.account);
+            else if constexpr (std::is_same_v<TIn, Issue> && std::is_same_v<TOut, MPTIssue>)
                 return getIndexHash(
-                    LedgerNameSpace::BOOK_DIR,
-                    in.currency,
-                    out.getMptID(),
-                    in.account);
-            else if constexpr (
-                std::is_same_v<TIn, MPTIssue> && std::is_same_v<TOut, Issue>)
+                    LedgerNameSpace::BOOK_DIR, in.currency, out.getMptID(), in.account);
+            else if constexpr (std::is_same_v<TIn, MPTIssue> && std::is_same_v<TOut, Issue>)
                 return getIndexHash(
-                    LedgerNameSpace::BOOK_DIR,
-                    in.getMptID(),
-                    out.currency,
-                    out.account);
+                    LedgerNameSpace::BOOK_DIR, in.getMptID(), out.currency, out.account);
             else
-                return getIndexHash(
-                    LedgerNameSpace::BOOK_DIR, in.getMptID(), out.getMptID());
+                return getIndexHash(LedgerNameSpace::BOOK_DIR, in.getMptID(), out.getMptID());
         },
         book.in.value(),
         book.out.value());
@@ -429,37 +414,22 @@ amm(Asset const& asset1, Asset const& asset2) noexcept
 {
     auto const& [minA, maxA] = std::minmax(asset1, asset2);
     return std::visit(
-        []<ValidIssueType TIss1, ValidIssueType TIss2>(
-            TIss1 const& issue1, TIss2 const& issue2) {
-            if constexpr (
-                std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, Issue>)
+        []<ValidIssueType TIss1, ValidIssueType TIss2>(TIss1 const& issue1, TIss2 const& issue2) {
+            if constexpr (std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, Issue>)
                 return amm(indexHash(
                     LedgerNameSpace::AMM,
                     issue1.account,
                     issue1.currency,
                     issue2.account,
                     issue2.currency));
-            else if constexpr (
-                std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, MPTIssue>)
+            else if constexpr (std::is_same_v<TIss1, Issue> && std::is_same_v<TIss2, MPTIssue>)
                 return amm(indexHash(
-                    LedgerNameSpace::AMM,
-                    issue1.account,
-                    issue1.currency,
-                    issue2.getMptID()));
-            else if constexpr (
-                std::is_same_v<TIss1, MPTIssue> && std::is_same_v<TIss2, Issue>)
+                    LedgerNameSpace::AMM, issue1.account, issue1.currency, issue2.getMptID()));
+            else if constexpr (std::is_same_v<TIss1, MPTIssue> && std::is_same_v<TIss2, Issue>)
                 return amm(indexHash(
-                    LedgerNameSpace::AMM,
-                    issue1.getMptID(),
-                    issue2.account,
-                    issue2.currency));
-            else if constexpr (
-                std::is_same_v<TIss1, MPTIssue> &&
-                std::is_same_v<TIss2, MPTIssue>)
-                return amm(indexHash(
-                    LedgerNameSpace::AMM,
-                    issue1.getMptID(),
-                    issue2.getMptID()));
+                    LedgerNameSpace::AMM, issue1.getMptID(), issue2.account, issue2.currency));
+            else if constexpr (std::is_same_v<TIss1, MPTIssue> && std::is_same_v<TIss2, MPTIssue>)
+                return amm(indexHash(LedgerNameSpace::AMM, issue1.getMptID(), issue2.getMptID()));
         },
         minA.value(),
         maxA.value());

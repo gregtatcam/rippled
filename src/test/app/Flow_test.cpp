@@ -867,10 +867,8 @@ struct Flow_test : public beast::unit_test::suite
             env.close();
             env(trust(bob, USD(20)));
 
-            STAmount tinyAmt1{
-                USD, 9000000000000000ll, -17, false, STAmount::unchecked{}};
-            STAmount tinyAmt3{
-                USD, 9000000000000003ll, -17, false, STAmount::unchecked{}};
+            STAmount tinyAmt1{USD, 9000000000000000ll, -17, false, STAmount::unchecked{}};
+            STAmount tinyAmt3{USD, 9000000000000003ll, -17, false, STAmount::unchecked{}};
 
             env(offer(gw, drops(9000000000), tinyAmt3));
             env(pay(alice, bob, tinyAmt1),
@@ -893,10 +891,8 @@ struct Flow_test : public beast::unit_test::suite
             env.close();
             env(trust(alice, USD(20)));
 
-            STAmount tinyAmt1{
-                USD, 9000000000000000ll, -17, false, STAmount::unchecked{}};
-            STAmount tinyAmt3{
-                USD, 9000000000000003ll, -17, false, STAmount::unchecked{}};
+            STAmount tinyAmt1{USD, 9000000000000000ll, -17, false, STAmount::unchecked{}};
+            STAmount tinyAmt3{USD, 9000000000000003ll, -17, false, STAmount::unchecked{}};
 
             env(pay(gw, alice, tinyAmt1));
 

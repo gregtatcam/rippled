@@ -152,13 +152,9 @@ public:
     // balances so newly acquired assets are not counted toward the balance.
     // This is required to support PaymentSandbox.
     virtual STAmount
-    balanceHookIOU(
-        AccountID const& account,
-        AccountID const& issuer,
-        STAmount const& amount) const
+    balanceHookIOU(AccountID const& account, AccountID const& issuer, STAmount const& amount) const
     {
-        XRPL_ASSERT(
-            amount.holds<Issue>(), "balanceHookIOU: amount is for Issue");
+        XRPL_ASSERT(amount.holds<Issue>(), "balanceHookIOU: amount is for Issue");
 
         return amount;
     }
@@ -166,10 +162,7 @@ public:
     // balanceHookMPT adjusts balances so newly acquired assets are not counted
     // toward the balance.
     virtual STAmount
-    balanceHookMPT(
-        AccountID const& account,
-        MPTIssue const& issue,
-        std::int64_t amount) const
+    balanceHookMPT(AccountID const& account, MPTIssue const& issue, std::int64_t amount) const
     {
         return STAmount{issue, amount};
     }

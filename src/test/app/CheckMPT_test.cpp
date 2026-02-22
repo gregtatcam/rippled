@@ -12,13 +12,10 @@ class CheckMPT_test : public beast::unit_test::suite
     checksOnAccount(test::jtx::Env& env, test::jtx::Account account)
     {
         std::vector<std::shared_ptr<SLE const>> result;
-        forEachItem(
-            *env.current(),
-            account,
-            [&result](std::shared_ptr<SLE const> const& sle) {
-                if (sle && sle->getType() == ltCHECK)
-                    result.push_back(sle);
-            });
+        forEachItem(*env.current(), account, [&result](std::shared_ptr<SLE const> const& sle) {
+            if (sle && sle->getType() == ltCHECK)
+                result.push_back(sle);
+        });
         return result;
     }
 
@@ -30,8 +27,7 @@ class CheckMPT_test : public beast::unit_test::suite
     verifyDeliveredAmount(test::jtx::Env& env, STAmount const& amount)
     {
         // Get the hash for the most recent transaction.
-        std::string const txHash{
-            env.tx()->getJson(JsonOptions::none)[jss::hash].asString()};
+        std::string const txHash{env.tx()->getJson(JsonOptions::none)[jss::hash].asString()};
 
         // Verify DeliveredAmount and delivered_amount metadata are correct.
         env.close();
@@ -43,11 +39,8 @@ class CheckMPT_test : public beast::unit_test::suite
 
         // DeliveredAmount and delivered_amount should both be present and
         // equal amount.
-        BEAST_EXPECT(
-            meta[sfDeliveredAmount.jsonName] ==
-            amount.getJson(JsonOptions::none));
-        BEAST_EXPECT(
-            meta[jss::delivered_amount] == amount.getJson(JsonOptions::none));
+        BEAST_EXPECT(meta[sfDeliveredAmount.jsonName] == amount.getJson(JsonOptions::none));
+        BEAST_EXPECT(meta[jss::delivered_amount] == amount.getJson(JsonOptions::none));
     }
 
     void
@@ -72,8 +65,7 @@ class CheckMPT_test : public beast::unit_test::suite
         // Note that no MPToken has been set up for alice, but alice can
         // still write a check for USD.  You don't have to have the funds
         // necessary to cover a check in order to write a check.
-        auto writeTwoChecks = [&env, &USD, this](
-                                  Account const& from, Account const& to) {
+        auto writeTwoChecks = [&env, &USD, this](Account const& from, Account const& to) {
             std::uint32_t const fromOwnerCount{ownerCount(env, from)};
             std::uint32_t const toOwnerCount{ownerCount(env, to)};
 
@@ -90,8 +82,7 @@ class CheckMPT_test : public beast::unit_test::suite
             BEAST_EXPECT(checksOnAccount(env, to).size() == toCkCount + 2);
 
             env.require(owners(from, fromOwnerCount + 2));
-            env.require(
-                owners(to, to == from ? fromOwnerCount + 2 : toOwnerCount));
+            env.require(owners(to, to == from ? fromOwnerCount + 2 : toOwnerCount));
         };
         //  from     to
         writeTwoChecks(alice, bob);
@@ -142,9 +133,7 @@ class CheckMPT_test : public beast::unit_test::suite
 
         // alice uses multisigning to create a check.
         XRPAmount const baseFeeDrops{env.current()->fees().base};
-        env(check::create(alice, bob, USD(50)),
-            msig(bogie, demon),
-            fee(3 * baseFeeDrops));
+        env(check::create(alice, bob, USD(50)), msig(bogie, demon), fee(3 * baseFeeDrops));
         env.close();
         BEAST_EXPECT(checksOnAccount(env, alice).size() == aliceCount + 7);
         BEAST_EXPECT(checksOnAccount(env, bob).size() == bobCount + 7);
@@ -173,9 +162,7 @@ class CheckMPT_test : public beast::unit_test::suite
          * require they both result in error/success code `expected`
          */
         auto writeTwoChecksDI = [&env, &USD, this](
-                                    Account const& from,
-                                    Account const& to,
-                                    TER expected) {
+                                    Account const& from, Account const& to, TER expected) {
             std::uint32_t const fromOwnerCount{ownerCount(env, from)};
             std::uint32_t const toOwnerCount{ownerCount(env, to)};
 
@@ -190,13 +177,11 @@ class CheckMPT_test : public beast::unit_test::suite
 
             if (expected == tesSUCCESS)
             {
-                BEAST_EXPECT(
-                    checksOnAccount(env, from).size() == fromCkCount + 2);
+                BEAST_EXPECT(checksOnAccount(env, from).size() == fromCkCount + 2);
                 BEAST_EXPECT(checksOnAccount(env, to).size() == toCkCount + 2);
 
                 env.require(owners(from, fromOwnerCount + 2));
-                env.require(
-                    owners(to, to == from ? fromOwnerCount + 2 : toOwnerCount));
+                env.require(owners(to, to == from ? fromOwnerCount + 2 : toOwnerCount));
                 return;
             }
 
@@ -251,20 +236,15 @@ class CheckMPT_test : public beast::unit_test::suite
         STAmount const startBalance{XRP(1'000).value()};
         env.fund(startBalance, gw1, gwF, alice, bob);
 
-        auto USDM = MPTTester(
-            {.env = env, .issuer = gw1, .flags = MPTDEXFlags | tfMPTCanLock});
+        auto USDM = MPTTester({.env = env, .issuer = gw1, .flags = MPTDEXFlags | tfMPTCanLock});
         MPT const USD = USDM;
 
         // Bad fee.
-        env(check::create(alice, bob, USD(50)),
-            fee(drops(-10)),
-            ter(temBAD_FEE));
+        env(check::create(alice, bob, USD(50)), fee(drops(-10)), ter(temBAD_FEE));
         env.close();
 
         // Bad flags.
-        env(check::create(alice, bob, USD(50)),
-            txflags(tfImmediateOrCancel),
-            ter(temINVALID_FLAG));
+        env(check::create(alice, bob, USD(50)), txflags(tfImmediateOrCancel), ter(temINVALID_FLAG));
         env.close();
 
         // Check to self.
@@ -321,10 +301,7 @@ class CheckMPT_test : public beast::unit_test::suite
         {
             // Globally frozen asset.
             env.close();
-            auto USFM = MPTTester(
-                {.env = env,
-                 .issuer = gwF,
-                 .flags = MPTDEXFlags | tfMPTCanLock});
+            auto USFM = MPTTester({.env = env, .issuer = gwF, .flags = MPTDEXFlags | tfMPTCanLock});
             MPT const USF = USFM;
             USFM.set({.flags = tfMPTLock});
 
@@ -376,9 +353,7 @@ class CheckMPT_test : public beast::unit_test::suite
         }
 
         // Expired expiration.
-        env(check::create(alice, bob, USD(50)),
-            expiration(env.now()),
-            ter(tecEXPIRED));
+        env(check::create(alice, bob, USD(50)), expiration(env.now()), ter(tecEXPIRED));
         env.close();
 
         using namespace std::chrono_literals;
@@ -418,8 +393,8 @@ class CheckMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, bob);
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 105});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 105});
 
             // alice writes the check before she gets the funds.
             uint256 const chkId1{getCheckIndex(alice, env.seq(alice))};
@@ -555,11 +530,8 @@ class CheckMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, bob);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, bob},
-                 .maxAmt = 20});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 20});
 
             env(pay(gw, alice, USD(8)));
             env.close();
@@ -580,8 +552,7 @@ class CheckMPT_test : public beast::unit_test::suite
 
             // bob attempts to cash a check for the amount on the check.
             // Should fail, since alice doesn't have the funds.
-            env(check::cash(bob, chkId9, check::DeliverMin(USD(9))),
-                ter(tecPATH_PARTIAL));
+            env(check::cash(bob, chkId9, check::DeliverMin(USD(9))), ter(tecPATH_PARTIAL));
             env.close();
 
             // bob sets a DeliverMin of 7 and gets all that alice has.
@@ -690,11 +661,8 @@ class CheckMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, bob);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, bob},
-                 .maxAmt = 20});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 20});
 
             // alice creates her checks ahead of time.
             uint256 const chkId1{getCheckIndex(alice, env.seq(alice))};
@@ -733,9 +701,7 @@ class CheckMPT_test : public beast::unit_test::suite
 
             // bob uses multisigning to cash a check.
             XRPAmount const baseFeeDrops{env.current()->fees().base};
-            env(check::cash(bob, chkId2, (USD(2))),
-                msig(bogie, demon),
-                fee(3 * baseFeeDrops));
+            env(check::cash(bob, chkId2, (USD(2))), msig(bogie, demon), fee(3 * baseFeeDrops));
             env.close();
             env.require(balance(alice, USD(5)));
             env.require(balance(bob, USD(3)));
@@ -792,8 +758,7 @@ class CheckMPT_test : public beast::unit_test::suite
         // bob attempts to cash the check for face value.  Should fail.
         env(check::cash(bob, chkId125, USD(125)), ter(tecPATH_PARTIAL));
         env.close();
-        env(check::cash(bob, chkId125, check::DeliverMin(USD(101))),
-            ter(tecPATH_PARTIAL));
+        env(check::cash(bob, chkId125, check::DeliverMin(USD(101))), ter(tecPATH_PARTIAL));
         env.close();
 
         // bob decides that he'll accept anything USD(75) or up.
@@ -897,9 +862,7 @@ class CheckMPT_test : public beast::unit_test::suite
         auto failingCases = [&env, &gw, &alice, &bob](
                                 uint256 const& chkId, STAmount const& amount) {
             // Bad fee.
-            env(check::cash(bob, chkId, amount),
-                fee(drops(-10)),
-                ter(temBAD_FEE));
+            env(check::cash(bob, chkId, amount), fee(drops(-10)), ter(temBAD_FEE));
             env.close();
 
             // Bad flags.
@@ -929,8 +892,7 @@ class CheckMPT_test : public beast::unit_test::suite
                 neg.negate();
                 env(check::cash(bob, chkId, neg), ter(temBAD_AMOUNT));
                 env.close();
-                env(check::cash(bob, chkId, amount.zeroed()),
-                    ter(temBAD_AMOUNT));
+                env(check::cash(bob, chkId, amount.zeroed()), ter(temBAD_AMOUNT));
                 env.close();
             }
 
@@ -966,8 +928,7 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
 
             // DeliverMin bigger than SendMax.
-            env(check::cash(bob, chkId, check::DeliverMin(amount + amount)),
-                ter(tecPATH_PARTIAL));
+            env(check::cash(bob, chkId, check::DeliverMin(amount + amount)), ter(tecPATH_PARTIAL));
             env.close();
         };
 
@@ -1001,8 +962,7 @@ class CheckMPT_test : public beast::unit_test::suite
             // MPTLocked flag is set and the account is not the issuer of MPT
             env(check::cash(bob, chkIdFroz1, USD(1)), ter(tecPATH_PARTIAL));
             env.close();
-            env(check::cash(bob, chkIdFroz1, check::DeliverMin(USD(1))),
-                ter(tecPATH_PARTIAL));
+            env(check::cash(bob, chkIdFroz1, check::DeliverMin(USD(1))), ter(tecPATH_PARTIAL));
             env.close();
 
             USDM.set({.flags = tfMPTUnlock});
@@ -1017,8 +977,7 @@ class CheckMPT_test : public beast::unit_test::suite
             USDM.set({.holder = alice, .flags = tfMPTLock});
             env(check::cash(bob, chkIdFroz2, USD(2)), ter(tecPATH_PARTIAL));
             env.close();
-            env(check::cash(bob, chkIdFroz2, check::DeliverMin(USD(1))),
-                ter(tecPATH_PARTIAL));
+            env(check::cash(bob, chkIdFroz2, check::DeliverMin(USD(1))), ter(tecPATH_PARTIAL));
             env.close();
 
             // Clear that freeze.  Now check cashing works.
@@ -1032,8 +991,7 @@ class CheckMPT_test : public beast::unit_test::suite
             USDM.set({.holder = bob, .flags = tfMPTLock});
             env(check::cash(bob, chkIdFroz3, USD(3)), ter(tecFROZEN));
             env.close();
-            env(check::cash(bob, chkIdFroz3, check::DeliverMin(USD(1))),
-                ter(tecFROZEN));
+            env(check::cash(bob, chkIdFroz3, check::DeliverMin(USD(1))), ter(tecFROZEN));
             env.close();
 
             // Clear that freeze.  Now check cashing works again.
@@ -1051,8 +1009,7 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
             env(check::cash(bob, chkIdNoDest1, USD(1)), ter(tecDST_TAG_NEEDED));
             env.close();
-            env(check::cash(bob, chkIdNoDest1, check::DeliverMin(USD(1))),
-                ter(tecDST_TAG_NEEDED));
+            env(check::cash(bob, chkIdNoDest1, check::DeliverMin(USD(1))), ter(tecDST_TAG_NEEDED));
             env.close();
 
             // bob can cash a check with a destination tag.
@@ -1132,18 +1089,15 @@ class CheckMPT_test : public beast::unit_test::suite
             // Three checks that expire in 10 minutes.
             using namespace std::chrono_literals;
             uint256 const chkIdNotExp1{getCheckIndex(alice, env.seq(alice))};
-            env(check::create(alice, bob, XRP(10)),
-                expiration(env.now() + 600s));
+            env(check::create(alice, bob, XRP(10)), expiration(env.now() + 600s));
             env.close();
 
             uint256 const chkIdNotExp2{getCheckIndex(alice, env.seq(alice))};
-            env(check::create(alice, bob, USD(10)),
-                expiration(env.now() + 600s));
+            env(check::create(alice, bob, USD(10)), expiration(env.now() + 600s));
             env.close();
 
             uint256 const chkIdNotExp3{getCheckIndex(alice, env.seq(alice))};
-            env(check::create(alice, bob, XRP(10)),
-                expiration(env.now() + 600s));
+            env(check::create(alice, bob, XRP(10)), expiration(env.now() + 600s));
             env.close();
 
             // Three checks that expire in one second.
@@ -1238,9 +1192,7 @@ class CheckMPT_test : public beast::unit_test::suite
 
             // alice uses multisigning to cancel a check.
             XRPAmount const baseFeeDrops{env.current()->fees().base};
-            env(check::cancel(alice, chkIdMSig),
-                msig(bogie, demon),
-                fee(3 * baseFeeDrops));
+            env(check::cancel(alice, chkIdMSig), msig(bogie, demon), fee(3 * baseFeeDrops));
             env.close();
             BEAST_EXPECT(checksOnAccount(env, alice).size() == 2);
             BEAST_EXPECT(ownerCount(env, alice) == signersCount + 2);
@@ -1273,11 +1225,8 @@ class CheckMPT_test : public beast::unit_test::suite
         env.fund(XRP(1'000), gw, alice, bob);
         env.close();
 
-        MPT const USD = MPTTester(
-            {.env = env,
-             .issuer = gw,
-             .holders = {alice, bob},
-             .maxAmt = 1'000});
+        MPT const USD =
+            MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 1'000});
 
         // alice and bob grab enough tickets for all the following
         // transactions.  Note that once the tickets are acquired alice's
@@ -1401,13 +1350,10 @@ class CheckMPT_test : public beast::unit_test::suite
             verifyOwners(std::uint32_t line, bool print = false) const
             {
                 if (print)
-                    std::cout << acct.name() << " " << ownerCount(env, acct)
-                              << " " << owners << std::endl;
+                    std::cout << acct.name() << " " << ownerCount(env, acct) << " " << owners
+                              << std::endl;
                 suite.expect(
-                    ownerCount(env, acct) == owners,
-                    "Owner count mismatch",
-                    __FILE__,
-                    line);
+                    ownerCount(env, acct) == owners, "Owner count mismatch", __FILE__, line);
             }
 
             // Operators to make using the class more convenient.
@@ -1434,8 +1380,8 @@ class CheckMPT_test : public beast::unit_test::suite
                 auto flags = MPTDEXFlags | tfMPTCanLock;
                 if (requireAuth)
                     flags |= tfMPTRequireAuth;
-                auto [it, _] = mpts.emplace(
-                    s, MPTTester({.env = env, .issuer = acct, .flags = flags}));
+                auto [it, _] =
+                    mpts.emplace(s, MPTTester({.env = env, .issuer = acct, .flags = flags}));
                 (void)_;
                 ++owners;
 
@@ -1446,12 +1392,10 @@ class CheckMPT_test : public beast::unit_test::suite
             getIt(MPT const& mpt)
             {
                 if (!isIssuer)
-                    Throw<std::runtime_error>(
-                        "AccountOwns::set must be issuer");
+                    Throw<std::runtime_error>("AccountOwns::set must be issuer");
                 auto it = mpts.find(mpt.name);
                 if (it == mpts.end())
-                    Throw<std::runtime_error>(
-                        "AccountOwns::set mpt doesn't exist");
+                    Throw<std::runtime_error>("AccountOwns::set mpt doesn't exist");
                 return it;
             }
 
@@ -1478,16 +1422,12 @@ class CheckMPT_test : public beast::unit_test::suite
                 if (auto const redeem = it->second.getBalance(id))
                     pay(it, id, acct, redeem);
                 // delete mptoken
-                it->second.authorize(
-                    {.account = id, .flags = tfMPTUnauthorize});
+                it->second.authorize({.account = id, .flags = tfMPTUnauthorize});
                 --id.owners;
             }
 
             void
-            pay(iterator& it,
-                Account const& src,
-                Account const& dst,
-                std::uint64_t amount)
+            pay(iterator& it, Account const& src, Account const& dst, std::uint64_t amount)
             {
                 if (env.le(keylet::account(dst))->isFlag(lsfDepositAuth))
                 {
@@ -1577,8 +1517,7 @@ class CheckMPT_test : public beast::unit_test::suite
             MPT const OF1 = gw1["OF1"];
             env(offer(gw1, XRP(98), OF1(98)));
             env.close();
-            BEAST_EXPECT(
-                env.le(keylet::mptoken(OF1.issuanceID, alice)) == nullptr);
+            BEAST_EXPECT(env.le(keylet::mptoken(OF1.issuanceID, alice)) == nullptr);
             env(offer(alice, OF1(98), XRP(98)));
             ++alice.owners;
             env.close();
@@ -1596,8 +1535,7 @@ class CheckMPT_test : public beast::unit_test::suite
             uint256 const chkId{getCheckIndex(gw1, env.seq(gw1))};
             env(check::create(gw1, alice, CK1(98)));
             env.close();
-            BEAST_EXPECT(
-                env.le(keylet::mptoken(CK1.issuanceID, alice)) == nullptr);
+            BEAST_EXPECT(env.le(keylet::mptoken(CK1.issuanceID, alice)) == nullptr);
             env(check::cash(alice, chkId, CK1(98)));
             ++alice.owners;
             verifyDeliveredAmount(env, CK1(98));

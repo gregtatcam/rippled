@@ -1,5 +1,4 @@
-#ifndef XRPL_APP_PATHS_MPT_H_INCLUDED
-#define XRPL_APP_PATHS_MPT_H_INCLUDED
+#pragma once
 
 #include <xrpl/protocol/MPTIssue.h>
 
@@ -15,8 +14,7 @@ private:
     bool const maxedOut_;
 
 public:
-    PathFindMPT(MPTID const& mptID)
-        : mptID_(mptID), zeroBalance_(false), maxedOut_(false)
+    PathFindMPT(MPTID const& mptID) : mptID_(mptID), zeroBalance_(false), maxedOut_(false)
     {
     }
     PathFindMPT(MPTID const& mptID, bool zeroBalance, bool maxedOut)
@@ -45,5 +43,3 @@ public:
 };
 
 }  // namespace xrpl
-
-#endif  // XRPL_APP_PATHS_MPT_H_INCLUDED

@@ -9,7 +9,8 @@ namespace xrpl {
 namespace test {
 namespace jtx {
 
-PrettyAmount::operator AnyAmount() const
+PrettyAmount::
+operator AnyAmount() const
 {
     return {amount_};
 }
@@ -59,13 +60,13 @@ operator<<(std::ostream& os, PrettyAmount const& amount)
             }
             else
             {
-                os << amount.value().getText() << "/"
-                   << to_string(issue.currency) << "(" << amount.name() << ")";
+                os << amount.value().getText() << "/" << to_string(issue.currency) << "("
+                   << amount.name() << ")";
             }
         },
         [&](MPTIssue const& issue) {
-            os << amount.value().getText() << "/" << to_string(issue) << "("
-               << amount.name() << ")";
+            os << amount.value().getText() << "/" << to_string(issue) << "(" << amount.name()
+               << ")";
         });
     return os;
 }

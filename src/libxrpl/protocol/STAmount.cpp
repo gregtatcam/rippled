@@ -91,11 +91,9 @@ static bool
 areComparable(STAmount const& v1, STAmount const& v2)
 {
     return std::visit(
-        [&]<ValidIssueType TIss1, ValidIssueType TIss2>(
-            TIss1 const& issue1, TIss2 const& issue2) {
+        [&]<ValidIssueType TIss1, ValidIssueType TIss2>(TIss1 const& issue1, TIss2 const& issue2) {
             if constexpr (is_issue_v<TIss1> && is_issue_v<TIss2>)
-                return v1.native() == v2.native() &&
-                    issue1.currency == issue2.currency;
+                return v1.native() == v2.native() && issue1.currency == issue2.currency;
             else if constexpr (is_mptissue_v<TIss1> && is_mptissue_v<TIss2>)
                 return issue1 == issue2;
             else
@@ -525,8 +523,7 @@ canAdd(STAmount const& a, STAmount const& b)
                 static STAmount const maxLoss{IOUAmount{1, -4}, noIssue()};
                 STAmount lhs = divide((a - b) + b, a, noIssue()) - one;
                 STAmount rhs = divide((b - a) + a, b, noIssue()) - one;
-                return ((rhs.negative() ? -rhs : rhs) +
-                        (lhs.negative() ? -lhs : lhs)) <= maxLoss;
+                return ((rhs.negative() ? -rhs : rhs) + (lhs.negative() ? -lhs : lhs)) <= maxLoss;
             }
 
             // MPT (overflow & underflow check)
@@ -535,13 +532,9 @@ canAdd(STAmount const& a, STAmount const& b)
                 MPTAmount A = a.mpt();
                 MPTAmount B = b.mpt();
                 if ((B > MPTAmount{0} &&
-                     A > MPTAmount{std::numeric_limits<
-                             MPTAmount::value_type>::max()} -
-                             B) ||
+                     A > MPTAmount{std::numeric_limits<MPTAmount::value_type>::max()} - B) ||
                     (B < MPTAmount{0} &&
-                     A < MPTAmount{std::numeric_limits<
-                             MPTAmount::value_type>::min()} -
-                             B))
+                     A < MPTAmount{std::numeric_limits<MPTAmount::value_type>::min()} - B))
                 {
                     return false;
                 }
@@ -626,10 +619,7 @@ canSubtract(STAmount const& a, STAmount const& b)
 
                 // Overflow check
                 if (B < MPTAmount{0} &&
-                    A >
-                        MPTAmount{
-                            std::numeric_limits<MPTAmount::value_type>::max()} +
-                            B)
+                    A > MPTAmount{std::numeric_limits<MPTAmount::value_type>::max()} + B)
                     return false;
                 return true;
             }
@@ -804,15 +794,11 @@ STAmount::add(Serializer& s) const
                 if (*this == beast::zero)
                     s.add64(cIssuedCurrency);
                 else if (mIsNegative)  // 512 = not native
-                    s.add64(
-                        mValue |
-                        (static_cast<std::uint64_t>(mOffset + 512 + 97)
-                         << (64 - 10)));
+                    s.add64(mValue | (static_cast<std::uint64_t>(mOffset + 512 + 97) << (64 - 10)));
                 else  // 256 = positive
                     s.add64(
                         mValue |
-                        (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97)
-                         << (64 - 10)));
+                        (static_cast<std::uint64_t>(mOffset + 512 + 256 + 97) << (64 - 10)));
                 s.addBitString(issue.currency);
                 s.addBitString(issue.account);
             }
@@ -1432,11 +1418,7 @@ canonicalizeRound(bool integral, std::uint64_t& value, int& offset, bool)
 // rounding decisions.  canonicalizeRoundStrict() tracks all of the bits in
 // the value being rounded.
 static void
-canonicalizeRoundStrict(
-    bool integral,
-    std::uint64_t& value,
-    int& offset,
-    bool roundUp)
+canonicalizeRoundStrict(bool integral, std::uint64_t& value, int& offset, bool roundUp)
 {
     if (integral)
     {

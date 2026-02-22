@@ -44,10 +44,8 @@ class Asset
 public:
     using value_type = std::variant<Issue, MPTIssue>;
     using token_type = std::variant<Currency, MPTID>;
-    using AmtType = std::variant<
-        AmountType<XRPAmount>,
-        AmountType<IOUAmount>,
-        AmountType<MPTAmount>>;
+    using AmtType =
+        std::variant<AmountType<XRPAmount>, AmountType<IOUAmount>, AmountType<MPTAmount>>;
 
 private:
     value_type issue_;
@@ -199,9 +197,7 @@ Asset::token() const
 {
     return visit(
         [&](Issue const& issue) -> Asset::token_type { return issue.currency; },
-        [&](MPTIssue const& issue) -> Asset::token_type {
-            return issue.getMptID();
-        });
+        [&](MPTIssue const& issue) -> Asset::token_type { return issue.getMptID(); });
 }
 
 constexpr Asset::AmtType
@@ -261,12 +257,8 @@ constexpr bool
 operator==(BadAsset const&, Asset const& rhs)
 {
     return rhs.visit(
-        [](Issue const& issue) -> bool {
-            return badCurrency() == issue.currency;
-        },
-        [](MPTIssue const& issue) -> bool {
-            return issue.getIssuer() == xrpAccount();
-        });
+        [](Issue const& issue) -> bool { return badCurrency() == issue.currency; },
+        [](MPTIssue const& issue) -> bool { return issue.getIssuer() == xrpAccount(); });
 }
 
 constexpr bool
@@ -315,12 +307,8 @@ inline bool
 validAsset(Asset const& asset)
 {
     return asset.visit(
-        [](Issue const& issue) {
-            return isConsistent(issue) && issue.currency != badCurrency();
-        },
-        [](MPTIssue const& issue) {
-            return issue.getIssuer() != xrpAccount();
-        });
+        [](Issue const& issue) { return isConsistent(issue) && issue.currency != badCurrency(); },
+        [](MPTIssue const& issue) { return issue.getIssuer() != xrpAccount(); });
 }
 
 template <class Hasher>

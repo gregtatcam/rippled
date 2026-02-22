@@ -698,16 +698,13 @@ class LedgerEntry_test : public beast::unit_test::suite
             {
                 Json::Value jvParams;
                 jvParams[jss::amm] = to_string(amm.ammID());
-                auto const result =
-                    env.rpc("json", "ledger_entry", to_string(jvParams));
+                auto const result = env.rpc("json", "ledger_entry", to_string(jvParams));
                 BEAST_EXPECT(
                     result.isObject() && result.isMember(jss::result) &&
                     !result[jss::result].isMember(jss::error) &&
                     result[jss::result].isMember(jss::node) &&
-                    result[jss::result][jss::node].isMember(
-                        sfLedgerEntryType.jsonName) &&
-                    result[jss::result][jss::node]
-                          [sfLedgerEntryType.jsonName] == jss::AMM);
+                    result[jss::result][jss::node].isMember(sfLedgerEntryType.jsonName) &&
+                    result[jss::result][jss::node][sfLedgerEntryType.jsonName] == jss::AMM);
             }
 
             {
@@ -723,16 +720,13 @@ class LedgerEntry_test : public beast::unit_test::suite
                     ammParams[jss::asset2] = to_json(USD.raw());
                 }
                 jvParams[jss::amm] = ammParams;
-                auto const result =
-                    env.rpc("json", "ledger_entry", to_string(jvParams));
+                auto const result = env.rpc("json", "ledger_entry", to_string(jvParams));
                 BEAST_EXPECT(
                     result.isObject() && result.isMember(jss::result) &&
                     !result[jss::result].isMember(jss::error) &&
                     result[jss::result].isMember(jss::node) &&
-                    result[jss::result][jss::node].isMember(
-                        sfLedgerEntryType.jsonName) &&
-                    result[jss::result][jss::node]
-                          [sfLedgerEntryType.jsonName] == jss::AMM);
+                    result[jss::result][jss::node].isMember(sfLedgerEntryType.jsonName) &&
+                    result[jss::result][jss::node][sfLedgerEntryType.jsonName] == jss::AMM);
             }
 
             // negative tests

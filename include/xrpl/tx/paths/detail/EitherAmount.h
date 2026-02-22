@@ -1,5 +1,4 @@
-#ifndef XRPL_PATH_IMPL_EITHERAMOUNT_H_INCLUDED
-#define XRPL_PATH_IMPL_EITHERAMOUNT_H_INCLUDED
+#pragma once
 
 #include <xrpl/protocol/Concepts.h>
 #include <xrpl/protocol/IOUAmount.h>
@@ -31,8 +30,7 @@ struct EitherAmount
     get() const
     {
         if (!holds<T>())
-            Throw<std::logic_error>(
-                "EitherAmount doesn't hold requested amount");
+            Throw<std::logic_error>("EitherAmount doesn't hold requested amount");
         return std::get<T>(amount);
     }
 
@@ -40,9 +38,7 @@ struct EitherAmount
     friend std::ostream&
     operator<<(std::ostream& stream, EitherAmount const& amt)
     {
-        std::visit(
-            [&]<StepAmount T>(T const& a) { stream << to_string(a); },
-            amt.amount);
+        std::visit([&]<StepAmount T>(T const& a) { stream << to_string(a); }, amt.amount);
         return stream;
     }
 #endif
@@ -56,5 +52,3 @@ get(EitherAmount const& amt)
 }
 
 }  // namespace xrpl
-
-#endif

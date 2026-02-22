@@ -193,14 +193,12 @@ PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
     {
         bool const disallowXRP(sleDest->getFlags() & lsfDisallowXRP);
 
-        auto const destAssets =
-            accountDestAssets(*raDstAccount, crCache, !disallowXRP);
+        auto const destAssets = accountDestAssets(*raDstAccount, crCache, !disallowXRP);
 
         for (auto const& asset : destAssets)
             jvDestCur.append(to_string(asset));
 
-        jvStatus[jss::destination_tag] =
-            (sleDest->getFlags() & lsfRequireDestTag);
+        jvStatus[jss::destination_tag] = (sleDest->getFlags() & lsfRequireDestTag);
     }
 
     jvStatus[jss::ledger_hash] = to_string(lrLedger->header().hash);
@@ -218,9 +216,7 @@ PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
     in all cases.
 */
 std::pair<bool, Json::Value>
-PathRequest::doCreate(
-    std::shared_ptr<AssetCache> const& cache,
-    Json::Value const& value)
+PathRequest::doCreate(std::shared_ptr<AssetCache> const& cache, Json::Value const& value)
 {
     bool valid = false;
 
@@ -290,8 +286,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
 
     convert_all_ = saDstAmount == STAmount(saDstAmount.asset(), 1u, 0, true);
 
-    if (!validAsset(saDstAmount.asset()) ||
-        (!convert_all_ && saDstAmount <= beast::zero))
+    if (!validAsset(saDstAmount.asset()) || (!convert_all_ && saDstAmount <= beast::zero))
     {
         jvStatus = rpcError(rpcDST_AMT_MALFORMED);
         return PFR_PJ_INVALID;
@@ -309,8 +304,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
         saSendMax.emplace();
         if (!amountFromJsonNoThrow(*saSendMax, jvParams[jss::send_max]) ||
             !validAsset(saSendMax->asset()) ||
-            (*saSendMax <= beast::zero &&
-             *saSendMax != STAmount(saSendMax->asset(), 1u, 0, true)))
+            (*saSendMax <= beast::zero && *saSendMax != STAmount(saSendMax->asset(), 1u, 0, true)))
         {
             jvStatus = rpcError(rpcSENDMAX_MALFORMED);
             return PFR_PJ_INVALID;
@@ -365,8 +359,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
             // Optional issuer
             AccountID srcIssuerID;
             if (c.isMember(jss::issuer) &&
-                (c.isMember(jss::mpt_issuance_id) ||
-                 !c[jss::issuer].isString() ||
+                (c.isMember(jss::mpt_issuance_id) || !c[jss::issuer].isString() ||
                  !to_issuer(srcIssuerID, c[jss::issuer].asString())))
             {
                 jvStatus = rpcError(rpcSRC_ISR_MALFORMED);
@@ -409,17 +402,14 @@ PathRequest::parseJson(Json::Value const& jvParams)
                         [&](Currency const& currency) {
                             if (srcIssuerID != *raSrcAccount)
                             {
-                                sciSourceAssets.insert(
-                                    Issue{currency, srcIssuerID});
+                                sciSourceAssets.insert(Issue{currency, srcIssuerID});
                             }
                             else if (saSendMax->getIssuer() != *raSrcAccount)
                             {
-                                sciSourceAssets.insert(
-                                    Issue{currency, saSendMax->getIssuer()});
+                                sciSourceAssets.insert(Issue{currency, saSendMax->getIssuer()});
                             }
                             {
-                                sciSourceAssets.insert(
-                                    Issue{currency, *raSrcAccount});
+                                sciSourceAssets.insert(Issue{currency, *raSrcAccount});
                             }
                         },
                         [&](MPTID const& mpt) { sciSourceAssets.insert(mpt); });
@@ -431,9 +421,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
                     [&](Currency const& currency) {
                         sciSourceAssets.insert(Issue{currency, srcIssuerID});
                     },
-                    [&](MPTID const& mpt) {
-                        sciSourceAssets.insert(MPTIssue{mpt});
-                    });
+                    [&](MPTID const& mpt) { sciSourceAssets.insert(MPTIssue{mpt}); });
             }
         }
     }
@@ -532,13 +520,11 @@ PathRequest::findPaths(
                     [&]<typename TAsset>(TAsset const& a) {
                         if (!sameAccount || a != saDstAmount.asset())
                         {
-                            if (sourceAssets.size() >=
-                                RPC::Tuning::max_auto_src_cur)
+                            if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
                                 return false;
                             if constexpr (std::is_same_v<TAsset, Currency>)
-                                sourceAssets.insert(Issue{
-                                    a,
-                                    a.isZero() ? xrpAccount() : *raSrcAccount});
+                                sourceAssets.insert(
+                                    Issue{a, a.isZero() ? xrpAccount() : *raSrcAccount});
                             else
                                 sourceAssets.insert(MPTIssue{a});
                         }
@@ -557,12 +543,11 @@ PathRequest::findPaths(
     {
         if (continueCallback && !continueCallback())
             break;
-        JLOG(m_journal.debug())
-            << iIdentifier
-            << " Trying to find paths: " << STAmount(asset, 1).getFullText();
+        JLOG(m_journal.debug()) << iIdentifier
+                                << " Trying to find paths: " << STAmount(asset, 1).getFullText();
 
-        auto& pathfinder = getPathFinder(
-            cache, pathasset_map, asset, dst_amount, level, continueCallback);
+        auto& pathfinder =
+            getPathFinder(cache, pathasset_map, asset, dst_amount, level, continueCallback);
         if (!pathfinder)
         {
             JLOG(m_journal.debug()) << iIdentifier << " No paths found";
@@ -571,11 +556,7 @@ PathRequest::findPaths(
 
         STPath fullLiquidityPath;
         auto ps = pathfinder->getBestPaths(
-            max_paths_,
-            fullLiquidityPath,
-            mContext[asset],
-            asset.getIssuer(),
-            continueCallback);
+            max_paths_, fullLiquidityPath, mContext[asset], asset.getIssuer(), continueCallback);
         mContext[asset] = ps;
 
         auto const& sourceAccount = [&] {
@@ -593,12 +574,9 @@ PathRequest::findPaths(
                 return *saSendMax;
             return asset.visit(
                 [&](Issue const& issue) {
-                    return STAmount(
-                        Issue{issue.currency, sourceAccount}, 1u, 0, true);
+                    return STAmount(Issue{issue.currency, sourceAccount}, 1u, 0, true);
                 },
-                [](MPTIssue const& issue) {
-                    return STAmount(issue, 1u, 0, true);
-                });
+                [](MPTIssue const& issue) { return STAmount(issue, 1u, 0, true); });
         }();
 
         JLOG(m_journal.debug()) << iIdentifier << " Paths found, calling rippleCalc";
@@ -654,8 +632,7 @@ PathRequest::findPaths(
             Json::Value jvEntry(Json::objectValue);
             if (rc.actualAmountIn.holds<Issue>())
                 rc.actualAmountIn.get<Issue>().account = sourceAccount;
-            jvEntry[jss::source_amount] =
-                rc.actualAmountIn.getJson(JsonOptions::none);
+            jvEntry[jss::source_amount] = rc.actualAmountIn.getJson(JsonOptions::none);
             jvEntry[jss::paths_computed] = ps.getJson(JsonOptions::none);
 
             if (convert_all_)
@@ -706,8 +683,7 @@ PathRequest::doUpdate(
     if (hasCompletion())
     {
         // Old ripple_path_find API gives destination_currencies
-        auto& destAssets =
-            (newStatus[jss::destination_currencies] = Json::arrayValue);
+        auto& destAssets = (newStatus[jss::destination_currencies] = Json::arrayValue);
         auto const assets = accountDestAssets(*raDstAccount, cache, true);
         for (auto const& asset : assets)
             destAssets.append(to_string(asset));

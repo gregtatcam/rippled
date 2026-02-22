@@ -203,9 +203,7 @@ OrderBookDBImpl::addOrderBook(Book const& book)
 
 // return list of all orderbooks that want this issuerID and currencyID
 std::vector<Book>
-OrderBookDB::getBooksByTakerPays(
-    Asset const& asset,
-    std::optional<uint256> const& domain)
+OrderBookDBImpl::getBooksByTakerPays(Asset const& asset, std::optional<uint256> const& domain)
 {
     std::vector<Book> ret;
 
@@ -233,9 +231,7 @@ OrderBookDB::getBooksByTakerPays(
 }
 
 int
-OrderBookDB::getBookSize(
-    Asset const& asset,
-    std::optional<uint256> const& domain)
+OrderBookDBImpl::getBookSize(Asset const& asset, std::optional<uint256> const& domain)
 {
     std::lock_guard sl(mLock);
 
@@ -246,8 +242,7 @@ OrderBookDB::getBookSize(
     }
     else
     {
-        if (auto it = domainBooks_.find({asset, *domain});
-            it != domainBooks_.end())
+        if (auto it = domainBooks_.find({asset, *domain}); it != domainBooks_.end())
             return static_cast<int>(it->second.size());
     }
 
@@ -255,7 +250,7 @@ OrderBookDB::getBookSize(
 }
 
 bool
-OrderBookDB::isBookToXRP(Asset const& asset, std::optional<Domain> domain)
+OrderBookDBImpl::isBookToXRP(Asset const& asset, std::optional<Domain> domain)
 {
     std::lock_guard sl(mLock);
     if (domain)

@@ -650,8 +650,7 @@ DirectStepI<TDerived>::validFwd(PaymentSandbox& sb, ApplyView& afView, EitherAmo
 
     auto const savCache = *cache_;
 
-    XRPL_ASSERT(
-        in.holds<IOUAmount>(), "xrpl::DirectStepI::validFwd : input is IOU");
+    XRPL_ASSERT(in.holds<IOUAmount>(), "xrpl::DirectStepI::validFwd : input is IOU");
 
     auto const [maxSrcToDst, srcDebtDir] =
         static_cast<TDerived const*>(this)->maxFlow(sb, cache_->srcToDst);

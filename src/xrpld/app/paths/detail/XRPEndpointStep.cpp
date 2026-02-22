@@ -188,8 +188,7 @@ private:
                     return 0;
                 },
                 [&](MPTIssue const& issue) {
-                    if (!ctx.view.exists(
-                            keylet::mptoken(issue.getMptID(), acc)))
+                    if (!ctx.view.exists(keylet::mptoken(issue.getMptID(), acc)))
                         return -1;
                     return 0;
                 });
@@ -291,9 +290,7 @@ XRPEndpointStep<TDerived>::validFwd(PaymentSandbox& sb, ApplyView& afView, Eithe
         return {false, EitherAmount(XRPAmount(beast::zero))};
     }
 
-    XRPL_ASSERT(
-        in.holds<XRPAmount>(),
-        "xrpl::XRPEndpointStep::validFwd : input is XRP");
+    XRPL_ASSERT(in.holds<XRPAmount>(), "xrpl::XRPEndpointStep::validFwd : input is XRP");
 
     auto const& xrpIn = in.get<XRPAmount>();
     auto const balance = static_cast<TDerived const*>(this)->xrpLiquid(sb);

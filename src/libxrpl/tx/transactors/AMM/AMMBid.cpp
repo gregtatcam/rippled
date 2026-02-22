@@ -17,8 +17,7 @@ AMMBid::checkExtraFeatures(PreflightContext const& ctx)
         return false;
 
     if (!ctx.rules.enabled(featureMPTokensV2) &&
-        (ctx.tx[sfAsset].holds<MPTIssue>() ||
-         ctx.tx[sfAsset2].holds<MPTIssue>()))
+        (ctx.tx[sfAsset].holds<MPTIssue>() || ctx.tx[sfAsset2].holds<MPTIssue>()))
         return false;
 
     return true;
@@ -203,17 +202,14 @@ applyBid(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::Jour
             auctionSlot.setFieldU16(sfDiscountedFee, fee);
         else if (auctionSlot.isFieldPresent(sfDiscountedFee))
             auctionSlot.makeFieldAbsent(sfDiscountedFee);
-        auctionSlot.setFieldAmount(
-            sfPrice, toSTAmount(lpTokens.asset(), minPrice));
+        auctionSlot.setFieldAmount(sfPrice, toSTAmount(lpTokens.asset(), minPrice));
         if (ctx_.tx.isFieldPresent(sfAuthAccounts))
             auctionSlot.setFieldArray(sfAuthAccounts, ctx_.tx.getFieldArray(sfAuthAccounts));
         else
             auctionSlot.makeFieldAbsent(sfAuthAccounts);
         // Burn the remaining bid amount
-        auto const saBurn = adjustLPTokens(
-            lptAMMBalance,
-            toSTAmount(lptAMMBalance.asset(), burn),
-            IsDeposit::No);
+        auto const saBurn =
+            adjustLPTokens(lptAMMBalance, toSTAmount(lptAMMBalance.asset(), burn), IsDeposit::No);
         if (saBurn >= lptAMMBalance)
         {
             // This error case should never occur.
@@ -223,8 +219,7 @@ applyBid(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::Jour
             return tecINTERNAL;
             // LCOV_EXCL_STOP
         }
-        auto res = redeemIOU(
-            sb, account_, saBurn, lpTokens.get<Issue>(), ctx_.journal);
+        auto res = redeemIOU(sb, account_, saBurn, lpTokens.get<Issue>(), ctx_.journal);
         if (res != tesSUCCESS)
         {
             JLOG(ctx_.journal.debug()) << "AMM Bid: failed to redeem.";

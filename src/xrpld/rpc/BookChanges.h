@@ -189,21 +189,15 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
 
         volA.asset().visit(
             [&](Issue const&) {
-                inner[jss::currency_a] =
-                    (isXRP(volA) ? "XRP_drops" : to_string(volA.asset()));
+                inner[jss::currency_a] = (isXRP(volA) ? "XRP_drops" : to_string(volA.asset()));
             },
-            [&](MPTIssue const&) {
-                inner[jss::mpt_issuance_id_a] = to_string(volA.asset());
-            });
+            [&](MPTIssue const&) { inner[jss::mpt_issuance_id_a] = to_string(volA.asset()); });
 
         volB.asset().visit(
             [&](Issue const&) {
-                inner[jss::currency_b] =
-                    (isXRP(volB) ? "XRP_drops" : to_string(volB.asset()));
+                inner[jss::currency_b] = (isXRP(volB) ? "XRP_drops" : to_string(volB.asset()));
             },
-            [&](MPTIssue const&) {
-                inner[jss::mpt_issuance_id_b] = to_string(volB.asset());
-            });
+            [&](MPTIssue const&) { inner[jss::mpt_issuance_id_b] = to_string(volB.asset()); });
 
         inner[jss::volume_a] = volToStr(volA);
         inner[jss::volume_b] = volToStr(volB);

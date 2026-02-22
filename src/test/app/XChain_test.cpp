@@ -291,8 +291,7 @@ struct BalanceTransfer
     bool
     has_happened(STAmount const& amt, STAmount const& reward, bool check_payer = true)
     {
-        auto reward_cost =
-            multiply(reward, STAmount(reward_accounts.size()), reward.asset());
+        auto reward_cost = multiply(reward, STAmount(reward_accounts.size()), reward.asset());
         return check_most_balances(amt, reward) &&
             (!check_payer || payer_.diff() == -(reward_cost + txFees_));
     }
@@ -1504,8 +1503,7 @@ struct XChain_test : public beast::unit_test::suite, public jtx::XChainBridgeObj
 
             BEAST_EXPECT(!scEnv.claimID(jvb, 1));  // claim id deleted
 
-            BEAST_EXPECT(transfer.has_happened(
-                amt, divide(reward, STAmount(3), reward.asset())));
+            BEAST_EXPECT(transfer.has_happened(amt, divide(reward, STAmount(3), reward.asset())));
         }
 
         // 4,4 => should succeed
@@ -1565,8 +1563,7 @@ struct XChain_test : public beast::unit_test::suite, public jtx::XChainBridgeObj
 
             BEAST_EXPECT(!scEnv.claimID(jvb, claimID));  // claim id deleted
 
-            BEAST_EXPECT(transfer.has_happened(
-                amt, divide(reward, STAmount(2), reward.asset())));
+            BEAST_EXPECT(transfer.has_happened(amt, divide(reward, STAmount(2), reward.asset())));
         }
 
         // 1,2 => should fail
@@ -3889,11 +3886,7 @@ private:
             else
             {
                 it->second.expectedDiff +=
-                    (divisor == 1 ? amt
-                                  : divide(
-                                        amt,
-                                        STAmount(amt.asset(), divisor),
-                                        amt.asset()));
+                    (divisor == 1 ? amt : divide(amt, STAmount(amt.asset(), divisor), amt.asset()));
             }
         }
 
@@ -3904,10 +3897,7 @@ private:
                 return;
             receive(
                 acct,
-                times == 1
-                    ? -amt
-                    : -multiply(
-                          amt, STAmount(amt.asset(), times), amt.asset()));
+                times == 1 ? -amt : -multiply(amt, STAmount(amt.asset(), times), amt.asset()));
         }
 
         void

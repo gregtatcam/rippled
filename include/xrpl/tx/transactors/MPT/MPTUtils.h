@@ -1,5 +1,4 @@
-#ifndef XRPL_APP_MISC_MPTUTILS_H_INCLUDED
-#define XRPL_APP_MISC_MPTUTILS_H_INCLUDED
+#pragma once
 
 #include <xrpl/basics/contract.h>
 #include <xrpl/protocol/Protocol.h>
@@ -19,11 +18,7 @@ class ReadView;
  * transaction is allowed.
  */
 TER
-checkMPTTxAllowed(
-    ReadView const& v,
-    TxType tx,
-    Asset const& asset,
-    AccountID const& accountID);
+checkMPTTxAllowed(ReadView const& v, TxType tx, Asset const& asset, AccountID const& accountID);
 
 inline std::int64_t
 maxMPTAmount(SLE const& sleIssuance)
@@ -32,5 +27,3 @@ maxMPTAmount(SLE const& sleIssuance)
 }
 
 }  // namespace xrpl
-
-#endif  // XRPL_APP_MISC_MPTUTILS_H_INCLUDED

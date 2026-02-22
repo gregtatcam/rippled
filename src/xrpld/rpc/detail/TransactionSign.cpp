@@ -243,9 +243,7 @@ checkPayment(
             // If no SendMax, default to Amount with sender as issuer if Issue.
             sendMax = amount;
             sendMax.asset().visit(
-                [&](Issue const&) {
-                    sendMax.get<Issue>().account = srcAddressID;
-                },
+                [&](Issue const&) { sendMax.get<Issue>().account = srcAddressID; },
                 [](MPTIssue const&) {});
         }
 
@@ -262,8 +260,7 @@ checkPayment(
             if (auto ledger = app.openLedger().current())
             {
                 Pathfinder pf(
-                    std::make_shared<AssetCache>(
-                        ledger, app.journal("AssetCache")),
+                    std::make_shared<AssetCache>(ledger, app.journal("AssetCache")),
                     srcAddressID,
                     *dstAccountID,
                     sendMax.asset(),
@@ -278,8 +275,7 @@ checkPayment(
                     pf.computePathRanks(4);
                     STPath fullLiquidityPath;
                     STPathSet paths;
-                    result = pf.getBestPaths(
-                        4, fullLiquidityPath, paths, sendMax.getIssuer());
+                    result = pf.getBestPaths(4, fullLiquidityPath, paths, sendMax.getIssuer());
                 }
             }
 

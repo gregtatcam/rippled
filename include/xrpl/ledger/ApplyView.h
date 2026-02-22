@@ -219,8 +219,7 @@ public:
         STAmount const& amount,
         STAmount const& preCreditBalance)
     {
-        XRPL_ASSERT(
-            amount.holds<Issue>(), "creditHookIOU: amount is for Issue");
+        XRPL_ASSERT(amount.holds<Issue>(), "creditHookIOU: amount is for Issue");
     }
 
     virtual void
@@ -231,8 +230,7 @@ public:
         std::uint64_t preCreditBalanceHolder,
         std::int64_t preCreditBalanceIssuer)
     {
-        XRPL_ASSERT(
-            amount.holds<MPTIssue>(), "creditHookMPT: amount is for MPTIssue");
+        XRPL_ASSERT(amount.holds<MPTIssue>(), "creditHookMPT: amount is for MPTIssue");
     }
 
     /** Facilitate tracking of MPT sold by an issuer owning MPT sell offer.
@@ -268,10 +266,7 @@ public:
      * changes OutstandingAmount 10 1,000USD.
      */
     virtual void
-    issuerSelfDebitHookMPT(
-        MPTIssue const& issue,
-        std::uint64_t amount,
-        std::int64_t origBalance)
+    issuerSelfDebitHookMPT(MPTIssue const& issue, std::uint64_t amount, std::int64_t origBalance)
     {
     }
 

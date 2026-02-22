@@ -159,9 +159,7 @@ class AMMCalc_test : public beast::unit_test::suite
     std::string
     toString(STAmount const& a)
     {
-        return (boost::format("%s/%s") % a.getText() %
-                to_string(a.get<Issue>().currency))
-            .str();
+        return (boost::format("%s/%s") % a.getText() % to_string(a.get<Issue>().currency)).str();
     }
 
     STAmount
@@ -186,10 +184,9 @@ class AMMCalc_test : public beast::unit_test::suite
         STAmount sin{};
         int limitingStep = vp.size();
         STAmount limitStepOut{};
-        auto trate = [&](STAmount const& amt) {
+        auto transferRate = [&](STAmount const& amt) {
             auto const currency = to_string(amt.get<Issue>().currency);
-            return rates.find(currency) != rates.end() ? rates.at(currency)
-                                                       : QUALITY_ONE;
+            return rates.find(currency) != rates.end() ? rates.at(currency) : QUALITY_ONE;
         };
         // swap out reverse
         sin = sout;
@@ -250,10 +247,9 @@ class AMMCalc_test : public beast::unit_test::suite
         STAmount sout{};
         int limitingStep = 0;
         STAmount limitStepIn{};
-        auto trate = [&](STAmount const& amt) {
+        auto transferRate = [&](STAmount const& amt) {
             auto const currency = to_string(amt.get<Issue>().currency);
-            return rates.find(currency) != rates.end() ? rates.at(currency)
-                                                       : QUALITY_ONE;
+            return rates.find(currency) != rates.end() ? rates.at(currency) : QUALITY_ONE;
         };
         // Swap in forward
         for (auto it = vp.begin(); it != vp.end(); ++it)

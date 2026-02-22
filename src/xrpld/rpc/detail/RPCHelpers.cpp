@@ -389,11 +389,9 @@ parseSubUnsubJson(
         return std::make_pair(rpcDST_ISR_MALFORMED, rpcDST_AMT_MALFORMED);
     }();
 
-    if (jv.isMember(jss::mpt_issuance_id) &&
-        (jv.isMember(jss::currency) || jss::issuer))
+    if (jv.isMember(jss::mpt_issuance_id) && (jv.isMember(jss::currency) || jss::issuer))
     {
-        JLOG(j.info()) << boost::format("Bad %s currency or MPT.") %
-                name.c_str();
+        JLOG(j.info()) << boost::format("Bad %s currency or MPT.") % name.c_str();
         return rpcINVALID_PARAMS;
     }
 
@@ -410,11 +408,9 @@ parseSubUnsubJson(
 
         // Parse optional issuer.
         if (((jv.isMember(jss::issuer)) &&
-             (!jv[jss::issuer].isString() ||
-              !to_issuer(issue.account, jv[jss::issuer].asString())))
+             (!jv[jss::issuer].isString() || !to_issuer(issue.account, jv[jss::issuer].asString())))
             // Don't allow illegal issuers.
-            || (!issue.currency != !issue.account) ||
-            noAccount() == issue.account)
+            || (!issue.currency != !issue.account) || noAccount() == issue.account)
         {
             JLOG(j.info()) << boost::format("Bad %s issuer.") % name.c_str();
             return issuerError;
@@ -430,9 +426,7 @@ parseSubUnsubJson(
     }
     else
     {
-        JLOG(j.info()) << boost::format(
-                              "Neither %s currency or MPT is present.") %
-                name.c_str();
+        JLOG(j.info()) << boost::format("Neither %s currency or MPT is present.") % name.c_str();
         return assetError;
     }
 

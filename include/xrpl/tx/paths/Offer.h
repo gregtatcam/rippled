@@ -174,14 +174,12 @@ TOffer<TIn, TOut>::setFieldAmounts()
     if constexpr (std::is_same_v<TIn, XRPAmount>)
         m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in));
     else
-        m_entry->setFieldAmount(
-            sfTakerPays, toSTAmount(m_amounts.in, assetIn_));
+        m_entry->setFieldAmount(sfTakerPays, toSTAmount(m_amounts.in, assetIn_));
 
     if constexpr (std::is_same_v<TOut, XRPAmount>)
         m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out));
     else
-        m_entry->setFieldAmount(
-            sfTakerGets, toSTAmount(m_amounts.out, assetOut_));
+        m_entry->setFieldAmount(sfTakerGets, toSTAmount(m_amounts.out, assetOut_));
 }
 
 template <StepAmount TIn, StepAmount TOut>
@@ -214,10 +212,7 @@ template <typename... Args>
 TER
 TOffer<TIn, TOut>::send(Args&&... args)
 {
-    return accountSend(
-        std::forward<Args>(args)...,
-        WaiveTransferFee::No,
-        AllowMPTOverflow::Yes);
+    return accountSend(std::forward<Args>(args)..., WaiveTransferFee::No, AllowMPTOverflow::Yes);
 }
 
 template <StepAmount TIn, StepAmount TOut>

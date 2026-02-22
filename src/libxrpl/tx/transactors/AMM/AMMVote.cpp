@@ -14,8 +14,7 @@ AMMVote::checkExtraFeatures(PreflightContext const& ctx)
         return false;
 
     if (!ctx.rules.enabled(featureMPTokensV2) &&
-        (ctx.tx[sfAsset].holds<MPTIssue>() ||
-         ctx.tx[sfAsset2].holds<MPTIssue>()))
+        (ctx.tx[sfAsset].holds<MPTIssue>() || ctx.tx[sfAsset2].holds<MPTIssue>()))
         return false;
 
     return true;

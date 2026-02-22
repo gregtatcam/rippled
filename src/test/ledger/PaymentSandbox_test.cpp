@@ -105,8 +105,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
             ApplyViewImpl av(&*env.current(), tapNONE);
 
             auto const iss = USD_gw1;
-            auto const startingAmount = accountHolds(
-                av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
+            auto const startingAmount =
+                accountHolds(av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
             {
                 auto r = accountSend(av, gw1, alice, toCredit, j);
                 BEAST_EXPECT(r == tesSUCCESS);
@@ -128,8 +128,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
             ApplyViewImpl av(&*env.current(), tapNONE);
 
             auto const iss = USD_gw1;
-            auto const startingAmount = accountHolds(
-                av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
+            auto const startingAmount =
+                accountHolds(av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
 
             rippleCredit(av, gw1, alice, toCredit, true, j);
             BEAST_EXPECT(
@@ -148,8 +148,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
             PaymentSandbox pv(&av);
 
             auto const iss = USD_gw1;
-            auto const startingAmount = accountHolds(
-                pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
+            auto const startingAmount =
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
 
             {
                 auto r = accountSend(pv, gw1, alice, toCredit, j);
@@ -174,8 +174,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
             PaymentSandbox pv(&av);
 
             auto const iss = USD_gw1;
-            auto const startingAmount = accountHolds(
-                pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
+            auto const startingAmount =
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
 
             rippleCredit(pv, gw1, alice, toCredit, true, j);
             BEAST_EXPECT(
@@ -189,8 +189,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
             PaymentSandbox pv(&av);
 
             auto const iss = USD_gw1;
-            auto const startingAmount = accountHolds(
-                pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
+            auto const startingAmount =
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
 
             BEAST_EXPECT(redeemIOU(pv, alice, toDebit, iss, j) == tesSUCCESS);
             BEAST_EXPECT(
@@ -204,8 +204,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
             PaymentSandbox pv(&av);
 
             auto const iss = USD_gw1;
-            auto const startingAmount = accountHolds(
-                pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
+            auto const startingAmount =
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
 
             BEAST_EXPECT(issueIOU(pv, alice, toCredit, iss, j) == tesSUCCESS);
             BEAST_EXPECT(
@@ -219,8 +219,8 @@ class PaymentSandbox_test : public beast::unit_test::suite
             PaymentSandbox pv(&av);
 
             auto const iss = USD_gw1;
-            auto const startingAmount = accountHolds(
-                pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
+            auto const startingAmount =
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j);
 
             {
                 auto r = accountSend(pv, gw1, alice, toCredit, j);
@@ -352,8 +352,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
 
         // Expect that the STAmount issuer returned by balanceHookIOU() is
         // correct.
-        STAmount const balance =
-            sb.balanceHookIOU(gw.id(), alice.id(), {USD, 600});
+        STAmount const balance = sb.balanceHookIOU(gw.id(), alice.id(), {USD, 600});
         BEAST_EXPECT(balance.getIssuer() == USD.account.id());
     }
 

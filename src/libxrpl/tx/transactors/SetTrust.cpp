@@ -133,10 +133,9 @@ SetTrust::checkPermission(ReadView const& view, STTx const& tx)
         return terNO_DELEGATE_PERMISSION;
 
     auto const saLimitAmount = tx.getFieldAmount(sfLimitAmount);
-    auto const sleRippleState = view.read(keylet::line(
-        tx[sfAccount],
-        saLimitAmount.getIssuer(),
-        saLimitAmount.get<Issue>().currency));
+    auto const sleRippleState = view.read(
+        keylet::line(
+            tx[sfAccount], saLimitAmount.getIssuer(), saLimitAmount.get<Issue>().currency));
 
     // if the trustline does not exist, granular permissions are
     // not allowed to create trustline
@@ -238,9 +237,7 @@ SetTrust::preclaim(PreclaimContext const& ctx)
                 if (auto const lpTokens = ammSle->getFieldAmount(sfLPTokenBalance);
                     lpTokens == beast::zero)
                     return tecAMM_EMPTY;
-                else if (
-                    lpTokens.get<Issue>().currency !=
-                    saLimitAmount.get<Issue>().currency)
+                else if (lpTokens.get<Issue>().currency != saLimitAmount.get<Issue>().currency)
                     return tecNO_PERMISSION;
             }
             else

@@ -3803,15 +3803,13 @@ class Invariants_test : public beast::unit_test::suite
         doInvariantCheck(
             {{"OutstandingAmount overflow"}},
             [](Account const& A1, Account const&, ApplyContext& ac) {
-                // mpissuance outstanding is negative
+                // mptissuance outstanding is negative
                 auto const sle = ac.view().peek(keylet::account(A1.id()));
                 if (!sle)
                     return false;
 
-                MPTIssue const mpt{
-                    MPTIssue{makeMptID(sle->getFieldU32(sfSequence), A1)}};
-                auto sleNew =
-                    std::make_shared<SLE>(keylet::mptIssuance(mpt.getMptID()));
+                MPTIssue const mpt{MPTIssue{makeMptID(sle->getFieldU32(sfSequence), A1)}};
+                auto sleNew = std::make_shared<SLE>(keylet::mptIssuance(mpt.getMptID()));
                 sleNew->setFieldU64(sfOutstandingAmount, 110);
                 sleNew->setFieldU64(sfMaximumAmount, 100);
                 ac.view().insert(sleNew);
@@ -3822,21 +3820,18 @@ class Invariants_test : public beast::unit_test::suite
         doInvariantCheck(
             {{"invalid OutstandingAmount balance"}},
             [](Account const& A1, Account const& A2, ApplyContext& ac) {
-                // mpissuance outstanding is negative
+                // mptissuance outstanding is negative
                 auto const sle = ac.view().peek(keylet::account(A1.id()));
                 if (!sle)
                     return false;
 
-                MPTIssue const mpt{
-                    MPTIssue{makeMptID(sle->getFieldU32(sfSequence), A1)}};
-                auto sleNew =
-                    std::make_shared<SLE>(keylet::mptIssuance(mpt.getMptID()));
+                MPTIssue const mpt{MPTIssue{makeMptID(sle->getFieldU32(sfSequence), A1)}};
+                auto sleNew = std::make_shared<SLE>(keylet::mptIssuance(mpt.getMptID()));
                 sleNew->setFieldU64(sfOutstandingAmount, 100);
                 sleNew->setFieldU64(sfMaximumAmount, 100);
                 ac.view().insert(sleNew);
 
-                sleNew =
-                    std::make_shared<SLE>(keylet::mptoken(mpt.getMptID(), A2));
+                sleNew = std::make_shared<SLE>(keylet::mptoken(mpt.getMptID(), A2));
                 sleNew->setFieldU64(sfMPTAmount, 90);
                 ac.view().insert(sleNew);
 

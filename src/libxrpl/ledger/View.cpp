@@ -178,9 +178,7 @@ bool
 isGlobalFrozen(ReadView const& view, Asset const& asset)
 {
     return asset.visit(
-        [&](Issue const& issue) {
-            return isGlobalFrozen(view, issue.getIssuer());
-        },
+        [&](Issue const& issue) { return isGlobalFrozen(view, issue.getIssuer()); },
         [&](MPTIssue const& issue) { return isGlobalFrozen(view, issue); });
 }
 
@@ -382,8 +380,7 @@ getLineIfUsable(
                 auto const sleAmm = view.read(keylet::amm((*sleIssuer)[sfAMMID]));
 
                 if (!sleAmm ||
-                    isLPTokenFrozen(
-                        view, account, (*sleAmm)[sfAsset], (*sleAmm)[sfAsset2]))
+                    isLPTokenFrozen(view, account, (*sleAmm)[sfAsset], (*sleAmm)[sfAsset2]))
                 {
                     return nullptr;
                 }
@@ -579,18 +576,11 @@ accountHolds(
 {
     return asset.visit(
         [&](Issue const& issue) {
-            return accountHolds(
-                view, account, issue, zeroIfFrozen, j, includeFullBalance);
+            return accountHolds(view, account, issue, zeroIfFrozen, j, includeFullBalance);
         },
         [&](MPTIssue const& issue) {
             return accountHolds(
-                view,
-                account,
-                issue,
-                zeroIfFrozen,
-                zeroIfUnauthorized,
-                j,
-                includeFullBalance);
+                view, account, issue, zeroIfFrozen, zeroIfUnauthorized, j, includeFullBalance);
         });
 }
 
@@ -602,19 +592,13 @@ accountFunds(
     FreezeHandling freezeHandling,
     beast::Journal j)
 {
-    XRPL_ASSERT(
-        saDefault.holds<Issue>(), "xrpl::accountFunds: saDefault holds Issue");
+    XRPL_ASSERT(saDefault.holds<Issue>(), "xrpl::accountFunds: saDefault holds Issue");
 
     if (!saDefault.native() && saDefault.getIssuer() == id)
         return saDefault;
 
     return accountHolds(
-        view,
-        id,
-        saDefault.get<Issue>().currency,
-        saDefault.getIssuer(),
-        freezeHandling,
-        j);
+        view, id, saDefault.get<Issue>().currency, saDefault.getIssuer(), freezeHandling, j);
 }
 
 STAmount
@@ -627,18 +611,10 @@ accountFunds(
     beast::Journal j)
 {
     return saDefault.asset().visit(
-        [&](Issue const&) {
-            return accountFunds(view, id, saDefault, freezeHandling, j);
-        },
+        [&](Issue const&) { return accountFunds(view, id, saDefault, freezeHandling, j); },
         [&](MPTIssue const&) {
             return accountHolds(
-                view,
-                id,
-                saDefault.asset(),
-                freezeHandling,
-                authHandling,
-                j,
-                shFULL_BALANCE);
+                view, id, saDefault.asset(), freezeHandling, authHandling, j, shFULL_BALANCE);
         });
 }
 
@@ -655,10 +631,7 @@ issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue)
 }
 
 void
-issuerSelfDebitHookMPT(
-    ApplyView& view,
-    MPTIssue const& issue,
-    std::uint64_t amount)
+issuerSelfDebitHookMPT(ApplyView& view, MPTIssue const& issue, std::uint64_t amount)
 {
     auto const available = availableMPTAmount(view, issue);
     view.issuerSelfDebitHookMPT(issue, amount, available);
@@ -1675,9 +1648,7 @@ trustCreate(
     sleRippleState->setFieldAmount(bSetHigh ? sfHighLimit : sfLowLimit, saLimit);
     sleRippleState->setFieldAmount(
         bSetHigh ? sfLowLimit : sfHighLimit,
-        STAmount(Issue{
-            saBalance.get<Issue>().currency,
-            bSetDst ? uSrcAccountID : uDstAccountID}));
+        STAmount(Issue{saBalance.get<Issue>().currency, bSetDst ? uSrcAccountID : uDstAccountID}));
 
     if (uQualityIn)
         sleRippleState->setFieldU32(bSetHigh ? sfHighQualityIn : sfLowQualityIn, uQualityIn);
@@ -1716,8 +1687,7 @@ trustCreate(
     // ONLY: Create ripple balance.
     sleRippleState->setFieldAmount(sfBalance, bSetHigh ? -saBalance : saBalance);
 
-    view.creditHookIOU(
-        uSrcAccountID, uDstAccountID, saBalance, saBalance.zeroed());
+    view.creditHookIOU(uSrcAccountID, uDstAccountID, saBalance, saBalance.zeroed());
 
     return tesSUCCESS;
 }
@@ -2431,8 +2401,7 @@ isMPTOverflow(
     std::uint64_t const limit = (allowOverflow == AllowMPTOverflow::Yes)
         ? std::numeric_limits<std::uint64_t>::max()
         : maximumAmount;
-    return (
-        sendAmount > maximumAmount || outstandingAmount > (limit - sendAmount));
+    return (sendAmount > maximumAmount || outstandingAmount > (limit - sendAmount));
 }
 
 static TER
@@ -2459,8 +2428,7 @@ rippleCreditMPT(
     {
         if (view.rules().enabled(featureMPTokensV2))
         {
-            if (isMPTOverflow(
-                    amt, outstanding, maxAmount, AllowMPTOverflow::Yes))
+            if (isMPTOverflow(amt, outstanding, maxAmount, AllowMPTOverflow::Yes))
                 return tecPATH_DRY;
         }
         (*sleIssuance)[sfOutstandingAmount] += amt;
@@ -2474,12 +2442,7 @@ rippleCreditMPT(
             auto const holderBalance = sle->getFieldU64(sfMPTAmount);
             if (holderBalance < amt)
                 return tecINSUFFICIENT_FUNDS;
-            view.creditHookMPT(
-                uSenderID,
-                uReceiverID,
-                saAmount,
-                (*sle)[sfMPTAmount],
-                available);
+            view.creditHookMPT(uSenderID, uReceiverID, saAmount, (*sle)[sfMPTAmount], available);
             (*sle)[sfMPTAmount] = holderBalance - amt;
             view.update(sle);
         }
@@ -2502,12 +2465,7 @@ rippleCreditMPT(
         auto const mptokenID = keylet::mptoken(mptID.key, uReceiverID);
         if (auto sle = view.peek(mptokenID))
         {
-            view.creditHookMPT(
-                uSenderID,
-                uReceiverID,
-                saAmount,
-                (*sle)[sfMPTAmount],
-                available);
+            view.creditHookMPT(uSenderID, uReceiverID, saAmount, (*sle)[sfMPTAmount], available);
             (*sle)[sfMPTAmount] += amt;
             view.update(sle);
         }
@@ -2548,12 +2506,10 @@ rippleSendMPT(
             auto const maxAmount = maxMPTAmount(*sle);
             auto const outstanding = sle->getFieldU64(sfOutstandingAmount);
             auto const mptokensV2 = view.rules().enabled(featureMPTokensV2);
-            allowOverflow =
-                (allowOverflow == AllowMPTOverflow::Yes && mptokensV2)
+            allowOverflow = (allowOverflow == AllowMPTOverflow::Yes && mptokensV2)
                 ? AllowMPTOverflow::Yes
                 : AllowMPTOverflow::No;
-            if (isMPTOverflow(
-                    sendAmount, outstanding, maxAmount, allowOverflow))
+            if (isMPTOverflow(sendAmount, outstanding, maxAmount, allowOverflow))
                 return tecPATH_DRY;
         }
 
@@ -2692,14 +2648,7 @@ accountSendMPT(
     STAmount saActual{saAmount.asset()};
 
     return rippleSendMPT(
-        view,
-        uSenderID,
-        uReceiverID,
-        saAmount,
-        saActual,
-        j,
-        waiveFee,
-        allowOverflow);
+        view, uSenderID, uReceiverID, saAmount, saActual, j, waiveFee, allowOverflow);
 }
 
 static TER
@@ -2728,18 +2677,11 @@ accountSend(
 {
     return saAmount.asset().visit(
         [&](Issue const&) {
-            return accountSendIOU(
-                view, uSenderID, uReceiverID, saAmount, j, waiveFee);
+            return accountSendIOU(view, uSenderID, uReceiverID, saAmount, j, waiveFee);
         },
         [&](MPTIssue const&) {
             return accountSendMPT(
-                view,
-                uSenderID,
-                uReceiverID,
-                saAmount,
-                j,
-                waiveFee,
-                allowOverflow);
+                view, uSenderID, uReceiverID, saAmount, j, waiveFee, allowOverflow);
         });
 }
 
@@ -2753,17 +2695,13 @@ accountSendMulti(
     WaiveTransferFee waiveFee)
 {
     XRPL_ASSERT_PARTS(
-        receivers.size() > 1,
-        "xrpl::accountSendMulti",
-        "multiple recipients provided");
+        receivers.size() > 1, "xrpl::accountSendMulti", "multiple recipients provided");
     return asset.visit(
         [&](Issue const& issue) {
-            return accountSendMultiIOU(
-                view, senderID, issue, receivers, j, waiveFee);
+            return accountSendMultiIOU(view, senderID, issue, receivers, j, waiveFee);
         },
         [&](MPTIssue const& issue) {
-            return accountSendMultiMPT(
-                view, senderID, issue, receivers, j, waiveFee);
+            return accountSendMultiMPT(view, senderID, issue, receivers, j, waiveFee);
         });
 }
 
@@ -2830,8 +2768,7 @@ issueIOU(
         "xrpl::issueIOU : neither account nor issuer is XRP");
 
     // Consistency check
-    XRPL_ASSERT(
-        issue == amount.get<Issue>(), "xrpl::issueIOU : matching issue");
+    XRPL_ASSERT(issue == amount.get<Issue>(), "xrpl::issueIOU : matching issue");
 
     // Can't send to self!
     XRPL_ASSERT(issue.account != account, "xrpl::issueIOU : not issuer account");
@@ -2923,8 +2860,7 @@ redeemIOU(
         "xrpl::redeemIOU : neither account nor issuer is XRP");
 
     // Consistency check
-    XRPL_ASSERT(
-        issue == amount.get<Issue>(), "xrpl::redeemIOU : matching issue");
+    XRPL_ASSERT(issue == amount.get<Issue>(), "xrpl::redeemIOU : matching issue");
 
     // Can't send to self!
     XRPL_ASSERT(issue.account != account, "xrpl::redeemIOU : not issuer account");
@@ -3088,12 +3024,9 @@ requireAuth(
 
             auto const asset = sleVault->at(sfAsset);
             if (auto const err = asset.visit(
-                    [&](Issue const& issue) {
-                        return requireAuth(view, issue, account, authType);
-                    },
+                    [&](Issue const& issue) { return requireAuth(view, issue, account, authType); },
                     [&](MPTIssue const& issue) {
-                        return requireAuth(
-                            view, issue, account, authType, depth + 1);
+                        return requireAuth(view, issue, account, authType, depth + 1);
                     });
                 !isTesSuccess(err))
                 return err;
@@ -3106,8 +3039,7 @@ requireAuth(
     bool const mptokensV2 = view.rules().enabled(featureMPTokensV2);
     // if account has no MPToken, fail
     if (!sleToken &&
-        (!mptokensV2 || authType == AuthType::StrongAuth ||
-         authType == AuthType::Legacy))
+        (!mptokensV2 || authType == AuthType::StrongAuth || authType == AuthType::Legacy))
         return tecNO_AUTH;
 
     // Note, this check is not amendment-gated because DomainID will be always
@@ -3249,8 +3181,7 @@ canTrade(ReadView const& view, Asset const& asset)
     return asset.visit(
         [&](Issue const&) -> TER { return tesSUCCESS; },
         [&](MPTIssue const& mptIssue) -> TER {
-            auto const sleIssuance =
-                view.read(keylet::mptIssuance(mptIssue.getMptID()));
+            auto const sleIssuance = view.read(keylet::mptIssuance(mptIssue.getMptID()));
             if (!sleIssuance)
                 return tecOBJECT_NOT_FOUND;
             if (!sleIssuance->isFlag(lsfMPTCanTrade))
@@ -3443,10 +3374,7 @@ deleteAMMMPToken(
     beast::Journal j)
 {
     if (!view.dirRemove(
-            keylet::ownerDir(ammAccountID),
-            (*sleMpt)[sfOwnerNode],
-            sleMpt->key(),
-            false))
+            keylet::ownerDir(ammAccountID), (*sleMpt)[sfOwnerNode], sleMpt->key(), false))
         return tefBAD_LEDGER;
 
     view.erase(sleMpt);
@@ -3465,12 +3393,10 @@ rippleCredit(
 {
     return saAmount.asset().visit(
         [&](Issue const&) {
-            return rippleCreditIOU(
-                view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
+            return rippleCreditIOU(view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
         },
         [&](MPTIssue const&) {
-            XRPL_ASSERT(
-                !bCheckIssuer, "xrpl::rippleCredit : not checking issuer");
+            XRPL_ASSERT(!bCheckIssuer, "xrpl::rippleCredit : not checking issuer");
             return rippleCreditMPT(view, uSenderID, uReceiverID, saAmount, j);
         });
 }

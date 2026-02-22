@@ -75,10 +75,7 @@ public:
     // Get the adjustments for the balance between main and other.
     // Returns the debits, credits and the original balance
     std::optional<AdjustmentIOU>
-    adjustmentsIOU(
-        AccountID const& main,
-        AccountID const& other,
-        Currency const& currency) const;
+    adjustmentsIOU(AccountID const& main, AccountID const& other, Currency const& currency) const;
 
     std::optional<AdjustmentMPT>
     adjustmentsMPT(MPTID const& mptID) const;
@@ -99,10 +96,7 @@ public:
         std::int64_t preCreditBalanceIssuer);
 
     void
-    issuerSelfDebitMPT(
-        MPTIssue const& issue,
-        std::uint64_t amount,
-        std::int64_t origBalance);
+    issuerSelfDebitMPT(MPTIssue const& issue, std::uint64_t amount, std::int64_t origBalance);
 
     void
     ownerCount(AccountID const& id, std::uint32_t cur, std::uint32_t next);
@@ -118,10 +112,7 @@ public:
 
 private:
     static KeyIOU
-    makeKeyIOU(
-        AccountID const& a1,
-        AccountID const& a2,
-        Currency const& currency);
+    makeKeyIOU(AccountID const& a1, AccountID const& a2, Currency const& currency);
 
     std::map<KeyIOU, ValueIOU> creditsIOU_;
     std::map<MPTID, IssuerValueMPT> creditsMPT_;
@@ -189,20 +180,15 @@ public:
     /** @} */
 
     STAmount
-    balanceHookIOU(
-        AccountID const& account,
-        AccountID const& issuer,
-        STAmount const& amount) const override;
-
-    STAmount
-    balanceHookMPT(
-        AccountID const& account,
-        MPTIssue const& issue,
-        std::int64_t amount) const override;
-
-    STAmount
-    balanceHookSelfIssueMPT(MPTIssue const& issue, std::int64_t amount)
+    balanceHookIOU(AccountID const& account, AccountID const& issuer, STAmount const& amount)
         const override;
+
+    STAmount
+    balanceHookMPT(AccountID const& account, MPTIssue const& issue, std::int64_t amount)
+        const override;
+
+    STAmount
+    balanceHookSelfIssueMPT(MPTIssue const& issue, std::int64_t amount) const override;
 
     void
     creditHookIOU(
@@ -220,10 +206,8 @@ public:
         std::int64_t preCreditBalanceIssuer) override;
 
     void
-    issuerSelfDebitHookMPT(
-        MPTIssue const& issue,
-        std::uint64_t amount,
-        std::int64_t origBalance) override;
+    issuerSelfDebitHookMPT(MPTIssue const& issue, std::uint64_t amount, std::int64_t origBalance)
+        override;
 
     void
     adjustOwnerCountHook(AccountID const& account, std::uint32_t cur, std::uint32_t next) override;

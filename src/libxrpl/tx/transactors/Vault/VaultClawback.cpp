@@ -160,8 +160,7 @@ VaultClawback::preclaim(PreclaimContext const& ctx)
 
         return vaultAsset.visit(
             [&](MPTIssue const& issue) -> TER {
-                auto const mptIssue =
-                    ctx.view.read(keylet::mptIssuance(issue.getMptID()));
+                auto const mptIssue = ctx.view.read(keylet::mptIssuance(issue.getMptID()));
                 if (mptIssue == nullptr)
                     return tecOBJECT_NOT_FOUND;
 
@@ -180,16 +179,13 @@ VaultClawback::preclaim(PreclaimContext const& ctx)
                 if (!issuerSle)
                 {
                     // LCOV_EXCL_START
-                    JLOG(ctx.j.error())
-                        << "VaultClawback: missing submitter account.";
+                    JLOG(ctx.j.error()) << "VaultClawback: missing submitter account.";
                     return tefINTERNAL;
                     // LCOV_EXCL_STOP
                 }
 
-                std::uint32_t const issuerFlags =
-                    issuerSle->getFieldU32(sfFlags);
-                if (!(issuerFlags & lsfAllowTrustLineClawback) ||
-                    (issuerFlags & lsfNoFreeze))
+                std::uint32_t const issuerFlags = issuerSle->getFieldU32(sfFlags);
+                if (!(issuerFlags & lsfAllowTrustLineClawback) || (issuerFlags & lsfNoFreeze))
                 {
                     JLOG(ctx.j.debug()) << "VaultClawback: cannot clawback "
                                            "IOU vault asset.";

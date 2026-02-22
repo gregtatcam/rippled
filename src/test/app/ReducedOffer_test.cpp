@@ -162,8 +162,7 @@ public:
                     bobOffer.out.asset(),
                     bobOffer.out.mantissa() - mantissaReduce,
                     bobOffer.out.exponent()};
-                STAmount aliceXRP{
-                    bobOffer.in.asset(), bobOffer.in.mantissa() - 1};
+                STAmount aliceXRP{bobOffer.in.asset(), bobOffer.in.mantissa() - 1};
                 Amounts alicesOffer{aliceUSD, aliceXRP};
                 blockedCount += exerciseOfferPair(alicesOffer, bobOffer);
             }
@@ -295,8 +294,7 @@ public:
                     aliceOffer.out.asset(),
                     aliceOffer.out.mantissa() - mantissaReduce,
                     aliceOffer.out.exponent()};
-                STAmount bobXRP{
-                    aliceOffer.in.asset(), aliceOffer.in.mantissa() - 1};
+                STAmount bobXRP{aliceOffer.in.asset(), aliceOffer.in.mantissa() - 1};
                 Amounts bobOffer{bobUSD, bobXRP};
 
                 blockedCount += exerciseOfferPair(aliceOffer, bobOffer);

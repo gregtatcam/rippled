@@ -209,10 +209,9 @@ AMMLiquidity<TIn, TOut>::getOffer(ReadView const& view, std::optional<Quality> c
     {
         if (offer->amount().in > beast::zero && offer->amount().out > beast::zero)
         {
-            JLOG(j_.trace())
-                << "AMMLiquidity::getOffer, created "
-                << to_string(offer->amount().in) << "/" << assetIn_ << " "
-                << to_string(offer->amount().out) << "/" << assetOut_;
+            JLOG(j_.trace()) << "AMMLiquidity::getOffer, created " << to_string(offer->amount().in)
+                             << "/" << assetIn_ << " " << to_string(offer->amount().out) << "/"
+                             << assetOut_;
             return offer;
         }
 

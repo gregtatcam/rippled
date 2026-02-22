@@ -742,18 +742,14 @@ parseLeaf(
                             return ret;
                         }
 
-                        if (pathEl.isMember(jss::currency) &&
-                            pathEl.isMember(jss::mpt_issuance_id))
+                        if (pathEl.isMember(jss::currency) && pathEl.isMember(jss::mpt_issuance_id))
                         {
-                            error = RPC::make_error(
-                                rpcINVALID_PARAMS, "Invalid Asset.");
+                            error = RPC::make_error(rpcINVALID_PARAMS, "Invalid Asset.");
                             return ret;
                         }
 
-                        bool const isMPT =
-                            pathEl.isMember(jss::mpt_issuance_id);
-                        auto const assetName =
-                            isMPT ? jss::mpt_issuance_id : jss::currency;
+                        bool const isMPT = pathEl.isMember(jss::mpt_issuance_id);
+                        auto const assetName = isMPT ? jss::mpt_issuance_id : jss::currency;
                         Json::Value const& account = pathEl[jss::account];
                         Json::Value const& asset = pathEl[assetName];
                         Json::Value const& issuer = pathEl[jss::issuer];
@@ -772,8 +768,7 @@ parseLeaf(
                             // human account id
                             if (!account.isString())
                             {
-                                error = string_expected(
-                                    element_name, jss::account.c_str());
+                                error = string_expected(element_name, jss::account.c_str());
                                 return ret;
                             }
 
@@ -784,8 +779,7 @@ parseLeaf(
                                 auto const a = parseBase58<AccountID>(account.asString());
                                 if (!a)
                                 {
-                                    error = invalid_data(
-                                        element_name, jss::account.c_str());
+                                    error = invalid_data(element_name, jss::account.c_str());
                                     return ret;
                                 }
                                 uAccount = *a;
@@ -797,8 +791,7 @@ parseLeaf(
                             // human asset
                             if (!asset.isString())
                             {
-                                error = string_expected(
-                                    element_name, assetName.c_str());
+                                error = string_expected(element_name, assetName.c_str());
                                 return ret;
                             }
 
@@ -809,14 +802,12 @@ parseLeaf(
                                 MPTID u;
                                 if (!u.parseHex(asset.asString()))
                                 {
-                                    error = invalid_data(
-                                        element_name, assetName.c_str());
+                                    error = invalid_data(element_name, assetName.c_str());
                                     return ret;
                                 }
                                 if (getMPTIssuer(u) == beast::zero)
                                 {
-                                    error = invalid_data(
-                                        element_name, jss::account.c_str());
+                                    error = invalid_data(element_name, jss::account.c_str());
                                     return ret;
                                 }
                                 uAsset = u;
@@ -826,11 +817,9 @@ parseLeaf(
                                 Currency currency;
                                 if (!currency.parseHex(asset.asString()))
                                 {
-                                    if (!to_currency(
-                                            currency, asset.asString()))
+                                    if (!to_currency(currency, asset.asString()))
                                     {
-                                        error = invalid_data(
-                                            element_name, assetName.c_str());
+                                        error = invalid_data(element_name, assetName.c_str());
                                         return ret;
                                     }
                                 }
@@ -843,8 +832,7 @@ parseLeaf(
                             // human account id
                             if (!issuer.isString())
                             {
-                                error = string_expected(
-                                    element_name, jss::issuer.c_str());
+                                error = string_expected(element_name, jss::issuer.c_str());
                                 return ret;
                             }
 
@@ -853,18 +841,15 @@ parseLeaf(
                                 auto const a = parseBase58<AccountID>(issuer.asString());
                                 if (!a)
                                 {
-                                    error = invalid_data(
-                                        element_name, jss::issuer.c_str());
+                                    error = invalid_data(element_name, jss::issuer.c_str());
                                     return ret;
                                 }
                                 uIssuer = *a;
                             }
 
-                            if (isMPT &&
-                                uIssuer != getMPTIssuer(uAsset.get<MPTID>()))
+                            if (isMPT && uIssuer != getMPTIssuer(uAsset.get<MPTID>()))
                             {
-                                error = invalid_data(
-                                    element_name, jss::issuer.c_str());
+                                error = invalid_data(element_name, jss::issuer.c_str());
                                 return ret;
                             }
                         }

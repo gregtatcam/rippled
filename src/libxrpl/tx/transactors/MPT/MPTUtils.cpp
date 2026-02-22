@@ -1,26 +1,20 @@
-#include <xrpld/app/misc/MPTUtils.h>
-
 #include <xrpl/ledger/ReadView.h>
 #include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Indexes.h>
+#include <xrpl/tx/transactors/MPT/MPTUtils.h>
 
 namespace xrpl {
 
 static TER
-checkMPTAllowed(
-    ReadView const& view,
-    TxType txType,
-    Asset const& asset,
-    AccountID const& accountID)
+checkMPTAllowed(ReadView const& view, TxType txType, Asset const& asset, AccountID const& accountID)
 {
     if (!asset.holds<MPTIssue>())
         return tesSUCCESS;
 
     auto const& issuanceID = asset.get<MPTIssue>().getMptID();
     auto const validTx = txType == ttAMM_CREATE || txType == ttAMM_DEPOSIT ||
-        txType == ttAMM_WITHDRAW || txType == ttOFFER_CREATE ||
-        txType == ttCHECK_CREATE || txType == ttCHECK_CASH ||
-        txType == ttPAYMENT;
+        txType == ttAMM_WITHDRAW || txType == ttOFFER_CREATE || txType == ttCHECK_CREATE ||
+        txType == ttCHECK_CASH || txType == ttPAYMENT;
     XRPL_ASSERT(validTx, "xrpl::checkMPTAllowed : all MPT tx or DEX");
     if (!validTx)
         return tefINTERNAL;
@@ -47,8 +41,7 @@ checkMPTAllowed(
         if ((flags & lsfMPTCanTransfer) == 0)
             return tecNO_PERMISSION;
 
-        auto const mptSle =
-            view.read(keylet::mptoken(issuanceKey.key, accountID));
+        auto const mptSle = view.read(keylet::mptoken(issuanceKey.key, accountID));
         // Allow to succeed since some tx create MPToken if it doesn't exist.
         // Tx's have their own check for missing MPToken.
         if (!mptSle)

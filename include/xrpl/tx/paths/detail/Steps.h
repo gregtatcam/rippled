@@ -5,9 +5,8 @@
 #include <xrpl/protocol/Concepts.h>
 #include <xrpl/protocol/Quality.h>
 #include <xrpl/protocol/QualityFunction.h>
-#include <xrpl/protocol/STLedgerEntry.h>
 #include <xrpl/protocol/TER.h>
-#include <xrpl/tx/paths/detail/AmountSpec.h>
+#include <xrpl/tx/paths/detail/EitherAmount.h>
 
 #include <boost/container/flat_set.hpp>
 
@@ -556,9 +555,8 @@ struct StrandContext
         OfferCrossing offerCrossing_,
         bool isDefaultPath_,
         std::array<boost::container::flat_set<Asset>, 2>&
-            seenDirectAssets_,  ///< For detecting currency loops
-        boost::container::flat_set<Asset>&
-            seenBookOuts_,  ///< For detecting book loops
+            seenDirectAssets_,                             ///< For detecting currency loops
+        boost::container::flat_set<Asset>& seenBookOuts_,  ///< For detecting book loops
         AMMContext& ammContext_,
         std::optional<uint256> const& domainID,
         beast::Journal j_);  ///< Journal for logging
@@ -615,10 +613,7 @@ std::pair<TER, std::unique_ptr<Step>>
 make_XRPEndpointStep(StrandContext const& ctx, AccountID const& acc);
 
 std::pair<TER, std::unique_ptr<Step>>
-make_BookStepMM(
-    StrandContext const& ctx,
-    MPTIssue const& in,
-    MPTIssue const& out);
+make_BookStepMM(StrandContext const& ctx, MPTIssue const& in, MPTIssue const& out);
 
 std::pair<TER, std::unique_ptr<Step>>
 make_BookStepMX(StrandContext const& ctx, MPTIssue const& in);
@@ -636,8 +631,7 @@ template <StepAmount InAmt, StepAmount OutAmt>
 bool
 isDirectXrpToXrp(Strand const& strand)
 {
-    if constexpr (
-        std::is_same_v<InAmt, XRPAmount> && std::is_same_v<OutAmt, XRPAmount>)
+    if constexpr (std::is_same_v<InAmt, XRPAmount> && std::is_same_v<OutAmt, XRPAmount>)
         return strand.size() == 2;
     else
         return false;

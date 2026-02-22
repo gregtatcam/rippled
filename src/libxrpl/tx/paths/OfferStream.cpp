@@ -12,8 +12,7 @@ bool
 checkIssuers(ReadView const& view, Book const& book)
 {
     auto issuerExists = [](ReadView const& view, Asset const& asset) -> bool {
-        return isXRP(asset.getIssuer()) ||
-            view.read(keylet::account(asset.getIssuer()));
+        return isXRP(asset.getIssuer()) || view.read(keylet::account(asset.getIssuer()));
     };
     return issuerExists(view, book.in) && issuerExists(view, book.out);
 }
@@ -95,13 +94,11 @@ accountFundsHelper(
     {
         if (id == asset.getIssuer())
         {
-            return toAmount<T>(
-                issuerFundsToSelfIssue(view, asset.get<MPTIssue>()));
+            return toAmount<T>(issuerFundsToSelfIssue(view, asset.get<MPTIssue>()));
         }
     }
 
-    return toAmount<T>(
-        accountHolds(view, id, asset, freezeHandling, authHandling, j));
+    return toAmount<T>(accountHolds(view, id, asset, freezeHandling, authHandling, j));
 }
 
 template <StepAmount TIn, StepAmount TOut>
@@ -137,8 +134,7 @@ TOfferStreamBase<TIn, TOut>::shouldRmSmallIncreasedQOffer() const
     TTakerGets const ownerFunds = toAmount<TTakerGets>(*ownerFunds_);
 
     auto const effectiveAmounts = [&] {
-        if (offer_.owner() != offer_.assetOut().getIssuer() &&
-            ownerFunds < ofrAmts.out)
+        if (offer_.owner() != offer_.assetOut().getIssuer() && ownerFunds < ofrAmts.out)
         {
             // adjust the amounts by owner funds.
             //
@@ -224,8 +220,7 @@ TOfferStreamBase<TIn, TOut>::step()
                 offer_.assetIn().getIssuer());
             if (deepFrozen)
             {
-                JLOG(j_.trace())
-                    << "Removing deep frozen unfunded offer " << entry->key();
+                JLOG(j_.trace()) << "Removing deep frozen unfunded offer " << entry->key();
                 permRmOffer(entry->key());
                 offer_ = TOffer<TIn, TOut>{};
                 continue;

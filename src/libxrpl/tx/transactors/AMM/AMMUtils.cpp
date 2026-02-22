@@ -17,10 +17,10 @@ ammPoolHolds(
     AuthHandling authHandling,
     beast::Journal const j)
 {
-    auto const assetInBalance = accountHolds(
-        view, ammAccountID, asset1, freezeHandling, authHandling, j);
-    auto const assetOutBalance = accountHolds(
-        view, ammAccountID, asset2, freezeHandling, authHandling, j);
+    auto const assetInBalance =
+        accountHolds(view, ammAccountID, asset1, freezeHandling, authHandling, j);
+    auto const assetOutBalance =
+        accountHolds(view, ammAccountID, asset2, freezeHandling, authHandling, j);
     return std::make_pair(assetInBalance, assetOutBalance);
 }
 
@@ -40,23 +40,20 @@ ammHolds(
         if (optAsset1 && optAsset2)
         {
             if (invalidAMMAssetPair(
-                    *optAsset1,
-                    *optAsset2,
-                    std::make_optional(std::make_pair(asset1, asset2))))
+                    *optAsset1, *optAsset2, std::make_optional(std::make_pair(asset1, asset2))))
             {
                 // This error can only be hit if the AMM is corrupted
                 // LCOV_EXCL_START
-                JLOG(j.debug()) << "ammHolds: Invalid optAsset1 or optAsset2 "
-                                << *optAsset1 << " " << *optAsset2;
+                JLOG(j.debug()) << "ammHolds: Invalid optAsset1 or optAsset2 " << *optAsset1 << " "
+                                << *optAsset2;
                 return std::nullopt;
                 // LCOV_EXCL_STOP
             }
             return std::make_optional(std::make_pair(*optAsset1, *optAsset2));
         }
-        auto const singleAsset =
-            [&asset1, &asset2, &j](
-                Asset checkIssue,
-                char const* label) -> std::optional<std::pair<Asset, Asset>> {
+        auto const singleAsset = [&asset1, &asset2, &j](
+                                     Asset checkIssue,
+                                     char const* label) -> std::optional<std::pair<Asset, Asset>> {
             if (checkIssue == asset1)
                 return std::make_optional(std::make_pair(asset1, asset2));
             else if (checkIssue == asset2)
@@ -148,13 +145,7 @@ ammLPHolds(
     AccountID const& lpAccount,
     beast::Journal const j)
 {
-    return ammLPHolds(
-        view,
-        ammSle[sfAsset],
-        ammSle[sfAsset2],
-        ammSle[sfAccount],
-        lpAccount,
-        j);
+    return ammLPHolds(view, ammSle[sfAsset], ammSle[sfAsset2], ammSle[sfAccount], lpAccount, j);
 }
 
 std::uint16_t
@@ -186,16 +177,12 @@ getTradingFee(ReadView const& view, SLE const& ammSle, AccountID const& account)
 }
 
 STAmount
-ammAccountHolds(
-    ReadView const& view,
-    AccountID const& ammAccountID,
-    Asset const& asset)
+ammAccountHolds(ReadView const& view, AccountID const& ammAccountID, Asset const& asset)
 {
     // Get the actual AMM balance without factoring in the balance hook
     return asset.visit(
         [&](MPTIssue const& issue) {
-            if (auto const sle =
-                    view.read(keylet::mptoken(issue, ammAccountID));
+            if (auto const sle = view.read(keylet::mptoken(issue, ammAccountID));
                 sle && !isFrozen(view, ammAccountID, issue))
                 return STAmount{issue, (*sle)[sfMPTAmount]};
             return STAmount{asset};
@@ -206,11 +193,9 @@ ammAccountHolds(
                 if (auto const sle = view.read(keylet::account(ammAccountID)))
                     return (*sle)[sfBalance];
             }
-            else if (auto const sle = view.read(keylet::line(
-                         ammAccountID, issue.account, issue.currency));
-                     sle &&
-                     !isFrozen(
-                         view, ammAccountID, issue.currency, issue.account))
+            else if (auto const sle =
+                         view.read(keylet::line(ammAccountID, issue.account, issue.currency));
+                     sle && !isFrozen(view, ammAccountID, issue.currency, issue.account))
             {
                 STAmount amount = (*sle)[sfBalance];
                 if (ammAccountID > issue.account)
@@ -245,21 +230,16 @@ deleteAMMTrustLines(
                 if (sleItem->getFieldAmount(sfBalance) != beast::zero)
                 {
                     // LCOV_EXCL_START
-                    JLOG(j.error())
-                        << "deleteAMMObjects: deleting trustline with "
-                           "non-zero balance.";
+                    JLOG(j.error()) << "deleteAMMObjects: deleting trustline with "
+                                       "non-zero balance.";
                     return {tecINTERNAL, SkipEntry::No};
                     // LCOV_EXCL_STOP
                 }
 
-                return {
-                    deleteAMMTrustLine(sb, sleItem, ammAccountID, j),
-                    SkipEntry::No};
+                return {deleteAMMTrustLine(sb, sleItem, ammAccountID, j), SkipEntry::No};
             }
             // LCOV_EXCL_START
-            JLOG(j.error())
-                << "deleteAMMObjects: deleting non-trustline or non-MPT "
-                << nodeType;
+            JLOG(j.error()) << "deleteAMMObjects: deleting non-trustline or non-MPT " << nodeType;
             return {tecINTERNAL, SkipEntry::No};
             // LCOV_EXCL_STOP
         },
@@ -293,23 +273,18 @@ deleteAMMMPTokens(Sandbox& sb, AccountID const& ammAccountID, beast::Journal j)
                     // LCOV_EXCL_STOP
                 }
 
-                return {
-                    deleteAMMMPToken(sb, sleItem, ammAccountID, j),
-                    SkipEntry::No};
+                return {deleteAMMMPToken(sb, sleItem, ammAccountID, j), SkipEntry::No};
             }
             else if (nodeType == ltRIPPLE_STATE)
             {
                 // Trustlines should have been deleted
                 // LCOV_EXCL_START
-                JLOG(j.error())
-                    << "deleteAMMObjects: trustlines should have been deleted";
+                JLOG(j.error()) << "deleteAMMObjects: trustlines should have been deleted";
                 return {tecINTERNAL, SkipEntry::No};
                 // LCOV_EXCL_STOP
             }
             // LCOV_EXCL_START
-            JLOG(j.error())
-                << "deleteAMMObjects: deleting non-trustline or non-MPT "
-                << nodeType;
+            JLOG(j.error()) << "deleteAMMObjects: deleting non-trustline or non-MPT " << nodeType;
             return {tecINTERNAL, SkipEntry::No};
             // LCOV_EXCL_STOP
         },
@@ -318,11 +293,7 @@ deleteAMMMPTokens(Sandbox& sb, AccountID const& ammAccountID, beast::Journal j)
 }
 
 TER
-deleteAMMAccount(
-    Sandbox& sb,
-    Asset const& asset,
-    Asset const& asset2,
-    beast::Journal j)
+deleteAMMAccount(Sandbox& sb, Asset const& asset, Asset const& asset2, beast::Journal j)
 {
     auto ammSle = sb.peek(keylet::amm(asset, asset2));
     if (!ammSle)
@@ -351,8 +322,7 @@ deleteAMMAccount(
     // Delete AMM's MPTokens only if all trustlines are deleted. If trustlines
     // are not deleted then AMM can be re-created with Deposit and
     // AMM's MPToken(s) must exist.
-    if (auto const ter = deleteAMMMPTokens(sb, ammAccountID, j);
-        ter != tesSUCCESS)
+    if (auto const ter = deleteAMMMPTokens(sb, ammAccountID, j); ter != tesSUCCESS)
         return ter;
 
     auto const ownerDirKeylet = keylet::ownerDir(ammAccountID);
@@ -525,9 +495,7 @@ verifyAndAdjustLPTokenBalance(
     std::shared_ptr<SLE>& ammSle,
     AccountID const& account)
 {
-    if (auto const res =
-            isOnlyLiquidityProvider(sb, lpTokens.get<Issue>(), account);
-        !res)
+    if (auto const res = isOnlyLiquidityProvider(sb, lpTokens.get<Issue>(), account); !res)
         return Unexpected<TER>(res.error());
     else if (res.value())
     {

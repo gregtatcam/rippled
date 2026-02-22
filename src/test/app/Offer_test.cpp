@@ -1278,8 +1278,7 @@ public:
             auto const gw_initial_balance = drops(1149999730);
             auto const alice_initial_balance = drops(499946999680);
             auto const bob_initial_balance = drops(10199999920);
-            auto const small_amount =
-                STAmount{bob["USD"], UINT64_C(2710505431213761), -33};
+            auto const small_amount = STAmount{bob["USD"], UINT64_C(2710505431213761), -33};
 
             env.fund(gw_initial_balance, gw);
             env.fund(alice_initial_balance, alice);
@@ -2142,10 +2141,8 @@ public:
             STAmount low{issue};
             STAmount high{issue};
 
-            low.get<Issue>().account =
-                (accountLow ? account.id() : issue.account);
-            high.get<Issue>().account =
-                (accountLow ? issue.account : account.id());
+            low.get<Issue>().account = (accountLow ? account.id() : issue.account);
+            high.get<Issue>().account = (accountLow ? issue.account : account.id());
 
             BEAST_EXPECT(sleTrust->getFieldAmount(sfLowLimit) == low);
             BEAST_EXPECT(sleTrust->getFieldAmount(sfHighLimit) == high);
@@ -2277,8 +2274,7 @@ public:
             std::uint32_t const acctOfferSeq = env.seq(acct) - 1;
 
             BEAST_EXPECT(env.balance(acct, USD) == t.balanceUsd);
-            BEAST_EXPECT(
-                env.balance(acct, xrpIssue()) == t.fundXrp - t.spentXrp);
+            BEAST_EXPECT(env.balance(acct, xrpIssue()) == t.fundXrp - t.spentXrp);
             env.require(offers(acct, t.offers));
             env.require(owners(acct, t.owners));
 
@@ -2768,8 +2764,7 @@ public:
 
             // Check results
             BEAST_EXPECT(env.balance(acct, USD) == t.finalUsd);
-            BEAST_EXPECT(
-                env.balance(acct, xrpIssue()) == t.fundXrp - t.spentXrp);
+            BEAST_EXPECT(env.balance(acct, xrpIssue()) == t.fundXrp - t.spentXrp);
             env.require(offers(acct, t.offers));
             env.require(owners(acct, t.owners));
 

@@ -380,8 +380,7 @@ limitOut(
         else if constexpr (std::is_same_v<TOutAmt, MPTAmount>)
             return MPTAmount{*out};
         else
-            return STAmount{
-                remainingOut.asset(), out->mantissa(), out->exponent()};
+            return STAmount{remainingOut.asset(), out->mantissa(), out->exponent()};
     }();
     // A tiny difference could be due to the round off
     if (withinRelativeDistance(out, remainingOut, Number(1, -9)))

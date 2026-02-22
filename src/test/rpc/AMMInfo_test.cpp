@@ -44,17 +44,14 @@ public:
             BEAST_EXPECT(jv[jss::error_message] == "Account malformed.");
         });
 
-        std::vector<std::tuple<
-            std::optional<Issue>,
-            std::optional<Issue>,
-            TestAccount,
-            bool>> const invalidParams = {
-            {xrpIssue(), std::nullopt, None, false},
-            {std::nullopt, USD, None, false},
-            {xrpIssue(), std::nullopt, Alice, false},
-            {std::nullopt, USD, Alice, false},
-            {xrpIssue(), USD, Alice, false},
-            {std::nullopt, std::nullopt, None, true}};
+        std::vector<std::tuple<std::optional<Issue>, std::optional<Issue>, TestAccount, bool>> const
+            invalidParams = {
+                {xrpIssue(), std::nullopt, None, false},
+                {std::nullopt, USD, None, false},
+                {xrpIssue(), std::nullopt, Alice, false},
+                {std::nullopt, USD, Alice, false},
+                {xrpIssue(), USD, Alice, false},
+                {std::nullopt, std::nullopt, None, true}};
 
         // Invalid parameters
         testAMM([&](AMM& ammAlice, Env&) {
@@ -109,17 +106,14 @@ public:
             BEAST_EXPECT(jv[jss::error_message] == "Account malformed.");
         });
 
-        std::vector<std::tuple<
-            std::optional<Issue>,
-            std::optional<Issue>,
-            TestAccount,
-            bool>> const invalidParamsBadAccount = {
-            {xrpIssue(), std::nullopt, None, false},
-            {std::nullopt, USD, None, false},
-            {xrpIssue(), std::nullopt, Bogie, false},
-            {std::nullopt, USD, Bogie, false},
-            {xrpIssue(), USD, Bogie, false},
-            {std::nullopt, std::nullopt, None, true}};
+        std::vector<std::tuple<std::optional<Issue>, std::optional<Issue>, TestAccount, bool>> const
+            invalidParamsBadAccount = {
+                {xrpIssue(), std::nullopt, None, false},
+                {std::nullopt, USD, None, false},
+                {xrpIssue(), std::nullopt, Bogie, false},
+                {std::nullopt, USD, Bogie, false},
+                {xrpIssue(), USD, Bogie, false},
+                {std::nullopt, std::nullopt, None, true}};
 
         // Invalid parameters *and* invalid AMM account, default API version
         testAMM([&](AMM& ammAlice, Env&) {
@@ -181,11 +175,10 @@ public:
             mpt1.create({.flags = tfMPTCanTransfer | tfMPTCanTrade});
             auto const MPT = mpt["MPT"];
             auto const MPT1 = mpt1["MPT"];
-            std::vector<std::tuple<PrettyAmount, PrettyAmount, IOUAmount>>
-                pools = {
-                    {XRP(100), MPT(100), IOUAmount{100'000}},
-                    {USD(100), MPT(100), IOUAmount{100}},
-                    {MPT(100), MPT1(100), IOUAmount{100}}};
+            std::vector<std::tuple<PrettyAmount, PrettyAmount, IOUAmount>> pools = {
+                {XRP(100), MPT(100), IOUAmount{100'000}},
+                {USD(100), MPT(100), IOUAmount{100}},
+                {MPT(100), MPT1(100), IOUAmount{100}}};
             for (auto& pool : pools)
             {
                 AMM amm(env, gw, std::get<0>(pool), std::get<1>(pool));

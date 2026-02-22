@@ -753,12 +753,7 @@ private:
                     // deposit the other non-frozen token when AMMClawback is
                     // enabled.
                     ammAlice.deposit(
-                        carol,
-                        XRP(100),
-                        std::nullopt,
-                        std::nullopt,
-                        std::nullopt,
-                        ter(tecFROZEN));
+                        carol, XRP(100), std::nullopt, std::nullopt, std::nullopt, ter(tecFROZEN));
                 for (auto const& account : {carol, gw})
                 {
                     ammAlice.deposit(
@@ -769,18 +764,9 @@ private:
                         std::nullopt,
                         ter(tecFROZEN));
                     ammAlice.deposit(
-                        account,
-                        1'000'000,
-                        std::nullopt,
-                        std::nullopt,
-                        ter(tecFROZEN));
+                        account, 1'000'000, std::nullopt, std::nullopt, ter(tecFROZEN));
                     ammAlice.deposit(
-                        account,
-                        XRP(100),
-                        USD(100),
-                        std::nullopt,
-                        std::nullopt,
-                        ter(tecFROZEN));
+                        account, XRP(100), USD(100), std::nullopt, std::nullopt, ter(tecFROZEN));
                 }
             },
             std::nullopt,
@@ -1751,24 +1737,15 @@ private:
 
         // Globally frozen asset
         testAMM([&](AMM& ammAlice, Env& env) {
-            ammAlice.deposit(
-                {.account = gw,
-                 .asset1In = USD(1'000),
-                 .asset2In = XRP(1'000)});
+            ammAlice.deposit({.account = gw, .asset1In = USD(1'000), .asset2In = XRP(1'000)});
             env(fset(gw, asfGlobalFreeze));
             env.close();
             // Can withdraw non-frozen token
             for (auto const& account : {alice, gw})
             {
                 ammAlice.withdraw(account, XRP(100));
-                ammAlice.withdraw(
-                    account,
-                    USD(100),
-                    std::nullopt,
-                    std::nullopt,
-                    ter(tecFROZEN));
-                ammAlice.withdraw(
-                    account, 1'000, std::nullopt, std::nullopt, ter(tecFROZEN));
+                ammAlice.withdraw(account, USD(100), std::nullopt, std::nullopt, ter(tecFROZEN));
+                ammAlice.withdraw(account, 1'000, std::nullopt, std::nullopt, ter(tecFROZEN));
             }
         });
 
@@ -5176,12 +5153,7 @@ private:
         auto prep = [&](Env& env, auto gwRate, auto gw1Rate) {
             fund(env, gw, {alice, carol, bob, ed}, XRP(2'000), {USD(2'000)});
             env.fund(XRP(2'000), gw1);
-            fund(
-                env,
-                gw1,
-                {alice, carol, bob, ed},
-                {ETH(2'000), CAN(2'000)},
-                Fund::TokenOnly);
+            fund(env, gw1, {alice, carol, bob, ed}, {ETH(2'000), CAN(2'000)}, Fund::TokenOnly);
             env(rate(gw, gwRate));
             env(rate(gw1, gw1Rate));
             env.close();
@@ -5794,8 +5766,8 @@ private:
                                     swapAssetOut(Amounts{poolIn, poolOut}, takerGets, tfee),
                                     takerGets};
                             }
-                            auto const takerPays = toAmount<STAmount>(
-                                getAsset(poolIn), Number{1, -10} * poolIn);
+                            auto const takerPays =
+                                toAmount<STAmount>(getAsset(poolIn), Number{1, -10} * poolIn);
                             return Amounts{
                                 takerPays, swapAssetIn(Amounts{poolIn, poolOut}, takerPays, tfee)};
                         }();

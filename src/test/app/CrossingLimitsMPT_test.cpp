@@ -20,8 +20,8 @@ public:
         auto const gw = Account("gateway");
 
         env.fund(XRP(100'000'000), gw, "alice", "bob", "carol", "dan");
-        MPT const USD = MPTTester(
-            {.env = env, .issuer = gw, .holders = {"bob", "dan"}, .maxAmt = 2});
+        MPT const USD =
+            MPTTester({.env = env, .issuer = gw, .holders = {"bob", "dan"}, .maxAmt = 2});
         env(pay(gw, "bob", USD(1)));
         env(pay(gw, "dan", USD(1)));
         n_offers(env, 2'000, "bob", XRP(1), USD(1));
@@ -62,11 +62,8 @@ public:
 
         env.fund(XRP(100'000'000), gw, "alice", "bob", "carol");
         int const bobsOfferCount = maxConsumed + 150;
-        MPT const USD = MPTTester(
-            {.env = env,
-             .issuer = gw,
-             .holders = {"bob"},
-             .maxAmt = bobsOfferCount});
+        MPT const USD =
+            MPTTester({.env = env, .issuer = gw, .holders = {"bob"}, .maxAmt = bobsOfferCount});
         env(pay(gw, "bob", USD(bobsOfferCount)));
         env.close();
         n_offers(env, bobsOfferCount, "bob", XRP(1), USD(1));
@@ -101,24 +98,24 @@ public:
         env.fund(XRP(100'000'000), gw, "alice", "bob", "carol", "dan", "evita");
 
         int const maxConsumed = 1'000;
-        int const evitasOfferCount{maxConsumed + 49};
+        int const evitaOfferCount{maxConsumed + 49};
 
         MPT const USD = MPTTester(
             {.env = env,
              .issuer = gw,
              .holders = {"bob", "alice", "carol", "evita"},
-             .maxAmt = 2'000 + evitasOfferCount + 1});
+             .maxAmt = 2'000 + evitaOfferCount + 1});
 
         env(pay(gw, "alice", USD(1000)));
         env(pay(gw, "carol", USD(1)));
-        env(pay(gw, "evita", USD(evitasOfferCount + 1)));
+        env(pay(gw, "evita", USD(evitaOfferCount + 1)));
 
         // Give carol an extra 150 (unfunded) offers when we're using Taker
         // to accommodate that difference.
-        int const carolsOfferCount{700};
+        int const carolOfferCount{700};
         n_offers(env, 400, "alice", XRP(1), USD(1));
-        n_offers(env, carolsOfferCount, "carol", XRP(1), USD(1));
-        n_offers(env, evitasOfferCount, "evita", XRP(1), USD(1));
+        n_offers(env, carolOfferCount, "carol", XRP(1), USD(1));
+        n_offers(env, evitaOfferCount, "evita", XRP(1), USD(1));
 
         // Bob offers to buy 1000 XRP for 1000 USD. He takes all 400 USD from
         // Alice's offers, 1 USD from Carol's and then removes 599 of Carol's
@@ -128,9 +125,9 @@ public:
         env.require(balance("alice", USD(600)));
         env.require(owners("alice", 1));
         env.require(balance("carol", USD(0)));
-        env.require(owners("carol", carolsOfferCount - 599));
-        env.require(balance("evita", USD(evitasOfferCount + 1)));
-        env.require(owners("evita", evitasOfferCount + 1));
+        env.require(owners("carol", carolOfferCount - 599));
+        env.require(balance("evita", USD(evitaOfferCount + 1)));
+        env.require(owners("evita", evitaOfferCount + 1));
 
         // Dan offers to buy maxConsumed + 50 XRP USD. He removes all of
         // Carol's remaining offers as unfunded, then takes
@@ -204,12 +201,8 @@ public:
                 // initial best quality
                 n_offers(env, 2'000, alice, EUR(2), XRP(1));
                 n_offers(env, 100, alice, XRP(1), USD(4));
-                n_offers(
-                    env,
-                    801,
-                    carol,
-                    XRP(1),
-                    USD(3));  // only one offer is funded
+                n_offers(env, 801, carol, XRP(1),
+                         USD(3));  // only one offer is funded
                 n_offers(env, 1'000, alice, XRP(1), USD(3));
 
                 n_offers(env, 1, alice, EUR(500), USD(500));
@@ -229,7 +222,7 @@ public:
                 //     offers unfunded.
                 //     b. Carol's remaining 800 offers are consumed as unfunded.
                 //     c. 199 of alice's XRP(1) to USD(3) offers are consumed.
-                //        A book step is allowed to consume a maxium of 1000
+                //        A book step is allowed to consume a maximum of 1000
                 //        offers at a given quality, and that limit is now
                 //        reached.
                 //     d. Now the strand is dry, even though there are still
@@ -245,7 +238,7 @@ public:
                 //     Bob spent 500 EUR (100+400)
                 //     Bob has 1500 EUR left
                 //     In this step:
-                //     Bob spents 500 EUR and receives 500 USD.
+                //     Bob spends 500 EUR and receives 500 USD.
                 // In total:
                 //           Bob spent 1100 EUR (200 + 400 + 500)
                 //           Bob has 900 EUR remaining (2000 - 1100)
@@ -265,8 +258,7 @@ public:
 
                 env.require(balance(alice, USD(2'503)));
                 env.require(balance(alice, EUR(1'100)));
-                auto const numAOffers =
-                    2'000 + 100 + 1'000 + 1 - (2 * 100 + 2 * 199 + 1 + 1);
+                auto const numAOffers = 2'000 + 100 + 1'000 + 1 - (2 * 100 + 2 * 199 + 1 + 1);
                 env.require(offers(alice, numAOffers));
                 env.require(owners(alice, numAOffers + 2));
 
@@ -301,12 +293,8 @@ public:
                 n_offers(env, 1, alice, EUR(1), USD(10));
                 n_offers(env, 2'000, alice, EUR(2), XRP(1));
                 n_offers(env, 100, alice, XRP(1), USD(4));
-                n_offers(
-                    env,
-                    801,
-                    carol,
-                    XRP(1),
-                    USD(3));  // only one offer is funded
+                n_offers(env, 801, carol, XRP(1),
+                         USD(3));  // only one offer is funded
                 n_offers(env, 1'000, alice, XRP(1), USD(3));
 
                 n_offers(env, 1, alice, EUR(499), USD(499));
@@ -327,7 +315,7 @@ public:
                 //     offers unfunded.
                 //     b. Carol's remaining 800 offers are consumed as unfunded.
                 //     c. 199 of alice's XRP(1) to USD(3) offers are consumed.
-                //        A book step is allowed to consume a maxium of 1000
+                //        A book step is allowed to consume a maximum of 1000
                 //        offers at a given quality, and that limit is now
                 //        reached.
                 //     d. Now the strand is dry, even though there are still
@@ -357,8 +345,8 @@ public:
 
                 env.require(balance(alice, USD(2'494)));
                 env.require(balance(alice, EUR(1'100)));
-                auto const numAOffers = 1 + 2'000 + 100 + 1'000 + 1 -
-                    (1 + 2 * 100 + 2 * 199 + 1 + 1);
+                auto const numAOffers =
+                    1 + 2'000 + 100 + 1'000 + 1 - (1 + 2 * 100 + 2 * 199 + 1 + 1);
                 env.require(offers(alice, numAOffers));
                 env.require(owners(alice, numAOffers + 2));
 
@@ -383,8 +371,7 @@ public:
 
         env.fund(XRP(100'000'000), gw, alice, bob);
 
-        MPT const USD =
-            MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
+        MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
 
         env(pay(gw, alice, USD(8'000)));
         env.close();

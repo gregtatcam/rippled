@@ -112,8 +112,7 @@ doAMMInfo(RPC::JsonContext& context)
             return Unexpected(rpcINVALID_PARAMS);
 
         XRPL_ASSERT(
-            (asset1.has_value() == asset2.has_value()) &&
-                (asset1.has_value() != ammID.has_value()),
+            (asset1.has_value() == asset2.has_value()) && (asset1.has_value() != ammID.has_value()),
             "xrpl::doAMMInfo : asset1 and asset2 do match");
 
         auto const ammKeylet = [&]() {
@@ -131,8 +130,7 @@ doAMMInfo(RPC::JsonContext& context)
             asset2 = (*amm)[sfAsset2];
         }
 
-        return ValuesFromContextParams{
-            accountID, *asset1, *asset2, std::move(amm)};
+        return ValuesFromContextParams{accountID, *asset1, *asset2, std::move(amm)};
     };
 
     auto const r = getValuesFromContextParams();
@@ -155,9 +153,8 @@ doAMMInfo(RPC::JsonContext& context)
         FreezeHandling::fhIGNORE_FREEZE,
         AuthHandling::ahIGNORE_AUTH,
         context.j);
-    auto const lptAMMBalance = accountID
-        ? ammLPHolds(*ledger, *amm, *accountID, context.j)
-        : (*amm)[sfLPTokenBalance];
+    auto const lptAMMBalance =
+        accountID ? ammLPHolds(*ledger, *amm, *accountID, context.j) : (*amm)[sfLPTokenBalance];
 
     Json::Value ammResult;
     asset1Balance.setJson(ammResult[jss::amount]);

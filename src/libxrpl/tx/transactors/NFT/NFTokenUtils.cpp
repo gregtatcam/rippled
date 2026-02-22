@@ -828,11 +828,7 @@ tokenOfferCreatePreclaim(
             return tecNO_LINE;
         }
 
-        if (isFrozen(
-                view,
-                nftIssuer,
-                amount.get<Issue>().currency,
-                amount.getIssuer()))
+        if (isFrozen(view, nftIssuer, amount.get<Issue>().currency, amount.getIssuer()))
             return tecFROZEN;
     }
 
@@ -845,8 +841,7 @@ tokenOfferCreatePreclaim(
             return tefNFTOKEN_IS_NOT_TRANSFERABLE;
     }
 
-    if (isFrozen(
-            view, acctID, amount.get<Issue>().currency, amount.getIssuer()))
+    if (isFrozen(view, acctID, amount.get<Issue>().currency, amount.getIssuer()))
         return tecFROZEN;
 
     // If this is an offer to buy the token, the account must have the

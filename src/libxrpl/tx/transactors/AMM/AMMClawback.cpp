@@ -28,8 +28,7 @@ AMMClawback::checkExtraFeatures(xrpl::PreflightContext const& ctx)
     std::optional<STAmount> const clawAmount = ctx.tx[~sfAmount];
 
     if (!ctx.rules.enabled(featureMPTokensV2) &&
-        ((clawAmount && clawAmount->holds<MPTIssue>()) ||
-         ctx.tx[sfAsset].holds<MPTIssue>() ||
+        ((clawAmount && clawAmount->holds<MPTIssue>()) || ctx.tx[sfAsset].holds<MPTIssue>() ||
          ctx.tx[sfAsset2].holds<MPTIssue>()))
         return false;
 
@@ -106,8 +105,7 @@ AMMClawback::preclaim(PreclaimContext const& ctx)
     std::uint32_t const issuerFlagsIn = sleIssuer->getFieldU32(sfFlags);
     if (!ctx.view.rules().enabled(featureMPTokensV2))
     {
-        if (!(issuerFlagsIn & lsfAllowTrustLineClawback) ||
-            (issuerFlagsIn & lsfNoFreeze))
+        if (!(issuerFlagsIn & lsfAllowTrustLineClawback) || (issuerFlagsIn & lsfNoFreeze))
             return tecNO_PERMISSION;
         return tesSUCCESS;
     }
@@ -118,15 +116,13 @@ AMMClawback::preclaim(PreclaimContext const& ctx)
                 if (issue.native())
                     return false;  // LCOV_EXCL_LINE
 
-                if (!(issuerFlagsIn & lsfAllowTrustLineClawback) ||
-                    (issuerFlagsIn & lsfNoFreeze))
+                if (!(issuerFlagsIn & lsfAllowTrustLineClawback) || (issuerFlagsIn & lsfNoFreeze))
                     return false;
 
                 return true;
             },
             [&](MPTIssue const& issue) {
-                auto const sleIssuance =
-                    ctx.view.read(keylet::mptIssuance(issue.getMptID()));
+                auto const sleIssuance = ctx.view.read(keylet::mptIssuance(issue.getMptID()));
 
                 if (!sleIssuance || !sleIssuance->isFlag(lsfMPTCanClawback) ||
                     sleIssuance->getAccountID(sfIssuer) != ctx.tx[sfAccount])
@@ -293,8 +289,7 @@ AMMClawback::equalWithdrawMatchingOneAmount(
     auto frac = Number{amount} / amountBalance;
     auto amount2Withdraw = amount2Balance * frac;
 
-    auto const lpTokensWithdraw =
-        toSTAmount(lptAMMBalance.asset(), lptAMMBalance * frac);
+    auto const lpTokensWithdraw = toSTAmount(lptAMMBalance.asset(), lptAMMBalance * frac);
     if (lpTokensWithdraw > holdLPtokens)
         // if lptoken balance less than what the issuer intended to clawback,
         // clawback all the tokens. Because we are doing a two-asset withdrawal,

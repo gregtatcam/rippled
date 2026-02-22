@@ -6,8 +6,7 @@ namespace xrpl {
 std::string
 to_string(PathAsset const& asset)
 {
-    return std::visit(
-        [&](auto const& issue) { return to_string(issue); }, asset.value());
+    return std::visit([&](auto const& issue) { return to_string(issue); }, asset.value());
 }
 
 std::ostream&

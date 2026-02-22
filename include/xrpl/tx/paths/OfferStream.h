@@ -4,8 +4,8 @@
 #include <xrpl/basics/chrono.h>
 #include <xrpl/beast/utility/Journal.h>
 #include <xrpl/ledger/View.h>
-#include <xrpl/tx/paths/BookTip.h>
 #include <xrpl/protocol/Concepts.h>
+#include <xrpl/tx/paths/BookTip.h>
 #include <xrpl/tx/paths/Offer.h>
 
 #include <boost/container/flat_set.hpp>

@@ -181,9 +181,7 @@ isAnyFrozen(
 {
     return asset.visit(
         [&](Issue const& issue) { return isAnyFrozen(view, accounts, issue); },
-        [&](MPTIssue const& issue) {
-            return isAnyFrozen(view, accounts, issue, depth);
-        });
+        [&](MPTIssue const& issue) { return isAnyFrozen(view, accounts, issue, depth); });
 }
 
 [[nodiscard]] bool
@@ -342,10 +340,7 @@ issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue);
  * See ApplyView::issuerSelfDebitHookMPT().
  */
 void
-issuerSelfDebitHookMPT(
-    ApplyView& view,
-    MPTIssue const& issue,
-    std::uint64_t amount);
+issuerSelfDebitHookMPT(ApplyView& view, MPTIssue const& issue, std::uint64_t amount);
 
 // Return the account's liquid (not reserved) XRP.  Generally prefer
 // calling accountHolds() over this interface.  However, this interface
@@ -430,12 +425,8 @@ transferRate(ReadView const& view, MPTID const& issuanceID);
 transferRate(ReadView const& view, STAmount const& amount)
 {
     return amount.asset().visit(
-        [&](Issue const& issue) {
-            return transferRate(view, issue.getIssuer());
-        },
-        [&](MPTIssue const& issue) {
-            return transferRate(view, issue.getMptID());
-        });
+        [&](Issue const& issue) { return transferRate(view, issue.getIssuer()); },
+        [&](MPTIssue const& issue) { return transferRate(view, issue.getMptID()); });
 }
 
 /** Returns `true` if the directory is empty

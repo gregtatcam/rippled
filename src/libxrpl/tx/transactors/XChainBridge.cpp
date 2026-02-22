@@ -1149,8 +1149,7 @@ attestationPreflight(PreflightContext const& ctx)
 
     if (att->sendingAmount.signum() <= 0)
         return temXCHAIN_BAD_PROOF;
-    auto const expectedIssue =
-        bridgeSpec.issue(STXChainBridge::srcChain(att->wasLockingChainSend));
+    auto const expectedIssue = bridgeSpec.issue(STXChainBridge::srcChain(att->wasLockingChainSend));
     if (att->sendingAmount.asset() != expectedIssue)
         return temXCHAIN_BAD_PROOF;
 

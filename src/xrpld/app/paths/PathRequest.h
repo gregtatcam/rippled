@@ -3,7 +3,6 @@
 #include <xrpld/app/ledger/Ledger.h>
 #include <xrpld/app/paths/AssetCache.h>
 #include <xrpld/app/paths/Pathfinder.h>
-#include <xrpld/rpc/InfoSub.h>
 
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/json/json_value.h>

@@ -1,12 +1,8 @@
-#include <xrpld/app/misc/MPTUtils.h>
-#include <xrpld/app/tx/detail/CreateCheck.h>
-
 #include <xrpl/basics/Log.h>
 #include <xrpl/ledger/View.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/TER.h>
-#include <xrpl/protocol/TxFlags.h>
 #include <xrpl/tx/transactors/Check/CreateCheck.h>
 
 namespace xrpl {
@@ -14,8 +10,7 @@ namespace xrpl {
 bool
 CreateCheck::checkExtraFeatures(xrpl::PreflightContext const& ctx)
 {
-    if (!ctx.rules.enabled(featureMPTokensV2) &&
-        ctx.tx[sfSendMax].holds<MPTIssue>())
+    if (!ctx.rules.enabled(featureMPTokensV2) && ctx.tx[sfSendMax].holds<MPTIssue>())
         return false;
 
     return true;
@@ -113,31 +108,25 @@ CreateCheck::preclaim(PreclaimContext const& ctx)
                     if (issuerId != srcId)
                     {
                         // Check if the issuer froze the line
-                        auto const sleTrust = ctx.view.read(
-                            keylet::line(srcId, issuerId, issue.currency));
+                        auto const sleTrust =
+                            ctx.view.read(keylet::line(srcId, issuerId, issue.currency));
                         if (sleTrust &&
-                            sleTrust->isFlag(
-                                (issuerId > srcId) ? lsfHighFreeze
-                                                   : lsfLowFreeze))
+                            sleTrust->isFlag((issuerId > srcId) ? lsfHighFreeze : lsfLowFreeze))
                         {
-                            JLOG(ctx.j.warn())
-                                << "Creating a check for frozen trustline.";
+                            JLOG(ctx.j.warn()) << "Creating a check for frozen trustline.";
                             return tecFROZEN;
                         }
                     }
                     if (issuerId != dstId)
                     {
                         // Check if dst froze the line.
-                        auto const sleTrust = ctx.view.read(
-                            keylet::line(issuerId, dstId, issue.currency));
+                        auto const sleTrust =
+                            ctx.view.read(keylet::line(issuerId, dstId, issue.currency));
                         if (sleTrust &&
-                            sleTrust->isFlag(
-                                (dstId > issuerId) ? lsfHighFreeze
-                                                   : lsfLowFreeze))
+                            sleTrust->isFlag((dstId > issuerId) ? lsfHighFreeze : lsfLowFreeze))
                         {
-                            JLOG(ctx.j.warn())
-                                << "Creating a check for "
-                                   "destination frozen trustline.";
+                            JLOG(ctx.j.warn()) << "Creating a check for "
+                                                  "destination frozen trustline.";
                             return tecFROZEN;
                         }
                     }

@@ -44,7 +44,10 @@ suggestWords:
 words:
   - abempty
   - AMMID
-  - AMMMP
+  - AMMMPT
+  - AMMMPToken
+  - AMMMPTokens
+  - AMMXRP
   - amt
   - amts
   - asnode
@@ -97,6 +100,7 @@ words:
   - distro
   - doxyfile
   - dxrpl
+  - enabled
   - endmacro
   - exceptioned
   - Falco

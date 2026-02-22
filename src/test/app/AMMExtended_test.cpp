@@ -1364,8 +1364,7 @@ private:
         BEAST_EXPECT(sa == XRP(100'000'000));
         // Bob gets ~99.99USD. This is the amount Bob
         // can get out of AMM for 100,000,000XRP.
-        BEAST_EXPECT(
-            equal(da, STAmount{bob["USD"], UINT64_C(99'9999000001), -10}));
+        BEAST_EXPECT(equal(da, STAmount{bob["USD"], UINT64_C(99'9999000001), -10}));
     }
 
     // carol holds gateway AUD, sells gateway AUD for XRP
@@ -3320,12 +3319,7 @@ private:
             env.trust(USD(1'000), alice, bob);
             env.trust(EUR(1'000), alice, bob);
             env.close();
-            fund(
-                env,
-                bob,
-                {alice, gw},
-                {BobUSD(100), BobEUR(100)},
-                Fund::TokenOnly);
+            fund(env, bob, {alice, gw}, {BobUSD(100), BobEUR(100)}, Fund::TokenOnly);
 
             AMM ammBobXRP_USD(env, bob, XRP(100), BobUSD(100));
             env(offer(gw, XRP(100), USD(100)), txflags(tfPassive));

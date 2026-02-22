@@ -3,7 +3,6 @@
 #include <test/jtx/Env.h>
 
 #include <xrpld/app/misc/TxQ.h>
-#include <xrpld/app/paths/detail/Steps.h>
 
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/json/json_value.h>
@@ -12,6 +11,7 @@
 #include <xrpl/protocol/STNumber.h>
 #include <xrpl/protocol/Units.h>
 #include <xrpl/protocol/jss.h>
+#include <xrpl/tx/paths/detail/Steps.h>
 
 #include <source_location>
 #include <vector>
@@ -549,10 +549,7 @@ ledgerEntryState(
     std::string const& currency);
 
 Json::Value
-ledgerEntryOffer(
-    jtx::Env& env,
-    jtx::Account const& acct,
-    std::uint32_t offer_seq);
+ledgerEntryOffer(jtx::Env& env, jtx::Account const& acct, std::uint32_t offer_seq);
 
 Json::Value
 ledgerEntryMPT(jtx::Env& env, jtx::Account const& acct, MPTID const& mptID);
@@ -681,7 +678,7 @@ bool
 equal(std::unique_ptr<Step> const& s1, MPTEndpointStepInfo const& dsi);
 
 bool
-equal(std::unique_ptr<Step> const& s1, XRPEndpointStepInfo const& xrpsi);
+equal(std::unique_ptr<Step> const& s1, XRPEndpointStepInfo const& xrpStepInfo);
 
 bool
 equal(std::unique_ptr<Step> const& s1, xrpl::Book const& bsi);
@@ -944,18 +941,18 @@ pay(AccountID const& account,
 class expiration
 {
 private:
-    std::uint32_t const expry_;
+    std::uint32_t const expiry_;
 
 public:
     explicit expiration(NetClock::time_point const& expiry)
-        : expry_{expiry.time_since_epoch().count()}
+        : expiry_{expiry.time_since_epoch().count()}
     {
     }
 
     void
     operator()(Env&, JTx& jt) const
     {
-        jt[sfExpiration.jsonName] = expry_;
+        jt[sfExpiration.jsonName] = expiry_;
     }
 };
 
@@ -1031,20 +1028,13 @@ template <typename TTester>
 void
 testHelper3TokensMix(TTester&& tester)
 {
-    tester(
-        detail::issueHelperMPT, detail::issueHelperMPT, detail::issueHelperMPT);
-    tester(
-        detail::issueHelperMPT, detail::issueHelperMPT, detail::issueHelperIOU);
-    tester(
-        detail::issueHelperMPT, detail::issueHelperIOU, detail::issueHelperMPT);
-    tester(
-        detail::issueHelperMPT, detail::issueHelperIOU, detail::issueHelperIOU);
-    tester(
-        detail::issueHelperIOU, detail::issueHelperMPT, detail::issueHelperMPT);
-    tester(
-        detail::issueHelperIOU, detail::issueHelperMPT, detail::issueHelperIOU);
-    tester(
-        detail::issueHelperIOU, detail::issueHelperIOU, detail::issueHelperMPT);
+    tester(detail::issueHelperMPT, detail::issueHelperMPT, detail::issueHelperMPT);
+    tester(detail::issueHelperMPT, detail::issueHelperMPT, detail::issueHelperIOU);
+    tester(detail::issueHelperMPT, detail::issueHelperIOU, detail::issueHelperMPT);
+    tester(detail::issueHelperMPT, detail::issueHelperIOU, detail::issueHelperIOU);
+    tester(detail::issueHelperIOU, detail::issueHelperMPT, detail::issueHelperMPT);
+    tester(detail::issueHelperIOU, detail::issueHelperMPT, detail::issueHelperIOU);
+    tester(detail::issueHelperIOU, detail::issueHelperIOU, detail::issueHelperMPT);
 }
 
 }  // namespace jtx

@@ -732,12 +732,7 @@ struct PayStrand_test : public beast::unit_test::suite
             test(env, USD, std::nullopt, STPath({ape(gw), ape(carol)}), temBAD_PATH_LOOP);
 
             // The same offer can't appear more than once on a path
-            test(
-                env,
-                EUR,
-                USD,
-                STPath({ipe(EUR), ipe(USD), ipe(EUR)}),
-                temBAD_PATH_LOOP);
+            test(env, EUR, USD, STPath({ipe(EUR), ipe(USD), ipe(EUR)}), temBAD_PATH_LOOP);
         }
 
         {
@@ -867,11 +862,8 @@ struct PayStrand_test : public beast::unit_test::suite
                 std::nullopt,
                 env.app().logs().journal("Flow"));
             BEAST_EXPECT(ter == tesSUCCESS);
-            BEAST_EXPECT(equal(
-                strand,
-                D{alice, gw, usdC},
-                B{USD, xrpIssue(), std::nullopt},
-                XRPS{bob}));
+            BEAST_EXPECT(
+                equal(strand, D{alice, gw, usdC}, B{USD, xrpIssue(), std::nullopt}, XRPS{bob}));
         }
     }
 

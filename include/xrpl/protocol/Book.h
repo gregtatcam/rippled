@@ -23,10 +23,7 @@ public:
     {
     }
 
-    Book(
-        Asset const& in_,
-        Asset const& out_,
-        std::optional<uint256> const& domain_)
+    Book(Asset const& in_, Asset const& out_, std::optional<uint256> const& domain_)
         : in(in_), out(out_), domain(domain_)
     {
     }
@@ -116,8 +113,7 @@ public:
 };
 
 template <>
-struct hash<xrpl::MPTIssue>
-    : private boost::base_from_member<std::hash<xrpl::MPTID>, 0>
+struct hash<xrpl::MPTIssue> : private boost::base_from_member<std::hash<xrpl::MPTID>, 0>
 {
 private:
     using id_hash_type = boost::base_from_member<std::hash<xrpl::MPTID>, 0>;

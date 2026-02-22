@@ -88,8 +88,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
                 account = sit.get160();
 
             XRPL_ASSERT(
-                !(hasCurrency && hasMPT),
-                "xrpl::STPathSet::STPathSet : not has Currency and MPT");
+                !(hasCurrency && hasMPT), "xrpl::STPathSet::STPathSet : not has Currency and MPT");
             if (hasCurrency)
                 asset = static_cast<Currency>(sit.get160());
 
@@ -151,15 +150,11 @@ STPathSet::isDefault() const
 }
 
 bool
-STPath::hasSeen(
-    AccountID const& account,
-    PathAsset const& asset,
-    AccountID const& issuer) const
+STPath::hasSeen(AccountID const& account, PathAsset const& asset, AccountID const& issuer) const
 {
     for (auto& p : mPath)
     {
-        if (p.getAccountID() == account && p.getPathAsset() == asset &&
-            p.getIssuerID() == issuer)
+        if (p.getAccountID() == account && p.getPathAsset() == asset && p.getIssuerID() == issuer)
             return true;
     }
 
@@ -182,8 +177,7 @@ STPath::getJson(JsonOptions) const
             elem[jss::account] = to_string(it.getAccountID());
 
         XRPL_ASSERT(
-            !(iType & STPathElement::typeCurrency &&
-              iType & STPathElement::typeMPT),
+            !(iType & STPathElement::typeCurrency && iType & STPathElement::typeMPT),
             "xrpl::STPath::getJson : not type Currency and MPT");
         if (iType & STPathElement::typeCurrency)
             elem[jss::currency] = to_string(it.getCurrency());

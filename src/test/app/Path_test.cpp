@@ -844,9 +844,8 @@ public:
             })",
             jv);
 
-        auto const jv_l =
-            env.le(keylet::line(Account("bob").id(), Account("alice")["USD"]))
-                ->getJson(JsonOptions::none);
+        auto const jv_l = env.le(keylet::line(Account("bob").id(), Account("alice")["USD"]))
+                              ->getJson(JsonOptions::none);
         for (auto it = jv.begin(); it != jv.end(); ++it)
             BEAST_EXPECT(*it == jv_l[it.memberName()]);
     }
@@ -887,17 +886,14 @@ public:
             })",
             jv);
 
-        auto const jv_l =
-            env.le(keylet::line(Account("bob").id(), Account("alice")["USD"]))
-                ->getJson(JsonOptions::none);
+        auto const jv_l = env.le(keylet::line(Account("bob").id(), Account("alice")["USD"]))
+                              ->getJson(JsonOptions::none);
         for (auto it = jv.begin(); it != jv.end(); ++it)
             BEAST_EXPECT(*it == jv_l[it.memberName()]);
 
         env.trust(Account("bob")["USD"](0), "alice");
         env.trust(Account("alice")["USD"](0), "bob");
-        BEAST_EXPECT(
-            env.le(keylet::line(
-                Account("bob").id(), Account("alice")["USD"])) == nullptr);
+        BEAST_EXPECT(env.le(keylet::line(Account("bob").id(), Account("alice")["USD"])) == nullptr);
     }
 
     void
@@ -940,16 +936,13 @@ public:
             })",
             jv);
 
-        auto const jv_l =
-            env.le(keylet::line(Account("alice").id(), Account("bob")["USD"]))
-                ->getJson(JsonOptions::none);
+        auto const jv_l = env.le(keylet::line(Account("alice").id(), Account("bob")["USD"]))
+                              ->getJson(JsonOptions::none);
         for (auto it = jv.begin(); it != jv.end(); ++it)
             BEAST_EXPECT(*it == jv_l[it.memberName()]);
 
         env(pay("alice", "bob", Account("alice")["USD"](50)));
-        BEAST_EXPECT(
-            env.le(keylet::line(
-                Account("alice").id(), Account("bob")["USD"])) == nullptr);
+        BEAST_EXPECT(env.le(keylet::line(Account("alice").id(), Account("bob")["USD"])) == nullptr);
     }
 
     void

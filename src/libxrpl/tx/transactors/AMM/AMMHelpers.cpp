@@ -3,10 +3,7 @@
 namespace xrpl {
 
 STAmount
-ammLPTokens(
-    STAmount const& asset1,
-    STAmount const& asset2,
-    Asset const& lptIssue)
+ammLPTokens(STAmount const& asset1, STAmount const& asset2, Asset const& lptIssue)
 {
     // AMM invariant: sqrt(asset1 * asset2) >= LPTokensBalance
     auto const rounding = isFeatureEnabled(fixAMMv1_3) ? Number::downward : Number::getround();
@@ -73,8 +70,7 @@ ammAssetIn(
     auto const c = d * d - f2 * f2;
     if (!isFeatureEnabled(fixAMMv1_3))
     {
-        return toSTAmount(
-            asset1Balance.asset(), asset1Balance * solveQuadraticEq(a, b, c));
+        return toSTAmount(asset1Balance.asset(), asset1Balance * solveQuadraticEq(a, b, c));
     }
     else
     {
@@ -196,8 +192,7 @@ adjustAmountsByLPTokens(
         {
             Number const fr = lpTokensActual / lpTokens;
             auto const amountActual = toSTAmount(amount.asset(), fr * amount);
-            auto const amount2Actual =
-                toSTAmount(amount2->asset(), fr * *amount2);
+            auto const amount2Actual = toSTAmount(amount2->asset(), fr * *amount2);
             if (!ammRoundingEnabled)
                 return std::make_tuple(
                     amountActual < amount ? amountActual : amount,

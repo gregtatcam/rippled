@@ -33,16 +33,14 @@ struct BookDirs_test : public beast::unit_test::suite
 
         {
             env(offer("alice", Account("alice")["USD"](50), XRP(10)));
-            auto d = BookDirs(
-                *env.current(),
-                Book(Account("alice")["USD"], xrpIssue(), std::nullopt));
+            auto d =
+                BookDirs(*env.current(), Book(Account("alice")["USD"], xrpIssue(), std::nullopt));
             BEAST_EXPECT(std::distance(d.begin(), d.end()) == 1);
         }
 
         {
             env(offer("alice", gw["CNY"](50), XRP(10)));
-            auto d = BookDirs(
-                *env.current(), Book(gw["CNY"], xrpIssue(), std::nullopt));
+            auto d = BookDirs(*env.current(), Book(gw["CNY"], xrpIssue(), std::nullopt));
             BEAST_EXPECT(std::distance(d.begin(), d.end()) == 1);
         }
 
@@ -50,8 +48,7 @@ struct BookDirs_test : public beast::unit_test::suite
             env.trust(Account("bob")["CNY"](10), "alice");
             env(pay("bob", "alice", Account("bob")["CNY"](10)));
             env(offer("alice", USD(50), Account("bob")["CNY"](10)));
-            auto d = BookDirs(
-                *env.current(), Book(USD, Account("bob")["CNY"], std::nullopt));
+            auto d = BookDirs(*env.current(), Book(USD, Account("bob")["CNY"], std::nullopt));
             BEAST_EXPECT(std::distance(d.begin(), d.end()) == 1);
         }
 
@@ -61,8 +58,7 @@ struct BookDirs_test : public beast::unit_test::suite
                 for (auto k = 0; k < 80; ++k)
                     env(offer("alice", AUD(i), XRP(j)));
 
-            auto d =
-                BookDirs(*env.current(), Book(AUD, xrpIssue(), std::nullopt));
+            auto d = BookDirs(*env.current(), Book(AUD, xrpIssue(), std::nullopt));
             BEAST_EXPECT(std::distance(d.begin(), d.end()) == 240);
             auto i = 1, j = 3, k = 0;
             for (auto const& e : d)

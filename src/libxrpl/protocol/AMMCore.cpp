@@ -45,18 +45,13 @@ ammLPTCurrency(Asset const& asset1, Asset const& asset2)
 }
 
 Issue
-ammLPTIssue(
-    Asset const& asset1,
-    Asset const& asset2,
-    AccountID const& ammAccountID)
+ammLPTIssue(Asset const& asset1, Asset const& asset2, AccountID const& ammAccountID)
 {
     return Issue(ammLPTCurrency(asset1, asset2), ammAccountID);
 }
 
 NotTEC
-invalidAMMAsset(
-    Asset const& asset,
-    std::optional<std::pair<Asset, Asset>> const& pair)
+invalidAMMAsset(Asset const& asset, std::optional<std::pair<Asset, Asset>> const& pair)
 {
     auto const err = asset.visit(
         [](MPTIssue const& issue) -> std::optional<NotTEC> {

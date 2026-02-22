@@ -1007,27 +1007,21 @@ removeDeletedTrustLines(
 }
 
 static void
-removeDeletedMPTs(
-    ApplyView& view,
-    std::vector<uint256> const& mpts,
-    beast::Journal viewJ)
+removeDeletedMPTs(ApplyView& view, std::vector<uint256> const& mpts, beast::Journal viewJ)
 {
     // There could be at most two MPTs - one for each side of AMM pool
     if (mpts.size() > 2)
     {
-        JLOG(viewJ.error())
-            << "removeDeletedTrustLines: deleted mpts exceed 2 " << mpts.size();
+        JLOG(viewJ.error()) << "removeDeletedTrustLines: deleted mpts exceed 2 " << mpts.size();
         return;
     }
 
     for (auto const& index : mpts)
     {
         if (auto const sleState = view.peek({ltMPTOKEN, index});
-            deleteAMMMPToken(view, sleState, (*sleState)[sfIssuer], viewJ) !=
-            tesSUCCESS)
+            deleteAMMMPToken(view, sleState, (*sleState)[sfIssuer], viewJ) != tesSUCCESS)
         {
-            JLOG(viewJ.error())
-                << "removeDeletedMPTs: failed to delete AMM MPT";
+            JLOG(viewJ.error()) << "removeDeletedMPTs: failed to delete AMM MPT";
         }
     }
 }
@@ -1175,8 +1169,7 @@ Transactor::operator()()
         std::vector<uint256> expiredNFTokenOffers;
         std::vector<uint256> expiredCredentials;
 
-        bool const doOffers =
-            ((result == tecOVERSIZE) || (result == tecKILLED));
+        bool const doOffers = ((result == tecOVERSIZE) || (result == tecKILLED));
         bool const doLinesOrMPTs = (result == tecINCOMPLETE);
         bool const doNFTokenOffers = (result == tecEXPIRED);
         bool const doCredentials = (result == tecEXPIRED);
@@ -1245,9 +1238,8 @@ Transactor::operator()()
 
         if (result == tecINCOMPLETE)
         {
-            removeDeletedTrustLines(
-                view(), removedTrustLines, ctx_.app.journal("View"));
-            removeDeletedMPTs(view(), removedMPTs, ctx_.app.journal("View"));
+            removeDeletedTrustLines(view(), removedTrustLines, ctx_.registry.journal("View"));
+            removeDeletedMPTs(view(), removedMPTs, ctx_.registry.journal("View"));
         }
 
         if (result == tecEXPIRED)

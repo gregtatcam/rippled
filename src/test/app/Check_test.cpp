@@ -1372,19 +1372,15 @@ class Check_test : public beast::unit_test::suite
             env(check::cash(bob, chkIdFroz1, check::DeliverMin(USD(0.5))), ter(tecPATH_PARTIAL));
             env.close();
 
-            env(check::cash(gw, chkIdFroz4ToIssuer, USD(1)),
-                ter(tecPATH_PARTIAL));
+            env(check::cash(gw, chkIdFroz4ToIssuer, USD(1)), ter(tecPATH_PARTIAL));
             env.close();
-            env(check::cash(
-                    gw, chkIdFroz4ToIssuer, check::DeliverMin(USD(0.5))),
+            env(check::cash(gw, chkIdFroz4ToIssuer, check::DeliverMin(USD(0.5))),
                 ter(tecPATH_PARTIAL));
             env.close();
 
             env(check::cash(alice, chkIdFroz4Issuer, USD(1)), ter(tecFROZEN));
             env.close();
-            env(check::cash(
-                    alice, chkIdFroz4Issuer, check::DeliverMin(USD(0.5))),
-                ter(tecFROZEN));
+            env(check::cash(alice, chkIdFroz4Issuer, check::DeliverMin(USD(0.5))), ter(tecFROZEN));
             env.close();
 
             env(fclear(gw, asfGlobalFreeze));
@@ -1931,15 +1927,11 @@ class Check_test : public beast::unit_test::suite
                     if (!BEAST_EXPECT(!offerAmount.native() && !checkAmount.native()))
                         return;
 
-                        BEAST_EXPECT(
-                            offerAmount.getIssuer() == checkAmount.getIssuer());
-                        BEAST_EXPECT(
-                            offerAmount.negative() == checkAmount.negative());
-                        BEAST_EXPECT(
-                            offerAmount.mantissa() == checkAmount.mantissa());
-                        BEAST_EXPECT(
-                            offerAmount.exponent() == checkAmount.exponent());
-                    };
+                    BEAST_EXPECT(offerAmount.getIssuer() == checkAmount.getIssuer());
+                    BEAST_EXPECT(offerAmount.negative() == checkAmount.negative());
+                    BEAST_EXPECT(offerAmount.mantissa() == checkAmount.mantissa());
+                    BEAST_EXPECT(offerAmount.exponent() == checkAmount.exponent());
+                };
                 cmpReqAmount(sfBalance);
                 cmpReqAmount(sfLowLimit);
                 cmpReqAmount(sfHighLimit);

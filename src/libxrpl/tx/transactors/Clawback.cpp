@@ -97,8 +97,8 @@ preclaimHelper<Issue>(
     if (!(issuerFlagsIn & lsfAllowTrustLineClawback) || (issuerFlagsIn & lsfNoFreeze))
         return tecNO_PERMISSION;
 
-    auto const sleRippleState = ctx.view.read(
-        keylet::line(holder, issuer, clawAmount.get<Issue>().currency));
+    auto const sleRippleState =
+        ctx.view.read(keylet::line(holder, issuer, clawAmount.get<Issue>().currency));
     if (!sleRippleState)
         return tecNO_LINE;
 
@@ -122,12 +122,8 @@ preclaimHelper<Issue>(
     // the available balance of a trustline is prone to new changes (eg.
     // XLS-34). So we must use `accountHolds`.
     if (accountHolds(
-            ctx.view,
-            holder,
-            clawAmount.get<Issue>().currency,
-            issuer,
-            fhIGNORE_FREEZE,
-            ctx.j) <= beast::zero)
+            ctx.view, holder, clawAmount.get<Issue>().currency, issuer, fhIGNORE_FREEZE, ctx.j) <=
+        beast::zero)
         return tecINSUFFICIENT_FUNDS;
 
     return tesSUCCESS;

@@ -18,13 +18,11 @@ countOffers(
     Asset const& takerGets)
 {
     size_t count = 0;
-    forEachItem(
-        *env.current(), account, [&](std::shared_ptr<SLE const> const& sle) {
-            if (sle->getType() == ltOFFER &&
-                sle->getFieldAmount(sfTakerPays).asset() == takerPays &&
-                sle->getFieldAmount(sfTakerGets).asset() == takerGets)
-                ++count;
-        });
+    forEachItem(*env.current(), account, [&](std::shared_ptr<SLE const> const& sle) {
+        if (sle->getType() == ltOFFER && sle->getFieldAmount(sfTakerPays).asset() == takerPays &&
+            sle->getFieldAmount(sfTakerGets).asset() == takerGets)
+            ++count;
+    });
     return count;
 }
 
@@ -59,11 +57,7 @@ isOffer(
 /** An offer exists
  */
 inline bool
-isOffer(
-    jtx::Env& env,
-    jtx::Account const& account,
-    Asset const& takerPays,
-    Asset const& takerGets)
+isOffer(jtx::Env& env, jtx::Account const& account, Asset const& takerPays, Asset const& takerGets)
 {
     return countOffers(env, account, takerPays, takerGets) > 0;
 }

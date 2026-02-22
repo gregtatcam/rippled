@@ -134,10 +134,7 @@ public:
     emplace_back(Args&&... args);
 
     bool
-    hasSeen(
-        AccountID const& account,
-        PathAsset const& asset,
-        AccountID const& issuer) const;
+    hasSeen(AccountID const& account, PathAsset const& asset, AccountID const& issuer) const;
 
     Json::Value getJson(JsonOptions) const;
 
@@ -398,9 +395,8 @@ STPathElement::getIssuerID() const
 inline bool
 STPathElement::operator==(STPathElement const& t) const
 {
-    return (mType & typeAccount) == (t.mType & typeAccount) &&
-        hash_value_ == t.hash_value_ && mAccountID == t.mAccountID &&
-        mAssetID == t.mAssetID && mIssuerID == t.mIssuerID;
+    return (mType & typeAccount) == (t.mType & typeAccount) && hash_value_ == t.hash_value_ &&
+        mAccountID == t.mAccountID && mAssetID == t.mAssetID && mIssuerID == t.mIssuerID;
 }
 
 inline bool

@@ -3122,7 +3122,7 @@ NetworkOPsImp::transJson(
                 amount,
                 fhIGNORE_FREEZE,
                 ahIGNORE_AUTH,
-                app_.journal("View"));
+                registry_.journal("View"));
             jvObj[jss::transaction][jss::owner_funds] = ownerFunds.getText();
         }
     }
@@ -4199,8 +4199,8 @@ NetworkOPsImp::getBookPage(
 
     ReadView const& view = *lpLedger;
 
-    bool const bGlobalFreeze = isGlobalFrozen(view, book.out.getIssuer()) ||
-        isGlobalFrozen(view, book.in.getIssuer());
+    bool const bGlobalFreeze =
+        isGlobalFrozen(view, book.out.getIssuer()) || isGlobalFrozen(view, book.in.getIssuer());
 
     bool bDone = false;
     bool bDirectAdvance = true;
@@ -4211,7 +4211,7 @@ NetworkOPsImp::getBookPage(
     STAmount saDirRate;
 
     auto const rate = transferRate(view, book.out.getIssuer());
-    auto viewJ = app_.journal("View");
+    auto viewJ = registry_.journal("View");
 
     while (!bDone && iLimit-- > 0)
     {
@@ -4330,9 +4330,7 @@ NetworkOPsImp::getBookPage(
 
                     saTakerGetsFunded.setJson(jvOffer[jss::taker_gets_funded]);
                     std::min(
-                        saTakerPays,
-                        multiply(
-                            saTakerGetsFunded, saDirRate, saTakerPays.asset()))
+                        saTakerPays, multiply(saTakerGetsFunded, saDirRate, saTakerPays.asset()))
                         .setJson(jvOffer[jss::taker_pays_funded]);
                 }
 
@@ -4476,9 +4474,7 @@ NetworkOPsImp::getBookPage(
 
                 // TODO(tom): The result of this expression is not used - what's
                 // going on here?
-                std::min(
-                    saTakerPays,
-                    multiply(saTakerGetsFunded, saDirRate, saTakerPays.asset()))
+                std::min(saTakerPays, multiply(saTakerGetsFunded, saDirRate, saTakerPays.asset()))
                     .setJson(jvOffer[jss::taker_pays_funded]);
             }
 

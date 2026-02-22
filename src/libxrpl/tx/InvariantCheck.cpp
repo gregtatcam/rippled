@@ -57,18 +57,15 @@ enum Privilege {
     changeNFTCounts = 0x0020,     // The transaction can mint or burn an NFT
     createMPTIssuance = 0x0040,   // The transaction can create a new MPT issuance
     destroyMPTIssuance = 0x0080,  // The transaction can destroy an MPT issuance
-    mustAuthorizeMPT = 0x0100,  // The transaction MUST create or delete an MPT
-                                // object (except by issuer)
-    mayAuthorizeMPT = 0x0200,   // The transaction MAY create or delete an MPT
-                                // object (except by issuer)
-    mayDeleteMPT =
-        0x0400,  // The transaction MAY delete an MPT object. May not create.
-    mustModifyVault =
-        0x0800,  // The transaction must modify, delete or create, a vault
-    mayModifyVault =
-        0x1000,  // The transaction MAY modify, delete or create, a vault
-    mayCreateMPT = 0x2000,  // The transaction MAY create an MPT object
-                            // (except by issuer)
+    mustAuthorizeMPT = 0x0100,    // The transaction MUST create or delete an MPT
+                                  // object (except by issuer)
+    mayAuthorizeMPT = 0x0200,     // The transaction MAY create or delete an MPT
+                                  // object (except by issuer)
+    mayDeleteMPT = 0x0400,        // The transaction MAY delete an MPT object. May not create.
+    mustModifyVault = 0x0800,     // The transaction must modify, delete or create, a vault
+    mayModifyVault = 0x1000,      // The transaction MAY modify, delete or create, a vault
+    mayCreateMPT = 0x2000,        // The transaction MAY create an MPT object
+                                  // (except by issuer)
 };
 constexpr Privilege
 operator|(Privilege lhs, Privilege rhs)
@@ -659,8 +656,7 @@ NoXRPTrustLines::visitEntry(
         // checking the issue directly here instead of
         // relying on .native() just in case native somehow
         // were systematically incorrect
-        xrpTrustLine_ =
-            after->getFieldAmount(sfLowLimit).asset() == xrpIssue() ||
+        xrpTrustLine_ = after->getFieldAmount(sfLowLimit).asset() == xrpIssue() ||
             after->getFieldAmount(sfHighLimit).asset() == xrpIssue();
     }
 }
@@ -1377,23 +1373,15 @@ ValidClawback::finalize(
             AccountID const& holder = amount.getIssuer();
             STAmount const holderBalance = amount.asset().visit(
                 [&](Issue const& issue) {
-                    return accountHolds(
-                        view,
-                        holder,
-                        issue.currency,
-                        issuer,
-                        fhIGNORE_FREEZE,
-                        j);
+                    return accountHolds(view, holder, issue.currency, issuer, fhIGNORE_FREEZE, j);
                 },
                 [&](MPTIssue const& issue) {
-                    return accountHolds(
-                        view, issuer, issue, fhIGNORE_FREEZE, ahIGNORE_AUTH, j);
+                    return accountHolds(view, issuer, issue, fhIGNORE_FREEZE, ahIGNORE_AUTH, j);
                 });
 
             if (holderBalance.signum() < 0)
             {
-                JLOG(j.fatal())
-                    << "Invariant failed: trustline or MPT balance is negative";
+                JLOG(j.fatal()) << "Invariant failed: trustline or MPT balance is negative";
                 return false;
             }
         }
@@ -1516,8 +1504,7 @@ ValidMPTIssuance::finalize(
             return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 1;
         }
 
-        bool const lendingProtocolEnabled =
-            view.rules().enabled(featureLendingProtocol);
+        bool const lendingProtocolEnabled = view.rules().enabled(featureLendingProtocol);
         bool const mptV2Enabled = view.rules().enabled(featureMPTokensV2);
         // ttESCROW_FINISH may authorize an MPT, but it can't have the
         // mayAuthorizeMPT privilege, because that may cause
@@ -1544,8 +1531,7 @@ ValidMPTIssuance::finalize(
                 mptV2Enabled && hasPrivilege(tx, mayAuthorizeMPT) &&
                 (txnType == ttAMM_WITHDRAW || txnType == ttAMM_CLAWBACK))
             {
-                if (submittedByIssuer && txnType == ttAMM_WITHDRAW &&
-                    mptokensCreated_ > 0)
+                if (submittedByIssuer && txnType == ttAMM_WITHDRAW && mptokensCreated_ > 0)
                 {
                     JLOG(j.fatal()) << "Invariant failed: MPT authorize "
                                        "submitted by issuer succeeded "
@@ -1554,15 +1540,12 @@ ValidMPTIssuance::finalize(
                 }
                 else if (mptokensCreated_ > 1 || mptokensDeleted_ > 2)
                 {
-                    JLOG(j.fatal())
-                        << "Invariant failed: MPT authorize  succeeded "
-                           "but created/deleted bad number of mptokens";
+                    JLOG(j.fatal()) << "Invariant failed: MPT authorize  succeeded "
+                                       "but created/deleted bad number of mptokens";
                     return false;
                 }
             }
-            else if (
-                lendingProtocolEnabled &&
-                (mptokensCreated_ + mptokensDeleted_) > 1)
+            else if (lendingProtocolEnabled && (mptokensCreated_ + mptokensDeleted_) > 1)
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT authorize succeeded "
                                    "but created/deleted bad number mptokens";
@@ -1615,16 +1598,14 @@ ValidMPTIssuance::finalize(
                 (txnType == ttAMM_CREATE && mptokensCreated_ > 2) ||
                 (txnType == ttCHECK_CASH && mptokensCreated_ > 1))
             {
-                JLOG(j.fatal())
-                    << "Invariant failed: MPT authorize "
-                       "succeeded but created bad number of mptokens";
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize "
+                                   "succeeded but created bad number of mptokens";
                 return false;
             }
             else if (submittedByIssuer)
             {
-                JLOG(j.fatal())
-                    << "Invariant failed: MPT authorize submitted by issuer "
-                       "succeeded but created mptokens";
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize submitted by issuer "
+                                   "succeeded but created mptokens";
                 return false;
             }
 
@@ -2121,10 +2102,8 @@ ValidAMM::finalizeCreate(
         // Create invariant:
         // sqrt(amount * amount2) == LPTokens
         // all balances are greater than zero
-        if (!validBalances(
-                amount, amount2, *lptAMMBalanceAfter_, ZeroAllowed::No) ||
-            ammLPTokens(amount, amount2, lptAMMBalanceAfter_->get<Issue>()) !=
-                *lptAMMBalanceAfter_)
+        if (!validBalances(amount, amount2, *lptAMMBalanceAfter_, ZeroAllowed::No) ||
+            ammLPTokens(amount, amount2, lptAMMBalanceAfter_->get<Issue>()) != *lptAMMBalanceAfter_)
         {
             JLOG(j.error()) << "AMMCreate invariant failed: " << amount << " " << amount2 << " "
                             << *lptAMMBalanceAfter_;
@@ -2176,13 +2155,7 @@ ValidAMM::generalInvariant(
     beast::Journal const& j) const
 {
     auto const [amount, amount2] = ammPoolHolds(
-        view,
-        *ammAccount_,
-        tx[sfAsset],
-        tx[sfAsset2],
-        fhIGNORE_FREEZE,
-        ahIGNORE_AUTH,
-        j);
+        view, *ammAccount_, tx[sfAsset], tx[sfAsset2], fhIGNORE_FREEZE, ahIGNORE_AUTH, j);
     // Deposit and Withdrawal invariant:
     // sqrt(amount * amount2) >= LPTokens
     // all balances are greater than zero
@@ -3063,12 +3036,10 @@ ValidVault::finalize(
                 if (isXRP(issue))
                     return get(deltas_.find(keylet::account(id).key));
                 return get(
-                    deltas_.find(keylet::line(id, issue).key),
-                    id > issue.getIssuer() ? -1 : 1);
+                    deltas_.find(keylet::line(id, issue).key), id > issue.getIssuer() ? -1 : 1);
             },
             [&](MPTIssue const& issue) {
-                return get(
-                    deltas_.find(keylet::mptoken(issue.getMptID(), id).key));
+                return get(deltas_.find(keylet::mptoken(issue.getMptID(), id).key));
             });
     };
     auto const deltaAssetsTxAccount = [&]() -> std::optional<Number> {
@@ -3603,8 +3574,8 @@ ValidPayment::visitEntry(
         else if (type == ltMPTOKEN)
         {
             // subtract before from after
-            data_[makeKey(sle)].mptAmount += (order == Before ? -1 : 1) *
-                (sle[sfMPTAmount] + sle[~sfLockedAmount].value_or(0));
+            data_[makeKey(sle)].mptAmount +=
+                (order == Before ? -1 : 1) * (sle[sfMPTAmount] + sle[~sfLockedAmount].value_or(0));
         }
     };
 
@@ -3640,13 +3611,11 @@ ValidPayment::finalize(
         for (auto const& [id, data] : data_)
         {
             (void)id;
-            if (data.outstanding[After] !=
-                (data.outstanding[Before] + data.mptAmount))
+            if (data.outstanding[After] != (data.outstanding[Before] + data.mptAmount))
             {
-                JLOG(j.fatal())
-                    << "Invariant failed: invalid OutstandingAmount balance "
-                    << data.outstanding[Before] << " "
-                    << data.outstanding[After] << " " << data.mptAmount;
+                JLOG(j.fatal()) << "Invariant failed: invalid OutstandingAmount balance "
+                                << data.outstanding[Before] << " " << data.outstanding[After] << " "
+                                << data.mptAmount;
                 return enforce ? false : true;
             }
         }

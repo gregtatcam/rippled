@@ -1,16 +1,9 @@
-#include <xrpld/app/ledger/Ledger.h>
-#include <xrpld/app/misc/MPTUtils.h>
-#include <xrpld/app/paths/Flow.h>
-#include <xrpld/app/tx/detail/CashCheck.h>
-#include <xrpld/app/tx/detail/MPTokenAuthorize.h>
-
 #include <xrpl/basics/Log.h>
 #include <xrpl/basics/scope.h>
 #include <xrpl/ledger/View.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/TER.h>
-#include <xrpl/protocol/TxFlags.h>
 #include <xrpl/tx/paths/Flow.h>
 #include <xrpl/tx/transactors/Check/CashCheck.h>
 
@@ -175,8 +168,7 @@ CashCheck::preclaim(PreclaimContext const& ctx)
                     auto const sleTrustLine =
                         ctx.view.read(keylet::line(dstId, issuerId, currency));
 
-                    auto const sleIssuer =
-                        ctx.view.read(keylet::account(issuerId));
+                    auto const sleIssuer = ctx.view.read(keylet::account(issuerId));
                     if (!sleIssuer)
                     {
                         JLOG(ctx.j.warn()) << "Can't receive IOUs from "
@@ -201,8 +193,7 @@ CashCheck::preclaim(PreclaimContext const& ctx)
                         bool const canonical_gt(dstId > issuerId);
 
                         bool const is_authorized(
-                            sleTrustLine->at(sfFlags) &
-                            (canonical_gt ? lsfLowAuth : lsfHighAuth));
+                            sleTrustLine->at(sfFlags) & (canonical_gt ? lsfLowAuth : lsfHighAuth));
 
                         if (!is_authorized)
                         {
@@ -221,16 +212,14 @@ CashCheck::preclaim(PreclaimContext const& ctx)
                     // not be frozen.
                     if (isFrozen(ctx.view, dstId, currency, issuerId))
                     {
-                        JLOG(ctx.j.warn())
-                            << "Cashing a check to a frozen trustline.";
+                        JLOG(ctx.j.warn()) << "Cashing a check to a frozen trustline.";
                         return tecFROZEN;
                     }
 
                     return tesSUCCESS;
                 },
                 [&](MPTIssue const& issue) -> TER {
-                    auto const sleIssuer =
-                        ctx.view.read(keylet::account(issuerId));
+                    auto const sleIssuer = ctx.view.read(keylet::account(issuerId));
                     if (!sleIssuer)
                     {
                         JLOG(ctx.j.warn()) << "Can't receive MPTs from "
@@ -239,24 +228,20 @@ CashCheck::preclaim(PreclaimContext const& ctx)
                         return tecNO_ISSUER;
                     }
 
-                    if (auto const err = requireAuth(
-                            ctx.view, issue, dstId, AuthType::WeakAuth);
+                    if (auto const err = requireAuth(ctx.view, issue, dstId, AuthType::WeakAuth);
                         err != tesSUCCESS)
                     {
-                        JLOG(ctx.j.warn())
-                            << "Cashing a check to a MPT requiring auth.";
+                        JLOG(ctx.j.warn()) << "Cashing a check to a MPT requiring auth.";
                         return err;
                     }
 
                     if (isFrozen(ctx.view, dstId, issue))
                     {
-                        JLOG(ctx.j.warn())
-                            << "Cashing a check to a frozen MPT.";
+                        JLOG(ctx.j.warn()) << "Cashing a check to a frozen MPT.";
                         return tecFROZEN;
                     }
 
-                    if (auto const err = canTrade(ctx.view, value.asset());
-                        err != tesSUCCESS)
+                    if (auto const err = canTrade(ctx.view, value.asset()); err != tesSUCCESS)
                     {
                         JLOG(ctx.j.warn()) << "MPT DEX is not allowed.";
                         return err;
@@ -361,18 +346,14 @@ CashCheck::doApply()
                 return optDeliverMin->asset().visit(
                     [&](Issue const&) {
                         return STAmount(
-                            optDeliverMin->asset(),
-                            STAmount::cMaxValue / 2,
-                            STAmount::cMaxOffset);
+                            optDeliverMin->asset(), STAmount::cMaxValue / 2, STAmount::cMaxOffset);
                     },
                     [&](MPTIssue const&) {
-                        return STAmount(
-                            optDeliverMin->asset(), maxMPTokenAmount / 2);
+                        return STAmount(optDeliverMin->asset(), maxMPTokenAmount / 2);
                     });
             };
             STAmount const flowDeliver{
-                optDeliverMin ? maxDeliverMin()
-                              : ctx_.tx.getFieldAmount(sfAmount)};
+                optDeliverMin ? maxDeliverMin() : ctx_.tx.getFieldAmount(sfAmount)};
 
             // Check reserve. Return destination account SLE if enough reserve,
             // otherwise return nullptr.
@@ -399,8 +380,7 @@ CashCheck::doApply()
                 [&](Issue const& issue) -> std::optional<TER> {
                     // If a trust line does not exist yet create one.
                     Issue const& trustLineIssue = issue;
-                    AccountID const truster =
-                        deliverIssuer == account_ ? srcId : account_;
+                    AccountID const truster = deliverIssuer == account_ ? srcId : account_;
                     trustLineKey = keylet::line(truster, trustLineIssue);
                     destLow = deliverIssuer > account_;
 
@@ -433,9 +413,9 @@ CashCheck::doApply()
                                 sleDst,             // Account to add to
                                 false,              // authorize account
                                 (sleDst->getFlags() & lsfDefaultRipple) == 0,
-                                false,           // freeze trust line
-                                false,           // deep freeze trust line
-                                initialBalance,  // zero initial balance
+                                false,                      // freeze trust line
+                                false,                      // deep freeze trust line
+                                initialBalance,             // zero initial balance
                                 Issue(currency, account_),  // limit of zero
                                 0,                          // quality in
                                 0,                          // quality out
@@ -462,16 +442,13 @@ CashCheck::doApply()
                     if (!sleTrustLine)
                         return tecNO_LINE;
 
-                    SF_AMOUNT const& tweakedLimit =
-                        destLow ? sfLowLimit : sfHighLimit;
+                    SF_AMOUNT const& tweakedLimit = destLow ? sfLowLimit : sfHighLimit;
                     savedLimit = sleTrustLine->at(tweakedLimit);
 
                     // Set the trust line limit to the highest possible
                     // value while flow runs.
                     STAmount const bigAmount(
-                        trustLineIssue,
-                        STAmount::cMaxValue,
-                        STAmount::cMaxOffset);
+                        trustLineIssue, STAmount::cMaxValue, STAmount::cMaxOffset);
                     sleTrustLine->at(tweakedLimit) = bigAmount;
 
                     return std::nullopt;
@@ -481,8 +458,7 @@ CashCheck::doApply()
                     {
                         auto const& mptID = issue.getMptID();
                         // Create MPT if it doesn't exist
-                        auto const mptokenKey =
-                            keylet::mptoken(mptID, account_);
+                        auto const mptokenKey = keylet::mptoken(mptID, account_);
                         if (!psb.exists(mptokenKey))
                         {
                             auto sleDst = checkReserve();
@@ -490,8 +466,7 @@ CashCheck::doApply()
                                 return tecINSUFFICIENT_RESERVE;
 
                             if (auto const err =
-                                    MPTokenAuthorize::checkCreateMPT(
-                                        psb, mptID, account_, j_);
+                                    MPTokenAuthorize::checkCreateMPT(psb, mptID, account_, j_);
                                 err != tesSUCCESS)
                                 return err;
                         }
@@ -506,8 +481,7 @@ CashCheck::doApply()
             scope_exit fixup([&psb, &trustLineKey, destLow, &savedLimit]() {
                 if (trustLineKey)
                 {
-                    SF_AMOUNT const& tweakedLimit =
-                        destLow ? sfLowLimit : sfHighLimit;
+                    SF_AMOUNT const& tweakedLimit = destLow ? sfLowLimit : sfHighLimit;
                     if (auto const sleTrustLine = psb.peek(*trustLineKey))
                         sleTrustLine->at(tweakedLimit) = savedLimit;
                 }

@@ -35,11 +35,7 @@ public:
             mantissa--;
 
             if (mantissa < STAmount::cMinValue)
-                return {
-                    amount.asset(),
-                    mantissa,
-                    amount.exponent(),
-                    amount.negative()};
+                return {amount.asset(), mantissa, amount.exponent(), amount.negative()};
 
             return {
                 amount.asset(),
@@ -54,11 +50,7 @@ public:
             mantissa++;
 
             if (mantissa > STAmount::cMaxValue)
-                return {
-                    amount.asset(),
-                    mantissa,
-                    amount.exponent(),
-                    amount.negative()};
+                return {amount.asset(), mantissa, amount.exponent(), amount.negative()};
 
             return {
                 amount.asset(),

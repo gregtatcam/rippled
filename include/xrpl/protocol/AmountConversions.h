@@ -96,15 +96,12 @@ inline MPTAmount
 toAmount<MPTAmount>(STAmount const& amt)
 {
     XRPL_ASSERT(
-        amt.holds<MPTIssue>() && amt.mantissa() <= maxMPTokenAmount &&
-            amt.exponent() == 0,
+        amt.holds<MPTIssue>() && amt.mantissa() <= maxMPTokenAmount && amt.exponent() == 0,
         "xrpl::toAmount<MPTAmount> : maximum mantissa");
     if (amt.mantissa() > maxMPTokenAmount || amt.exponent() != 0)
-        Throw<std::runtime_error>(
-            "toAmount<MPTAmount>: invalid mantissa or exponent");
+        Throw<std::runtime_error>("toAmount<MPTAmount>: invalid mantissa or exponent");
     bool const isNeg = amt.negative();
-    std::int64_t const sMant =
-        isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
+    std::int64_t const sMant = isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
 
     return MPTAmount(sMant);
 }
@@ -144,10 +141,7 @@ toAmount<MPTAmount>(MPTAmount const& amt)
 
 template <typename T>
 T
-toAmount(
-    Asset const& asset,
-    Number const& n,
-    Number::rounding_mode mode = Number::getround())
+toAmount(Asset const& asset, Number const& n, Number::rounding_mode mode = Number::getround())
 {
     saveNumberRoundMode rm(Number::getround());
     if (isXRP(asset))
@@ -187,15 +181,10 @@ toMaxAmount(Asset const& asset)
         return asset.visit(
             [](Issue const& issue) {
                 if (isXRP(issue))
-                    return STAmount(
-                        issue,
-                        static_cast<std::int64_t>(STAmount::cMaxNativeN));
-                return STAmount(
-                    issue, STAmount::cMaxValue, STAmount::cMaxOffset);
+                    return STAmount(issue, static_cast<std::int64_t>(STAmount::cMaxNativeN));
+                return STAmount(issue, STAmount::cMaxValue, STAmount::cMaxOffset);
             },
-            [](MPTIssue const& issue) {
-                return STAmount(issue, maxMPTokenAmount);
-            });
+            [](MPTIssue const& issue) { return STAmount(issue, maxMPTokenAmount); });
     }
     else
     {
@@ -205,10 +194,7 @@ toMaxAmount(Asset const& asset)
 }
 
 inline STAmount
-toSTAmount(
-    Asset const& asset,
-    Number const& n,
-    Number::rounding_mode mode = Number::getround())
+toSTAmount(Asset const& asset, Number const& n, Number::rounding_mode mode = Number::getround())
 {
     return toAmount<STAmount>(asset, n, mode);
 }

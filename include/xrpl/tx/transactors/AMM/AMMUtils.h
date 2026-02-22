@@ -68,20 +68,13 @@ getTradingFee(ReadView const& view, SLE const& ammSle, AccountID const& account)
 /** Returns total amount held by AMM for the given token.
  */
 STAmount
-ammAccountHolds(
-    ReadView const& view,
-    AccountID const& ammAccountID,
-    Asset const& asset);
+ammAccountHolds(ReadView const& view, AccountID const& ammAccountID, Asset const& asset);
 
 /** Delete trustlines to AMM. If all trustlines are deleted then
  * AMM object and account are deleted. Otherwise tecIMPCOMPLETE is returned.
  */
 TER
-deleteAMMAccount(
-    Sandbox& view,
-    Asset const& asset,
-    Asset const& asset2,
-    beast::Journal j);
+deleteAMMAccount(Sandbox& view, Asset const& asset, Asset const& asset2, beast::Journal j);
 
 /** Initialize Auction and Voting slots and set the trading/discounted fee.
  */

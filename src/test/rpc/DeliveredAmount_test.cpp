@@ -374,8 +374,7 @@ public:
         testTxDeliveredAmountRPC();
         testAccountDeliveredAmountSubscribe();
 
-        testMPTDeliveredAmountRPC(
-            all - fixMPTDeliveredAmount - featureMPTokensV2);
+        testMPTDeliveredAmountRPC(all - fixMPTDeliveredAmount - featureMPTokensV2);
         testMPTDeliveredAmountRPC(all);
     }
 };

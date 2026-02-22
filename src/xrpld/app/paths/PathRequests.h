@@ -35,9 +35,7 @@ public:
     requestsPending() const;
 
     std::shared_ptr<AssetCache>
-    getAssetCache(
-        std::shared_ptr<ReadView const> const& ledger,
-        bool authoritative);
+    getAssetCache(std::shared_ptr<ReadView const> const& ledger, bool authoritative);
 
     // Create a new-style path request that pushes
     // updates to a subscriber

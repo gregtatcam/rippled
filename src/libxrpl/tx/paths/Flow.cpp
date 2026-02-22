@@ -12,11 +12,7 @@ namespace xrpl {
 
 template <class FlowResult>
 static auto
-finishFlow(
-    PaymentSandbox& sb,
-    Asset const& srcAsset,
-    Asset const& dstAsset,
-    FlowResult&& f)
+finishFlow(PaymentSandbox& sb, Asset const& srcAsset, Asset const& dstAsset, FlowResult&& f)
 {
     path::RippleCalc::Output result;
     if (f.ter == tesSUCCESS)
@@ -97,8 +93,8 @@ flow(
 
     if (j.trace())
     {
-        j.trace() << "\nsrc: " << src << "\ndst: " << dst
-                  << "\nsrcAsset: " << srcAsset << "\ndstAsset: " << dstAsset;
+        j.trace() << "\nsrc: " << src << "\ndst: " << dst << "\nsrcAsset: " << srcAsset
+                  << "\ndstAsset: " << dstAsset;
         j.trace() << "\nNumStrands: " << strands.size();
         for (auto const& curStrand : strands)
         {
@@ -115,8 +111,7 @@ flow(
     // represented by different types, use templates to tell `flow` about the
     // amount types.
     return std::visit(
-        [&, &strands_ = strands]<typename TIn, typename TOut>(
-            TIn const&, TOut const&) {
+        [&, &strands_ = strands]<typename TIn, typename TOut>(TIn const&, TOut const&) {
             using TIn_ = typename TIn::amount_type;
             using TOut_ = typename TOut::amount_type;
             return finishFlow(

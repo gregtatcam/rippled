@@ -228,10 +228,7 @@ parse(Json::Value const& param)
 }
 
 Expected<Asset, Json::Value>
-requiredAsset(
-    Json::Value const& params,
-    Json::StaticString const fieldName,
-    std::string const& err)
+requiredAsset(Json::Value const& params, Json::StaticString const fieldName, std::string const& err)
 {
     return required<Asset>(params, fieldName, err, "Asset");
 }
