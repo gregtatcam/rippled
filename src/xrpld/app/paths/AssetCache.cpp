@@ -14,9 +14,9 @@ AssetCache::AssetCache(
 
 AssetCache::~AssetCache()
 {
-    JLOG(journal_.debug()) << "destroyed for ledger " << ledger_->header().seq
-                           << " with " << lines_.size() << " accounts and "
-                           << totalLineCount_ << " distinct trust lines.";
+    JLOG(journal_.debug()) << "destroyed for ledger " << ledger_->header().seq << " with "
+                           << lines_.size() << " accounts and " << totalLineCount_
+                           << " distinct trust lines.";
 }
 
 std::shared_ptr<std::vector<PathFindTrustLine>>
@@ -26,8 +26,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
     AccountKey key(accountID, direction, hash);
     AccountKey otherkey(
         accountID,
-        direction == LineDirection::outgoing ? LineDirection::incoming
-                                             : LineDirection::outgoing,
+        direction == LineDirection::outgoing ? LineDirection::incoming : LineDirection::outgoing,
         hash);
 
     std::lock_guard sl(mLock);
@@ -86,8 +85,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
             PathFindTrustLine::getItems(accountID, *ledger_, direction);
         if (lines.size())
         {
-            it->second = std::make_shared<std::vector<PathFindTrustLine>>(
-                std::move(lines));
+            it->second = std::make_shared<std::vector<PathFindTrustLine>>(std::move(lines));
             totalLineCount_ += it->second->size();
         }
     }
@@ -96,14 +94,12 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
         !it->second || (it->second->size() > 0),
         "xrpl::AssetCache::getRippleLines : null or nonempty lines");
     auto const size = it->second ? it->second->size() : 0;
-    JLOG(journal_.trace()) << "getRippleLines for ledger "
-                           << ledger_->header().seq << " found " << size
-                           << (key.direction_ == LineDirection::outgoing
-                                   ? " outgoing"
-                                   : " incoming")
-                           << " lines for " << (inserted ? "new " : "existing ")
-                           << accountID << " out of a total of "
-                           << lines_.size() << " accounts and "
+    JLOG(journal_.trace()) << "getRippleLines for ledger " << ledger_->header().seq << " found "
+                           << size
+                           << (key.direction_ == LineDirection::outgoing ? " outgoing"
+                                                                         : " incoming")
+                           << " lines for " << (inserted ? "new " : "existing ") << accountID
+                           << " out of a total of " << lines_.size() << " accounts and "
                            << totalLineCount_ << " trust lines";
 
     return it->second;

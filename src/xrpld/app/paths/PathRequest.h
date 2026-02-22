@@ -1,5 +1,4 @@
-#ifndef XRPL_APP_PATHS_PATHREQUEST_H_INCLUDED
-#define XRPL_APP_PATHS_PATHREQUEST_H_INCLUDED
+#pragma once
 
 #include <xrpld/app/ledger/Ledger.h>
 #include <xrpld/app/paths/AssetCache.h>
@@ -10,6 +9,7 @@
 #include <xrpl/json/json_value.h>
 #include <xrpl/protocol/PathAsset.h>
 #include <xrpl/protocol/UintTypes.h>
+#include <xrpl/server/InfoSub.h>
 
 #include <map>
 #include <mutex>
@@ -160,5 +160,3 @@ private:
 };
 
 }  // namespace xrpl
-
-#endif

@@ -1,13 +1,12 @@
 #include <test/jtx/AMM.h>
 #include <test/jtx/Env.h>
 
-#include <xrpld/app/misc/AMMHelpers.h>
-#include <xrpld/app/misc/AMMUtils.h>
-
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/AmountConversions.h>
 #include <xrpl/protocol/ApiVersion.h>
 #include <xrpl/protocol/jss.h>
+#include <xrpl/tx/transactors/AMM/AMMHelpers.h>
+#include <xrpl/tx/transactors/AMM/AMMUtils.h>
 
 namespace xrpl {
 namespace test {
@@ -27,8 +26,7 @@ AMM::initialTokens()
     if (!env_.enabled(fixAMMv1_3))
     {
         auto const product = number(asset1_) * number(asset2_);
-        return (IOUAmount)(product.mantissa() >= 0 ? root2(product)
-                                                   : root2(-product));
+        return (IOUAmount)(product.mantissa() >= 0 ? root2(product) : root2(-product));
     }
     return getLPTokensBalance();
 }
@@ -193,8 +191,7 @@ AMM::ammRpcInfo(
         (apiVersion == RPC::apiInvalidVersion
              ? env_.rpc("json", "amm_info", to_string(jv))
              : env_.rpc(apiVersion, "json", "amm_info", to_string(jv)));
-    if (jr.isObject() && jr.isMember(jss::result) &&
-        jr[jss::result].isMember(jss::status))
+    if (jr.isObject() && jr.isMember(jss::result) && jr[jss::result].isMember(jss::status))
         return jr[jss::result];
     return Json::nullValue;
 }
@@ -261,8 +258,7 @@ AMM::expectLPTokens(AccountID const& account, IOUAmount const& expTokens) const
     if (auto const amm =
             env_.current()->read(keylet::amm(asset1_.asset(), asset2_.asset())))
     {
-        auto const lptAMMBalance =
-            ammLPHolds(*env_.current(), *amm, account, env_.journal);
+        auto const lptAMMBalance = ammLPHolds(*env_.current(), *amm, account, env_.journal);
         return lptAMMBalance == STAmount{expTokens, lptIssue_};
     }
     return false;
@@ -289,20 +285,18 @@ AMM::expectAuctionSlot(
 bool
 AMM::expectAuctionSlot(std::vector<AccountID> const& authAccounts) const
 {
-    return expectAuctionSlot([&](std::uint32_t,
-                                 std::optional<std::uint8_t>,
-                                 IOUAmount const&,
-                                 STArray const& accounts) {
-        for (auto const& account : accounts)
-        {
-            if (std::find(
-                    authAccounts.cbegin(),
-                    authAccounts.cend(),
-                    account.getAccountID(sfAccount)) == authAccounts.end())
-                return false;
-        }
-        return true;
-    });
+    return expectAuctionSlot(
+        [&](std::uint32_t, std::optional<std::uint8_t>, IOUAmount const&, STArray const& accounts) {
+            for (auto const& account : accounts)
+            {
+                if (std::find(
+                        authAccounts.cbegin(),
+                        authAccounts.cend(),
+                        account.getAccountID(sfAccount)) == authAccounts.end())
+                    return false;
+            }
+            return true;
+        });
 }
 
 bool
@@ -330,8 +324,7 @@ AMM::expectAmmRpcInfo(
     std::optional<std::string> const& ledger_index,
     std::optional<AccountID> const& ammAccount) const
 {
-    auto const jv = ammRpcInfo(
-        account, ledger_index, std::nullopt, std::nullopt, ammAccount);
+    auto const jv = ammRpcInfo(account, ledger_index, std::nullopt, std::nullopt, ammAccount);
     return expectAmmInfo(asset1, asset2, balance, jv);
 }
 
@@ -340,13 +333,12 @@ AMM::expectAmmInfo(
     STAmount const& asset1,
     STAmount const& asset2,
     IOUAmount const& balance,
-    Json::Value const& jvres) const
+    Json::Value const& jvRes) const
 {
-    if (!jvres.isMember(jss::amm))
+    if (!jvRes.isMember(jss::amm))
         return false;
-    auto const& jv = jvres[jss::amm];
-    if (!jv.isMember(jss::amount) || !jv.isMember(jss::amount2) ||
-        !jv.isMember(jss::lp_token))
+    auto const& jv = jvRes[jss::amm];
+    if (!jv.isMember(jss::amount) || !jv.isMember(jss::amount2) || !jv.isMember(jss::lp_token))
         return false;
     STAmount asset1Info;
     if (!amountFromJsonNoThrow(asset1Info, jv[jss::amount]))
@@ -371,10 +363,8 @@ AMM::setTokens(
 {
     if (assets)
     {
-        jv[jss::Asset] =
-            STIssue(sfAsset, assets->first).getJson(JsonOptions::none);
-        jv[jss::Asset2] =
-            STIssue(sfAsset, assets->second).getJson(JsonOptions::none);
+        jv[jss::Asset] = STIssue(sfAsset, assets->first).getJson(JsonOptions::none);
+        jv[jss::Asset2] = STIssue(sfAsset, assets->second).getJson(JsonOptions::none);
     }
     else
     {
@@ -712,8 +702,7 @@ AMM::bid(BidArg const& arg)
             Throw<std::runtime_error>("AMM::Bid");
         if (amm->isFieldPresent(sfAuctionSlot))
         {
-            auto const& auctionSlot =
-                static_cast<STObject const&>(amm->peekAtField(sfAuctionSlot));
+            auto const& auctionSlot = static_cast<STObject const&>(amm->peekAtField(sfAuctionSlot));
             lastPurchasePrice_ = auctionSlot[sfPrice].iou();
         }
     }
@@ -721,8 +710,7 @@ AMM::bid(BidArg const& arg)
     bidMax_ = std::nullopt;
 
     Json::Value jv;
-    jv[jss::Account] =
-        arg.account ? arg.account->human() : creatorAccount_.human();
+    jv[jss::Account] = arg.account ? arg.account->human() : creatorAccount_.human();
     setTokens(jv, arg.assets);
     auto getBid = [&](auto const& bid) {
         if (std::holds_alternative<int>(bid))
@@ -824,8 +812,7 @@ AMM::expectAuctionSlot(auto&& cb) const
             Throw<std::runtime_error>("AMM::expectAuctionSlot");
         if (amm->isFieldPresent(sfAuctionSlot))
         {
-            auto const& auctionSlot =
-                static_cast<STObject const&>(amm->peekAtField(sfAuctionSlot));
+            auto const& auctionSlot = static_cast<STObject const&>(amm->peekAtField(sfAuctionSlot));
             if (auctionSlot.isFieldPresent(sfAccount))
             {
                 // This could fail in pre-fixInnerObjTemplate tests
@@ -834,11 +821,9 @@ AMM::expectAuctionSlot(auto&& cb) const
                 // to avoid the failure.
                 auto const slotFee = auctionSlot[~sfDiscountedFee].value_or(0);
                 auto const slotInterval = ammAuctionTimeSlot(
-                    env_.app().timeKeeper().now().time_since_epoch().count(),
-                    auctionSlot);
+                    env_.app().timeKeeper().now().time_since_epoch().count(), auctionSlot);
                 auto const slotPrice = auctionSlot[sfPrice].iou();
-                auto const authAccounts =
-                    auctionSlot.getFieldArray(sfAuthAccounts);
+                auto const authAccounts = auctionSlot.getFieldArray(sfAuthAccounts);
                 return cb(slotFee, slotInterval, slotPrice, authAccounts);
             }
         }

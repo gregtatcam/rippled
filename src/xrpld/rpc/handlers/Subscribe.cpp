@@ -1,6 +1,5 @@
 #include <xrpld/app/ledger/LedgerMaster.h>
 #include <xrpld/app/main/Application.h>
-#include <xrpld/app/misc/NetworkOPs.h>
 #include <xrpld/rpc/Context.h>
 #include <xrpld/rpc/RPCSub.h>
 #include <xrpld/rpc/Role.h>
@@ -12,6 +11,7 @@
 #include <xrpl/protocol/RPCErr.h>
 #include <xrpl/protocol/jss.h>
 #include <xrpl/resource/Fees.h>
+#include <xrpl/server/NetworkOPs.h>
 
 namespace xrpl {
 
@@ -63,8 +63,8 @@ doSubscribe(RPC::JsonContext& context)
                     strUsername,
                     strPassword,
                     context.app.logs());
-                ispSub = context.netOps.addRpcSub(
-                    strUrl, std::dynamic_pointer_cast<InfoSub>(rspSub));
+                ispSub =
+                    context.netOps.addRpcSub(strUrl, std::dynamic_pointer_cast<InfoSub>(rspSub));
             }
             catch (std::runtime_error& ex)
             {
@@ -110,8 +110,7 @@ doSubscribe(RPC::JsonContext& context)
             std::string streamName = it.asString();
             if (streamName == "server")
             {
-                context.netOps.subServer(
-                    ispSub, jvResult, context.role == Role::ADMIN);
+                context.netOps.subServer(ispSub, jvResult, context.role == Role::ADMIN);
             }
             else if (streamName == "ledger")
             {
@@ -196,8 +195,7 @@ doSubscribe(RPC::JsonContext& context)
         if (!id)
             return rpcError(rpcINVALID_PARAMS);
 
-        if (auto result = context.netOps.subAccountHistory(ispSub, *id);
-            result != rpcSUCCESS)
+        if (auto result = context.netOps.subAccountHistory(ispSub, *id); result != rpcSUCCESS)
         {
             return rpcError(result);
         }
@@ -205,8 +203,7 @@ doSubscribe(RPC::JsonContext& context)
         jvResult[jss::warning] =
             "account_history_tx_stream is an experimental feature and likely "
             "to be removed in the future";
-        JLOG(context.j.debug())
-            << "doSubscribe: account_history_tx_stream: " << toBase58(*id);
+        JLOG(context.j.debug()) << "doSubscribe: account_history_tx_stream: " << toBase58(*id);
     }
 
     if (context.params.isMember(jss::books))
@@ -216,10 +213,8 @@ doSubscribe(RPC::JsonContext& context)
 
         for (auto& j : context.params[jss::books])
         {
-            if (!j.isObject() || !j.isMember(jss::taker_pays) ||
-                !j.isMember(jss::taker_gets) ||
-                !j[jss::taker_pays].isObjectOrNull() ||
-                !j[jss::taker_gets].isObjectOrNull())
+            if (!j.isObject() || !j.isMember(jss::taker_pays) || !j.isMember(jss::taker_gets) ||
+                !j[jss::taker_pays].isObjectOrNull() || !j[jss::taker_gets].isObjectOrNull())
                 return rpcError(rpcINVALID_PARAMS);
 
             Book book;
@@ -252,8 +247,7 @@ doSubscribe(RPC::JsonContext& context)
             if (j.isMember(jss::domain))
             {
                 uint256 domain;
-                if (!j[jss::domain].isString() ||
-                    !domain.parseHex(j[jss::domain].asString()))
+                if (!j[jss::domain].isString() || !domain.parseHex(j[jss::domain].asString()))
                 {
                     return rpcError(rpcDOMAIN_MALFORMED);
                 }
@@ -272,8 +266,7 @@ doSubscribe(RPC::JsonContext& context)
             context.netOps.subBook(ispSub, book);
 
             // both_sides is deprecated.
-            bool const both =
-                (j.isMember(jss::both) && j[jss::both].asBool()) ||
+            bool const both = (j.isMember(jss::both) && j[jss::both].asBool()) ||
                 (j.isMember(jss::both_sides) && j[jss::both_sides].asBool());
 
             if (both)

@@ -1,5 +1,4 @@
-#ifndef XRPL_LEDGER_PAYMENTSANDBOX_H_INCLUDED
-#define XRPL_LEDGER_PAYMENTSANDBOX_H_INCLUDED
+#pragma once
 
 #include <xrpl/ledger/RawView.h>
 #include <xrpl/ledger/Sandbox.h>
@@ -157,8 +156,7 @@ public:
 
     PaymentSandbox(PaymentSandbox&&) = default;
 
-    PaymentSandbox(ReadView const* base, ApplyFlags flags)
-        : ApplyViewBase(base, flags)
+    PaymentSandbox(ReadView const* base, ApplyFlags flags) : ApplyViewBase(base, flags)
     {
     }
 
@@ -185,8 +183,7 @@ public:
     {
     }
 
-    explicit PaymentSandbox(PaymentSandbox* base)
-        : ApplyViewBase(base, base->flags()), ps_(base)
+    explicit PaymentSandbox(PaymentSandbox* base) : ApplyViewBase(base, base->flags()), ps_(base)
     {
     }
     /** @} */
@@ -229,14 +226,10 @@ public:
         std::int64_t origBalance) override;
 
     void
-    adjustOwnerCountHook(
-        AccountID const& account,
-        std::uint32_t cur,
-        std::uint32_t next) override;
+    adjustOwnerCountHook(AccountID const& account, std::uint32_t cur, std::uint32_t next) override;
 
     std::uint32_t
-    ownerCountHook(AccountID const& account, std::uint32_t count)
-        const override;
+    ownerCountHook(AccountID const& account, std::uint32_t count) const override;
 
     /** Apply changes to base view.
 
@@ -268,5 +261,3 @@ private:
 };
 
 }  // namespace xrpl
-
-#endif

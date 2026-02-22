@@ -1,10 +1,9 @@
-#include <xrpld/app/paths/detail/Steps.h>
-
 #include <xrpl/basics/contract.h>
 #include <xrpl/json/json_writer.h>
 #include <xrpl/ledger/ReadView.h>
 #include <xrpl/protocol/IOUAmount.h>
 #include <xrpl/protocol/XRPAmount.h>
+#include <xrpl/tx/paths/detail/Steps.h>
 
 #include <algorithm>
 
@@ -21,12 +20,10 @@ checkNear(IOUAmount const& expected, IOUAmount const& actual)
     if (actual.exponent() < -20)
         return true;
 
-    auto const a = (expected.exponent() < actual.exponent())
-        ? expected.mantissa() / 10
-        : expected.mantissa();
-    auto const b = (actual.exponent() < expected.exponent())
-        ? actual.mantissa() / 10
-        : actual.mantissa();
+    auto const a =
+        (expected.exponent() < actual.exponent()) ? expected.mantissa() / 10 : expected.mantissa();
+    auto const b =
+        (actual.exponent() < expected.exponent()) ? actual.mantissa() / 10 : actual.mantissa();
     if (a == b)
         return true;
 
@@ -111,8 +108,7 @@ toStep(
     {
         // LCOV_EXCL_START
         // should already be taken care of
-        JLOG(j.error())
-            << "Found offer/account payment step. Aborting payment strand.";
+        JLOG(j.error()) << "Found offer/account payment step. Aborting payment strand.";
         UNREACHABLE("xrpl::toStep : offer/account payment payment strand");
         return {temBAD_PATH, std::unique_ptr<Step>{}};
         // LCOV_EXCL_STOP
@@ -226,8 +222,7 @@ toStrand(
         if (hasAccount && isXRP(pe.getAccountID()))
             return {temBAD_PATH, Strand{}};
 
-        if (hasCurrency && hasIssuer &&
-            isXRP(pe.getCurrency()) != isXRP(pe.getIssuerID()))
+        if (hasCurrency && hasIssuer && isXRP(pe.getCurrency()) != isXRP(pe.getIssuerID()))
             return {temBAD_PATH, Strand{}};
 
         if (hasIssuer && (pe.getIssuerID() == noAccount()))
@@ -488,8 +483,7 @@ toStrand(
                     else
                     {
                         // Last step. insert xrp endpoint step
-                        auto msr =
-                            make_XRPEndpointStep(ctx(), next->getAccountID());
+                        auto msr = make_XRPEndpointStep(ctx(), next->getAccountID());
                         if (msr.first != tesSUCCESS)
                             return {msr.first, Strand{}};
                         result.push_back(std::move(msr.second));
@@ -617,8 +611,7 @@ toStrands(
     result.reserve(1 + paths.size());
     // Insert the strand into result if it is not already part of the vector
     auto insert = [&](Strand s) {
-        bool const hasStrand =
-            std::find(result.begin(), result.end(), s) != result.end();
+        bool const hasStrand = std::find(result.begin(), result.end(), s) != result.end();
 
         if (!hasStrand)
             result.emplace_back(std::move(s));
@@ -653,8 +646,7 @@ toStrands(
         else if (strand.empty())
         {
             JLOG(j.trace()) << "toStrand failed";
-            Throw<FlowException>(
-                tefEXCEPTION, "toStrand returned tes & empty strand");
+            Throw<FlowException>(tefEXCEPTION, "toStrand returned tes & empty strand");
         }
         else
         {
@@ -698,8 +690,7 @@ toStrands(
         else if (strand.empty())
         {
             JLOG(j.trace()) << "toStrand failed";
-            Throw<FlowException>(
-                tefEXCEPTION, "toStrand returned tes & empty strand");
+            Throw<FlowException>(tefEXCEPTION, "toStrand returned tes & empty strand");
         }
         else
         {

@@ -40,8 +40,7 @@ ammLPTCurrency(Asset const& asset1, Asset const& asset2)
         maxA.value());
     Currency currency;
     *currency.begin() = AMMCurrencyCode;
-    std::copy(
-        hash.begin(), hash.begin() + currency.size() - 1, currency.begin() + 1);
+    std::copy(hash.begin(), hash.begin() + currency.size() - 1, currency.begin() + 1);
     return currency;
 }
 
@@ -114,12 +113,10 @@ ammAuctionTimeSlot(std::uint64_t current, STObject const& auctionSlot)
     // but check just to be safe
     auto const expiration = auctionSlot[sfExpiration];
     XRPL_ASSERT(
-        expiration >= TOTAL_TIME_SLOT_SECS,
-        "xrpl::ammAuctionTimeSlot : minimum expiration");
+        expiration >= TOTAL_TIME_SLOT_SECS, "xrpl::ammAuctionTimeSlot : minimum expiration");
     if (expiration >= TOTAL_TIME_SLOT_SECS)
     {
-        if (auto const start = expiration - TOTAL_TIME_SLOT_SECS;
-            current >= start)
+        if (auto const start = expiration - TOTAL_TIME_SLOT_SECS; current >= start)
         {
             if (auto const diff = current - start; diff < TOTAL_TIME_SLOT_SECS)
                 return diff / AUCTION_SLOT_INTERVAL_DURATION;

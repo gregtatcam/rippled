@@ -83,8 +83,7 @@ IOU::operator()(epsilon_t) const
 PrettyAmount
 IOU::operator()(xrpl::detail::epsilon_multiple m) const
 {
-    return {
-        STAmount(issue(), safe_cast<std::uint64_t>(m.n), -81), account.name()};
+    return {STAmount(issue(), safe_cast<std::uint64_t>(m.n), -81), account.name()};
 }
 
 std::ostream&

@@ -49,9 +49,7 @@ AMMOffer<TIn, TOut>::amount() const
 
 template <StepAmount TIn, StepAmount TOut>
 void
-AMMOffer<TIn, TOut>::consume(
-    ApplyView& view,
-    TAmounts<TIn, TOut> const& consumed)
+AMMOffer<TIn, TOut>::consume(ApplyView& view, TAmounts<TIn, TOut> const& consumed)
 {
     // Consumed offer must be less or equal to the original
     if (consumed.in > amounts_.in || consumed.out > amounts_.out)
@@ -92,10 +90,8 @@ AMMOffer<TIn, TOut>::limitOut(
 
 template <StepAmount TIn, StepAmount TOut>
 TAmounts<TIn, TOut>
-AMMOffer<TIn, TOut>::limitIn(
-    TAmounts<TIn, TOut> const& offerAmount,
-    TIn const& limit,
-    bool roundUp) const
+AMMOffer<TIn, TOut>::limitIn(TAmounts<TIn, TOut> const& offerAmount, TIn const& limit, bool roundUp)
+    const
 {
     // See the comments above in limitOut().
     if (ammLiquidity_.multiPath())
@@ -115,45 +111,36 @@ AMMOffer<TIn, TOut>::getQualityFunc() const
 {
     if (ammLiquidity_.multiPath())
         return QualityFunction{quality(), QualityFunction::CLOBLikeTag{}};
-    return QualityFunction{
-        balances_, ammLiquidity_.tradingFee(), QualityFunction::AMMTag{}};
+    return QualityFunction{balances_, ammLiquidity_.tradingFee(), QualityFunction::AMMTag{}};
 }
 
 template <StepAmount TIn, StepAmount TOut>
 bool
-AMMOffer<TIn, TOut>::checkInvariant(
-    TAmounts<TIn, TOut> const& consumed,
-    beast::Journal j) const
+AMMOffer<TIn, TOut>::checkInvariant(TAmounts<TIn, TOut> const& consumed, beast::Journal j) const
 {
     if (consumed.in > amounts_.in || consumed.out > amounts_.out)
     {
-        JLOG(j.error()) << "AMMOffer::checkInvariant failed: consumed "
-                        << to_string(consumed.in) << " "
-                        << to_string(consumed.out) << " amounts "
-                        << to_string(amounts_.in) << " "
-                        << to_string(amounts_.out);
+        JLOG(j.error()) << "AMMOffer::checkInvariant failed: consumed " << to_string(consumed.in)
+                        << " " << to_string(consumed.out) << " amounts " << to_string(amounts_.in)
+                        << " " << to_string(amounts_.out);
 
         return false;
     }
 
     Number const product = balances_.in * balances_.out;
-    auto const newBalances = TAmounts<TIn, TOut>{
-        balances_.in + consumed.in, balances_.out - consumed.out};
+    auto const newBalances =
+        TAmounts<TIn, TOut>{balances_.in + consumed.in, balances_.out - consumed.out};
     Number const newProduct = newBalances.in * newBalances.out;
 
-    if (newProduct >= product ||
-        withinRelativeDistance(product, newProduct, Number{1, -7}))
+    if (newProduct >= product || withinRelativeDistance(product, newProduct, Number{1, -7}))
         return true;
 
-    JLOG(j.error()) << "AMMOffer::checkInvariant failed: balances "
-                    << to_string(balances_.in) << " "
-                    << to_string(balances_.out) << " new balances "
-                    << to_string(newBalances.in) << " "
-                    << to_string(newBalances.out) << " product/newProduct "
-                    << product << " " << newProduct << " diff "
-                    << (product != Number{0}
-                            ? to_string((product - newProduct) / product)
-                            : "undefined");
+    JLOG(j.error()) << "AMMOffer::checkInvariant failed: balances " << to_string(balances_.in)
+                    << " " << to_string(balances_.out) << " new balances "
+                    << to_string(newBalances.in) << " " << to_string(newBalances.out)
+                    << " product/newProduct " << product << " " << newProduct << " diff "
+                    << (product != Number{0} ? to_string((product - newProduct) / product)
+                                             : "undefined");
     return false;
 }
 

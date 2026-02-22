@@ -1,5 +1,4 @@
-#ifndef XRPL_TEST_JTX_MPT_H_INCLUDED
-#define XRPL_TEST_JTX_MPT_H_INCLUDED
+#pragma once
 
 #include <test/jtx/Account.h>
 #include <test/jtx/Env.h>
@@ -87,8 +86,7 @@ struct MPTCreate
     std::optional<std::vector<Account>> authorize = std::nullopt;
     // pay if seated. if authorize is not seated then authorize.
     // if empty vector then pay to either authorize or all holders.
-    std::optional<std::pair<std::vector<Account>, std::uint64_t>> pay =
-        std::nullopt;
+    std::optional<std::pair<std::vector<Account>, std::uint64_t>> pay = std::nullopt;
     std::optional<std::uint32_t> flags = {0};
     std::optional<std::uint32_t> mutableFlags = std::nullopt;
     bool authHolder = false;
@@ -184,19 +182,19 @@ public:
     create(MPTCreate const& arg = MPTCreate{});
 
     static Json::Value
-    createjv(MPTCreate const& arg = MPTCreate{});
+    createJV(MPTCreate const& arg = MPTCreate{});
 
     void
     destroy(MPTDestroy const& arg = MPTDestroy{});
 
     static Json::Value
-    destroyjv(MPTDestroy const& arg = MPTDestroy{});
+    destroyJV(MPTDestroy const& arg = MPTDestroy{});
 
     void
     authorize(MPTAuthorize const& arg = MPTAuthorize{});
 
     static Json::Value
-    authorizejv(MPTAuthorize const& arg = MPTAuthorize{});
+    authorizeJV(MPTAuthorize const& arg = MPTAuthorize{});
 
     void
     authorizeHolders(Holders const& holders);
@@ -205,22 +203,20 @@ public:
     set(MPTSet const& set = {});
 
     static Json::Value
-    setjv(MPTSet const& set = {});
+    setJV(MPTSet const& set = {});
 
     [[nodiscard]] bool
     checkDomainID(std::optional<uint256> expected) const;
 
     [[nodiscard]] bool
-    checkMPTokenAmount(Account const& holder, std::int64_t expectedAmount)
-        const;
+    checkMPTokenAmount(Account const& holder, std::int64_t expectedAmount) const;
 
     [[nodiscard]] bool
     checkMPTokenOutstandingAmount(std::int64_t expectedAmount) const;
 
     [[nodiscard]] bool
-    checkFlags(
-        uint32_t const expectedFlags,
-        std::optional<Account> const& holder = std::nullopt) const;
+    checkFlags(uint32_t const expectedFlags, std::optional<Account> const& holder = std::nullopt)
+        const;
 
     [[nodiscard]] bool
     checkMetadata(std::string const& metadata) const;
@@ -295,10 +291,7 @@ private:
     TER
     submit(A const& arg, Json::Value const& jv)
     {
-        env_(
-            jv,
-            txflags(arg.flags.value_or(0)),
-            ter(arg.err.value_or(tesSUCCESS)));
+        env_(jv, txflags(arg.flags.value_or(0)), ter(arg.err.value_or(tesSUCCESS)));
         auto const err = env_.ter();
         if (close_)
             env_.close();
@@ -322,5 +315,3 @@ private:
 }  // namespace jtx
 }  // namespace test
 }  // namespace xrpl
-
-#endif

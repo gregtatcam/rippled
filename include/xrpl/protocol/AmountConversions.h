@@ -1,5 +1,4 @@
-#ifndef XRPL_PROTOCOL_AMOUNTCONVERSION_H_INCLUDED
-#define XRPL_PROTOCOL_AMOUNTCONVERSION_H_INCLUDED
+#pragma once
 
 #include <xrpl/protocol/IOUAmount.h>
 #include <xrpl/protocol/Protocol.h>
@@ -72,8 +71,7 @@ toAmount<IOUAmount>(STAmount const& amt)
         amt.mantissa() < std::numeric_limits<std::int64_t>::max(),
         "xrpl::toAmount<IOUAmount> : maximum mantissa");
     bool const isNeg = amt.negative();
-    std::int64_t const sMant =
-        isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
+    std::int64_t const sMant = isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
 
     XRPL_ASSERT(!isXRP(amt), "xrpl::toAmount<IOUAmount> : is not XRP");
     return IOUAmount(sMant, amt.exponent());
@@ -87,8 +85,7 @@ toAmount<XRPAmount>(STAmount const& amt)
         amt.mantissa() < std::numeric_limits<std::int64_t>::max(),
         "xrpl::toAmount<XRPAmount> : maximum mantissa");
     bool const isNeg = amt.negative();
-    std::int64_t const sMant =
-        isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
+    std::int64_t const sMant = isNeg ? -std::int64_t(amt.mantissa()) : amt.mantissa();
 
     XRPL_ASSERT(isXRP(amt), "xrpl::toAmount<XRPAmount> : is XRP");
     return XRPAmount(sMant);
@@ -255,5 +252,3 @@ get(STAmount const& a)
 }
 
 }  // namespace xrpl
-
-#endif

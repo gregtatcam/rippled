@@ -158,20 +158,20 @@ doGatewayBalances(RPC::JsonContext& context)
                     }
                 }
 
-                auto rs = PathFindTrustLine::makeItem(accountID, sle);
+            auto rs = PathFindTrustLine::makeItem(accountID, sle);
 
-                if (!rs)
-                    return;
+            if (!rs)
+                return;
 
-                int balSign = rs->getBalance().signum();
-                if (balSign == 0)
-                    return;
+            int balSign = rs->getBalance().signum();
+            if (balSign == 0)
+                return;
 
-                auto const& peer = rs->getAccountIDPeer();
+            auto const& peer = rs->getAccountIDPeer();
 
-                // Here, a negative balance means the cold wallet owes (normal)
-                // A positive balance means the cold wallet has an asset
-                // (unusual)
+            // Here, a negative balance means the cold wallet owes (normal)
+            // A positive balance means the cold wallet has an asset
+            // (unusual)
 
                 if (hotWallets.count(peer) > 0)
                 {

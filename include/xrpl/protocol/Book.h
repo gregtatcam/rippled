@@ -1,5 +1,4 @@
-#ifndef XRPL_PROTOCOL_BOOK_H_INCLUDED
-#define XRPL_PROTOCOL_BOOK_H_INCLUDED
+#pragma once
 
 #include <xrpl/basics/CountedObject.h>
 #include <xrpl/basics/base_uint.h>
@@ -60,8 +59,7 @@ reversed(Book const& book);
 [[nodiscard]] inline constexpr bool
 operator==(Book const& lhs, Book const& rhs)
 {
-    return (lhs.in == rhs.in) && (lhs.out == rhs.out) &&
-        (lhs.domain == rhs.domain);
+    return (lhs.in == rhs.in) && (lhs.out == rhs.out) && (lhs.domain == rhs.domain);
 }
 /** @} */
 
@@ -94,15 +92,12 @@ operator<=>(Book const& lhs, Book const& rhs)
 namespace std {
 
 template <>
-struct hash<xrpl::Issue>
-    : private boost::base_from_member<std::hash<xrpl::Currency>, 0>,
-      private boost::base_from_member<std::hash<xrpl::AccountID>, 1>
+struct hash<xrpl::Issue> : private boost::base_from_member<std::hash<xrpl::Currency>, 0>,
+                           private boost::base_from_member<std::hash<xrpl::AccountID>, 1>
 {
 private:
-    using currency_hash_type =
-        boost::base_from_member<std::hash<xrpl::Currency>, 0>;
-    using issuer_hash_type =
-        boost::base_from_member<std::hash<xrpl::AccountID>, 1>;
+    using currency_hash_type = boost::base_from_member<std::hash<xrpl::Currency>, 0>;
+    using issuer_hash_type = boost::base_from_member<std::hash<xrpl::AccountID>, 1>;
 
 public:
     hash() = default;
@@ -115,8 +110,7 @@ public:
     {
         value_type result(currency_hash_type::member(value.currency));
         if (!isXRP(value.currency))
-            boost::hash_combine(
-                result, issuer_hash_type::member(value.account));
+            boost::hash_combine(result, issuer_hash_type::member(value.account));
         return result;
     }
 };
@@ -247,5 +241,3 @@ struct hash<xrpl::Book> : std::hash<xrpl::Book>
 };
 
 }  // namespace boost
-
-#endif

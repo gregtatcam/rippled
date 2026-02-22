@@ -63,76 +63,43 @@ struct STNumber_test : public beast::unit_test::suite
         }
 
         {
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, Json::Value(42)) ==
-                STNumber(sfNumber, 42));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, Json::Value(-42)) ==
-                STNumber(sfNumber, -42));
+            BEAST_EXPECT(numberFromJson(sfNumber, Json::Value(42)) == STNumber(sfNumber, 42));
+            BEAST_EXPECT(numberFromJson(sfNumber, Json::Value(-42)) == STNumber(sfNumber, -42));
 
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, Json::UInt(42)) ==
-                STNumber(sfNumber, 42));
+            BEAST_EXPECT(numberFromJson(sfNumber, Json::UInt(42)) == STNumber(sfNumber, 42));
 
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-123") == STNumber(sfNumber, -123));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-123") == STNumber(sfNumber, -123));
 
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "123") == STNumber(sfNumber, 123));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-123") == STNumber(sfNumber, -123));
+            BEAST_EXPECT(numberFromJson(sfNumber, "123") == STNumber(sfNumber, 123));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-123") == STNumber(sfNumber, -123));
 
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "3.14") ==
-                STNumber(sfNumber, Number(314, -2)));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-3.14") ==
-                STNumber(sfNumber, -Number(314, -2)));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "3.14e2") == STNumber(sfNumber, 314));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-3.14e2") ==
-                STNumber(sfNumber, -314));
+            BEAST_EXPECT(numberFromJson(sfNumber, "3.14") == STNumber(sfNumber, Number(314, -2)));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-3.14") == STNumber(sfNumber, -Number(314, -2)));
+            BEAST_EXPECT(numberFromJson(sfNumber, "3.14e2") == STNumber(sfNumber, 314));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-3.14e2") == STNumber(sfNumber, -314));
 
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "1000e-2") == STNumber(sfNumber, 10));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-1000e-2") ==
-                STNumber(sfNumber, -10));
+            BEAST_EXPECT(numberFromJson(sfNumber, "1000e-2") == STNumber(sfNumber, 10));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-1000e-2") == STNumber(sfNumber, -10));
 
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "0") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "0.0") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "0.000") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-0") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-0.0") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-0.000") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "0e6") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "0.0e6") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "0.000e6") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-0e6") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-0.0e6") == STNumber(sfNumber, 0));
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, "-0.000e6") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "0") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "0.0") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "0.000") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-0") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-0.0") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-0.000") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "0e6") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "0.0e6") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "0.000e6") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-0e6") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-0.0e6") == STNumber(sfNumber, 0));
+            BEAST_EXPECT(numberFromJson(sfNumber, "-0.000e6") == STNumber(sfNumber, 0));
 
             {
                 NumberRoundModeGuard mg(Number::towards_zero);
                 // maxint64 9,223,372,036,854,775,807
-                auto const maxInt =
-                    std::to_string(std::numeric_limits<std::int64_t>::max());
+                auto const maxInt = std::to_string(std::numeric_limits<std::int64_t>::max());
                 // minint64 -9,223,372,036,854,775,808
-                auto const minInt =
-                    std::to_string(std::numeric_limits<std::int64_t>::min());
+                auto const minInt = std::to_string(std::numeric_limits<std::int64_t>::min());
                 if (Number::getMantissaScale() == MantissaRange::small)
                 {
                     BEAST_EXPECT(
@@ -146,40 +113,29 @@ struct STNumber_test : public beast::unit_test::suite
                 {
                     BEAST_EXPECT(
                         numberFromJson(sfNumber, maxInt) ==
-                        STNumber(
-                            sfNumber, Number{9'223'372'036'854'775'807, 0}));
+                        STNumber(sfNumber, Number{9'223'372'036'854'775'807, 0}));
                     BEAST_EXPECT(
                         numberFromJson(sfNumber, minInt) ==
                         STNumber(
                             sfNumber,
-                            Number{
-                                true,
-                                9'223'372'036'854'775'808ULL,
-                                0,
-                                Number::normalized{}}));
+                            Number{true, 9'223'372'036'854'775'808ULL, 0, Number::normalized{}}));
                 }
             }
 
             constexpr auto imin = std::numeric_limits<int>::min();
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, imin) ==
-                STNumber(sfNumber, Number(imin, 0)));
+            BEAST_EXPECT(numberFromJson(sfNumber, imin) == STNumber(sfNumber, Number(imin, 0)));
             BEAST_EXPECT(
                 numberFromJson(sfNumber, std::to_string(imin)) ==
                 STNumber(sfNumber, Number(imin, 0)));
 
             constexpr auto imax = std::numeric_limits<int>::max();
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, imax) ==
-                STNumber(sfNumber, Number(imax, 0)));
+            BEAST_EXPECT(numberFromJson(sfNumber, imax) == STNumber(sfNumber, Number(imax, 0)));
             BEAST_EXPECT(
                 numberFromJson(sfNumber, std::to_string(imax)) ==
                 STNumber(sfNumber, Number(imax, 0)));
 
             constexpr auto umax = std::numeric_limits<unsigned int>::max();
-            BEAST_EXPECT(
-                numberFromJson(sfNumber, umax) ==
-                STNumber(sfNumber, Number(umax, 0)));
+            BEAST_EXPECT(numberFromJson(sfNumber, umax) == STNumber(sfNumber, Number(umax, 0)));
             BEAST_EXPECT(
                 numberFromJson(sfNumber, std::to_string(umax)) ==
                 STNumber(sfNumber, Number(umax, 0)));

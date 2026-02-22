@@ -112,16 +112,14 @@ class PaymentSandbox_test : public beast::unit_test::suite
                 BEAST_EXPECT(r == tesSUCCESS);
             }
             BEAST_EXPECT(
-                accountHolds(
-                    av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount + toCredit);
             {
                 auto r = accountSend(av, alice, gw1, toDebit, j);
                 BEAST_EXPECT(r == tesSUCCESS);
             }
             BEAST_EXPECT(
-                accountHolds(
-                    av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount + toCredit - toDebit);
         }
 
@@ -135,14 +133,12 @@ class PaymentSandbox_test : public beast::unit_test::suite
 
             rippleCredit(av, gw1, alice, toCredit, true, j);
             BEAST_EXPECT(
-                accountHolds(
-                    av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount + toCredit);
 
             rippleCredit(av, alice, gw1, toDebit, true, j);
             BEAST_EXPECT(
-                accountHolds(
-                    av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(av, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount + toCredit - toDebit);
         }
 
@@ -160,8 +156,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
                 BEAST_EXPECT(r == tesSUCCESS);
             }
             BEAST_EXPECT(
-                accountHolds(
-                    pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount);
 
             {
@@ -169,8 +164,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
                 BEAST_EXPECT(r == tesSUCCESS);
             }
             BEAST_EXPECT(
-                accountHolds(
-                    pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount - toDebit);
         }
 
@@ -185,8 +179,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
 
             rippleCredit(pv, gw1, alice, toCredit, true, j);
             BEAST_EXPECT(
-                accountHolds(
-                    pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount);
         }
 
@@ -201,8 +194,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
 
             BEAST_EXPECT(redeemIOU(pv, alice, toDebit, iss, j) == tesSUCCESS);
             BEAST_EXPECT(
-                accountHolds(
-                    pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount - toDebit);
         }
 
@@ -217,8 +209,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
 
             BEAST_EXPECT(issueIOU(pv, alice, toCredit, iss, j) == tesSUCCESS);
             BEAST_EXPECT(
-                accountHolds(
-                    pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount);
         }
 
@@ -236,32 +227,21 @@ class PaymentSandbox_test : public beast::unit_test::suite
                 BEAST_EXPECT(r == tesSUCCESS);
             }
             BEAST_EXPECT(
-                accountHolds(
-                    pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount);
 
             {
                 PaymentSandbox pv2(&pv);
                 BEAST_EXPECT(
-                    accountHolds(
-                        pv2,
-                        alice,
-                        iss.currency,
-                        iss.account,
-                        fhIGNORE_FREEZE,
-                        j) == startingAmount);
+                    accountHolds(pv2, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                    startingAmount);
                 {
                     auto r = accountSend(pv2, gw1, alice, toCredit, j);
                     BEAST_EXPECT(r == tesSUCCESS);
                 }
                 BEAST_EXPECT(
-                    accountHolds(
-                        pv2,
-                        alice,
-                        iss.currency,
-                        iss.account,
-                        fhIGNORE_FREEZE,
-                        j) == startingAmount);
+                    accountHolds(pv2, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                    startingAmount);
             }
 
             {
@@ -269,8 +249,7 @@ class PaymentSandbox_test : public beast::unit_test::suite
                 BEAST_EXPECT(r == tesSUCCESS);
             }
             BEAST_EXPECT(
-                accountHolds(
-                    pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
+                accountHolds(pv, alice, iss.currency, iss.account, fhIGNORE_FREEZE, j) ==
                 startingAmount - toDebit);
         }
     }
@@ -294,17 +273,9 @@ class PaymentSandbox_test : public beast::unit_test::suite
 
         auto const issue = USD;
         STAmount tinyAmt(
-            issue,
-            STAmount::cMinValue,
-            STAmount::cMinOffset + 1,
-            false,
-            STAmount::unchecked{});
+            issue, STAmount::cMinValue, STAmount::cMinOffset + 1, false, STAmount::unchecked{});
         STAmount hugeAmt(
-            issue,
-            STAmount::cMaxValue,
-            STAmount::cMaxOffset - 1,
-            false,
-            STAmount::unchecked{});
+            issue, STAmount::cMaxValue, STAmount::cMaxOffset - 1, false, STAmount::unchecked{});
 
         ApplyViewImpl av(&*env.current(), tapNONE);
         PaymentSandbox pv(&av);
@@ -318,11 +289,10 @@ class PaymentSandbox_test : public beast::unit_test::suite
         testcase("Reserve");
         using namespace jtx;
 
-        auto accountFundsXRP = [](ReadView const& view,
-                                  AccountID const& id,
-                                  beast::Journal j) -> XRPAmount {
-            return toAmount<XRPAmount>(accountHolds(
-                view, id, xrpCurrency(), xrpAccount(), fhZERO_IF_FROZEN, j));
+        auto accountFundsXRP =
+            [](ReadView const& view, AccountID const& id, beast::Journal j) -> XRPAmount {
+            return toAmount<XRPAmount>(
+                accountHolds(view, id, xrpCurrency(), xrpAccount(), fhZERO_IF_FROZEN, j));
         };
 
         auto reserve = [](jtx::Env& env, std::uint32_t count) -> XRPAmount {
@@ -343,17 +313,14 @@ class PaymentSandbox_test : public beast::unit_test::suite
             // zero (there was a bug that caused her funds to become negative).
 
             {
-                auto r =
-                    accountSend(sb, xrpAccount(), alice, XRP(100), env.journal);
+                auto r = accountSend(sb, xrpAccount(), alice, XRP(100), env.journal);
                 BEAST_EXPECT(r == tesSUCCESS);
             }
             {
-                auto r =
-                    accountSend(sb, alice, xrpAccount(), XRP(100), env.journal);
+                auto r = accountSend(sb, alice, xrpAccount(), XRP(100), env.journal);
                 BEAST_EXPECT(r == tesSUCCESS);
             }
-            BEAST_EXPECT(
-                accountFundsXRP(sb, alice, env.journal) == beast::zero);
+            BEAST_EXPECT(accountFundsXRP(sb, alice, env.journal) == beast::zero);
         }
     }
 

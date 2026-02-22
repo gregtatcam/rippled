@@ -1,4 +1,3 @@
-#include <xrpld/app/misc/NetworkOPs.h>
 #include <xrpld/rpc/Context.h>
 #include <xrpld/rpc/Role.h>
 #include <xrpld/rpc/detail/RPCHelpers.h>
@@ -7,6 +6,7 @@
 #include <xrpl/protocol/ErrorCodes.h>
 #include <xrpl/protocol/RPCErr.h>
 #include <xrpl/protocol/jss.h>
+#include <xrpl/server/NetworkOPs.h>
 
 namespace xrpl {
 
@@ -135,9 +135,8 @@ doUnsubscribe(RPC::JsonContext& context)
         }
         context.netOps.unsubAccountHistory(ispSub, *id, stopHistoryOnly);
 
-        JLOG(context.j.debug())
-            << "doUnsubscribe: account_history_tx_stream: " << toBase58(*id)
-            << " stopHistoryOnly=" << (stopHistoryOnly ? "true" : "false");
+        JLOG(context.j.debug()) << "doUnsubscribe: account_history_tx_stream: " << toBase58(*id)
+                                << " stopHistoryOnly=" << (stopHistoryOnly ? "true" : "false");
     }
 
     if (context.params.isMember(jss::books))
@@ -147,10 +146,8 @@ doUnsubscribe(RPC::JsonContext& context)
 
         for (auto& jv : context.params[jss::books])
         {
-            if (!jv.isObject() || !jv.isMember(jss::taker_pays) ||
-                !jv.isMember(jss::taker_gets) ||
-                !jv[jss::taker_pays].isObjectOrNull() ||
-                !jv[jss::taker_gets].isObjectOrNull())
+            if (!jv.isObject() || !jv.isMember(jss::taker_pays) || !jv.isMember(jss::taker_gets) ||
+                !jv[jss::taker_pays].isObjectOrNull() || !jv[jss::taker_gets].isObjectOrNull())
             {
                 return rpcError(rpcINVALID_PARAMS);
             }
@@ -176,8 +173,7 @@ doUnsubscribe(RPC::JsonContext& context)
             if (jv.isMember(jss::domain))
             {
                 uint256 domain;
-                if (!jv[jss::domain].isString() ||
-                    !domain.parseHex(jv[jss::domain].asString()))
+                if (!jv[jss::domain].isString() || !domain.parseHex(jv[jss::domain].asString()))
                 {
                     return rpcError(rpcDOMAIN_MALFORMED);
                 }

@@ -1,5 +1,4 @@
-#ifndef XRPL_PROTOCOL_STPATHSET_H_INCLUDED
-#define XRPL_PROTOCOL_STPATHSET_H_INCLUDED
+#pragma once
 
 #include <xrpl/basics/CountedObject.h>
 #include <xrpl/beast/utility/instrumentation.h>
@@ -28,8 +27,7 @@ class STPathElement final : public CountedObject<STPathElement>
 public:
     enum Type {
         typeNone = 0x00,
-        typeAccount =
-            0x01,  // Rippling through an account (vs taking an offer).
+        typeAccount = 0x01,   // Rippling through an account (vs taking an offer).
         typeCurrency = 0x10,  // Currency follows.
         typeIssuer = 0x20,    // Issuer follows.
         typeMPT = 0x40,       // MPT follows.
@@ -256,8 +254,7 @@ inline STPathElement::STPathElement(
         mAccountID = *account;
         mType |= typeAccount;
         XRPL_ASSERT(
-            mAccountID != noAccount(),
-            "xrpl::STPathElement::STPathElement : account is set");
+            mAccountID != noAccount(), "xrpl::STPathElement::STPathElement : account is set");
     }
 
     if (asset)
@@ -270,9 +267,7 @@ inline STPathElement::STPathElement(
     {
         mIssuerID = *issuer;
         mType |= typeIssuer;
-        XRPL_ASSERT(
-            mIssuerID != noAccount(),
-            "xrpl::STPathElement::STPathElement : issuer is set");
+        XRPL_ASSERT(mIssuerID != noAccount(), "xrpl::STPathElement::STPathElement : issuer is set");
     }
 
     hash_value_ = get_hash(*this);
@@ -550,5 +545,3 @@ STPathSet::emplace_back(Args&&... args)
 }
 
 }  // namespace xrpl
-
-#endif

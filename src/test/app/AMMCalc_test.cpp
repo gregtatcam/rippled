@@ -1,8 +1,7 @@
 #include <test/jtx.h>
 
-#include <xrpld/app/misc/AMMHelpers.h>
-
 #include <xrpl/protocol/Quality.h>
+#include <xrpl/tx/transactors/AMM/AMMHelpers.h>
 
 #include <boost/format.hpp>
 #include <boost/regex.hpp>
@@ -24,8 +23,8 @@ class AMMCalc_test : public beast::unit_test::suite
 {
     using token_iter = boost::sregex_token_iterator;
     using steps = std::vector<std::pair<Amounts, bool>>;
-    using trates = std::map<std::string, std::uint32_t>;
-    using swapargs = std::tuple<steps, STAmount, trates, std::uint32_t>;
+    using transfer_rates = std::map<std::string, std::uint32_t>;
+    using swapargs = std::tuple<steps, STAmount, transfer_rates, std::uint32_t>;
     jtx::Account const gw{jtx::Account("gw")};
     token_iter const end_;
 
@@ -102,10 +101,10 @@ class AMMCalc_test : public beast::unit_test::suite
         return {{{*a1, *a2}, amm}};
     }
 
-    std::optional<trates>
+    std::optional<transfer_rates>
     getTransferRate(token_iter& p)
     {
-        trates rates{};
+        transfer_rates rates{};
         if (p == end_)
             return rates;
         std::string str = *p;
@@ -116,8 +115,8 @@ class AMMCalc_test : public beast::unit_test::suite
         {
             if (auto const rate = getRate(p++))
             {
-                auto const [currency, trate, delimited] = *rate;
-                rates[currency] = trate;
+                auto const [currency, transferRate, delimited] = *rate;
+                rates[currency] = transferRate;
                 if (delimited)
                     break;
             }
@@ -181,7 +180,7 @@ class AMMCalc_test : public beast::unit_test::suite
         auto const vp = std::get<steps>(args);
         STAmount sout = std::get<STAmount>(args);
         auto const fee = std::get<std::uint32_t>(args);
-        auto const rates = std::get<trates>(args);
+        auto const rates = std::get<transfer_rates>(args);
         STAmount resultOut = sout;
         STAmount resultIn{};
         STAmount sin{};
@@ -196,7 +195,7 @@ class AMMCalc_test : public beast::unit_test::suite
         sin = sout;
         for (auto it = vp.rbegin(); it != vp.rend(); ++it)
         {
-            sout = mulratio(sin, trate(sin), QUALITY_ONE, true);
+            sout = mulratio(sin, transferRate(sin), QUALITY_ONE, true);
             auto const [amts, amm] = *it;
             // assume no amm limit
             if (amm)
@@ -223,7 +222,7 @@ class AMMCalc_test : public beast::unit_test::suite
         for (int i = limitingStep + 1; i < vp.size(); ++i)
         {
             auto const [amts, amm] = vp[i];
-            sin = mulratio(sin, QUALITY_ONE, trate(sin), false);
+            sin = mulratio(sin, QUALITY_ONE, transferRate(sin), false);
             if (amm)
             {
                 sout = swapAssetIn(amts, sin, fee);
@@ -236,8 +235,7 @@ class AMMCalc_test : public beast::unit_test::suite
             sin = sout;
             resultOut = sout;
         }
-        std::cout << "in: " << toString(resultIn)
-                  << " out: " << toString(resultOut) << std::endl;
+        std::cout << "in: " << toString(resultIn) << " out: " << toString(resultOut) << std::endl;
     }
 
     void
@@ -246,7 +244,7 @@ class AMMCalc_test : public beast::unit_test::suite
         auto const vp = std::get<steps>(args);
         STAmount sin = std::get<STAmount>(args);
         auto const fee = std::get<std::uint32_t>(args);
-        auto const rates = std::get<trates>(args);
+        auto const rates = std::get<transfer_rates>(args);
         STAmount resultIn = sin;
         STAmount resultOut{};
         STAmount sout{};
@@ -261,11 +259,8 @@ class AMMCalc_test : public beast::unit_test::suite
         for (auto it = vp.begin(); it != vp.end(); ++it)
         {
             auto const [amts, amm] = *it;
-            sin = mulratio(
-                sin,
-                QUALITY_ONE,
-                trate(sin),
-                false);  // out of the next step
+            sin = mulratio(sin, QUALITY_ONE, transferRate(sin),
+                           false);  // out of the next step
             // assume no amm limit
             if (amm)
             {
@@ -290,7 +285,7 @@ class AMMCalc_test : public beast::unit_test::suite
         // swap out if limiting step
         for (int i = limitingStep - 1; i >= 0; --i)
         {
-            sout = mulratio(sin, trate(sin), QUALITY_ONE, false);
+            sout = mulratio(sin, transferRate(sin), QUALITY_ONE, false);
             auto const [amts, amm] = vp[i];
             if (amm)
             {
@@ -303,9 +298,8 @@ class AMMCalc_test : public beast::unit_test::suite
             }
             resultIn = sin;
         }
-        resultOut = mulratio(resultOut, QUALITY_ONE, trate(resultOut), true);
-        std::cout << "in: " << toString(resultIn)
-                  << " out: " << toString(resultOut) << std::endl;
+        resultOut = mulratio(resultOut, QUALITY_ONE, transferRate(resultOut), true);
+        std::cout << "in: " << toString(resultIn) << " out: " << toString(resultOut) << std::endl;
     }
 
     void
@@ -379,11 +373,8 @@ class AMMCalc_test : public beast::unit_test::suite
                 {
                     Account const amm("amm");
                     auto const LPT = amm["LPT"];
-                    std::cout
-                        << to_string(
-                               ammLPTokens(pool->first.in, pool->first.out, LPT)
-                                   .iou())
-                        << std::endl;
+                    std::cout << to_string(ammLPTokens(pool->first.in, pool->first.out, LPT).iou())
+                              << std::endl;
                     return true;
                 }
             }
@@ -410,17 +401,13 @@ class AMMCalc_test : public beast::unit_test::suite
                                 env.current()->rules(),
                                 beast::Journal(beast::Journal::getNullSink()));
                             ammOffer)
-                            std::cout
-                                << "amm offer: " << toString(ammOffer->in)
-                                << " " << toString(ammOffer->out)
-                                << "\nnew pool: "
-                                << toString(pool->first.in + ammOffer->in)
-                                << " "
-                                << toString(pool->first.out - ammOffer->out)
-                                << std::endl;
-                        else
-                            std::cout << "can't change the pool's SP quality"
+                            std::cout << "amm offer: " << toString(ammOffer->in) << " "
+                                      << toString(ammOffer->out)
+                                      << "\nnew pool: " << toString(pool->first.in + ammOffer->in)
+                                      << " " << toString(pool->first.out - ammOffer->out)
                                       << std::endl;
+                        else
+                            std::cout << "can't change the pool's SP quality" << std::endl;
                         return true;
                     }
                 }

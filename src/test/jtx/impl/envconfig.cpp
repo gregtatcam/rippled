@@ -108,9 +108,7 @@ addGrpcConfig(std::unique_ptr<Config> cfg)
 }
 
 std::unique_ptr<Config>
-addGrpcConfigWithSecureGateway(
-    std::unique_ptr<Config> cfg,
-    std::string const& secureGateway)
+addGrpcConfigWithSecureGateway(std::unique_ptr<Config> cfg, std::string const& secureGateway)
 {
     (*cfg)[SECTION_PORT_GRPC].set("ip", getEnvLocalhostAddr());
 

@@ -1,5 +1,4 @@
-#ifndef XRPL_TEST_CSF_PEERGROUP_H_INCLUDED
-#define XRPL_TEST_CSF_PEERGROUP_H_INCLUDED
+#pragma once
 
 #include <test/csf/Peer.h>
 #include <test/csf/random.h>
@@ -313,8 +312,7 @@ randomRankedTrust(
     RandomNumberDistribution sizeDist,
     Generator& g)
 {
-    std::vector<PeerGroup> const groups =
-        randomRankedGroups(peers, ranks, numGroups, sizeDist, g);
+    std::vector<PeerGroup> const groups = randomRankedGroups(peers, ranks, numGroups, sizeDist, g);
 
     std::uniform_int_distribution<int> u(0, groups.size() - 1);
     for (auto& peer : peers)
@@ -338,8 +336,7 @@ randomRankedConnect(
     Generator& g,
     SimDuration delay)
 {
-    std::vector<PeerGroup> const groups =
-        randomRankedGroups(peers, ranks, numGroups, sizeDist, g);
+    std::vector<PeerGroup> const groups = randomRankedGroups(peers, ranks, numGroups, sizeDist, g);
 
     std::uniform_int_distribution<int> u(0, groups.size() - 1);
     for (auto& peer : peers)
@@ -352,4 +349,3 @@ randomRankedConnect(
 }  // namespace csf
 }  // namespace test
 }  // namespace xrpl
-#endif

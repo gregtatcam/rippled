@@ -1,8 +1,9 @@
-#include <xrpld/app/misc/HashRouter.h>
+#include <xrpld/app/misc/setup_HashRouter.h>
 #include <xrpld/core/Config.h>
 
 #include <xrpl/basics/chrono.h>
 #include <xrpl/beast/unit_test.h>
+#include <xrpl/core/HashRouter.h>
 
 namespace xrpl {
 namespace test {
@@ -368,9 +369,7 @@ class HashRouter_test : public beast::unit_test::suite
         HF f2 = HF::SAVED;
         HF combined = f1 | f2;
 
-        BEAST_EXPECT(
-            static_cast<UHF>(combined) ==
-            (static_cast<UHF>(f1) | static_cast<UHF>(f2)));
+        BEAST_EXPECT(static_cast<UHF>(combined) == (static_cast<UHF>(f1) | static_cast<UHF>(f2)));
 
         HF temp = f1;
         temp |= f2;

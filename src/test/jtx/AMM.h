@@ -1,5 +1,4 @@
-#ifndef XRPL_TEST_JTX_AMM_H_INCLUDED
-#define XRPL_TEST_JTX_AMM_H_INCLUDED
+#pragma once
 
 #include <test/jtx/Account.h>
 #include <test/jtx/Env.h>
@@ -362,8 +361,7 @@ public:
     }
 
     IOUAmount
-    getLPTokensBalance(
-        std::optional<AccountID> const& account = std::nullopt) const;
+    getLPTokensBalance(std::optional<AccountID> const& account = std::nullopt) const;
 
     friend std::ostream&
     operator<<(std::ostream& s, AMM const& amm)
@@ -530,5 +528,3 @@ ammClawback(
 }  // namespace jtx
 }  // namespace test
 }  // namespace xrpl
-
-#endif  // XRPL_TEST_JTX_AMM_H_INCLUDED

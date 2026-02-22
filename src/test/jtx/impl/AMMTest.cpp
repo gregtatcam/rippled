@@ -111,15 +111,11 @@ AMMTestBase::testAMM(
     std::vector<FeatureBitset> const& vfeatures)
 {
     testAMM(
-        std::move(cb),
-        TestAMMArg{
-            .pool = pool, .tfee = tfee, .ter = ter, .features = vfeatures});
+        std::move(cb), TestAMMArg{.pool = pool, .tfee = tfee, .ter = ter, .features = vfeatures});
 }
 
 void
-AMMTestBase::testAMM(
-    std::function<void(jtx::AMM&, jtx::Env&)>&& cb,
-    TestAMMArg const& arg)
+AMMTestBase::testAMM(std::function<void(jtx::AMM&, jtx::Env&)>&& cb, TestAMMArg const& arg)
 {
     using namespace jtx;
 
@@ -137,8 +133,7 @@ AMMTestBase::testAMM(
             features - featureSingleAssetVault - featureLendingProtocol,
             arg.noLog ? std::make_unique<CaptureLogs>(&logs) : nullptr};
 
-        auto const [asset1, asset2] =
-            arg.pool ? *arg.pool : std::make_pair(XRP(10000), USD(10000));
+        auto const [asset1, asset2] = arg.pool ? *arg.pool : std::make_pair(XRP(10000), USD(10000));
         auto toFund = [&](STAmount const& a) -> STAmount {
             if (a.native())
             {

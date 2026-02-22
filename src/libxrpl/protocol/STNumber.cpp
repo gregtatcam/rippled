@@ -20,8 +20,7 @@
 
 namespace xrpl {
 
-STNumber::STNumber(SField const& field, Number const& value)
-    : STTakesAsset(field), value_(value)
+STNumber::STNumber(SField const& field, Number const& value) : STTakesAsset(field), value_(value)
 {
 }
 
@@ -63,9 +62,7 @@ void
 STNumber::add(Serializer& s) const
 {
     XRPL_ASSERT(getFName().isBinary(), "xrpl::STNumber::add : field is binary");
-    XRPL_ASSERT(
-        getFName().fieldType == getSType(),
-        "xrpl::STNumber::add : field type match");
+    XRPL_ASSERT(getFName().fieldType == getSType(), "xrpl::STNumber::add : field type match");
 
     auto value = value_;
     auto const mantissa = value.mantissa();
@@ -80,10 +77,7 @@ STNumber::add(Serializer& s) const
             // The number should be rounded to the asset's precision, but round
             // it here if it has an asset assigned.
             roundToAsset(*asset_, value);
-            XRPL_ASSERT_PARTS(
-                value_ == value,
-                "xrpl::STNumber::add",
-                "value is already rounded");
+            XRPL_ASSERT_PARTS(value_ == value, "xrpl::STNumber::add", "value is already rounded");
         }
         else
         {
@@ -139,8 +133,7 @@ bool
 STNumber::isEquivalent(STBase const& t) const
 {
     XRPL_ASSERT(
-        t.getSType() == this->getSType(),
-        "xrpl::STNumber::isEquivalent : field type match");
+        t.getSType() == this->getSType(), "xrpl::STNumber::isEquivalent : field type match");
     STNumber const& v = dynamic_cast<STNumber const&>(t);
     return value_ == v;
 }
@@ -239,9 +232,7 @@ numberFromJson(SField const& field, Json::Value const& value)
         parts = partsFromString(value.asString());
 
         XRPL_ASSERT_PARTS(
-            !getCurrentTransactionRules(),
-            "xrpld::numberFromJson",
-            "Not in a Transactor context");
+            !getCurrentTransactionRules(), "xrpld::numberFromJson", "Not in a Transactor context");
 
         // Number mantissas are much bigger than the allowable parsed values, so
         // it can't be out of range.
@@ -255,12 +246,7 @@ numberFromJson(SField const& field, Json::Value const& value)
     }
 
     return STNumber{
-        field,
-        Number{
-            parts.negative,
-            parts.mantissa,
-            parts.exponent,
-            Number::normalized{}}};
+        field, Number{parts.negative, parts.mantissa, parts.exponent, Number::normalized{}}};
 }
 
 }  // namespace xrpl

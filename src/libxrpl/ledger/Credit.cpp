@@ -33,11 +33,7 @@ creditLimit(
 }
 
 IOUAmount
-creditLimit2(
-    ReadView const& v,
-    AccountID const& acc,
-    AccountID const& iss,
-    Currency const& cur)
+creditLimit2(ReadView const& v, AccountID const& acc, AccountID const& iss, Currency const& cur)
 {
     return toAmount<IOUAmount>(creditLimit(v, acc, iss, cur));
 }

@@ -157,10 +157,7 @@ DeferredCredits::issuerSelfDebitMPT(
 }
 
 void
-DeferredCredits::ownerCount(
-    AccountID const& id,
-    std::uint32_t cur,
-    std::uint32_t next)
+DeferredCredits::ownerCount(AccountID const& id, std::uint32_t cur, std::uint32_t next)
 {
     auto const v = std::max(cur, next);
     auto r = ownerCounts_.emplace(std::make_pair(id, v));
@@ -382,8 +379,7 @@ PaymentSandbox::balanceHookSelfIssueMPT(
 }
 
 std::uint32_t
-PaymentSandbox::ownerCountHook(AccountID const& account, std::uint32_t count)
-    const
+PaymentSandbox::ownerCountHook(AccountID const& account, std::uint32_t count) const
 {
     std::uint32_t result = count;
     for (auto curSB = this; curSB; curSB = curSB->ps_)
