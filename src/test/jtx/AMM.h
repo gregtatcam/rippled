@@ -1,5 +1,4 @@
-#ifndef XRPL_TEST_JTX_AMM_H_INCLUDED
-#define XRPL_TEST_JTX_AMM_H_INCLUDED
+#pragma once
 
 #include <test/jtx/Account.h>
 #include <test/jtx/Env.h>
@@ -165,7 +164,7 @@ public:
         CreateArg const& arg);
 
     static Json::Value
-    createjv(
+    createJv(
         AccountID const& account,
         STAmount const& asset1,
         STAmount const& asset2,
@@ -239,7 +238,7 @@ public:
     ammExists() const;
 
     static Json::Value
-    depositjv(DepositArg const& arg);
+    depositJv(DepositArg const& arg);
 
     IOUAmount
     deposit(
@@ -275,7 +274,7 @@ public:
     deposit(DepositArg const& arg);
 
     static Json::Value
-    withdrawjv(WithdrawArg const& arg);
+    withdrawJv(WithdrawArg const& arg);
 
     IOUAmount
     withdraw(
@@ -323,7 +322,7 @@ public:
     withdraw(WithdrawArg const& arg);
 
     static Json::Value
-    votejv(VoteArg const& arg);
+    voteJv(VoteArg const& arg);
 
     void
     vote(
@@ -362,8 +361,7 @@ public:
     }
 
     IOUAmount
-    getLPTokensBalance(
-        std::optional<AccountID> const& account = std::nullopt) const;
+    getLPTokensBalance(std::optional<AccountID> const& account = std::nullopt) const;
 
     friend std::ostream&
     operator<<(std::ostream& s, AMM const& amm)
@@ -386,15 +384,10 @@ public:
     }
 
     static Json::Value
-    deletejv(
-        AccountID const& account,
-        Asset const& asset1,
-        Asset const& assets);
+    deleteJv(AccountID const& account, Asset const& asset1, Asset const& assets);
 
     void
-    ammDelete(
-        AccountID const& account,
-        std::optional<ter> const& ter = std::nullopt);
+    ammDelete(AccountID const& account, std::optional<ter> const& ter = std::nullopt);
 
     void
     setClose(bool close)
@@ -409,9 +402,7 @@ public:
     }
 
     void
-    setTokens(
-        Json::Value& jv,
-        std::optional<std::pair<Asset, Asset>> const& assets = std::nullopt);
+    setTokens(Json::Value& jv, std::optional<std::pair<Asset, Asset>> const& assets = std::nullopt);
 
     Asset const&
     operator[](std::uint8_t i)
@@ -425,8 +416,7 @@ public:
     {
         AMM const& amm;
         std::vector<Json::StaticString> names;
-        Pool(AMM const& a, std::vector<Json::StaticString> const& n = {})
-            : amm(a), names(n)
+        Pool(AMM const& a, std::vector<Json::StaticString> const& n = {}) : amm(a), names(n)
         {
         }
         friend std::ostream&
@@ -530,5 +520,3 @@ ammClawback(
 }  // namespace jtx
 }  // namespace test
 }  // namespace xrpl
-
-#endif  // XRPL_TEST_JTX_AMM_H_INCLUDED

@@ -1,5 +1,4 @@
-#ifndef XRPL_SHAMAP_SHAMAPITEM_H_INCLUDED
-#define XRPL_SHAMAP_SHAMAPITEM_H_INCLUDED
+#pragma once
 
 #include <xrpl/basics/ByteUtilities.h>
 #include <xrpl/basics/CountedObject.h>
@@ -47,9 +46,7 @@ private:
         : tag_(tag), size_(static_cast<std::uint32_t>(data.size()))
     {
         std::memcpy(
-            reinterpret_cast<std::uint8_t*>(this) + sizeof(*this),
-            data.data(),
-            data.size());
+            reinterpret_cast<std::uint8_t*>(this) + sizeof(*this), data.data(), data.size());
     }
 
 public:
@@ -142,8 +139,7 @@ inline boost::intrusive_ptr<SHAMapItem>
 make_shamapitem(uint256 const& tag, Slice data)
 {
     XRPL_ASSERT(
-        data.size() <= megabytes<std::size_t>(16),
-        "xrpl::make_shamapitem : maximum input size");
+        data.size() <= megabytes<std::size_t>(16), "xrpl::make_shamapitem : maximum input size");
 
     std::uint8_t* raw = detail::slabber.allocate(data.size());
 
@@ -169,5 +165,3 @@ make_shamapitem(SHAMapItem const& other)
 }
 
 }  // namespace xrpl
-
-#endif

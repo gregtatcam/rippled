@@ -11,8 +11,7 @@ Permission::Permission()
 #pragma push_macro("TRANSACTION")
 #undef TRANSACTION
 
-#define TRANSACTION(tag, value, name, delegable, amendment, ...) \
-    {value, amendment},
+#define TRANSACTION(tag, value, name, delegable, amendment, ...) {value, amendment},
 
 #include <xrpl/protocol/detail/transactions.macro>
 
@@ -91,8 +90,7 @@ Permission::getPermissionName(std::uint32_t const value) const
 
     // not a granular permission, check if it maps to a transaction type
     auto const txType = permissionToTxType(value);
-    if (auto const* item = TxFormats::getInstance().findByType(txType);
-        item != nullptr)
+    if (auto const* item = TxFormats::getInstance().findByType(txType); item != nullptr)
         return item->getName();
 
     return std::nullopt;
@@ -142,9 +140,7 @@ Permission::getTxFeature(TxType txType) const
 }
 
 bool
-Permission::isDelegable(
-    std::uint32_t const& permissionValue,
-    Rules const& rules) const
+Permission::isDelegable(std::uint32_t const& permissionValue, Rules const& rules) const
 {
     auto const granularPermission =
         getGranularName(static_cast<GranularPermissionType>(permissionValue));
@@ -166,8 +162,7 @@ Permission::isDelegable(
     // Delegation is only allowed if the required amendment for the transaction
     // is enabled. For transactions that do not require an amendment, delegation
     // is always allowed.
-    if (txFeaturesIt->second != uint256{} &&
-        !rules.enabled(txFeaturesIt->second))
+    if (txFeaturesIt->second != uint256{} && !rules.enabled(txFeaturesIt->second))
         return false;
 
     if (it->second == Delegation::notDelegable)

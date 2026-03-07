@@ -1,5 +1,4 @@
-#ifndef XRPL_APP_PATHASSET_H_INCLUDED
-#define XRPL_APP_PATHASSET_H_INCLUDED
+#pragma once
 
 #include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Concepts.h>
@@ -99,8 +98,7 @@ constexpr bool
 operator==(PathAsset const& lhs, PathAsset const& rhs)
 {
     return std::visit(
-        []<ValidPathAsset TLhs, ValidPathAsset TRhs>(
-            TLhs const& lhs_, TRhs const& rhs_) {
+        []<ValidPathAsset TLhs, ValidPathAsset TRhs>(TLhs const& lhs_, TRhs const& rhs_) {
             if constexpr (std::is_same_v<TLhs, TRhs>)
                 return lhs_ == rhs_;
             else
@@ -114,9 +112,7 @@ template <typename Hasher>
 void
 hash_append(Hasher& h, PathAsset const& pathAsset)
 {
-    std::visit(
-        [&]<ValidPathAsset T>(T const& e) { hash_append(h, e); },
-        pathAsset.value());
+    std::visit([&]<ValidPathAsset T>(T const& e) { hash_append(h, e); }, pathAsset.value());
 }
 
 inline bool
@@ -132,5 +128,3 @@ std::ostream&
 operator<<(std::ostream& os, PathAsset const& x);
 
 }  // namespace xrpl
-
-#endif  // XRPL_APP_PATHASSET_H_INCLUDED

@@ -1,7 +1,4 @@
-#ifndef XRPL_TXQ_H_INCLUDED
-#define XRPL_TXQ_H_INCLUDED
-
-#include <xrpld/app/tx/applySteps.h>
+#pragma once
 
 #include <xrpl/ledger/ApplyView.h>
 #include <xrpl/ledger/OpenView.h>
@@ -9,6 +6,7 @@
 #include <xrpl/protocol/STTx.h>
 #include <xrpl/protocol/SeqProxy.h>
 #include <xrpl/protocol/TER.h>
+#include <xrpl/tx/applySteps.h>
 
 #include <boost/circular_buffer.hpp>
 #include <boost/intrusive/set.hpp>
@@ -314,9 +312,7 @@ public:
      *        and first available sequence
      */
     FeeAndSeq
-    getTxRequiredFeeAndSeq(
-        OpenView const& view,
-        std::shared_ptr<STTx const> const& tx) const;
+    getTxRequiredFeeAndSeq(OpenView const& view, std::shared_ptr<STTx const> const& tx) const;
 
     /** Returns information about the transactions currently
         in the queue for the account.
@@ -382,18 +378,15 @@ private:
         /// Constructor
         FeeMetrics(Setup const& setup, beast::Journal j)
             : minimumTxnCount_(
-                  setup.standAlone ? setup.minimumTxnInLedgerSA
-                                   : setup.minimumTxnInLedger)
+                  setup.standAlone ? setup.minimumTxnInLedgerSA : setup.minimumTxnInLedger)
             , targetTxnCount_(
-                  setup.targetTxnInLedger < minimumTxnCount_
-                      ? minimumTxnCount_
-                      : setup.targetTxnInLedger)
+                  setup.targetTxnInLedger < minimumTxnCount_ ? minimumTxnCount_
+                                                             : setup.targetTxnInLedger)
             , maximumTxnCount_(
-                  setup.maximumTxnInLedger
-                      ? *setup.maximumTxnInLedger < targetTxnCount_
+                  setup.maximumTxnInLedger ? *setup.maximumTxnInLedger < targetTxnCount_
                           ? targetTxnCount_
                           : *setup.maximumTxnInLedger
-                      : std::optional<std::size_t>(std::nullopt))
+                                           : std::optional<std::size_t>(std::nullopt))
             , txnsExpected_(minimumTxnCount_)
             , recentTxnCounts_(setup.ledgersInQueue)
             , escalationMultiplier_(setup.minimumEscalationMultiplier)
@@ -412,11 +405,7 @@ private:
             @param setup Customization params.
         */
         std::size_t
-        update(
-            Application& app,
-            ReadView const& view,
-            bool timeLeap,
-            TxQ::Setup const& setup);
+        update(Application& app, ReadView const& view, bool timeLeap, TxQ::Setup const& setup);
 
         /// Snapshot of the externally relevant FeeMetrics
         /// fields at any given time.
@@ -634,8 +623,7 @@ private:
         operator()(MaybeTx const& lhs, MaybeTx const& rhs) const
         {
             if (lhs.feeLevel == rhs.feeLevel)
-                return (lhs.txID ^ MaybeTx::parentHashComp) <
-                    (rhs.txID ^ MaybeTx::parentHashComp);
+                return (lhs.txID ^ MaybeTx::parentHashComp) < (rhs.txID ^ MaybeTx::parentHashComp);
             return lhs.feeLevel > rhs.feeLevel;
         }
     };
@@ -728,13 +716,11 @@ private:
         std::optional<TxQAccount::TxMap::iterator> const& replacedTxIter,
         std::shared_ptr<STTx const> const& tx);
 
-    using FeeHook = boost::intrusive::member_hook<
-        MaybeTx,
-        boost::intrusive::set_member_hook<>,
-        &MaybeTx::byFeeListHook>;
+    using FeeHook = boost::intrusive::
+        member_hook<MaybeTx, boost::intrusive::set_member_hook<>, &MaybeTx::byFeeListHook>;
 
-    using FeeMultiSet = boost::intrusive::
-        multiset<MaybeTx, FeeHook, boost::intrusive::compare<OrderCandidates>>;
+    using FeeMultiSet =
+        boost::intrusive::multiset<MaybeTx, FeeHook, boost::intrusive::compare<OrderCandidates>>;
 
     using AccountMap = std::map<AccountID, TxQAccount>;
 
@@ -804,8 +790,7 @@ private:
         is higher), or next entry in byFee_ (lower fee level).
         Used to get the next "applicable" MaybeTx for accept().
     */
-    FeeMultiSet::iterator_type eraseAndAdvance(
-        FeeMultiSet::const_iterator_type);
+    FeeMultiSet::iterator_type eraseAndAdvance(FeeMultiSet::const_iterator_type);
     /// Erase a range of items, based on TxQAccount::TxMap iterators
     TxQAccount::TxMap::iterator
     erase(
@@ -843,8 +828,7 @@ template <class T>
 XRPAmount
 toDrops(FeeLevel<T> const& level, XRPAmount baseFee)
 {
-    return mulDiv(level, baseFee, TxQ::baseLevel)
-        .value_or(XRPAmount(STAmount::cMaxNativeN));
+    return mulDiv(level, baseFee, TxQ::baseLevel).value_or(XRPAmount(STAmount::cMaxNativeN));
 }
 
 inline FeeLevel64
@@ -855,5 +839,3 @@ toFeeLevel(XRPAmount const& drops, XRPAmount const& baseFee)
 }
 
 }  // namespace xrpl
-
-#endif

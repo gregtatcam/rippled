@@ -1,5 +1,4 @@
-#ifndef XRPL_PROTOCOL_AMMCORE_H_INCLUDED
-#define XRPL_PROTOCOL_AMMCORE_H_INCLUDED
+#pragma once
 
 #include <xrpl/basics/Number.h>
 #include <xrpl/protocol/AccountID.h>
@@ -37,10 +36,7 @@ ammLPTCurrency(Asset const& asset1, Asset const& asset2);
 /** Calculate LPT Issue from AMM asset pair.
  */
 Issue
-ammLPTIssue(
-    Asset const& asset1,
-    Asset const& asset2,
-    AccountID const& ammAccountID);
+ammLPTIssue(Asset const& asset1, Asset const& asset2, AccountID const& ammAccountID);
 
 /** Validate the amount.
  * If validZero is false and amount is beast::zero then invalid amount.
@@ -103,5 +99,3 @@ feeMultHalf(std::uint16_t tfee)
 }
 
 }  // namespace xrpl
-
-#endif  // XRPL_PROTOCOL_AMMCORE_H_INCLUDED

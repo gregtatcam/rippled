@@ -1,15 +1,13 @@
 #include <test/jtx.h>
 #include <test/jtx/PathSet.h>
 
-#include <xrpld/app/paths/Flow.h>
-#include <xrpld/app/paths/detail/Steps.h>
 #include <xrpld/core/Config.h>
 
-#include <xrpl/basics/contract.h>
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/ledger/Sandbox.h>
 #include <xrpl/protocol/Feature.h>
-#include <xrpl/protocol/jss.h>
+#include <xrpl/tx/paths/Flow.h>
+#include <xrpl/tx/paths/detail/Steps.h>
 
 namespace xrpl {
 namespace test {
@@ -33,8 +31,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             Env env(*this, features);
 
             env.fund(XRP(10000), alice, bob, gw);
-            MPT const USD =
-                MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
             env(pay(gw, alice, USD(100)));
             env(pay(alice, bob, USD(10)), paths(USD));
             env.require(balance(bob, USD(10)));
@@ -44,14 +41,11 @@ struct FlowMPT_test : public beast::unit_test::suite
             Env env(*this, features);
 
             env.fund(XRP(10000), alice, bob, gw);
-            MPT const USD =
-                MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
             env(pay(gw, alice, USD(100)));
             env(pay(alice, bob, USD(110)), paths(USD), ter(tecPATH_PARTIAL));
             env.require(balance(bob, USD(0)));
-            env(pay(alice, bob, USD(110)),
-                paths(USD),
-                txflags(tfPartialPayment));
+            env(pay(alice, bob, USD(110)), paths(USD), txflags(tfPartialPayment));
             env.require(balance(bob, USD(100)));
         }
 
@@ -63,16 +57,10 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env.fund(XRP(10'000), gw, alice, bob, carol);
                 env.close();
 
-                auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, carol}});
-                auto const EUR = issue2(
-                    {.env = env,
-                     .token = "EUR",
-                     .issuer = gw,
-                     .holders = {bob}});
+                auto const USD =
+                    issue1({.env = env, .token = "USD", .issuer = gw, .holders = {alice, carol}});
+                auto const EUR =
+                    issue2({.env = env, .token = "EUR", .issuer = gw, .holders = {bob}});
 
                 env(pay(gw, alice, USD(100)));
                 env(pay(gw, bob, EUR(100)));
@@ -86,9 +74,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                     ter(tecPATH_DRY));
                 env.require(balance(carol, USD(0)));
 
-                env(pay(bob, carol, USD(5)),
-                    sendmax(EUR(4)),
-                    txflags(tfPartialPayment));
+                env(pay(bob, carol, USD(5)), sendmax(EUR(4)), txflags(tfPartialPayment));
                 env.require(balance(carol, USD(4)));
             };
             testHelper2TokensMix(test);
@@ -116,15 +102,9 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env.close();
 
                 auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "USD", .issuer = gw, .holders = {alice, bob, carol}});
                 auto const BTC = issue2(
-                    {.env = env,
-                     .token = "BTC",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "BTC", .issuer = gw, .holders = {alice, bob, carol}});
 
                 env(pay(gw, alice, BTC(50)));
                 env(pay(gw, bob, USD(50)));
@@ -150,15 +130,9 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env.close();
 
                 auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "USD", .issuer = gw, .holders = {alice, bob, carol}});
                 auto const BTC = issue2(
-                    {.env = env,
-                     .token = "BTC",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "BTC", .issuer = gw, .holders = {alice, bob, carol}});
 
                 env(pay(gw, alice, BTC(50)));
                 env(pay(gw, bob, USD(50)));
@@ -166,9 +140,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env(offer(bob, BTC(50), XRP(50)));
                 env(offer(bob, XRP(50), USD(50)));
 
-                env(pay(alice, carol, USD(50)),
-                    path(~XRP, ~USD),
-                    sendmax(BTC(50)));
+                env(pay(alice, carol, USD(50)), path(~XRP, ~USD), sendmax(BTC(50)));
 
                 env.require(balance(alice, BTC(0)));
                 env.require(balance(bob, BTC(50)));
@@ -186,10 +158,8 @@ struct FlowMPT_test : public beast::unit_test::suite
             env.fund(XRP(10'000), alice, bob, carol, gw);
             env.close();
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {alice, bob, carol}});
-            MPT const BTC = MPTTester(
-                {.env = env, .issuer = gw, .holders = {alice, bob, carol}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob, carol}});
+            MPT const BTC = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob, carol}});
 
             env(pay(gw, bob, USD(50)));
 
@@ -212,10 +182,8 @@ struct FlowMPT_test : public beast::unit_test::suite
             env.fund(XRP(10'000), alice, bob, carol, gw);
             env.close();
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {alice, bob, carol}});
-            MPT const BTC = MPTTester(
-                {.env = env, .issuer = gw, .holders = {alice, bob, carol}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob, carol}});
+            MPT const BTC = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob, carol}});
 
             env(pay(gw, alice, USD(50)));
 
@@ -238,20 +206,11 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env.close();
 
                 auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "USD", .issuer = gw, .holders = {alice, bob, carol}});
                 auto const BTC = issue2(
-                    {.env = env,
-                     .token = "BTC",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "BTC", .issuer = gw, .holders = {alice, bob, carol}});
                 auto const EUR = issue3(
-                    {.env = env,
-                     .token = "EUR",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "EUR", .issuer = gw, .holders = {alice, bob, carol}});
 
                 env(pay(gw, alice, BTC(60)));
                 env(pay(gw, bob, USD(50)));
@@ -268,10 +227,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(isOffer(env, bob, BTC(40), EUR(50)));
                 BEAST_EXPECT(isOffer(env, bob, EUR(50), USD(50)));
 
-                env(pay(alice, carol, USD(50)),
-                    path(~USD),
-                    path(~EUR, ~USD),
-                    sendmax(BTC(60)));
+                env(pay(alice, carol, USD(50)), path(~USD), path(~EUR, ~USD), sendmax(BTC(60)));
 
                 env.require(balance(alice, BTC(10)));
                 env.require(balance(bob, BTC(50)));
@@ -345,8 +301,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                     STPathSet paths;
                     auto IPE = [](Asset const& asset) {
                         return STPathElement(
-                            STPathElement::typeAsset |
-                                STPathElement::typeIssuer,
+                            STPathElement::typeAsset | STPathElement::typeIssuer,
                             xrpAccount(),
                             asset,
                             asset.getIssuer());
@@ -377,17 +332,16 @@ struct FlowMPT_test : public beast::unit_test::suite
                 }();
 
                 BEAST_EXPECT(flowResult.removableOffers.size() == 1);
-                env.app().openLedger().modify(
-                    [&](OpenView& view, beast::Journal j) {
-                        if (flowResult.removableOffers.empty())
-                            return false;
-                        Sandbox sb(&view, tapNONE);
-                        for (auto const& o : flowResult.removableOffers)
-                            if (auto ok = sb.peek(keylet::offer(o)))
-                                offerDelete(sb, ok, flowJournal);
-                        sb.apply(view);
-                        return true;
-                    });
+                env.app().openLedger().modify([&](OpenView& view, beast::Journal j) {
+                    if (flowResult.removableOffers.empty())
+                        return false;
+                    Sandbox sb(&view, tapNONE);
+                    for (auto const& o : flowResult.removableOffers)
+                        if (auto ok = sb.peek(keylet::offer(o)))
+                            offerDelete(sb, ok, flowJournal);
+                    sb.apply(view);
+                    return true;
+                });
 
                 // used in payment, but since payment failed should
                 // be untouched
@@ -412,15 +366,9 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env.fund(XRP(10'000), alice, bob, carol, gw);
 
                 auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "USD", .issuer = gw, .holders = {alice, bob, carol}});
                 auto const EUR = issue1(
-                    {.env = env,
-                     .token = "EUR",
-                     .issuer = gw,
-                     .holders = {alice, bob, carol}});
+                    {.env = env, .token = "EUR", .issuer = gw, .holders = {alice, bob, carol}});
 
                 env(pay(gw, alice, USD(1'000)));
                 env(pay(gw, bob, EUR(1'000)));
@@ -436,8 +384,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 // provide 1 drop for less than USD(0.5), then the
                 // remaining fractional offer would block the order
                 // book.
-                TER const expectedTER =
-                    reducedOffersV2 ? TER(tecPATH_DRY) : TER(tesSUCCESS);
+                TER const expectedTER = reducedOffersV2 ? TER(tecPATH_DRY) : TER(tesSUCCESS);
                 env(pay(alice, carol, EUR(1)),
                     path(~XRP, ~EUR),
                     sendmax(USD(4)),
@@ -451,22 +398,19 @@ struct FlowMPT_test : public beast::unit_test::suite
                     env.require(balance(bob, EUR(999)));
 
                     // Show that bob's USD offer is now a blocker.
-                    std::shared_ptr<SLE const> const usdOffer =
-                        env.le(bobUsdOffer);
+                    std::shared_ptr<SLE const> const usdOffer = env.le(bobUsdOffer);
                     if (BEAST_EXPECT(usdOffer))
                     {
                         std::uint64_t const bookRate = [&usdOffer]() {
                             // Extract the least significant 64
                             // bits from the book page.  That's
                             // where the quality is stored.
-                            std::string bookDirStr =
-                                to_string(usdOffer->at(sfBookDirectory));
+                            std::string bookDirStr = to_string(usdOffer->at(sfBookDirectory));
                             bookDirStr.erase(0, 48);
                             return std::stoull(bookDirStr, nullptr, 16);
                         }();
-                        std::uint64_t const actualRate = getRate(
-                            usdOffer->at(sfTakerGets),
-                            usdOffer->at(sfTakerPays));
+                        std::uint64_t const actualRate =
+                            getRate(usdOffer->at(sfTakerGets), usdOffer->at(sfTakerPays));
 
                         // We expect the actual rate of the offer to
                         // be worse (larger) than the rate of the
@@ -630,12 +574,8 @@ struct FlowMPT_test : public beast::unit_test::suite
                  .maxAmt = 1'000});
 
             env(offer(gw, XRP(100), USD(100)));
-            env(pay(alice, bob, USD(100)),
-                sendmax(XRP(100)),
-                txflags(tfPartialPayment));
-            env.require(
-                balance(alice, XRP(10'000 - 100) - txfee(env, 2)),
-                balance(bob, USD(80)));
+            env(pay(alice, bob, USD(100)), sendmax(XRP(100)), txflags(tfPartialPayment));
+            env.require(balance(alice, XRP(10'000 - 100) - txfee(env, 2)), balance(bob, USD(80)));
         }
         {
             // Offer where the owner is also the issuer, sender pays
@@ -653,9 +593,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env(offer(gw, XRP(125), USD(125)));
             env(pay(alice, bob, USD(100)), sendmax(XRP(200)));
-            env.require(
-                balance(alice, XRP(10'000 - 125) - txfee(env, 2)),
-                balance(bob, USD(100)));
+            env.require(balance(alice, XRP(10'000 - 125) - txfee(env, 2)), balance(bob, USD(100)));
         }
     }
 
@@ -678,16 +616,10 @@ struct FlowMPT_test : public beast::unit_test::suite
             env.fund(reserve(env, 5), bob);
             env.close();
 
-            auto const USD = issue1(
-                {.env = env,
-                 .token = "USD",
-                 .issuer = gw,
-                 .holders = {alice, carol, bob}});
-            auto const EUR = issue2(
-                {.env = env,
-                 .token = "EUR",
-                 .issuer = gw,
-                 .holders = {alice, carol, bob}});
+            auto const USD =
+                issue1({.env = env, .token = "USD", .issuer = gw, .holders = {alice, carol, bob}});
+            auto const EUR =
+                issue2({.env = env, .token = "EUR", .issuer = gw, .holders = {alice, carol, bob}});
 
             env(pay(gw, alice, EUR(50)));
             env(pay(gw, bob, USD(50)));
@@ -735,8 +667,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(10'000), alice, bob, carol, gw);
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {alice, bob, carol}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob, carol}});
 
             env(pay(gw, bob, USD(100)));
             env(offer(bob, XRP(50), USD(50)));
@@ -764,13 +695,10 @@ struct FlowMPT_test : public beast::unit_test::suite
     offersOnAccount(jtx::Env& env, jtx::Account account)
     {
         std::vector<std::shared_ptr<SLE const>> result;
-        forEachItem(
-            *env.current(),
-            account,
-            [&result](std::shared_ptr<SLE const> const& sle) {
-                if (sle->getType() == ltOFFER)
-                    result.push_back(sle);
-            });
+        forEachItem(*env.current(), account, [&result](std::shared_ptr<SLE const> const& sle) {
+            if (sle->getType() == ltOFFER)
+                result.push_back(sle);
+        });
         return result;
     }
 
@@ -804,17 +732,9 @@ struct FlowMPT_test : public beast::unit_test::suite
             env.close();
 
             auto const USD = issue1(
-                {.env = env,
-                 .token = "USD",
-                 .issuer = gw1,
-                 .holders = {alice},
-                 .limit = 20'000});
+                {.env = env, .token = "USD", .issuer = gw1, .holders = {alice}, .limit = 20'000});
             auto const EUR = issue2(
-                {.env = env,
-                 .token = "EUR",
-                 .issuer = gw2,
-                 .holders = {alice},
-                 .limit = 20'000});
+                {.env = env, .token = "EUR", .issuer = gw2, .holders = {alice}, .limit = 20'000});
 
             env(pay(gw1, alice, USD(10)));
             env(pay(gw2, alice, EUR(10'000)));
@@ -837,9 +757,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(offer[sfTakerPays] == USD(5'000));
             }
 
-            env(pay(alice, alice, EUR(6'000)),
-                sendmax(USD(5'000)),
-                txflags(tfPartialPayment));
+            env(pay(alice, alice, EUR(6'000)), sendmax(USD(5'000)), txflags(tfPartialPayment));
             env.close();
 
             env.require(owners(alice, 3));
@@ -885,10 +803,10 @@ struct FlowMPT_test : public beast::unit_test::suite
         auto const alice = Account("alice");
 
         auto initMPT = [&](Env& env) {
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw1, .holders = {alice}, .maxAmt = 506});
-            MPT const EUR = MPTTester(
-                {.env = env, .issuer = gw2, .holders = {alice}, .maxAmt = 606});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw1, .holders = {alice}, .maxAmt = 506});
+            MPT const EUR =
+                MPTTester({.env = env, .issuer = gw2, .holders = {alice}, .maxAmt = 606});
             // Payment's engine last step overflows
             // OutstandingAmount since it doesn't know if the
             // BookStep redeems or not. The BookStep then has 600EUR
@@ -899,11 +817,8 @@ struct FlowMPT_test : public beast::unit_test::suite
         };
 
         auto initXRP = [&](Env& env) {
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw1,
-                 .holders = {alice},
-                 .maxAmt = 1'000});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw1, .holders = {alice}, .maxAmt = 1'000});
             // Payment's engine last step overflows
             // OutstandingAmount since it doesn't know if the
             // BookStep redeems or not. The BookStep then has 600EUR
@@ -977,9 +892,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(offer[sfTakerPays] == TOK1(500));
             }
 
-            env(pay(alice, alice, TOK2(60)),
-                sendmax(TOK1(50)),
-                txflags(tfPartialPayment));
+            env(pay(alice, alice, TOK2(60)), sendmax(TOK1(50)), txflags(tfPartialPayment));
             env.close();
 
             env.require(owners(alice, ownerCnt));
@@ -1024,8 +937,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
         env.fund(XRP(10'000), alice, gw);
 
-        MPT const USD = MPTTester(
-            {.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 20});
+        MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 20});
 
         env(pay(gw, alice, USD(10)));
         env(offer(alice, XRP(50'000), USD(10)));
@@ -1055,17 +967,12 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(100'000), alice, bob, gw);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, bob},
-                 .maxAmt = 20E+17});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 20E+17});
 
             // scale by 17
-            STAmount tinyAmt1{
-                USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
-            STAmount tinyAmt3{
-                USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
+            STAmount tinyAmt1{USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
+            STAmount tinyAmt3{USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
 
             env(offer(gw, drops(9'000'000'000), tinyAmt3));
 
@@ -1086,17 +993,12 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(100'000), alice, bob, gw);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, bob},
-                 .maxAmt = 20E+17});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 20E+17});
 
             // scale by 17
-            STAmount tinyAmt1{
-                USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
-            STAmount tinyAmt3{
-                USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
+            STAmount tinyAmt1{USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
+            STAmount tinyAmt3{USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
 
             env(pay(gw, alice, tinyAmt1));
 
@@ -1111,7 +1013,7 @@ struct FlowMPT_test : public beast::unit_test::suite
     }
 
     void
-    testReexecuteDirectStep(FeatureBitset features)
+    testReExecuteDirectStep(FeatureBitset features)
     {
         testcase("ReexecuteDirectStep");
 
@@ -1125,11 +1027,8 @@ struct FlowMPT_test : public beast::unit_test::suite
         env.fund(XRP(10'000), alice, bob, gw);
 
         // scale by 16
-        MPT const USD = MPTTester(
-            {.env = env,
-             .issuer = gw,
-             .holders = {alice, bob},
-             .maxAmt = 100E+16});
+        MPT const USD =
+            MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 100E+16});
 
         env(
             pay(gw,
@@ -1201,9 +1100,7 @@ struct FlowMPT_test : public beast::unit_test::suite
         env.close();
 
         // This payment caused assert.
-        env(pay(ann, ann, CTB(68'700)),
-            sendmax(drops(20'000'000'000)),
-            txflags(tfPartialPayment));
+        env(pay(ann, ann, CTB(68'700)), sendmax(drops(20'000'000'000)), txflags(tfPartialPayment));
     }
 
     void
@@ -1239,16 +1136,10 @@ struct FlowMPT_test : public beast::unit_test::suite
                 Env env(*this);
                 env.fund(XRP(10'000), alice, bob, gw);
 
-                auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, bob}});
-                auto const EUR = issue2(
-                    {.env = env,
-                     .token = "EUR",
-                     .issuer = gw,
-                     .holders = {alice, bob}});
+                auto const USD =
+                    issue1({.env = env, .token = "USD", .issuer = gw, .holders = {alice, bob}});
+                auto const EUR =
+                    issue2({.env = env, .token = "EUR", .issuer = gw, .holders = {alice, bob}});
                 env(pay(gw, alice, USD(100)));
                 env(pay(gw, alice, EUR(100)));
                 env.close();
@@ -1272,16 +1163,10 @@ struct FlowMPT_test : public beast::unit_test::suite
             auto test = [&](auto&& issue1, auto&& issue2) {
                 Env env(*this);
                 env.fund(XRP(10'000), alice, bob, gw);
-                auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, bob}});
-                auto const EUR = issue2(
-                    {.env = env,
-                     .token = "EUR",
-                     .issuer = gw,
-                     .holders = {alice, bob}});
+                auto const USD =
+                    issue1({.env = env, .token = "USD", .issuer = gw, .holders = {alice, bob}});
+                auto const EUR =
+                    issue2({.env = env, .token = "EUR", .issuer = gw, .holders = {alice, bob}});
                 env(pay(gw, alice, USD(100)));
                 env(pay(gw, alice, EUR(100)));
                 env.close();
@@ -1305,21 +1190,12 @@ struct FlowMPT_test : public beast::unit_test::suite
                 Env env(*this);
                 env.fund(XRP(10'000), alice, bob, gw);
                 env.close();
-                auto const USD = issue1(
-                    {.env = env,
-                     .token = "USD",
-                     .issuer = gw,
-                     .holders = {alice, bob}});
-                auto const EUR = issue2(
-                    {.env = env,
-                     .token = "EUR",
-                     .issuer = gw,
-                     .holders = {alice, bob}});
-                auto const JPY = issue3(
-                    {.env = env,
-                     .token = "JPY",
-                     .issuer = gw,
-                     .holders = {alice, bob}});
+                auto const USD =
+                    issue1({.env = env, .token = "USD", .issuer = gw, .holders = {alice, bob}});
+                auto const EUR =
+                    issue2({.env = env, .token = "EUR", .issuer = gw, .holders = {alice, bob}});
+                auto const JPY =
+                    issue3({.env = env, .token = "JPY", .issuer = gw, .holders = {alice, bob}});
                 env(pay(gw, alice, USD(100)));
                 env(pay(gw, alice, EUR(100)));
                 env(pay(gw, alice, JPY(100)));
@@ -1357,11 +1233,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, carol},
-                 .maxAmt = 100});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, carol}, .maxAmt = 100});
 
             env(pay(gw, alice, USD(100)));
 
@@ -1379,11 +1252,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, carol},
-                 .maxAmt = 100});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, carol}, .maxAmt = 100});
 
             env(pay(gw, alice, USD(80)));
 
@@ -1403,10 +1273,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             env.fund(XRP(1'000), gw, alice, carol, bob);
 
             MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, carol, bob},
-                 .maxAmt = 100});
+                {.env = env, .issuer = gw, .holders = {alice, carol, bob}, .maxAmt = 100});
 
             env(pay(gw, bob, USD(20)));
             env(pay(gw, alice, USD(80)));
@@ -1426,11 +1293,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol, bob);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, carol},
-                 .maxAmt = 100});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, carol}, .maxAmt = 100});
 
             env(pay(gw, alice, USD(100)));
 
@@ -1452,8 +1316,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol);
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
 
             env(pay(gw, carol, USD(100)));
 
@@ -1477,8 +1341,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol);
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
 
             env(pay(gw, carol, USD(80)));
 
@@ -1501,17 +1365,14 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice);
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 100});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice}, .maxAmt = 100});
 
             env(pay(gw, alice, USD(100)));
 
             env(offer(alice, USD(100), XRP(100)));
 
-            env(pay(gw, alice, XRP(100)),
-                sendmax(USD(100)),
-                path(~XRP),
-                ter(tecPATH_PARTIAL));
+            env(pay(gw, alice, XRP(100)), sendmax(USD(100)), path(~XRP), ter(tecPATH_PARTIAL));
 
             BEAST_EXPECT(env.balance(gw, USD) == USD(-100));
             BEAST_EXPECT(env.balance(alice, USD) == USD(100));
@@ -1565,8 +1426,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol);
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 120});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 120});
 
             env(pay(gw, carol, USD(100)));
 
@@ -1588,8 +1449,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol);
 
-            MPT const USD = MPTTester(
-                {.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {carol}, .maxAmt = 100});
 
             env(pay(gw, carol, USD(100)));
 
@@ -1667,8 +1528,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 else
                 {
                     BEAST_EXPECT(
-                        env.balance(carol, EUR) ==
-                        STAmount(EUR, UINT64_C(209'9009900990099), -13));
+                        env.balance(carol, EUR) == STAmount(EUR, UINT64_C(209'9009900990099), -13));
                 }
                 // 100/101 is partially crossed (90/91) and 100/100 is
                 // unfunded when MPT. All offers are consumed if IOU.
@@ -1687,11 +1547,8 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             env.fund(XRP(1'000), gw, alice, carol);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, carol},
-                 .maxAmt = 2'000});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, carol}, .maxAmt = 2'000});
 
             env(pay(gw, carol, USD(1'000)));
             env(pay(gw, alice, USD(600)));
@@ -1705,9 +1562,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(offer(alice, XRP(15), USD(28)));
             env(offer(alice, XRP(25), USD(46)));
 
-            env(pay(carol, carol, USD(200)),
-                sendmax(XRP(100)),
-                txflags(tfPartialPayment));
+            env(pay(carol, carol, USD(200)), sendmax(XRP(100)), txflags(tfPartialPayment));
 
             BEAST_EXPECT(env.balance(gw, USD) == USD(-1'624));
             BEAST_EXPECT(env.balance(carol, USD) == USD(1'102));
@@ -1723,11 +1578,8 @@ struct FlowMPT_test : public beast::unit_test::suite
             Env env(*this);
             env.fund(XRP(1'000), gw, alice, carol, bob);
 
-            MPT const USD = MPTTester(
-                {.env = env,
-                 .issuer = gw,
-                 .holders = {alice, carol, bob},
-                 .maxAmt = 30});
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice, carol, bob}, .maxAmt = 30});
 
             env(pay(gw, alice, USD(12)));  // 12, 15, 20
             env(pay(gw, bob, USD(5)));     // 5, 5, 10
@@ -1736,10 +1588,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             env(offer(gw, XRP(10), USD(11)));
             env(offer(bob, XRP(10), USD(10)));
 
-            env(pay(carol, bob, USD(30)),
-                sendmax(XRP(30)),
-                txflags(tfPartialPayment),
-                path(~USD));
+            env(pay(carol, bob, USD(30)), sendmax(XRP(30)), txflags(tfPartialPayment), path(~USD));
             BEAST_EXPECT(env.balance(gw, USD) == USD(-28));
             BEAST_EXPECT(env.balance(alice, USD) == USD(0));
             // 12+11+5
@@ -1761,7 +1610,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 int sendMax;
                 int dstTrustLimit;
                 int dstExpectEUR;
-                int outstUSD;
+                int outstandingUSD;
                 int expEdBuyUSD;
                 int expDanBuyUSD;
                 int expBobSellUSD;
@@ -1788,24 +1637,11 @@ struct FlowMPT_test : public beast::unit_test::suite
 
             auto test = [&](TestData const& d) {
                 Env env(*this);
-                env.fund(
-                    XRP(1'000),
-                    gw,
-                    alice,
-                    carol,
-                    bob,
-                    dan,
-                    john,
-                    ed,
-                    sam,
-                    bill);
+                env.fund(XRP(1'000), gw, alice, carol, bob, dan, john, ed, sam, bill);
                 env.close();
 
                 MPT const USD = MPTTester(
-                    {.env = env,
-                     .issuer = gw,
-                     .holders = {alice, carol, bob},
-                     .maxAmt = d.maxAmt});
+                    {.env = env, .issuer = gw, .holders = {alice, carol, bob}, .maxAmt = d.maxAmt});
                 auto const EUR = gw["EUR"];
 
                 env(pay(gw, alice, USD(100)));
@@ -1872,14 +1708,12 @@ struct FlowMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(env.balance(john, USD) == USD(100));
                 BEAST_EXPECT(env.balance(dan, USD) == USD(d.expDanBuyUSD));
                 BEAST_EXPECT(env.balance(ed, USD) == USD(d.expEdBuyUSD));
-                BEAST_EXPECT(env.balance(gw, USD) == USD(-d.outstUSD));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(-d.outstandingUSD));
                 BEAST_EXPECT(env.balance(alice, USD) == USD(0));
                 BEAST_EXPECT(env.balance(carol, USD) == USD(0));
+                BEAST_EXPECT(env.balance(bob, USD) == USD(100 - d.expBobSellUSD));
                 BEAST_EXPECT(
-                    env.balance(bob, USD) == USD(100 - d.expBobSellUSD));
-                BEAST_EXPECT(
-                    env.balance(gw) ==
-                    XRPAmount{d.expGwXRP * DROPS_PER_XRP - baseFee * 9});
+                    env.balance(gw) == XRPAmount{d.expGwXRP * DROPS_PER_XRP - baseFee * 9});
                 BEAST_EXPECT(expectOffers(env, john, 0));
                 BEAST_EXPECT(expectOffers(env, gw, d.expOffersGw));
                 BEAST_EXPECT(expectOffers(env, dan, d.expOffersDan()));
@@ -1896,8 +1730,8 @@ struct FlowMPT_test : public beast::unit_test::suite
                 // gw's sell USD is consumed because there is sufficient available balance (100USD).
                 // but OutstandingAmount is 300USD because gw's sell offer is balanced out by
                 // gw's buy offer.
-                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
-                {  400,   400,    400,     400,      300,     100,  100,   100,    1100, 0,       false},
+                //*maxAmt sendMax limitEUR expectEUR outstandingUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  400,   400,    400,     400,      300,           100,  100,   100,    1100, 0,       false},
                 // Sell USD: alice, carol, bob, gw are consumed.
                 // Buy USD: john, gw, dan, ed (partially) are consumed.
                 // gw's sell USD is partially consumed because there is available balance (50USD).
@@ -1905,33 +1739,33 @@ struct FlowMPT_test : public beast::unit_test::suite
                 // gw's buy offer. ed's offer is on the books because it's partially crossed.
                 // gw's offer is removed from the order book because it's partially consumed and
                 // the remaining offer is unfunded.
-                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
-                {  350,   400,    400,     350,      250,     50,   100,   100,    1050, 0,       false},
+                //*maxAmt sendMax limitEUR expectEUR outstandingUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  350,   400,    400,     350,      250,           50,   100,   100,    1050, 0,       false},
                 // Sell USD: alice, carol, bob are consumed; gw's is unfunded
                 //   since OutstandingAmount is initially at MaximumAmount.
                 // Buy USD: john, gw, dan are consumed; ed's remains on the order
                 //   book since 300USD is the sell limit.
-                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
-                {  300,   400,    400,     300,      200,     0,    100,   100,    1000, 0,       false},
+                //*maxAmt sendMax limitEUR expectEUR outstandingUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   400,    400,     300,      200,           0,    100,   100,    1000, 0,       false},
                 // Same as above. bill's trustline limit sets the output to 300USD.
-                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
-                {  300,   400,    300,     300,      200,     0,    100,   100,    1000, 0,       false},
+                //*maxAmt sendMax limitEUR expectEUR outstandingUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   400,    300,     300,      200,           0,    100,   100,    1000, 0,       false},
                 // Sell USD: alice, carol, bob are consumed; gw's removed from
                 //   the order book since it's unfunded.
                 // Buy USD: john, gw, dan are consumed; ed's  remains on the order
                 //   book since 300USD is the limit.
-                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
-                {  300,   400,    300,     300,      200,     0,    100,   100,    1000, 0,       true},
+                //*maxAmt sendMax limitEUR expectEUR outstandingUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   400,    300,     300,      200,           0,    100,   100,    1000, 0,       true},
                 // Sell USD: alice, carol are consumed; gw's removed from
                 //   the order book in rev pass since it's unfunded; bob's
                 //   remains on the order book.
                 // Buy USD: john, gw; ed's, dan's  remains on the order
                 //   book since 300USD is the limit.
-                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
-                {  300,   200,    300,     200,      200,     0,    0,     0,      1000, 0,       false},
+                //*maxAmt sendMax limitEUR expectEUR outstandingUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   200,    300,     200,      200,           0,    0,     0,      1000, 0,       false},
                 // Same as three tests above since limited by buy 300USD (gw offer is unfunded)
-                //*maxAmt sendMax limitEUR expectEUR outstUSD edBuy danBuy bobSell gwXRP offersGw lastGw
-                {  300,   380,    400,     300,      200,     0,    100,   100,    1000, 0,       false},
+                //*maxAmt sendMax limitEUR expectEUR outstandingUSD edBuy danBuy bobSell gwXRP offersGw lastGw
+                {  300,   380,    400,     300,      200,           0,    100,   100,    1000, 0,       false},
             };
             // clang-format on
             for (auto const& t : tests)
@@ -1949,7 +1783,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 int sendMax;
                 int gwOffer;  // quality == 1
                 int dstExpectXRP;
-                int outstUSD;
+                int outstandingUSD;
                 int expBobBuyUSD;
                 int expGwXRP;  // whole XRP excluding the fees
                 std::uint8_t expOffersGw;
@@ -1967,11 +1801,8 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env.fund(XRP(1'000), gw, alice, carol, bob, ed);
                 env.close();
 
-                MPT const USD = MPTTester(
-                    {.env = env,
-                     .issuer = gw,
-                     .holders = {alice},
-                     .maxAmt = d.maxAmt});
+                MPT const USD =
+                    MPTTester({.env = env, .issuer = gw, .holders = {alice}, .maxAmt = d.maxAmt});
 
                 env(pay(gw, alice, USD(300)));
                 env.close();
@@ -2007,10 +1838,9 @@ struct FlowMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(env.balance(carol, USD) == USD(100));
                 BEAST_EXPECT(env.balance(bob, USD) == USD(d.expBobBuyUSD));
                 BEAST_EXPECT(env.balance(ed) == XRP(d.dstExpectXRP));
-                BEAST_EXPECT(env.balance(gw, USD) == USD(-d.outstUSD));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(-d.outstandingUSD));
                 BEAST_EXPECT(
-                    env.balance(gw) ==
-                    XRPAmount{d.expGwXRP * DROPS_PER_XRP - baseFee * 3});
+                    env.balance(gw) == XRPAmount{d.expGwXRP * DROPS_PER_XRP - baseFee * 3});
                 BEAST_EXPECT(expectOffers(env, carol, 0));
                 BEAST_EXPECT(expectOffers(env, bob, d.expOffersBob()));
                 BEAST_EXPECT(expectOffers(env, gw, d.expOffersGw));
@@ -2021,27 +1851,27 @@ struct FlowMPT_test : public beast::unit_test::suite
                 // Buy USD: carol, gw, bob are consumed.
                 // Gw gets 300USD from alice; carol and bob buy 200USD,
                 // therefore OutstandingAmount is 200.
-                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
-                { 300,    300,    100,    1300,  200,     100,   900,  0,       false},
+                //*maxAmt sendMax gwOffer dstXRP outstandingUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    100,    1300,  200,           100,   900,  0,       false},
                 // Same as above. Gw offer location in the order book doesn't matter
-                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
-                { 300,    300,    100,    1300,  200,     100,   900,  0,       true},
+                //*maxAmt sendMax gwOffer dstXRP outstandingUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    100,    1300,  200,           100,   900,  0,       true},
                 // Buy USD: carol, gw are consumed. bob's offer remains on the order book.
                 // Gw gets 300USD from alice; carol buys 100USD,
                 // therefore OutstandingAmount is 100.
-                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
-                { 300,    300,    200,    1300,  100,     0,     800,  0,       false},
+                //*maxAmt sendMax gwOffer dstXRP outstandingUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    200,    1300,  100,           0,     800,  0,       false},
                 // Buy USD: carol, bob are consumed; gw's is partially consumed (100/100) since it's last.
                 // Gw gets 300USD from alice; carol and bob buy 200USD,
                 // therefore OutstandingAmount is 200.
-                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
-                { 300,    300,    200,    1300,  200,     100,   900,  1,       true},
+                //*maxAmt sendMax gwOffer dstXRP outstandingUSD bobBuy gwXRP offersGw lastGw
+                { 300,    300,    200,    1300,  200,           100,   900,  1,       true},
                 // Buy USD: carol, bob are consumed; gw's is partially consumed (50/50) since it's last
                 // and sendMax limits the output.
                 // Gw gets 250USD from alice; carol and bob buy 200USD, alice has 50USD left,
                 // therefore OutstandingAmount is 200.
-                //*maxAmt sendMax gwOffer dstXRP outstUSD bobBuy gwXRP offersGw lastGw
-                { 300,    250,    200,    1250,  250,     100,   950,  1,       true},
+                //*maxAmt sendMax gwOffer dstXRP outstandingUSD bobBuy gwXRP offersGw lastGw
+                { 300,    250,    200,    1250,  250,           100,   950,  1,       true},
             };
             // clang-format on
             for (auto const& t : tests)
@@ -2060,7 +1890,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 int initDst;
                 int gwOffer;  // quality == 1
                 int dstExpectUSD;
-                int outstUSD;
+                int outstandingUSD;
                 int expAliceXRP;  // whole XRP excluding the fees
                 int expBobSellUSD;
                 int expGwXRP;
@@ -2079,10 +1909,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 env.close();
 
                 MPT const USD = MPTTester(
-                    {.env = env,
-                     .issuer = gw,
-                     .holders = {carol, bob, ed},
-                     .maxAmt = d.maxAmt});
+                    {.env = env, .issuer = gw, .holders = {carol, bob, ed}, .maxAmt = d.maxAmt});
 
                 if (d.initDst != 0)
                     env(pay(gw, ed, USD(d.initDst)));
@@ -2118,18 +1945,15 @@ struct FlowMPT_test : public beast::unit_test::suite
 
                 auto const baseFee = env.current()->fees().base.drops();
                 BEAST_EXPECT(
-                    env.balance(alice) ==
-                    XRPAmount{d.expAliceXRP * DROPS_PER_XRP - baseFee});
+                    env.balance(alice) == XRPAmount{d.expAliceXRP * DROPS_PER_XRP - baseFee});
                 BEAST_EXPECT(env.balance(carol, USD) == USD(0));
-                BEAST_EXPECT(
-                    env.balance(bob, USD) == USD(100 - d.expBobSellUSD));
+                BEAST_EXPECT(env.balance(bob, USD) == USD(100 - d.expBobSellUSD));
                 BEAST_EXPECT(env.balance(ed, USD) == USD(d.dstExpectUSD));
-                BEAST_EXPECT(env.balance(gw, USD) == USD(-d.outstUSD));
+                BEAST_EXPECT(env.balance(gw, USD) == USD(-d.outstandingUSD));
                 BEAST_EXPECT(
                     env.balance(gw) ==
                     XRPAmount{
-                        d.expGwXRP * DROPS_PER_XRP -
-                        baseFee * (4 + (d.initDst != 0 ? 1 : 0))});
+                        d.expGwXRP * DROPS_PER_XRP - baseFee * (4 + (d.initDst != 0 ? 1 : 0))});
                 BEAST_EXPECT(expectOffers(env, carol, 0));
                 BEAST_EXPECT(expectOffers(env, bob, d.expOffersBob()));
                 BEAST_EXPECT(expectOffers(env, gw, d.expOffersGw));
@@ -2139,45 +1963,45 @@ struct FlowMPT_test : public beast::unit_test::suite
             std::vector<TestData> tests = {
                 // Sell USD: carol, gw, bob are consumed.
                 // ed buys 300USD from carol, gw, bob therefore OutstandingAmount is 300.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    300,    0,      100,    300,   300,     700,     100,    1100, 0,       false},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    0,      100,    300,   300,           700,     100,    1100, 0,       false},
                 // Same as above. Gw offer location in the order book doesn't matter
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    300,    0,      100,    300,   300,     700,     100,    1100, 0,       true},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    0,      100,    300,   300,           700,     100,    1100, 0,       true},
                 // Sell USD: carol, bob are consumed, gw is partially consumed.
                 // ed buys 200 from carol and bob and 50 from gw because gw can only issue 50
                 // (300(max) - 200(carol+bob) - 50(ed)). ed buys 250 from carol, gw, bob and has 50 initially,
                 // therefore OutstandingAmount is 300.
                 // gw's offer is removed from the order book because it's partially consumed and the remaining
                 // offer is unfunded.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    300,    50,     100,    300,   300,     750,     100,    1050, 0,       false},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    50,     100,    300,   300,           750,     100,    1050, 0,       false},
                 // Same as above. Gw offer location in the order book doesn't matter.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    300,    50,     100,    300,   300,     750,     100,    1050, 0,       true},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    50,     100,    300,   300,           750,     100,    1050, 0,       true},
                 // Same as above. Gw offer size doesn't matter.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    300,    50,     200,    300,   300,     750,     100,    1050, 0,       true},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    300,    50,     200,    300,   300,           750,     100,    1050, 0,       true},
                 // Sell USD: carol, gw are consumed, bob is partially consumed.
                 // ed buys 200 from carol and gw and 50 form bob because of sendMax limit. bob keeps 50,
                 // therefore OutstandingAmount is 300.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    250,    0,      100,    250,   300,     750,     50,     1100, 0,       false},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    0,      100,    250,   300,           750,     50,     1100, 0,       false},
                 // Sell USD: carol, bob are consumed, gw is partially consumed because of sendMax limit.
                 // ed buys 200 from carol and bob and 50 from gw. Therefore, OutstandingAmount is 250.
                 // gw's offer remains on the order book because it's partially consumed and has more funds.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    250,    0,      100,    250,   250,     750,     100,    1050, 1,       true},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    0,      100,    250,   250,           750,     100,    1050, 1,       true},
                 // Sell USD: carol, bob are consumed, gw is partially consumed because of sendMax limit, also
                 // there is only 50 available to issue. ed buys 200 from carol and bob and 50 from gw, plus
                 // he has initially 50, therefore OutstandingAmount is 300.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    250,    50,     100,    300,   300,     750,     100,    1050, 0,       true},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    50,     100,    300,   300,           750,     100,    1050, 0,       true},
                 // Sell USD: carol, bob are consumed, gw is not consumed because there is not available funds
                 // to issue. ed buys 200 from carol and bob and, plus he has initially 100,
                 // therefore OutstandingAmount is 300. gw offer is removed because it's unfunded.
-                //*maxAmt sendMax initDst gwOffer dstUSD outstUSD aliceXRP bobSell gwXRP offersGw lastGw
-                { 300,    250,    100,    100,    300,   300,     800,     100,    1000, 0,       true},
+                //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw
+                { 300,    250,    100,    100,    300,   300,           800,     100,    1000, 0,       true},
             };
             // clang-format on
             for (auto const& t : tests)
@@ -2187,14 +2011,11 @@ struct FlowMPT_test : public beast::unit_test::suite
         // Cross-currency payment with BookStep as the first step.
         // BookStep limits the buy amount.
         {
-            auto test = [&](int sendMax,
-                            std::uint16_t dstXRP,
-                            std::uint8_t expGwOffers) {
+            auto test = [&](int sendMax, std::uint16_t dstXRP, std::uint8_t expGwOffers) {
                 Env env(*this);
                 env.fund(XRP(1'000), gw, alice, carol);
 
-                MPT const USD =
-                    MPTTester({.env = env, .issuer = gw, .maxAmt = 300});
+                MPT const USD = MPTTester({.env = env, .issuer = gw, .maxAmt = 300});
 
                 env(offer(carol, USD(400), XRP(400)));
                 env(offer(gw, USD(100), XRP(100)));
@@ -2245,7 +2066,7 @@ struct FlowMPT_test : public beast::unit_test::suite
         testSelfFundedXRPEndpoint(false, features);
         testSelfFundedXRPEndpoint(true, features);
         testUnfundedOffer(features);
-        testReexecuteDirectStep(features);
+        testReExecuteDirectStep(features);
         testSelfPayLowQualityOffer(features);
     }
 

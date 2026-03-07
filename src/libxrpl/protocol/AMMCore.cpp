@@ -40,24 +40,18 @@ ammLPTCurrency(Asset const& asset1, Asset const& asset2)
         maxA.value());
     Currency currency;
     *currency.begin() = AMMCurrencyCode;
-    std::copy(
-        hash.begin(), hash.begin() + currency.size() - 1, currency.begin() + 1);
+    std::copy(hash.begin(), hash.begin() + currency.size() - 1, currency.begin() + 1);
     return currency;
 }
 
 Issue
-ammLPTIssue(
-    Asset const& asset1,
-    Asset const& asset2,
-    AccountID const& ammAccountID)
+ammLPTIssue(Asset const& asset1, Asset const& asset2, AccountID const& ammAccountID)
 {
     return Issue(ammLPTCurrency(asset1, asset2), ammAccountID);
 }
 
 NotTEC
-invalidAMMAsset(
-    Asset const& asset,
-    std::optional<std::pair<Asset, Asset>> const& pair)
+invalidAMMAsset(Asset const& asset, std::optional<std::pair<Asset, Asset>> const& pair)
 {
     auto const err = asset.visit(
         [](MPTIssue const& issue) -> std::optional<NotTEC> {
@@ -114,12 +108,10 @@ ammAuctionTimeSlot(std::uint64_t current, STObject const& auctionSlot)
     // but check just to be safe
     auto const expiration = auctionSlot[sfExpiration];
     XRPL_ASSERT(
-        expiration >= TOTAL_TIME_SLOT_SECS,
-        "xrpl::ammAuctionTimeSlot : minimum expiration");
+        expiration >= TOTAL_TIME_SLOT_SECS, "xrpl::ammAuctionTimeSlot : minimum expiration");
     if (expiration >= TOTAL_TIME_SLOT_SECS)
     {
-        if (auto const start = expiration - TOTAL_TIME_SLOT_SECS;
-            current >= start)
+        if (auto const start = expiration - TOTAL_TIME_SLOT_SECS; current >= start)
         {
             if (auto const diff = current - start; diff < TOTAL_TIME_SLOT_SECS)
                 return diff / AUCTION_SLOT_INTERVAL_DURATION;

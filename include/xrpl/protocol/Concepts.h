@@ -1,5 +1,4 @@
-#ifndef XRPL_PROTOCOL_CONCEPTS_H_INCLUDED
-#define XRPL_PROTOCOL_CONCEPTS_H_INCLUDED
+#pragma once
 
 #include <xrpl/protocol/UintTypes.h>
 
@@ -16,32 +15,25 @@ class XRPAmount;
 class MPTAmount;
 
 template <typename A>
-concept StepAmount = std::is_same_v<A, XRPAmount> ||
-    std::is_same_v<A, IOUAmount> || std::is_same_v<A, MPTAmount>;
+concept StepAmount =
+    std::is_same_v<A, XRPAmount> || std::is_same_v<A, IOUAmount> || std::is_same_v<A, MPTAmount>;
 
 template <typename TIss>
-concept ValidIssueType =
-    std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>;
+concept ValidIssueType = std::is_same_v<TIss, Issue> || std::is_same_v<TIss, MPTIssue>;
 
 template <typename A>
-concept AssetType =
-    std::is_convertible_v<A, Asset> || std::is_convertible_v<A, Issue> ||
+concept AssetType = std::is_convertible_v<A, Asset> || std::is_convertible_v<A, Issue> ||
     std::is_convertible_v<A, MPTIssue> || std::is_convertible_v<A, MPTID>;
 
 template <typename T>
-concept ValidPathAsset =
-    (std::is_same_v<T, Currency> || std::is_same_v<T, MPTID>);
+concept ValidPathAsset = (std::is_same_v<T, Currency> || std::is_same_v<T, MPTID>);
 
 template <class TTakerPays, class TTakerGets>
 concept ValidTaker =
-    ((std::is_same_v<TTakerPays, IOUAmount> ||
-      std::is_same_v<TTakerPays, XRPAmount> ||
-      std::is_same_v<TTakerPays, MPTAmount> ||
-      std::is_same_v<TTakerGets, IOUAmount> ||
-      std::is_same_v<TTakerGets, XRPAmount> ||
-      std::is_same_v<TTakerGets, MPTAmount>) &&
-     (!std::is_same_v<TTakerPays, XRPAmount> ||
-      !std::is_same_v<TTakerGets, XRPAmount>));
+    ((std::is_same_v<TTakerPays, IOUAmount> || std::is_same_v<TTakerPays, XRPAmount> ||
+      std::is_same_v<TTakerPays, MPTAmount> || std::is_same_v<TTakerGets, IOUAmount> ||
+      std::is_same_v<TTakerGets, XRPAmount> || std::is_same_v<TTakerGets, MPTAmount>) &&
+     (!std::is_same_v<TTakerPays, XRPAmount> || !std::is_same_v<TTakerGets, XRPAmount>));
 
 namespace detail {
 
@@ -81,8 +73,7 @@ constexpr auto
 visit(Variant&& v, Visitors&&... visitors) -> decltype(auto)
 {
     // Use the function template helper instead of raw CTAD.
-    auto visitor_set =
-        make_combine_visitors(std::forward<Visitors>(visitors)...);
+    auto visitor_set = make_combine_visitors(std::forward<Visitors>(visitors)...);
 
     // Delegate to std::visit, perfectly forwarding the variant and the visitor
     // set.
@@ -92,5 +83,3 @@ visit(Variant&& v, Visitors&&... visitors) -> decltype(auto)
 }  // namespace detail
 
 }  // namespace xrpl
-
-#endif  // XRPL_PROTOCOL_CONCEPTS_H_INCLUDED

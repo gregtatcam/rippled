@@ -101,8 +101,7 @@ addSourceAsset(
             else
             {
                 if (srcIssuer)
-                    Throw<std::runtime_error>(
-                        "MPT source_currencies can't have issuer");
+                    Throw<std::runtime_error>("MPT source_currencies can't have issuer");
                 jv[jss::mpt_issuance_id] = to_string(asset);
             }
         },
@@ -226,8 +225,8 @@ find_paths(
     std::optional<AccountID> const& srcIssuer,
     std::optional<uint256> const& domain)
 {
-    Json::Value result = find_paths_request(
-        env, src, dst, saDstAmount, saSendMax, srcAsset, srcIssuer, domain);
+    Json::Value result =
+        find_paths_request(env, src, dst, saDstAmount, saSendMax, srcAsset, srcIssuer, domain);
     if (result.isMember(jss::error))
         return std::make_tuple(STPathSet{}, STAmount{}, STAmount{});
 
@@ -275,14 +274,7 @@ find_paths_by_element(
     std::optional<uint256> const& domain)
 {
     return find_paths(
-        env,
-        src,
-        dst,
-        saDstAmount,
-        saSendMax,
-        srcElement->getPathAsset(),
-        srcIssuer,
-        domain);
+        env, src, dst, saDstAmount, saSendMax, srcElement->getPathAsset(), srcIssuer, domain);
 }
 
 /******************************************************************************/
@@ -301,11 +293,7 @@ xrpMinusFee(Env const& env, std::int64_t xrpAmount)
 };
 
 [[nodiscard]] bool
-expectHolding(
-    Env& env,
-    AccountID const& account,
-    STAmount const& value,
-    bool defaultLimits)
+expectHolding(Env& env, AccountID const& account, STAmount const& value, bool defaultLimits)
 {
     if (auto const sle = env.le(keylet::line(account, value.get<Issue>())))
     {
@@ -321,8 +309,8 @@ expectHolding(
             low.get<Issue>().account = accountLow ? account : issue.account;
             high.get<Issue>().account = accountLow ? issue.account : account;
 
-            expectDefaultTrustLine = sle->getFieldAmount(sfLowLimit) == low &&
-                sle->getFieldAmount(sfHighLimit) == high;
+            expectDefaultTrustLine =
+                sle->getFieldAmount(sfLowLimit) == low && sle->getFieldAmount(sfHighLimit) == high;
         }
 
         auto amount = sle->getFieldAmount(sfBalance);
@@ -335,21 +323,13 @@ expectHolding(
 }
 
 [[nodiscard]] bool
-expectHolding(
-    Env& env,
-    AccountID const& account,
-    None const&,
-    Issue const& issue)
+expectHolding(Env& env, AccountID const& account, None const&, Issue const& issue)
 {
     return !env.le(keylet::line(account, issue));
 }
 
 [[nodiscard]] bool
-expectHolding(
-    Env& env,
-    AccountID const& account,
-    None const&,
-    MPTIssue const& mptIssue)
+expectHolding(Env& env, AccountID const& account, None const&, MPTIssue const& mptIssue)
 {
     return !env.le(keylet::mptoken(mptIssue.getMptID(), account));
 }
@@ -358,17 +338,14 @@ expectHolding(
 expectHolding(Env& env, AccountID const& account, None const& value)
 {
     return std::visit(
-        [&](auto const& issue) {
-            return expectHolding(env, account, value, issue);
-        },
+        [&](auto const& issue) { return expectHolding(env, account, value, issue); },
         value.asset.value());
 }
 
 [[nodiscard]] bool
 expectMPT(Env& env, AccountID const& account, STAmount const& value)
 {
-    auto const mptIssuanceID =
-        keylet::mptIssuance(value.asset().get<MPTIssue>());
+    auto const mptIssuanceID = keylet::mptIssuance(value.asset().get<MPTIssue>());
     auto const mptToken = env.le(keylet::mptoken(mptIssuanceID.key, account));
     return mptToken && (*mptToken)[sfMPTAmount] == value.mpt().value();
 }
@@ -382,24 +359,21 @@ expectOffers(
 {
     std::uint16_t cnt = 0;
     std::uint16_t matched = 0;
-    forEachItem(
-        *env.current(), account, [&](std::shared_ptr<SLE const> const& sle) {
-            if (!sle)
-                return false;
-            if (sle->getType() == ltOFFER)
-            {
-                ++cnt;
-                if (std::find_if(
-                        toMatch.begin(), toMatch.end(), [&](auto const& a) {
-                            return a.in == sle->getFieldAmount(sfTakerPays) &&
-                                a.out == sle->getFieldAmount(sfTakerGets);
-                        }) != toMatch.end())
-                    ++matched;
-            }
-            return true;
-        });
-    return size == cnt &&
-        ((toMatch.size() == 0 && size != 0) || (matched == toMatch.size()));
+    forEachItem(*env.current(), account, [&](std::shared_ptr<SLE const> const& sle) {
+        if (!sle)
+            return false;
+        if (sle->getType() == ltOFFER)
+        {
+            ++cnt;
+            if (std::find_if(toMatch.begin(), toMatch.end(), [&](auto const& a) {
+                    return a.in == sle->getFieldAmount(sfTakerPays) &&
+                        a.out == sle->getFieldAmount(sfTakerGets);
+                }) != toMatch.end())
+                ++matched;
+        }
+        return true;
+    });
+    return size == cnt && ((toMatch.size() == 0 && size != 0) || (matched == toMatch.size()));
 }
 
 Json::Value
@@ -428,10 +402,7 @@ ledgerEntryState(
 }
 
 Json::Value
-ledgerEntryOffer(
-    jtx::Env& env,
-    jtx::Account const& acct,
-    std::uint32_t offer_seq)
+ledgerEntryOffer(jtx::Env& env, jtx::Account const& acct, std::uint32_t offer_seq)
 {
     Json::Value jvParams;
     jvParams[jss::offer][jss::account] = acct.human();
@@ -466,10 +437,7 @@ accountBalance(Env& env, Account const& acct)
 }
 
 [[nodiscard]] bool
-expectLedgerEntryRoot(
-    Env& env,
-    Account const& acct,
-    STAmount const& expectedValue)
+expectLedgerEntryRoot(Env& env, Account const& acct, STAmount const& expectedValue)
 {
     return accountBalance(env, acct) == to_string(expectedValue.xrp());
 }
@@ -544,10 +512,7 @@ claim(
 }
 
 uint256
-channel(
-    AccountID const& account,
-    AccountID const& dst,
-    std::uint32_t seqProxyValue)
+channel(AccountID const& account, AccountID const& dst, std::uint32_t seqProxyValue)
 {
     auto const k = keylet::payChan(account, dst, seqProxyValue);
     return k.key;
@@ -575,12 +540,7 @@ channelExists(ReadView const& view, uint256 const& chan)
 /******************************************************************************/
 
 void
-n_offers(
-    Env& env,
-    std::size_t n,
-    Account const& account,
-    STAmount const& in,
-    STAmount const& out)
+n_offers(Env& env, std::size_t n, Account const& account, STAmount const& in, STAmount const& out)
 {
     auto const ownerCount = env.le(account)->getFieldU32(sfOwnerCount);
     for (std::size_t i = 0; i < n; i++)
@@ -600,16 +560,18 @@ cpe(PathAsset const& pa)
 {
     return pa.visit(
         [](Currency const& currency) {
-            return STPathElement(
-                STPathElement::typeCurrency,
-                xrpAccount(),
-                currency,
-                xrpAccount());
+            return STPathElement(STPathElement::typeCurrency, xrpAccount(), currency, xrpAccount());
         },
         [](MPTID const& mpt) {
-            return STPathElement(
-                STPathElement::typeMPT, xrpAccount(), mpt, xrpAccount());
+            return STPathElement(STPathElement::typeMPT, xrpAccount(), mpt, xrpAccount());
         });
+};
+
+// All path element
+STPathElement
+allPathElements(AccountID const& a, Asset const& asset)
+{
+    return STPathElement(a, asset, asset.getIssuer());
 };
 
 STPathElement
@@ -636,23 +598,14 @@ ipe(Asset const& asset)
 STPathElement
 iape(AccountID const& account)
 {
-    return STPathElement(
-        STPathElement::typeIssuer, xrpAccount(), xrpCurrency(), account);
+    return STPathElement(STPathElement::typeIssuer, xrpAccount(), xrpCurrency(), account);
 };
 
 // Account path element
 STPathElement
 ape(AccountID const& a)
 {
-    return STPathElement(
-        STPathElement::typeAccount, a, xrpCurrency(), xrpAccount());
-};
-
-// All path element
-STPathElement
-allpe(AccountID const& a, Asset const& asset)
-{
-    return STPathElement(a, asset, asset.getIssuer());
+    return STPathElement(STPathElement::typeAccount, a, xrpCurrency(), xrpAccount());
 };
 
 bool
@@ -672,11 +625,11 @@ equal(std::unique_ptr<xrpl::Step> const& s1, MPTEndpointStepInfo const& dsi)
 }
 
 bool
-equal(std::unique_ptr<xrpl::Step> const& s1, XRPEndpointStepInfo const& xrpsi)
+equal(std::unique_ptr<xrpl::Step> const& s1, XRPEndpointStepInfo const& xrpStepInfo)
 {
     if (!s1)
         return false;
-    return test::xrpEndpointStepEqual(*s1, xrpsi.acc);
+    return test::xrpEndpointStepEqual(*s1, xrpStepInfo.acc);
 }
 
 bool
@@ -845,10 +798,7 @@ del(AccountID const& account, uint256 const& loanID, std::uint32_t flags)
 }
 
 Json::Value
-pay(AccountID const& account,
-    uint256 const& loanID,
-    STAmount const& amount,
-    std::uint32_t flags)
+pay(AccountID const& account, uint256 const& loanID, STAmount const& amount, std::uint32_t flags)
 {
     Json::Value jv;
     jv[sfTransactionType] = jss::LoanPay;

@@ -20,11 +20,17 @@ repos:
         args: [--assume-in-merge]
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: 7d85583be209cb547946c82fbe51f4bc5dd1d017 # frozen: v18.1.8
+    rev: 75ca4ad908dc4a99f57921f29b7e6c1521e10b26 # frozen: v21.1.8
     hooks:
       - id: clang-format
         args: [--style=file]
         "types_or": [c++, c, proto]
+
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: e2c2116d86a80e72e7146a06e68b7c228afc6319 # frozen: v0.6.13
+    hooks:
+      - id: cmake-format
+        additional_dependencies: [PyYAML]
 
   - repo: https://github.com/rbubley/mirrors-prettier
     rev: 5ba47274f9b181bce26a5150a725577f3c336011 # frozen: v3.6.2

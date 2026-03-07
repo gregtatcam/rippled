@@ -1,5 +1,4 @@
-#ifndef XRPL_XRPL_RPC_HANDLERS_VERSION_H
-#define XRPL_XRPL_RPC_HANDLERS_VERSION_H
+#pragma once
 
 #include <xrpl/protocol/ApiVersion.h>
 
@@ -43,5 +42,3 @@ private:
 
 }  // namespace RPC
 }  // namespace xrpl
-
-#endif

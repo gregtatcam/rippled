@@ -17,9 +17,7 @@ namespace xrpl {
 namespace LedgerEntryHelpers {
 
 Unexpected<Json::Value>
-missingFieldError(
-    Json::StaticString const field,
-    std::optional<std::string> err = std::nullopt)
+missingFieldError(Json::StaticString const field, std::optional<std::string> err = std::nullopt)
 {
     Json::Value json = Json::objectValue;
     auto error = RPC::missing_field_message(std::string(field.c_str()));
@@ -30,10 +28,7 @@ missingFieldError(
 }
 
 Unexpected<Json::Value>
-invalidFieldError(
-    std::string const& err,
-    Json::StaticString const field,
-    std::string const& type)
+invalidFieldError(std::string const& err, Json::StaticString const field, std::string const& type)
 {
     Json::Value json = Json::objectValue;
     auto error = RPC::expected_field_message(field, type);
@@ -233,10 +228,7 @@ parse(Json::Value const& param)
 }
 
 Expected<Asset, Json::Value>
-requiredAsset(
-    Json::Value const& params,
-    Json::StaticString const fieldName,
-    std::string const& err)
+requiredAsset(Json::Value const& params, Json::StaticString const fieldName, std::string const& err)
 {
     return required<Asset>(params, fieldName, err, "Asset");
 }
@@ -255,15 +247,15 @@ parseBridgeFields(Json::Value const& params)
         return Unexpected(value.error());
     }
 
-    auto const lockingChainDoor = requiredAccountID(
-        params, jss::LockingChainDoor, "malformedLockingChainDoor");
+    auto const lockingChainDoor =
+        requiredAccountID(params, jss::LockingChainDoor, "malformedLockingChainDoor");
     if (!lockingChainDoor)
     {
         return Unexpected(lockingChainDoor.error());
     }
 
-    auto const issuingChainDoor = requiredAccountID(
-        params, jss::IssuingChainDoor, "malformedIssuingChainDoor");
+    auto const issuingChainDoor =
+        requiredAccountID(params, jss::IssuingChainDoor, "malformedIssuingChainDoor");
     if (!issuingChainDoor)
     {
         return Unexpected(issuingChainDoor.error());
@@ -276,8 +268,7 @@ parseBridgeFields(Json::Value const& params)
     }
     catch (std::runtime_error const& ex)
     {
-        return invalidFieldError(
-            "malformedIssue", jss::LockingChainIssue, "Issue");
+        return invalidFieldError("malformedIssue", jss::LockingChainIssue, "Issue");
     }
 
     Issue issuingChainIssue;
@@ -287,15 +278,11 @@ parseBridgeFields(Json::Value const& params)
     }
     catch (std::runtime_error const& ex)
     {
-        return invalidFieldError(
-            "malformedIssue", jss::IssuingChainIssue, "Issue");
+        return invalidFieldError("malformedIssue", jss::IssuingChainIssue, "Issue");
     }
 
     return STXChainBridge(
-        *lockingChainDoor,
-        lockingChainIssue,
-        *issuingChainDoor,
-        issuingChainIssue);
+        *lockingChainDoor, lockingChainIssue, *issuingChainDoor, issuingChainIssue);
 }
 
 }  // namespace LedgerEntryHelpers

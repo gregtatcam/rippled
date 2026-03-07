@@ -1,5 +1,4 @@
-#ifndef XRPL_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
-#define XRPL_PATH_IMPL_PATHFINDERUTILS_H_INCLUDED
+#pragma once
 
 #include <xrpl/protocol/STAmount.h>
 
@@ -12,12 +11,9 @@ largestAmount(STAmount const& amt)
         [&](Issue const& issue) -> STAmount {
             if (issue.native())
                 return INITIAL_XRP;
-            return STAmount(
-                amt.asset(), STAmount::cMaxValue, STAmount::cMaxOffset);
+            return STAmount(amt.asset(), STAmount::cMaxValue, STAmount::cMaxOffset);
         },
-        [&](MPTIssue const&) {
-            return STAmount(amt.asset(), maxMPTokenAmount, 0);
-        });
+        [&](MPTIssue const&) { return STAmount(amt.asset(), maxMPTokenAmount, 0); });
 }
 
 inline STAmount
@@ -36,5 +32,3 @@ convertAllCheck(STAmount const& a)
 }
 
 }  // namespace xrpl
-
-#endif

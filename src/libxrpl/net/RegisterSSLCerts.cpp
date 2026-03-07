@@ -16,10 +16,7 @@
 namespace xrpl {
 
 void
-registerSSLCerts(
-    boost::asio::ssl::context& ctx,
-    boost::system::error_code& ec,
-    beast::Journal j)
+registerSSLCerts(boost::asio::ssl::context& ctx, boost::system::error_code& ec, beast::Journal j)
 {
 #if BOOST_OS_WINDOWS
     auto certStoreDelete = [](void* h) {
@@ -31,8 +28,7 @@ registerSSLCerts(
 
     if (!hStore)
     {
-        ec = boost::system::error_code(
-            GetLastError(), boost::system::system_category());
+        ec = boost::system::error_code(GetLastError(), boost::system::system_category());
         return;
     }
 
@@ -44,8 +40,7 @@ registerSSLCerts(
     if (!store)
     {
         ec = boost::system::error_code(
-            static_cast<int>(::ERR_get_error()),
-            boost::asio::error::get_ssl_category());
+            static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category());
         return;
     }
 
@@ -58,8 +53,7 @@ registerSSLCerts(
     };
 
     PCCERT_CONTEXT pContext = NULL;
-    while ((pContext = CertEnumCertificatesInStore(hStore.get(), pContext)) !=
-           NULL)
+    while ((pContext = CertEnumCertificatesInStore(hStore.get(), pContext)) != NULL)
     {
         unsigned char const* pbCertEncoded = pContext->pbCertEncoded;
         std::unique_ptr<X509, decltype(X509_free)*> x509{

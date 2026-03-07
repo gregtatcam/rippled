@@ -55,10 +55,7 @@ fund(
                     return amtsOut[i++];
                 else if (amt.holds<MPTIssue>() && mptIssuer)
                 {
-                    MPTTester mpt(
-                        {.env = env,
-                         .issuer = *mptIssuer,
-                         .holders = accounts});
+                    MPTTester mpt({.env = env, .issuer = *mptIssuer, .holders = accounts});
                     return STAmount{mpt.issuanceID(), amt.mpt().value()};
                 }
                 return amt;
@@ -111,15 +108,11 @@ AMMTestBase::testAMM(
     std::vector<FeatureBitset> const& vfeatures)
 {
     testAMM(
-        std::move(cb),
-        TestAMMArg{
-            .pool = pool, .tfee = tfee, .ter = ter, .features = vfeatures});
+        std::move(cb), TestAMMArg{.pool = pool, .tfee = tfee, .ter = ter, .features = vfeatures});
 }
 
 void
-AMMTestBase::testAMM(
-    std::function<void(jtx::AMM&, jtx::Env&)>&& cb,
-    TestAMMArg const& arg)
+AMMTestBase::testAMM(std::function<void(jtx::AMM&, jtx::Env&)>&& cb, TestAMMArg const& arg)
 {
     using namespace jtx;
 
@@ -137,8 +130,7 @@ AMMTestBase::testAMM(
             features - featureSingleAssetVault - featureLendingProtocol,
             arg.noLog ? std::make_unique<CaptureLogs>(&logs) : nullptr};
 
-        auto const [asset1, asset2] =
-            arg.pool ? *arg.pool : std::make_pair(XRP(10000), USD(10000));
+        auto const [asset1, asset2] = arg.pool ? *arg.pool : std::make_pair(XRP(10000), USD(10000));
         auto toFund = [&](STAmount const& a) -> STAmount {
             if (a.native())
             {
@@ -163,35 +155,25 @@ AMMTestBase::testAMM(
         std::vector<STAmount> funded;
         if (!asset1.native() && !asset2.native())
         {
-            funded =
-                fund(env, gw, {alice, carol}, {toFund1, toFund2}, Fund::All);
+            funded = fund(env, gw, {alice, carol}, {toFund1, toFund2}, Fund::All);
         }
         else if (asset1.native())
         {
-            funded =
-                fund(env, gw, {alice, carol}, toFund1, {toFund2}, Fund::All);
+            funded = fund(env, gw, {alice, carol}, toFund1, {toFund2}, Fund::All);
             funded.insert(funded.begin(), toFund1);
         }
         else if (asset2.native())
         {
-            funded =
-                fund(env, gw, {alice, carol}, toFund2, {toFund1}, Fund::All);
+            funded = fund(env, gw, {alice, carol}, toFund2, {toFund1}, Fund::All);
             funded.push_back(toFund2);
         }
 
-        auto const pool1 =
-            STAmount{funded[0].asset(), static_cast<Number>(asset1)};
-        auto const pool2 =
-            STAmount{funded[1].asset(), static_cast<Number>(asset2)};
+        auto const pool1 = STAmount{funded[0].asset(), static_cast<Number>(asset1)};
+        auto const pool2 = STAmount{funded[1].asset(), static_cast<Number>(asset2)};
 
         AMM ammAlice(
-            env,
-            alice,
-            pool1,
-            pool2,
-            CreateArg{.log = false, .tfee = arg.tfee, .err = arg.ter});
-        if (BEAST_EXPECT(
-                ammAlice.expectBalances(pool1, pool2, ammAlice.tokens())))
+            env, alice, pool1, pool2, CreateArg{.log = false, .tfee = arg.tfee, .err = arg.ter});
+        if (BEAST_EXPECT(ammAlice.expectBalances(pool1, pool2, ammAlice.tokens())))
             cb(ammAlice, env);
     }
 }

@@ -1,5 +1,4 @@
-#ifndef XRPL_RPC_BOOKCHANGES_H_INCLUDED
-#define XRPL_RPC_BOOKCHANGES_H_INCLUDED
+#pragma once
 
 #include <xrpl/json/json_value.h>
 #include <xrpl/protocol/LedgerFormats.h>
@@ -41,8 +40,7 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
 
     for (auto& tx : lpAccepted->txs)
     {
-        if (!tx.first || !tx.second ||
-            !tx.first->isFieldPresent(sfTransactionType))
+        if (!tx.first || !tx.second || !tx.first->isFieldPresent(sfTransactionType))
             continue;
 
         std::optional<uint32_t> offerCancel;
@@ -74,8 +72,7 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
             // if either FF or PF are missing we can't compute
             // but generally these are cancelled rather than crossed
             // so skipping them is consistent
-            if (!node.isFieldPresent(sfFinalFields) ||
-                !node.isFieldPresent(sfPreviousFields))
+            if (!node.isFieldPresent(sfFinalFields) || !node.isFieldPresent(sfPreviousFields))
                 continue;
 
             auto const& ffBase = node.peekAtField(sfFinalFields);
@@ -105,8 +102,7 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
             std::string g{to_string(deltaGets.asset())};
             std::string p{to_string(deltaPays.asset())};
 
-            bool const noswap =
-                isXRP(deltaGets) ? true : (isXRP(deltaPays) ? false : (g < p));
+            bool const noswap = isXRP(deltaGets) ? true : (isXRP(deltaPays) ? false : (g < p));
 
             STAmount first = noswap ? deltaGets : deltaPays;
             STAmount second = noswap ? deltaPays : deltaGets;
@@ -169,8 +165,8 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
     jvObj[jss::validated] = lpAccepted->header().validated;
     jvObj[jss::ledger_index] = lpAccepted->header().seq;
     jvObj[jss::ledger_hash] = to_string(lpAccepted->header().hash);
-    jvObj[jss::ledger_time] = Json::Value::UInt(
-        lpAccepted->header().closeTime.time_since_epoch().count());
+    jvObj[jss::ledger_time] =
+        Json::Value::UInt(lpAccepted->header().closeTime.time_since_epoch().count());
 
     jvObj[jss::changes] = Json::arrayValue;
 
@@ -193,21 +189,15 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
 
         volA.asset().visit(
             [&](Issue const&) {
-                inner[jss::currency_a] =
-                    (isXRP(volA) ? "XRP_drops" : to_string(volA.asset()));
+                inner[jss::currency_a] = (isXRP(volA) ? "XRP_drops" : to_string(volA.asset()));
             },
-            [&](MPTIssue const&) {
-                inner[jss::mpt_issuance_id_a] = to_string(volA.asset());
-            });
+            [&](MPTIssue const&) { inner[jss::mpt_issuance_id_a] = to_string(volA.asset()); });
 
         volB.asset().visit(
             [&](Issue const&) {
-                inner[jss::currency_b] =
-                    (isXRP(volB) ? "XRP_drops" : to_string(volB.asset()));
+                inner[jss::currency_b] = (isXRP(volB) ? "XRP_drops" : to_string(volB.asset()));
             },
-            [&](MPTIssue const&) {
-                inner[jss::mpt_issuance_id_b] = to_string(volB.asset());
-            });
+            [&](MPTIssue const&) { inner[jss::mpt_issuance_id_b] = to_string(volB.asset()); });
 
         inner[jss::volume_a] = volToStr(volA);
         inner[jss::volume_b] = volToStr(volB);
@@ -227,5 +217,3 @@ computeBookChanges(std::shared_ptr<L const> const& lpAccepted)
 
 }  // namespace RPC
 }  // namespace xrpl
-
-#endif

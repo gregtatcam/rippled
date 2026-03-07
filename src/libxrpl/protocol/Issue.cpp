@@ -89,8 +89,7 @@ issueFromJson(Json::Value const& v)
 
     if (v.isMember(jss::mpt_issuance_id))
     {
-        Throw<std::runtime_error>(
-            "issueFromJson, Issue should not have mpt_issuance_id");
+        Throw<std::runtime_error>("issueFromJson, Issue should not have mpt_issuance_id");
     }
 
     Json::Value const curStr = v[jss::currency];
@@ -98,8 +97,7 @@ issueFromJson(Json::Value const& v)
 
     if (!curStr.isString())
     {
-        Throw<Json::error>(
-            "issueFromJson currency must be a string Json value");
+        Throw<Json::error>("issueFromJson currency must be a string Json value");
     }
 
     auto const currency = to_currency(curStr.asString());

@@ -1,5 +1,4 @@
-#ifndef XRPL_PROTOCOL_MPTISSUE_H_INCLUDED
-#define XRPL_PROTOCOL_MPTISSUE_H_INCLUDED
+#pragma once
 
 #include <xrpl/protocol/AccountID.h>
 #include <xrpl/protocol/UintTypes.h>
@@ -85,8 +84,8 @@ inline AccountID const&
 getMPTIssuer(MPTID const& mptid)
 {
     static_assert(sizeof(MPTID) == (sizeof(std::uint32_t) + sizeof(AccountID)));
-    AccountID const* accountId = reinterpret_cast<AccountID const*>(
-        mptid.data() + sizeof(std::uint32_t));
+    AccountID const* accountId =
+        reinterpret_cast<AccountID const*>(mptid.data() + sizeof(std::uint32_t));
     return *accountId;
 }
 
@@ -135,5 +134,3 @@ struct hash<xrpl::MPTID> : xrpl::MPTID::hasher
 };
 
 }  // namespace std
-
-#endif  // XRPL_PROTOCOL_MPTISSUE_H_INCLUDED

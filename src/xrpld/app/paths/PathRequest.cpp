@@ -1,10 +1,7 @@
 #include <xrpld/app/main/Application.h>
-#include <xrpld/app/misc/LoadFeeTrack.h>
-#include <xrpld/app/misc/NetworkOPs.h>
 #include <xrpld/app/paths/AccountAssets.h>
 #include <xrpld/app/paths/PathRequest.h>
 #include <xrpld/app/paths/PathRequests.h>
-#include <xrpld/app/paths/RippleCalc.h>
 #include <xrpld/app/paths/detail/PathfinderUtils.h>
 #include <xrpld/core/Config.h>
 #include <xrpld/rpc/detail/Tuning.h>
@@ -14,6 +11,9 @@
 #include <xrpl/protocol/ErrorCodes.h>
 #include <xrpl/protocol/RPCErr.h>
 #include <xrpl/protocol/UintTypes.h>
+#include <xrpl/server/LoadFeeTrack.h>
+#include <xrpl/server/NetworkOPs.h>
+#include <xrpl/tx/paths/RippleCalc.h>
 
 #include <optional>
 #include <tuple>
@@ -76,21 +76,18 @@ PathRequest::~PathRequest()
     if (quick_reply_ != steady_clock::time_point{})
     {
         fast = " fast:";
-        fast += std::to_string(
-            duration_cast<milliseconds>(quick_reply_ - created_).count());
+        fast += std::to_string(duration_cast<milliseconds>(quick_reply_ - created_).count());
         fast += "ms";
     }
     if (full_reply_ != steady_clock::time_point{})
     {
         full = " full:";
-        full += std::to_string(
-            duration_cast<milliseconds>(full_reply_ - created_).count());
+        full += std::to_string(duration_cast<milliseconds>(full_reply_ - created_).count());
         full += "ms";
     }
-    stream
-        << iIdentifier << " complete:" << fast << full << " total:"
-        << duration_cast<milliseconds>(steady_clock::now() - created_).count()
-        << "ms";
+    stream << iIdentifier << " complete:" << fast << full
+           << " total:" << duration_cast<milliseconds>(steady_clock::now() - created_).count()
+           << "ms";
 }
 
 bool
@@ -173,8 +170,7 @@ PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
 
     auto const sleDest = lrLedger->read(keylet::account(*raDstAccount));
 
-    Json::Value& jvDestCur =
-        (jvStatus[jss::destination_currencies] = Json::arrayValue);
+    Json::Value& jvDestCur = (jvStatus[jss::destination_currencies] = Json::arrayValue);
 
     if (!sleDest)
     {
@@ -197,14 +193,12 @@ PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
     {
         bool const disallowXRP(sleDest->getFlags() & lsfDisallowXRP);
 
-        auto const destAssets =
-            accountDestAssets(*raDstAccount, crCache, !disallowXRP);
+        auto const destAssets = accountDestAssets(*raDstAccount, crCache, !disallowXRP);
 
         for (auto const& asset : destAssets)
             jvDestCur.append(to_string(asset));
 
-        jvStatus[jss::destination_tag] =
-            (sleDest->getFlags() & lsfRequireDestTag);
+        jvStatus[jss::destination_tag] = (sleDest->getFlags() & lsfRequireDestTag);
     }
 
     jvStatus[jss::ledger_hash] = to_string(lrLedger->header().hash);
@@ -222,9 +216,7 @@ PathRequest::isValid(std::shared_ptr<AssetCache> const& crCache)
     in all cases.
 */
 std::pair<bool, Json::Value>
-PathRequest::doCreate(
-    std::shared_ptr<AssetCache> const& cache,
-    Json::Value const& value)
+PathRequest::doCreate(std::shared_ptr<AssetCache> const& cache, Json::Value const& value)
 {
     bool valid = false;
 
@@ -272,16 +264,14 @@ PathRequest::parseJson(Json::Value const& jvParams)
         return PFR_PJ_INVALID;
     }
 
-    raSrcAccount =
-        parseBase58<AccountID>(jvParams[jss::source_account].asString());
+    raSrcAccount = parseBase58<AccountID>(jvParams[jss::source_account].asString());
     if (!raSrcAccount)
     {
         jvStatus = rpcError(rpcSRC_ACT_MALFORMED);
         return PFR_PJ_INVALID;
     }
 
-    raDstAccount =
-        parseBase58<AccountID>(jvParams[jss::destination_account].asString());
+    raDstAccount = parseBase58<AccountID>(jvParams[jss::destination_account].asString());
     if (!raDstAccount)
     {
         jvStatus = rpcError(rpcDST_ACT_MALFORMED);
@@ -296,8 +286,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
 
     convert_all_ = saDstAmount == STAmount(saDstAmount.asset(), 1u, 0, true);
 
-    if (!validAsset(saDstAmount.asset()) ||
-        (!convert_all_ && saDstAmount <= beast::zero))
+    if (!validAsset(saDstAmount.asset()) || (!convert_all_ && saDstAmount <= beast::zero))
     {
         jvStatus = rpcError(rpcDST_AMT_MALFORMED);
         return PFR_PJ_INVALID;
@@ -315,8 +304,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
         saSendMax.emplace();
         if (!amountFromJsonNoThrow(*saSendMax, jvParams[jss::send_max]) ||
             !validAsset(saSendMax->asset()) ||
-            (*saSendMax <= beast::zero &&
-             *saSendMax != STAmount(saSendMax->asset(), 1u, 0, true)))
+            (*saSendMax <= beast::zero && *saSendMax != STAmount(saSendMax->asset(), 1u, 0, true)))
         {
             jvStatus = rpcError(rpcSENDMAX_MALFORMED);
             return PFR_PJ_INVALID;
@@ -371,8 +359,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
             // Optional issuer
             AccountID srcIssuerID;
             if (c.isMember(jss::issuer) &&
-                (c.isMember(jss::mpt_issuance_id) ||
-                 !c[jss::issuer].isString() ||
+                (c.isMember(jss::mpt_issuance_id) || !c[jss::issuer].isString() ||
                  !to_issuer(srcIssuerID, c[jss::issuer].asString())))
             {
                 jvStatus = rpcError(rpcSRC_ISR_MALFORMED);
@@ -402,8 +389,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
                 {
                     // If neither is the source and they are not equal, then the
                     // source issuer is illegal.
-                    if (srcIssuerID != *raSrcAccount &&
-                        saSendMax->getIssuer() != *raSrcAccount &&
+                    if (srcIssuerID != *raSrcAccount && saSendMax->getIssuer() != *raSrcAccount &&
                         srcIssuerID != saSendMax->getIssuer())
                     {
                         jvStatus = rpcError(rpcSRC_ISR_MALFORMED);
@@ -416,17 +402,14 @@ PathRequest::parseJson(Json::Value const& jvParams)
                         [&](Currency const& currency) {
                             if (srcIssuerID != *raSrcAccount)
                             {
-                                sciSourceAssets.insert(
-                                    Issue{currency, srcIssuerID});
+                                sciSourceAssets.insert(Issue{currency, srcIssuerID});
                             }
                             else if (saSendMax->getIssuer() != *raSrcAccount)
                             {
-                                sciSourceAssets.insert(
-                                    Issue{currency, saSendMax->getIssuer()});
+                                sciSourceAssets.insert(Issue{currency, saSendMax->getIssuer()});
                             }
                             {
-                                sciSourceAssets.insert(
-                                    Issue{currency, *raSrcAccount});
+                                sciSourceAssets.insert(Issue{currency, *raSrcAccount});
                             }
                         },
                         [&](MPTID const& mpt) { sciSourceAssets.insert(mpt); });
@@ -438,9 +421,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
                     [&](Currency const& currency) {
                         sciSourceAssets.insert(Issue{currency, srcIssuerID});
                     },
-                    [&](MPTID const& mpt) {
-                        sciSourceAssets.insert(MPTIssue{mpt});
-                    });
+                    [&](MPTID const& mpt) { sciSourceAssets.insert(MPTIssue{mpt}); });
             }
         }
     }
@@ -451,8 +432,7 @@ PathRequest::parseJson(Json::Value const& jvParams)
     if (jvParams.isMember(jss::domain))
     {
         uint256 num;
-        if (!jvParams[jss::domain].isString() ||
-            !num.parseHex(jvParams[jss::domain].asString()))
+        if (!jvParams[jss::domain].isString() || !num.parseHex(jvParams[jss::domain].asString()))
         {
             jvStatus = rpcError(rpcDOMAIN_MALFORMED);
             return PFR_PJ_INVALID;
@@ -540,13 +520,11 @@ PathRequest::findPaths(
                     [&]<typename TAsset>(TAsset const& a) {
                         if (!sameAccount || a != saDstAmount.asset())
                         {
-                            if (sourceAssets.size() >=
-                                RPC::Tuning::max_auto_src_cur)
+                            if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
                                 return false;
                             if constexpr (std::is_same_v<TAsset, Currency>)
-                                sourceAssets.insert(Issue{
-                                    a,
-                                    a.isZero() ? xrpAccount() : *raSrcAccount});
+                                sourceAssets.insert(
+                                    Issue{a, a.isZero() ? xrpAccount() : *raSrcAccount});
                             else
                                 sourceAssets.insert(MPTIssue{a});
                         }
@@ -565,12 +543,11 @@ PathRequest::findPaths(
     {
         if (continueCallback && !continueCallback())
             break;
-        JLOG(m_journal.debug())
-            << iIdentifier
-            << " Trying to find paths: " << STAmount(asset, 1).getFullText();
+        JLOG(m_journal.debug()) << iIdentifier
+                                << " Trying to find paths: " << STAmount(asset, 1).getFullText();
 
-        auto& pathfinder = getPathFinder(
-            cache, pathasset_map, asset, dst_amount, level, continueCallback);
+        auto& pathfinder =
+            getPathFinder(cache, pathasset_map, asset, dst_amount, level, continueCallback);
         if (!pathfinder)
         {
             JLOG(m_journal.debug()) << iIdentifier << " No paths found";
@@ -579,11 +556,7 @@ PathRequest::findPaths(
 
         STPath fullLiquidityPath;
         auto ps = pathfinder->getBestPaths(
-            max_paths_,
-            fullLiquidityPath,
-            mContext[asset],
-            asset.getIssuer(),
-            continueCallback);
+            max_paths_, fullLiquidityPath, mContext[asset], asset.getIssuer(), continueCallback);
         mContext[asset] = ps;
 
         auto const& sourceAccount = [&] {
@@ -601,22 +574,17 @@ PathRequest::findPaths(
                 return *saSendMax;
             return asset.visit(
                 [&](Issue const& issue) {
-                    return STAmount(
-                        Issue{issue.currency, sourceAccount}, 1u, 0, true);
+                    return STAmount(Issue{issue.currency, sourceAccount}, 1u, 0, true);
                 },
-                [](MPTIssue const& issue) {
-                    return STAmount(issue, 1u, 0, true);
-                });
+                [](MPTIssue const& issue) { return STAmount(issue, 1u, 0, true); });
         }();
 
-        JLOG(m_journal.debug())
-            << iIdentifier << " Paths found, calling rippleCalc";
+        JLOG(m_journal.debug()) << iIdentifier << " Paths found, calling rippleCalc";
 
         path::RippleCalc::Input rcInput;
         if (convert_all_)
             rcInput.partialPaymentAllowed = true;
-        auto sandbox =
-            std::make_unique<PaymentSandbox>(&*cache->getLedger(), tapNONE);
+        auto sandbox = std::make_unique<PaymentSandbox>(&*cache->getLedger(), tapNONE);
         auto rc = path::RippleCalc::rippleCalculate(
             *sandbox,
             saMaxAmount,    // --> Amount to send is unlimited
@@ -632,12 +600,10 @@ PathRequest::findPaths(
         if (!convert_all_ && !fullLiquidityPath.empty() &&
             (rc.result() == terNO_LINE || rc.result() == tecPATH_PARTIAL))
         {
-            JLOG(m_journal.debug())
-                << iIdentifier << " Trying with an extra path element";
+            JLOG(m_journal.debug()) << iIdentifier << " Trying with an extra path element";
 
             ps.push_back(fullLiquidityPath);
-            sandbox =
-                std::make_unique<PaymentSandbox>(&*cache->getLedger(), tapNONE);
+            sandbox = std::make_unique<PaymentSandbox>(&*cache->getLedger(), tapNONE);
             rc = path::RippleCalc::rippleCalculate(
                 *sandbox,
                 saMaxAmount,    // --> Amount to send is unlimited
@@ -652,14 +618,12 @@ PathRequest::findPaths(
             if (rc.result() != tesSUCCESS)
             {
                 JLOG(m_journal.warn())
-                    << iIdentifier << " Failed with covering path "
-                    << transHuman(rc.result());
+                    << iIdentifier << " Failed with covering path " << transHuman(rc.result());
             }
             else
             {
                 JLOG(m_journal.debug())
-                    << iIdentifier << " Extra path element gives "
-                    << transHuman(rc.result());
+                    << iIdentifier << " Extra path element gives " << transHuman(rc.result());
             }
         }
 
@@ -668,13 +632,11 @@ PathRequest::findPaths(
             Json::Value jvEntry(Json::objectValue);
             if (rc.actualAmountIn.holds<Issue>())
                 rc.actualAmountIn.get<Issue>().account = sourceAccount;
-            jvEntry[jss::source_amount] =
-                rc.actualAmountIn.getJson(JsonOptions::none);
+            jvEntry[jss::source_amount] = rc.actualAmountIn.getJson(JsonOptions::none);
             jvEntry[jss::paths_computed] = ps.getJson(JsonOptions::none);
 
             if (convert_all_)
-                jvEntry[jss::destination_amount] =
-                    rc.actualAmountOut.getJson(JsonOptions::none);
+                jvEntry[jss::destination_amount] = rc.actualAmountOut.getJson(JsonOptions::none);
 
             if (hasCompletion())
             {
@@ -686,8 +648,8 @@ PathRequest::findPaths(
         }
         else
         {
-            JLOG(m_journal.debug()) << iIdentifier << " rippleCalc returns "
-                                    << transHuman(rc.result());
+            JLOG(m_journal.debug())
+                << iIdentifier << " rippleCalc returns " << transHuman(rc.result());
         }
     }
 
@@ -707,8 +669,7 @@ PathRequest::doUpdate(
     std::function<bool(void)> const& continueCallback)
 {
     using namespace std::chrono;
-    JLOG(m_journal.debug())
-        << iIdentifier << " update " << (fast ? "fast" : "normal");
+    JLOG(m_journal.debug()) << iIdentifier << " update " << (fast ? "fast" : "normal");
 
     {
         std::lock_guard sl(mLock);
@@ -722,8 +683,7 @@ PathRequest::doUpdate(
     if (hasCompletion())
     {
         // Old ripple_path_find API gives destination_currencies
-        auto& destAssets =
-            (newStatus[jss::destination_currencies] = Json::arrayValue);
+        auto& destAssets = (newStatus[jss::destination_currencies] = Json::arrayValue);
         auto const assets = accountDestAssets(*raDstAccount, cache, true);
         for (auto const& asset : assets)
             destAssets.append(to_string(asset));
@@ -800,8 +760,7 @@ PathRequest::doUpdate(
         jvStatus = newStatus;
     }
 
-    JLOG(m_journal.debug())
-        << iIdentifier << " update finished " << (fast ? "fast" : "normal");
+    JLOG(m_journal.debug()) << iIdentifier << " update finished " << (fast ? "fast" : "normal");
     return newStatus;
 }
 

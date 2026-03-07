@@ -30,8 +30,7 @@ paths::operator()(Env& env, JTx& jt) const
     }
 
     Pathfinder pf(
-        std::make_shared<AssetCache>(
-            env.current(), env.app().journal("AssetCache")),
+        std::make_shared<AssetCache>(env.current(), env.app().journal("AssetCache")),
         from,
         to,
         in_,
@@ -96,9 +95,7 @@ path::append_one(BookSpec const& book)
             jv["currency"] = to_string(issue.currency);
             jv["issuer"] = toBase58(issue.account);
         },
-        [&](MPTIssue const& issue) {
-            jv["mpt_issuance_id"] = to_string(issue.getMptID());
-        });
+        [&](MPTIssue const& issue) { jv["mpt_issuance_id"] = to_string(issue.getMptID()); });
 }
 
 void

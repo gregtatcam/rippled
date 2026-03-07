@@ -1,5 +1,4 @@
-#ifndef XRPL_BASICS_IOUAMOUNT_H_INCLUDED
-#define XRPL_BASICS_IOUAMOUNT_H_INCLUDED
+#pragma once
 
 #include <xrpl/basics/LocalValue.h>
 #include <xrpl/basics/Number.h>
@@ -22,8 +21,7 @@ namespace xrpl {
     if the amount exceeds the largest representable amount, but underflows
     will silently truncate to zero.
 */
-class IOUAmount : private boost::totally_ordered<IOUAmount>,
-                  private boost::additive<IOUAmount>
+class IOUAmount : private boost::totally_ordered<IOUAmount>, private boost::additive<IOUAmount>
 {
 private:
     using mantissa_type = std::int64_t;
@@ -113,7 +111,8 @@ IOUAmount::operator=(beast::Zero)
     return *this;
 }
 
-inline IOUAmount::operator Number() const
+inline IOUAmount::
+operator Number() const
 {
     return Number{mantissa_, exponent_};
 }
@@ -143,7 +142,8 @@ IOUAmount::operator<(IOUAmount const& other) const
     return Number{*this} < Number{other};
 }
 
-inline IOUAmount::operator bool() const noexcept
+inline IOUAmount::
+operator bool() const noexcept
 {
     return mantissa_ != 0;
 }
@@ -175,11 +175,7 @@ to_string(IOUAmount const& amount);
    dividing by den.
 */
 IOUAmount
-mulRatio(
-    IOUAmount const& amt,
-    std::uint32_t num,
-    std::uint32_t den,
-    bool roundUp);
+mulRatio(IOUAmount const& amt, std::uint32_t num, std::uint32_t den, bool roundUp);
 
 // Since many uses of the number class do not have access to a ledger,
 // getSTNumberSwitchover needs to be globally accessible.
@@ -214,5 +210,3 @@ public:
 };
 
 }  // namespace xrpl
-
-#endif
