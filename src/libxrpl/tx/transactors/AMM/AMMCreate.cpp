@@ -9,6 +9,7 @@
 #include <xrpl/tx/transactors/AMM/AMMHelpers.h>
 #include <xrpl/tx/transactors/AMM/AMMUtils.h>
 #include <xrpl/tx/transactors/MPT/MPTUtils.h>
+#include <xrpl/tx/transactors/MPT/MPTokenAuthorize.h>
 
 namespace xrpl {
 

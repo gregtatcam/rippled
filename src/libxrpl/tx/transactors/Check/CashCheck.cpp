@@ -6,6 +6,7 @@
 #include <xrpl/protocol/TER.h>
 #include <xrpl/tx/paths/Flow.h>
 #include <xrpl/tx/transactors/Check/CashCheck.h>
+#include <xrpl/tx/transactors/MPT/MPTokenAuthorize.h>
 
 #include <algorithm>
 
