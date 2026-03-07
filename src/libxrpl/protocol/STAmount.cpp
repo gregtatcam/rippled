@@ -449,6 +449,7 @@ getRate(STAmount const& offerOut, STAmount const& offerIn)
 {
     if (offerOut == beast::zero)
         return 0;
+
     try
     {
         STAmount r = divide(offerIn, offerOut, noIssue());
@@ -460,12 +461,11 @@ getRate(STAmount const& offerOut, STAmount const& offerIn)
         std::uint64_t ret = r.exponent() + 100;
         return (ret << (64 - 8)) | r.mantissa();
     }
-    catch (std::exception const&)
+    catch (...)
     {
+        // overflow -- very bad offer
+        return 0;
     }
-
-    // overflow -- very bad offer
-    return 0;
 }
 
 /**

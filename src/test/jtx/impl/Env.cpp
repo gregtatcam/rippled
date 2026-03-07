@@ -583,10 +583,10 @@ Env::st(JTx const& jt)
     {
         return sterilize(STTx{std::move(*obj)});
     }
-    catch (std::exception const&)
+    catch (...)
     {
+        return nullptr;
     }
-    return nullptr;
 }
 
 std::shared_ptr<STTx const>
@@ -609,10 +609,10 @@ Env::ust(JTx const& jt)
     {
         return std::make_shared<STTx const>(std::move(*obj));
     }
-    catch (std::exception const&)
+    catch (...)
     {
+        return nullptr;
     }
-    return nullptr;
 }
 
 Json::Value
