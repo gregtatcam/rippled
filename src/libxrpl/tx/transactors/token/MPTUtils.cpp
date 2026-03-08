@@ -1,7 +1,7 @@
 #include <xrpl/ledger/ReadView.h>
 #include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Indexes.h>
-#include <xrpl/tx/transactors/MPT/MPTUtils.h>
+#include <xrpl/tx/transactors/token/MPTUtils.h>
 
 namespace xrpl {
 

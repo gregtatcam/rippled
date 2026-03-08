@@ -107,6 +107,7 @@ ValidMPTIssuance::finalize(
         }
 
         bool const lendingProtocolEnabled = view.rules().enabled(featureLendingProtocol);
+        bool const mptV2Enabled = view.rules().enabled(featureMPTokensV2);
         // ttESCROW_FINISH may authorize an MPT, but it can't have the
         // mayAuthorizeMPT privilege, because that may cause
         // non-amendment-gated side effects.
@@ -128,7 +129,25 @@ ValidMPTIssuance::finalize(
                                    "succeeded but deleted issuances";
                 return false;
             }
-            else if (lendingProtocolEnabled && mptokensCreated_ + mptokensDeleted_ > 1)
+            else if (
+                mptV2Enabled && hasPrivilege(tx, mayAuthorizeMPT) &&
+                (txnType == ttAMM_WITHDRAW || txnType == ttAMM_CLAWBACK))
+            {
+                if (submittedByIssuer && txnType == ttAMM_WITHDRAW && mptokensCreated_ > 0)
+                {
+                    JLOG(j.fatal()) << "Invariant failed: MPT authorize "
+                                       "submitted by issuer succeeded "
+                                       "but created bad number of mptokens";
+                    return false;
+                }
+                else if (mptokensCreated_ > 1 || mptokensDeleted_ > 2)
+                {
+                    JLOG(j.fatal()) << "Invariant failed: MPT authorize  succeeded "
+                                       "but created/deleted bad number of mptokens";
+                    return false;
+                }
+            }
+            else if (lendingProtocolEnabled && (mptokensCreated_ + mptokensDeleted_) > 1)
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT authorize succeeded "
                                    "but created/deleted bad number mptokens";
@@ -153,6 +172,51 @@ ValidMPTIssuance::finalize(
 
             return true;
         }
+
+        if (hasPrivilege(tx, mayCreateMPT))
+        {
+            bool const submittedByIssuer = tx.isFieldPresent(sfHolder);
+
+            if (mptIssuancesCreated_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize "
+                                   "succeeded but created MPT issuances";
+                return false;
+            }
+            else if (mptIssuancesDeleted_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize "
+                                   "succeeded but deleted issuances";
+                return false;
+            }
+            else if (mptokensDeleted_ > 0)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize "
+                                   "succeeded but deleted MPTokens";
+                return false;
+            }
+            // AMM can be created with IOU/MPT or MPT/MPT
+            else if (
+                (txnType == ttAMM_CREATE && mptokensCreated_ > 2) ||
+                (txnType == ttCHECK_CASH && mptokensCreated_ > 1))
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize "
+                                   "succeeded but created bad number of mptokens";
+                return false;
+            }
+            else if (submittedByIssuer)
+            {
+                JLOG(j.fatal()) << "Invariant failed: MPT authorize submitted by issuer "
+                                   "succeeded but created mptokens";
+                return false;
+            }
+
+            // Offer crossing or payment may consume multiple offers
+            // where takerPays is MPT amount. If the offer owner doesn't
+            // own MPT then MPT is created automatically.
+            return true;
+        }
+
         if (txnType == ttESCROW_FINISH)
         {
             // ttESCROW_FINISH may authorize an MPT, but it can't have the

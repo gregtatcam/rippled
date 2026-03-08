@@ -3,7 +3,7 @@
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/tx/paths/RippleCalc.h>
-#include <xrpl/tx/transactors/AMM/AMMContext.h>
+#include <xrpl/tx/transactors/dex/AMMContext.h>
 
 namespace xrpl {
 namespace test {

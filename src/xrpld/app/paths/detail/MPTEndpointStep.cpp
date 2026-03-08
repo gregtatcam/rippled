@@ -4,8 +4,8 @@
 #include <xrpl/protocol/MPTAmount.h>
 #include <xrpl/protocol/Quality.h>
 #include <xrpl/tx/paths/detail/Steps.h>
-#include <xrpl/tx/transactors/MPT/MPTUtils.h>
-#include <xrpl/tx/transactors/MPT/MPTokenAuthorize.h>
+#include <xrpl/tx/transactors/token/MPTUtils.h>
+#include <xrpl/tx/transactors/token/MPTokenAuthorize.h>
 
 #include <boost/container/flat_set.hpp>
 

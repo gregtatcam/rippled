@@ -17,7 +17,7 @@
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/jss.h>
-#include <xrpl/tx/transactors/AMM/AMMHelpers.h>
+#include <xrpl/tx/transactors/dex/AMMHelpers.h>
 
 namespace xrpl {
 namespace test {
@@ -34,7 +34,7 @@ class MPToken_test : public beast::unit_test::suite
         // test preflight of MPTokenIssuanceCreate
         {
             // If the MPT amendment is not enabled, you should not be able to
-            // create MPTokenIssuances
+            // create MPTokenIssuance
             Env env{*this, features - featureMPTokensV1};
             MPTTester mptAlice(env, alice);
 

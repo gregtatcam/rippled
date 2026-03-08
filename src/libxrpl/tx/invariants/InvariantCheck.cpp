@@ -282,25 +282,29 @@ NoZeroEscrow::visitEntry(
         }
         else
         {
-            // IOU case
-            if (amount.holds<Issue>())
-            {
-                if (amount <= beast::zero)
-                    return true;
+            return amount.asset().visit(
+                [&](Issue const& issue) {
+                    // IOU case
+                    if (amount <= beast::zero)
+                        return true;
 
-                if (badCurrency() == amount.getCurrency())
-                    return true;
-            }
+                    if (badCurrency() == issue.currency)
+                        return true;
 
-            // MPT case
-            if (amount.holds<MPTIssue>())
-            {
-                if (amount <= beast::zero)
-                    return true;
+                    return false;
+                }
 
-                if (amount.mpt() > MPTAmount{maxMPTokenAmount})
-                    return true;  // LCOV_EXCL_LINE
-            }
+                // MPT case
+                ,
+                [&](MPTIssue const&) {
+                    if (amount <= beast::zero)
+                        return true;
+
+                    if (amount.mpt() > MPTAmount{maxMPTokenAmount})
+                        return true;  // LCOV_EXCL_LINE
+
+                    return false;
+                });
         }
         return false;
     };
@@ -595,8 +599,8 @@ NoXRPTrustLines::visitEntry(
         // checking the issue directly here instead of
         // relying on .native() just in case native somehow
         // were systematically incorrect
-        xrpTrustLine_ = after->getFieldAmount(sfLowLimit).issue() == xrpIssue() ||
-            after->getFieldAmount(sfHighLimit).issue() == xrpIssue();
+        xrpTrustLine_ = after->getFieldAmount(sfLowLimit).asset() == xrpIssue() ||
+            after->getFieldAmount(sfHighLimit).asset() == xrpIssue();
     }
 }
 
@@ -769,17 +773,23 @@ ValidClawback::finalize(
             return false;
         }
 
-        if (trustlinesChanged == 1)
+        bool const mptV2Enabled = view.rules().enabled(featureMPTokensV2);
+        if (trustlinesChanged == 1 || (mptV2Enabled && mptokensChanged == 1))
         {
             AccountID const issuer = tx.getAccountID(sfAccount);
             STAmount const& amount = tx.getFieldAmount(sfAmount);
             AccountID const& holder = amount.getIssuer();
-            STAmount const holderBalance =
-                accountHolds(view, holder, amount.getCurrency(), issuer, fhIGNORE_FREEZE, j);
+            STAmount const holderBalance = amount.asset().visit(
+                [&](Issue const& issue) {
+                    return accountHolds(view, holder, issue.currency, issuer, fhIGNORE_FREEZE, j);
+                },
+                [&](MPTIssue const& issue) {
+                    return accountHolds(view, issuer, issue, fhIGNORE_FREEZE, ahIGNORE_AUTH, j);
+                });
 
             if (holderBalance.signum() < 0)
             {
-                JLOG(j.fatal()) << "Invariant failed: trustline balance is negative";
+                JLOG(j.fatal()) << "Invariant failed: trustline or MPT balance is negative";
                 return false;
             }
         }
@@ -1003,6 +1013,80 @@ NoModifiedUnmodifiableFields::finalize(
                 return false;
         }
     }
+    return true;
+}
+
+void
+ValidPayment::visitEntry(
+    bool,
+    std::shared_ptr<SLE const> const& before,
+    std::shared_ptr<SLE const> const& after)
+{
+    if (overflow_)
+        return;
+
+    auto makeKey = [](SLE const& sle) {
+        if (sle.getType() == ltMPTOKEN_ISSUANCE)
+            return makeMptID(sle[sfSequence], sle[sfIssuer]);
+        return sle[sfMPTokenIssuanceID];
+    };
+
+    auto update = [&](SLE const& sle, Order order) {
+        auto const type = sle.getType();
+        if (type == ltMPTOKEN_ISSUANCE)
+        {
+            data_[makeKey(sle)].outstanding[order] = sle[sfOutstandingAmount];
+        }
+        else if (type == ltMPTOKEN)
+        {
+            // subtract before from after
+            data_[makeKey(sle)].mptAmount +=
+                (order == Before ? -1 : 1) * (sle[sfMPTAmount] + sle[~sfLockedAmount].value_or(0));
+        }
+    };
+
+    if (before)
+        update(*before, Before);
+
+    if (after)
+    {
+        if (after->getType() == ltMPTOKEN_ISSUANCE)
+            overflow_ = (*after)[sfOutstandingAmount] >
+                (*after)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+        update(*after, After);
+    }
+}
+
+bool
+ValidPayment::finalize(
+    STTx const& tx,
+    TER const result,
+    XRPAmount const,
+    ReadView const& view,
+    beast::Journal const& j)
+{
+    if (result == tesSUCCESS)
+    {
+        bool const enforce = view.rules().enabled(featureMPTokensV2);
+        if (overflow_)
+        {
+            JLOG(j.fatal()) << "Invariant failed: OutstandingAmount overflow";
+            return enforce ? false : true;
+        }
+
+        for (auto const& [id, data] : data_)
+        {
+            (void)id;
+            if (data.outstanding[After] != (data.outstanding[Before] + data.mptAmount))
+            {
+                JLOG(j.fatal()) << "Invariant failed: invalid OutstandingAmount balance "
+                                << data.outstanding[Before] << " " << data.outstanding[After] << " "
+                                << data.mptAmount;
+                return enforce ? false : true;
+            }
+        }
+    }
+
     return true;
 }
 
