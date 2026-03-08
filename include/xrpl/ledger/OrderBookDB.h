@@ -3,8 +3,8 @@
 #include <xrpl/ledger/AcceptedLedgerTx.h>
 #include <xrpl/ledger/BookListeners.h>
 #include <xrpl/ledger/ReadView.h>
+#include <xrpl/protocol/Asset.h>
 #include <xrpl/protocol/Book.h>
-#include <xrpl/protocol/Issue.h>
 #include <xrpl/protocol/MultiApiJson.h>
 #include <xrpl/protocol/UintTypes.h>
 

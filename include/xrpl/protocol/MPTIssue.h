@@ -89,6 +89,12 @@ getMPTIssuer(MPTID const& mptid)
     return *accountId;
 }
 
+// Disallow temporary
+inline AccountID const&
+getMPTIssuer(MPTID const&&) = delete;
+inline AccountID const&
+getMPTIssuer(MPTID&&) = delete;
+
 inline MPTID
 noMPT()
 {
