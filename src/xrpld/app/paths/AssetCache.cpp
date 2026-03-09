@@ -1,7 +1,7 @@
 #include <xrpld/app/paths/AssetCache.h>
 #include <xrpld/app/paths/TrustLine.h>
 
-#include </Users/gregt/Work/Projects/rippled-fork-dev/include/xrpl/tx/transactors/MPT/MPTUtils.h>
+#include <xrpl/tx/transactors/token/MPTUtils.h>
 
 namespace xrpl {
 
