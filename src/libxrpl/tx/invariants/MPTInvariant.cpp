@@ -253,4 +253,78 @@ ValidMPTIssuance::finalize(
         mptokensDeleted_ == 0;
 }
 
+void
+ValidMPTPayment::visitEntry(
+    bool,
+    std::shared_ptr<SLE const> const& before,
+    std::shared_ptr<SLE const> const& after)
+{
+    if (overflow_)
+        return;
+
+    auto makeKey = [](SLE const& sle) {
+        if (sle.getType() == ltMPTOKEN_ISSUANCE)
+            return makeMptID(sle[sfSequence], sle[sfIssuer]);
+        return sle[sfMPTokenIssuanceID];
+    };
+
+    auto update = [&](SLE const& sle, Order order) {
+        auto const type = sle.getType();
+        if (type == ltMPTOKEN_ISSUANCE)
+        {
+            data_[makeKey(sle)].outstanding[order] = sle[sfOutstandingAmount];
+        }
+        else if (type == ltMPTOKEN)
+        {
+            // subtract before from after
+            data_[makeKey(sle)].mptAmount +=
+                (order == Before ? -1 : 1) * (sle[sfMPTAmount] + sle[~sfLockedAmount].value_or(0));
+        }
+    };
+
+    if (before)
+        update(*before, Before);
+
+    if (after)
+    {
+        if (after->getType() == ltMPTOKEN_ISSUANCE)
+            overflow_ = (*after)[sfOutstandingAmount] >
+                (*after)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+        update(*after, After);
+    }
+}
+
+bool
+ValidMPTPayment::finalize(
+    STTx const& tx,
+    TER const result,
+    XRPAmount const,
+    ReadView const& view,
+    beast::Journal const& j)
+{
+    if (result == tesSUCCESS)
+    {
+        bool const enforce = view.rules().enabled(featureMPTokensV2);
+        if (overflow_)
+        {
+            JLOG(j.fatal()) << "Invariant failed: OutstandingAmount overflow";
+            return !enforce;
+        }
+
+        for (auto const& [id, data] : data_)
+        {
+            (void)id;
+            if (data.outstanding[After] != (data.outstanding[Before] + data.mptAmount))
+            {
+                JLOG(j.fatal()) << "Invariant failed: invalid OutstandingAmount balance "
+                                << data.outstanding[Before] << " " << data.outstanding[After] << " "
+                                << data.mptAmount;
+                return !enforce;
+            }
+        }
+    }
+
+    return true;
+}
+
 }  // namespace xrpl
