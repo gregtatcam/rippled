@@ -1344,6 +1344,12 @@ BookStep<TIn, TOut, TDerived>::checkMPTDEX(ReadView const& view, AccountID const
             // Offer's owner is an issuer
             if (asset.getIssuer() == owner)
                 return true;
+            // The previous step could be MPTEndpointStep with non issuer account or
+            // BookStep. Fail both if in asset is locked. In the former case it is holder
+            // to locked holder transfer. In the latter case it is not possible to tell if
+            // it is issuer to holder or holder to holder transfer.
+            if (isFrozen(view, owner, book_.in.get<MPTIssue>()))
+                return false;
             // Previous step is BookStep. BookStep only sends if CanTransfer is
             // set and not locked or the offer is owned by an issuer
             if (prevStep_->bookStepBook())
@@ -1366,7 +1372,7 @@ BookStep<TIn, TOut, TDerived>::checkMPTDEX(ReadView const& view, AccountID const
         if (asset.getIssuer() == owner)
             return true;
 
-        // Next step is BookStep and offer's owner is not an issuer
+        // Next step is BookStep and offer's owner is not an issuer.
         return canTransfer(view, asset, owner, owner) == tesSUCCESS;
     }
 
