@@ -29,13 +29,13 @@ escrowCancelPreclaimHelper<Issue>(
     AccountID const& account,
     STAmount const& amount)
 {
-    AccountID issuer = amount.getIssuer();
+    AccountID const& issuer = amount.getIssuer();
     // If the issuer is the same as the account, return tecINTERNAL
     if (issuer == account)
         return tecINTERNAL;  // LCOV_EXCL_LINE
 
     // If the issuer has requireAuth set, check if the account is authorized
-    if (auto const ter = requireAuth(ctx.view, amount.issue(), account); ter != tesSUCCESS)
+    if (auto const ter = requireAuth(ctx.view, amount.get<Issue>(), account); ter != tesSUCCESS)
         return ter;
 
     return tesSUCCESS;
