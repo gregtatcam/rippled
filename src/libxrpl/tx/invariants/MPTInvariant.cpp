@@ -140,6 +140,11 @@ ValidMPTIssuance::finalize(
                                        "but created bad number of mptokens";
                     return false;
                 }
+                //  At most one MPToken may be created on withdraw/clawback since:
+                //  - Liquidity Provider must have at least one token in order
+                //    participate in AMM pool liquidity.
+                //  - At most two MPTokens may be deleted if AMM pool, which has exactly
+                //    two tokens, is empty after withdraw/clawback.
                 else if (mptokensCreated_ > 1 || mptokensDeleted_ > 2)
                 {
                     JLOG(j.fatal()) << "Invariant failed: MPT authorize  succeeded "
@@ -195,7 +200,9 @@ ValidMPTIssuance::finalize(
                                    "succeeded but deleted MPTokens";
                 return false;
             }
-            // AMM can be created with IOU/MPT or MPT/MPT
+            // AMMCreate may auto-create up to two MPT objects:
+            //   - one per asset side in an MPT/MPT AMM, or one in an IOU/MPT AMM.
+            // CheckCash may auto-create at most one MPT object for the receiver.
             else if (
                 (txnType == ttAMM_CREATE && mptokensCreated_ > 2) ||
                 (txnType == ttCHECK_CASH && mptokensCreated_ > 1))
