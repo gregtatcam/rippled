@@ -51,7 +51,7 @@ AMMDelete::doApply()
     Sandbox sb(&ctx_.view());
 
     auto const ter = deleteAMMAccount(sb, ctx_.tx[sfAsset], ctx_.tx[sfAsset2], j_);
-    if (ter == tesSUCCESS || ter == tecINCOMPLETE)
+    if (isTesSuccess(ter) || ter == tecINCOMPLETE)
         sb.apply(ctx_.rawView());
 
     return ter;

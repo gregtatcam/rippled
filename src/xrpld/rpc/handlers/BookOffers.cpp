@@ -204,10 +204,8 @@ doBookOffers(RPC::JsonContext& context)
         {
             return RPC::make_error(rpcDOMAIN_MALFORMED, "Unable to parse domain.");
         }
-        else
-        {
-            domain = num;
-        }
+
+        domain = num;
     }
 
     if (book.in == book.out)
@@ -216,7 +214,7 @@ doBookOffers(RPC::JsonContext& context)
         return RPC::make_error(rpcBAD_MARKET);
     }
 
-    unsigned int limit;
+    unsigned int limit = 0;
     if (auto err = readLimitField(limit, RPC::Tuning::bookOffers, context))
         return *err;
 

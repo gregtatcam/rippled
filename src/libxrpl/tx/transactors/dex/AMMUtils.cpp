@@ -1,4 +1,5 @@
 #include <xrpl/basics/Log.h>
+#include <xrpl/basics/safe_cast.h>
 #include <xrpl/ledger/Sandbox.h>
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/STObject.h>
@@ -55,9 +56,13 @@ ammHolds(
                                      Asset checkIssue,
                                      char const* label) -> std::optional<std::pair<Asset, Asset>> {
             if (checkIssue == asset1)
+            {
                 return std::make_optional(std::make_pair(asset1, asset2));
-            else if (checkIssue == asset2)
+            }
+            if (checkIssue == asset2)
+            {
                 return std::make_optional(std::make_pair(asset2, asset1));
+            }
             // Unreachable unless AMM corrupted.
             // LCOV_EXCL_START
             JLOG(j.debug()) << "ammHolds: Invalid " << label << " " << checkIssue;
@@ -68,7 +73,7 @@ ammHolds(
         {
             return singleAsset(*optAsset1, "optAsset1");
         }
-        else if (optAsset2)
+        if (optAsset2)
         {
             // Cannot have Amount2 without Amount.
             return singleAsset(*optAsset2, "optAsset2");  // LCOV_EXCL_LINE
@@ -157,7 +162,7 @@ getTradingFee(ReadView const& view, SLE const& ammSle, AccountID const& account)
         "xrpl::getTradingFee : auction present");
     if (ammSle.isFieldPresent(sfAuctionSlot))
     {
-        auto const& auctionSlot = static_cast<STObject const&>(ammSle.peekAtField(sfAuctionSlot));
+        auto const& auctionSlot = safe_downcast<STObject const&>(ammSle.peekAtField(sfAuctionSlot));
         // Not expired
         if (auto const expiration = auctionSlot[~sfExpiration];
             duration_cast<seconds>(view.header().parentCloseTime.time_since_epoch()).count() <
@@ -168,8 +173,10 @@ getTradingFee(ReadView const& view, SLE const& ammSle, AccountID const& account)
             if (auctionSlot.isFieldPresent(sfAuthAccounts))
             {
                 for (auto const& acct : auctionSlot.getFieldArray(sfAuthAccounts))
+                {
                     if (acct[~sfAccount] == account)
                         return auctionSlot[sfDiscountedFee];
+                }
             }
         }
     }
@@ -317,7 +324,7 @@ deleteAMMAccount(Sandbox& sb, Asset const& asset, Asset const& asset2, beast::Jo
     }
 
     if (auto const ter = deleteAMMTrustLines(sb, ammAccountID, maxDeletableAMMTrustLines, j);
-        ter != tesSUCCESS)
+        !isTesSuccess(ter))
         return ter;
 
     // Delete AMM's MPTokens only if all trustlines are deleted. If trustlines
@@ -386,13 +393,21 @@ initializeFeeAuctionVote(
     auctionSlot.setFieldAmount(sfPrice, STAmount{lptAsset, 0});
     // Set the fee
     if (tfee != 0)
+    {
         ammSle->setFieldU16(sfTradingFee, tfee);
+    }
     else if (ammSle->isFieldPresent(sfTradingFee))
+    {
         ammSle->makeFieldAbsent(sfTradingFee);  // LCOV_EXCL_LINE
+    }
     if (auto const dfee = tfee / AUCTION_SLOT_DISCOUNTED_FEE_FRACTION)
+    {
         auctionSlot.setFieldU16(sfDiscountedFee, dfee);
+    }
     else if (auctionSlot.isFieldPresent(sfDiscountedFee))
+    {
         auctionSlot.makeFieldAbsent(sfDiscountedFee);  // LCOV_EXCL_LINE
+    }
 }
 
 Expected<bool, TER>
@@ -467,14 +482,20 @@ isOnlyLiquidityProvider(ReadView const& view, Issue const& ammIssue, AccountID c
                 }
                 // AMM account has at most two IOU trustlines
                 else if (++nIOUTrustLines > 2)
+                {
                     return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
+                }
             }
             // Another Liquidity Provider LPToken trustline
             else if (isLPTokenTrustline)
+            {
                 return false;
+            }
             // AMM account has at most two IOU trustlines
             else if (++nIOUTrustLines > 2)
+            {
                 return Unexpected<TER>(tecINTERNAL);  // LCOV_EXCL_LINE
+            }
         }
         auto const uNodeNext = ownerDir->getFieldU64(sfIndexNext);
         if (uNodeNext == 0)
@@ -496,9 +517,13 @@ verifyAndAdjustLPTokenBalance(
     std::shared_ptr<SLE>& ammSle,
     AccountID const& account)
 {
-    if (auto const res = isOnlyLiquidityProvider(sb, lpTokens.get<Issue>(), account); !res)
+    auto const res = isOnlyLiquidityProvider(sb, lpTokens.get<Issue>(), account);
+    if (!res.has_value())
+    {
         return Unexpected<TER>(res.error());
-    else if (res.value())
+    }
+
+    if (res.value())
     {
         if (withinRelativeDistance(
                 lpTokens, ammSle->getFieldAmount(sfLPTokenBalance), Number{1, -3}))

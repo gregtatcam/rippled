@@ -1,5 +1,7 @@
 #include <xrpl/basics/Log.h>
 #include <xrpl/ledger/View.h>
+#include <xrpl/ledger/helpers/OfferHelpers.h>
+#include <xrpl/ledger/helpers/RippleStateHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/LedgerFormats.h>
 #include <xrpl/tx/paths/OfferStream.h>
@@ -87,8 +89,10 @@ accountFundsHelper(
     if constexpr (std::is_same_v<T, IOUAmount>)
     {
         if (id == asset.getIssuer())
+        {
             // self funded
             return amtDefault;
+        }
     }
     else if constexpr (std::is_same_v<T, MPTAmount>)
     {

@@ -97,7 +97,7 @@ STIssue::add(Serializer& s) const
         [&](MPTIssue const& issue) {
             s.addBitString(issue.getIssuer());
             s.addBitString(noAccount());
-            std::uint32_t sequence;
+            std::uint32_t sequence = 0;
             memcpy(&sequence, issue.getMptID().data(), sizeof(sequence));
             s.add32(sequence);
         });
@@ -107,7 +107,7 @@ bool
 STIssue::isEquivalent(STBase const& t) const
 {
     STIssue const* v = dynamic_cast<STIssue const*>(&t);
-    return v && (*v == *this);
+    return (v != nullptr) && (*v == *this);
 }
 
 bool

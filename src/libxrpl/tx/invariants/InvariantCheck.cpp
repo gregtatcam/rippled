@@ -3,6 +3,8 @@
 #include <xrpl/basics/Log.h>
 #include <xrpl/beast/utility/instrumentation.h>
 #include <xrpl/ledger/View.h>
+#include <xrpl/ledger/helpers/AccountRootHelpers.h>
+#include <xrpl/ledger/helpers/RippleStateHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/LedgerFormats.h>
@@ -147,7 +149,7 @@ XRPNotCreated::finalize(
     TER const,
     XRPAmount const fee,
     ReadView const&,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     // The net change should never be positive, as this would mean that the
     // transaction created XRP out of thin air. That's not possible.
@@ -207,7 +209,7 @@ XRPBalanceChecks::finalize(
     TER const,
     XRPAmount const,
     ReadView const&,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if (bad_)
     {
@@ -251,7 +253,7 @@ NoBadOffers::finalize(
     TER const,
     XRPAmount const,
     ReadView const&,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if (bad_)
     {
@@ -348,7 +350,7 @@ NoZeroEscrow::finalize(
     TER const,
     XRPAmount const,
     ReadView const& rv,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if (bad_)
     {
@@ -377,20 +379,22 @@ AccountRootsNotDeleted::finalize(
     TER const result,
     XRPAmount const,
     ReadView const&,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     // AMM account root can be deleted as the result of AMM withdraw/delete
     // transaction when the total AMM LP Tokens balance goes to 0.
     // A successful AccountDelete or AMMDelete MUST delete exactly
     // one account root.
-    if (hasPrivilege(tx, mustDeleteAcct) && result == tesSUCCESS)
+    if (hasPrivilege(tx, mustDeleteAcct) && isTesSuccess(result))
     {
         if (accountsDeleted_ == 1)
             return true;
 
         if (accountsDeleted_ == 0)
+        {
             JLOG(j.fatal()) << "Invariant failed: account deletion "
                                "succeeded without deleting an account";
+        }
         else
             JLOG(j.fatal()) << "Invariant failed: account deletion "
                                "succeeded but deleted multiple accounts!";
@@ -400,7 +404,7 @@ AccountRootsNotDeleted::finalize(
     // A successful AMMWithdraw/AMMClawback MAY delete one account root
     // when the total AMM LP Tokens balance goes to 0. Not every AMM withdraw
     // deletes the AMM account, accountsDeleted_ is set if it is deleted.
-    if (hasPrivilege(tx, mayDeleteAcct) && result == tesSUCCESS && accountsDeleted_ == 1)
+    if (hasPrivilege(tx, mayDeleteAcct) && isTesSuccess(result) && accountsDeleted_ == 1)
         return true;
 
     if (accountsDeleted_ == 0)
@@ -569,7 +573,7 @@ LedgerEntryTypesMatch::finalize(
     TER const,
     XRPAmount const,
     ReadView const&,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if ((!typeMismatch_) && (!invalidTypeAdded_))
         return true;
@@ -611,7 +615,7 @@ NoXRPTrustLines::finalize(
     TER const,
     XRPAmount const,
     ReadView const&,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if (!xrpTrustLine_)
         return true;
@@ -631,11 +635,11 @@ NoDeepFreezeTrustLinesWithoutFreeze::visitEntry(
     if (after && after->getType() == ltRIPPLE_STATE)
     {
         std::uint32_t const uFlags = after->getFieldU32(sfFlags);
-        bool const lowFreeze = uFlags & lsfLowFreeze;
-        bool const lowDeepFreeze = uFlags & lsfLowDeepFreeze;
+        bool const lowFreeze = (uFlags & lsfLowFreeze) != 0u;
+        bool const lowDeepFreeze = (uFlags & lsfLowDeepFreeze) != 0u;
 
-        bool const highFreeze = uFlags & lsfHighFreeze;
-        bool const highDeepFreeze = uFlags & lsfHighDeepFreeze;
+        bool const highFreeze = (uFlags & lsfHighFreeze) != 0u;
+        bool const highDeepFreeze = (uFlags & lsfHighDeepFreeze) != 0u;
 
         deepFreezeWithoutFreeze_ = (lowDeepFreeze && !lowFreeze) || (highDeepFreeze && !highFreeze);
     }
@@ -647,7 +651,7 @@ NoDeepFreezeTrustLinesWithoutFreeze::finalize(
     TER const,
     XRPAmount const,
     ReadView const&,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if (!deepFreezeWithoutFreeze_)
         return true;
@@ -680,7 +684,7 @@ ValidNewAccountRoot::finalize(
     TER const result,
     XRPAmount const,
     ReadView const& view,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if (accountsCreated_ == 0)
         return true;
@@ -693,7 +697,7 @@ ValidNewAccountRoot::finalize(
     }
 
     // From this point on we know exactly one account was created.
-    if (hasPrivilege(tx, createAcct | createPseudoAcct) && result == tesSUCCESS)
+    if (hasPrivilege(tx, createAcct | createPseudoAcct) && isTesSuccess(result))
     {
         bool const pseudoAccount =
             (pseudoAccount_ &&
@@ -755,12 +759,12 @@ ValidClawback::finalize(
     TER const result,
     XRPAmount const,
     ReadView const& view,
-    beast::Journal const& j)
+    beast::Journal const& j) const
 {
     if (tx.getTxnType() != ttCLAWBACK)
         return true;
 
-    if (result == tesSUCCESS)
+    if (isTesSuccess(result))
     {
         if (trustlinesChanged > 1)
         {
@@ -824,8 +828,10 @@ ValidPseudoAccounts::visitEntry(
     std::shared_ptr<SLE const> const& after)
 {
     if (isDelete)
+    {
         // Deletion is ignored
         return;
+    }
 
     if (after && after->getType() == ltACCOUNT_ROOT)
     {
@@ -913,8 +919,10 @@ NoModifiedUnmodifiableFields::visitEntry(
     std::shared_ptr<SLE const> const& after)
 {
     if (isDelete || !before)
+    {
         // Creation and deletion are ignored
         return;
+    }
 
     changedEntries_.emplace(before, after);
 }

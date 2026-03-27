@@ -37,7 +37,7 @@ rpf(jtx::Account const& src, jtx::Account const& dst, std::uint32_t num_src)
     {
         auto& sc = (jv[jss::source_currencies] = Json::arrayValue);
         Json::Value j = Json::objectValue;
-        while (num_src--)
+        while ((num_src--) != 0u)
         {
             j[jss::currency] = std::to_string(num_src + 100);
             sc.append(j);
@@ -204,6 +204,8 @@ public:
                     Json::Value p;
                     p["Paths"] = path[jss::paths_computed];
                     STParsedJSONObject po("generic", p);
+
+                    // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
                     paths = po.object->getFieldPathSet(sfPaths);
                 }
             }
@@ -1512,7 +1514,7 @@ public:
             }
             else
             {
-                BEAST_EXPECT(st.size() == 0);
+                BEAST_EXPECT(st.empty());
                 BEAST_EXPECT(equal(sa, XRP(0)));
             }
         };

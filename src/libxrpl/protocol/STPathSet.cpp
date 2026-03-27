@@ -68,7 +68,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             if (iType == STPathElement::typeNone)
                 return;
         }
-        else if (iType & ~STPathElement::typeAll)
+        else if ((iType & ~STPathElement::typeAll) != 0)
         {
             JLOG(debugLog().error()) << "Bad path element " << iType << " in pathset";
             Throw<std::runtime_error>("bad path element");
@@ -84,7 +84,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             PathAsset asset;
             AccountID issuer;
 
-            if (hasAccount)
+            if (hasAccount != 0)
                 account = sit.get160();
 
             XRPL_ASSERT(
@@ -95,7 +95,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             if (hasMPT)
                 asset = sit.get192();
 
-            if (hasIssuer)
+            if (hasIssuer != 0)
                 issuer = sit.get160();
 
             path.emplace_back(account, asset, issuer, hasCurrency);
@@ -140,7 +140,7 @@ bool
 STPathSet::isEquivalent(STBase const& t) const
 {
     STPathSet const* v = dynamic_cast<STPathSet const*>(&t);
-    return v && (value == v->value);
+    return (v != nullptr) && (value == v->value);
 }
 
 bool
@@ -173,19 +173,20 @@ STPath::getJson(JsonOptions) const
 
         elem[jss::type] = iType;
 
-        if (iType & STPathElement::typeAccount)
+        if ((iType & STPathElement::typeAccount) != 0u)
             elem[jss::account] = to_string(it.getAccountID());
 
         XRPL_ASSERT(
-            !(iType & STPathElement::typeCurrency && iType & STPathElement::typeMPT),
+            ((iType & STPathElement::typeCurrency) == 0u)  && ((iType & STPathElement::typeMPT)
+                                                                  == 0u),
             "xrpl::STPath::getJson : not type Currency and MPT");
-        if (iType & STPathElement::typeCurrency)
+        if ((iType & STPathElement::typeCurrency) != 0u)
             elem[jss::currency] = to_string(it.getCurrency());
 
-        if (iType & STPathElement::typeMPT)
+        if ((iType & STPathElement::typeMPT) != 0u)
             elem[jss::mpt_issuance_id] = to_string(it.getMPTID());
 
-        if (iType & STPathElement::typeIssuer)
+        if ((iType & STPathElement::typeIssuer) != 0u)
             elem[jss::issuer] = to_string(it.getIssuerID());
 
         ret.append(elem);
@@ -228,16 +229,16 @@ STPathSet::add(Serializer& s) const
 
             s.add8(iType);
 
-            if (iType & STPathElement::typeAccount)
+            if ((iType & STPathElement::typeAccount) != 0)
                 s.addBitString(speElement.getAccountID());
 
-            if (iType & STPathElement::typeMPT)
+            if ((iType & STPathElement::typeMPT) != 0u)
                 s.addBitString(speElement.getMPTID());
 
-            if (iType & STPathElement::typeCurrency)
+            if ((iType & STPathElement::typeCurrency) != 0u)
                 s.addBitString(speElement.getCurrency());
 
-            if (iType & STPathElement::typeIssuer)
+            if ((iType & STPathElement::typeIssuer) != 0)
                 s.addBitString(speElement.getIssuerID());
         }
 

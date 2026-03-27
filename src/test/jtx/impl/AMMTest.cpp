@@ -101,18 +101,17 @@ AMMTestBase::AMMTestBase()
 
 void
 AMMTestBase::testAMM(
-    std::function<void(jtx::AMM&, jtx::Env&)>&& cb,
+    std::function<void(jtx::AMM&, jtx::Env&)> const& cb,
     std::optional<std::pair<STAmount, STAmount>> const& pool,
     std::uint16_t tfee,
     std::optional<jtx::ter> const& ter,
     std::vector<FeatureBitset> const& vfeatures)
 {
-    testAMM(
-        std::move(cb), TestAMMArg{.pool = pool, .tfee = tfee, .ter = ter, .features = vfeatures});
+    testAMM(cb, TestAMMArg{.pool = pool, .tfee = tfee, .ter = ter, .features = vfeatures});
 }
 
 void
-AMMTestBase::testAMM(std::function<void(jtx::AMM&, jtx::Env&)>&& cb, TestAMMArg const& arg)
+AMMTestBase::testAMM(std::function<void(jtx::AMM&, jtx::Env&)> const& cb, TestAMMArg const& arg)
 {
     using namespace jtx;
 
@@ -179,13 +178,13 @@ AMMTestBase::testAMM(std::function<void(jtx::AMM&, jtx::Env&)>&& cb, TestAMMArg 
 }
 
 XRPAmount
-AMMTest::reserve(jtx::Env& env, std::uint32_t count) const
+AMMTest::reserve(jtx::Env& env, std::uint32_t count)
 {
     return env.current()->fees().accountReserve(count);
 }
 
 XRPAmount
-AMMTest::ammCrtFee(jtx::Env& env) const
+AMMTest::ammCrtFee(jtx::Env& env)
 {
     return env.current()->fees().increment;
 }

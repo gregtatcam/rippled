@@ -1,6 +1,7 @@
 #include <test/jtx/AMM.h>
 #include <test/jtx/Env.h>
 
+#include <xrpl/basics/safe_cast.h>
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/AmountConversions.h>
 #include <xrpl/protocol/ApiVersion.h>
@@ -52,8 +53,6 @@ AMM::AMM(
     , log_(log)
     , doClose_(close)
     , lastPurchasePrice_(0)
-    , bidMin_()
-    , bidMax_()
     , msig_(ms)
     , fee_(fee)
     , ammAccount_(create(tfee, flags, seq, ter))
@@ -134,9 +133,13 @@ AMM::create(
     if (flags)
         jv[jss::Flags] = *flags;
     if (fee_ != 0)
+    {
         jv[sfFee] = std::to_string(fee_);
+    }
     else
+    {
         jv[jss::Fee] = std::to_string(env_.current()->fees().increment.drops());
+    }
     submit(jv, seq, ter);
 
     if (!ter || env_.ter() == tesSUCCESS)
@@ -230,6 +233,7 @@ IOUAmount
 AMM::getLPTokensBalance(std::optional<AccountID> const& account) const
 {
     if (account)
+    {
         return accountHolds(
                    *env_.current(),
                    *account,
@@ -237,6 +241,7 @@ AMM::getLPTokensBalance(std::optional<AccountID> const& account) const
                    FreezeHandling::fhZERO_IF_FROZEN,
                    env_.journal)
             .iou();
+    }
     if (auto const amm = env_.current()->read(keylet::amm(asset1_.asset(), asset2_.asset())))
         return amm->getFieldAmount(sfLPTokenBalance).iou();
     return IOUAmount{0};
@@ -662,7 +667,7 @@ AMM::vote(
 void
 AMM::vote(VoteArg const& arg)
 {
-    return vote(arg.account, arg.tfee, arg.flags, arg.seq, arg.assets, arg.err);
+    vote(arg.account, arg.tfee, arg.flags, arg.seq, arg.assets, arg.err);
 }
 
 Json::Value
@@ -675,7 +680,8 @@ AMM::bid(BidArg const& arg)
             Throw<std::runtime_error>("AMM::Bid");
         if (amm->isFieldPresent(sfAuctionSlot))
         {
-            auto const& auctionSlot = static_cast<STObject const&>(amm->peekAtField(sfAuctionSlot));
+            auto const& auctionSlot =
+                safe_downcast<STObject const&>(amm->peekAtField(sfAuctionSlot));
             lastPurchasePrice_ = auctionSlot[sfPrice].iou();
         }
     }
@@ -687,11 +693,15 @@ AMM::bid(BidArg const& arg)
     setTokens(jv, arg.assets);
     auto getBid = [&](auto const& bid) {
         if (std::holds_alternative<int>(bid))
+        {
             return STAmount{lptIssue_, std::get<int>(bid)};
-        else if (std::holds_alternative<IOUAmount>(bid))
+        }
+        if (std::holds_alternative<IOUAmount>(bid))
+        {
             return toSTAmount(std::get<IOUAmount>(bid), lptIssue_);
-        else
-            return std::get<STAmount>(bid);
+        }
+
+        return std::get<STAmount>(bid);
     };
     if (arg.bidMin)
     {
@@ -705,7 +715,7 @@ AMM::bid(BidArg const& arg)
         saTokens.setJson(jv[jss::BidMax]);
         bidMax_ = saTokens.iou();
     }
-    if (arg.authAccounts.size() > 0)
+    if (!arg.authAccounts.empty())
     {
         Json::Value accounts(Json::arrayValue);
         for (auto const& account : arg.authAccounts)
@@ -753,22 +763,38 @@ AMM::submit(
     if (msig_)
     {
         if (seq && ter)
+        {
             env_(jv, *msig_, *seq, *ter);
+        }
         else if (seq)
+        {
             env_(jv, *msig_, *seq);
+        }
         else if (ter)
+        {
             env_(jv, *msig_, *ter);
+        }
         else
+        {
             env_(jv, *msig_);
+        }
     }
     else if (seq && ter)
+    {
         env_(jv, *seq, *ter);
+    }
     else if (seq)
+    {
         env_(jv, *seq);
+    }
     else if (ter)
+    {
         env_(jv, *ter);
+    }
     else
+    {
         env_(jv);
+    }
     if (doClose_)
         env_.close();
 }
@@ -783,7 +809,8 @@ AMM::expectAuctionSlot(auto&& cb) const
             Throw<std::runtime_error>("AMM::expectAuctionSlot");
         if (amm->isFieldPresent(sfAuctionSlot))
         {
-            auto const& auctionSlot = static_cast<STObject const&>(amm->peekAtField(sfAuctionSlot));
+            auto const& auctionSlot =
+                safe_downcast<STObject const&>(amm->peekAtField(sfAuctionSlot));
             if (auctionSlot.isFieldPresent(sfAccount))
             {
                 // This could fail in pre-fixInnerObjTemplate tests
@@ -792,7 +819,7 @@ AMM::expectAuctionSlot(auto&& cb) const
                 // to avoid the failure.
                 auto const slotFee = auctionSlot[~sfDiscountedFee].value_or(0);
                 auto const slotInterval = ammAuctionTimeSlot(
-                    env_.app().timeKeeper().now().time_since_epoch().count(), auctionSlot);
+                    env_.app().getTimeKeeper().now().time_since_epoch().count(), auctionSlot);
                 auto const slotPrice = auctionSlot[sfPrice].iou();
                 auto const authAccounts = auctionSlot.getFieldArray(sfAuthAccounts);
                 return cb(slotFee, slotInterval, slotPrice, authAccounts);

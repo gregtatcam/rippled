@@ -1,6 +1,7 @@
 #include <xrpl/ledger/OrderBookDB.h>
 #include <xrpl/ledger/Sandbox.h>
 #include <xrpl/ledger/View.h>
+#include <xrpl/ledger/helpers/AccountRootHelpers.h>
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/STIssue.h>
@@ -81,13 +82,13 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
         return tecDUPLICATE;
     }
 
-    if (auto const ter = requireAuth(ctx.view, amount.asset(), accountID); ter != tesSUCCESS)
+    if (auto const ter = requireAuth(ctx.view, amount.asset(), accountID); !isTesSuccess(ter))
     {
         JLOG(ctx.j.debug()) << "AMM Instance: account is not authorized, " << amount.asset();
         return ter;
     }
 
-    if (auto const ter = requireAuth(ctx.view, amount2.asset(), accountID); ter != tesSUCCESS)
+    if (auto const ter = requireAuth(ctx.view, amount2.asset(), accountID); !isTesSuccess(ter))
     {
         JLOG(ctx.j.debug()) << "AMM Instance: account is not authorized, " << amount2.asset();
         return ter;
@@ -182,27 +183,28 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     auto clawbackDisabled = [&](Asset const& asset) -> TER {
         return asset.visit(
             [&](MPTIssue const& issue) -> TER {
-                if (auto const sle = ctx.view.read(keylet::mptIssuance(issue.getMptID())); !sle)
-                    return tecINTERNAL;
-                else if (sle->getFlags() & lsfMPTCanClawback)
+                auto const sle = ctx.view.read(keylet::mptIssuance(issue.getMptID()));
+                if (!sle)
+                    return tecINTERNAL; // LCOV_EXCL_LINE
+                if (sle->isFlag(lsfMPTCanClawback))
                     return tecNO_PERMISSION;
                 return tesSUCCESS;
             },
             [&](Issue const& issue) -> TER {
-                if (isXRP(issue))
-                    return tesSUCCESS;
-
-                if (auto const sle = ctx.view.read(keylet::account(asset.getIssuer())); !sle)
-                    return tecINTERNAL;
-                else if (sle->getFlags() & lsfAllowTrustLineClawback)
-                    return tecNO_PERMISSION;
-                return tesSUCCESS;
+              if (isXRP(issue))
+                  return tesSUCCESS;
+              auto const sle = ctx.view.read(keylet::account(issue.account));
+              if (!sle)
+                  return tecINTERNAL;  // LCOV_EXCL_LINE
+              if (sle->isFlag(lsfAllowTrustLineClawback))
+                  return tecNO_PERMISSION;
+              return tesSUCCESS;
             });
     };
 
-    if (auto const ter = clawbackDisabled(amount.asset()); ter != tesSUCCESS)
+    if (auto const ter = clawbackDisabled(amount.asset()); !isTesSuccess(ter))
         return ter;
-    if (auto const ter = clawbackDisabled(amount2.asset()); ter != tesSUCCESS)
+    if (auto const ter = clawbackDisabled(amount2.asset()); !isTesSuccess(ter))
         return ter;
 
     return tesSUCCESS;
@@ -264,17 +266,13 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
 
     // Send LPT to LP.
     auto res = accountSend(sb, accountId, account_, lpTokens, ctx_.journal);
-    if (res != tesSUCCESS)
+    if (!isTesSuccess(res))
     {
         JLOG(j_.debug()) << "AMM Instance: failed to send LPT " << lpTokens;
         return {res, false};
     }
 
     auto sendAndInitTrustOrMPT = [&](STAmount const& amount) -> TER {
-        auto doSend = [&]() {
-            return accountSend(
-                sb, account_, accountId, amount, ctx_.journal, WaiveTransferFee::Yes);
-        };
         // Authorize MPT
         return amount.asset().visit(
             [&](MPTIssue const& issue) -> TER {
@@ -284,38 +282,44 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
                 std::uint32_t flags = lsfMPTAMM;
                 if (auto const err =
                         requireAuth(ctx_.view(), mptIssue, accountId, AuthType::WeakAuth);
-                    err != tesSUCCESS)
+                    !isTesSuccess(err))
                 {
                     if (err == tecNO_AUTH)
+                    {
                         flags |= lsfMPTAuthorized;
+                    }
                     else
+                    {
                         return err;
+                    }
                 }
 
                 if (auto const err = MPTokenAuthorize::createMPToken(sb, mptID, accountId, flags);
-                    err != tesSUCCESS)
+                    !isTesSuccess(err))
                     return err;
                 // Don't adjust AMM owner count.
                 // It's irrelevant for pseudo-account like AMM.
-                return doSend();
+                return
+                    accountSend(sb, account_, accountId, amount, ctx_.journal,
+WaiveTransferFee::Yes);
             },
             // Set AMM flag on AMM trustline
             [&](Issue const& issue) -> TER {
-                if (auto const err = doSend(); err != tesSUCCESS)
-                    return err;
-
-                if (!isXRP(issue))
+                if (auto const res =
+                        accountSend(sb, account_, accountId, amount, ctx_.journal, WaiveTransferFee::Yes))
+                    return res;
+                // Set AMM flag on AMM trustline
+                if (!isXRP(amount))
                 {
-                    if (SLE::pointer sleRippleState =
-                            sb.peek(keylet::line(accountId, amount.get<Issue>()));
-                        !sleRippleState)
-                        return tecINTERNAL;
-                    else
+                    SLE::pointer sleRippleState = sb.peek(keylet::line(accountId, issue));
+                    if (!sleRippleState)
                     {
-                        auto const flags = sleRippleState->getFlags();
-                        sleRippleState->setFieldU32(sfFlags, flags | lsfAMMNode);
-                        sb.update(sleRippleState);
+                        return tecINTERNAL;  // LCOV_EXCL_LINE
                     }
+
+                    auto const flags = sleRippleState->getFlags();
+                    sleRippleState->setFieldU32(sfFlags, flags | lsfAMMNode);
+                    sb.update(sleRippleState);
                 }
                 return tesSUCCESS;
             });
@@ -323,7 +327,7 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
 
     // Send asset1.
     res = sendAndInitTrustOrMPT(amount);
-    if (res != tesSUCCESS)
+    if (!isTesSuccess(res))
     {
         JLOG(j_.debug()) << "AMM Instance: failed to send " << amount;
         return {res, false};
@@ -331,7 +335,7 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
 
     // Send asset2.
     res = sendAndInitTrustOrMPT(amount2);
-    if (res != tesSUCCESS)
+    if (!isTesSuccess(res))
     {
         JLOG(j_.debug()) << "AMM Instance: failed to send " << amount2;
         return {res, false};
@@ -348,7 +352,7 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
     addOrderBook(amount.asset(), amount2.asset(), getRate(amount2, amount));
     addOrderBook(amount2.asset(), amount.asset(), getRate(amount, amount2));
 
-    return {res, res == tesSUCCESS};
+    return {res, isTesSuccess(res)};
 }
 
 TER
