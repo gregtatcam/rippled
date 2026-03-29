@@ -27,12 +27,9 @@ AMMClawback::checkExtraFeatures(xrpl::PreflightContext const& ctx)
 
     std::optional<STAmount> const clawAmount = ctx.tx[~sfAmount];
 
-    if (!ctx.rules.enabled(featureMPTokensV2) &&
-        ((clawAmount && clawAmount->holds<MPTIssue>()) || ctx.tx[sfAsset].holds<MPTIssue>() ||
-         ctx.tx[sfAsset2].holds<MPTIssue>()))
-        return false;
-
-    return true;
+    return ctx.rules.enabled(featureMPTokensV2) ||
+        (!(clawAmount && clawAmount->holds<MPTIssue>()) && !ctx.tx[sfAsset].holds<MPTIssue>() &&
+         !ctx.tx[sfAsset2].holds<MPTIssue>());
 }
 
 NotTEC

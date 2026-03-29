@@ -392,7 +392,9 @@ toStrand(
                 curAsset.get<Issue>().account = xrpAccount();
         }
         else if (cur->hasMPT())
+        {
             curAsset = cur->getPathAsset().get<MPTID>();
+        }
 
         using ImpliedStepRet = std::pair<TER, std::unique_ptr<Step>>;
         auto getImpliedStep = [&](AccountID const& src_,

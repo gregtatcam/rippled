@@ -283,7 +283,7 @@ deleteAMMMPTokens(Sandbox& sb, AccountID const& ammAccountID, beast::Journal j)
 
                 return {deleteAMMMPToken(sb, sleItem, ammAccountID, j), SkipEntry::No};
             }
-            else if (nodeType == ltRIPPLE_STATE)
+            if (nodeType == ltRIPPLE_STATE)
             {
                 // Trustlines should have been deleted
                 // LCOV_EXCL_START

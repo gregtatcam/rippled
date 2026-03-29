@@ -827,10 +827,14 @@ private:
             env.close();
 
             if (!features[featureAMMClawback])
+            {
                 amm.deposit(carol, XRP(10), std::nullopt, std::nullopt, std::nullopt);
+            }
             else
+            {
                 amm.deposit(
                     carol, XRP(10), std::nullopt, std::nullopt, std::nullopt, ter(tecNO_AUTH));
+            }
         }
 
         // MPTCanTransfer is not set and the account is not the issuer of MPT
@@ -2104,8 +2108,10 @@ private:
                 ammAlice.withdraw(
                     alice, IOUAmount{9'999'999'9999, -4}, std::nullopt, std::nullopt, err);
                 if (env.enabled(fixAMMv1_3))
+                {
                     BEAST_EXPECT(ammAlice.expectBalances(
                         MPT(ammAlice[0])(1), STAmount{USD, 1, -7}, IOUAmount{1, -4}));
+                }
             },
             {{AMMMPT(10'000'000'000), USD(10'000)}},
             0,
@@ -2122,8 +2128,10 @@ private:
                 ammAlice.withdraw(
                     alice, IOUAmount{9'999'999'999999999, -9}, std::nullopt, std::nullopt, err);
                 if (env.enabled(fixAMMv1_3))
+                {
                     BEAST_EXPECT(ammAlice.expectBalances(
                         MPT(ammAlice[0])(1), STAmount{USD, 1, -11}, IOUAmount{1, -8}));
+                }
             },
             {{AMMMPT(10'000'000'000), USD(10'000)}},
             0,
@@ -3393,7 +3401,7 @@ private:
             // The vote is not added to the slots
             ammAlice.vote(carol, 1'000);
             auto const info = ammAlice.ammRpcInfo()[jss::amm][jss::vote_slots];
-            for (std::uint16_t i = 0; i < info.size(); ++i)
+            for (auto i = 0; i < info.size(); ++i)
                 BEAST_EXPECT(info[i][jss::account] != carol.human());
             // But the slots are refreshed and the fee is changed
             BEAST_EXPECT(ammAlice.expectTradingFee(82));
@@ -3706,12 +3714,12 @@ private:
 
             // 10th Interval after close, price for 1st interval.
             env(ammAlice.bid({.account = carol}));
-            env.close(seconds(10 * AUCTION_SLOT_INTERVAL_DURATION + 1));
+            env.close(seconds((10 * AUCTION_SLOT_INTERVAL_DURATION) + 1));
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, 10, IOUAmount{121'275, -3}));
 
             // 20th Interval (expired) after close, price for 10th interval.
             env(ammAlice.bid({.account = bob}));
-            env.close(seconds(AUCTION_SLOT_TIME_INTERVALS * AUCTION_SLOT_INTERVAL_DURATION + 1));
+            env.close(seconds((AUCTION_SLOT_TIME_INTERVALS * AUCTION_SLOT_INTERVAL_DURATION) + 1));
             BEAST_EXPECT(ammAlice.expectAuctionSlot(0, std::nullopt, IOUAmount{127'33875, -5}));
 
             // 0 Interval.
@@ -5250,7 +5258,7 @@ private:
             AMM ammAlice(env, alice, XRP(10'000), BTC(10'000'000'000'000'000));
 
             for (int i = 0; i < 30; ++i)
-                env(offer(alice, ETH(1'000'000'000'000 + 10'000'000'000 * i), XRP(1)));
+                env(offer(alice, ETH(1'000'000'000'000 + (10'000'000'000 * i)), XRP(1)));
             // This is worse quality offer than 30 offers above.
             // It will not be consumed because of AMM offers limit.
             env(offer(alice, ETH(140'000'000'000'000), XRP(100)));
@@ -5286,7 +5294,7 @@ private:
             AMM ammAlice(env, alice, XRP(10'000), BTC(10'000'000'000'000'000));
 
             for (int i = 0; i < 29; ++i)
-                env(offer(alice, ETH(1'000'000'000'000 + 10'000'000'000 * i), XRP(1)));
+                env(offer(alice, ETH(1'000'000'000'000 + (10'000'000'000 * i)), XRP(1)));
             // This is worse quality offer than 30 offers above.
             // It will not be consumed because of AMM offers limit.
             env(offer(alice, ETH(140'000'000'000'000), XRP(100)));
@@ -5598,9 +5606,13 @@ private:
 
                 // Carol gets back less than the original deposit
                 if (!features[fixAMMv1_3])
+                {
                     env.require(balance(carol, MPT(ammAlice[1])(29'995)));
+                }
                 else
+                {
                     env.require(balance(carol, MPT(ammAlice[1])(29'994)));
+                }
             },
             {{USD(1000), AMMMPT(1000)}},
             0,
@@ -5625,9 +5637,13 @@ private:
                 auto const tokensNoFee = ammAlice.deposit(carol, deposit);
                 BEAST_EXPECT(tokensFee == IOUAmount(485636'0611129, -7));
                 if (!features[fixAMMv1_3])
+                {
                     BEAST_EXPECT(tokensNoFee == IOUAmount(487659'8005807, -7));
+                }
                 else
+                {
                     BEAST_EXPECT(tokensNoFee == IOUAmount(487612'21584827, -8));
+                }
             },
             {{XRP(10'000), AMMMPT(10'000)}},
             1'000,
@@ -5679,9 +5695,13 @@ private:
                 // Single withdrawal. Carol gets ~5USD less than deposited.
                 ammAlice.withdrawAll(carol, MPT(ammAlice[1])(0));
                 if (!features[fixAMMv1_3])
+                {
                     env.require(balance(carol, MPT(ammAlice[1])(29'995)));
+                }
                 else
+                {
                     env.require(balance(carol, MPT(ammAlice[1])(29'994)));
+                }
             },
             {{USD(1000), AMMMPT(1000)}},
             0,
@@ -5705,9 +5725,13 @@ private:
                 BEAST_EXPECT(ammAlice.expectTradingFee(0));
                 auto const tokensNoFee = ammAlice.withdraw(carol, deposit);
                 if (!features[fixAMMv1_3])
+                {
                     env.require(balance(carol, MPT(ammAlice[1])(30443)));
+                }
                 else
+                {
                     env.require(balance(carol, MPT(ammAlice[1])(30442)));
+                }
                 BEAST_EXPECT(tokensNoFee == IOUAmount(746'327'46496649, -8));
                 BEAST_EXPECT(tokensFee == IOUAmount(750'588'23529411, -8));
             },
@@ -6255,7 +6279,7 @@ private:
             // verify that the quality is better in the first case, and CLOB
             // is selected in the second case.
             {
-                std::array<Quality, 3> q;
+                std::array<Quality, 3> q{};
                 for (auto i = 0; i < 3; ++i)
                 {
                     Env env(*this, features);
@@ -6340,7 +6364,7 @@ private:
 
             // Same as the payment but reduced offer quality
             {
-                std::array<Quality, 3> q;
+                std::array<Quality, 3> q{};
                 for (auto i = 0; i < 3; ++i)
                 {
                     Env env(*this, features);
@@ -6480,7 +6504,7 @@ private:
             // multiple AMM offers are generated, which results in slightly
             // worse overall quality.
             {
-                std::array<Quality, 3> q;
+                std::array<Quality, 3> q{};
                 for (auto i = 0; i < 3; ++i)
                 {
                     Env env(*this, features);
@@ -6859,8 +6883,7 @@ private:
                  .asset2In = BTC(1'000),
                  .flags = tfTwoAssetIfEmpty,
                  .tfee = 1'000});
-            return;
-            BEAST_EXPECT(amm.expectBalances(USD(11'000), BTC(11'000), amm.tokens()));
+            BEAST_EXPECT(amm.expectBalances(USD(1'000), BTC(1'000), IOUAmount{1'000}));
             BEAST_EXPECT(amm.expectTradingFee(1'000));
             BEAST_EXPECT(amm.expectAuctionSlot(100, 0, IOUAmount{0}));
 
@@ -6883,7 +6906,7 @@ private:
             MPTTester USD({.env = env, .issuer = gw, .holders = {alice}, .pay = 20'000});
             MPTTester BTC({.env = env, .issuer = gw, .holders = {alice}, .pay = 20'000});
             AMM amm(env, gw, USD(10'000), BTC(10'000));
-            for (auto i = 0; i < maxDeletableAMMTrustLines * 2 + 10; ++i)
+            for (auto i = 0; i < (maxDeletableAMMTrustLines * 2) + 10; ++i)
             {
                 Account const a{std::to_string(i)};
                 env.fund(XRP(1'000), a);

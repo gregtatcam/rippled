@@ -481,7 +481,7 @@ Payment::doApply()
             terResult = tecPATH_DRY;
         return terResult;
     }
-    else if (isDstMPT)
+    if (isDstMPT)
     {
         JLOG(j_.trace()) << " dstAmount=" << dstAmount.getFullText();
         auto const& mptIssue = dstAmount.get<MPTIssue>();

@@ -374,7 +374,7 @@ expectOffers(
         }
         return true;
     });
-    return size == cnt && ((toMatch.size() == 0 && size != 0) || (matched == toMatch.size()));
+    return size == cnt && ((toMatch.empty() && size != 0) || (matched == toMatch.size()));
 }
 
 Json::Value
@@ -649,7 +649,7 @@ issueHelperIOU(IssuerArgs const& args)
     auto const iou = args.issuer[args.token];
     if (args.transferFee != 0)
     {
-        auto const tfee = 1. + static_cast<double>(args.transferFee) / 100'000;
+        auto const tfee = 1. + (static_cast<double>(args.transferFee) / 100'000);
         args.env(rate(args.issuer, tfee));
     }
     for (auto const& account : args.holders)
@@ -670,18 +670,16 @@ issueHelperMPT(IssuerArgs const& args)
              .issuer = args.issuer,
              .holders = args.holders,
              .transferFee = args.transferFee,
-             .maxAmt = *args.limit});
+             .maxAmt = args.limit});
         return mpt;
     }
-    else
-    {
-        MPT const mpt = MPTTester(
-            {.env = args.env,
-             .issuer = args.issuer,
-             .holders = args.holders,
-             .transferFee = args.transferFee});
-        return mpt;
-    }
+
+    MPT const mpt = MPTTester(
+        {.env = args.env,
+         .issuer = args.issuer,
+         .holders = args.holders,
+         .transferFee = args.transferFee});
+    return mpt;
 }
 
 }  // namespace detail

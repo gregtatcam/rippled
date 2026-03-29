@@ -10,12 +10,12 @@ namespace test {
 
 struct PayStrandMPT_test : public beast::unit_test::suite
 {
-    jtx::DirectStepInfo
+    static jtx::DirectStepInfo
     makeEndpointStep(jtx::Account const& src, jtx::Account const& dst, jtx::IOU const& iou)
     {
         return jtx::DirectStepInfo{src, dst, iou.currency};
     }
-    jtx::MPTEndpointStepInfo
+    static jtx::MPTEndpointStepInfo
     makeEndpointStep(jtx::Account const& src, jtx::Account const& dst, jtx::MPT const& mpt)
     {
         return jtx::MPTEndpointStepInfo{src, dst, mpt.mpt()};
@@ -146,16 +146,24 @@ struct PayStrandMPT_test : public beast::unit_test::suite
 
                 auto const err = [&]() {
                     if constexpr (std::is_same_v<tUSD, MPT>)
+                    {
                         return tecNO_AUTH;
+                    }
                     else
+                    {
                         return terNO_LINE;
+                    }
                 }();
                 test(env, USD, std::nullopt, STPath(), err);
 
                 if constexpr (std::is_same_v<tUSD, MPT>)
+                {
                     MPTTester(env, gw, USD).authorizeHolders({alice, bob, carol});
+                }
                 else
+                {
                     env.trust(USD(1'000), alice, bob, carol);
+                }
 
                 test(env, USD, std::nullopt, STPath(), tecPATH_DRY);
 
@@ -172,9 +180,13 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     makeEndpointStep(alice, gw, USD),
                     makeEndpointStep(gw, bob, USD));
                 if constexpr (std::is_same_v<tEUR, MPT>)
+                {
                     MPTTester(env, gw, EUR).authorizeHolders({alice, bob});
+                }
                 else
+                {
                     env.trust(EUR(1'000), alice, bob);
+                }
 
                 // Insert implied offer
                 test(

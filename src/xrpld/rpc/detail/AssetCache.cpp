@@ -77,7 +77,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
     {
         XRPL_ASSERT(it->second == nullptr, "xrpl::Asset::getRippleLines : null lines");
         auto lines = PathFindTrustLine::getItems(accountID, *ledger_, direction);
-        if (lines.size())
+        if (!lines.empty())
         {
             it->second = std::make_shared<std::vector<PathFindTrustLine>>(std::move(lines));
             totalLineCount_ += it->second->size();
@@ -85,7 +85,7 @@ AssetCache::getRippleLines(AccountID const& accountID, LineDirection direction)
     }
 
     XRPL_ASSERT(
-        !it->second || (it->second->size() > 0),
+        !it->second || !it->second->empty(),
         "xrpl::AssetCache::getRippleLines : null or nonempty lines");
     auto const size = it->second ? it->second->size() : 0;
     JLOG(journal_.trace()) << "getRippleLines for ledger " << ledger_->header().seq << " found "
@@ -133,9 +133,13 @@ AssetCache::getMPTs(xrpl::AccountID const& account)
     });
 
     if (mpts.empty())
+    {
         mpts_.emplace(account, nullptr);
+    }
     else
+    {
         mpts_.emplace(account, std::make_shared<std::vector<PathFindMPT>>(std::move(mpts)));
+    }
 
     return mpts_[account];
 }

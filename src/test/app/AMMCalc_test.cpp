@@ -192,7 +192,7 @@ class AMMCalc_test : public beast::unit_test::suite
         STAmount limitStepOut{};
         auto transferRate = [&](STAmount const& amt) {
             auto const currency = to_string(amt.get<Issue>().currency);
-            return rates.find(currency) != rates.end() ? rates.at(currency) : QUALITY_ONE;
+            return rates.contains(currency) ? rates.at(currency) : QUALITY_ONE;
         };
         // swap out reverse
         sin = sout;
@@ -255,7 +255,7 @@ class AMMCalc_test : public beast::unit_test::suite
         STAmount limitStepIn{};
         auto transferRate = [&](STAmount const& amt) {
             auto const currency = to_string(amt.get<Issue>().currency);
-            return rates.find(currency) != rates.end() ? rates.at(currency) : QUALITY_ONE;
+            return rates.contains(currency) ? rates.at(currency) : QUALITY_ONE;
         };
         // Swap in forward
         for (auto it = vp.begin(); it != vp.end(); ++it)

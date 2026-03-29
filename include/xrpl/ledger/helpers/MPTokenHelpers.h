@@ -225,5 +225,4 @@ issuerSelfDebitHookMPT(ApplyView& view, MPTIssue const& issue, std::uint64_t amo
 TER
 checkMPTTxAllowed(ReadView const& v, TxType tx, Asset const& asset, AccountID const& accountID);
 
-
 }  // namespace xrpl

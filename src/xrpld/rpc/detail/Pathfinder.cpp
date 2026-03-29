@@ -1039,10 +1039,14 @@ Pathfinder::addLink(
 
                         auto const correctAsset = [&]() {
                             if constexpr (isLine)
+                            {
                                 return uEndPathAsset.get<Currency>() ==
                                     asset.getLimit().template get<Issue>().currency;
+                            }
                             if constexpr (isMPT)
+                            {
                                 return uEndPathAsset.get<MPTID>() == asset.getMptID();
+                            }
                         }();
                         auto checkAsset = [&]() {
                             if constexpr (isLine)

@@ -93,11 +93,17 @@ areComparable(STAmount const& v1, STAmount const& v2)
     return std::visit(
         [&]<ValidIssueType TIss1, ValidIssueType TIss2>(TIss1 const& issue1, TIss2 const& issue2) {
             if constexpr (is_issue_v<TIss1> && is_issue_v<TIss2>)
+            {
                 return v1.native() == v2.native() && issue1.currency == issue2.currency;
+            }
             else if constexpr (is_mptissue_v<TIss1> && is_mptissue_v<TIss2>)
+            {
                 return issue1 == issue2;
+            }
             else
+            {
                 return false;
+            }
         },
         v1.asset().value(),
         v2.asset().value());

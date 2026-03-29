@@ -338,8 +338,10 @@ struct FlowMPT_test : public beast::unit_test::suite
                         return false;
                     Sandbox sb(&view, tapNONE);
                     for (auto const& o : flowResult.removableOffers)
+                    {
                         if (auto ok = sb.peek(keylet::offer(o)))
                             offerDelete(sb, ok, flowJournal);
+                    }
                     sb.apply(view);
                     return true;
                 });
@@ -548,9 +550,13 @@ struct FlowMPT_test : public beast::unit_test::suite
                 // therefore carl gets 25EUR if MPT, 25.6EUR if IOU.
                 auto const carolEUR = [&]() {
                     if constexpr (std::is_same_v<tEUR, IOU>)
+                    {
                         return EUR(25.6);
+                    }
                     else
+                    {
                         return EUR(25);
+                    }
                 }();
                 env.require(
                     balance(alice, XRP(10'000 - 40) - fee),
@@ -771,9 +777,13 @@ struct FlowMPT_test : public beast::unit_test::suite
                 auto const offer = *offerPtr;
                 BEAST_EXPECT(offer[sfLedgerEntryType] == ltOFFER);
                 if constexpr (std::is_same_v<std::decay_t<decltype(EUR)>, IOU>)
+                {
                     BEAST_EXPECT(offer[sfTakerGets] == EUR(5'988));
+                }
                 else
+                {
                     BEAST_EXPECT(offer[sfTakerGets] == EUR(5'989));
+                }
                 BEAST_EXPECT(offer[sfTakerPays] == USD(4'990));
             }
         };
@@ -879,9 +889,13 @@ struct FlowMPT_test : public beast::unit_test::suite
             env.require(owners(alice, ownerCnt));
             env.require(balance(alice, TOK1(500)));
             if (isTakerGetsXRP)
+            {
                 env.require(balance(alice, TOK2(2'000) - 2 * f));
+            }
             else
+            {
                 env.require(balance(alice, TOK2(600)));
+            }
 
             auto aliceOffers = offersOnAccount(env, alice);
             BEAST_EXPECT(aliceOffers.size() == 1);
@@ -899,9 +913,13 @@ struct FlowMPT_test : public beast::unit_test::suite
             env.require(owners(alice, ownerCnt));
             env.require(balance(alice, TOK1(500)));
             if (isTakerGetsXRP)
+            {
                 env.require(balance(alice, TOK2(2'000) - 3 * f));
+            }
             else
+            {
                 env.require(balance(alice, TOK2(600)));
+            }
             aliceOffers = offersOnAccount(env, alice);
             BEAST_EXPECT(aliceOffers.size() == 1);
             for (auto const& offerPtr : aliceOffers)
@@ -1521,10 +1539,14 @@ struct FlowMPT_test : public beast::unit_test::suite
                 if constexpr (std::is_same_v<tEUR, MPT>)
                 {
                     if constexpr (std::is_same_v<tUSD, MPT>)
+                    {
                         BEAST_EXPECT(env.balance(carol, EUR) == EUR(210));
+                    }
                     else
+                    {
                         // carol sells 600USD since all offers are consumed
                         BEAST_EXPECT(env.balance(carol, EUR) == EUR(100));
+                    }
                 }
                 else
                 {

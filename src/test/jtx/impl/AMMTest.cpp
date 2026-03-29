@@ -52,8 +52,10 @@ fund(
         {
             auto amt_ = [&]() {
                 if (amtsOut.size() == amts.size())
+                {
                     return amtsOut[i++];
-                else if (amt.holds<MPTIssue>() && mptIssuer)
+                }
+                if (amt.holds<MPTIssue>() && mptIssuer)
                 {
                     MPTTester mpt({.env = env, .issuer = *mptIssuer, .holders = accounts});
                     return STAmount{mpt.issuanceID(), amt.mpt().value()};

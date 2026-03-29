@@ -399,7 +399,8 @@ parseSubUnsubJson(
         return std::make_pair(rpcDST_ISR_MALFORMED, rpcDST_AMT_MALFORMED);
     }();
 
-    if (jv.isMember(jss::mpt_issuance_id) && (jv.isMember(jss::currency) || jss::issuer))
+    if (jv.isMember(jss::mpt_issuance_id) &&
+        (jv.isMember(jss::currency) || jv.isMember(jss::issuer)))
     {
         JLOG(j.info()) << boost::format("Bad %s currency or MPT.") % name.c_str();
         return rpcINVALID_PARAMS;

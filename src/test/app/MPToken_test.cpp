@@ -3245,7 +3245,7 @@ class MPToken_test : public beast::unit_test::suite
             bool const lockMPToken = (flags & (tfMPTCanLock | tfMPTCanClawback)) == tfMPTCanLock;
             bool const lockMPTIssue =
                 (flags & (tfMPTCanLock | tfMPTCanClawback)) == (tfMPTCanLock | tfMPTCanClawback);
-            bool const requireAuth = flags & tfMPTRequireAuth;
+            bool const requireAuth = (flags & tfMPTRequireAuth) != 0u;
 
             auto mpt = MPTTester(
                 {.env = env,
@@ -3259,9 +3259,13 @@ class MPToken_test : public beast::unit_test::suite
             if (requireAuth)
                 mpt.authorize({.account = gw, .holder = alice, .flags = tfMPTUnauthorize});
             if (lockMPToken)
+            {
                 mpt.set({.holder = alice, .flags = tfMPTLock});
+            }
             else if (lockMPTIssue)
+            {
                 mpt.set({.flags = tfMPTLock});
+            }
 
             auto testOffer =
                 [&](Account const& account, auto const& buy, auto const& sell, bool buyUSD) {
@@ -3993,9 +3997,13 @@ class MPToken_test : public beast::unit_test::suite
             };
             auto getErr = [&]<typename Token>(Token const&, TestArg const& arg) {
                 if constexpr (std::is_same_v<Token, IOU>)
+                {
                     return arg.errIOU.value_or(arg.err);
+                }
                 else if constexpr (std::is_same_v<Token, MPTTester>)
+                {
                     return arg.err;
+                }
             };
             auto getMPT = [&](Env& env) {
                 MPTTester BTC(
@@ -4060,14 +4068,18 @@ class MPToken_test : public beast::unit_test::suite
                 env.close();
 
                 if (arg.globalFlagBuy != LockType::None)
+                {
                     lock(env, gw, ETH, LockType::Global);
+                }
                 else
                 {
                     lock(env, arg.offerOwner, ETH, arg.offerFlagBuy);
                     lock(env, arg.src, ETH, arg.srcFlag);
                 }
                 if (arg.globalFlagSell != LockType::None)
+                {
                     lock(env, gw, BTC, LockType::Global);
+                }
                 else
                 {
                     lock(env, arg.offerOwner, BTC, arg.offerFlagSell);
@@ -4183,9 +4195,13 @@ class MPToken_test : public beast::unit_test::suite
 
             auto test = [&](bool withDomain) {
                 if (withDomain)
+                {
                     env(offer(bob, ETH(1), BTC(1)), domain(domainID));
+                }
                 else
+                {
                     env(offer(bob, ETH(1), BTC(1)));
+                }
 
                 auto const err = withDomain ? ter(tesSUCCESS) : ter(tecPATH_DRY);
                 env(pay(alice, carol, BTC(1)),
@@ -5472,7 +5488,7 @@ class MPToken_test : public beast::unit_test::suite
             // dan has USD/gw and USD1/gw. Had USD been IOU, it would have
             // rippled through dan's account.
             auto const [pathSet, srcAmt, dstAmt] = find_paths(env, john, sean, GBP(-1), XRP(-1));
-            BEAST_EXPECT(pathSet.size() == 0);
+            BEAST_EXPECT(pathSet.empty());
 
             env(pay(john, sean, GBP(10)),
                 sendmax(XRP(20)),

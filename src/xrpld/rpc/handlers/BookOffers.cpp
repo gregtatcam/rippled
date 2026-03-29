@@ -21,16 +21,22 @@ std::optional<Json::Value>
 validateTakerJSON(Json::Value const& taker, Json::StaticString const& name)
 {
     if (!taker.isMember(jss::currency) && !taker.isMember(jss::mpt_issuance_id))
+    {
         return RPC::missing_field_error((boost::format("%s.currency") % name.c_str()).str());
+    }
 
     if (taker.isMember(jss::mpt_issuance_id) &&
         (taker.isMember(jss::currency) || taker.isMember(jss::issuer)))
+    {
         return RPC::invalid_field_error(name.c_str());
+    }
 
     if ((taker.isMember(jss::currency) && !taker[jss::currency].isString()) ||
         (taker.isMember(jss::mpt_issuance_id) && !taker[jss::mpt_issuance_id].isString()))
+    {
         return RPC::expected_field_error(
             (boost::format("%s.currency") % name.c_str()).str(), "string");
+    }
 
     return std::nullopt;
 }
@@ -65,9 +71,11 @@ parseTakerAssetJSON(
     {
         MPTID mptid;
         if (!mptid.parseHex(taker[jss::mpt_issuance_id].asString()))
+        {
             return RPC::make_error(
                 assetError,
                 (boost::format("Invalid field '%s.mpt_issuance_id'") % name.c_str()).str());
+        }
         asset = mptid;
     }
 
@@ -94,20 +102,26 @@ parseTakerIssuerJSON(
         if (taker.isMember(jss::issuer))
         {
             if (!taker[jss::issuer].isString())
+            {
                 return RPC::expected_field_error(
                     (boost::format("%s.issuer") % name.c_str()).str(), "string");
+            }
 
             if (!to_issuer(issue.account, taker[jss::issuer].asString()))
+            {
                 return RPC::make_error(
                     issuerError,
                     (boost::format("Invalid field '%s.issuer', bad issuer.") % name.c_str()).str());
+            }
 
             if (issue.account == noAccount())
+            {
                 return RPC::make_error(
                     issuerError,
                     (boost::format("Invalid field '%s.issuer', bad issuer account one.") %
                      name.c_str())
                         .str());
+            }
         }
         else
         {
@@ -115,6 +129,7 @@ parseTakerIssuerJSON(
         }
 
         if (isXRP(issue.currency) && !isXRP(issue.account))
+        {
             return RPC::make_error(
                 issuerError,
                 (boost::format(
@@ -122,13 +137,16 @@ parseTakerIssuerJSON(
                      "specification.") %
                  name.c_str())
                     .str());
+        }
 
         if (!isXRP(issue.currency) && isXRP(issue.account))
+        {
             return RPC::make_error(
                 issuerError,
                 (boost::format("Invalid field '%s.issuer', expected non-XRP issuer.") %
                  name.c_str())
                     .str());
+        }
     }
 
     return std::nullopt;

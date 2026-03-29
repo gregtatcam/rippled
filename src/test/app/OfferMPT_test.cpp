@@ -12,13 +12,13 @@ namespace test {
 
 class OfferMPT_test : public beast::unit_test::suite
 {
-    XRPAmount
+    static XRPAmount
     reserve(jtx::Env& env, std::uint32_t count)
     {
         return env.current()->fees().accountReserve(count);
     }
 
-    std::uint32_t
+    static std::uint32_t
     lastClose(jtx::Env& env)
     {
         return env.current()->header().parentCloseTime.time_since_epoch().count();
@@ -1093,14 +1093,18 @@ public:
             {
                 env.fund(XRP(10'000), partner);
                 if constexpr (std::is_same_v<tUSD, IOU>)
+                {
                     env(trust(partner, USD(100)));
+                }
                 else
                 {
                     MPTTester MUSD(env, gw, USD);
                     MUSD.authorize({.account = partner});
                 }
                 if constexpr (std::is_same_v<tBTC, IOU>)
+                {
                     env(trust(partner, BTC(500)));
+                }
                 else
                 {
                     MPTTester MBTC(env, gw, BTC);
@@ -1147,7 +1151,7 @@ public:
                 auto acctOffers = offersOnAccount(env, account_to_test);
 
                 // No stale offers
-                BEAST_EXPECT(acctOffers.size() == 0);
+                BEAST_EXPECT(acctOffers.empty());
                 for (auto const& offerPtr : acctOffers)
                 {
                     auto const& offer = *offerPtr;
@@ -2029,7 +2033,7 @@ public:
 
             // The gateway optionally creates an offer that would be crossed.
             auto const book = t.bookAmount;
-            if (book)
+            if (book != 0)
                 env(offer(gw, XRP(book), USD(book * t.scale)));
             env.close();
             std::uint32_t const gwOfferSeq = env.seq(gw) - 1;
@@ -2063,7 +2067,7 @@ public:
 
             auto acctOffers = offersOnAccount(env, acct);
             BEAST_EXPECT(acctOffers.size() == t.offers);
-            if (acctOffers.size() && t.offers)
+            if (!acctOffers.empty() && t.offers != 0)
             {
                 auto const& acctOffer = *(acctOffers.front());
 
@@ -2074,7 +2078,7 @@ public:
 
             if (t.preAuth == noPreAuth)
             {
-                if (t.balanceUsd.value().signum())
+                if (t.balanceUsd.value().signum() != 0)
                 {
                     // Verify the correct contents of MPT
                     BEAST_EXPECT(env.balance(acct, USD) == expBalanceUsd);
@@ -2562,10 +2566,10 @@ public:
             env.require(offers(acct, t.offers));
             env.require(owners(acct, t.owners));
 
-            if (t.offers)
+            if (t.offers != 0)
             {
                 auto const acctOffers = offersOnAccount(env, acct);
-                if (acctOffers.size() > 0)
+                if (!acctOffers.empty())
                 {
                     BEAST_EXPECT(acctOffers.size() == 1);
                     auto const& acctOffer = *(acctOffers.front());
@@ -2801,7 +2805,7 @@ public:
                 env.require(balance(eve, XRP(18'000)));
                 auto const evesOffers = offersOnAccount(env, eve);
                 BEAST_EXPECT(evesOffers.size() == 1);
-                if (evesOffers.size() != 0)
+                if (!evesOffers.empty())
                 {
                     auto const& evesOffer = *(evesOffers.front());
                     BEAST_EXPECT(evesOffer[sfLedgerEntryType] == ltOFFER);
@@ -2935,7 +2939,7 @@ public:
 
                 // In pre-flow code ova's offer is left empty in the ledger.
                 auto const ovasOffers = offersOnAccount(env, ova);
-                if (ovasOffers.size() != 0)
+                if (!ovasOffers.empty())
                 {
                     BEAST_EXPECT(ovasOffers.size() == 1);
                     auto const& ovasOffer = *(ovasOffers.front());
@@ -3498,7 +3502,7 @@ public:
             struct Actor
             {
                 Account acct;
-                int offers;        // offers on account after crossing
+                int offers{};      // offers on account after crossing
                 PrettyAmount xrp;  // final expected after crossing
                 PrettyAmount btc;  // final expected after crossing
                 PrettyAmount usd;  // final expected after crossing
@@ -3509,9 +3513,9 @@ public:
                 // to assign each of the three roles.  By using indices it is
                 // easy for alice to own the offer in the first leg, the second
                 // leg, or both.
-                std::size_t self;
-                std::size_t leg0;
-                std::size_t leg1;
+                std::size_t self{};
+                std::size_t leg0{};
+                std::size_t leg1{};
                 PrettyAmount btcStart;
                 std::vector<Actor> actors;
             };
@@ -3519,10 +3523,10 @@ public:
             // clang-format off
             TestData const tests[]{
                 //        btcStart   --------------------- actor[0] ---------------------    -------------------- actor[1] -------------------
-                {0, 0, 1, BTC(200), {{"ann", 0, drops(3900000'000000 - 4 * baseFee), BTC(200), USD(3000)}, {"abe", 0, drops(4100000'000000 - 3 * baseFee), BTC( 0), USD(750)}}},  // no BTC xfer fee
-                {0, 1, 0, BTC(200), {{"bev", 0, drops(4100000'000000 - 4 * baseFee), BTC( 75), USD(2000)}, {"bob", 0, drops(3900000'000000 - 3 * baseFee), BTC(100), USD(  0)}}},  // no USD xfer fee
-                {0, 0, 0, BTC(200), {{"cam", 0, drops(4000000'000000 - 5 * baseFee), BTC(200), USD(2000)}                                                     }},  // no xfer fee
-                {0, 1, 0, BTC( 50), {{"deb", 1, drops(4040000'000000 - 4 * baseFee), BTC(  0), USD(2000)}, {"dan", 1, drops(3960000'000000 - 3 * baseFee), BTC( 40), USD(  0)}}},  // no USD xfer fee
+                {0, 0, 1, BTC(200), {{"ann", 0, drops(3900000'000000 - (4 * baseFee)), BTC(200), USD(3000)}, {"abe", 0, drops(4100000'000000 - (3 * baseFee)), BTC( 0), USD(750)}}},  // no BTC xfer fee
+                {0, 1, 0, BTC(200), {{"bev", 0, drops(4100000'000000 - (4 * baseFee)), BTC( 75), USD(2000)}, {"bob", 0, drops(3900000'000000 - (3 * baseFee)), BTC(100), USD(  0)}}},  // no USD xfer fee
+                {0, 0, 0, BTC(200), {{"cam", 0, drops(4000000'000000 - (5 * baseFee)), BTC(200), USD(2000)}                                                     }},  // no xfer fee
+                {0, 1, 0, BTC( 50), {{"deb", 1, drops(4040000'000000 - (4 * baseFee)), BTC(  0), USD(2000)}, {"dan", 1, drops(3960000'000000 - (3 * baseFee)), BTC( 40), USD(  0)}}},  // no USD xfer fee
             };
             // clang-format on
 
@@ -3673,7 +3677,7 @@ public:
             struct Actor
             {
                 Account acct;
-                int offers;        // offers on account after crossing
+                int offers{};      // offers on account after crossing
                 PrettyAmount xrp;  // final expected after crossing
                 PrettyAmount btc;  // final expected after crossing
                 PrettyAmount usd;  // final expected after crossing
@@ -3684,9 +3688,9 @@ public:
                 // to assign each of the three roles.  By using indices it is
                 // easy for alice to own the offer in the first leg, the second
                 // leg, or both.
-                std::size_t self;
-                std::size_t leg0;
-                std::size_t leg1;
+                std::size_t self{};
+                std::size_t leg0{};
+                std::size_t leg1{};
                 PrettyAmount btcStart;
                 std::vector<Actor> actors;
             };
@@ -3694,8 +3698,8 @@ public:
             // clang-format off
             TestData const flowTests[]{
                 //         btcStart    ------------------- actor[0] --------------------    ------------------- actor[1] --------------------
-                {0, 0, 1, BTC(5), {{"gay", 1, drops(3950000'000000 - 4 * baseFee), BTC(5), USD(2500)}, {"gar", 1, drops(4050000'000000 - 3 * baseFee), BTC(0), USD(1375)}}}, // no BTC xfer fee
-                {0, 0, 0, BTC(5), {{"hye", 2, drops(4000000'000000 - 5 * baseFee), BTC(5), USD(2000)}                                                     }}  // no xfer fee
+                {0, 0, 1, BTC(5), {{"gay", 1, drops(3950000'000000 - (4 * baseFee)), BTC(5), USD (2500)}, {"gar", 1, drops(4050000'000000 - (3 * baseFee)), BTC(0), USD(1375)}}}, // no BTC xfer fee
+                {0, 0, 0, BTC(5), {{"hye", 2, drops(4000000'000000 - (5 * baseFee)), BTC(5), USD (2000)}                                                     }}  // no xfer fee
             };
             // clang-format on
 
@@ -4220,7 +4224,7 @@ public:
         // Verify that the third offer alice created was consumed.
         {
             auto offers = sortedOffersOnAccount(env, alice);
-            BEAST_EXPECT(offers.size() == 0);
+            BEAST_EXPECT(offers.empty());
         }
         env.require(balance(alice, USD(0)));
         env.require(owners(alice, 1));
@@ -4593,9 +4597,11 @@ public:
             std::map<std::uint32_t, std::pair<STAmount, STAmount>> offers;
             forEachItem(*env.current(), alice, [&](std::shared_ptr<SLE const> const& sle) {
                 if (sle->getType() == ltOFFER)
+                {
                     offers.emplace(
                         (*sle)[sfSequence],
                         std::make_pair((*sle)[sfTakerPays], (*sle)[sfTakerGets]));
+                }
             });
 
             // first offer

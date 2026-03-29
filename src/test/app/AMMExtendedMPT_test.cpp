@@ -1775,8 +1775,12 @@ private:
                     return false;
                 Sandbox sb(&view, tapNONE);
                 for (auto const& o : flowResult.removableOffers)
+                {
                     if (auto ok = sb.peek(keylet::offer(o)))
+                    {
                         offerDelete(sb, ok, flowJournal);
+                    }
+                }
                 sb.apply(view);
                 return true;
             });
@@ -2732,7 +2736,7 @@ private:
                 sendmax(XRP(5)),
                 ter(tecPATH_PARTIAL));
             env.require(
-                balance(alice, drops(10'000'000'000 - 3 * env.current()->fees().base.drops())));
+                balance(alice, drops(10'000'000'000 - (3 * env.current()->fees().base.drops()))));
             env.require(balance(bob, drops(10'000'000'000 - env.current()->fees().base.drops())));
         }
 

@@ -427,8 +427,8 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
             env.require(balance(alice, USD(0)));
             env.require(balance(bob, USD(100)));
-            BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
-            BEAST_EXPECT(checksOnAccount(env, bob).size() == 0);
+            BEAST_EXPECT(checksOnAccount(env, alice).empty());
+            BEAST_EXPECT(checksOnAccount(env, bob).empty());
             BEAST_EXPECT(ownerCount(env, alice) == 1);
             BEAST_EXPECT(ownerCount(env, bob) == 1);
 
@@ -452,8 +452,8 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
             env.require(balance(alice, USD(20)));
             env.require(balance(bob, USD(80)));
-            BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
-            BEAST_EXPECT(checksOnAccount(env, bob).size() == 0);
+            BEAST_EXPECT(checksOnAccount(env, alice).empty());
+            BEAST_EXPECT(checksOnAccount(env, bob).empty());
             BEAST_EXPECT(ownerCount(env, alice) == 1);
             BEAST_EXPECT(ownerCount(env, bob) == 1);
 
@@ -520,8 +520,8 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
             env.require(balance(alice, USD(0)));
             env.require(balance(bob, USD(0)));
-            BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
-            BEAST_EXPECT(checksOnAccount(env, bob).size() == 0);
+            BEAST_EXPECT(checksOnAccount(env, alice).empty());
+            BEAST_EXPECT(checksOnAccount(env, bob).empty());
             BEAST_EXPECT(ownerCount(env, alice) == 1);
             BEAST_EXPECT(ownerCount(env, bob) == 1);
         }
@@ -602,8 +602,8 @@ class CheckMPT_test : public beast::unit_test::suite
             verifyDeliveredAmount(env, USD(2));
             env.require(balance(alice, USD(0)));
             env.require(balance(bob, USD(8)));
-            BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
-            BEAST_EXPECT(checksOnAccount(env, bob).size() == 0);
+            BEAST_EXPECT(checksOnAccount(env, alice).empty());
+            BEAST_EXPECT(checksOnAccount(env, bob).empty());
             BEAST_EXPECT(ownerCount(env, alice) == 1);
             BEAST_EXPECT(ownerCount(env, bob) == 1);
         }
@@ -651,8 +651,8 @@ class CheckMPT_test : public beast::unit_test::suite
             env.require(balance(alice, USD(8) - bobGot));
             env.require(balance(bob, bobGot));
 
-            BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
-            BEAST_EXPECT(checksOnAccount(env, bob).size() == 0);
+            BEAST_EXPECT(checksOnAccount(env, alice).empty());
+            BEAST_EXPECT(checksOnAccount(env, bob).empty());
             BEAST_EXPECT(ownerCount(env, alice) == 1);
             BEAST_EXPECT(ownerCount(env, bob) == 1);
         }
@@ -706,8 +706,8 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
             env.require(balance(alice, USD(5)));
             env.require(balance(bob, USD(3)));
-            BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
-            BEAST_EXPECT(checksOnAccount(env, bob).size() == 0);
+            BEAST_EXPECT(checksOnAccount(env, alice).empty());
+            BEAST_EXPECT(checksOnAccount(env, bob).empty());
             BEAST_EXPECT(ownerCount(env, alice) == 1);
             BEAST_EXPECT(ownerCount(env, bob) == signersCount + 1);
         }
@@ -768,8 +768,8 @@ class CheckMPT_test : public beast::unit_test::suite
         verifyDeliveredAmount(env, USD(100));
         env.require(balance(alice, USD(1'000 - 125)));
         env.require(balance(bob, USD(0 + 100)));
-        BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
-        BEAST_EXPECT(checksOnAccount(env, bob).size() == 0);
+        BEAST_EXPECT(checksOnAccount(env, alice).empty());
+        BEAST_EXPECT(checksOnAccount(env, bob).empty());
 
 #if 0
         // Adjust gw's rate...
@@ -1206,7 +1206,7 @@ class CheckMPT_test : public beast::unit_test::suite
 
             env(check::cancel(bob, chkIdNotExp3));
             env.close();
-            BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
+            BEAST_EXPECT(checksOnAccount(env, alice).empty());
             BEAST_EXPECT(ownerCount(env, alice) == signersCount + 0);
         }
     }
@@ -1299,7 +1299,7 @@ class CheckMPT_test : public beast::unit_test::suite
         auto const baseFee = env.current()->fees().base;
         env.require(owners(alice, 7));
         env.require(tickets(alice, env.seq(alice) - aliceTicketSeq));
-        BEAST_EXPECT(checksOnAccount(env, alice).size() == 0);
+        BEAST_EXPECT(checksOnAccount(env, alice).empty());
         BEAST_EXPECT(env.seq(alice) == aliceSeq);
         env.require(balance(alice, USD(700)));
         env.require(balance(alice, XRP(700) - 6 * baseFee));
@@ -1327,7 +1327,7 @@ class CheckMPT_test : public beast::unit_test::suite
             beast::unit_test::suite& suite;
             Env& env;
             Account const acct;
-            std::size_t owners;
+            std::size_t owners{0};
             hash_map<std::string, MPTTester> mpts;
             bool const isIssuer;
             bool const requireAuth;
@@ -1351,14 +1351,16 @@ class CheckMPT_test : public beast::unit_test::suite
             verifyOwners(std::uint32_t line, bool print = false) const
             {
                 if (print)
+                {
                     std::cout << acct.name() << " " << ownerCount(env, acct) << " " << owners
                               << std::endl;
+                }
                 suite.expect(
                     ownerCount(env, acct) == owners, "Owner count mismatch", __FILE__, line);
             }
 
             // Operators to make using the class more convenient.
-            operator Account const() const
+            operator Account() const
             {
                 return acct;
             }
@@ -1437,7 +1439,9 @@ class CheckMPT_test : public beast::unit_test::suite
                     env(fset(dst, asfDepositAuth));
                 }
                 else
+                {
                     it->second.pay(src, dst, amount);
+                }
             }
 
             void

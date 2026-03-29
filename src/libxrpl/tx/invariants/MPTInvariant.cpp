@@ -52,7 +52,7 @@ ValidMPTIssuance::finalize(
     ReadView const& view,
     beast::Journal const& j) const
 {
-    if (isTesSuccess(result))
+    if (isTesSuccess(result) || result == tecINCOMPLETE)
     {
         auto const& rules = view.rules();
         [[maybe_unused]]
@@ -238,8 +238,9 @@ ValidMPTIssuance::finalize(
             return true;
         }
 
-        if (hasPrivilege(tx, mayDeleteMPT) && mptokensDeleted_ == 1 && mptokensCreated_ == 0 &&
-            mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0)
+        if (hasPrivilege(tx, mayDeleteMPT) &&
+            ((txnType == ttAMM_DELETE && mptokensDeleted_ <= 2) || mptokensDeleted_ == 1) &&
+            mptokensCreated_ == 0 && mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 0)
             return true;
     }
 
@@ -299,8 +300,10 @@ ValidMPTPayment::visitEntry(
     if (after)
     {
         if (after->getType() == ltMPTOKEN_ISSUANCE)
+        {
             overflow_ = (*after)[sfOutstandingAmount] >
                 (*after)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+        }
         update(*after, After);
     }
 }

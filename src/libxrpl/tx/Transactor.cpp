@@ -1196,9 +1196,13 @@ Transactor::operator()()
                     {
                         // Removal of obsolete AMM trust line
                         if (before->getType() == ltRIPPLE_STATE)
+                        {
                             removedTrustLines.push_back(index);
+                        }
                         else if (before->getType() == ltMPTOKEN)
+                        {
                             removedMPTs.push_back(index);
+                        }
                     }
 
                     if (doNFTokenOffers && before && after &&

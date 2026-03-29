@@ -20,12 +20,9 @@ AMMDeposit::checkExtraFeatures(PreflightContext const& ctx)
     auto const amount = ctx.tx[~sfAmount];
     auto const amount2 = ctx.tx[~sfAmount2];
 
-    if (!ctx.rules.enabled(featureMPTokensV2) &&
-        (ctx.tx[sfAsset].holds<MPTIssue>() || ctx.tx[sfAsset2].holds<MPTIssue>() ||
-         (amount && amount->holds<MPTIssue>()) || (amount2 && amount2->holds<MPTIssue>())))
-        return false;
-
-    return true;
+    return ctx.rules.enabled(featureMPTokensV2) ||
+        (!ctx.tx[sfAsset].holds<MPTIssue>() && !ctx.tx[sfAsset2].holds<MPTIssue>() &&
+         !(amount && amount->holds<MPTIssue>()) && !(amount2 && amount2->holds<MPTIssue>()));
 }
 
 std::uint32_t

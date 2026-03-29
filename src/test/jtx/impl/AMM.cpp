@@ -389,18 +389,28 @@ AMM::depositJv(DepositArg const& arg)
     // If including asset1In and asset2In or tokens as
     // deposit min amounts then must set the flags
     // explicitly instead of relying on this logic.
-    if (!(flags & tfDepositSubTx))
+    if ((flags & tfDepositSubTx) == 0u)
     {
         if (arg.tokens && !arg.asset1In)
+        {
             flags |= tfLPToken;
+        }
         else if (arg.tokens && arg.asset1In)
+        {
             flags |= tfOneAssetLPToken;
+        }
         else if (arg.asset1In && arg.asset2In)
+        {
             flags |= tfTwoAsset;
+        }
         else if (arg.maxEP && arg.asset1In)
+        {
             flags |= tfLimitLPToken;
+        }
         else if (arg.asset1In)
+        {
             flags |= tfSingleAsset;
+        }
     }
     jv[jss::Flags] = flags;
 
@@ -520,18 +530,28 @@ AMM::withdrawJv(WithdrawArg const& arg)
     std::uint32_t flags = 0;
     if (arg.flags)
         flags = *arg.flags;
-    if (!(flags & tfWithdrawSubTx))
+    if ((flags & tfWithdrawSubTx) == 0u)
     {
         if (arg.tokens && !arg.asset1Out)
+        {
             flags |= tfLPToken;
+        }
         else if (arg.asset1Out && arg.asset2Out)
+        {
             flags |= tfTwoAsset;
+        }
         else if (arg.tokens && arg.asset1Out)
+        {
             flags |= tfOneAssetLPToken;
+        }
         else if (arg.asset1Out && arg.maxEP)
+        {
             flags |= tfLimitLPToken;
+        }
         else if (arg.asset1Out)
+        {
             flags |= tfSingleAsset;
+        }
     }
     jv[jss::Flags] = flags;
 

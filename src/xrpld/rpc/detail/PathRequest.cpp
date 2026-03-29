@@ -524,10 +524,14 @@ PathRequest::findPaths(
                             if (sourceAssets.size() >= RPC::Tuning::max_auto_src_cur)
                                 return false;
                             if constexpr (std::is_same_v<TAsset, Currency>)
+                            {
                                 sourceAssets.insert(
                                     Issue{a, a.isZero() ? xrpAccount() : *raSrcAccount});
+                            }
                             else
+                            {
                                 sourceAssets.insert(MPTIssue{a});
+                            }
                         }
                         return true;
                     },
@@ -659,7 +663,7 @@ PathRequest::findPaths(
         after four source currencies, 50 - (4 * 4) = 34.
     */
     int const size = sourceAssets.size();
-    consumer_.charge({std::clamp(size * size + 34, 50, 400), "path update"});
+    consumer_.charge({std::clamp((size * size) + 34, 50, 400), "path update"});
     return true;
 }
 

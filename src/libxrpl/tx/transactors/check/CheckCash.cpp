@@ -20,12 +20,9 @@ CheckCash::checkExtraFeatures(xrpl::PreflightContext const& ctx)
     auto const optAmount = ctx.tx[~sfAmount];
     auto const optDeliverMin = ctx.tx[~sfDeliverMin];
 
-    if (!ctx.rules.enabled(featureMPTokensV2) &&
-        ((optAmount && optAmount->holds<MPTIssue>()) ||
-         (optDeliverMin && optDeliverMin->holds<MPTIssue>())))
-        return false;
-
-    return true;
+    return ctx.rules.enabled(featureMPTokensV2) ||
+        (!(optAmount && optAmount->holds<MPTIssue>()) &&
+         !(optDeliverMin && optDeliverMin->holds<MPTIssue>()));
 }
 
 NotTEC

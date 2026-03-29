@@ -3,6 +3,8 @@
 #include <xrpl/ledger/View.h>
 #include <xrpl/protocol/SField.h>
 
+#include <algorithm>
+
 namespace xrpl {
 
 namespace detail {
@@ -112,12 +114,14 @@ DeferredCredits::creditMPT(
         if (isSenderIssuer)
         {
             v.credit += mptAmtVal;
-            if (v.holders.find(receiver) == v.holders.end())
+            if (!v.holders.contains(receiver))
+            {
                 v.holders[receiver].origBalance = preCreditBalanceHolder;
+            }
         }
         else
         {
-            if (v.holders.find(sender) == v.holders.end())
+            if (!v.holders.contains(sender))
             {
                 v.holders[sender].debit = mptAmtVal;
                 v.holders[sender].origBalance = preCreditBalanceHolder;
@@ -317,7 +321,7 @@ PaymentSandbox::balanceHookMPT(AccountID const& account, MPTIssue const& issue, 
     std::int64_t delta = 0;
     std::int64_t lastBal = amount;
     std::int64_t minBal = amount;
-    for (auto curSB = this; curSB; curSB = curSB->ps_)
+    for (auto curSB = this; curSB != nullptr; curSB = curSB->ps_)
     {
         if (auto adj = curSB->tab_.adjustmentsMPT(issue))
         {
@@ -334,8 +338,7 @@ PaymentSandbox::balanceHookMPT(AccountID const& account, MPTIssue const& issue, 
                 delta += adj->credit;
                 lastBal = adj->origBalance;
             }
-            if (lastBal < minBal)
-                minBal = lastBal;
+            minBal = std::min(lastBal, minBal);
         }
     }
 

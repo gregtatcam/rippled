@@ -75,16 +75,16 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
         }
         else
         {
-            auto hasAccount = iType & STPathElement::typeAccount;
-            auto hasCurrency = iType & STPathElement::typeCurrency;
-            auto hasIssuer = iType & STPathElement::typeIssuer;
-            auto hasMPT = iType & STPathElement::typeMPT;
+            auto const hasAccount = (iType & STPathElement::typeAccount) != 0u;
+            auto const hasCurrency = (iType & STPathElement::typeCurrency) != 0u;
+            auto const hasIssuer = (iType & STPathElement::typeIssuer) != 0u;
+            auto const hasMPT = (iType & STPathElement::typeMPT) != 0u;
 
             AccountID account;
             PathAsset asset;
             AccountID issuer;
 
-            if (hasAccount != 0)
+            if (hasAccount)
                 account = sit.get160();
 
             XRPL_ASSERT(
@@ -95,7 +95,7 @@ STPathSet::STPathSet(SerialIter& sit, SField const& name) : STBase(name)
             if (hasMPT)
                 asset = sit.get192();
 
-            if (hasIssuer != 0)
+            if (hasIssuer)
                 issuer = sit.get160();
 
             path.emplace_back(account, asset, issuer, hasCurrency);

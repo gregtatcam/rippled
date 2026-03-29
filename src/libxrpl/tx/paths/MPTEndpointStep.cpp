@@ -9,6 +9,7 @@
 
 #include <boost/container/flat_set.hpp>
 
+#include <algorithm>
 #include <sstream>
 
 namespace xrpl {
@@ -26,7 +27,7 @@ protected:
     bool const isLast_;
     // Direct payment between the holders
     // Used by maxFlow's last step.
-    bool const isDirectBetweenHolders_;
+    bool const isDirectBetweenHolders_ = false;
     beast::Journal const j_;
 
     struct Cache
@@ -70,7 +71,7 @@ protected:
     void
     resetCache(DebtDirection dir);
 
-public:
+private:
     MPTEndpointStep(
         StrandContext const& ctx,
         AccountID const& src,
@@ -84,7 +85,7 @@ public:
         , isDirectBetweenHolders_(
               mptIssue_ == ctx.strandDeliver && ctx.strandSrc != mptIssue_.getIssuer() &&
               ctx.strandDst != mptIssue_.getIssuer() &&
-              (ctx.isFirst || (ctx.prevStep && !ctx.prevStep->bookStepBook())))
+              (ctx.isFirst || (ctx.prevStep != nullptr && !ctx.prevStep->bookStepBook())))
         , j_(ctx.j)
     {
         XRPL_ASSERT(
@@ -92,6 +93,7 @@ public:
             "MPTEndpointStep::MPTEndpointStep src or dst must be an issuer");
     }
 
+public:
     AccountID const&
     src() const
     {
@@ -206,6 +208,8 @@ private:
         }
         return false;
     }
+
+    friend TDerived;
 };
 
 //------------------------------------------------------------------------------
@@ -223,8 +227,17 @@ public:
     using MPTEndpointStep<MPTEndpointPaymentStep>::MPTEndpointStep;
     using MPTEndpointStep<MPTEndpointPaymentStep>::check;
 
-    bool
-    verifyPrevStepDebtDirection(DebtDirection) const
+    MPTEndpointPaymentStep(
+        StrandContext const& ctx,
+        AccountID const& src,
+        AccountID const& dst,
+        MPTID const& mpt)
+        : MPTEndpointStep<MPTEndpointPaymentStep>(ctx, src, dst, mpt)
+    {
+    }
+
+    static bool
+    verifyPrevStepDebtDirection(DebtDirection)
     {
         // A payment doesn't care regardless of prevStepRedeems.
         return true;
@@ -242,7 +255,7 @@ public:
     }
 
     // Not applicable for payment
-    TER
+    static TER
     checkCreateMPT(ApplyView&, DebtDirection)
     {
         return tesSUCCESS;
@@ -256,8 +269,17 @@ public:
     using MPTEndpointStep<MPTEndpointOfferCrossingStep>::MPTEndpointStep;
     using MPTEndpointStep<MPTEndpointOfferCrossingStep>::check;
 
-    bool
-    verifyPrevStepDebtDirection(DebtDirection prevStepDir) const
+    MPTEndpointOfferCrossingStep(
+        StrandContext const& ctx,
+        AccountID const& src,
+        AccountID const& dst,
+        MPTID const& mpt)
+        : MPTEndpointStep<MPTEndpointOfferCrossingStep>(ctx, src, dst, mpt)
+    {
+    }
+
+    static bool
+    verifyPrevStepDebtDirection(DebtDirection prevStepDir)
     {
         // During offer crossing we rely on the fact that prevStepRedeems
         // will *always* issue.  That's because:
@@ -271,8 +293,8 @@ public:
 
     // Verify the consistency of the step.  These checks are specific to
     // offer crossing and assume that general checks were already performed.
-    TER
-    check(StrandContext const& ctx, std::shared_ptr<const SLE> const& sleSrc) const;
+    static TER
+    check(StrandContext const& ctx, std::shared_ptr<const SLE> const& sleSrc);
 
     std::string
     logString() const override
@@ -311,7 +333,7 @@ MPTEndpointPaymentStep::check(StrandContext const& ctx, std::shared_ptr<const SL
 
     // Direct MPT payment, no DEX
     if (mptIssue_ == ctx.strandDeliver &&
-        (ctx.isFirst || (ctx.prevStep && !ctx.prevStep->bookStepBook())))
+        (ctx.isFirst || (ctx.prevStep != nullptr && !ctx.prevStep->bookStepBook())))
     {
         // Between holders
         if (isDirectBetweenHolders_)
@@ -340,7 +362,7 @@ MPTEndpointPaymentStep::check(StrandContext const& ctx, std::shared_ptr<const SL
     // a payment can still be successful. For instance, when a balance
     // is shifted from one holder to another.
 
-    if (!prevStep_)
+    if (prevStep_ == nullptr)
     {
         auto const owed =
             accountFunds(ctx.view, src_, mptIssue_, fhIGNORE_FREEZE, ahIGNORE_AUTH, j_);
@@ -354,7 +376,6 @@ MPTEndpointPaymentStep::check(StrandContext const& ctx, std::shared_ptr<const SL
 
 TER
 MPTEndpointOfferCrossingStep::check(StrandContext const& ctx, std::shared_ptr<const SLE> const&)
-    const
 {
     return tesSUCCESS;
 }
@@ -397,7 +418,7 @@ MPTEndpointStep<TDerived>::maxPaymentFlow(ReadView const& sb) const
     {
         // If issuer is the source account, and it is direct payment then
         // MPTEndpointStep is the only step. Provide available maxFlow.
-        if (!prevStep_)
+        if (prevStep_ == nullptr)
             return {toAmount<MPTAmount>(maxFlow), DebtDirection::issues};
 
         // MPTEndpointStep is the last step. It's always issuing in
@@ -686,15 +707,14 @@ template <class TDerived>
 std::pair<std::uint32_t, std::uint32_t>
 MPTEndpointStep<TDerived>::qualitiesSrcRedeems(ReadView const& sb) const
 {
-    if (!prevStep_)
+    if (prevStep_ == nullptr)
         return {QUALITY_ONE, QUALITY_ONE};
 
     auto const prevStepQIn = prevStep_->lineQualityIn(sb);
     // Unlike trustline MPT doesn't have line quality field
     auto srcQOut = QUALITY_ONE;
 
-    if (prevStepQIn > srcQOut)
-        srcQOut = prevStepQIn;
+    srcQOut = std::max<std::uint32_t>(prevStepQIn, srcQOut);
     return {srcQOut, QUALITY_ONE};
 }
 
@@ -731,15 +751,13 @@ MPTEndpointStep<TDerived>::qualities(
     {
         return qualitiesSrcRedeems(sb);
     }
-    else
-    {
-        auto const prevStepDebtDirection = [&] {
-            if (prevStep_)
-                return prevStep_->debtDirection(sb, strandDir);
-            return DebtDirection::issues;
-        }();
-        return qualitiesSrcIssues(sb, prevStepDebtDirection);
-    }
+
+    auto const prevStepDebtDirection = [&] {
+        if (prevStep_ != nullptr)
+            return prevStep_->debtDirection(sb, strandDir);
+        return DebtDirection::issues;
+    }();
+    return qualitiesSrcIssues(sb, prevStepDebtDirection);
 }
 
 template <class TDerived>
@@ -802,9 +820,9 @@ MPTEndpointStep<TDerived>::check(StrandContext const& ctx) const
             return terLOCKED;
     }
 
-    if (ctx.seenBookOuts.count(mptIssue_))
+    if (ctx.seenBookOuts.count(mptIssue_) > 0)
     {
-        if (!ctx.prevStep)
+        if (ctx.prevStep == nullptr)
         {
             UNREACHABLE(
                 "xrpl::MPTEndpointStep::check : prev seen book without a "
