@@ -2,7 +2,7 @@
 #include <xrpld/rpc/detail/TrustLine.h>
 
 #include <xrpl/ledger/helpers/DirectoryHelpers.h>
-#include <xrpl/tx/transactors/token/MPTUtils.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 
 namespace xrpl {
 

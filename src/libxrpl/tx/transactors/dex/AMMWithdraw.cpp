@@ -1,12 +1,12 @@
 #include <xrpl/basics/Number.h>
 #include <xrpl/ledger/Sandbox.h>
 #include <xrpl/ledger/helpers/AccountRootHelpers.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/tx/transactors/dex/AMMHelpers.h>
 #include <xrpl/tx/transactors/dex/AMMUtils.h>
 #include <xrpl/tx/transactors/dex/AMMWithdraw.h>
-#include <xrpl/tx/transactors/token/MPTUtils.h>
 #include <xrpl/tx/transactors/token/MPTokenAuthorize.h>
 
 namespace xrpl {

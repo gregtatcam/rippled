@@ -2,6 +2,7 @@
 #include <xrpl/ledger/Sandbox.h>
 #include <xrpl/ledger/View.h>
 #include <xrpl/ledger/helpers/AccountRootHelpers.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/STIssue.h>
@@ -9,7 +10,6 @@
 #include <xrpl/tx/transactors/dex/AMMCreate.h>
 #include <xrpl/tx/transactors/dex/AMMHelpers.h>
 #include <xrpl/tx/transactors/dex/AMMUtils.h>
-#include <xrpl/tx/transactors/token/MPTUtils.h>
 #include <xrpl/tx/transactors/token/MPTokenAuthorize.h>
 
 namespace xrpl {

@@ -212,4 +212,18 @@ issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue);
 void
 issuerSelfDebitHookMPT(ApplyView& view, MPTIssue const& issue, std::uint64_t amount);
 
+//------------------------------------------------------------------------------
+//
+// MPT DEX
+//
+//------------------------------------------------------------------------------
+
+/* Return true if a transaction is allowed for the specified MPT/account. The
+ * function checks MPTokenIssuance and MPToken objects flags to determine if the
+ * transaction is allowed.
+ */
+TER
+checkMPTTxAllowed(ReadView const& v, TxType tx, Asset const& asset, AccountID const& accountID);
+
+
 }  // namespace xrpl
