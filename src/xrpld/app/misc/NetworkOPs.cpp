@@ -3179,7 +3179,7 @@ NetworkOPsImp::transJson(
                 amount,
                 fhIGNORE_FREEZE,
                 ahIGNORE_AUTH,
-                registry_.journal("View"));
+                registry_.getJournal("View"));
             jvObj[jss::transaction][jss::owner_funds] = ownerFunds.getText();
         }
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <xrpld/app/paths/AssetCache.h>
+#include <xrpld/rpc/detail/AssetCache.h>
 #include <xrpld/rpc/detail/Pathfinder.h>
 
 #include <xrpl/basics/base_uint.h>
@@ -21,7 +21,7 @@ namespace xrpl {
 // The request issuer must maintain a strong pointer
 
 class AssetCache;
-class PathRequestsManager;
+class PathRequestManager;
 
 // Return values from parseJson <0 = invalid, >0 = valid
 #define PFR_PJ_INVALID -1

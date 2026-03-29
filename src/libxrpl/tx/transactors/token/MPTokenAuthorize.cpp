@@ -172,7 +172,8 @@ MPTokenAuthorize::checkCreateMPT(
     auto const mptokenID = keylet::mptoken(mptIssuanceID.key, holder);
     if (!view.exists(mptokenID))
     {
-        if (auto const err = createMPToken(view, mptIssue.getMptID(), holder, 0); err != tesSUCCESS)
+        if (auto const err = createMPToken(view, mptIssue.getMptID(), holder, 0);
+            !isTesSuccess(err))
             return err;
         auto const sleAcct = view.peek(keylet::account(holder));
         if (!sleAcct)

@@ -5,6 +5,7 @@
 
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/ledger/Sandbox.h>
+#include <xrpl/ledger/helpers/OfferHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/tx/paths/Flow.h>
 #include <xrpl/tx/paths/detail/Steps.h>
@@ -293,7 +294,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 BEAST_EXPECT(isOffer(env, bob, BTC(60), EUR(5'000)));
                 BEAST_EXPECT(isOffer(env, carol, BTC(1'000), EUR(100)));
 
-                auto flowJournal = env.app().logs().journal("Flow");
+                auto flowJournal = env.app().getLogs().journal("Flow");
                 auto const flowResult = [&] {
                     STAmount deliver(USD(5'100));
                     STAmount smax(BTC(61));
@@ -332,7 +333,7 @@ struct FlowMPT_test : public beast::unit_test::suite
                 }();
 
                 BEAST_EXPECT(flowResult.removableOffers.size() == 1);
-                env.app().openLedger().modify([&](OpenView& view, beast::Journal j) {
+                env.app().getOpenLedger().modify([&](OpenView& view, beast::Journal j) {
                     if (flowResult.removableOffers.empty())
                         return false;
                     Sandbox sb(&view, tapNONE);

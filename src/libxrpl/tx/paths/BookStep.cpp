@@ -3,6 +3,7 @@
 #include <xrpl/beast/utility/instrumentation.h>
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/ledger/helpers/AccountRootHelpers.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/protocol/Book.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/IOUAmount.h>
@@ -66,7 +67,7 @@ protected:
     std::optional<Cache> cache_;
 
 private:
-    BookStep(StrandContext const& ctx, Issue const& in, Issue const& out)
+    BookStep(StrandContext const& ctx, Asset const& in, Asset const& out)
         : book_(in, out, ctx.domainID)
         , strandSrc_(ctx.strandSrc)
         , strandDst_(ctx.strandDst)
@@ -256,7 +257,7 @@ class BookPaymentStep : public BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>
 public:
     explicit BookPaymentStep() = default;
 
-    BookPaymentStep(StrandContext const& ctx, Issue const& in, Issue const& out)
+    BookPaymentStep(StrandContext const& ctx, Asset const& in, Asset const& out)
         : BookStep<TIn, TOut, BookPaymentStep<TIn, TOut>>(ctx, in, out)
     {
     }
@@ -709,8 +710,7 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
         // Make sure offer owner has authorization to own Assets from issuer
         // and MPT assets can be traded/transferred.
         // An account can always own XRP or their own Assets.
-        if (!isTesSuccess(requireAuth(applyView, assetIn, owner)) || !checkMPTDEX(sb,
-                                                                                          owner))
+        if (!isTesSuccess(requireAuth(applyView, assetIn, owner)) || !checkMPTDEX(sb, owner))
         {
             // Offer owner not authorized to hold IOU/MPT from issuer.
             // Remove this offer even if no crossing occurs.
@@ -841,8 +841,8 @@ BookStep<TIn, TOut, TDerived>::consumeOffer(
     // The offer owner gets the ofrAmt. The difference between ofrAmt and
     // stepAmt is a transfer fee that goes to book_.in.account
     {
-        auto const dr =
-            offer.send(sb, book_.in.getIssuer(), offer.owner(), toSTAmount(ofrAmt.in, book_.in), j_);
+        auto const dr = offer.send(
+            sb, book_.in.getIssuer(), offer.owner(), toSTAmount(ofrAmt.in, book_.in), j_);
         if (!isTesSuccess(dr))
             Throw<FlowException>(dr);
     }
@@ -1286,8 +1286,8 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
 
     // Do not allow two books to output the same issue. This may cause offers on
     // one step to unfund offers in another step.
-    if (!ctx.seenBookOuts.insert(book_.out).second || (ctx.seenDirectAssets[0].count(book_.out)
-                                                       != 0u))
+    if (!ctx.seenBookOuts.insert(book_.out).second ||
+        (ctx.seenDirectAssets[0].count(book_.out) != 0u))
     {
         JLOG(j_.debug()) << "BookStep: loop detected: " << *this;
         return temBAD_PATH_LOOP;
@@ -1321,7 +1321,8 @@ BookStep<TIn, TOut, TDerived>::check(StrandContext const& ctx) const
                     auto sle = view.read(keylet::line(*prev, cur, issue.currency));
                     if (!sle)
                         return terNO_LINE;
-                    if (((*sle)[sfFlags] & ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple)) != 0u)
+                    if (((*sle)[sfFlags] & ((cur > *prev) ? lsfHighNoRipple : lsfLowNoRipple)) !=
+                        0u)
                         return terNO_RIPPLE;
                     return std::nullopt;
                 },
@@ -1359,7 +1360,7 @@ template <class TIn, class TOut, class TDerived>
 bool
 BookStep<TIn, TOut, TDerived>::checkMPTDEX(ReadView const& view, AccountID const& owner) const
 {
-    if (canTrade(view, book_.in) != tesSUCCESS || canTrade(view, book_.out) != tesSUCCESS)
+    if (!isTesSuccess(canTrade(view, book_.in)) || !isTesSuccess(canTrade(view, book_.out)))
         return false;
 
     if (book_.in.holds<MPTIssue>())
@@ -1384,7 +1385,7 @@ BookStep<TIn, TOut, TDerived>::checkMPTDEX(ReadView const& view, AccountID const
                 return true;
             // Previous step is MPTEndpointStep and offer's owner is not an
             // issuer
-            return canTransfer(view, asset, owner, owner) == tesSUCCESS;
+            return isTesSuccess(canTransfer(view, asset, owner, owner));
         }();
         if (!ret)
             return false;
@@ -1401,7 +1402,7 @@ BookStep<TIn, TOut, TDerived>::checkMPTDEX(ReadView const& view, AccountID const
             return true;
 
         // Next step is BookStep and offer's owner is not an issuer.
-        return canTransfer(view, asset, owner, owner) == tesSUCCESS;
+        return isTesSuccess(canTransfer(view, asset, owner, owner));
     }
 
     return true;

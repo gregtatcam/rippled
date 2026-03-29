@@ -110,9 +110,8 @@ toStep(
         (e2->getNodeType() & STPathElement::typeAsset) ||
             (e2->getNodeType() & STPathElement::typeIssuer),
         "xrpl::toStep : currency or issuer");
-    PathAsset const outAsset = ((e2->getNodeType() & STPathElement::typeAsset) != 0u)
-        ? e2->getPathAsset()
-        : curAsset;
+    PathAsset const outAsset =
+        ((e2->getNodeType() & STPathElement::typeAsset) != 0u) ? e2->getPathAsset() : curAsset;
     auto const outIssuer = ((e2->getNodeType() & STPathElement::typeIssuer) != 0u)
         ? e2->getIssuerID()
         : curAsset.getIssuer();
@@ -283,8 +282,8 @@ toStrand(
             STPathElement const& lastAsset =
                 *std::find_if(normPath.rbegin(), normPath.rend(), hasAsset);
             if (lastAsset.getPathAsset() != deliver ||
-                (offerCrossing != OfferCrossing::no && lastAsset.getIssuerID() != deliver.getIssuer
-                                                                                 ()))
+                (offerCrossing != OfferCrossing::no &&
+                 lastAsset.getIssuerID() != deliver.getIssuer()))
             {
                 normPath.emplace_back(std::nullopt, deliver, deliver.getIssuer());
             }

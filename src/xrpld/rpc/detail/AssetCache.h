@@ -1,15 +1,7 @@
 #pragma once
 
-<<<<<<<< HEAD:src/xrpld/rpc/detail/AssetCache.h
-#include <xrpld/app/ledger/Ledger.h>
-#include <xrpld/app/paths/MPT.h>
-#include <xrpld/app/paths/TrustLine.h>
-|||||||| 1bf9e6e7da:src/xrpld/app/paths/RippleLineCache.h
-#include <xrpld/app/ledger/Ledger.h>
-#include <xrpld/app/paths/TrustLine.h>
-========
+#include <xrpld/rpc/detail/MPT.h>
 #include <xrpld/rpc/detail/TrustLine.h>
->>>>>>>> develop:src/xrpld/rpc/detail/RippleLineCache.h
 
 #include <xrpl/basics/CountedObject.h>
 #include <xrpl/basics/hardened_hash.h>

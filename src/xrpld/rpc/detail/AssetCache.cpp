@@ -1,6 +1,7 @@
-#include <xrpld/app/paths/AssetCache.h>
-#include <xrpld/app/paths/TrustLine.h>
+#include <xrpld/rpc/detail/AssetCache.h>
+#include <xrpld/rpc/detail/TrustLine.h>
 
+#include <xrpl/ledger/helpers/DirectoryHelpers.h>
 #include <xrpl/tx/transactors/token/MPTUtils.h>
 
 namespace xrpl {

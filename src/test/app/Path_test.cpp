@@ -4,8 +4,8 @@
 #include <test/jtx/envconfig.h>
 #include <test/jtx/permissioned_dex.h>
 
-#include <xrpld/app/paths/AccountAssets.h>
 #include <xrpld/rpc/RPCHandler.h>
+#include <xrpld/rpc/detail/AccountAssets.h>
 #include <xrpld/rpc/detail/Tuning.h>
 
 #include <xrpl/beast/unit_test.h>

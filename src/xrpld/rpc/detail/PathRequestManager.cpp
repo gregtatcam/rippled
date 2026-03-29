@@ -15,7 +15,7 @@ namespace xrpl {
     Get the correct ledger to use.
 */
 std::shared_ptr<AssetCache>
-PathRequestsManager::getLineCache(std::shared_ptr<ReadView const> const& ledger, bool authoritative)
+PathRequestManager::getAssetCache(std::shared_ptr<ReadView const> const& ledger, bool authoritative)
 {
     std::lock_guard sl(mLock);
 
@@ -35,8 +35,8 @@ PathRequestsManager::getLineCache(std::shared_ptr<ReadView const> const& ledger,
         // Assign to the local before the member, because the member is a
         // weak_ptr, and will immediately discard it if there are no other
         // references.
-        assetCache_ = assetCache = std::make_shared<AssetCache>(ledger, app_.getJournal
-                                                                        ("AssetCache"));
+        assetCache_ = assetCache =
+            std::make_shared<AssetCache>(ledger, app_.getJournal("AssetCache"));
     }
     return assetCache;
 }

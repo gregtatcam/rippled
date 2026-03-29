@@ -1,6 +1,7 @@
 #include <xrpl/basics/Log.h>
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/ledger/View.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/protocol/MPTAmount.h>
 #include <xrpl/protocol/Quality.h>
 #include <xrpl/tx/paths/detail/Steps.h>
@@ -299,13 +300,13 @@ MPTEndpointPaymentStep::check(StrandContext const& ctx, std::shared_ptr<const SL
     auto const& issuer = mptIssue_.getIssuer();
     if (src_ != issuer)
     {
-        if (auto const ter = requireAuth(ctx.view, mptIssue_, src_); ter != tesSUCCESS)
+        if (auto const ter = requireAuth(ctx.view, mptIssue_, src_); !isTesSuccess(ter))
             return ter;
     }
 
     if (dst_ != issuer)
     {
-        if (auto const ter = requireAuth(ctx.view, mptIssue_, dst_); ter != tesSUCCESS)
+        if (auto const ter = requireAuth(ctx.view, mptIssue_, dst_); !isTesSuccess(ter))
             return ter;
     }
 
@@ -322,7 +323,7 @@ MPTEndpointPaymentStep::check(StrandContext const& ctx, std::shared_ptr<const SL
                 return tecLOCKED;
 
             if (auto const ter = canTransfer(ctx.view, mptIssue_, holder, ctx.strandDst);
-                ter != tesSUCCESS)
+                !isTesSuccess(ter))
                 return ter;
         }
         // Don't need to check if a payment is between issuer and holder
@@ -331,7 +332,7 @@ MPTEndpointPaymentStep::check(StrandContext const& ctx, std::shared_ptr<const SL
     // Cross-token MPT payment via DEX
     else
     {
-        if (auto const ter = canTrade(ctx.view, mptIssue_); ter != tesSUCCESS)
+        if (auto const ter = canTrade(ctx.view, mptIssue_); !isTesSuccess(ter))
             return ter;
     }
 
@@ -370,7 +371,7 @@ MPTEndpointOfferCrossingStep::checkCreateMPT(ApplyView& view, xrpl::DebtDirectio
         // if crossed. Insufficient reserve is allowed if the offer
         // crossed. See CreateOffer::applyGuts() for reserve check.
         if (auto const err = MPTokenAuthorize::checkCreateMPT(view, mptIssue_, dst_, j_);
-            err != tesSUCCESS)
+            !isTesSuccess(err))
         {
             JLOG(j_.trace()) << "MPTEndpointStep::checkCreateMPT: failed create MPT";
             resetCache(srcDebtDir);
@@ -452,7 +453,7 @@ MPTEndpointStep<TDerived>::revImp(
     }
 
     if (auto const err = static_cast<TDerived*>(this)->checkCreateMPT(sb, srcDebtDir);
-        err != tesSUCCESS)
+        !isTesSuccess(err))
         return {beast::zero, beast::zero};
 
     // Don't have to factor in dstQIn since it is always QUALITY_ONE
@@ -469,7 +470,7 @@ MPTEndpointStep<TDerived>::revImp(
             toSTAmount(srcToDst, srcToDstIss),
             /*checkIssuer*/ false,
             j_);
-        if (ter != tesSUCCESS)
+        if (!isTesSuccess(ter))
         {
             JLOG(j_.trace()) << "MPTEndpointStep::rev: error " << ter;
             resetCache(srcDebtDir);
@@ -494,7 +495,7 @@ MPTEndpointStep<TDerived>::revImp(
         toSTAmount(maxSrcToDst, srcToDstIss),
         /*checkIssuer*/ false,
         j_);
-    if (ter != tesSUCCESS)
+    if (!isTesSuccess(ter))
     {
         JLOG(j_.trace()) << "MPTEndpointStep::rev: error " << ter;
         resetCache(srcDebtDir);
@@ -579,7 +580,7 @@ MPTEndpointStep<TDerived>::fwdImp(
     }
 
     if (auto const err = static_cast<TDerived*>(this)->checkCreateMPT(sb, srcDebtDir);
-        err != tesSUCCESS)
+        !isTesSuccess(err))
         return {beast::zero, beast::zero};
 
     MPTAmount const srcToDst = mulRatio(in, QUALITY_ONE, srcQOut, /*roundUp*/ false);
@@ -596,7 +597,7 @@ MPTEndpointStep<TDerived>::fwdImp(
             toSTAmount(cache_->srcToDst, srcToDstIss),
             /*checkIssuer*/ false,
             j_);
-        if (ter != tesSUCCESS)
+        if (!isTesSuccess(ter))
         {
             JLOG(j_.trace()) << "MPTEndpointStep::fwd: error " << ter;
             resetCache(srcDebtDir);
@@ -620,7 +621,7 @@ MPTEndpointStep<TDerived>::fwdImp(
             toSTAmount(cache_->srcToDst, srcToDstIss),
             /*checkIssuer*/ false,
             j_);
-        if (ter != tesSUCCESS)
+        if (!isTesSuccess(ter))
         {
             JLOG(j_.trace()) << "MPTEndpointStep::fwd: error " << ter;
             resetCache(srcDebtDir);
@@ -864,7 +865,7 @@ make_MPTEndpointStep(
 {
     TER ter = tefINTERNAL;
     std::unique_ptr<Step> r;
-    if (ctx.offerCrossing)
+    if (ctx.offerCrossing != OfferCrossing::no)
     {
         auto offerCrossingStep = std::make_unique<MPTEndpointOfferCrossingStep>(ctx, src, dst, mpt);
         ter = offerCrossingStep->check(ctx);
@@ -876,7 +877,7 @@ make_MPTEndpointStep(
         ter = paymentStep->check(ctx);
         r = std::move(paymentStep);
     }
-    if (ter != tesSUCCESS)
+    if (!isTesSuccess(ter))
         return {ter, nullptr};
 
     return {tesSUCCESS, std::move(r)};

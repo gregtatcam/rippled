@@ -9,14 +9,13 @@
 #include <test/jtx/trust.h>
 #include <test/jtx/xchain_bridge.h>
 
-#include <xrpld/app/paths/detail/StepChecks.h>
-
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/beast/utility/Zero.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/jss.h>
+#include <xrpl/tx/paths/detail/StepChecks.h>
 #include <xrpl/tx/transactors/dex/AMMHelpers.h>
 
 namespace xrpl {
@@ -6488,7 +6487,7 @@ public:
     {
         using namespace test::jtx;
         FeatureBitset const all{testable_amendments()};
-#if 0
+
         // MPTokenIssuanceCreate
         testCreateValidation(all - featureSingleAssetVault);
         testCreateValidation(all - featurePermissionedDomains);
@@ -6572,10 +6571,10 @@ public:
 
         // Test offer crossing
         testOfferCrossing(all);
-#endif
+
         // Test cross asset payment
         testCrossAssetPayment(all);
-#if 0
+
         // Test path finding
         testPath(all);
 
@@ -6587,7 +6586,6 @@ public:
 
         // Test AMM
         testBasicAMM(all);
-#endif
     }
 };
 

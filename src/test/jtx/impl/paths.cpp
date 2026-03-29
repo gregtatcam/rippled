@@ -30,7 +30,7 @@ paths::operator()(Env& env, JTx& jt) const
     }
 
     Pathfinder pf(
-        std::make_shared<AssetCache>(env.current(), env.app().journal("AssetCache")),
+        std::make_shared<AssetCache>(env.current(), env.app().getJournal("AssetCache")),
         from,
         to,
         in_,

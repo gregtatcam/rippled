@@ -177,8 +177,8 @@ STPath::getJson(JsonOptions) const
             elem[jss::account] = to_string(it.getAccountID());
 
         XRPL_ASSERT(
-            ((iType & STPathElement::typeCurrency) == 0u)  && ((iType & STPathElement::typeMPT)
-                                                                  == 0u),
+            ((iType & STPathElement::typeCurrency) == 0u) ||
+                ((iType & STPathElement::typeMPT) == 0u),
             "xrpl::STPath::getJson : not type Currency and MPT");
         if ((iType & STPathElement::typeCurrency) != 0u)
             elem[jss::currency] = to_string(it.getCurrency());

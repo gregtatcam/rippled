@@ -1,6 +1,7 @@
 #include <xrpl/ledger/View.h>
 #include <xrpl/ledger/helpers/AccountRootHelpers.h>
 #include <xrpl/ledger/helpers/DirectoryHelpers.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/ledger/helpers/RippleStateHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
@@ -11,12 +12,9 @@
 namespace xrpl {
 
 bool
-CreateCheck::checkExtraFeatures(xrpl::PreflightContext const& ctx)
+CheckCreate::checkExtraFeatures(xrpl::PreflightContext const& ctx)
 {
-    if (!ctx.rules.enabled(featureMPTokensV2) && ctx.tx[sfSendMax].holds<MPTIssue>())
-        return false;
-
-    return true;
+    return ctx.rules.enabled(featureMPTokensV2) || !ctx.tx[sfSendMax].holds<MPTIssue>();
 }
 
 NotTEC

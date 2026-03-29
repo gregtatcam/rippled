@@ -1,4 +1,4 @@
-#include <xrpld/app/paths/AccountAssets.h>
+#include <xrpld/rpc/detail/AccountAssets.h>
 
 namespace xrpl {
 

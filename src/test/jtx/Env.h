@@ -510,7 +510,6 @@ public:
     */
     // VFALCO NOTE This should return a unit-less amount
     PrettyAmount
-    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     balance(Account const& account, Asset const& asset) const;
 
     /** Returns the IOU limit on an account.

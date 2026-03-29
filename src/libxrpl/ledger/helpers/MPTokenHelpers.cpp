@@ -303,18 +303,11 @@ requireAuth(
                 return tefINTERNAL;  // LCOV_EXCL_LINE
 
             auto const asset = sleVault->at(sfAsset);
-            if (auto const err = std::visit(
-                    [&]<ValidIssueType TIss>(TIss const& issue) {
-                        if constexpr (std::is_same_v<TIss, Issue>)
-                        {
-                            return requireAuth(view, issue, account, authType);
-                        }
-                        else
-                        {
-                            return requireAuth(view, issue, account, authType, depth + 1);
-                        }
-                    },
-                    asset.value());
+            if (auto const err = asset.visit(
+                    [&](Issue const& issue) { return requireAuth(view, issue, account, authType); },
+                    [&](MPTIssue const& issue) {
+                        return requireAuth(view, issue, account, authType, depth + 1);
+                    });
                 !isTesSuccess(err))
                 return err;
         }
@@ -323,8 +316,10 @@ requireAuth(
     auto const mptokenID = keylet::mptoken(mptID.key, account);
     auto const sleToken = view.read(mptokenID);
 
+    bool const mptokensV2 = view.rules().enabled(featureMPTokensV2);
     // if account has no MPToken, fail
-    if (!sleToken && (authType == AuthType::StrongAuth || authType == AuthType::Legacy))
+    if (!sleToken &&
+        (!mptokensV2 || authType == AuthType::StrongAuth || authType == AuthType::Legacy))
         return tecNO_AUTH;
 
     // Note, this check is not amendment-gated because DomainID will be always
@@ -358,7 +353,7 @@ requireAuth(
 
     // mptoken must be authorized if issuance enabled requireAuth
     if (sleIssuance->isFlag(lsfMPTRequireAuth) &&
-        (!sleToken || !sleToken->isFlag(lsfMPTAuthorized)))
+        ((!sleToken && mptokensV2) || !sleToken->isFlag(lsfMPTAuthorized)))
         return tecNO_AUTH;
 
     return tesSUCCESS;  // Note: sleToken might be null
@@ -482,6 +477,21 @@ canTransfer(
             return TER{tecNO_AUTH};
     }
     return tesSUCCESS;
+}
+
+TER
+canTrade(ReadView const& view, Asset const& asset)
+{
+    return asset.visit(
+        [&](Issue const&) -> TER { return tesSUCCESS; },
+        [&](MPTIssue const& mptIssue) -> TER {
+            auto const sleIssuance = view.read(keylet::mptIssuance(mptIssue.getMptID()));
+            if (!sleIssuance)
+                return tecOBJECT_NOT_FOUND;
+            if (!sleIssuance->isFlag(lsfMPTCanTrade))
+                return tecNO_PERMISSION;
+            return tesSUCCESS;
+        });
 }
 
 TER
@@ -747,6 +757,61 @@ rippleUnlockEscrowMPT(
         view.update(sleIssuance);
     }
     return tesSUCCESS;
+}
+
+std::int64_t
+maxMPTAmount(SLE const& sleIssuance)
+{
+    return sleIssuance[~sfMaximumAmount].value_or(maxMPTokenAmount);
+}
+
+std::int64_t
+availableMPTAmount(SLE const& sleIssuance)
+{
+    auto const max = maxMPTAmount(sleIssuance);
+    auto const outstanding = sleIssuance[sfOutstandingAmount];
+    return max - outstanding;
+}
+
+std::int64_t
+availableMPTAmount(ReadView const& view, MPTID const& mptID)
+{
+    auto const sle = view.read(keylet::mptIssuance(mptID));
+    if (!sle)
+        Throw<std::runtime_error>(transHuman(tecINTERNAL));
+    return availableMPTAmount(*sle);
+}
+
+bool
+isMPTOverflow(
+    std::int64_t sendAmount,
+    std::uint64_t outstandingAmount,
+    std::int64_t maximumAmount,
+    AllowMPTOverflow allowOverflow)
+{
+    std::uint64_t const limit = (allowOverflow == AllowMPTOverflow::Yes)
+        ? std::numeric_limits<std::uint64_t>::max()
+        : maximumAmount;
+    return (sendAmount > maximumAmount || outstandingAmount > (limit - sendAmount));
+}
+
+STAmount
+issuerFundsToSelfIssue(ReadView const& view, MPTIssue const& issue)
+{
+    STAmount amount{issue};
+
+    auto const sle = view.read(keylet::mptIssuance(issue));
+    if (!sle)
+        return amount;
+    auto const available = availableMPTAmount(*sle);
+    return view.balanceHookSelfIssueMPT(issue, available);
+}
+
+void
+issuerSelfDebitHookMPT(ApplyView& view, MPTIssue const& issue, std::uint64_t amount)
+{
+    auto const available = availableMPTAmount(view, issue);
+    view.issuerSelfDebitHookMPT(issue, amount, available);
 }
 
 }  // namespace xrpl

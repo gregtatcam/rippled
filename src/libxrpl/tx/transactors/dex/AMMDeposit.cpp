@@ -349,10 +349,10 @@ AMMDeposit::preclaim(PreclaimContext const& ctx)
     }
 
     if (auto const ter = checkMPTTxAllowed(ctx.view, ttAMM_DEPOSIT, ctx.tx[sfAsset], accountID);
-        ter != tesSUCCESS)
+        !isTesSuccess(ter))
         return ter;
     if (auto const ter = checkMPTTxAllowed(ctx.view, ttAMM_DEPOSIT, ctx.tx[sfAsset2], accountID);
-        ter != tesSUCCESS)
+        !isTesSuccess(ter))
         return ter;
 
     return tesSUCCESS;

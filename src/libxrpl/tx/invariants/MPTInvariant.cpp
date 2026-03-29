@@ -135,8 +135,7 @@ ValidMPTIssuance::finalize(
                                    "succeeded but deleted issuances";
                 return false;
             }
-            else if (
-                mptV2Enabled && hasPrivilege(tx, mayAuthorizeMPT) &&
+            if (mptV2Enabled && hasPrivilege(tx, mayAuthorizeMPT) &&
                 (txnType == ttAMM_WITHDRAW || txnType == ttAMM_CLAWBACK))
             {
                 if (submittedByIssuer && txnType == ttAMM_WITHDRAW && mptokensCreated_ > 0)
@@ -151,7 +150,7 @@ ValidMPTIssuance::finalize(
                 //    participate in AMM pool liquidity.
                 //  - At most two MPTokens may be deleted if AMM pool, which has exactly
                 //    two tokens, is empty after withdraw/clawback.
-                else if (mptokensCreated_ > 1 || mptokensDeleted_ > 2)
+                if (mptokensCreated_ > 1 || mptokensDeleted_ > 2)
                 {
                     JLOG(j.fatal()) << "Invariant failed: MPT authorize  succeeded "
                                        "but created/deleted bad number of mptokens";
@@ -164,13 +163,14 @@ ValidMPTIssuance::finalize(
                                    "but created/deleted bad number mptokens";
                 return false;
             }
-            if (submittedByIssuer && (mptokensCreated_ > 0 || mptokensDeleted_ > 0))
+            else if (submittedByIssuer && (mptokensCreated_ > 0 || mptokensDeleted_ > 0))
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT authorize submitted by issuer "
                                    "succeeded but created/deleted mptokens";
                 return false;
             }
-            if (!submittedByIssuer && hasPrivilege(tx, mustAuthorizeMPT) &&
+            else if (
+                !submittedByIssuer && hasPrivilege(tx, mustAuthorizeMPT) &&
                 (mptokensCreated_ + mptokensDeleted_ != 1))
             {
                 // if the holder submitted this tx, then a mptoken must be
@@ -193,13 +193,13 @@ ValidMPTIssuance::finalize(
                                    "succeeded but created MPT issuances";
                 return false;
             }
-            else if (mptIssuancesDeleted_ > 0)
+            if (mptIssuancesDeleted_ > 0)
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT authorize "
                                    "succeeded but deleted issuances";
                 return false;
             }
-            else if (mptokensDeleted_ > 0)
+            if (mptokensDeleted_ > 0)
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT authorize "
                                    "succeeded but deleted MPTokens";
@@ -208,15 +208,14 @@ ValidMPTIssuance::finalize(
             // AMMCreate may auto-create up to two MPT objects:
             //   - one per asset side in an MPT/MPT AMM, or one in an IOU/MPT AMM.
             // CheckCash may auto-create at most one MPT object for the receiver.
-            else if (
-                (txnType == ttAMM_CREATE && mptokensCreated_ > 2) ||
+            if ((txnType == ttAMM_CREATE && mptokensCreated_ > 2) ||
                 (txnType == ttCHECK_CASH && mptokensCreated_ > 1))
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT authorize "
                                    "succeeded but created bad number of mptokens";
                 return false;
             }
-            else if (submittedByIssuer)
+            if (submittedByIssuer)
             {
                 JLOG(j.fatal()) << "Invariant failed: MPT authorize submitted by issuer "
                                    "succeeded but created mptokens";
@@ -314,7 +313,7 @@ ValidMPTPayment::finalize(
     ReadView const& view,
     beast::Journal const& j)
 {
-    if (result == tesSUCCESS)
+    if (isTesSuccess(result))
     {
         bool const enforce = view.rules().enabled(featureMPTokensV2);
         if (overflow_)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <xrpld/app/paths/AssetCache.h>
+#include <xrpld/rpc/detail/AssetCache.h>
 
 #include <xrpl/basics/CountedObject.h>
 #include <xrpl/core/LoadEvent.h>

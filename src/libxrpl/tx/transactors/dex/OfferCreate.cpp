@@ -3,6 +3,7 @@
 #include <xrpl/ledger/PaymentSandbox.h>
 #include <xrpl/ledger/helpers/AccountRootHelpers.h>
 #include <xrpl/ledger/helpers/DirectoryHelpers.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/ledger/helpers/OfferHelpers.h>
 #include <xrpl/ledger/helpers/RippleStateHelpers.h>
 #include <xrpl/protocol/Feature.h>
@@ -196,9 +197,9 @@ OfferCreate::preclaim(PreclaimContext const& ctx)
             return tecNO_PERMISSION;
     }
 
-    if (auto const ter = canTrade(ctx.view, saTakerPays.asset()); ter != tesSUCCESS)
+    if (auto const ter = canTrade(ctx.view, saTakerPays.asset()); !isTesSuccess(ter))
         return ter;
-    if (auto const ter = canTrade(ctx.view, saTakerGets.asset()); ter != tesSUCCESS)
+    if (auto const ter = canTrade(ctx.view, saTakerGets.asset()); !isTesSuccess(ter))
         return ter;
 
     return tesSUCCESS;
@@ -268,9 +269,10 @@ OfferCreate::checkAcceptAsset(
                 return tesSUCCESS;
             }
 
-          // There's no difference which side enacted deep freeze, accepting
-          // tokens shouldn't be possible.
-          bool const deepFrozen = ((*trustLine)[sfFlags] & (lsfLowDeepFreeze | lsfHighDeepFreeze)) != 0u;
+            // There's no difference which side enacted deep freeze, accepting
+            // tokens shouldn't be possible.
+            bool const deepFrozen =
+                ((*trustLine)[sfFlags] & (lsfLowDeepFreeze | lsfHighDeepFreeze)) != 0u;
 
             if (deepFrozen)
             {

@@ -109,7 +109,7 @@ AMMClawback::preclaim(PreclaimContext const& ctx)
         // permission
         if (((issuerFlagsIn & lsfAllowTrustLineClawback) == 0u) ||
             ((issuerFlagsIn & lsfNoFreeze) != 0u))
-        return tesSUCCESS;
+            return tesSUCCESS;
     }
 
     auto const checkClawAsset = [&](Asset const asset) -> bool {
@@ -118,14 +118,13 @@ AMMClawback::preclaim(PreclaimContext const& ctx)
                 if (issue.native())
                     return false;  // LCOV_EXCL_LINE
 
-                return ((issuerFlagsIn & lsfAllowTrustLineClawback) != 0u ) &&
+                return ((issuerFlagsIn & lsfAllowTrustLineClawback) != 0u) &&
                     ((issuerFlagsIn & lsfNoFreeze) == 0u);
             },
             [&](MPTIssue const& issue) {
                 auto const sleIssuance = ctx.view.read(keylet::mptIssuance(issue.getMptID()));
 
-                return sleIssuance &&
-                    sleIssuance->isFlag(lsfMPTCanClawback) &&
+                return sleIssuance && sleIssuance->isFlag(lsfMPTCanClawback) &&
                     sleIssuance->getAccountID(sfIssuer) == ctx.tx[sfAccount];
             });
     };

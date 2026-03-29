@@ -1,5 +1,6 @@
 #include <xrpl/basics/Number.h>
 #include <xrpl/ledger/Sandbox.h>
+#include <xrpl/ledger/helpers/AccountRootHelpers.h>
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/tx/transactors/dex/AMMHelpers.h>
@@ -230,7 +231,7 @@ AMMWithdraw::preclaim(PreclaimContext const& ctx)
 
             if (auto const ter =
                     checkMPTTxAllowed(ctx.view, ttAMM_WITHDRAW, amount->asset(), accountID);
-                ter != tesSUCCESS)
+                !isTesSuccess(ter))
                 return ter;
         }
         return tesSUCCESS;
@@ -622,11 +623,11 @@ AMMWithdraw::withdraw(
         {
             auto const& mptIssue = asset.get<MPTIssue>();
             if (auto const err = requireAuth(view, mptIssue, account, AuthType::WeakAuth);
-                err != tesSUCCESS)
+                !isTesSuccess(err))
                 return err;
 
             if (auto const err = MPTokenAuthorize::checkCreateMPT(view, mptIssue, account, journal);
-                err != tesSUCCESS)
+                !isTesSuccess(err))
                 return err;
         }
         return tesSUCCESS;
@@ -635,7 +636,7 @@ AMMWithdraw::withdraw(
     if (auto const err = sufficientReserve(amountWithdrawActual.asset()))
         return {err, STAmount{}, STAmount{}, STAmount{}};
 
-    if (auto const res = createMPToken(amountWithdrawActual.asset()); res != tesSUCCESS)
+    if (auto const res = createMPToken(amountWithdrawActual.asset()); !isTesSuccess(res))
         return {res, STAmount{}, STAmount{}, STAmount{}};
 
     // Withdraw amountWithdraw
@@ -670,8 +671,8 @@ AMMWithdraw::withdraw(
     }
 
     // Withdraw LP tokens
-    res = redeemIOU(view, account, lpTokensWithdrawActual, lpTokensWithdrawActual.get<Issue>(),
-                    journal);
+    res = redeemIOU(
+        view, account, lpTokensWithdrawActual, lpTokensWithdrawActual.get<Issue>(), journal);
     if (!isTesSuccess(res))
     {
         // LCOV_EXCL_START

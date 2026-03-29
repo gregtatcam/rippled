@@ -963,9 +963,9 @@ protected:
                     << paymentComponents.trackedPrincipalDelta << ", "
                     << paymentComponents.trackedInterestPart() << ", "
                     << paymentComponents.trackedManagementFeeDelta << ", " << [&]() -> char const* {
-                    if (paymentComponents.specialCase == detail::PaymentSpecialCase::final)
+                    if (paymentComponents.specialCase == ::xrpl::detail::PaymentSpecialCase::final)
                         return "final";
-                    if (paymentComponents.specialCase == detail::PaymentSpecialCase::extra)
+                    if (paymentComponents.specialCase == ::xrpl::detail::PaymentSpecialCase::extra)
                         return "extra";
                     return "none";
                 }() << std::endl;
@@ -2531,9 +2531,11 @@ protected:
                              << paymentComponents.trackedInterestPart() << ", "
                              << paymentComponents.trackedManagementFeeDelta << ", "
                              << [&]() -> char const* {
-                        if (paymentComponents.specialCase == detail::PaymentSpecialCase::final)
+                        if (paymentComponents.specialCase ==
+                            ::xrpl::detail::PaymentSpecialCase::final)
                             return "final";
-                        if (paymentComponents.specialCase == detail::PaymentSpecialCase::extra)
+                        if (paymentComponents.specialCase ==
+                            ::xrpl::detail::PaymentSpecialCase::extra)
                             return "extra";
                         return "none";
                     }();

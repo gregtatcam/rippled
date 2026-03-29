@@ -878,8 +878,8 @@ struct PayStrand_test : public beast::unit_test::suite
                 std::nullopt,
                 env.app().getJournal("Flow"));
             BEAST_EXPECT(isTesSuccess(ter));
-            BEAST_EXPECT(equal(
-                strand, D{alice, gw, usdC}, B{USD, xrpIssue(), std::nullopt}, XRPS{bob}));
+            BEAST_EXPECT(
+                equal(strand, D{alice, gw, usdC}, B{USD, xrpIssue(), std::nullopt}, XRPS{bob}));
         }
     }
 

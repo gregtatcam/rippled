@@ -58,7 +58,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 OfferCrossing::no,
                 ammContext,
                 std::nullopt,
-                env.app().logs().journal("Flow"));
+                env.app().getLogs().journal("Flow"));
             BEAST_EXPECT(ter == expTer);
             if (sizeof...(expSteps) != 0)
                 BEAST_EXPECT(jtx::equal(strand, std::forward<decltype(expSteps)>(expSteps)...));
@@ -110,7 +110,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                         OfferCrossing::no,
                         ammContext,
                         std::nullopt,
-                        env.app().logs().journal("Flow"));
+                        env.app().getLogs().journal("Flow"));
                     (void)_;
                     BEAST_EXPECT(ter == tesSUCCESS);
                 }
@@ -128,7 +128,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                         OfferCrossing::no,
                         ammContext,
                         std::nullopt,
-                        env.app().logs().journal("Flow"));
+                        env.app().getLogs().journal("Flow"));
                     (void)_;
                     BEAST_EXPECT(ter == tesSUCCESS);
                 }
@@ -347,7 +347,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 OfferCrossing::no,
                 ammContext,
                 std::nullopt,
-                env.app().logs().journal("Flow"));
+                env.app().getLogs().journal("Flow"));
             BEAST_EXPECT(ter == tesSUCCESS);
             BEAST_EXPECT(equal(strand, M{alice, gw, USD}));
         }
@@ -376,7 +376,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                 OfferCrossing::no,
                 ammContext,
                 std::nullopt,
-                env.app().logs().journal("Flow"));
+                env.app().getLogs().journal("Flow"));
             BEAST_EXPECT(ter == tesSUCCESS);
             BEAST_EXPECT(
                 equal(strand, M{alice, gw, USD}, B{USD, xrpIssue(), std::nullopt}, XRPS{bob}));
@@ -544,7 +544,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     noAccount(),
                     pathSet,
                     std::nullopt,
-                    env.app().logs(),
+                    env.app(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);
             }
@@ -557,7 +557,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     srcAcc,
                     pathSet,
                     std::nullopt,
-                    env.app().logs(),
+                    env.app(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);
             }
@@ -570,7 +570,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     srcAcc,
                     pathSet,
                     std::nullopt,
-                    env.app().logs(),
+                    env.app(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);
             }
@@ -583,7 +583,7 @@ struct PayStrandMPT_test : public beast::unit_test::suite
                     srcAcc,
                     pathSet,
                     std::nullopt,
-                    env.app().logs(),
+                    env.app(),
                     &inputs);
                 BEAST_EXPECT(r.result() == temBAD_PATH);
             }

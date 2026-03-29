@@ -3,10 +3,10 @@
 #include <test/jtx/AMMTest.h>
 #include <test/jtx/PathSet.h>
 
-#include <xrpld/app/paths/AMMOffer.h>
-
 #include <xrpl/ledger/PaymentSandbox.h>
+#include <xrpl/ledger/helpers/OfferHelpers.h>
 #include <xrpl/protocol/Feature.h>
+#include <xrpl/tx/paths/AMMOffer.h>
 #include <xrpl/tx/paths/Flow.h>
 
 namespace xrpl {
@@ -1731,7 +1731,7 @@ private:
             BEAST_EXPECT(isOffer(env, carol, BTC(1'000'000'000), GBP(1'000'000)));
             BEAST_EXPECT(isOffer(env, bob, GBP(50'000'000), ETH(50'000'000)));
 
-            auto flowJournal = env.app().logs().journal("Flow");
+            auto flowJournal = env.app().getLogs().journal("Flow");
             auto const flowResult = [&] {
                 STAmount deliver(ETH(51'000'000));
                 STAmount smax(BTC(61'000'000));
@@ -1770,7 +1770,7 @@ private:
             }();
 
             BEAST_EXPECT(flowResult.removableOffers.size() == 1);
-            env.app().openLedger().modify([&](OpenView& view, beast::Journal j) {
+            env.app().getOpenLedger().modify([&](OpenView& view, beast::Journal j) {
                 if (flowResult.removableOffers.empty())
                     return false;
                 Sandbox sb(&view, tapNONE);

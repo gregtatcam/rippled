@@ -167,10 +167,10 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
     }
 
     if (auto const ter = checkMPTTxAllowed(ctx.view, ttAMM_CREATE, amount.asset(), accountID);
-        ter != tesSUCCESS)
+        !isTesSuccess(ter))
         return ter;
     if (auto const ter = checkMPTTxAllowed(ctx.view, ttAMM_CREATE, amount2.asset(), accountID);
-        ter != tesSUCCESS)
+        !isTesSuccess(ter))
         return ter;
 
     // If featureAMMClawback is enabled, allow AMMCreate without checking
@@ -185,20 +185,20 @@ AMMCreate::preclaim(PreclaimContext const& ctx)
             [&](MPTIssue const& issue) -> TER {
                 auto const sle = ctx.view.read(keylet::mptIssuance(issue.getMptID()));
                 if (!sle)
-                    return tecINTERNAL; // LCOV_EXCL_LINE
+                    return tecINTERNAL;  // LCOV_EXCL_LINE
                 if (sle->isFlag(lsfMPTCanClawback))
                     return tecNO_PERMISSION;
                 return tesSUCCESS;
             },
             [&](Issue const& issue) -> TER {
-              if (isXRP(issue))
-                  return tesSUCCESS;
-              auto const sle = ctx.view.read(keylet::account(issue.account));
-              if (!sle)
-                  return tecINTERNAL;  // LCOV_EXCL_LINE
-              if (sle->isFlag(lsfAllowTrustLineClawback))
-                  return tecNO_PERMISSION;
-              return tesSUCCESS;
+                if (isXRP(issue))
+                    return tesSUCCESS;
+                auto const sle = ctx.view.read(keylet::account(issue.account));
+                if (!sle)
+                    return tecINTERNAL;  // LCOV_EXCL_LINE
+                if (sle->isFlag(lsfAllowTrustLineClawback))
+                    return tecNO_PERMISSION;
+                return tesSUCCESS;
             });
     };
 
@@ -299,14 +299,13 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
                     return err;
                 // Don't adjust AMM owner count.
                 // It's irrelevant for pseudo-account like AMM.
-                return
-                    accountSend(sb, account_, accountId, amount, ctx_.journal,
-WaiveTransferFee::Yes);
+                return accountSend(
+                    sb, account_, accountId, amount, ctx_.journal, WaiveTransferFee::Yes);
             },
             // Set AMM flag on AMM trustline
             [&](Issue const& issue) -> TER {
-                if (auto const res =
-                        accountSend(sb, account_, accountId, amount, ctx_.journal, WaiveTransferFee::Yes))
+                if (auto const res = accountSend(
+                        sb, account_, accountId, amount, ctx_.journal, WaiveTransferFee::Yes))
                     return res;
                 // Set AMM flag on AMM trustline
                 if (!isXRP(amount))

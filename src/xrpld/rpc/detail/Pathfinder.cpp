@@ -8,6 +8,7 @@
 #include <xrpl/json/to_string.h>
 #include <xrpl/ledger/OrderBookDB.h>
 #include <xrpl/ledger/PaymentSandbox.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/tx/paths/RippleCalc.h>
 
 #include <tuple>
@@ -728,7 +729,7 @@ Pathfinder::getPathsOut(
     bool const bAuthRequired = [&]() {
         if (pathAsset.holds<Currency>())
             return (aFlags & lsfRequireAuth) != 0;
-        return requireAuth(*mLedger, asset.get<MPTIssue>(), account) != tesSUCCESS;
+        return !isTesSuccess(requireAuth(*mLedger, asset.get<MPTIssue>(), account));
     }();
     bool const bFrozen = [&]() {
         if (pathAsset.holds<Currency>())
@@ -1135,16 +1136,16 @@ Pathfinder::addLink(
                             std::placeholders::_1,
                             std::placeholders::_2));
 
-                        int count = candidates.size();
-                        // allow more paths from source
-                        if ((count > 10) && (uEndAccount != mSrcAccount))
-                        {
-                            count = 10;
-                        }
-                        else if (count > 50)
-                        {
-                            count = 50;
-                        }
+                    int count = candidates.size();
+                    // allow more paths from source
+                    if ((count > 10) && (uEndAccount != mSrcAccount))
+                    {
+                        count = 10;
+                    }
+                    else if (count > 50)
+                    {
+                        count = 50;
+                    }
 
                     auto it = candidates.begin();
                     while (count-- != 0)

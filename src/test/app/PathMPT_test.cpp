@@ -2,9 +2,9 @@
 #include <test/jtx/AMM.h>
 #include <test/jtx/envconfig.h>
 
-#include <xrpld/app/paths/AccountAssets.h>
 #include <xrpld/rpc/Context.h>
 #include <xrpld/rpc/RPCHandler.h>
+#include <xrpld/rpc/detail/AccountAssets.h>
 #include <xrpld/rpc/detail/RPCHelpers.h>
 #include <xrpld/rpc/detail/Tuning.h>
 

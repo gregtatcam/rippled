@@ -1,6 +1,7 @@
 #include <xrpl/basics/scope.h>
 #include <xrpl/ledger/View.h>
 #include <xrpl/ledger/helpers/AccountRootHelpers.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/ledger/helpers/RippleStateHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
@@ -14,7 +15,7 @@
 namespace xrpl {
 
 bool
-CashCheck::checkExtraFeatures(xrpl::PreflightContext const& ctx)
+CheckCash::checkExtraFeatures(xrpl::PreflightContext const& ctx)
 {
     auto const optAmount = ctx.tx[~sfAmount];
     auto const optDeliverMin = ctx.tx[~sfDeliverMin];
@@ -195,8 +196,9 @@ CheckCash::preclaim(PreclaimContext const& ctx)
                         // Determine which entry we need to access.
                         bool const canonical_gt(dstId > issuerId);
 
-                bool const is_authorized(
-                    (sleTrustLine->at(sfFlags) & (canonical_gt ? lsfLowAuth : lsfHighAuth)) != 0u);
+                        bool const is_authorized(
+                            (sleTrustLine->at(sfFlags) &
+                             (canonical_gt ? lsfLowAuth : lsfHighAuth)) != 0u);
 
                         if (!is_authorized)
                         {
@@ -232,7 +234,7 @@ CheckCash::preclaim(PreclaimContext const& ctx)
                     }
 
                     if (auto const err = requireAuth(ctx.view, issue, dstId, AuthType::WeakAuth);
-                        err != tesSUCCESS)
+                        !isTesSuccess(err))
                     {
                         JLOG(ctx.j.warn()) << "Cashing a check to a MPT requiring auth.";
                         return err;
@@ -244,7 +246,7 @@ CheckCash::preclaim(PreclaimContext const& ctx)
                         return tecFROZEN;
                     }
 
-                    if (auto const err = canTrade(ctx.view, value.asset()); err != tesSUCCESS)
+                    if (auto const err = canTrade(ctx.view, value.asset()); !isTesSuccess(err))
                     {
                         JLOG(ctx.j.warn()) << "MPT DEX is not allowed.";
                         return err;
@@ -367,7 +369,7 @@ CheckCash::doApply()
 
                 // Can the account cover the trust line's or MPT reserve?
                 if (std::uint32_t const ownerCount = {sleDst->at(sfOwnerCount)};
-                    mPriorBalance < psb.fees().accountReserve(ownerCount + 1))
+                    preFeeBalance_ < psb.fees().accountReserve(ownerCount + 1))
                 {
                     JLOG(j_.trace()) << "Trust line does not exist. "
                                         "Insufficient reserve to create line.";
@@ -472,7 +474,7 @@ CheckCash::doApply()
 
                             if (auto const err =
                                     MPTokenAuthorize::checkCreateMPT(psb, mptID, account_, j_);
-                                err != tesSUCCESS)
+                                !isTesSuccess(err))
                                 return err;
                         }
                     }

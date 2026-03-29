@@ -1,6 +1,6 @@
 #pragma once
 
-#include <xrpld/app/paths/AssetCache.h>
+#include <xrpld/rpc/detail/AssetCache.h>
 
 #include <xrpl/protocol/UintTypes.h>
 

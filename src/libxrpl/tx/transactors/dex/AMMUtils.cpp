@@ -330,7 +330,7 @@ deleteAMMAccount(Sandbox& sb, Asset const& asset, Asset const& asset2, beast::Jo
     // Delete AMM's MPTokens only if all trustlines are deleted. If trustlines
     // are not deleted then AMM can be re-created with Deposit and
     // AMM's MPToken(s) must exist.
-    if (auto const ter = deleteAMMMPTokens(sb, ammAccountID, j); ter != tesSUCCESS)
+    if (auto const ter = deleteAMMMPTokens(sb, ammAccountID, j); !isTesSuccess(ter))
         return ter;
 
     auto const ownerDirKeylet = keylet::ownerDir(ammAccountID);
