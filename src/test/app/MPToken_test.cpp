@@ -4053,9 +4053,13 @@ class MPToken_test : public beast::unit_test::suite
                 else if constexpr (std::is_same_v<Token, MPTTester>)
                 {
                     if (lock == Global)
+                    {
                         token.set({.flags = tfMPTLock});
+                    }
                     else if (token.issuer() != account)
+                    {
                         token.set({.holder = account, .flags = tfMPTLock});
+                    }
                 }
             };
             auto test = [&](auto&& getTokens, TestArg const& arg) {

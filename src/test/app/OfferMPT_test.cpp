@@ -2387,7 +2387,7 @@ public:
 
             // In pre-flow code alice's offer is left empty in the ledger.
             auto const aliceOffers = offersOnAccount(env, alice);
-            if (aliceOffers.size() != 0)
+            if (!aliceOffers.empty())
             {
                 BEAST_EXPECT(aliceOffers.size() == 1);
                 auto const& aliceOffer = *(aliceOffers.front());

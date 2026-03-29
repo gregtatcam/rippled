@@ -1338,12 +1338,7 @@ class CheckMPT_test : public beast::unit_test::suite
                 Account const& a,
                 bool isIssuer_,
                 bool requireAuth_ = false)
-                : suite(s)
-                , env(e)
-                , acct(a)
-                , owners(0)
-                , isIssuer(isIssuer_)
-                , requireAuth(requireAuth_)
+                : suite(s), env(e), acct(a), isIssuer(isIssuer_), requireAuth(requireAuth_)
             {
             }
 

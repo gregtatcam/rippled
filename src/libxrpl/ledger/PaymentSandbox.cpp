@@ -354,7 +354,7 @@ PaymentSandbox::balanceHookSelfIssueMPT(xrpl::MPTIssue const& issue, std::int64_
 {
     std::int64_t selfDebited = 0;
     std::int64_t lastBal = amount;
-    for (auto curSB = this; curSB; curSB = curSB->ps_)
+    for (auto curSB = this; curSB != nullptr; curSB = curSB->ps_)
     {
         if (auto adj = curSB->tab_.adjustmentsMPT(issue))
         {
