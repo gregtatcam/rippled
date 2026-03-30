@@ -831,7 +831,7 @@ public:
 
             auto const aliceOffers = offersOnAccount(env, alice);
             BEAST_EXPECT(aliceOffers.size() == 1);
-            for (auto offerPtr : aliceOffers)
+            for (auto const& offerPtr : aliceOffers)
             {
                 auto const& offer = *offerPtr;
                 BEAST_EXPECT(offer[sfTakerGets] == XRP(2'000));
@@ -846,7 +846,7 @@ public:
 
             auto const bobOffers = offersOnAccount(env, bob);
             BEAST_EXPECT(bobOffers.size() == 1);
-            for (auto offerPtr : bobOffers)
+            for (auto const& offerPtr : bobOffers)
             {
                 auto const& offer = *offerPtr;
                 BEAST_EXPECT(offer[sfTakerGets] == USD(1'000));
@@ -894,7 +894,7 @@ public:
 
             auto const bobOffers = offersOnAccount(env, "bob");
             BEAST_EXPECT(bobOffers.size() == 1);
-            for (auto offerPtr : bobOffers)
+            for (auto const& offerPtr : bobOffers)
             {
                 auto const& offer = *offerPtr;
                 BEAST_EXPECT(offer[sfTakerGets] == USD(4'995));

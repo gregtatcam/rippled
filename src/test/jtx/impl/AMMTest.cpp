@@ -140,7 +140,7 @@ AMMTestBase::testAMM(std::function<void(jtx::AMM&, jtx::Env&)> const& cb, TestAM
                     return defXRP;
                 return a + XRP(1000);
             }
-            auto const defAmt = STAmount{a.asset(), 30000};
+            auto defAmt = STAmount{a.asset(), 30000};
             if (a <= defAmt)
                 return defAmt;
             return a + STAmount{a.asset(), 1000};

@@ -111,6 +111,7 @@ public:
         gate g;
         // Test RPC::Tuning::max_src_cur source currencies.
         std::vector<MPTID> num_src;
+        num_src.reserve(RPC::Tuning::max_src_cur);
         for (std::uint8_t i = 0; i < RPC::Tuning::max_src_cur; ++i)
             num_src.push_back(makeMptID(i, bob));
         app.getJobQueue().postCoro(jtCLIENT, "RPC-Client", [&](auto const& coro) {

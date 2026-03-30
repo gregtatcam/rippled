@@ -1329,7 +1329,7 @@ class Vault_test : public beast::unit_test::suite
                         return defXRP;
                     return a + XRP(1000);
                 }
-                auto const defIOU = STAmount{a.asset(), 30000};
+                auto defIOU = STAmount{a.asset(), 30000};
                 if (a <= defIOU)
                     return defIOU;
                 return a + STAmount{a.asset(), 1000};

@@ -360,7 +360,7 @@ changeSpotPriceQuality(
 
     // Generate the offer starting with XRP side. Return seated offer amounts
     // if the offer can be generated, otherwise nullopt.
-    auto const amounts = [&]() {
+    auto amounts = [&]() {
         if (isXRP(getAsset(pool.out)))
             return getAMMOfferStartWithTakerGets(pool, quality, tfee);
         return getAMMOfferStartWithTakerPays(pool, quality, tfee);
