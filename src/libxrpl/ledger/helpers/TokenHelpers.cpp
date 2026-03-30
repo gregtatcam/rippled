@@ -1042,11 +1042,11 @@ rippleCreditMPT(
         auto const mptokenID = keylet::mptoken(mptID.key, uSenderID);
         if (auto sle = view.peek(mptokenID))
         {
-            auto const holderBalance = sle->getFieldU64(sfMPTAmount);
-            if (holderBalance < amt)
+            auto const senderBalance = sle->getFieldU64(sfMPTAmount);
+            if (senderBalance < amt)
                 return tecINSUFFICIENT_FUNDS;
             view.creditHookMPT(uSenderID, uReceiverID, saAmount, (*sle)[sfMPTAmount], available);
-            (*sle)[sfMPTAmount] = holderBalance - amt;
+            (*sle)[sfMPTAmount] = senderBalance - amt;
             view.update(sle);
         }
         else

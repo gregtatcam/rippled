@@ -826,21 +826,21 @@ checkMPTAllowed(ReadView const& view, TxType txType, Asset const& asset, Account
         txType == ttCHECK_CASH || txType == ttPAYMENT;
     XRPL_ASSERT(validTx, "xrpl::checkMPTAllowed : all MPT tx or DEX");
     if (!validTx)
-        return tefINTERNAL;
+        return tefINTERNAL;  // LCOV_EXCL_LINE
 
     auto const& issuer = asset.getIssuer();
     if (!view.exists(keylet::account(issuer)))
-        return tecNO_ISSUER;
+        return tecNO_ISSUER;  // LCOV_EXCL_LINE
 
     auto const issuanceKey = keylet::mptIssuance(issuanceID);
     auto const issuanceSle = view.read(issuanceKey);
     if (!issuanceSle)
-        return tecOBJECT_NOT_FOUND;
+        return tecOBJECT_NOT_FOUND;  // LCOV_EXCL_LINE
 
     auto const flags = issuanceSle->getFlags();
 
     if ((flags & lsfMPTLocked) != 0u)
-        return tecLOCKED;
+        return tecLOCKED;  // LCOV_EXCL_LINE
     // Offer crossing and Payment
     if ((flags & lsfMPTCanTrade) == 0)
         return tecNO_PERMISSION;

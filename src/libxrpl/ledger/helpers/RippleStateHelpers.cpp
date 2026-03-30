@@ -772,7 +772,7 @@ deleteAMMMPToken(
 {
     if (!view.dirRemove(
             keylet::ownerDir(ammAccountID), (*sleMpt)[sfOwnerNode], sleMpt->key(), false))
-        return tefBAD_LEDGER;
+        return tefBAD_LEDGER;  // LCOV_EXCL_LINE
 
     view.erase(sleMpt);
 
