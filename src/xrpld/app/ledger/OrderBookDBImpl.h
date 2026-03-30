@@ -48,7 +48,7 @@ public:
     getBookSize(Asset const& asset, std::optional<Domain> const& domain = std::nullopt) override;
 
     bool
-    isBookToXRP(Asset const& asset, std::optional<Domain> domain = std::nullopt) override;
+    isBookToXRP(Asset const& asset, std::optional<Domain> const& domain = std::nullopt) override;
 
     // OrderBookDBImpl-specific methods
     void
@@ -67,7 +67,7 @@ public:
     makeBookListeners(Book const&) override;
 
 private:
-    ServiceRegistry& registry_;
+    std::reference_wrapper<ServiceRegistry> registry_;
     int const pathSearchMax_;
     bool const standalone_;
 
