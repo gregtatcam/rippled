@@ -202,7 +202,7 @@ getAMMOfferStartWithTakerGets(
 
     // Try to reduce the offer size to improve the quality.
     // The quality might still not match the targetQuality for a tiny offer.
-    if (auto const amounts = getAmounts(*nTakerGets); Quality{amounts} < targetQuality)
+    if (auto amounts = getAmounts(*nTakerGets); Quality{amounts} < targetQuality)
         return getAmounts(detail::reduceOffer(amounts.out));
     else
         return amounts;
@@ -269,7 +269,7 @@ getAMMOfferStartWithTakerPays(
 
     // Try to reduce the offer size to improve the quality.
     // The quality might still not match the targetQuality for a tiny offer.
-    if (auto const amounts = getAmounts(*nTakerPays); Quality{amounts} < targetQuality)
+    if (auto amounts = getAmounts(*nTakerPays); Quality{amounts} < targetQuality)
         return getAmounts(detail::reduceOffer(amounts.in));
     else
         return amounts;
@@ -334,8 +334,7 @@ changeSpotPriceQuality(
             }
             auto const takerPays = toAmount<TIn>(getAsset(pool.in), nTakerPays, Number::upward);
             // should not fail
-            if (auto const amounts =
-                    TAmounts<TIn, TOut>{takerPays, swapAssetIn(pool, takerPays, tfee)};
+            if (auto amounts = TAmounts<TIn, TOut>{takerPays, swapAssetIn(pool, takerPays, tfee)};
                 Quality{amounts} < quality &&
                 !withinRelativeDistance(Quality{amounts}, quality, Number(1, -7)))
             {
