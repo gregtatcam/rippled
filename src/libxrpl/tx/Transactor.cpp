@@ -1239,9 +1239,9 @@ Transactor::operator()()
 
         if (result == tecINCOMPLETE)
         {
-            removeDeletedTrustLines(view(), removedTrustLines, ctx_.registry.get().getJournal
-                                                                                 ("View"));
-            removeDeletedMPTs(view(), removedMPTs, ctx_.registry.get(). getJournal("View"));
+            removeDeletedTrustLines(
+                view(), removedTrustLines, ctx_.registry.get().getJournal("View"));
+            removeDeletedMPTs(view(), removedMPTs, ctx_.registry.get().getJournal("View"));
         }
 
         if (result == tecEXPIRED)
