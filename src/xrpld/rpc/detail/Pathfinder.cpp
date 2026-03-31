@@ -697,8 +697,8 @@ bool
 Pathfinder::issueMatchesOrigin(Asset const& asset)
 {
     bool const matchingAsset = (asset == mSrcPathAsset);
-    bool const matchingAccount = isXRP(asset) ||
-        (mSrcIssuer && asset.getIssuer() == mSrcIssuer) || asset.getIssuer() == mSrcAccount;
+    bool const matchingAccount = isXRP(asset) || (mSrcIssuer && asset.getIssuer() == mSrcIssuer) ||
+        asset.getIssuer() == mSrcAccount;
 
     return matchingAsset && matchingAccount;
 }
