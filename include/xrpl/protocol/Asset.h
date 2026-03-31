@@ -30,7 +30,7 @@ struct BadAsset
 inline BadAsset const&
 badAsset()
 {
-    static BadAsset a;
+    static BadAsset const a;
     return a;
 }
 

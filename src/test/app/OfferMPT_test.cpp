@@ -75,7 +75,7 @@ public:
             // Offers for the good quality path
             env(offer(carol, BTC(1), USD(100)));
 
-            PathSet paths(Path(XRP, USD), Path(USD));
+            PathSet const paths(Path(XRP, USD), Path(USD));
 
             env(pay(alice, bob, USD(100)),
                 json(paths.json()),
@@ -103,7 +103,7 @@ public:
         env.fund(XRP(10'000), alice, gw);
         env.close();
 
-        MPT USD = MPTTester({.env = env, .issuer = gw, .holders = {alice}});
+        MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice}});
 
         env(pay(gw, alice, USD(50)));
         env.close();
@@ -248,7 +248,7 @@ public:
         env.fund(XRP(10'000), alice, bob, carol, dan, erin, gw);
         env.close();
 
-        MPT USD = MPTTester(
+        MPT const USD = MPTTester(
             {.env = env,
              .issuer = gw,
              .holders = {alice, bob, carol, dan, erin},
@@ -419,7 +419,7 @@ public:
             auto tinyAmount = [&]<typename T>(T const& token) -> PrettyAmount {
                 if constexpr (std::is_same_v<T, IOU>)
                 {
-                    STAmount amt(
+                    STAmount const amt(
                         token,
                         /*mantissa*/ 1,
                         /*exponent*/ -81);
@@ -427,7 +427,7 @@ public:
                 }
                 else
                 {
-                    STAmount amt(
+                    STAmount const amt(
                         token,
                         /*mantissa*/ 1,
                         /*exponent*/ 0);
@@ -596,7 +596,7 @@ public:
 
             env.fund(r + f, alice);
 
-            MPT USD = MPTTester({.env = env, .issuer = gw, .holders = {alice}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice}});
 
             auto const usdOffer = USD(1'000);
 
@@ -618,7 +618,7 @@ public:
             env.fund(r + f, alice);
             env.fund(r + 2 * f + xrpOffer, bob);
 
-            MPT USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
 
             auto const usdOffer = USD(1'000);
             auto const usdOffer2 = USD(500);
@@ -651,7 +651,7 @@ public:
 
             env.fund(r + f, alice);
 
-            MPT USD = MPTTester({.env = env, .issuer = gw, .holders = {alice}});
+            MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice}});
 
             auto const usdOffer = USD(1'000);
             auto const usdOffer2 = USD(500);
@@ -1223,7 +1223,7 @@ public:
         env.fund(alice_initial_balance, alice);
         env.fund(bob_initial_balance, bob);
 
-        MPTTester MUSD({.env = env, .issuer = gw, .holders = {alice, bob}, .transferFee = 5'000});
+        MPTTester const MUSD({.env = env, .issuer = gw, .holders = {alice, bob}, .transferFee = 5'000});
         MPT const USD = MUSD;
         auto const small_amount = STAmount{USD, 1};
 
@@ -4530,7 +4530,7 @@ public:
 
         auto getIOU = [&](Env& env) -> PrettyAsset {
             static int i = 0;
-            std::string name = "IO" + std::to_string(i++);
+            std::string const name = "IO" + std::to_string(i++);
             auto const iou = gw[name];
             env(trust(alice, iou(1'000)));
             env(pay(gw, alice, iou(100)));
@@ -4555,7 +4555,7 @@ public:
         // XRP/MPT, MPT/XRP, MPT/MPT offers are not adjusted for TickSize
         // IOU/IOU, XRP/IOU, IOU/XRP offers have TickSize logic unchanged
         // IOU/MPT, MPT/IOU have TickSize logic applied to adjust IOU only
-        std::vector<TestInfo> tests = {
+        std::vector<TestInfo> const tests = {
             {getIOU, getIOU, 10, 30},
             {getIOU, getXRP, 10, 30'000'000},
             {getXRP, getIOU, 10'000'000, 30},

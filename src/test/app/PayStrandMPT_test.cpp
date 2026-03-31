@@ -536,12 +536,12 @@ struct PayStrandMPT_test : public beast::unit_test::suite
         env.fund(XRP(10'000), alice, bob, gw);
         MPT const USD = MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}});
 
-        STAmount sendMax{USD, 100, 1};
-        STAmount noAccountAmount{MPTIssue{0, noAccount()}, 100, 1};
-        STAmount deliver;
+        STAmount const sendMax{USD, 100, 1};
+        STAmount const noAccountAmount{MPTIssue{0, noAccount()}, 100, 1};
+        STAmount const deliver;
         AccountID const srcAcc = alice.id();
-        AccountID dstAcc = bob.id();
-        STPathSet pathSet;
+        AccountID const dstAcc = bob.id();
+        STPathSet const pathSet;
         xrpl::path::RippleCalc::Input inputs;
         inputs.defaultPathsAllowed = true;
         try

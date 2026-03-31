@@ -102,14 +102,14 @@ getMPTIssuer(MPTID&&) = delete;
 inline MPTID
 noMPT()
 {
-    static MPTIssue mpt{0, noAccount()};
+    static MPTIssue const mpt{0, noAccount()};
     return mpt.getMptID();
 }
 
 inline MPTID
 badMPT()
 {
-    static MPTIssue mpt{0, xrpAccount()};
+    static MPTIssue const mpt{0, xrpAccount()};
     return mpt.getMptID();
 }
 

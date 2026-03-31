@@ -3336,8 +3336,8 @@ class MPToken_test : public beast::unit_test::suite
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice);
-            MPTTester BTC({.env = env, .issuer = gw, .holders = {alice}, .pay = 100});
-            MPTTester ETH({.env = env, .issuer = gw});
+            MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice}, .pay = 100});
+            MPTTester const ETH({.env = env, .issuer = gw});
 
             env(offer(alice, ETH(10), BTC(10)));
             env(offer(alice, BTC(10), ETH(10)), ter(tecUNFUNDED_OFFER));
@@ -3401,7 +3401,7 @@ class MPToken_test : public beast::unit_test::suite
                  .pay = 100,
                  .flags = tfMPTRequireAuth | MPTDEXFlags,
                  .authHolder = true});
-            MPTTester ETH(
+            MPTTester const ETH(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice},
@@ -3465,14 +3465,14 @@ class MPToken_test : public beast::unit_test::suite
         {
             Env env(*this);
             env.fund(XRP(1'000), gw, alice, carol);
-            MPTTester BTC(
+            MPTTester const BTC(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol},
                  .pay = 100,
                  .flags = tfMPTCanTransfer,
                  .mutableFlags = tmfMPTCanMutateCanTrade});
-            MPTTester ETH(
+            MPTTester const ETH(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol},
@@ -3723,14 +3723,14 @@ class MPToken_test : public beast::unit_test::suite
                  .pay = 1'000,
                  .flags = tfMPTCanLock | MPTDEXFlags,
                  .mutableFlags = tmfMPTCanMutateCanTransfer});
-            MPTTester USD(
+            MPTTester const USD(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol, bob},
                  .pay = 1'000,
                  .flags = MPTDEXFlags | tfMPTCanLock,
                  .mutableFlags = tmfMPTCanMutateCanTransfer});
-            MPTTester CAD(
+            MPTTester const CAD(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol, bob},
@@ -3945,14 +3945,14 @@ class MPToken_test : public beast::unit_test::suite
                  .pay = 1'000,
                  .flags = tfMPTCanTransfer,
                  .mutableFlags = tmfMPTCanMutateCanTrade});
-            MPTTester ETH(
+            MPTTester const ETH(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol, bob},
                  .pay = 1'000,
                  .flags = tfMPTCanTransfer | tfMPTCanTrade,
                  .mutableFlags = tmfMPTCanMutateCanTrade});
-            MPTTester USD(
+            MPTTester const USD(
                 {.env = env,
                  .issuer = gw,
                  .holders = {alice, carol, bob},
@@ -4006,13 +4006,13 @@ class MPToken_test : public beast::unit_test::suite
                 }
             };
             auto getMPT = [&](Env& env) {
-                MPTTester BTC(
+                MPTTester const BTC(
                     {.env = env,
                      .issuer = gw,
                      .holders = {alice, carol, bob},
                      .pay = 100,
                      .flags = tfMPTCanLock | MPTDEXFlags});
-                MPTTester ETH(
+                MPTTester const ETH(
                     {.env = env,
                      .issuer = gw,
                      .holders = {alice, carol, bob},
@@ -4046,7 +4046,7 @@ class MPToken_test : public beast::unit_test::suite
                     }
                     else
                     {
-                        IOU iou{account, token.currency};
+                        IOU const iou{account, token.currency};
                         env(trust(gw, iou(0), tfSetFreeze));
                     }
                 }
@@ -4099,7 +4099,7 @@ class MPToken_test : public beast::unit_test::suite
                 env.close();
             };
             // clang-format off
-            std::vector<TestArg> tests = {
+            std::vector<TestArg> const tests = {
                     // src, dst, offer's owner are a holder
                     {.src = alice, .dst = carol, .offerOwner = bob, .srcFlag = Individual, .err = tecPATH_DRY},
                     // dst can receive IOU even if the account is frozen
@@ -4189,7 +4189,7 @@ class MPToken_test : public beast::unit_test::suite
         // It must not consume a regular USD/MPT offer.
         {
             Env env(*this, features);
-            Account domainOwner("DomainOwner");
+            Account const domainOwner("DomainOwner");
             env.fund(XRP(1'000), gw, alice, carol, bob);
             auto const domainID =
                 setupDomain(env, {alice, bob, carol, gw}, domainOwner, "permdex-cred");
@@ -4223,7 +4223,7 @@ class MPToken_test : public beast::unit_test::suite
         // a regular payment.
         {
             Env env(*this, features);
-            Account domainOwner("DomainOwner");
+            Account const domainOwner("DomainOwner");
             env.fund(XRP(1'000), gw, alice, carol, bob);
             auto const domainID =
                 setupDomain(env, {alice, bob, carol, gw}, domainOwner, "permdex-cred");
@@ -4704,7 +4704,7 @@ class MPToken_test : public beast::unit_test::suite
             mpt.authorize({.account = bob});
             mpt.pay(gw, alice, 10'100);
 
-            AMM amm(env, alice, XRP(10'000), MPT(10'100));
+            AMM const amm(env, alice, XRP(10'000), MPT(10'100));
 
             env(pay(carol, bob, MPT(100)),
                 test::jtx::path(~MPT),
@@ -4732,7 +4732,7 @@ class MPToken_test : public beast::unit_test::suite
             mpt.authorize({.account = bob});
             mpt.pay(gw, alice, 10'100);
 
-            AMM amm(env, alice, USD(10'000), MPT(10'100));
+            AMM const amm(env, alice, USD(10'000), MPT(10'100));
 
             env(pay(carol, bob, MPT(100)),
                 test::jtx::path(~MPT),
@@ -4766,7 +4766,7 @@ class MPToken_test : public beast::unit_test::suite
             mpt2.pay(gw, alice, 10'100);
             mpt2.pay(gw, carol, 100);
 
-            AMM amm(env, alice, MPT2(10'000), MPT1(10'100));
+            AMM const amm(env, alice, MPT2(10'000), MPT1(10'100));
 
             env(pay(carol, bob, MPT1(100)),
                 test::jtx::path(~MPT1),
@@ -4811,7 +4811,7 @@ class MPToken_test : public beast::unit_test::suite
             env(offer(alice, MPT2(102), USD(103)));
             env(offer(alice, USD(103), CRN(104)));
             env.close();
-            AMM amm(env, alice, CRN(1'000), MPT3(1'104));
+            AMM const amm(env, alice, CRN(1'000), MPT3(1'104));
             env(offer(alice, MPT3(104), YAN(100)));
 
             env(pay(carol, bob, YAN(100)),
@@ -4855,7 +4855,7 @@ class MPToken_test : public beast::unit_test::suite
             env(offer(alice, MPT2(102), USD(103)));
             env(offer(alice, USD(103), CRN(104)));
             env.close();
-            AMM amm(env, alice, CRN(1'000), MPT3(1'104));
+            AMM const amm(env, alice, CRN(1'000), MPT3(1'104));
             env(offer(alice, MPT3(104), MPT4(100)));
 
             env(pay(carol, bob, MPT4(100)),
@@ -5894,7 +5894,7 @@ class MPToken_test : public beast::unit_test::suite
             env.fund(XRP(1'000), alice, carol);
 
             // src is issuer
-            uint256 checkId{keylet::check(alice, env.seq(alice)).key};
+            uint256 const checkId{keylet::check(alice, env.seq(alice)).key};
 
             // can create
             env(check::create(alice, carol, MPT(100)));
@@ -5948,8 +5948,8 @@ class MPToken_test : public beast::unit_test::suite
         {
             Env env(*this, features);
             env.fund(XRP(1'000), gw, alice);
-            MPTTester BTC({.env = env, .issuer = gw});
-            AMM amm(env, gw, BTC(100), USD(100));
+            MPTTester const BTC({.env = env, .issuer = gw});
+            AMM const amm(env, gw, BTC(100), USD(100));
             env(amm::ammClawback(gw, alice, USD, MPT(alice), std::nullopt), ter(terNO_AMM));
             env(amm::ammClawback(gw, alice, USD, BTC, MPT(alice)(100)), ter(temBAD_AMOUNT));
         }
@@ -6162,7 +6162,7 @@ class MPToken_test : public beast::unit_test::suite
 
             env(pay(gw, alice, EUR(100)));
 
-            AMM amm(env, gw, USD(1'100), EUR(1'000));
+            AMM const amm(env, gw, USD(1'100), EUR(1'000));
 
             env(pay(alice, carol, USD(100)), sendmax(EUR(100)));
 
@@ -6183,8 +6183,8 @@ class MPToken_test : public beast::unit_test::suite
             MPT const BTC = MPTTester({.env = env, .issuer = gw, .holders = {alice, carol}});
             env(pay(gw, alice, EUR(100)));
 
-            AMM ammEUR_USD(env, gw, EUR(1'000), USD(1'100));
-            AMM ammUSD_BTC(env, gw, USD(1'000), BTC(1'100));
+            AMM const ammEUR_USD(env, gw, EUR(1'000), USD(1'100));
+            AMM const ammUSD_BTC(env, gw, USD(1'000), BTC(1'100));
 
             env(pay(alice, carol, BTC(100)),
                 sendmax(EUR(100)),
@@ -6209,7 +6209,7 @@ class MPToken_test : public beast::unit_test::suite
 
             env(pay(gw, alice, EUR(1'000)));
 
-            AMM amm(env, gw, EUR(1'000'000), USD(1'001'000));
+            AMM const amm(env, gw, EUR(1'000'000), USD(1'001'000));
 
             env(offer(alice, USD(1'000), EUR(1'000)));
 

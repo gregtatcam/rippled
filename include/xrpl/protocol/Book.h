@@ -127,7 +127,7 @@ public:
     value_type
     operator()(argument_type const& value) const
     {
-        value_type result(id_hash_type::member(value.getMptID()));
+        value_type const result(id_hash_type::member(value.getMptID()));
         return result;
     }
 };
@@ -153,11 +153,11 @@ public:
     {
         return asset.visit(
             [&](xrpl::Issue const& issue) {
-                value_type result(m_issue_hasher(issue));
+                value_type const result(m_issue_hasher(issue));
                 return result;
             },
             [&](xrpl::MPTIssue const& issue) {
-                value_type result(m_mptissue_hasher(issue));
+                value_type const result(m_mptissue_hasher(issue));
                 return result;
             });
     }

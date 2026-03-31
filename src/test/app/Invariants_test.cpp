@@ -3864,7 +3864,7 @@ class Invariants_test : public beast::unit_test::suite
                 [&](Account const& A1, Account const& A2, Env& env) {
                     Account const gw("gw");
                     env.fund(XRP(1'000), gw);
-                    MPTTester mpt(
+                    MPTTester const mpt(
                         {.env = env, .issuer = gw, .holders = {A1}, .pay = 100, .maxAmt = 100});
                     id = mpt.issuanceID();
                     return true;
@@ -3891,7 +3891,7 @@ class Invariants_test : public beast::unit_test::suite
             });
 
         // More MPTokens created than expected
-        std::array<std::pair<xrpl::TxType, std::uint8_t>, 4> tests = {
+        std::array<std::pair<xrpl::TxType, std::uint8_t>, 4> const tests = {
             std::make_pair(ttAMM_WITHDRAW, 2),
             std::make_pair(ttAMM_CLAWBACK, 2),
             std::make_pair(ttAMM_CREATE, 3),
@@ -3946,7 +3946,7 @@ class Invariants_test : public beast::unit_test::suite
                 [&](Account const& A1, Account const& A2, Env& env) {
                     Account const gw("gw");
                     env.fund(XRP(1'000), gw, A3);
-                    MPTTester mpt({.env = env, .issuer = gw, .holders = {A1, A2, A3}});
+                    MPTTester const mpt({.env = env, .issuer = gw, .holders = {A1, A2, A3}});
                     id = mpt.issuanceID();
                     return true;
                 });

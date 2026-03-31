@@ -185,7 +185,7 @@ public:
                 {MPT(100), MPT1(100), IOUAmount{100}}};
             for (auto& pool : pools)
             {
-                AMM amm(env, gw, std::get<0>(pool), std::get<1>(pool));
+                AMM const amm(env, gw, std::get<0>(pool), std::get<1>(pool));
                 BEAST_EXPECT(amm.expectAmmRpcInfo(
                     std::get<0>(pool),
                     std::get<1>(pool),

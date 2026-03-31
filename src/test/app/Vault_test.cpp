@@ -2247,12 +2247,12 @@ class Vault_test : public beast::unit_test::suite
 
             Env env{*this, testable_amendments() | featureSingleAssetVault};
             Account alice{"alice"};
-            Account issuer{"issuer"};
+            Account const issuer{"issuer"};
             env.fund(XRP(1'000), alice, issuer);
             env.close();
-            Vault vault{env};
+            Vault const vault{env};
 
-            MPTTester BTC({.env = env, .issuer = issuer, .holders = {alice}, .maxAmt = 100});
+            MPTTester const BTC({.env = env, .issuer = issuer, .holders = {alice}, .maxAmt = 100});
 
             auto [tx, k] = vault.create({.owner = issuer, .asset = BTC});
             env(tx);

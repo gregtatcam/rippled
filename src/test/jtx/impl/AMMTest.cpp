@@ -57,7 +57,7 @@ fund(
                 }
                 if (amt.holds<MPTIssue>() && mptIssuer)
                 {
-                    MPTTester mpt({.env = env, .issuer = *mptIssuer, .holders = accounts});
+                    MPTTester const mpt({.env = env, .issuer = *mptIssuer, .holders = accounts});
                     return STAmount{mpt.issuanceID(), amt.mpt().value()};
                 }
                 return amt;

@@ -296,7 +296,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
                 auto flowJournal = env.app().getLogs().journal("Flow");
                 auto const flowResult = [&] {
-                    STAmount deliver(USD(5'100));
+                    STAmount const deliver(USD(5'100));
                     STAmount smax(BTC(61));
                     PaymentSandbox sb(env.current().get(), tapNONE);
                     STPathSet paths;
@@ -309,10 +309,10 @@ struct FlowMPT_test : public beast::unit_test::suite
                     };
                     {
                         // BTC -> USD
-                        STPath p1({IPE(USD)});
+                        STPath const p1({IPE(USD)});
                         paths.push_back(p1);
                         // BTC -> EUR -> USD
-                        STPath p2({IPE(EUR), IPE(USD)});
+                        STPath const p2({IPE(EUR), IPE(USD)});
                         paths.push_back(p2);
                     }
 
@@ -990,8 +990,8 @@ struct FlowMPT_test : public beast::unit_test::suite
                 MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 20E+17});
 
             // scale by 17
-            STAmount tinyAmt1{USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
-            STAmount tinyAmt3{USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
+            STAmount const tinyAmt1{USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
+            STAmount const tinyAmt3{USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
 
             env(offer(gw, drops(9'000'000'000), tinyAmt3));
 
@@ -1016,8 +1016,8 @@ struct FlowMPT_test : public beast::unit_test::suite
                 MPTTester({.env = env, .issuer = gw, .holders = {alice, bob}, .maxAmt = 20E+17});
 
             // scale by 17
-            STAmount tinyAmt1{USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
-            STAmount tinyAmt3{USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
+            STAmount const tinyAmt1{USD, 9'000'000'000'000'000ll, 0, false, STAmount::unchecked{}};
+            STAmount const tinyAmt3{USD, 9'000'000'000'000'003ll, 0, false, STAmount::unchecked{}};
 
             env(pay(gw, alice, tinyAmt1));
 
@@ -1134,7 +1134,7 @@ struct FlowMPT_test : public beast::unit_test::suite
 
         env.fund(XRP(10000), alice);
 
-        MPT USD;
+        MPT const USD;
 
         env(pay(alice, alice, USD(100)), path(~USD), ter(temBAD_PATH));
     }
@@ -1747,7 +1747,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             };
 
             // clang-format off
-            std::vector<TestData> tests = {
+            std::vector<TestData> const tests = {
                 // Sell USD: alice, carol, bob, gw are consumed.
                 // Buy USD: john, gw, dan, ed are consumed.
                 // gw's sell USD is consumed because there is sufficient available balance (100USD).
@@ -1870,7 +1870,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             };
 
             // clang-format off
-            std::vector<TestData> tests = {
+            std::vector<TestData> const tests = {
                 // Buy USD: carol, gw, bob are consumed.
                 // Gw gets 300USD from alice; carol and bob buy 200USD,
                 // therefore OutstandingAmount is 200.
@@ -1983,7 +1983,7 @@ struct FlowMPT_test : public beast::unit_test::suite
             };
 
             // clang-format off
-            std::vector<TestData> tests = {
+            std::vector<TestData> const tests = {
                 // Sell USD: carol, gw, bob are consumed.
                 // ed buys 300USD from carol, gw, bob therefore OutstandingAmount is 300.
                 //*maxAmt sendMax initDst gwOffer dstUSD outstandingUSD aliceXRP bobSell gwXRP offersGw lastGw

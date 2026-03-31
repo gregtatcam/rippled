@@ -726,7 +726,7 @@ class LedgerEntry_test : public beast::unit_test::suite
                     ammParams[jss::asset] = obj;
                 }
                 {
-                    Json::Value obj(Json::objectValue);
+                    Json::Value const obj(Json::objectValue);
                     ammParams[jss::asset2] = to_json(USD.raw());
                 }
                 jvParams[jss::amm] = ammParams;

@@ -916,7 +916,7 @@ class CheckMPT_test : public beast::unit_test::suite
             // Currency mismatch.
             {
                 MPT const EUR = MPTTester({.env = env, .issuer = gw});
-                STAmount badAmount{EUR, amount};
+                STAmount const badAmount{EUR, amount};
                 env(check::cash(bob, chkId, badAmount), ter(temMALFORMED));
                 env.close();
             }
@@ -1997,7 +1997,7 @@ class CheckMPT_test : public beast::unit_test::suite
             env.close();
             // Use offers to automatically create the trust line.
             MPT const OF5 = gw3["OF5"];
-            std::uint32_t gw3OfferSeq = {env.seq(gw3)};
+            std::uint32_t const gw3OfferSeq = {env.seq(gw3)};
             env(offer(gw3, XRP(92), OF5(92)));
             ++gw3.owners;
             env.close();
