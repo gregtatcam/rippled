@@ -418,12 +418,12 @@ CheckCash::doApply()
                                 false,                                         // authorize account
                                 (sleDst->getFlags() & lsfDefaultRipple) == 0,  //
                                 false,                                         // freeze trust line
-                                false,                                         // deep freeze trust line
-                                initialBalance,                                // zero initial balance
-                                Issue(currency, account_),                     // limit of zero
-                                0,                                             // quality in
-                                0,                                             // quality out
-                                viewJ);                                        // journal
+                                false,                      // deep freeze trust line
+                                initialBalance,             // zero initial balance
+                                Issue(currency, account_),  // limit of zero
+                                0,                          // quality in
+                                0,                          // quality out
+                                viewJ);                     // journal
                             !isTesSuccess(ter))
                         {
                             return ter;
