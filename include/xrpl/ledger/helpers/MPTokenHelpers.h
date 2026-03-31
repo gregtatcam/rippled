@@ -80,6 +80,7 @@ authorizeMPToken(
  * requireAuth check is recursive for MPT shares in a vault, descending to
  * assets in the vault, up to maxAssetCheckDepth recursion depth. This is
  * purely defensive, as we currently do not allow such vaults to be created.
+ * WeakAuth intentionally allows missing MPTokens under MPToken V2.
  */
 [[nodiscard]] TER
 requireAuth(

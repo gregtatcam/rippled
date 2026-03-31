@@ -263,7 +263,7 @@ public:
      * BookStep limits it's output to 150USD. This in turn limits A3's send
      * amount to 150XRP: A1 buys 100XRP and sells 100USD to A3. This doesn't
      * change OutstandingAmount. GW buys 50XRP and sells 50USD to A3. This
-     * changes OutstandingAmount 10 1,000USD.
+     * changes OutstandingAmount to 1,000USD.
      */
     virtual void
     issuerSelfDebitHookMPT(MPTIssue const& issue, std::uint64_t amount, std::int64_t origBalance)

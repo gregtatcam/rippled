@@ -80,13 +80,17 @@ isXRP(MPTID const&)
     return false;
 }
 
-inline AccountID const&
+inline AccountID
 getMPTIssuer(MPTID const& mptid)
 {
     static_assert(sizeof(MPTID) == (sizeof(std::uint32_t) + sizeof(AccountID)));
-    AccountID const* accountId =
-        reinterpret_cast<AccountID const*>(mptid.data() + sizeof(std::uint32_t));
-    return *accountId;
+    // Extract the 20 bytes for the AccountID
+    std::array<std::uint8_t, sizeof(AccountID)> bytes;
+    std::copy_n(mptid.data() + sizeof(std::uint32_t), sizeof(AccountID), bytes.begin());
+
+    // bit_cast is a "magic" compiler intrinsic that is
+    // usually optimized away to nothing in the final assembly.
+    return std::bit_cast<AccountID>(bytes);
 }
 
 // Disallow temporary

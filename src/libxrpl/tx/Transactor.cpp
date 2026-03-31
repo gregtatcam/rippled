@@ -1005,13 +1005,13 @@ removeDeletedMPTs(ApplyView& view, std::vector<uint256> const& mpts, beast::Jour
     // There could be at most two MPTs - one for each side of AMM pool
     if (mpts.size() > 2)
     {
-        JLOG(viewJ.error()) << "removeDeletedTrustLines: deleted mpts exceed 2 " << mpts.size();
+        JLOG(viewJ.error()) << "removeDeletedMPTs: deleted mpts exceed 2 " << mpts.size();
         return;
     }
 
     for (auto const& index : mpts)
     {
-        if (auto const sleState = view.peek({ltMPTOKEN, index});
+        if (auto const sleState = view.peek({ltMPTOKEN, index}); sleState &&
             deleteAMMMPToken(view, sleState, (*sleState)[sfIssuer], viewJ) != tesSUCCESS)
         {
             JLOG(viewJ.error()) << "removeDeletedMPTs: failed to delete AMM MPT";

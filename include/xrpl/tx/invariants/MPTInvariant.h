@@ -38,7 +38,7 @@ class ValidMPTPayment
     enum Order { Before = 0, After = 1 };
     struct MPTData
     {
-        std::array<std::int64_t, After + 1> outstanding;
+        std::array<std::int64_t, After + 1> outstanding{};
         // sum (MPT after - MPT before)
         std::int64_t mptAmount{0};
     };
