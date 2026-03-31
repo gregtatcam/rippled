@@ -409,21 +409,21 @@ CheckCash::doApply()
                         initialBalance.get<Issue>().account = noAccount();
 
                         if (TER const ter = trustCreate(
-                                psb,                // payment sandbox
-                                destLow,            // is dest low?
-                                deliverIssuer,      // source
-                                account_,           // destination
-                                trustLineKey->key,  // ledger index
-                                sleDst,             // Account to add to
-                                false,              // authorize account
-                                (sleDst->getFlags() & lsfDefaultRipple) == 0,
-                                false,                      // freeze trust line
-                                false,                      // deep freeze trust line
-                                initialBalance,             // zero initial balance
-                                Issue(currency, account_),  // limit of zero
-                                0,                          // quality in
-                                0,                          // quality out
-                                viewJ);                     // journal
+                                psb,                                           // payment sandbox
+                                destLow,                                       // is dest low?
+                                deliverIssuer,                                 // source
+                                account_,                                      // destination
+                                trustLineKey->key,                             // ledger index
+                                sleDst,                                        // Account to add to
+                                false,                                         // authorize account
+                                (sleDst->getFlags() & lsfDefaultRipple) == 0,  //
+                                false,                                         // freeze trust line
+                                false,                                         // deep freeze trust line
+                                initialBalance,                                // zero initial balance
+                                Issue(currency, account_),                     // limit of zero
+                                0,                                             // quality in
+                                0,                                             // quality out
+                                viewJ);                                        // journal
                             !isTesSuccess(ter))
                         {
                             return ter;
