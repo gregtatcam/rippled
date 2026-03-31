@@ -143,7 +143,7 @@ template <typename T>
 T
 toAmount(Asset const& asset, Number const& n, Number::rounding_mode mode = Number::getround())
 {
-    saveNumberRoundMode rm(Number::getround());
+    saveNumberRoundMode const rm(Number::getround());
     if (isXRP(asset))
         Number::setround(mode);
 

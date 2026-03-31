@@ -172,7 +172,7 @@ class LedgerEntry_test : public beast::unit_test::suite
         };
 
         auto remove = [&](std::vector<std::uint8_t> indices) -> std::vector<Json::Value> {
-            std::unordered_set<std::uint8_t> indexSet(indices.begin(), indices.end());
+            std::unordered_set<std::uint8_t> const indexSet(indices.begin(), indices.end());
             std::vector<Json::Value> values;
             values.reserve(allBadValues.size() - indexSet.size());
             for (std::size_t i = 0; i < allBadValues.size(); ++i)
@@ -595,7 +595,7 @@ class LedgerEntry_test : public beast::unit_test::suite
         }
         {
             // Check malformed cases
-            Json::Value jvParams;
+            Json::Value const jvParams;
             testMalformedField(
                 env, jvParams, jss::account_root, FieldType::AccountField, "malformedAddress");
         }
@@ -702,7 +702,7 @@ class LedgerEntry_test : public beast::unit_test::suite
             env.fund(XRP(10000), alice);
             env.close();
             PrettyAsset const USD = getAsset(env);
-            AMM amm(env, alice, XRP(10), USD(1000));
+            AMM const amm(env, alice, XRP(10), USD(1000));
             env.close();
 
             {
@@ -1969,7 +1969,7 @@ class LedgerEntry_test : public beast::unit_test::suite
         }
         {
             // Malformed DID index
-            Json::Value jvParams;
+            Json::Value const jvParams;
             testMalformedField(
                 env, jvParams, jss::did, FieldType::AccountField, "malformedAddress");
         }
@@ -1985,7 +1985,7 @@ class LedgerEntry_test : public beast::unit_test::suite
         Env env(*this);
         Account const owner("owner");
         env.fund(XRP(1'000), owner);
-        Oracle oracle(
+        Oracle const oracle(
             env, {.owner = owner, .fee = static_cast<int>(env.current()->fees().base.drops())});
 
         {
@@ -2016,11 +2016,11 @@ class LedgerEntry_test : public beast::unit_test::suite
             Account const owner(std::string("owner") + std::to_string(i));
             env.fund(XRP(1'000), owner);
             // different accounts can have the same asset pair
-            Oracle oracle(env, {.owner = owner, .documentID = i, .fee = baseFee});
+            Oracle const oracle(env, {.owner = owner, .documentID = i, .fee = baseFee});
             accounts.push_back(owner.id());
             oracles.push_back(oracle.documentID());
             // same account can have different asset pair
-            Oracle oracle1(env, {.owner = owner, .documentID = i + 10, .fee = baseFee});
+            Oracle const oracle1(env, {.owner = owner, .documentID = i + 10, .fee = baseFee});
             accounts.push_back(owner.id());
             oracles.push_back(oracle1.documentID());
         }
@@ -2110,7 +2110,7 @@ class LedgerEntry_test : public beast::unit_test::suite
         }
         {
             // Malformed MPTIssuance index
-            Json::Value jvParams;
+            Json::Value const jvParams;
             testMalformedField(
                 env, jvParams, jss::mptoken, FieldType::HashOrObjectField, "malformedRequest");
         }

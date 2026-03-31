@@ -523,7 +523,7 @@ STAmount::fromNumber(A const& a, Number const& number)
 {
     bool const negative = number.mantissa() < 0;
     Number const working{negative ? -number : number};
-    Asset asset{a};
+    Asset const asset{a};
     if (asset.integral())
     {
         std::uint64_t const intValue = static_cast<std::int64_t>(working);
@@ -701,7 +701,7 @@ roundToAsset(
     std::int32_t scale,
     Number::rounding_mode rounding = Number::getround())
 {
-    NumberRoundModeGuard mg(rounding);
+    NumberRoundModeGuard const mg(rounding);
     STAmount const ret{asset, value};
     if (ret.integral())
         return ret;

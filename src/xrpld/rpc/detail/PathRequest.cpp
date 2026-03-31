@@ -92,7 +92,7 @@ PathRequest::~PathRequest()
 bool
 PathRequest::isNew()
 {
-    std::lock_guard sl(mIndexLock);
+    std::lock_guard const sl(mIndexLock);
 
     // does this path request still need its first full path
     return mLastIndex == 0;
@@ -101,7 +101,7 @@ PathRequest::isNew()
 bool
 PathRequest::needsUpdate(bool newOnly, LedgerIndex index)
 {
-    std::lock_guard sl(mIndexLock);
+    std::lock_guard const sl(mIndexLock);
 
     if (mInProgress)
     {
@@ -133,7 +133,7 @@ PathRequest::hasCompletion()
 void
 PathRequest::updateComplete()
 {
-    std::lock_guard sl(mIndexLock);
+    std::lock_guard const sl(mIndexLock);
 
     XRPL_ASSERT(mInProgress, "xrpl::PathRequest::updateComplete : in progress");
     mInProgress = false;
@@ -447,7 +447,7 @@ Json::Value
 PathRequest::doClose()
 {
     JLOG(m_journal.debug()) << iIdentifier << " closed";
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
     jvStatus[jss::closed] = true;
     return jvStatus;
 }
@@ -455,7 +455,7 @@ PathRequest::doClose()
 Json::Value
 PathRequest::doStatus(Json::Value const&)
 {
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
     jvStatus[jss::status] = jss::success;
     return jvStatus;
 }
@@ -574,7 +574,7 @@ PathRequest::findPaths(
             return *raSrcAccount;
         }();
 
-        STAmount saMaxAmount = [&]() {
+        STAmount const saMaxAmount = [&]() {
             if (saSendMax)
                 return *saSendMax;
             return asset.visit(
@@ -677,7 +677,7 @@ PathRequest::doUpdate(
     JLOG(m_journal.debug()) << iIdentifier << " update " << (fast ? "fast" : "normal");
 
     {
-        std::lock_guard sl(mLock);
+        std::lock_guard const sl(mLock);
 
         if (!isValid(cache))
             return jvStatus;
@@ -702,7 +702,7 @@ PathRequest::doUpdate(
     if (jvId)
         newStatus[jss::id] = jvId;
 
-    bool loaded = app_.getFeeTrack().isLoadedLocal();
+    bool const loaded = app_.getFeeTrack().isLoadedLocal();
 
     if (iLevel == 0)
     {
@@ -765,7 +765,7 @@ PathRequest::doUpdate(
     }
 
     {
-        std::lock_guard sl(mLock);
+        std::lock_guard const sl(mLock);
         jvStatus = newStatus;
     }
 

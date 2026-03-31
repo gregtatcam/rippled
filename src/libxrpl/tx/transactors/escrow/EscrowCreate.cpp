@@ -234,7 +234,7 @@ escrowCreatePreclaimHelper<MPTIssue>(
     AccountID const& dest,
     STAmount const& amount)
 {
-    AccountID issuer = amount.getIssuer();
+    AccountID const issuer = amount.getIssuer();
     // If the issuer is the same as the account, return tecNO_PERMISSION
     if (issuer == account)
         return tecNO_PERMISSION;

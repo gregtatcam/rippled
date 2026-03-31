@@ -231,7 +231,7 @@ accountHolds(
     beast::Journal j,
     SpendableHandling includeFullBalance)
 {
-    STAmount amount;
+    STAmount const amount;
     if (isXRP(currency))
     {
         return {xrpLiquid(view, account, 0, j)};
@@ -712,7 +712,7 @@ rippleSendMultiIOU(
     for (auto const& r : receivers)
     {
         auto const& receiverID = r.first;
-        STAmount amount{issue, r.second};
+        STAmount const amount{issue, r.second};
 
         /* If we aren't sending anything or if the sender is the same as the
          * receiver then we don't need to do anything.
@@ -738,7 +738,7 @@ rippleSendMultiIOU(
 
         // Calculate the amount to transfer accounting
         // for any transfer fees if the fee is not waived:
-        STAmount actualSend = (waiveFee == WaiveTransferFee::Yes)
+        STAmount const actualSend = (waiveFee == WaiveTransferFee::Yes)
             ? amount
             : multiply(amount, transferRate(view, issuer));
         actual += actualSend;
@@ -809,9 +809,9 @@ accountSendIOU(
      */
     TER terResult(tesSUCCESS);
 
-    SLE::pointer sender =
+    SLE::pointer const sender =
         uSenderID != beast::zero ? view.peek(keylet::account(uSenderID)) : SLE::pointer();
-    SLE::pointer receiver =
+    SLE::pointer const receiver =
         uReceiverID != beast::zero ? view.peek(keylet::account(uReceiverID)) : SLE::pointer();
 
     if (auto stream = j.trace())
@@ -907,7 +907,7 @@ accountSendMultiIOU(
      * ensure that transfers are balanced.
      */
 
-    SLE::pointer sender =
+    SLE::pointer const sender =
         senderID != beast::zero ? view.peek(keylet::account(senderID)) : SLE::pointer();
 
     if (auto stream = j.trace())
@@ -926,7 +926,7 @@ accountSendMultiIOU(
     for (auto const& r : receivers)
     {
         auto const& receiverID = r.first;
-        STAmount amount{issue, r.second};
+        STAmount const amount{issue, r.second};
 
         if (amount < beast::zero)
         {
@@ -939,7 +939,7 @@ accountSendMultiIOU(
         if (!amount || (senderID == receiverID))
             continue;
 
-        SLE::pointer receiver =
+        SLE::pointer const receiver =
             receiverID != beast::zero ? view.peek(keylet::account(receiverID)) : SLE::pointer();
 
         if (auto stream = j.trace())
@@ -1171,7 +1171,7 @@ rippleSendMultiMPT(
     for (auto const& r : receivers)
     {
         auto const& receiverID = r.first;
-        STAmount amount{mptIssue, r.second};
+        STAmount const amount{mptIssue, r.second};
 
         if (amount < beast::zero)
         {
@@ -1213,7 +1213,7 @@ rippleSendMultiMPT(
         }
 
         // Sending 3rd party MPTs: transit.
-        STAmount actualSend = (waiveFee == WaiveTransferFee::Yes)
+        STAmount const actualSend = (waiveFee == WaiveTransferFee::Yes)
             ? amount
             : multiply(amount, transferRate(view, amount.get<MPTIssue>().getMptID()));
         actual += actualSend;

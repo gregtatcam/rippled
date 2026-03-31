@@ -310,7 +310,7 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
                 // Set AMM flag on AMM trustline
                 if (!isXRP(amount))
                 {
-                    SLE::pointer sleRippleState = sb.peek(keylet::line(accountId, issue));
+                    SLE::pointer const sleRippleState = sb.peek(keylet::line(accountId, issue));
                     if (!sleRippleState)
                     {
                         return tecINTERNAL;  // LCOV_EXCL_LINE

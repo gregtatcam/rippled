@@ -184,7 +184,7 @@ OrderBookDBImpl::update(std::shared_ptr<ReadView const> const& ledger)
     JLOG(j_.debug()) << "Update completed (" << ledger->seq() << "): " << cnt << " books found";
 
     {
-        std::lock_guard sl(mLock);
+        std::lock_guard const sl(mLock);
         allBooks_.swap(allBooks);
         xrpBooks_.swap(xrpBooks);
         domainBooks_.swap(domainBooks);
@@ -197,9 +197,9 @@ OrderBookDBImpl::update(std::shared_ptr<ReadView const> const& ledger)
 void
 OrderBookDBImpl::addOrderBook(Book const& book)
 {
-    bool toXRP = isXRP(book.out);
+    bool const toXRP = isXRP(book.out);
 
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
 
     if (book.domain)
     {
@@ -227,7 +227,7 @@ OrderBookDBImpl::getBooksByTakerPays(Asset const& asset, std::optional<uint256> 
     std::vector<Book> ret;
 
     {
-        std::lock_guard sl(mLock);
+        std::lock_guard const sl(mLock);
 
         auto getBooks = [&](auto const& container, auto const& key) {
             if (auto it = container.find(key); it != container.end())
@@ -256,7 +256,7 @@ OrderBookDBImpl::getBooksByTakerPays(Asset const& asset, std::optional<uint256> 
 int
 OrderBookDBImpl::getBookSize(Asset const& asset, std::optional<uint256> const& domain)
 {
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
 
     if (!domain)
     {
@@ -275,7 +275,7 @@ OrderBookDBImpl::getBookSize(Asset const& asset, std::optional<uint256> const& d
 bool
 OrderBookDBImpl::isBookToXRP(Asset const& asset, std::optional<Domain> const& domain)
 {
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
     if (domain)
         return xrpDomainBooks_.contains({asset, *domain});
     return xrpBooks_.contains(asset);
@@ -284,7 +284,7 @@ OrderBookDBImpl::isBookToXRP(Asset const& asset, std::optional<Domain> const& do
 BookListeners::pointer
 OrderBookDBImpl::makeBookListeners(Book const& book)
 {
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
     auto ret = getBookListeners(book);
 
     if (!ret)
@@ -305,7 +305,7 @@ BookListeners::pointer
 OrderBookDBImpl::getBookListeners(Book const& book)
 {
     BookListeners::pointer ret;
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
 
     auto it0 = mListeners.find(book);
     if (it0 != mListeners.end())
@@ -322,7 +322,7 @@ OrderBookDBImpl::processTxn(
     AcceptedLedgerTx const& alTx,
     MultiApiJson const& jvObj)
 {
-    std::lock_guard sl(mLock);
+    std::lock_guard const sl(mLock);
 
     // For this particular transaction, maintain the set of unique
     // subscriptions that have already published it.  This prevents sending

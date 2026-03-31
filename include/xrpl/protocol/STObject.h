@@ -1155,7 +1155,7 @@ STObject::getFieldByValue(SField const& field) const
     if (!rf)
         throwFieldNotFound(field);
 
-    SerializedTypeID id = rf->getSType();
+    SerializedTypeID const id = rf->getSType();
 
     if (id == STI_NOTPRESENT)
         return V();  // optional field not present
@@ -1182,7 +1182,7 @@ STObject::getFieldByConstRef(SField const& field, V const& empty) const
     if (!rf)
         throwFieldNotFound(field);
 
-    SerializedTypeID id = rf->getSType();
+    SerializedTypeID const id = rf->getSType();
 
     if (id == STI_NOTPRESENT)
         return empty;  // optional field not present

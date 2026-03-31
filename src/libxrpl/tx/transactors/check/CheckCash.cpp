@@ -482,7 +482,7 @@ CheckCash::doApply()
                 return *err;
             // Make sure the tweaked limits are restored when we leave
             // scope.
-            scope_exit fixup([&psb, &trustLineKey, destLow, &savedLimit]() {
+            scope_exit const fixup([&psb, &trustLineKey, destLow, &savedLimit]() {
                 if (trustLineKey)
                 {
                     SF_AMOUNT const& tweakedLimit = destLow ? sfLowLimit : sfHighLimit;
