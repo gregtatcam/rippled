@@ -590,7 +590,7 @@ private:
                 alice, BAD(100), std::nullopt, std::nullopt, std::nullopt, ter(temBAD_CURRENCY));
 
             // Invalid Account
-            Account bad("bad");
+            Account const bad("bad");
             env.memoize(bad);
             ammAlice.deposit(
                 bad,
@@ -1593,7 +1593,7 @@ private:
             ammAlice.withdraw(alice, BAD(100), std::nullopt, std::nullopt, ter(temBAD_CURRENCY));
 
             // Invalid Account
-            Account bad("bad");
+            Account const bad("bad");
             env.memoize(bad);
             ammAlice.withdraw(
                 bad,
@@ -2210,7 +2210,7 @@ private:
             BEAST_EXPECT(ammAlice.expectTradingFee(0));
 
             // Invalid Account
-            Account bad("bad");
+            Account const bad("bad");
             env.memoize(bad);
             ammAlice.vote(bad, 1'000, std::nullopt, seq(1), std::nullopt, ter(terNO_ACCOUNT));
 
@@ -2444,7 +2444,7 @@ private:
                 ter(tecAMM_INVALID_TOKENS));
 
             // Invalid Account
-            Account bad("bad");
+            Account const bad("bad");
             env.memoize(bad);
             env(ammAlice.bid({
                     .account = bad,
@@ -2507,10 +2507,10 @@ private:
 
         // More than four Auth accounts.
         testAMM([&](AMM& ammAlice, Env& env) {
-            Account ed("ed");
-            Account bill("bill");
-            Account scott("scott");
-            Account james("james");
+            Account const ed("ed");
+            Account const bill("bill");
+            Account const scott("scott");
+            Account const james("james");
             env.fund(XRP(1'000), bob, ed, bill, scott, james);
             env.close();
             ammAlice.deposit(carol, 1'000'000);
@@ -3044,8 +3044,8 @@ private:
                 BEAST_EXPECT(ammAlice.expectAuctionSlot({carol}));
                 env(ammAlice.bid({.account = alice, .bidMin = IOUAmount{100}}));
                 BEAST_EXPECT(ammAlice.expectAuctionSlot({}));
-                Account bob("bob");
-                Account dan("dan");
+                Account const bob("bob");
+                Account const dan("dan");
                 fund(env, {bob, dan}, XRP(1'000));
                 env(ammAlice.bid({
                     .account = alice,

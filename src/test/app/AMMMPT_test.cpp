@@ -812,7 +812,7 @@ private:
         // Deposit unauthorized token
         {
             Env env{*this, features};
-            Account gw("gateway"), alice{"alice"}, carol{"carol"};
+            Account const gw("gateway"), alice{"alice"}, carol{"carol"};
             env.fund(XRP(30'000), alice, carol, gw);
             env.close();
 
@@ -841,7 +841,7 @@ private:
         // MPTCanTransfer is not set and the account is not the issuer of MPT
         {
             Env env{*this, features};
-            Account gw("gateway"), alice{"alice"}, carol{"carol"};
+            Account const gw("gateway"), alice{"alice"}, carol{"carol"};
             env.fund(XRP(30'000), alice, carol, gw);
             env.close();
 
@@ -5987,16 +5987,16 @@ private:
         {
             Env env(*this);
             Account const gw{"gateway"};
-            Account alice{"alice"};
-            Account bob("bob");
-            Account carol("carol");
-            Account ed("ed");
-            Account paul("paul");
-            Account dan("dan");
-            Account chris("chris");
-            Account simon("simon");
-            Account ben("ben");
-            Account natalie("natalie");
+            Account const alice{"alice"};
+            Account const bob("bob");
+            Account const carol("carol");
+            Account const ed("ed");
+            Account const paul("paul");
+            Account const dan("dan");
+            Account const chris("chris");
+            Account const simon("simon");
+            Account const ben("ben");
+            Account const natalie("natalie");
             std::vector<Account> const holders{
                 alice, bob, carol, ed, paul, dan, chris, simon, ben, natalie};
             env.fund(XRP(100000), gw, alice, bob, carol, ed, paul, dan, chris, simon, ben, natalie);
@@ -6078,16 +6078,16 @@ private:
         {
             Env env(*this);
             Account const gw{"gateway"};
-            Account alice{"alice"};
-            Account bob("bob");
-            Account carol("carol");
-            Account ed("ed");
-            Account paul("paul");
-            Account dan("dan");
-            Account chris("chris");
-            Account simon("simon");
-            Account ben("ben");
-            Account natalie("natalie");
+            Account const alice{"alice"};
+            Account const bob("bob");
+            Account const carol("carol");
+            Account const ed("ed");
+            Account const paul("paul");
+            Account const dan("dan");
+            Account const chris("chris");
+            Account const simon("simon");
+            Account const ben("ben");
+            Account const natalie("natalie");
             std::vector<Account> const holders{
                 alice, bob, carol, ed, paul, dan, chris, simon, ben, natalie};
             env.fund(XRP(100000), gw, alice, bob, carol, ed, paul, dan, chris, simon, ben, natalie);
@@ -6743,7 +6743,7 @@ private:
         using namespace jtx;
 
         Env env(*this, features);
-        Account gw{"gateway"}, alice{"alice"}, bob{"bob"};
+        Account const gw{"gateway"}, alice{"alice"}, bob{"bob"};
         env.fund(XRP(100000), gw, alice, bob);
         env.close();
         env(fset(gw, asfAllowTrustLineClawback));

@@ -57,7 +57,7 @@ class LedgerLoad_test : public beast::unit_test::suite
 
         for (auto i = 0; i < 20; ++i)
         {
-            Account acct{"A" + std::to_string(i)};
+            Account const acct{"A" + std::to_string(i)};
             env.fund(XRP(10000), acct);
             env.close();
             if (i > 0 && BEAST_EXPECT(prev.has_value()))

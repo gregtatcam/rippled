@@ -43,11 +43,11 @@ class Vault_test : public beast::unit_test::suite
     testSequences()
     {
         using namespace test::jtx;
-        Account issuer{"issuer"};
-        Account owner{"owner"};
-        Account depositor{"depositor"};
-        Account charlie{"charlie"};  // authorized 3rd party
-        Account dave{"dave"};
+        Account const issuer{"issuer"};
+        Account const owner{"owner"};
+        Account const depositor{"depositor"};
+        Account const charlie{"charlie"};  // authorized 3rd party
+        Account const dave{"dave"};
 
         auto const testSequence = [&, this](
                                       std::string const& prefix,
@@ -1549,9 +1549,9 @@ class Vault_test : public beast::unit_test::suite
                                 MPTTester& mptt)> test,
                             CaseArgs args = {}) {
             Env env{*this, testable_amendments() | featureSingleAssetVault};
-            Account issuer{"issuer"};
-            Account owner{"owner"};
-            Account depositor{"depositor"};
+            Account const issuer{"issuer"};
+            Account const owner{"owner"};
+            Account const depositor{"depositor"};
             env.fund(XRP(args.initialXRP), issuer, owner, depositor);
             env.close();
             Vault vault{env};
@@ -2173,8 +2173,8 @@ class Vault_test : public beast::unit_test::suite
             testcase("MPT shares to a vault");
 
             Env env{*this, testable_amendments() | featureSingleAssetVault};
-            Account owner{"owner"};
-            Account issuer{"issuer"};
+            Account const owner{"owner"};
+            Account const issuer{"issuer"};
             env.fund(XRP(1000000), owner, issuer);
             env.close();
             Vault const vault{env};
@@ -2246,7 +2246,7 @@ class Vault_test : public beast::unit_test::suite
             testcase("MPT OutstandingAmount > MaximumAmount");
 
             Env env{*this, testable_amendments() | featureSingleAssetVault};
-            Account alice{"alice"};
+            Account const alice{"alice"};
             Account const issuer{"issuer"};
             env.fund(XRP(1'000), alice, issuer);
             env.close();

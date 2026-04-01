@@ -4624,7 +4624,7 @@ class MPToken_test : public beast::unit_test::suite
         // MPT/MPT, different issuer
         {
             Env env{*this, features};
-            Account gw1{"gw1"};
+            Account const gw1{"gw1"};
 
             MPTTester mpt1(env, gw, {.holders = {alice, carol, bob}});
             mpt1.create(

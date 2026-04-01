@@ -475,7 +475,7 @@ struct Directory_test : public beast::unit_test::suite
     testDirectoryFull()
     {
         using namespace test::jtx;
-        Account alice("alice");
+        Account const alice("alice");
 
         auto const testCase = [&, this](FeatureBitset features, auto setup) {
             using namespace test::jtx;

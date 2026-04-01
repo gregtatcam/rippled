@@ -18,8 +18,8 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
         for (auto const& feature : {features, features - featureSingleAssetVault})
         {
             Env env(*this, feature);
-            Account gw{"gateway"};
-            Account alice{"alice"};
+            Account const gw{"gateway"};
+            Account const alice{"alice"};
             Account const bob{"bob"};
             env.fund(XRP(100000), gw, alice, bob);
             env.close();
@@ -99,7 +99,7 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
         {
             Env env(*this, features);
             Account const gw{"gateway"};
-            Account alice{"alice"};
+            Account const alice{"alice"};
             env.fund(XRP(100000), gw, alice);
             env.close();
 
@@ -129,7 +129,7 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             Env env(*this, features);
             Account const gw{"gateway"};
             Account const gw2{"gateway2"};
-            Account alice{"alice"};
+            Account const alice{"alice"};
             env.fund(XRP(100000), gw, gw2, alice);
             env.close();
 
@@ -168,7 +168,7 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
         {
             Env env(*this, features);
             Account const gw{"gateway"};
-            Account alice{"alice"};
+            Account const alice{"alice"};
             env.fund(XRP(10000), gw, alice);
             env.close();
 
@@ -234,7 +234,7 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             Env env(*this, features);
             Account const gw{"gateway"};
             Account const gw2{"gateway2"};
-            Account alice{"alice"};
+            Account const alice{"alice"};
             env.fund(XRP(100000), gw, gw2, alice);
             env.close();
 
@@ -301,8 +301,8 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
         {
             Env env(*this, features);
             Account const gw{"gateway"};
-            Account alice{"alice"};
-            Account bob{"bob"};
+            Account const alice{"alice"};
+            Account const bob{"bob"};
             env.fund(XRP(100000), gw, alice, bob);
             env.close();
 
@@ -397,8 +397,8 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             Env env(*this, features);
             Account const gw{"gateway"};
             Account const gw2{"gateway2"};
-            Account alice{"alice"};
-            Account bob{"bob"};
+            Account const alice{"alice"};
+            Account const bob{"bob"};
             env.fund(XRP(100000), gw, gw2, alice, bob);
             env.close();
 
@@ -494,8 +494,8 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             Env env(*this, features);
             Account const gw{"gateway"};
             Account const gw2{"gateway2"};
-            Account alice{"alice"};
-            Account bob{"bob"};
+            Account const alice{"alice"};
+            Account const bob{"bob"};
             env.fund(XRP(100000), gw, gw2, alice, bob);
             env.close();
 
@@ -1099,9 +1099,9 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
         // AMMClawback from MPT/MPT issued by each other
         {
             Env env(*this, features);
-            Account gw{"gateway"};
-            Account gw2{"gateway2"};
-            Account alice{"alice"};
+            Account const gw{"gateway"};
+            Account const gw2{"gateway2"};
+            Account const alice{"alice"};
             env.fund(XRP(100000), gw, gw2, alice);
             env.close();
 
@@ -1760,7 +1760,7 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
         {
             auto test = [&](auto&& issue1, auto&& issue2) {
                 Env env(*this);
-                Account gw("gateway"), alice("alice"), bob("bob");
+                Account const gw("gateway"), alice("alice"), bob("bob");
                 env.fund(XRP(30'000), alice, bob, gw);
                 env.close();
                 auto const USD = issue1(

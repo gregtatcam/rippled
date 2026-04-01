@@ -587,7 +587,7 @@ class Invariants_test : public beast::unit_test::suite
         using namespace test::jtx;
         testcase << "transfers when frozen";
 
-        Account G1{"G1"};
+        Account const G1{"G1"};
         // Helper function to establish the trustlines
         auto const createTrustlines = [&](Account const& A1, Account const& A2, Env& env) {
             // Preclose callback to establish trust lines with gateway
@@ -2389,8 +2389,8 @@ class Invariants_test : public beast::unit_test::suite
             return sample;
         };
 
-        Account A3{"A3"};
-        Account A4{"A4"};
+        Account const A3{"A3"};
+        Account const A4{"A4"};
         auto const precloseXrp = [&](Account const& A1, Account const& A2, Env& env) -> bool {
             env.fund(XRP(1000), A3, A4);
             Vault const vault{env};

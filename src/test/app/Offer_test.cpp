@@ -709,7 +709,7 @@ public:
 
     // Helper function that returns the Offers on an account.
     static std::vector<std::shared_ptr<SLE const>>
-    offersOnAccount(jtx::Env& env, jtx::Account account)
+    offersOnAccount(jtx::Env& env, jtx::Account const& account)
     {
         std::vector<std::shared_ptr<SLE const>> result;
         forEachItem(*env.current(), account, [&result](std::shared_ptr<SLE const> const& sle) {

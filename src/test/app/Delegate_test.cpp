@@ -1238,8 +1238,8 @@ class Delegate_test : public beast::unit_test::suite
         // test MPTokenIssuanceUnlock and MPTokenIssuanceLock permissions
         {
             Env env(*this);
-            Account alice{"alice"};
-            Account bob{"bob"};
+            Account const alice{"alice"};
+            Account const bob{"bob"};
             env.fund(XRP(100000), alice, bob);
             env.close();
 
@@ -1285,8 +1285,8 @@ class Delegate_test : public beast::unit_test::suite
         // test mix of granular and transaction level permission
         {
             Env env(*this);
-            Account alice{"alice"};
-            Account bob{"bob"};
+            Account const alice{"alice"};
+            Account const bob{"bob"};
             env.fund(XRP(100000), alice, bob);
             env.close();
 
@@ -1332,8 +1332,8 @@ class Delegate_test : public beast::unit_test::suite
         // tfFullyCanonicalSig won't block delegated transaction
         {
             Env env(*this);
-            Account alice{"alice"};
-            Account bob{"bob"};
+            Account const alice{"alice"};
+            Account const bob{"bob"};
             env.fund(XRP(100000), alice, bob);
             env.close();
 
@@ -1492,8 +1492,8 @@ class Delegate_test : public beast::unit_test::suite
         Account const alice{"alice"};
         Account const bob{"bob"};
         Account const carol{"carol"};
-        Account daria{"daria"};
-        Account edward{"edward"};
+        Account const daria{"daria"};
+        Account const edward{"edward"};
         env.fund(XRP(100000), alice, bob, carol, daria, edward);
         env.close();
 
@@ -1528,9 +1528,9 @@ class Delegate_test : public beast::unit_test::suite
         Account const alice{"alice"};
         Account const bob{"bob"};
         Account const carol{"carol"};
-        Account daria = Account{"daria"};
-        Account edward = Account{"edward"};
-        Account fred = Account{"fred"};
+        Account const daria{"daria"};
+        Account const edward{"edward"};
+        Account const fred{"fred"};
         env.fund(XRP(100000), alice, bob, carol, daria, edward, fred);
         env.close();
 
@@ -1567,8 +1567,8 @@ class Delegate_test : public beast::unit_test::suite
 
         Env env(*this, features);
 
-        Account alice{"alice"};
-        Account bob{"bob"};
+        Account const alice{"alice"};
+        Account const bob{"bob"};
         env.fund(XRP(100000), alice, bob);
         env.close();
 
