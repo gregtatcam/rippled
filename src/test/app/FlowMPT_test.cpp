@@ -357,7 +357,7 @@ struct FlowMPT_test : public beast::unit_test::suite
         }
         {
             // Do not produce more in the forward pass than the
-            // reverse pass This test uses a path that whose reverse
+            // reverse pass. This test uses a path whose reverse
             // pass will compute a 0.5 USD input required for a 1
             // EUR output. It sets a sendmax of 0.4 USD, so the
             // payment engine will need to do a forward pass.
@@ -722,7 +722,7 @@ struct FlowMPT_test : public beast::unit_test::suite
         // The old payment code handles the payment correctly.
         using namespace jtx;
 
-        auto test = [&](auto& issue1, auto&& issue2) {
+        auto test = [&](auto&& issue1, auto&& issue2) {
             auto const gw1 = Account("gw1");
             auto const gw2 = Account("gw2");
             auto const alice = Account("alice");
