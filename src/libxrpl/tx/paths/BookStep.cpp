@@ -1349,10 +1349,11 @@ BookStep<TIn, TOut, TDerived>::rate(
     Asset const& asset,
     AccountID const& dstAccount) const
 {
-    if (isXRP(asset) || asset.getIssuer() == dstAccount)
+    auto const& issuer = asset.getIssuer();
+    if (isXRP(issuer) || issuer == dstAccount)
         return parityRate;
     return asset.visit(
-        [&](Issue const& issue) { return transferRate(view, issue.getIssuer()); },
+        [&](Issue const&) { return transferRate(view, issuer); },
         [&](MPTIssue const& issue) { return transferRate(view, issue.getMptID()); });
 };
 

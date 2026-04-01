@@ -31,11 +31,6 @@ checkNear(IOUAmount const& expected, IOUAmount const& actual)
     auto const r = diff / std::max(std::abs(a), std::abs(b));
     return r <= ratTol;
 };
-bool
-checkNear(MPTAmount const& expected, MPTAmount const& actual)
-{
-    return expected == actual;
-}
 
 static bool
 isXRPAccount(STPathElement const& pe)

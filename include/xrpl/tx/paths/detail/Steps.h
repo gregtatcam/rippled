@@ -494,8 +494,11 @@ public:
 // Check equal with tolerance
 bool
 checkNear(IOUAmount const& expected, IOUAmount const& actual);
-bool
-checkNear(MPTAmount const& expected, MPTAmount const& actual);
+inline bool
+checkNear(MPTAmount const& expected, MPTAmount const& actual)
+{
+    return expected == actual;
+}
 inline bool
 checkNear(XRPAmount const& expected, XRPAmount const& actual)
 {

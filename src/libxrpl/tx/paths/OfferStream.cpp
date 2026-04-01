@@ -15,7 +15,8 @@ bool
 checkIssuers(ReadView const& view, Book const& book)
 {
     auto issuerExists = [](ReadView const& view, Asset const& asset) -> bool {
-        return isXRP(asset.getIssuer()) || view.read(keylet::account(asset.getIssuer()));
+        auto const& issuer = asset.getIssuer();
+        return isXRP(issuer) || view.exists(keylet::account(issuer));
     };
     return issuerExists(view, book.in) && issuerExists(view, book.out);
 }

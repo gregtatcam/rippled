@@ -229,7 +229,7 @@ STPathSet::add(Serializer& s) const
 
             s.add8(iType);
 
-            if ((iType & STPathElement::typeAccount) != 0)
+            if ((iType & STPathElement::typeAccount) != 0u)
                 s.addBitString(speElement.getAccountID());
 
             if ((iType & STPathElement::typeMPT) != 0u)
@@ -238,7 +238,7 @@ STPathSet::add(Serializer& s) const
             if ((iType & STPathElement::typeCurrency) != 0u)
                 s.addBitString(speElement.getCurrency());
 
-            if ((iType & STPathElement::typeIssuer) != 0)
+            if ((iType & STPathElement::typeIssuer) != 0u)
                 s.addBitString(speElement.getIssuerID());
         }
 

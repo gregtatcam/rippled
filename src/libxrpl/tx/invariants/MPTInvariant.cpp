@@ -52,9 +52,10 @@ ValidMPTIssuance::finalize(
     ReadView const& view,
     beast::Journal const& j) const
 {
-    if (isTesSuccess(result) || result == tecINCOMPLETE)
+    auto const& rules = view.rules();
+    bool const mptV2Enabled = rules.enabled(featureMPTokensV2);
+    if (isTesSuccess(result) || (mptV2Enabled && result == tecINCOMPLETE))
     {
-        auto const& rules = view.rules();
         [[maybe_unused]]
         bool const enforceCreatedByIssuer =
             rules.enabled(featureSingleAssetVault) || rules.enabled(featureLendingProtocol);
@@ -112,13 +113,12 @@ ValidMPTIssuance::finalize(
             return mptIssuancesCreated_ == 0 && mptIssuancesDeleted_ == 1;
         }
 
-        bool const lendingProtocolEnabled = view.rules().enabled(featureLendingProtocol);
-        bool const mptV2Enabled = view.rules().enabled(featureMPTokensV2);
+        bool const lendingProtocolEnabled = rules.enabled(featureLendingProtocol);
         // ttESCROW_FINISH may authorize an MPT, but it can't have the
         // mayAuthorizeMPT privilege, because that may cause
         // non-amendment-gated side effects.
         bool const enforceEscrowFinish = (txnType == ttESCROW_FINISH) &&
-            (view.rules().enabled(featureSingleAssetVault) || lendingProtocolEnabled);
+            (rules.enabled(featureSingleAssetVault) || lendingProtocolEnabled);
         if (hasPrivilege(tx, mustAuthorizeMPT | mayAuthorizeMPT) || enforceEscrowFinish)
         {
             bool const submittedByIssuer = tx.isFieldPresent(sfHolder);

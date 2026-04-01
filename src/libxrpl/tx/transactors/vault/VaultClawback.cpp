@@ -169,7 +169,7 @@ VaultClawback::preclaim(PreclaimContext const& ctx)
                     return tecOBJECT_NOT_FOUND;
 
                 std::uint32_t const issueFlags = mptIssue->getFieldU32(sfFlags);
-                if (!(issueFlags & lsfMPTCanClawback))
+                if ((issueFlags & lsfMPTCanClawback) == 0u)
                 {
                     JLOG(ctx.j.debug()) << "VaultClawback: cannot clawback "
                                            "MPT vault asset.";
@@ -189,7 +189,8 @@ VaultClawback::preclaim(PreclaimContext const& ctx)
                 }
 
                 std::uint32_t const issuerFlags = issuerSle->getFieldU32(sfFlags);
-                if (!(issuerFlags & lsfAllowTrustLineClawback) || (issuerFlags & lsfNoFreeze))
+                if (((issuerFlags & lsfAllowTrustLineClawback) == 0u) ||
+                    ((issuerFlags & lsfNoFreeze) != 0u))
                 {
                     JLOG(ctx.j.debug()) << "VaultClawback: cannot clawback "
                                            "IOU vault asset.";

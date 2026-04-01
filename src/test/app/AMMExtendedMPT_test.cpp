@@ -228,7 +228,8 @@ private:
         env.fund(XRP(200'000), gw, alice, bob);
         env.close();
 
-        MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
+        MPTTester const BTC(
+            {.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
         env(pay(gw, alice, BTC(500'000'000)));
 
         AMM const ammAlice(env, alice, XRP(150'000), BTC(51'000'000));
@@ -252,7 +253,8 @@ private:
         fund(env, gw, {alice, bob}, XRP(10'000));
         env.require(owners(bob, 0));
 
-        MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
+        MPTTester const BTC(
+            {.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
         env(pay(gw, bob, BTC(1'000'000'000)));
 
         env.require(owners(alice, 1), owners(bob, 1));
@@ -322,7 +324,8 @@ private:
         env.fund(XRP(40'000), alice);
         env.fund(XRP(1'000), bob);
 
-        MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
+        MPTTester const BTC(
+            {.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
         env(pay(gw, alice, BTC(10'100'000'000)));
 
         AMM const ammAlice(env, alice, XRP(10'000), BTC(10'100'000'000));
@@ -345,7 +348,8 @@ private:
         env.fund(XRP(40'100), alice);
         env.fund(XRP(1'000), bob);
 
-        MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
+        MPTTester const BTC(
+            {.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
         env(pay(gw, alice, BTC(40'000'000'000)));
 
         AMM const ammAlice(env, alice, XRP(10'100), BTC(10'000'000'000));
@@ -422,7 +426,8 @@ private:
         env.fund(XRP(2'000), bob);
         env.close();
 
-        MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
+        MPTTester const BTC(
+            {.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
 
         // Created only to increase one reserve count for alice
         MPTTester const ETH({.env = env, .issuer = gw, .holders = {alice}, .flags = MPTDEXFlags});
@@ -518,7 +523,8 @@ private:
         env.fund(XRP(2'000), bob);
         env.close();
 
-        MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
+        MPTTester const BTC(
+            {.env = env, .issuer = gw, .holders = {alice, bob}, .flags = MPTDEXFlags});
         env(pay(gw, bob, BTC(2'200'000'000)));
 
         AMM const ammBob(env, bob, XRP(1'000), BTC(2'200'000'000));
@@ -1310,14 +1316,17 @@ private:
         env.fund(XRP(20'000), M1);
         env.close();
 
-        MPTTester const XYZ_G1({.env = env, .issuer = G1, .holders = {A1, M1, A2}, .flags = MPTDEXFlags});
+        MPTTester const XYZ_G1(
+            {.env = env, .issuer = G1, .holders = {A1, M1, A2}, .flags = MPTDEXFlags});
 
-        MPTTester const XYZ_G2({.env = env, .issuer = G2, .holders = {A2, M1, A1}, .flags = MPTDEXFlags});
+        MPTTester const XYZ_G2(
+            {.env = env, .issuer = G2, .holders = {A2, M1, A1}, .flags = MPTDEXFlags});
 
         MPTTester const ABC_G3(
             {.env = env, .issuer = G3, .holders = {A1, A2, M1, A3}, .flags = MPTDEXFlags});
 
-        MPTTester const ABC_A2({.env = env, .issuer = A2, .holders = {G3, A1}, .flags = MPTDEXFlags});
+        MPTTester const ABC_A2(
+            {.env = env, .issuer = A2, .holders = {G3, A1}, .flags = MPTDEXFlags});
 
         env(pay(G1, A1, XYZ_G1(3'500'000'000)));
         env(pay(G3, A1, ABC_G3(1'200'000'000)));
@@ -2897,7 +2906,8 @@ private:
         Env env(*this, features);
         fund(env, gw, {alice, becky}, XRP(5'000));
 
-        MPTTester const BTC({.env = env, .issuer = gw, .holders = {alice, becky}, .flags = MPTDEXFlags});
+        MPTTester const BTC(
+            {.env = env, .issuer = gw, .holders = {alice, becky}, .flags = MPTDEXFlags});
 
         env(pay(gw, alice, BTC(500'000)));
         env.close();

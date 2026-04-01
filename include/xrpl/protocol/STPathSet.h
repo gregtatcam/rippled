@@ -101,6 +101,9 @@ public:
     getIssuerID() const;
 
     bool
+    isType(Type const& pe) const;
+
+    bool
     operator==(STPathElement const& t) const;
 
     bool
@@ -331,27 +334,33 @@ STPathElement::isAccount() const
 }
 
 inline bool
+STPathElement::isType(Type const& pe) const
+{
+    return (mType & pe) != 0u;
+}
+
+inline bool
 STPathElement::hasIssuer() const
 {
-    return getNodeType() & STPathElement::typeIssuer;
+    return isType(STPathElement::typeIssuer);
 }
 
 inline bool
 STPathElement::hasCurrency() const
 {
-    return getNodeType() & STPathElement::typeCurrency;
+    return isType(STPathElement::typeCurrency);
 }
 
 inline bool
 STPathElement::hasMPT() const
 {
-    return getNodeType() & STPathElement::typeMPT;
+    return isType(STPathElement::typeMPT);
 }
 
 inline bool
 STPathElement::hasAsset() const
 {
-    return getNodeType() & STPathElement::typeAsset;
+    return isType(STPathElement::typeAsset);
 }
 
 inline bool

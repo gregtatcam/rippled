@@ -1223,7 +1223,8 @@ public:
         env.fund(alice_initial_balance, alice);
         env.fund(bob_initial_balance, bob);
 
-        MPTTester const MUSD({.env = env, .issuer = gw, .holders = {alice, bob}, .transferFee = 5'000});
+        MPTTester const MUSD(
+            {.env = env, .issuer = gw, .holders = {alice, bob}, .transferFee = 5'000});
         MPT const USD = MUSD;
         auto const small_amount = STAmount{USD, 1};
 

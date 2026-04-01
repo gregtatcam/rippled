@@ -32,11 +32,8 @@ OfferCreate::checkExtraFeatures(PreflightContext const& ctx)
     if (ctx.tx.isFieldPresent(sfDomainID) && !ctx.rules.enabled(featurePermissionedDEX))
         return false;
 
-    if (!ctx.rules.enabled(featureMPTokensV2) &&
-        (ctx.tx[sfTakerPays].holds<MPTIssue>() || ctx.tx[sfTakerGets].holds<MPTIssue>()))
-        return false;
-
-    return true;
+    return ctx.rules.enabled(featureMPTokensV2) ||
+        (!ctx.tx[sfTakerPays].holds<MPTIssue>() && !ctx.tx[sfTakerGets].holds<MPTIssue>());
 }
 
 std::uint32_t

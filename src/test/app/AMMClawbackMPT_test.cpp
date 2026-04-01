@@ -106,7 +106,8 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             env(fset(gw, asfAllowTrustLineClawback));
             env.close();
 
-            MPT const BTC = MPTTester({.env = env, .issuer = gw, .holders = {alice}, .pay = 40'000});
+            MPT const BTC =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice}, .pay = 40'000});
 
             auto const USD = gw["USD"];
             env.trust(USD(10000), alice);
@@ -1640,7 +1641,8 @@ class AMMClawbackMPT_test : public beast::unit_test::suite
             env(pay(gw, alice, USD(1000)));
             env.close();
 
-            MPT const BTC = MPTTester({.env = env, .issuer = gw, .holders = {alice}, .pay = 40'000});
+            MPT const BTC =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice}, .pay = 40'000});
 
             AMM const amm(env, alice, USD(200), BTC(100));
             // Asset BTC is not clawable without tfMPTCanClawback.
