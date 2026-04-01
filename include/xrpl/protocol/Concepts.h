@@ -31,8 +31,9 @@ concept ValidPathAsset = (std::is_same_v<T, Currency> || std::is_same_v<T, MPTID
 template <class TTakerPays, class TTakerGets>
 concept ValidTaker =
     ((std::is_same_v<TTakerPays, IOUAmount> || std::is_same_v<TTakerPays, XRPAmount> ||
-      std::is_same_v<TTakerPays, MPTAmount> || std::is_same_v<TTakerGets, IOUAmount> ||
-      std::is_same_v<TTakerGets, XRPAmount> || std::is_same_v<TTakerGets, MPTAmount>) &&
+      std::is_same_v<TTakerPays, MPTAmount>) &&
+     (std::is_same_v<TTakerGets, IOUAmount> || std::is_same_v<TTakerGets, XRPAmount> ||
+      std::is_same_v<TTakerGets, MPTAmount>) &&
      (!std::is_same_v<TTakerPays, XRPAmount> || !std::is_same_v<TTakerGets, XRPAmount>));
 
 namespace detail {
