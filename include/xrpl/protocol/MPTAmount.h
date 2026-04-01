@@ -22,7 +22,7 @@ public:
     using value_type = std::int64_t;
 
 protected:
-    value_type value_;
+    value_type value_{};
 
 public:
     MPTAmount() = default;

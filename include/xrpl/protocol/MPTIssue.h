@@ -85,7 +85,7 @@ getMPTIssuer(MPTID const& mptid)
 {
     static_assert(sizeof(MPTID) == (sizeof(std::uint32_t) + sizeof(AccountID)));
     // Extract the 20 bytes for the AccountID
-    std::array<std::uint8_t, sizeof(AccountID)> bytes;
+    std::array<std::uint8_t, sizeof(AccountID)> bytes{};
     std::copy_n(mptid.data() + sizeof(std::uint32_t), sizeof(AccountID), bytes.begin());
 
     // bit_cast is a "magic" compiler intrinsic that is
