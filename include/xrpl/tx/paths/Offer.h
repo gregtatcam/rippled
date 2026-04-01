@@ -19,12 +19,12 @@ class TOffer
 {
 private:
     SLE::pointer m_entry;
-    Quality m_quality;
+    Quality m_quality{};
     AccountID m_account;
     Asset assetIn_;
     Asset assetOut_;
 
-    TAmounts<TIn, TOut> m_amounts;
+    TAmounts<TIn, TOut> m_amounts{};
     void
     setFieldAmounts();
 

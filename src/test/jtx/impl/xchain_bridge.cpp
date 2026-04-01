@@ -413,7 +413,6 @@ XChainBridgeObjects::XChainBridgeObjects()
         }
         return r;
     }())
-    , quorum(UT_XCHAIN_DEFAULT_QUORUM)
     , reward(XRP(1))
     , split_reward_quorum(divide(reward, STAmount(UT_XCHAIN_DEFAULT_QUORUM), reward.get<Issue>()))
     , split_reward_everyone(
