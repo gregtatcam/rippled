@@ -2,6 +2,7 @@
 //
 #include <xrpl/basics/Log.h>
 #include <xrpl/beast/utility/instrumentation.h>
+#include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/MPTIssue.h>
@@ -280,29 +281,50 @@ ValidMPTPayment::visitEntry(
         return sle[sfMPTokenIssuanceID];
     };
 
-    auto update = [&](SLE const& sle, Order order) {
+    auto update = [&](SLE const& sle, Order order) -> bool {
         auto const type = sle.getType();
         if (type == ltMPTOKEN_ISSUANCE)
         {
+            auto const outstanding = sle[sfOutstandingAmount];
+            if (outstanding > maxMPTokenAmount)
+            {
+                overflow_ = true;
+                return false;
+            }
             data_[makeKey(sle)].outstanding[order] = sle[sfOutstandingAmount];
         }
         else if (type == ltMPTOKEN)
         {
+            auto const mptAmt = sle[sfMPTAmount];
+            auto const lockedAmt = sle[~sfLockedAmount].value_or(0);
+            if (mptAmt > maxMPTokenAmount || lockedAmt > maxMPTokenAmount ||
+                lockedAmt > (maxMPTokenAmount - mptAmt))
+            {
+                overflow_ = true;
+                return false;
+            }
+            auto const res = static_cast<std::int64_t>(mptAmt + lockedAmt);
             // subtract before from after
-            data_[makeKey(sle)].mptAmount +=
-                (order == Before ? -1 : 1) * (sle[sfMPTAmount] + sle[~sfLockedAmount].value_or(0));
+            if (order == Before)
+            {
+                data_[makeKey(sle)].mptAmount -= res;
+            }
+            else
+            {
+                data_[makeKey(sle)].mptAmount += res;
+            }
         }
+        return true;
     };
 
-    if (before)
-        update(*before, Before);
+    if (before && !update(*before, Before))
+        return;
 
     if (after)
     {
         if (after->getType() == ltMPTOKEN_ISSUANCE)
         {
-            overflow_ = (*after)[sfOutstandingAmount] >
-                (*after)[~sfMaximumAmount].value_or(maxMPTokenAmount);
+            overflow_ = (*after)[sfOutstandingAmount] > maxMPTAmount(*after);
         }
         update(*after, After);
     }
@@ -328,7 +350,12 @@ ValidMPTPayment::finalize(
         for (auto const& [id, data] : data_)
         {
             (void)id;
-            if (data.outstanding[After] != (data.outstanding[Before] + data.mptAmount))
+            auto const signedMax = static_cast<std::int64_t>(maxMPTokenAmount);
+            bool const addOverflows =
+                (data.mptAmount > 0 && data.outstanding[Before] > (signedMax - data.mptAmount)) ||
+                (data.mptAmount < 0 && data.outstanding[Before] < (-signedMax - data.mptAmount));
+            if (addOverflows ||
+                data.outstanding[After] != (data.outstanding[Before] + data.mptAmount))
             {
                 JLOG(j.fatal()) << "Invariant failed: invalid OutstandingAmount balance "
                                 << data.outstanding[Before] << " " << data.outstanding[After] << " "

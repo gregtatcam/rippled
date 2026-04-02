@@ -796,7 +796,7 @@ Pathfinder::getPathsOut(
                         {
                             count += 10000;
                         }
-                        else if (bFrozen)
+                        else if (isIndividualFrozen(*mLedger, account, MPTIssue{mpt.getMptID()}))
                         {
                         }
                         else

@@ -303,9 +303,9 @@ OfferCreate::flowCross(
         STAmount const inStartBalance = accountFunds(
             psb, account_, takerAmount.in, fhZERO_IF_FROZEN, ahZERO_IF_UNAUTHORIZED, j_);
         // Allow unfunded MPT issuer
-        auto const allowUnfunded =
+        auto const disallowUnfunded =
             !inStartBalance.holds<MPTIssue>() || inStartBalance.getIssuer() != account_;
-        if (allowUnfunded && inStartBalance <= beast::zero)
+        if (disallowUnfunded && inStartBalance <= beast::zero)
         {
             // The account balance can't cover even part of the offer.
             JLOG(j_.debug()) << "Not crossing: taker is unfunded.";
@@ -413,7 +413,7 @@ OfferCreate::flowCross(
             STAmount const takerInBalance = accountFunds(
                 psb, account_, takerAmount.in, fhZERO_IF_FROZEN, ahZERO_IF_UNAUTHORIZED, j_);
 
-            if (allowUnfunded && takerInBalance <= beast::zero)
+            if (disallowUnfunded && takerInBalance <= beast::zero)
             {
                 // If offer crossing exhausted the account's funds don't
                 // create the offer.

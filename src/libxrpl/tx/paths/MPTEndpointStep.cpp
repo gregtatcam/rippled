@@ -647,7 +647,7 @@ MPTEndpointStep<TDerived>::fwdImp(
             resetCache(srcDebtDir);
             return {beast::zero, beast::zero};
         }
-        JLOG(j_.trace()) << "MPTEndpointStep::rev: Limiting"
+        JLOG(j_.trace()) << "MPTEndpointStep::fwd: Limiting"
                          << " srcRedeems: " << redeems(srcDebtDir) << " in: " << to_string(actualIn)
                          << " srcToDst: " << to_string(srcToDst) << " out: " << to_string(out);
     }

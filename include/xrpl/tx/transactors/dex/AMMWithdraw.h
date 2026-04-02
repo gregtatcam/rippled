@@ -98,7 +98,7 @@ public:
         STAmount const& lpTokens,
         STAmount const& lpTokensWithdraw,
         std::uint16_t tfee,
-        FreezeHandling freezeHanding,
+        FreezeHandling freezeHandling,
         AuthHandling authHandling,
         WithdrawAll withdrawAll,
         XRPAmount const& priorBalance,
