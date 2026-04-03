@@ -4231,16 +4231,14 @@ class MPToken_test : public beast::unit_test::suite
                     // src, dst are a holder, offer's owner is an issuer
                     {.src = alice, .dst = carol, .offerOwner = gw, .srcFlag = Individual, .err = tecPATH_DRY},
                     // dst can receive IOU even if the account is frozen
-                    {.src = alice, .dst = carol, .offerOwner = gw, .dstFlag = Individual, .err = tecPATH_DRY, .errIOU
-                    = tesSUCCESS}, // ???
+                    {.src = alice, .dst = carol, .offerOwner = gw, .dstFlag = Individual, .err = tecPATH_DRY, .errIOU = tesSUCCESS},
                     {.src = alice, .dst = carol, .offerOwner = gw, .globalFlagBuy = Global, .err = tecPATH_DRY},
                     {.src = alice, .dst = carol, .offerOwner = gw, .globalFlagSell = Global, .err = tecPATH_DRY},
                     // src is issuer, dst and offer's owner are a holder
                     // dst can receive IOU even if the account is frozen
-                    {.src = gw, .dst = carol, .offerOwner = bob, .dstFlag = Individual, .err = tecPATH_DRY, .errIOU =
-                    tesSUCCESS},
-                    // offer's owner can receive IOU and MPT from an issuer
-                    {.src = gw, .dst = carol, .offerOwner = bob, .offerFlagBuy = Individual, .err = tesSUCCESS},
+                    {.src = gw, .dst = carol, .offerOwner = bob, .dstFlag = Individual, .err = tecPATH_DRY, .errIOU = tesSUCCESS},
+                    // offer's owner can receive IOU from an issuer even if takerBuys is frozen, MPT offer is unfunded in this case
+                    {.src = gw, .dst = carol, .offerOwner = bob, .offerFlagBuy = Individual, .err = tecPATH_PARTIAL, .errIOU = tesSUCCESS},
                     {.src = gw, .dst = carol, .offerOwner = bob, .offerFlagSell = Individual, .err = tecPATH_PARTIAL},
                     // dst is issuer, src and offer's owner are a holder
                     {.src = alice, .dst = gw, .offerOwner = bob, .srcFlag = Individual, .err = tecPATH_DRY},

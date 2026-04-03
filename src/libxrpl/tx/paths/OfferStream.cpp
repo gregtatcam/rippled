@@ -217,20 +217,12 @@ TOfferStreamBase<TIn, TOut>::step()
             continue;
         }
 
-        if (offer_.assetIn().template holds<Issue>())
+        if (isDeepFrozen(view_, offer_.owner(), offer_.assetIn()))
         {
-            bool const deepFrozen = isDeepFrozen(
-                view_,
-                offer_.owner(),
-                offer_.assetIn().template get<Issue>().currency,
-                offer_.assetIn().getIssuer());
-            if (deepFrozen)
-            {
-                JLOG(j_.trace()) << "Removing deep frozen unfunded offer " << entry->key();
-                permRmOffer(entry->key());
-                offer_ = TOffer<TIn, TOut>{};
-                continue;
-            }
+            JLOG(j_.trace()) << "Removing deep frozen unfunded offer " << entry->key();
+            permRmOffer(entry->key());
+            offer_ = TOffer<TIn, TOut>{};
+            continue;
         }
 
         if (entry->isFieldPresent(sfDomainID) &&
