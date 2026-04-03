@@ -238,7 +238,16 @@ DeferredCredits::apply(DeferredCredits& to)
             toVal.credit += fromVal.credit;
             toVal.selfDebit += fromVal.selfDebit;
             for (auto& [k, v] : fromVal.holders)
-                toVal.holders[k] = v;
+            {
+                if (toVal.holders.find(k) == toVal.holders.end())
+                {
+                    toVal.holders[k] = v;
+                }
+                else
+                {
+                    toVal.holders[k].debit += v.debit;
+                }
+            }
             // Do not update the orig balance, it's already correct
         }
     }
