@@ -97,7 +97,7 @@ CheckCreate::preclaim(PreclaimContext const& ctx)
             if (isGlobalFrozen(ctx.view, sendMax.asset()))
             {
                 JLOG(ctx.j.warn()) << "Creating a check for frozen asset";
-                return tecFROZEN;
+                return sendMax.asset().holds<MPTIssue>() ? tecLOCKED : tecFROZEN;
             }
             auto const err = sendMax.asset().visit(
                 [&](Issue const& issue) -> std::optional<TER> {
@@ -136,9 +136,9 @@ CheckCreate::preclaim(PreclaimContext const& ctx)
                 },
                 [&](MPTIssue const& issue) -> std::optional<TER> {
                     if (srcId != issuerId && isFrozen(ctx.view, srcId, issue))
-                        return tecFROZEN;
+                        return tecLOCKED;
                     if (dstId != issuerId && isFrozen(ctx.view, dstId, issue))
-                        return tecFROZEN;
+                        return tecLOCKED;
 
                     return std::nullopt;
                 });

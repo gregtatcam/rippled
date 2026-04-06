@@ -240,7 +240,7 @@ CheckCash::preclaim(PreclaimContext const& ctx)
                     if (isFrozen(ctx.view, dstId, issue))
                     {
                         JLOG(ctx.j.warn()) << "Cashing a check to a frozen MPT.";
-                        return tecFROZEN;
+                        return tecLOCKED;
                     }
 
                     if (auto const err = canTrade(ctx.view, value.asset()); !isTesSuccess(err))

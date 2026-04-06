@@ -5748,9 +5748,9 @@ class MPToken_test : public beast::unit_test::suite
             mpt.set({.flags = tfMPTLock});
 
             // Create Check fails, holder or issuer as destination
-            env(check::create(alice, carol, mpt(10)), ter(tecFROZEN));
+            env(check::create(alice, carol, mpt(10)), ter(tecLOCKED));
             env.close();
-            env(check::create(gw, carol, mpt(10)), ter(tecFROZEN));
+            env(check::create(gw, carol, mpt(10)), ter(tecLOCKED));
             env.close();
 
             mpt.set({.flags = tfMPTUnlock});
@@ -5768,7 +5768,7 @@ class MPToken_test : public beast::unit_test::suite
             // Cash Check fails, holder and issuer env(check::cash(carol,
             // chkIdAlice, mpt(1)), ter(tecPATH_PARTIAL)); // tec is different
             // if the source is the issuer (this is consistent with IOU)
-            env(check::cash(carol, chkIdGw, mpt(2)), ter(tecFROZEN));
+            env(check::cash(carol, chkIdGw, mpt(2)), ter(tecLOCKED));
             env.close();
 
             mpt.set({.flags = tfMPTUnlock});
@@ -5779,9 +5779,9 @@ class MPToken_test : public beast::unit_test::suite
 
             // Individual lock
             mpt.set({.holder = alice, .flags = tfMPTLock});
-            env(check::create(alice, carol, mpt(10)), ter(tecFROZEN));
+            env(check::create(alice, carol, mpt(10)), ter(tecLOCKED));
             env.close();
-            env(check::create(carol, alice, mpt(10)), ter(tecFROZEN));
+            env(check::create(carol, alice, mpt(10)), ter(tecLOCKED));
             env.close();
 
             mpt.set({.holder = alice, .flags = tfMPTUnlock});
@@ -5799,9 +5799,9 @@ class MPToken_test : public beast::unit_test::suite
             env.close();
             mpt.set({.holder = alice, .flags = tfMPTLock});
             env(check::cash(carol, chkId1, mpt(1)), ter(tecPATH_PARTIAL));
-            env(check::cash(alice, chkId2, mpt(1)), ter(tecFROZEN));
+            env(check::cash(alice, chkId2, mpt(1)), ter(tecLOCKED));
             env(check::cash(gw, chkId3, mpt(1)), ter(tecPATH_PARTIAL));
-            env(check::cash(alice, chkId4, mpt(1)), ter(tecFROZEN));
+            env(check::cash(alice, chkId4, mpt(1)), ter(tecLOCKED));
         }
 
         // MPTRequireAuth flag is set and the account is not authorized.

@@ -306,7 +306,7 @@ class CheckMPT_test : public beast::unit_test::suite
             MPT const USF = USFM;
             USFM.set({.flags = tfMPTLock});
 
-            env(check::create(alice, bob, USF(50)), ter(tecFROZEN));
+            env(check::create(alice, bob, USF(50)), ter(tecLOCKED));
             env.close();
 
             USFM.set({.flags = tfMPTUnlock});
@@ -327,18 +327,18 @@ class CheckMPT_test : public beast::unit_test::suite
             // creating a check for USD ore receiving a check. This is different
             // from IOU where alice can receive checks from bob or gw.
             env.close();
-            env(check::create(alice, bob, USD(50)), ter(tecFROZEN));
+            env(check::create(alice, bob, USD(50)), ter(tecLOCKED));
             env.close();
             // Note that IOU returns tecPATH_DRY in this case.
             // IOU's internal error is terNO_LINE, which is
             // considered ter re-triable and changed to tecPATH_DRY.
             env(pay(alice, bob, USD(1)), ter(tecPATH_DRY));
             env.close();
-            env(check::create(bob, alice, USD(50)), ter(tecFROZEN));
+            env(check::create(bob, alice, USD(50)), ter(tecLOCKED));
             env.close();
             env(pay(bob, alice, USD(1)), ter(tecPATH_DRY));
             env.close();
-            env(check::create(gw1, alice, USD(50)), ter(tecFROZEN));
+            env(check::create(gw1, alice, USD(50)), ter(tecLOCKED));
             env.close();
             env(pay(gw1, alice, USD(1)));
             env.close();
@@ -990,9 +990,9 @@ class CheckMPT_test : public beast::unit_test::suite
 
             // Freeze bob's MPT.  bob can't cash the check.
             USDM.set({.holder = bob, .flags = tfMPTLock});
-            env(check::cash(bob, chkIdFroz3, USD(3)), ter(tecFROZEN));
+            env(check::cash(bob, chkIdFroz3, USD(3)), ter(tecLOCKED));
             env.close();
-            env(check::cash(bob, chkIdFroz3, check::DeliverMin(USD(1))), ter(tecFROZEN));
+            env(check::cash(bob, chkIdFroz3, check::DeliverMin(USD(1))), ter(tecLOCKED));
             env.close();
 
             // Clear that freeze.  Now check cashing works again.
@@ -1828,7 +1828,7 @@ class CheckMPT_test : public beast::unit_test::suite
             MPT const CK4 = gw1["CK4"];
             gw1.set(CK4, tfMPTLock);
             uint256 const chkId{getCheckIndex(gw1, env.seq(gw1))};
-            env(check::create(gw1, alice, CK4(92)), ter(tecFROZEN));
+            env(check::create(gw1, alice, CK4(92)), ter(tecLOCKED));
             env.close();
             BEAST_EXPECT(env.le(keylet::mptoken(CK4, alice)) == nullptr);
             env(check::cash(alice, chkId, CK4(92)), ter(tecNO_ENTRY));
@@ -1919,7 +1919,7 @@ class CheckMPT_test : public beast::unit_test::suite
             MPT const CK4 = gw1["CK4"];
             gw1.set(CK4, tfMPTLock);
             uint256 const chkId{getCheckIndex(alice, env.seq(alice))};
-            env(check::create(alice, bob, CK4(91)), ter(tecFROZEN));
+            env(check::create(alice, bob, CK4(91)), ter(tecLOCKED));
             env.close();
             BEAST_EXPECT(env.le(keylet::mptoken(CK4, bob)) == nullptr);
             env(check::cash(bob, chkId, CK4(91)), ter(tecNO_ENTRY));
