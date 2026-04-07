@@ -291,7 +291,7 @@ ValidMPTPayment::visitEntry(
                 overflow_ = true;
                 return false;
             }
-            data_[makeKey(sle)].outstanding[order] = sle[sfOutstandingAmount];
+            data_[makeKey(sle)].outstanding[order] = outstanding;
         }
         else if (type == ltMPTOKEN)
         {
