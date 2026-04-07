@@ -291,7 +291,7 @@ ValidMPTPayment::visitEntry(
                 overflow_ = true;
                 return false;
             }
-            data_[makeKey(sle)].outstanding[order] = sle[sfOutstandingAmount];
+            data_[makeKey(sle)].outstanding[order] = outstanding;
         }
         else if (type == ltMPTOKEN)
         {
@@ -326,7 +326,8 @@ ValidMPTPayment::visitEntry(
         {
             overflow_ = (*after)[sfOutstandingAmount] > maxMPTAmount(*after);
         }
-        update(*after, After);
+        if (!update(*after, After))
+            return;
     }
 }
 
@@ -347,10 +348,10 @@ ValidMPTPayment::finalize(
             return !enforce;
         }
 
+        auto const signedMax = static_cast<std::int64_t>(maxMPTokenAmount);
         for (auto const& [id, data] : data_)
         {
             (void)id;
-            auto const signedMax = static_cast<std::int64_t>(maxMPTokenAmount);
             bool const addOverflows =
                 (data.mptAmount > 0 && data.outstanding[Before] > (signedMax - data.mptAmount)) ||
                 (data.mptAmount < 0 && data.outstanding[Before] < (-signedMax - data.mptAmount));

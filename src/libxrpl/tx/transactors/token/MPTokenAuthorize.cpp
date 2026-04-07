@@ -133,57 +133,6 @@ MPTokenAuthorize::preclaim(PreclaimContext const& ctx)
 }
 
 TER
-MPTokenAuthorize::createMPToken(
-    ApplyView& view,
-    MPTID const& mptIssuanceID,
-    AccountID const& account,
-    std::uint32_t const flags)
-{
-    auto const mptokenKey = keylet::mptoken(mptIssuanceID, account);
-
-    auto const ownerNode =
-        view.dirInsert(keylet::ownerDir(account), mptokenKey, describeOwnerDir(account));
-
-    if (!ownerNode)
-        return tecDIR_FULL;  // LCOV_EXCL_LINE
-
-    auto mptoken = std::make_shared<SLE>(mptokenKey);
-    (*mptoken)[sfAccount] = account;
-    (*mptoken)[sfMPTokenIssuanceID] = mptIssuanceID;
-    (*mptoken)[sfFlags] = flags;
-    (*mptoken)[sfOwnerNode] = *ownerNode;
-
-    view.insert(mptoken);
-
-    return tesSUCCESS;
-}
-
-TER
-MPTokenAuthorize::checkCreateMPT(
-    xrpl::ApplyView& view,
-    xrpl::MPTIssue const& mptIssue,
-    xrpl::AccountID const& holder,
-    beast::Journal j)
-{
-    if (mptIssue.getIssuer() == holder)
-        return tesSUCCESS;
-
-    auto const mptIssuanceID = keylet::mptIssuance(mptIssue.getMptID());
-    auto const mptokenID = keylet::mptoken(mptIssuanceID.key, holder);
-    if (!view.exists(mptokenID))
-    {
-        if (auto const err = createMPToken(view, mptIssue.getMptID(), holder, 0);
-            !isTesSuccess(err))
-            return err;
-        auto const sleAcct = view.peek(keylet::account(holder));
-        if (!sleAcct)
-            return tecINTERNAL;
-        adjustOwnerCount(view, sleAcct, 1, j);
-    }
-    return tesSUCCESS;
-}
-
-TER
 MPTokenAuthorize::doApply()
 {
     auto const& tx = ctx_.tx;

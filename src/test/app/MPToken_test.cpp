@@ -11,13 +11,13 @@
 
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/beast/utility/Zero.h>
+#include <xrpl/ledger/helpers/AMMHelpers.h>
 #include <xrpl/ledger/helpers/TokenHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/jss.h>
 #include <xrpl/tx/paths/detail/StepChecks.h>
-#include <xrpl/tx/transactors/dex/AMMHelpers.h>
 
 namespace xrpl {
 namespace test {
@@ -3223,7 +3223,7 @@ class MPToken_test : public beast::unit_test::suite
     void
     testMultiSendMaximumAmount(FeatureBitset features)
     {
-        // Verify that rippleSendMultiMPT correctly enforces MaximumAmount
+        // Verify that directSendNoLimitMultiMPT correctly enforces MaximumAmount
         // when the issuer sends to multiple receivers. Pre-fixSecurity3_1_3,
         // a stale view.read() snapshot caused per-iteration checks to miss
         // aggregate overflows. Post-fix, a running total is used instead.

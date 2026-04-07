@@ -2,11 +2,11 @@
 #include <test/jtx/AMM.h>
 #include <test/jtx/AMMTest.h>
 
+#include <xrpl/ledger/helpers/AMMHelpers.h>
+#include <xrpl/ledger/helpers/AMMUtils.h>
 #include <xrpl/protocol/AMMCore.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/tx/transactors/dex/AMMBid.h>
-#include <xrpl/tx/transactors/dex/AMMHelpers.h>
-#include <xrpl/tx/transactors/dex/AMMUtils.h>
 
 namespace xrpl {
 namespace test {
@@ -6954,6 +6954,46 @@ private:
             amm.withdrawAll(alice);
             amm.withdrawAll(carol);
             amm.withdrawAll(gw);
+            BEAST_EXPECT(!amm.ammExists());
+        }
+
+        // This test validates both invariant changes work together for
+        // the specific case of MPT/MPT pools with > maxDeletableAMMTrustLines.
+        {
+            Env env(
+                *this,
+                envconfig([](std::unique_ptr<Config> cfg) {
+                    cfg->FEES.reference_fee = XRPAmount(1);
+                    return cfg;
+                }),
+                all);
+
+            env.fund(XRP(1'000), gw, alice);
+            MPT const USD =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice}, .pay = 20'000});
+            MPT const BTC =
+                MPTTester({.env = env, .issuer = gw, .holders = {alice}, .pay = 20'000});
+
+            // MPT/MPT pool with MANY trustlines
+            AMM amm(env, gw, USD(10'000), BTC(10'000));
+            for (auto i = 0; i < (maxDeletableAMMTrustLines * 2) + 10; ++i)
+            {
+                Account const a{std::to_string(i)};
+                env.fund(XRP(1'000), a);
+                env(trust(a, STAmount{amm.lptIssue(), 10'000}));
+                env.close();
+            }
+
+            amm.withdrawAll(gw);
+            // AMM is in empty state, but can't be auto-deleted because of the LPTokens trustlines.
+            BEAST_EXPECT(amm.expectBalances(USD(0), BTC(0), IOUAmount(0)));
+            BEAST_EXPECT(amm.ammExists());
+
+            // Critical: MPT/MPT pool + tecINCOMPLETE
+            amm.ammDelete(alice, ter(tecINCOMPLETE));
+            BEAST_EXPECT(amm.ammExists());
+
+            amm.ammDelete(alice);
             BEAST_EXPECT(!amm.ammExists());
         }
     }

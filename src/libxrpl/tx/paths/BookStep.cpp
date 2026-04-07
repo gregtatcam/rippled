@@ -2,6 +2,7 @@
 #include <xrpl/basics/contract.h>
 #include <xrpl/beast/utility/instrumentation.h>
 #include <xrpl/ledger/PaymentSandbox.h>
+#include <xrpl/ledger/helpers/AMMUtils.h>
 #include <xrpl/ledger/helpers/AccountRootHelpers.h>
 #include <xrpl/ledger/helpers/MPTokenHelpers.h>
 #include <xrpl/protocol/Book.h>
@@ -14,7 +15,6 @@
 #include <xrpl/tx/paths/OfferStream.h>
 #include <xrpl/tx/paths/detail/FlatSets.h>
 #include <xrpl/tx/paths/detail/Steps.h>
-#include <xrpl/tx/transactors/dex/AMMUtils.h>
 #include <xrpl/tx/transactors/token/MPTokenAuthorize.h>
 
 #include <boost/container/flat_set.hpp>
@@ -698,10 +698,11 @@ BookStep<TIn, TOut, TDerived>::forEachOffer(
             // Create MPToken for the offer's owner. No need to check
             // for the reserve since the offer is removed if it is consumed.
             // Therefore, the owner count remains the same.
-            if (auto const err =
-                    MPTokenAuthorize::checkCreateMPT(sb, assetIn.get<MPTIssue>(), owner, j_);
+            if (auto const err = checkCreateMPT(sb, assetIn.get<MPTIssue>(), owner, j_);
                 !isTesSuccess(err))
+            {
                 return true;
+            }
         }
 
         // It shouldn't matter from auth point of view whether it's sb

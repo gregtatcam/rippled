@@ -470,10 +470,11 @@ CheckCash::doApply()
                             if (sleDst == nullptr)
                                 return tecINSUFFICIENT_RESERVE;
 
-                            if (auto const err =
-                                    MPTokenAuthorize::checkCreateMPT(psb, mptID, account_, j_);
+                            if (auto const err = checkCreateMPT(psb, mptID, account_, j_);
                                 !isTesSuccess(err))
+                            {
                                 return err;
+                            }
                         }
                     }
 
