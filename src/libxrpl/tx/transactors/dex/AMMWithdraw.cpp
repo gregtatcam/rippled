@@ -623,9 +623,11 @@ AMMWithdraw::withdraw(
                 !isTesSuccess(err))
                 return err;
 
-            if (auto const err = MPTokenAuthorize::checkCreateMPT(view, mptIssue, account, journal);
+            if (auto const err = checkCreateMPT(view, mptIssue, account, journal);
                 !isTesSuccess(err))
+            {
                 return err;
+            }
         }
         return tesSUCCESS;
     };

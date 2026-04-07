@@ -171,6 +171,13 @@ createMPToken(
     AccountID const& account,
     std::uint32_t const flags);
 
+TER
+checkCreateMPT(
+    xrpl::ApplyView& view,
+    xrpl::MPTIssue const& mptIssue,
+    xrpl::AccountID const& holder,
+    beast::Journal j);
+
 //------------------------------------------------------------------------------
 //
 // MPT Overflow related
@@ -190,9 +197,9 @@ std::int64_t
 availableMPTAmount(ReadView const& view, MPTID const& mptID);
 
 /** Checks for two types of OutstandingAmount overflow during a send operation.
- * 1.  **Direct rippleCredit (Overflow: No):** A true overflow check when
+ * 1.  **Direct directSendNoFee (Overflow: No):** A true overflow check when
  * `OutstandingAmount > MaximumAmount`. This threshold is used for direct
- * rippleCredit transactions that bypass the payment engine.
+ * directSendNoFee transactions that bypass the payment engine.
  * 2.  **accountSend & Payment Engine (Overflow: Yes):** A temporary overflow
  * check when `OutstandingAmount > UINT64_MAX`. This higher threshold is used
  * for `accountSend` and payments processed via the payment engine.

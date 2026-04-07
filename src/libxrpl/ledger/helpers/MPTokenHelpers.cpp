@@ -778,6 +778,35 @@ createMPToken(
     return tesSUCCESS;
 }
 
+TER
+checkCreateMPT(
+    xrpl::ApplyView& view,
+    xrpl::MPTIssue const& mptIssue,
+    xrpl::AccountID const& holder,
+    beast::Journal j)
+{
+    if (mptIssue.getIssuer() == holder)
+        return tesSUCCESS;
+
+    auto const mptIssuanceID = keylet::mptIssuance(mptIssue.getMptID());
+    auto const mptokenID = keylet::mptoken(mptIssuanceID.key, holder);
+    if (!view.exists(mptokenID))
+    {
+        if (auto const err = createMPToken(view, mptIssue.getMptID(), holder, 0);
+            !isTesSuccess(err))
+        {
+            return err;
+        }
+        auto const sleAcct = view.peek(keylet::account(holder));
+        if (!sleAcct)
+        {
+            return tecINTERNAL;
+        }
+        adjustOwnerCount(view, sleAcct, 1, j);
+    }
+    return tesSUCCESS;
+}
+
 std::int64_t
 maxMPTAmount(SLE const& sleIssuance)
 {

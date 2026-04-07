@@ -294,8 +294,7 @@ applyCreate(ApplyContext& ctx_, Sandbox& sb, AccountID const& account_, beast::J
                     }
                 }
 
-                if (auto const err = MPTokenAuthorize::createMPToken(sb, mptID, accountId, flags);
-                    !isTesSuccess(err))
+                if (auto const err = createMPToken(sb, mptID, accountId, flags); !isTesSuccess(err))
                     return err;
                 // Don't adjust AMM owner count.
                 // It's irrelevant for pseudo-account like AMM.

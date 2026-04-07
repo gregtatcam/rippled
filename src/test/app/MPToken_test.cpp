@@ -11,13 +11,13 @@
 
 #include <xrpl/basics/base_uint.h>
 #include <xrpl/beast/utility/Zero.h>
+#include <xrpl/ledger/helpers/AMMHelpers.h>
 #include <xrpl/ledger/helpers/TokenHelpers.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/TER.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/jss.h>
 #include <xrpl/tx/paths/detail/StepChecks.h>
-#include <xrpl/tx/transactors/dex/AMMHelpers.h>
 
 namespace xrpl {
 namespace test {

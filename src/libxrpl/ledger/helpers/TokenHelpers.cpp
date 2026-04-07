@@ -1328,7 +1328,7 @@ directSendNoFee(
             return directSendNoFeeIOU(view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
         },
         [&](MPTIssue const&) {
-            XRPL_ASSERT(!bCheckIssuer, "xrpl::rippleCredit : not checking issuer");
+            XRPL_ASSERT(!bCheckIssuer, "xrpl::directSendNoFee : not checking issuer");
             return directSendNoFeeMPT(view, uSenderID, uReceiverID, saAmount, j);
         });
 }

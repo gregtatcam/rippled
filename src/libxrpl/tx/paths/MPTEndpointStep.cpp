@@ -390,8 +390,7 @@ MPTEndpointOfferCrossingStep::checkCreateMPT(ApplyView& view, xrpl::DebtDirectio
         // for the reserve since the offer doesn't go on the books
         // if crossed. Insufficient reserve is allowed if the offer
         // crossed. See CreateOffer::applyGuts() for reserve check.
-        if (auto const err = MPTokenAuthorize::checkCreateMPT(view, mptIssue_, dst_, j_);
-            !isTesSuccess(err))
+        if (auto const err = xrpl::checkCreateMPT(view, mptIssue_, dst_, j_); !isTesSuccess(err))
         {
             JLOG(j_.trace()) << "MPTEndpointStep::checkCreateMPT: failed create MPT";
             resetCache(srcDebtDir);
@@ -483,7 +482,7 @@ MPTEndpointStep<TDerived>::revImp(
     {
         MPTAmount const in = mulRatio(srcToDst, srcQOut, QUALITY_ONE, /*roundUp*/ true);
         cache_.emplace(in, srcToDst, srcToDst, srcDebtDir);
-        auto const ter = rippleCredit(
+        auto const ter = directSendNoFee(
             sb,
             src_,
             dst_,
@@ -508,7 +507,7 @@ MPTEndpointStep<TDerived>::revImp(
     MPTAmount const actualOut = maxSrcToDst;
     cache_.emplace(in, maxSrcToDst, actualOut, srcDebtDir);
 
-    auto const ter = rippleCredit(
+    auto const ter = directSendNoFee(
         sb,
         src_,
         dst_,
@@ -610,7 +609,7 @@ MPTEndpointStep<TDerived>::fwdImp(
         // Don't have to factor in dstQIn since it's always QUALITY_ONE
         MPTAmount const out = srcToDst;
         setCacheLimiting(in, srcToDst, out, srcDebtDir);
-        auto const ter = rippleCredit(
+        auto const ter = directSendNoFee(
             sb,
             src_,
             dst_,
@@ -634,7 +633,7 @@ MPTEndpointStep<TDerived>::fwdImp(
         // Don't have to factor in dstQIn since it's always QUALITY_ONE
         MPTAmount const out = maxSrcToDst;
         setCacheLimiting(actualIn, maxSrcToDst, out, srcDebtDir);
-        auto const ter = rippleCredit(
+        auto const ter = directSendNoFee(
             sb,
             src_,
             dst_,
