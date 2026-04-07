@@ -499,7 +499,7 @@ canTransfer(ReadView const& view, Asset const& asset, AccountID const& from, Acc
 // - Create trust line if needed.
 // --> bCheckIssuer : normally require issuer to be involved.
 static TER
-rippleCreditIOU(
+directSendNoFeeIOU(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -513,20 +513,21 @@ rippleCreditIOU(
     // Make sure issuer is involved.
     XRPL_ASSERT(
         !bCheckIssuer || uSenderID == issuer || uReceiverID == issuer,
-        "xrpl::rippleCreditIOU : matching issuer or don't care");
+        "xrpl::directSendNoFeeIOU : matching issuer or don't care");
     (void)issuer;
 
     // Disallow sending to self.
-    XRPL_ASSERT(uSenderID != uReceiverID, "xrpl::rippleCreditIOU : sender is not receiver");
+    XRPL_ASSERT(uSenderID != uReceiverID, "xrpl::directSendNoFeeIOU : sender is not receiver");
 
     bool const bSenderHigh = uSenderID > uReceiverID;
     auto const index = keylet::line(uSenderID, uReceiverID, currency);
 
     XRPL_ASSERT(
-        !isXRP(uSenderID) && uSenderID != noAccount(), "xrpl::rippleCreditIOU : sender is not XRP");
+        !isXRP(uSenderID) && uSenderID != noAccount(),
+        "xrpl::directSendNoFeeIOU : sender is not XRP");
     XRPL_ASSERT(
         !isXRP(uReceiverID) && uReceiverID != noAccount(),
-        "xrpl::rippleCreditIOU : receiver is not XRP");
+        "xrpl::directSendNoFeeIOU : receiver is not XRP");
 
     // If the line exists, modify it accordingly.
     if (auto const sleRippleState = view.peek(index))
@@ -542,7 +543,7 @@ rippleCreditIOU(
 
         saBalance -= saAmount;
 
-        JLOG(j.trace()) << "rippleCreditIOU: " << to_string(uSenderID) << " -> "
+        JLOG(j.trace()) << "directSendNoFeeIOU: " << to_string(uSenderID) << " -> "
                         << to_string(uReceiverID) << " : before=" << saBefore.getFullText()
                         << " amount=" << saAmount.getFullText()
                         << " after=" << saBalance.getFullText();
@@ -588,7 +589,7 @@ rippleCreditIOU(
 
         // Want to reflect balance to zero even if we are deleting line.
         sleRippleState->setFieldAmount(sfBalance, saBalance);
-        // ONLY: Adjust ripple balance.
+        // ONLY: Adjust balance.
 
         if (bDelete)
         {
@@ -609,7 +610,7 @@ rippleCreditIOU(
 
     saBalance.get<Issue>().account = noAccount();
 
-    JLOG(j.debug()) << "rippleCreditIOU: "
+    JLOG(j.debug()) << "directSendNoFeeIOU: "
                        "create line: "
                     << to_string(uSenderID) << " -> " << to_string(uReceiverID) << " : "
                     << saAmount.getFullText();
@@ -642,7 +643,7 @@ rippleCreditIOU(
 // --> saAmount: Amount/currency/issuer to deliver to receiver.
 // <-- saActual: Amount actually cost.  Sender pays fees.
 static TER
-rippleSendIOU(
+directSendNoLimitIOU(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -655,13 +656,13 @@ rippleSendIOU(
 
     XRPL_ASSERT(
         !isXRP(uSenderID) && !isXRP(uReceiverID),
-        "xrpl::rippleSendIOU : neither sender nor receiver is XRP");
-    XRPL_ASSERT(uSenderID != uReceiverID, "xrpl::rippleSendIOU : sender is not receiver");
+        "xrpl::directSendNoLimitIOU : neither sender nor receiver is XRP");
+    XRPL_ASSERT(uSenderID != uReceiverID, "xrpl::directSendNoLimitIOU : sender is not receiver");
 
     if (uSenderID == issuer || uReceiverID == issuer || issuer == noAccount())
     {
         // Direct send: redeeming IOUs and/or sending own IOUs.
-        auto const ter = rippleCreditIOU(view, uSenderID, uReceiverID, saAmount, false, j);
+        auto const ter = directSendNoFeeIOU(view, uSenderID, uReceiverID, saAmount, false, j);
         if (!isTesSuccess(ter))
             return ter;
         saActual = saAmount;
@@ -675,14 +676,14 @@ rippleSendIOU(
     saActual = (waiveFee == WaiveTransferFee::Yes) ? saAmount
                                                    : multiply(saAmount, transferRate(view, issuer));
 
-    JLOG(j.debug()) << "rippleSendIOU> " << to_string(uSenderID) << " - > "
+    JLOG(j.debug()) << "directSendNoLimitIOU> " << to_string(uSenderID) << " - > "
                     << to_string(uReceiverID) << " : deliver=" << saAmount.getFullText()
                     << " cost=" << saActual.getFullText();
 
-    TER terResult = rippleCreditIOU(view, issuer, uReceiverID, saAmount, true, j);
+    TER terResult = directSendNoFeeIOU(view, issuer, uReceiverID, saAmount, true, j);
 
     if (tesSUCCESS == terResult)
-        terResult = rippleCreditIOU(view, uSenderID, issuer, saActual, true, j);
+        terResult = directSendNoFeeIOU(view, uSenderID, issuer, saActual, true, j);
 
     return terResult;
 }
@@ -691,7 +692,7 @@ rippleSendIOU(
 // --> receivers: Amount/currency/issuer to deliver to receivers.
 // <-- saActual: Amount actually cost to sender.  Sender pays fees.
 static TER
-rippleSendMultiIOU(
+directSendNoLimitMultiIOU(
     ApplyView& view,
     AccountID const& senderID,
     Issue const& issue,
@@ -702,7 +703,7 @@ rippleSendMultiIOU(
 {
     auto const& issuer = issue.getIssuer();
 
-    XRPL_ASSERT(!isXRP(senderID), "xrpl::rippleSendMultiIOU : sender is not XRP");
+    XRPL_ASSERT(!isXRP(senderID), "xrpl::directSendNoLimitMultiIOU : sender is not XRP");
 
     // These may diverge
     STAmount takeFromSender{issue};
@@ -720,15 +721,15 @@ rippleSendMultiIOU(
         if (!amount || (senderID == receiverID))
             continue;
 
-        XRPL_ASSERT(!isXRP(receiverID), "xrpl::rippleSendMultiIOU : receiver is not XRP");
+        XRPL_ASSERT(!isXRP(receiverID), "xrpl::directSendNoLimitMultiIOU : receiver is not XRP");
 
         if (senderID == issuer || receiverID == issuer || issuer == noAccount())
         {
             // Direct send: redeeming IOUs and/or sending own IOUs.
-            if (auto const ter = rippleCreditIOU(view, senderID, receiverID, amount, false, j))
+            if (auto const ter = directSendNoFeeIOU(view, senderID, receiverID, amount, false, j))
                 return ter;
             actual += amount;
-            // Do not add amount to takeFromSender, because rippleCreditIOU took
+            // Do not add amount to takeFromSender, because directSendNoFeeIOU took
             // it.
 
             continue;
@@ -744,17 +745,18 @@ rippleSendMultiIOU(
         actual += actualSend;
         takeFromSender += actualSend;
 
-        JLOG(j.debug()) << "rippleSendMultiIOU> " << to_string(senderID) << " - > "
+        JLOG(j.debug()) << "directSendNoLimitMultiIOU> " << to_string(senderID) << " - > "
                         << to_string(receiverID) << " : deliver=" << amount.getFullText()
                         << " cost=" << actual.getFullText();
 
-        if (TER const terResult = rippleCreditIOU(view, issuer, receiverID, amount, true, j))
+        if (TER const terResult = directSendNoFeeIOU(view, issuer, receiverID, amount, true, j))
             return terResult;
     }
 
     if (senderID != issuer && takeFromSender)
     {
-        if (TER const terResult = rippleCreditIOU(view, senderID, issuer, takeFromSender, true, j))
+        if (TER const terResult =
+                directSendNoFeeIOU(view, senderID, issuer, takeFromSender, true, j))
             return terResult;
     }
 
@@ -799,7 +801,7 @@ accountSendIOU(
         JLOG(j.trace()) << "accountSendIOU: " << to_string(uSenderID) << " -> "
                         << to_string(uReceiverID) << " : " << saAmount.getFullText();
 
-        return rippleSendIOU(view, uSenderID, uReceiverID, saAmount, saActual, j, waiveFee);
+        return directSendNoLimitIOU(view, uSenderID, uReceiverID, saAmount, saActual, j, waiveFee);
     }
 
     /* XRP send which does not check reserve and can do pure adjustment.
@@ -898,7 +900,7 @@ accountSendMultiIOU(
         JLOG(j.trace()) << "accountSendMultiIOU: " << to_string(senderID) << " sending "
                         << receivers.size() << " IOUs";
 
-        return rippleSendMultiIOU(view, senderID, issue, receivers, actual, j, waiveFee);
+        return directSendNoLimitMultiIOU(view, senderID, issue, receivers, actual, j, waiveFee);
     }
 
     /* XRP send which does not check reserve and can do pure adjustment.
@@ -1008,7 +1010,7 @@ accountSendMultiIOU(
 }
 
 static TER
-rippleCreditMPT(
+directSendNoFeeMPT(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -1086,7 +1088,7 @@ rippleCreditMPT(
 }
 
 static TER
-rippleSendMPT(
+directSendNoLimitMPT(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -1096,9 +1098,9 @@ rippleSendMPT(
     WaiveTransferFee waiveFee,
     AllowMPTOverflow allowOverflow)
 {
-    XRPL_ASSERT(uSenderID != uReceiverID, "xrpl::rippleSendMPT : sender is not receiver");
+    XRPL_ASSERT(uSenderID != uReceiverID, "xrpl::directSendNoLimitMPT : sender is not receiver");
 
-    // Safe to get MPT since rippleSendMPT is only called by accountSendMPT
+    // Safe to get MPT since directSendNoLimitMPT is only called by accountSendMPT
     auto const& issuer = saAmount.getIssuer();
 
     auto const sle = view.read(keylet::mptIssuance(saAmount.get<MPTIssue>().getMptID()));
@@ -1123,7 +1125,7 @@ rippleSendMPT(
         }
 
         // Direct send: redeeming MPTs and/or sending own MPTs.
-        auto const ter = rippleCreditMPT(view, uSenderID, uReceiverID, saAmount, j);
+        auto const ter = directSendNoFeeMPT(view, uSenderID, uReceiverID, saAmount, j);
         if (!isTesSuccess(ter))
             return ter;
         saActual = saAmount;
@@ -1135,19 +1137,19 @@ rippleSendMPT(
         ? saAmount
         : multiply(saAmount, transferRate(view, saAmount.get<MPTIssue>().getMptID()));
 
-    JLOG(j.debug()) << "rippleSendMPT> " << to_string(uSenderID) << " - > "
+    JLOG(j.debug()) << "directSendNoLimitMPT> " << to_string(uSenderID) << " - > "
                     << to_string(uReceiverID) << " : deliver=" << saAmount.getFullText()
                     << " cost=" << saActual.getFullText();
 
-    if (auto const terResult = rippleCreditMPT(view, issuer, uReceiverID, saAmount, j);
+    if (auto const terResult = directSendNoFeeMPT(view, issuer, uReceiverID, saAmount, j);
         !isTesSuccess(terResult))
         return terResult;
 
-    return rippleCreditMPT(view, uSenderID, issuer, saActual, j);
+    return directSendNoFeeMPT(view, uSenderID, issuer, saActual, j);
 }
 
 static TER
-rippleSendMultiMPT(
+directSendNoLimitMultiMPT(
     ApplyView& view,
     AccountID const& senderID,
     MPTIssue const& mptIssue,
@@ -1164,7 +1166,7 @@ rippleSendMultiMPT(
 
     // For the issuer-as-sender case, track the running total to validate
     // against MaximumAmount. The read-only SLE (view.read) is not updated
-    // by rippleCreditMPT, so a per-iteration SLE read would be stale.
+    // by directSendNoFeeMPT, so a per-iteration SLE read would be stale.
     // Use uint64_t, not STAmount, to keep MaximumAmount comparisons in exact
     // integer arithmetic. STAmount implicitly converts to Number, whose
     // small-scale mantissa (~16 digits) can lose precision for values near
@@ -1196,7 +1198,7 @@ rippleSendMultiMPT(
             {
                 XRPL_ASSERT_PARTS(
                     takeFromSender == beast::zero,
-                    "xrpl::rippleSendMultiMPT",
+                    "xrpl::directSendNoLimitMultiMPT",
                     "sender == issuer, takeFromSender == zero");
 
                 std::uint64_t const sendAmount = amount.mpt().value();
@@ -1232,12 +1234,11 @@ rippleSendMultiMPT(
             }
 
             // Direct send: redeeming MPTs and/or sending own MPTs.
-            if (auto const ter = rippleCreditMPT(view, senderID, receiverID, amount, j);
+            if (auto const ter = directSendNoFeeMPT(view, senderID, receiverID, amount, j);
                 !isTesSuccess(ter))
                 return ter;
             actual += amount;
-            // Do not add amount to takeFromSender, because rippleCreditMPT
-            // took it.
+            // Do not add amount to takeFromSender, because directSendNoFeeMPT took it.
 
             continue;
         }
@@ -1249,17 +1250,17 @@ rippleSendMultiMPT(
         actual += actualSend;
         takeFromSender += actualSend;
 
-        JLOG(j.debug()) << "rippleSendMultiMPT> " << to_string(senderID) << " - > "
+        JLOG(j.debug()) << "directSendNoLimitMultiMPT> " << to_string(senderID) << " - > "
                         << to_string(receiverID) << " : deliver=" << amount.getFullText()
                         << " cost=" << actualSend.getFullText();
 
-        if (auto const ter = rippleCreditMPT(view, issuer, receiverID, amount, j);
+        if (auto const ter = directSendNoFeeMPT(view, issuer, receiverID, amount, j);
             !isTesSuccess(ter))
             return ter;
     }
     if (senderID != issuer && takeFromSender)
     {
-        if (auto const ter = rippleCreditMPT(view, senderID, issuer, takeFromSender, j);
+        if (auto const ter = directSendNoFeeMPT(view, senderID, issuer, takeFromSender, j);
             !isTesSuccess(ter))
             return ter;
     }
@@ -1289,7 +1290,7 @@ accountSendMPT(
 
     STAmount saActual{saAmount.asset()};
 
-    return rippleSendMPT(
+    return directSendNoLimitMPT(
         view, uSenderID, uReceiverID, saAmount, saActual, j, waiveFee, allowOverflow);
 }
 
@@ -1304,7 +1305,7 @@ accountSendMultiMPT(
 {
     STAmount actual;
 
-    return rippleSendMultiMPT(view, senderID, mptIssue, receivers, actual, j, waiveFee);
+    return directSendNoLimitMultiMPT(view, senderID, mptIssue, receivers, actual, j, waiveFee);
 }
 
 //------------------------------------------------------------------------------
@@ -1314,7 +1315,7 @@ accountSendMultiMPT(
 //------------------------------------------------------------------------------
 
 TER
-rippleCredit(
+directSendNoFee(
     ApplyView& view,
     AccountID const& uSenderID,
     AccountID const& uReceiverID,
@@ -1324,11 +1325,11 @@ rippleCredit(
 {
     return saAmount.asset().visit(
         [&](Issue const&) {
-            return rippleCreditIOU(view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
+            return directSendNoFeeIOU(view, uSenderID, uReceiverID, saAmount, bCheckIssuer, j);
         },
         [&](MPTIssue const&) {
             XRPL_ASSERT(!bCheckIssuer, "xrpl::rippleCredit : not checking issuer");
-            return rippleCreditMPT(view, uSenderID, uReceiverID, saAmount, j);
+            return directSendNoFeeMPT(view, uSenderID, uReceiverID, saAmount, j);
         });
 }
 

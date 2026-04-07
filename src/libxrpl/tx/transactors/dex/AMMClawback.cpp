@@ -1,12 +1,12 @@
 #include <xrpl/ledger/Sandbox.h>
 #include <xrpl/ledger/View.h>
+#include <xrpl/ledger/helpers/AMMHelpers.h>
+#include <xrpl/ledger/helpers/AMMUtils.h>
 #include <xrpl/protocol/Feature.h>
 #include <xrpl/protocol/Indexes.h>
 #include <xrpl/protocol/TxFlags.h>
 #include <xrpl/protocol/st.h>
 #include <xrpl/tx/transactors/dex/AMMClawback.h>
-#include <xrpl/tx/transactors/dex/AMMHelpers.h>
-#include <xrpl/tx/transactors/dex/AMMUtils.h>
 #include <xrpl/tx/transactors/dex/AMMWithdraw.h>
 
 #include <tuple>
@@ -252,7 +252,7 @@ AMMClawback::applyGuts(Sandbox& sb)
 
     auto sendAmount = [&](STAmount const& saAmount) -> TER {
         bool const checkIssuer = saAmount.holds<Issue>();
-        return rippleCredit(sb, holder, issuer, saAmount, checkIssuer, j_);
+        return directSendNoFee(sb, holder, issuer, saAmount, checkIssuer, j_);
     };
 
     auto const ter = sendAmount(amountWithdraw);
