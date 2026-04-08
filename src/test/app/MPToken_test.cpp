@@ -6631,7 +6631,7 @@ public:
     {
         using namespace test::jtx;
         FeatureBitset const all{testable_amendments()};
-#if 0
+
         testMultiSendMaximumAmount(all);
         // MPTokenIssuanceCreate
         testCreateValidation(all - featureSingleAssetVault);
@@ -6731,7 +6731,7 @@ public:
 
         // Test AMM
         testBasicAMM(all);
-#endif
+
         // Fixes
         testFixDoubleOwnerCount(all);
     }
