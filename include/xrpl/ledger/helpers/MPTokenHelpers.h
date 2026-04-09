@@ -130,6 +130,12 @@ canMPTTradeAndTransfer(
     AccountID const& from,
     AccountID const& to);
 
+/** Check if Asset can be traded on DEX. return tecNO_PERMISSION
+ * if it doesn't and tesSUCCESS otherwise.
+ */
+[[nodiscard]] TER
+canTrade(ReadView const& view, Asset const& asset);
+
 //------------------------------------------------------------------------------
 //
 // Empty holding operations (MPT-specific)

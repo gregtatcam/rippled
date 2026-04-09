@@ -688,6 +688,12 @@ private:
                 ammAlice.deposit(
                     carol, USD(100), std::nullopt, std::nullopt, std::nullopt, ter(tecLOCKED));
             }
+            else
+            {
+                // Carol can not deposit non-forzen token either
+                ammAlice.deposit(
+                    carol, USD(100), std::nullopt, std::nullopt, std::nullopt, ter(tecFROZEN));
+            }
 
             // Alice can deposit because she's not individually locked
             ammAlice.deposit(alice, BTC(100), std::nullopt, std::nullopt, std::nullopt);

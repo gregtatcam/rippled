@@ -3065,6 +3065,7 @@ private:
         {
             env(offer(bob, BTC(5), XRP(25)), ter(tecLOCKED));
             env.close();
+            BEAST_EXPECT(expectOffers(env, bob, 1, {{{BTC(5), XRP(25)}}}));
             BEAST_EXPECT(ammAlice.expectBalances(XRP(500), BTC(105), ammAlice.tokens()));
         }
 
